@@ -24,7 +24,6 @@ String type = (String)request.getAttribute("liferay-ui:search:type");
 
 String id = searchContainer.getId(request, namespace);
 
-int start = searchContainer.getStart();
 int end = searchContainer.getEnd();
 int total = searchContainer.getTotal();
 List resultRows = searchContainer.getResultRows();
@@ -157,7 +156,6 @@ int sortColumnIndex = -1;
 
 						<c:if test="<%= orderKey != null %>">
 							<div class="table-sort-liner">
-
 
 								<%
 								String orderByJS = searchContainer.getOrderByJS();
@@ -301,7 +299,7 @@ int sortColumnIndex = -1;
 				}
 			%>
 
-				<td class="table-cell">
+				<td class="table-cell <%= columnClassName %>">
 
 					<%
 					entry.print(pageContext);
@@ -354,7 +352,7 @@ int sortColumnIndex = -1;
 </c:if>
 
 <c:if test="<%= Validator.isNotNull(id) %>">
-	<input id="<%= namespace + id %>PrimaryKeys" name="<%= id %>PrimaryKeys" type="hidden" value="<%= StringUtil.merge(primaryKeys) %>" />
+	<input id="<%= namespace + id %>PrimaryKeys" name="<%= namespace + id %>PrimaryKeys" type="hidden" value="<%= StringUtil.merge(primaryKeys) %>" />
 
 	<aui:script use="liferay-search-container">
 		new Liferay.SearchContainer(
@@ -379,6 +377,4 @@ private static final String _ROW_CLASS_NAME_ALTERNATE = "";
 private static final String _ROW_CLASS_NAME_ALTERNATE_HOVER = "-hover";
 
 private static final String _ROW_CLASS_NAME_BODY = "";
-
-private static final String _ROW_CLASS_NAME_BODY_HOVER = "-hover";
 %>

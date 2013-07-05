@@ -220,7 +220,8 @@ create table BackgroundTask (
 	taskContext TEXT null,
 	completed BOOLEAN,
 	completionDate DATE null,
-	status INTEGER
+	status INTEGER,
+	statusMessage TEXT null
 );
 
 create table BlogsEntry (
@@ -770,8 +771,11 @@ create table Group_ (
 	description STRING null,
 	type_ INTEGER,
 	typeSettings TEXT null,
+	manualMembership BOOLEAN,
+	membershipRestriction INTEGER,
 	friendlyURL VARCHAR(255) null,
 	site BOOLEAN,
+	remoteStagingGroupCount INTEGER,
 	active_ BOOLEAN
 );
 
@@ -2050,6 +2054,7 @@ create table SystemEvent (
 	classNameId LONG,
 	classPK LONG,
 	classUuid VARCHAR(75) null,
+	referrerClassNameId LONG,
 	type_ INTEGER,
 	extraData TEXT null
 );
@@ -2097,6 +2102,17 @@ create table TrashVersion (
 	classNameId LONG,
 	classPK LONG,
 	status INTEGER
+);
+
+create table UserNotificationDelivery (
+	userNotificationDeliveryId LONG not null primary key,
+	companyId LONG,
+	userId LONG,
+	portletId VARCHAR(200) null,
+	classNameId LONG,
+	notificationType INTEGER,
+	deliveryType INTEGER,
+	deliver BOOLEAN
 );
 
 create table User_ (

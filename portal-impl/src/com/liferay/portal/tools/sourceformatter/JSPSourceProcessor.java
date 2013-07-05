@@ -132,7 +132,7 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			className = className.substring(
 				className.lastIndexOf(StringPool.PERIOD) + 1);
 
-			if (!isJSPImportRequired(
+			if (!isClassOrVariableRequired(
 					fileName, className, includeFileNames, checkedFileNames)) {
 
 				unneededImports.add(importLine);
@@ -278,13 +278,15 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 				new String[] {
 					"<br/>", "\"/>", "\" >", "@page import", "\"%>", ")%>",
 					"else{", "for(", "function (", "if(", "javascript: ",
-					"while(", "){\n"
+					"while(", "){\n", "\n\n\n"
 				},
 				new String[] {
 					"<br />", "\" />", "\">", "@ page import", "\" %>", ") %>",
 					"else {", "for (", "function(", "if (", "javascript:",
-					"while (", ") {\n"
+					"while (", ") {\n", "\n\n"
 				});
+
+			newContent = fixCompatClassImports(fileName, newContent);
 
 			if (stripJSPImports) {
 				try {
@@ -386,6 +388,8 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 		boolean hasUnsortedExceptions = false;
 
+		boolean javaSource = false;
+
 		while ((line = unsyncBufferedReader.readLine()) != null) {
 			lineCount++;
 
@@ -404,6 +408,20 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 			String trimmedLine = StringUtil.trimLeading(line);
 			String trimmedPreviousLine = StringUtil.trimLeading(previousLine);
+
+			if (trimmedLine.equals("<%") || trimmedLine.equals("<%!")) {
+				javaSource = true;
+			}
+			else if (trimmedLine.equals("%>")) {
+				javaSource = false;
+			}
+
+			if (javaSource && portalSource &&
+				hasUnusedVariable(fileName, trimmedLine)) {
+
+				processErrorMessage(
+					fileName, "Unused variable: " + fileName + " " + lineCount);
+			}
 
 			if (!trimmedLine.equals("%>") && line.contains("%>") &&
 				!line.contains("--%>") && !line.contains(" %>")) {
@@ -749,6 +767,118 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 		return sb.toString();
 	}
 
+	protected String getVariableName(String line) {
+		if (!line.endsWith(";") || line.startsWith("//")) {
+			return null;
+		}
+
+		String variableName = null;
+
+		int x = line.indexOf(" = ");
+
+		if (x == -1) {
+			int y = line.lastIndexOf(" ");
+
+			if (y != -1) {
+				variableName = line.substring(y + 1, line.length() - 1);
+			}
+		}
+		else {
+			line = line.substring(0, x);
+
+			int y = line.lastIndexOf(" ");
+
+			if (y != -1) {
+				variableName = line.substring(y + 1);
+			}
+		}
+
+		if (Validator.isVariableName(variableName)) {
+			return variableName;
+		}
+
+		return null;
+	}
+
+	protected boolean hasUnusedVariable(String fileName, String line) {
+		if (line.contains(": ")) {
+			return false;
+		}
+
+		String variableName = getVariableName(line);
+
+		if (Validator.isNull(variableName) || variableName.equals("false") ||
+			variableName.equals("true")) {
+
+			return false;
+		}
+
+		Set<String> includeFileNames = new HashSet<String>();
+
+		includeFileNames.add(fileName);
+
+		Set<String> checkedFileNames = new HashSet<String>();
+
+		return !isClassOrVariableRequired(
+			fileName, variableName, includeFileNames, checkedFileNames);
+	}
+
+	protected boolean isClassOrVariableRequired(
+		String fileName, String name, Set<String> includeFileNames,
+		Set<String> checkedFileNames) {
+
+		if (checkedFileNames.contains(fileName)) {
+			return false;
+		}
+
+		checkedFileNames.add(fileName);
+
+		String content = _jspContents.get(fileName);
+
+		if (Validator.isNull(content)) {
+			return false;
+		}
+
+		Pattern pattern = Pattern.compile(
+			"[^A-Za-z0-9_]" + name + "[^A-Za-z0-9_]");
+
+		Matcher matcher = pattern.matcher(content);
+
+		if (matcher.find() &&
+			((checkedFileNames.size() > 1) || matcher.find())) {
+
+			return true;
+		}
+
+		addJSPIncludeFileNames(fileName, includeFileNames);
+
+		String docrootPath = fileName.substring(
+			0, fileName.indexOf("docroot") + 7);
+
+		fileName = fileName.replaceFirst(docrootPath, StringPool.BLANK);
+
+		if (fileName.endsWith("init.jsp") ||
+			fileName.contains("init-ext.jsp")) {
+
+			addJSPReferenceFileNames(fileName, includeFileNames);
+		}
+
+		String[] includeFileNamesArray = includeFileNames.toArray(
+			new String[includeFileNames.size()]);
+
+		for (String includeFileName : includeFileNamesArray) {
+			if (!checkedFileNames.contains(includeFileName) &&
+				isClassOrVariableRequired(
+					includeFileName, name, includeFileNames,
+					checkedFileNames)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	protected boolean isJSPAttributName(String attributeName) {
 		if (Validator.isNull(attributeName)) {
 			return false;
@@ -804,60 +934,6 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 		includeFileName = docrootPath + includeFileName;
 
 		return isJSPDuplicateImport(includeFileName, importLine, true);
-	}
-
-	protected boolean isJSPImportRequired(
-		String fileName, String className, Set<String> includeFileNames,
-		Set<String> checkedFileNames) {
-
-		if (checkedFileNames.contains(fileName)) {
-			return false;
-		}
-
-		checkedFileNames.add(fileName);
-
-		String content = _jspContents.get(fileName);
-
-		if (Validator.isNull(content)) {
-			return false;
-		}
-
-		Pattern pattern = Pattern.compile(
-			"[^A-Za-z0-9_]" + className + "[^A-Za-z0-9_\"]");
-
-		Matcher matcher = pattern.matcher(content);
-
-		if (matcher.find()) {
-			return true;
-		}
-
-		addJSPIncludeFileNames(fileName, includeFileNames);
-
-		String docrootPath = fileName.substring(
-			0, fileName.indexOf("docroot") + 7);
-
-		fileName = fileName.replaceFirst(docrootPath, StringPool.BLANK);
-
-		if (fileName.endsWith("init.jsp") ||
-			fileName.contains("init-ext.jsp")) {
-
-			addJSPReferenceFileNames(fileName, includeFileNames);
-		}
-
-		String[] includeFileNamesArray = includeFileNames.toArray(
-			new String[includeFileNames.size()]);
-
-		for (String includeFileName : includeFileNamesArray) {
-			if (!checkedFileNames.contains(includeFileName) &&
-				isJSPImportRequired(
-					includeFileName, className, includeFileNames,
-					checkedFileNames)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	protected String sortJSPAttributes(

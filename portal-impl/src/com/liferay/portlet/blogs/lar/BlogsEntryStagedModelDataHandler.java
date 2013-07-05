@@ -23,14 +23,12 @@ import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Image;
+import com.liferay.portal.service.ImageLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.persistence.ImageUtil;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.blogs.service.BlogsEntryLocalServiceUtil;
-import com.liferay.portlet.blogs.service.persistence.BlogsEntryUtil;
 
 import java.io.InputStream;
 
@@ -59,14 +57,10 @@ public class BlogsEntryStagedModelDataHandler
 			PortletDataContext portletDataContext, BlogsEntry entry)
 		throws Exception {
 
-		if (!entry.isApproved() && !entry.isInTrash()) {
-			return;
-		}
-
 		Element entryElement = portletDataContext.getExportDataElement(entry);
 
 		if (entry.isSmallImage()) {
-			Image smallImage = ImageUtil.fetchByPrimaryKey(
+			Image smallImage = ImageLocalServiceUtil.fetchImage(
 				entry.getSmallImageId());
 
 			if (Validator.isNotNull(entry.getSmallImageURL())) {
@@ -139,7 +133,6 @@ public class BlogsEntryStagedModelDataHandler
 		boolean allowPingbacks = entry.isAllowPingbacks();
 		boolean allowTrackbacks = entry.isAllowTrackbacks();
 		String[] trackbacks = StringUtil.split(entry.getTrackbacks());
-		int status = entry.getStatus();
 
 		String smallImageFileName = null;
 		InputStream smallImageInputStream = null;
@@ -173,20 +166,14 @@ public class BlogsEntryStagedModelDataHandler
 				portletDataContext.createServiceContext(
 					entry, BlogsPortletDataHandler.NAMESPACE);
 
-			if ((status != WorkflowConstants.STATUS_APPROVED) &&
-				(status != WorkflowConstants.STATUS_IN_TRASH)) {
-
-				serviceContext.setWorkflowAction(
-					WorkflowConstants.ACTION_SAVE_DRAFT);
-			}
-
 			BlogsEntry importedEntry = null;
 
 			if (portletDataContext.isDataStrategyMirror()) {
 				serviceContext.setAttribute("urlTitle", entry.getUrlTitle());
 
-				BlogsEntry existingEntry = BlogsEntryUtil.fetchByUUID_G(
-					entry.getUuid(), portletDataContext.getScopeGroupId());
+				BlogsEntry existingEntry =
+					BlogsEntryLocalServiceUtil.fetchBlogsEntryByUuidAndGroupId(
+						entry.getUuid(), portletDataContext.getScopeGroupId());
 
 				if (existingEntry == null) {
 					serviceContext.setUuid(entry.getUuid());
@@ -199,12 +186,6 @@ public class BlogsEntryStagedModelDataHandler
 						entry.isSmallImage(), entry.getSmallImageURL(),
 						smallImageFileName, smallImageInputStream,
 						serviceContext);
-
-					if (status == WorkflowConstants.STATUS_IN_TRASH) {
-						importedEntry =
-							BlogsEntryLocalServiceUtil.moveEntryToTrash(
-								userId, importedEntry);
-					}
 				}
 				else {
 					importedEntry = BlogsEntryLocalServiceUtil.updateEntry(

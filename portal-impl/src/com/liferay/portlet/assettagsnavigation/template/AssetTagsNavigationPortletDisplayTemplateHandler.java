@@ -53,7 +53,7 @@ public class AssetTagsNavigationPortletDisplayTemplateHandler
 
 	@Override
 	public String getResourceName() {
-		return "com.liferay.portlet.assettagsnavigation";
+		return "com.liferay.portlet.assettagsnavigation.template";
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class AssetTagsNavigationPortletDisplayTemplateHandler
 
 		templateVariableGroup.addCollectionVariable(
 			"tags", List.class, PortletDisplayTemplateConstants.ENTRIES, "tag",
-			AssetTag.class, "curTag");
+			AssetTag.class, "curTag", "name");
 
 		TemplateVariableGroup assetServicesTemplateVariableGroup =
 			new TemplateVariableGroup("tag-services");

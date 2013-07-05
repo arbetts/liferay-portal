@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.lar;
 
+import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Portlet;
 
 import javax.portlet.PortletPreferences;
@@ -67,9 +68,6 @@ public interface PortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws PortletDataException;
 
-	public PortletDataHandlerControl[] getConfigurationControls(Portlet portlet)
-		throws PortletDataException;
-
 	public DataLevel getDataLevel();
 
 	/**
@@ -80,7 +78,17 @@ public interface PortletDataHandler {
 	 */
 	public String[] getDataPortletPreferences();
 
-	public String[] getDeletionSystemEventClassNames();
+	public StagedModelType[] getDeletionSystemEventStagedModelTypes();
+
+	public PortletDataHandlerControl[] getExportConfigurationControls(
+			long companyId, long groupId, Portlet portlet,
+			boolean privateLayout)
+		throws Exception;
+
+	public PortletDataHandlerControl[] getExportConfigurationControls(
+			long companyId, long groupId, Portlet portlet, long plid,
+			boolean privateLayout)
+		throws Exception;
 
 	/**
 	 * Returns an array of the controls defined for this data handler. These
@@ -106,6 +114,10 @@ public interface PortletDataHandler {
 		throws PortletDataException;
 
 	public long getExportModelCount(ManifestSummary manifestSummary);
+
+	public PortletDataHandlerControl[] getImportConfigurationControls(
+			Portlet portlet, ManifestSummary manifestSummary)
+		throws PortletDataException;
 
 	/**
 	 * Returns an array of the controls defined for this data handler. These
@@ -172,6 +184,16 @@ public interface PortletDataHandler {
 	public boolean isPublishToLiveByDefault();
 
 	public void prepareManifestSummary(PortletDataContext portletDataContext)
+		throws PortletDataException;
+
+	public PortletPreferences processExportPortletPreferences(
+			PortletDataContext portletDataContext, String portletId,
+			PortletPreferences portletPreferences, Element rootElement)
+		throws PortletDataException;
+
+	public PortletPreferences processImportPortletPreferences(
+			PortletDataContext portletDataContext, String portletId,
+			PortletPreferences portletPreferences)
 		throws PortletDataException;
 
 	public void setPortletId(String portletId);

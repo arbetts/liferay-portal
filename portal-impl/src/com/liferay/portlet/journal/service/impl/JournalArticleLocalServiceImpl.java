@@ -997,8 +997,7 @@ public class JournalArticleLocalServiceImpl
 
 		// Expando
 
-		expandoValueLocalService.deleteValues(
-			JournalArticle.class.getName(), article.getId());
+		expandoRowLocalService.deleteRows(article.getId());
 
 		// Workflow
 
@@ -1290,6 +1289,15 @@ public class JournalArticleLocalServiceImpl
 				userId, groupId, article.getArticleId(), article.getVersion(),
 				articleURL, serviceContext);
 		}
+	}
+
+	@Override
+	public JournalArticle fetchArticle(
+			long groupId, String articleId, double version)
+		throws SystemException {
+
+		return journalArticlePersistence.fetchByG_A_V(
+			groupId, articleId, version);
 	}
 
 	/**
@@ -2498,8 +2506,8 @@ public class JournalArticleLocalServiceImpl
 			Date displayDate = article.getDisplayDate();
 			Date expirationDate = article.getExpirationDate();
 
-			if (displayDate.before(now) &&
-				((expirationDate == null) || expirationDate.after(now))) {
+			if (((displayDate != null) && displayDate.before(now)) &&
+				((expirationDate == null) || expirationDate.after(now)) ) {
 
 				return article;
 			}

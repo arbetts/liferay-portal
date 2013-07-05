@@ -51,6 +51,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Tuple;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.Portlet;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.service.LayoutServiceUtil;
@@ -197,11 +198,20 @@ public class ImportLayoutsAction extends PortletAction {
 			ResourceResponse resourceResponse)
 		throws Exception {
 
+		String cmd = ParamUtil.getString(resourceRequest, Constants.CMD);
+
 		PortletContext portletContext = portletConfig.getPortletContext();
 
-		PortletRequestDispatcher portletRequestDispatcher =
-			portletContext.getRequestDispatcher(
+		PortletRequestDispatcher portletRequestDispatcher = null;
+
+		if (cmd.equals(Constants.IMPORT)) {
+			portletRequestDispatcher = portletContext.getRequestDispatcher(
+				"/html/portlet/layouts_admin/import_layouts_processes.jsp");
+		}
+		else {
+			portletRequestDispatcher = portletContext.getRequestDispatcher(
 				"/html/portlet/layouts_admin/import_layouts_resources.jsp");
+		}
 
 		portletRequestDispatcher.include(resourceRequest, resourceResponse);
 	}
@@ -342,6 +352,11 @@ public class ImportLayoutsAction extends PortletAction {
 
 				String referrerDisplayName = entry.getKey();
 				String referrerClasName = entry.getValue();
+
+				if (referrerClasName.equals(Portlet.class.getName())) {
+					referrerDisplayName = PortalUtil.getPortletTitle(
+						referrerDisplayName, themeDisplay.getLocale());
+				}
 
 				errorMessageJSONObject.put(
 					"info",
@@ -679,8 +694,9 @@ public class ImportLayoutsAction extends PortletAction {
 		boolean privateLayout = ParamUtil.getBoolean(
 			actionRequest, "privateLayout");
 
-		LayoutServiceUtil.importLayouts(
-			groupId, privateLayout, actionRequest.getParameterMap(), file);
+		LayoutServiceUtil.importLayoutsInBackground(
+			file.getName(), groupId, privateLayout,
+			actionRequest.getParameterMap(), file);
 	}
 
 	protected void validateFile(

@@ -435,9 +435,9 @@ public class DDMTemplateLocalServiceImpl
 		// System event
 
 		systemEventLocalService.addSystemEvent(
-			template.getGroupId(), DDMTemplate.class.getName(),
-			template.getTemplateId(), template.getUuid(),
-			SystemEventConstants.TYPE_DELETE);
+			0, template.getGroupId(), DDMTemplate.class.getName(),
+			template.getTemplateId(), template.getUuid(), null,
+			SystemEventConstants.TYPE_DELETE, null);
 	}
 
 	/**
@@ -802,6 +802,24 @@ public class DDMTemplateLocalServiceImpl
 
 		return ddmTemplateFinder.findByG_SC(
 			groupId, structureClassNameId, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns the number of templates matching the group and structure class
+	 * name ID, including Generic Templates.
+	 *
+	 * @param  groupId the primary key of the group
+	 * @param  structureClassNameId the primary key of the class name for the
+	 *         template's related structure
+	 * @return the number of matching templates
+	 * @throws SystemException if a system exception occurred
+	 */
+	@Override
+	public int getTemplatesByStructureClassNameIdCount(
+			long groupId, long structureClassNameId)
+		throws SystemException {
+
+		return ddmTemplateFinder.countByG_SC(groupId, structureClassNameId);
 	}
 
 	/**

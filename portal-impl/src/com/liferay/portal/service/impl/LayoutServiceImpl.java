@@ -38,6 +38,7 @@ import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutReference;
 import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.Plugin;
+import com.liferay.portal.model.User;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
@@ -455,7 +456,7 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	public long exportLayoutsAsFileInBackground(
 			String taskName, long groupId, boolean privateLayout,
 			long[] layoutIds, Map<String, String[]> parameterMap,
-			Date startDate, Date endDate)
+			Date startDate, Date endDate, String fileName)
 		throws PortalException, SystemException {
 
 		GroupPermissionUtil.check(
@@ -463,7 +464,7 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 
 		return layoutLocalService.exportLayoutsAsFileInBackground(
 			getUserId(), taskName, groupId, privateLayout, layoutIds,
-			parameterMap, startDate, endDate);
+			parameterMap, startDate, endDate, fileName);
 	}
 
 	/**
@@ -500,6 +501,22 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 
 		return layoutLocalService.exportPortletInfo(
 			plid, groupId, portletId, parameterMap, startDate, endDate);
+	}
+
+	@Override
+	public byte[] exportPortletInfo(
+			long companyId, String portletId,
+			Map<String, String[]> parameterMap, Date startDate, Date endDate)
+		throws PortalException, SystemException {
+
+		Group companyGroup = groupLocalService.getCompanyGroup(companyId);
+
+		GroupPermissionUtil.check(
+			getPermissionChecker(), companyGroup.getGroupId(),
+			ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+
+		return layoutLocalService.exportPortletInfo(
+			companyId, portletId, parameterMap, startDate, endDate);
 	}
 
 	/**
@@ -539,9 +556,47 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	}
 
 	@Override
+	public File exportPortletInfoAsFile(
+			long companyId, String portletId,
+			Map<String, String[]> parameterMap, Date startDate, Date endDate)
+		throws PortalException, SystemException {
+
+		Group companyGroup = groupLocalService.getCompanyGroup(companyId);
+
+		GroupPermissionUtil.check(
+			getPermissionChecker(), companyGroup.getGroupId(),
+			ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+
+		return layoutLocalService.exportPortletInfoAsFile(
+			companyId, portletId, parameterMap, startDate, endDate);
+	}
+
+	@Override
+	public long exportPortletInfoAsFileInBackground(
+			long userId, String taskName, String portletId,
+			Map<String, String[]> parameterMap, Date startDate, Date endDate,
+			String fileName)
+		throws PortalException, SystemException {
+
+		User user = userPersistence.findByPrimaryKey(userId);
+
+		Group companyGroup = groupLocalService.getCompanyGroup(
+			user.getCompanyId());
+
+		GroupPermissionUtil.check(
+			getPermissionChecker(), companyGroup.getGroupId(),
+			ActionKeys.EXPORT_IMPORT_PORTLET_INFO);
+
+		return layoutLocalService.exportPortletInfoAsFileInBackground(
+			userId, taskName, portletId, parameterMap, startDate, endDate,
+			fileName);
+	}
+
+	@Override
 	public long exportPortletInfoAsFileInBackground(
 			String taskName, long plid, long groupId, String portletId,
-			Map<String, String[]> parameterMap, Date startDate, Date endDate)
+			Map<String, String[]> parameterMap, Date startDate, Date endDate,
+			String fileName)
 		throws PortalException, SystemException {
 
 		Layout layout = layoutLocalService.getLayout(plid);
@@ -552,7 +607,7 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 
 		return layoutLocalService.exportPortletInfoAsFileInBackground(
 			getUserId(), taskName, plid, groupId, portletId, parameterMap,
-			startDate, endDate);
+			startDate, endDate, fileName);
 	}
 
 	/**
@@ -612,14 +667,14 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 			scopeGroupLayoutUuid = scopeGroupLayout.getUuid();
 		}
 
-		Map<Long, javax.portlet.PortletPreferences> jxPreferencesMap =
+		Map<Long, javax.portlet.PortletPreferences> jxPortletPreferencesMap =
 			PortletPreferencesFactoryUtil.getPortletSetupMap(
 				scopeGroup.getCompanyId(), groupId,
 				PortletKeys.PREFS_OWNER_ID_DEFAULT,
 				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, portletId, privateLayout);
 
 		for (Map.Entry<Long, javax.portlet.PortletPreferences> entry :
-				jxPreferencesMap.entrySet()) {
+				jxPortletPreferencesMap.entrySet()) {
 
 			long plid = entry.getKey();
 
@@ -649,14 +704,15 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 				continue;
 			}
 
-			javax.portlet.PortletPreferences jxPreferences = entry.getValue();
+			javax.portlet.PortletPreferences jxPortletPreferences =
+				entry.getValue();
 
 			String scopeType = GetterUtil.getString(
-				jxPreferences.getValue("lfrScopeType", null));
+				jxPortletPreferences.getValue("lfrScopeType", null));
 
 			if (scopeGroup.isLayout()) {
 				String scopeLayoutUuid = GetterUtil.getString(
-					jxPreferences.getValue("lfrScopeLayoutUuid", null));
+					jxPortletPreferences.getValue("lfrScopeLayoutUuid", null));
 
 				if (Validator.isNotNull(scopeType) &&
 					Validator.isNotNull(scopeLayoutUuid) &&

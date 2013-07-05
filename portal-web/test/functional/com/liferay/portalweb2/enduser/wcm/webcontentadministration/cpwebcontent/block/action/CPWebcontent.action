@@ -1,10 +1,22 @@
 <definition>
+	<command name="assertClick">
+		<case locator-key1="ACTION_MENULIST_MOVE_TO_THE_RECYCLE_BIN">
+			<execute function="AssertClick#assertTextClickAtAndWait" />
+		</case>
+		<case locator-key1="ENTRY_TABLE_TITLE">
+			<execute function="AssertClick#assertTextClickAtAndWait" />
+		</case>
+		<case locator-key1="ENTRY_MENULIST_MOVE_TO_THE_RECYCLE_BIN">
+			<execute function="AssertClick#assertTextClickAtAndWait" />
+		</case>-
+	</command>
+
 	<command name="assertTextEquals">
 		<case locator-key1="SUCCESS_MESSAGE">
 			<execute function="AssertTextEquals#assertText" value1="Your request completed successfully." />
 		</case>
 		<case locator-key1="SUCCESS_MESSAGE_RECYCLE_BIN">
-			<execute function="AssertTextEquals#assertText" value1="The selected item was moved to the Recycle Bin. Undo" />
+			<execute function="AssertTextEquals#assertPartialText" value1="moved to the Recycle Bin. Undo" />
 		</case>
 	</command>
 
@@ -27,7 +39,7 @@
 		<case locator-key1="ENTRY_MENULIST_MOVE">
 			<execute function="Click#textClickAtAndWait" value1="Move" />
 		</case>
-		<case locator-key1="ENTRY_TABLE_TITLE_1">
+		<case locator-key1="ENTRY_TABLE_TITLE">
 			<execute function="Click#textClickAt" />
 		</case>
 		<case locator-key1="MANAGE_MENULIST_STRUCTURES">

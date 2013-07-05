@@ -137,6 +137,8 @@ public interface Staging {
 
 	public String getSchedulerGroupName(String destinationName, long groupId);
 
+	public String getStagedPortletId(String portletId);
+
 	public Map<String, String[]> getStagingParameters();
 
 	public Map<String, String[]> getStagingParameters(
@@ -150,6 +152,8 @@ public interface Staging {
 		throws PortalException, SystemException;
 
 	public boolean isIncomplete(Layout layout, long layoutSetBranchId);
+
+	public void lockGroup(long userId, long groupId) throws Exception;
 
 	public void publishLayout(
 			long userId, long plid, long liveGroupId, boolean includeChildren)
@@ -213,6 +217,8 @@ public interface Staging {
 	public void setRecentLayoutSetBranchId(
 			User user, long layoutSetId, long layoutSetBranchId)
 		throws SystemException;
+
+	public void unlockGroup(long groupId) throws SystemException;
 
 	public void unscheduleCopyFromLive(PortletRequest PortletRequest)
 		throws Exception;

@@ -80,8 +80,10 @@ create index IX_55F58818 on AssetVocabulary (uuid_);
 create index IX_C4E6FD10 on AssetVocabulary (uuid_, companyId);
 create unique index IX_1B2B8792 on AssetVocabulary (uuid_, groupId);
 
+create index IX_98CC0AAB on BackgroundTask (groupId, name, taskExecutorClassName);
 create index IX_A73B688A on BackgroundTask (groupId, taskExecutorClassName);
 create index IX_7E757D70 on BackgroundTask (groupId, taskExecutorClassName, status);
+create index IX_C07CC7F8 on BackgroundTask (name);
 create index IX_2FCFE748 on BackgroundTask (taskExecutorClassName, status);
 
 create index IX_72EF6041 on BlogsEntry (companyId);
@@ -302,6 +304,7 @@ create index IX_F74AB912 on EmailAddress (uuid_, companyId);
 create index IX_A8C0CBE8 on ExpandoColumn (tableId);
 create unique index IX_FEFC8DA7 on ExpandoColumn (tableId, name);
 
+create index IX_49EB3118 on ExpandoRow (classPK);
 create index IX_D3F5D7AE on ExpandoRow (tableId);
 create unique index IX_81EFBFF5 on ExpandoRow (tableId, classPK);
 
@@ -657,7 +660,9 @@ create index IX_33B8CE8D on PortletItem (groupId, portletId, name);
 
 create index IX_E4F13E6E on PortletPreferences (ownerId, ownerType, plid);
 create unique index IX_C7057FF7 on PortletPreferences (ownerId, ownerType, plid, portletId);
+create index IX_C9A3FCE2 on PortletPreferences (ownerId, ownerType, portletId);
 create index IX_D5EDA3A1 on PortletPreferences (ownerType, plid, portletId);
+create index IX_A3B2A80C on PortletPreferences (ownerType, portletId);
 create index IX_F15C1C4F on PortletPreferences (plid);
 create index IX_D340DB76 on PortletPreferences (plid, portletId);
 create index IX_8E6DA3A1 on PortletPreferences (portletId);
@@ -813,6 +818,7 @@ create index IX_4460FA14 on SocialActivitySet (classNameId, classPK, type_);
 create index IX_9E13F2DE on SocialActivitySet (groupId);
 create index IX_9BE30DDF on SocialActivitySet (groupId, userId, classNameId, type_);
 create index IX_F71071BD on SocialActivitySet (groupId, userId, type_);
+create index IX_F80C4386 on SocialActivitySet (userId);
 create index IX_62AC101A on SocialActivitySet (userId, classNameId, classPK, type_);
 
 create index IX_8BE5F230 on SocialActivitySetting (groupId);
@@ -891,6 +897,9 @@ create index IX_7F187E63 on UserGroups_Teams (userGroupId);
 create unique index IX_41A32E0D on UserIdMapper (type_, externalUserId);
 create index IX_E60EA987 on UserIdMapper (userId);
 create unique index IX_D1C44A6E on UserIdMapper (userId, type_);
+
+create index IX_C648700A on UserNotificationDelivery (userId);
+create unique index IX_8B6E3ACE on UserNotificationDelivery (userId, portletId, classNameId, notificationType, deliveryType);
 
 create index IX_3E5D78C4 on UserNotificationEvent (userId);
 create index IX_3DBB361A on UserNotificationEvent (userId, archived);

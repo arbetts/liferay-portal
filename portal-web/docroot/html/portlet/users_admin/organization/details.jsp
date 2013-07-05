@@ -35,8 +35,6 @@ String type = BeanParamUtil.getString(organization, request, "type", PropsValues
 long regionId = BeanParamUtil.getLong(organization, request, "regionId");
 long countryId = BeanParamUtil.getLong(organization, request, "countryId");
 
-boolean deleteLogo = ParamUtil.getBoolean(request, "deleteLogo");
-
 long groupId = 0;
 
 if (organization != null) {
@@ -66,7 +64,7 @@ User selUser = (User)request.getAttribute("user.selUser");
 	<liferay-ui:error exception="<%= DuplicateOrganizationException.class %>" message="the-organization-name-is-already-taken" />
 	<liferay-ui:error exception="<%= OrganizationNameException.class %>" message="please-enter-a-valid-name" />
 
-	<aui:input name="name" />
+	<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" name="name" />
 
 	<c:choose>
 		<c:when test="<%= PropsValues.FIELD_ENABLE_COM_LIFERAY_PORTAL_MODEL_ORGANIZATION_STATUS %>">
@@ -290,7 +288,6 @@ if (parentOrganization != null) {
 						dialog: {
 							constrain: true,
 							modal: true,
-							zIndex: Liferay.zIndex.WINDOW + 2,
 							width: 600
 						},
 						id: '<portlet:namespace />selectOrganization',

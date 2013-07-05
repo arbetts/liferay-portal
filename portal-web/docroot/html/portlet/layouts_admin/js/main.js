@@ -3,7 +3,11 @@ AUI.add(
 	function(A) {
 		var Lang = A.Lang;
 
+		var FAILURE_TIMEOUT = 10000;
+
 		var REGEX_LAYOUT_ID = /layoutId_(\d+)/;
+
+		var RENDER_INTERVAL = 3000;
 
 		var STR_CHECKED = 'checked';
 
@@ -30,6 +34,7 @@ AUI.add(
 					logoNode: defaultConfig,
 					mirrorNode: defaultConfig,
 					mirrorWithOverwritingNode: defaultConfig,
+					processesNode: defaultConfig,
 					rangeAllNode: defaultConfig,
 					rangeDateRangeNode: defaultConfig,
 					rangeLastNode: defaultConfig,
@@ -60,6 +65,10 @@ AUI.add(
 						instance._bindUI();
 
 						instance._initLabels();
+
+						instance._processesResourceURL = config.processesResourceURL;
+
+						A.later(RENDER_INTERVAL, instance, instance._renderProcesses);
 					},
 
 					destructor: function() {
@@ -778,6 +787,44 @@ AUI.add(
 						submitForm(instance.get('form'));
 					},
 
+					_renderProcesses: function() {
+						var instance = this;
+
+						var processesNode = instance.get('processesNode');
+
+						if (processesNode && instance._processesResourceURL) {
+							A.io.request(
+								instance._processesResourceURL,
+								{
+									on: {
+										failure: function() {
+											new Liferay.Notice(
+												{
+													closeText: false,
+													content: Liferay.Language.get('your-request-failed-to-complete') + '<button type="button" class="close">&times;</button>',
+													noticeClass: 'hide',
+													timeout: FAILURE_TIMEOUT,
+													toggleText: false,
+													type: 'warning',
+													useAnimation: true
+												}
+											).show();
+										},
+										success: function(event, id, obj) {
+											processesNode.empty();
+
+											processesNode.plug(A.Plugin.ParseContent);
+
+											processesNode.setContent(this.get('responseData'));
+
+											A.later(RENDER_INTERVAL, instance, instance._renderProcesses);
+										}
+									}
+								}
+							);
+						}
+					},
+
 					_setCommentsAndRatingsLabels: function() {
 						var instance = this;
 
@@ -813,6 +860,12 @@ AUI.add(
 							}
 						);
 
+						if (selectedConfiguration.length == 0) {
+							instance.byId('PORTLET_CONFIGURATION_' + portletId + 'Checkbox').set('checked', false);
+
+							instance.byId('showChangeConfiguration_' + portletId).hide();
+						}
+
 						instance._setLabels('configurationLink_' + portletId, 'selectedConfiguration_' + portletId, selectedConfiguration.join(', '));
 					},
 
@@ -834,6 +887,12 @@ AUI.add(
 								}
 							}
 						);
+
+						if (selectedContent.length == 0) {
+							instance.byId('PORTLET_DATA_' + portletId + 'Checkbox').set('checked', false);
+
+							instance.byId('showChangeContent_' + portletId).hide();
+						}
 
 						instance._setLabels('contentLink_' + portletId, 'selectedContent_' + portletId, selectedContent.join(', '));
 					},
@@ -1063,6 +1122,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-dialog-iframe-deprecated', 'aui-modal', 'aui-tree-view', 'liferay-portlet-base','liferay-util-window']
+		requires: ['aui-dialog-iframe-deprecated', 'aui-io-request', 'aui-modal', 'aui-parse-content', 'aui-tree-view', 'liferay-notice', 'liferay-portlet-base', 'liferay-util-window']
 	}
 );

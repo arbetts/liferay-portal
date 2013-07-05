@@ -195,8 +195,8 @@ public class JournalFeedLocalServiceImpl
 		// System event
 
 		systemEventLocalService.addSystemEvent(
-			feed.getGroupId(), JournalFeed.class.getName(), feed.getId(),
-			feed.getUuid(), SystemEventConstants.TYPE_DELETE);
+			0, feed.getGroupId(), JournalFeed.class.getName(), feed.getId(),
+			feed.getUuid(), null, SystemEventConstants.TYPE_DELETE, null);
 
 		// Expando
 
@@ -220,6 +220,13 @@ public class JournalFeedLocalServiceImpl
 		JournalFeed feed = journalFeedPersistence.findByG_F(groupId, feedId);
 
 		deleteFeed(feed);
+	}
+
+	@Override
+	public JournalFeed fetchFeed(long groupId, String feedId)
+		throws SystemException {
+
+		return journalFeedPersistence.fetchByG_F(groupId, feedId);
 	}
 
 	@Override

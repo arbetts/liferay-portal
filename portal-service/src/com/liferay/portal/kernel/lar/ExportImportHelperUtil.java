@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.util.DateRange;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.theme.ThemeDisplay;
 
@@ -30,6 +31,7 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Map;
 
+import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 
 /**
@@ -37,11 +39,11 @@ import javax.portlet.PortletRequest;
  */
 public class ExportImportHelperUtil {
 
-	public static Calendar getDate(
+	public static Calendar getCalendar(
 		PortletRequest portletRequest, String paramPrefix,
 		boolean timeZoneSensitive) {
 
-		return getExportImportHelper().getDate(
+		return getExportImportHelper().getCalendar(
 			portletRequest, paramPrefix, timeZoneSensitive);
 	}
 
@@ -91,6 +93,15 @@ public class ExportImportHelperUtil {
 
 		return getExportImportHelper().getManifestSummary(
 			userId, groupId, parameterMap, fileEntry);
+	}
+
+	public static long getModelDeletionCount(
+			final PortletDataContext portletDataContext,
+			final StagedModelType stagedModelType)
+		throws PortalException, SystemException {
+
+		return getExportImportHelper().getModelDeletionCount(
+			portletDataContext, stagedModelType);
 	}
 
 	public static FileEntry getTempFileEntry(
@@ -179,6 +190,27 @@ public class ExportImportHelperUtil {
 
 		return getExportImportHelper().replaceImportLinksToLayouts(
 			portletDataContext, content, importReferencedContent);
+	}
+
+	public static void updateExportPortletPreferencesClassPKs(
+			PortletDataContext portletDataContext, Portlet portlet,
+			PortletPreferences portletPreferences, String key, String className,
+			Element rootElement)
+		throws Exception {
+
+		getExportImportHelper().updateExportPortletPreferencesClassPKs(
+			portletDataContext, portlet, portletPreferences, key, className,
+			rootElement);
+	}
+
+	public static void updateImportPortletPreferencesClassPKs(
+			PortletDataContext portletDataContext,
+			PortletPreferences portletPreferences, String key, Class<?> clazz,
+			long companyGroupId)
+		throws Exception {
+
+		getExportImportHelper().updateImportPortletPreferencesClassPKs(
+			portletDataContext, portletPreferences, key, clazz, companyGroupId);
 	}
 
 	public static MissingReferences validateMissingReferences(

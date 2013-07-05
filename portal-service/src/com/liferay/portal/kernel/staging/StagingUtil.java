@@ -227,6 +227,10 @@ public class StagingUtil {
 		return getStaging().getSchedulerGroupName(destinationName, groupId);
 	}
 
+	public static String getStagedPortletId(String portletId) {
+		return getStaging().getStagedPortletId(portletId);
+	}
+
 	public static Staging getStaging() {
 		PortalRuntimePermission.checkGetBeanProperty(StagingUtil.class);
 
@@ -259,6 +263,10 @@ public class StagingUtil {
 
 	public static boolean isIncomplete(Layout layout, long layoutSetBranchId) {
 		return getStaging().isIncomplete(layout, layoutSetBranchId);
+	}
+
+	public static void lockGroup(long userId, long groupId) throws Exception {
+		getStaging().lockGroup(userId, groupId);
 	}
 
 	public static void publishLayout(
@@ -385,6 +393,10 @@ public class StagingUtil {
 
 		getStaging().setRecentLayoutSetBranchId(
 			user, layoutSetId, layoutSetBranchId);
+	}
+
+	public static void unlockGroup(long groupId) throws SystemException {
+		getStaging().unlockGroup(groupId);
 	}
 
 	public static void unscheduleCopyFromLive(PortletRequest PortletRequest)

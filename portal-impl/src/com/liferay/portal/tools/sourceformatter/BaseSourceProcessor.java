@@ -30,11 +30,16 @@ import com.liferay.portal.util.FileImpl;
 import com.liferay.portal.xml.SAXReaderImpl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -265,6 +270,43 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 	protected abstract void doFormat() throws Exception;
 
+	protected String fixCompatClassImports(String fileName, String content)
+		throws IOException {
+
+		if (portalSource ||
+			!mainReleaseVersion.equals(MAIN_RELEASE_VERSION_6_1_0) ||
+			fileName.contains("/ext-") ||
+			fileName.contains("/portal-compat-shared/")) {
+
+			return content;
+		}
+
+		Map<String, String> compatClassNamesMap = getCompatClassNamesMap();
+
+		String newContent = content;
+
+		for (Map.Entry<String, String> entry : compatClassNamesMap.entrySet()) {
+			String compatClassName = entry.getKey();
+			String extendedClassName = entry.getValue();
+
+			Pattern pattern = Pattern.compile(extendedClassName + "\\W");
+
+			for (;;) {
+				Matcher matcher = pattern.matcher(newContent);
+
+				if (!matcher.find()) {
+					break;
+				}
+
+				newContent =
+					newContent.substring(0, matcher.start()) + compatClassName +
+						newContent.substring(matcher.end() - 1);
+			}
+		}
+
+		return newContent;
+	}
+
 	protected String fixCopyright(
 			String content, String copyright, String oldCopyright, File file,
 			String fileName)
@@ -408,6 +450,48 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		return newContent;
 	}
 
+	protected Map<String, String> getCompatClassNamesMap() throws IOException {
+		if (_compatClassNamesMap != null) {
+			return _compatClassNamesMap;
+		}
+
+		_compatClassNamesMap = new HashMap<String, String>();
+
+		String[] includes = new String[] {
+			"**\\portal-compat-shared\\src\\com\\liferay\\compat\\**\\*.java"
+		};
+
+		List<String> fileNames = getFileNames(new String[0], includes);
+
+		for (String fileName : fileNames) {
+			File file = new File(fileName);
+
+			String content = fileUtil.read(file);
+
+			fileName = StringUtil.replace(
+				fileName, StringPool.BACK_SLASH, StringPool.SLASH);
+
+			fileName = StringUtil.replace(
+				fileName, StringPool.SLASH, StringPool.PERIOD);
+
+			int pos = fileName.indexOf("com.");
+
+			String compatClassName = fileName.substring(pos);
+
+			compatClassName = compatClassName.substring(
+				0, compatClassName.length() - 5);
+
+			String extendedClassName = StringUtil.replace(
+				compatClassName, "compat.", StringPool.BLANK);
+
+			if (content.contains("extends " + extendedClassName)) {
+				_compatClassNamesMap.put(compatClassName, extendedClassName);
+			}
+		}
+
+		return _compatClassNamesMap;
+	}
+
 	protected String getCopyright() throws IOException {
 		String copyright = fileUtil.read("copyright.txt");
 
@@ -540,6 +624,71 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		return copyright;
 	}
 
+	protected Properties getExclusionsProperties(String fileName)
+		throws IOException {
+
+		InputStream inputStream = null;
+
+		int level = 0;
+
+		if (portalSource) {
+			ClassLoader classLoader =
+				BaseSourceProcessor.class.getClassLoader();
+
+			String sourceFormatterExclusions = System.getProperty(
+				"source-formatter-exclusions",
+				"com/liferay/portal/tools/dependencies/" + fileName);
+
+			URL url = classLoader.getResource(sourceFormatterExclusions);
+
+			if (url == null) {
+				return null;
+			}
+
+			inputStream = url.openStream();
+		}
+		else {
+			try {
+				inputStream = new FileInputStream(fileName);
+			}
+			catch (FileNotFoundException fnfe) {
+			}
+
+			if (inputStream == null) {
+				try {
+					inputStream = new FileInputStream("../" + fileName);
+
+					level = 1;
+				}
+				catch (FileNotFoundException fnfe) {
+				}
+			}
+
+			if (inputStream == null) {
+				try {
+					inputStream = new FileInputStream("../../" + fileName);
+
+					level = 2;
+				}
+				catch (FileNotFoundException fnfe) {
+					return null;
+				}
+			}
+		}
+
+		Properties properties = new Properties();
+
+		properties.load(inputStream);
+
+		inputStream.close();
+
+		if (level > 0) {
+			properties = stripTopLevelDirectories(properties, level);
+		}
+
+		return properties;
+	}
+
 	protected boolean hasMissingParentheses(String s) {
 		if (Validator.isNull(s)) {
 			return false;
@@ -666,6 +815,45 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				s = s.substring(0, x) + s.substring(y + 1);
 			}
 		}
+	}
+
+	protected Properties stripTopLevelDirectories(
+			Properties properties, int level)
+		throws IOException {
+
+		File dir = new File(".");
+
+		String dirName = dir.getCanonicalPath();
+
+		dirName = StringUtil.replace(
+			dirName, StringPool.BACK_SLASH, StringPool.SLASH);
+
+		int pos = dirName.length();
+
+		for (int i = 0; i < level; i++) {
+			pos = dirName.lastIndexOf(StringPool.SLASH, pos - 1);
+		}
+
+		String topLevelDirNames = dirName.substring(pos + 1) + StringPool.SLASH;
+
+		Properties newProperties = new Properties();
+
+		for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+			String key = (String)entry.getKey();
+
+			if (!key.startsWith(topLevelDirNames)) {
+				continue;
+			}
+
+			key = StringUtil.replaceFirst(
+				key, topLevelDirNames, StringPool.BLANK);
+
+			String value = (String)entry.getValue();
+
+			newProperties.setProperty(key, value);
+		}
+
+		return newProperties;
 	}
 
 	protected String trimContent(String content, boolean allowLeadingSpaces)
@@ -802,6 +990,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		}
 	}
 
+	private Map<String, String> _compatClassNamesMap;
 	private static List<String> _errorMessages = new ArrayList<String>();
 	private static String[] _excludes;
 	private static boolean _initialized;

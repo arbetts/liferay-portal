@@ -84,18 +84,23 @@ refererURL.setParameter("updateLayout", "true");
 								data.put("portlet-id", portlet.getPortletId());
 								data.put("title", PortalUtil.getPortletTitle(portlet, application, locale));
 
-								String cssClass = "lfr-content-item";
+								String cssClass = "drag-content-item";
 
 								if (portletLocked) {
 									cssClass += " lfr-portlet-used";
 								}
 							%>
 
-							<aui:nav-item cssClass='<%= cssClass %>'
-								data='<%= data %>'
-								href=""
-								iconClass='<%= portletInstanceable ? "icon-th-large" : "icon-stop" %>'
-								label="<%= PortalUtil.getPortletTitle(portlet, application, locale) %>">
+							<aui:nav-item cssClass="lfr-content-item" href="">
+								<span <%= AUIUtil.buildData(data) %> class="<%= cssClass %>">
+									<icon class="<%= portletInstanceable ? "icon-th-large" : "icon-stop" %>"></icon>
+
+									<liferay-ui:message key="<%= PortalUtil.getPortletTitle(portlet, application, locale) %>" />
+								</span>
+
+								<%
+								data.remove("draggable");
+								%>
 
 								<span <%= AUIUtil.buildData(data) %> class='add-content-item <%= portletLocked ? "lfr-portlet-used" : StringPool.BLANK %>'>
 									<liferay-ui:message key="add" />
@@ -219,13 +224,34 @@ private static PortletCategory _getRelevantPortletCategory(PermissionChecker per
 }
 %>
 
-<aui:script use="liferay-dockbar-add-application">
-	new Liferay.Dockbar.AddApplication(
+<aui:script use="liferay-dockbar-add-application,liferay-dockbar-portlet-dd">
+	var searchApplication = A.one('#<portlet:namespace />searchApplication');
+
+	var addApplication = new Liferay.Dockbar.AddApplication(
 		{
-			inputNode: A.one('#<portlet:namespace />searchApplication'),
+			focusItem: searchApplication,
+			inputNode: searchApplication,
 			namespace: '<portlet:namespace />',
 			nodeList: A.one('#<portlet:namespace />applicationList'),
-			nodeSelector: '.lfr-content-item'
+			nodeSelector: '.drag-content-item',
+			selected: !A.one('#<portlet:namespace />addApplicationForm').ancestor().hasClass('hide')
+		}
+	);
+
+	addApplication.plug(
+		Liferay.Dockbar.PortletDragDrop,
+		{
+			on: {
+				dragEnd: function(event) {
+					addApplication.addPortlet(
+						event.portletNode,
+						{
+							item: event.appendNode
+						}
+					);
+				}
+			},
+			srcNode: '#<portlet:namespace />applicationList'
 		}
 	);
 </aui:script>

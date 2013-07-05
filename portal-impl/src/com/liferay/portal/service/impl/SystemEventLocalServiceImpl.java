@@ -22,7 +22,6 @@ import com.liferay.portal.model.SystemEvent;
 import com.liferay.portal.model.User;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.service.base.SystemEventLocalServiceBaseImpl;
-import com.liferay.portal.util.PortalUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -34,19 +33,10 @@ public class SystemEventLocalServiceImpl
 	extends SystemEventLocalServiceBaseImpl {
 
 	@Override
-	public void addSystemEvent(
-			long userId, long groupId, long classNameId, long classPK,
-			String classUuid, int type)
-		throws PortalException, SystemException {
-
-		addSystemEvent(
-			userId, groupId, classNameId, classPK, classUuid, type, null);
-	}
-
-	@Override
-	public void addSystemEvent(
-			long userId, long groupId, long classNameId, long classPK,
-			String classUuid, int type, String extraData)
+	public SystemEvent addSystemEvent(
+			long userId, long groupId, String className, long classPK,
+			String classUuid, String referrerClassName, int type,
+			String extraData)
 		throws PortalException, SystemException {
 
 		if (userId == 0) {
@@ -62,46 +52,26 @@ public class SystemEventLocalServiceImpl
 			companyId = user.getCompanyId();
 			userName = user.getFullName();
 		}
+		else if (groupId > 0) {
+			Group group = groupPersistence.findByPrimaryKey(groupId);
 
-		if (companyId == 0) {
-			if (groupId > 0) {
-				Group group = groupPersistence.findByPrimaryKey(groupId);
-
-				companyId = group.getCompanyId();
-			}
-			else {
-				throw new IllegalArgumentException(
-					"Unable to determine company");
-			}
+			companyId = group.getCompanyId();
 		}
 
-		long systemEventId = counterLocalService.increment();
-
-		SystemEvent systemEvent = systemEventPersistence.create(systemEventId);
-
-		systemEvent.setGroupId(groupId);
-		systemEvent.setCompanyId(companyId);
-		systemEvent.setUserId(userId);
-		systemEvent.setUserName(userName);
-		systemEvent.setCreateDate(new Date());
-		systemEvent.setClassNameId(classNameId);
-		systemEvent.setClassPK(classPK);
-		systemEvent.setClassUuid(classUuid);
-		systemEvent.setType(type);
-		systemEvent.setExtraData(extraData);
-
-		systemEventPersistence.update(systemEvent);
+		return addSystemEvent(
+			userId, companyId, groupId, className, classPK, classUuid,
+			referrerClassName, type, extraData, userName);
 	}
 
 	@Override
-	public void addSystemEvent(
-			long groupId, String className, long classPK, String classUuid,
-			int type)
+	public SystemEvent addSystemEvent(
+			long companyId, String className, long classPK, String classUuid,
+			String referrerClassName, int type, String extraData)
 		throws PortalException, SystemException {
 
-		addSystemEvent(
-			0, groupId, PortalUtil.getClassNameId(className), classPK,
-			classUuid, type, null);
+		return addSystemEvent(
+			0, companyId, 0, className, classPK, classUuid, referrerClassName,
+			type, extraData, StringPool.BLANK);
 	}
 
 	@Override
@@ -134,6 +104,33 @@ public class SystemEventLocalServiceImpl
 
 		return systemEventPersistence.findByG_C_C_T(
 			groupId, classNameId, classPK, type);
+	}
+
+	protected SystemEvent addSystemEvent(
+			long userId, long companyId, long groupId, String className,
+			long classPK, String classUuid, String referrerClassName, int type,
+			String extraData, String userName)
+		throws PortalException, SystemException {
+
+		companyPersistence.findByPrimaryKey(companyId);
+
+		long systemEventId = counterLocalService.increment();
+
+		SystemEvent systemEvent = systemEventPersistence.create(systemEventId);
+
+		systemEvent.setGroupId(groupId);
+		systemEvent.setCompanyId(companyId);
+		systemEvent.setUserId(userId);
+		systemEvent.setUserName(userName);
+		systemEvent.setCreateDate(new Date());
+		systemEvent.setClassName(className);
+		systemEvent.setClassPK(classPK);
+		systemEvent.setClassUuid(classUuid);
+		systemEvent.setReferrerClassName(referrerClassName);
+		systemEvent.setType(type);
+		systemEvent.setExtraData(extraData);
+
+		return systemEventPersistence.update(systemEvent);
 	}
 
 }

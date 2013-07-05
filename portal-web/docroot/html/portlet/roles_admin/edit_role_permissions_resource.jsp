@@ -25,6 +25,16 @@ String curPortletResource = (String)request.getAttribute("edit_role_permissions.
 String curModelResource = (String)request.getAttribute("edit_role_permissions.jsp-curModelResource");
 String curModelResourceName = (String)request.getAttribute("edit_role_permissions.jsp-curModelResourceName");
 
+Portlet curPortlet = null;
+String curPortletId = StringPool.BLANK;
+String curPortletControlPanelEntryCategory = StringPool.BLANK;
+
+if (Validator.isNotNull(curPortletResource)) {
+	curPortlet = PortletLocalServiceUtil.getPortletById(themeDisplay.getCompanyId(), curPortletResource);
+	curPortletId = curPortlet.getPortletId();
+	curPortletControlPanelEntryCategory = curPortlet.getControlPanelEntryCategory();
+}
+
 List curActions = ResourceActionsUtil.getResourceActions(curPortletResource, curModelResource);
 
 curActions = ListUtil.sort(curActions, new ActionComparator(locale));
@@ -35,9 +45,24 @@ List<String> headerNames = new ArrayList<String>();
 
 headerNames.add("action");
 
-if (role.getType() == RoleConstants.TYPE_REGULAR) {
-	headerNames.add("scope");
-	headerNames.add(StringPool.BLANK);
+boolean showScope = true;
+
+if (curPortletId.equals(PortletKeys.PORTAL)) {
+	showScope = false;
+}
+else if (role.getType() != RoleConstants.TYPE_REGULAR) {
+	showScope = false;
+}
+else if (Validator.isNotNull(curPortletControlPanelEntryCategory) && !curPortletControlPanelEntryCategory.startsWith(PortletCategoryKeys.SITE_ADMINISTRATION)) {
+	showScope = false;
+}
+
+if (Validator.isNotNull(curModelResource) && curModelResource.equals(Group.class.getName())) {
+	showScope = true;
+}
+
+if (showScope) {
+	headerNames.add("sites");
 }
 
 SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, renderResponse.createRenderURL(), headerNames, "there-are-no-actions");
@@ -59,6 +84,16 @@ for (int i = 0; i < results.size(); i++) {
 
 	if (role.getName().equals(RoleConstants.GUEST) && guestUnsupportedActions.contains(actionId)) {
 		continue;
+	}
+
+	if (Validator.isNotNull(curPortletResource)) {
+		if (actionId.equals(ActionKeys.ACCESS_IN_CONTROL_PANEL) && Validator.isNull(curPortlet.getControlPanelEntryCategory())) {
+			continue;
+		}
+
+		if (actionId.equals(ActionKeys.ADD_TO_PAGE) && _hasHiddenPortletCategory(curPortlet)) {
+			continue;
+		}
 	}
 
 	String curResource = null;
@@ -141,10 +176,8 @@ for (int i = 0; i < results.size(); i++) {
 
 	row.addText(actionMessage);
 
-	if (role.getType() == RoleConstants.TYPE_REGULAR) {
+	if (showScope) {
 		row.addJSP("/html/portlet/roles_admin/edit_role_permissions_resource_scope.jsp");
-
-		row.addJSP("right", SearchEntry.DEFAULT_VALIGN, "/html/portlet/roles_admin/edit_role_permissions_resource_action.jsp");
 	}
 
 	resultRows.add(row);
@@ -152,3 +185,19 @@ for (int i = 0; i < results.size(); i++) {
 %>
 
 <liferay-ui:search-iterator paginate="<%= false %>" searchContainer="<%= searchContainer %>" />
+
+<%!
+private boolean _hasHiddenPortletCategory(Portlet portlet) {
+	PortletCategory portletCategory = (PortletCategory)WebAppPool.get(portlet.getCompanyId(), WebKeys.PORTLET_CATEGORY);
+
+	PortletCategory hiddenPortletCategory = portletCategory.getCategory("category.hidden");
+
+	Set<String> portletIds = hiddenPortletCategory.getPortletIds();
+
+	if (portletIds.contains(portlet.getPortletId())) {
+		return true;
+	}
+
+	return false;
+}
+%>

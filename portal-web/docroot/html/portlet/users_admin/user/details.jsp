@@ -29,8 +29,6 @@ birthday.set(Calendar.YEAR, 1970);
 if (selContact != null) {
 	birthday.setTime(selContact.getBirthday());
 }
-
-boolean deletePortrait = ParamUtil.getBoolean(request, "deletePortrait");
 %>
 
 <liferay-ui:error-marker key="errorSection" value="details" />
@@ -68,7 +66,7 @@ boolean deletePortrait = ParamUtil.getBoolean(request, "deletePortrait");
 				</aui:field-wrapper>
 			</c:when>
 			<c:otherwise>
-				<aui:input name="screenName" />
+				<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" name="screenName" />
 			</c:otherwise>
 		</c:choose>
 	</c:if>

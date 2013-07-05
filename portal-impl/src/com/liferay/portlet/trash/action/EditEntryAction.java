@@ -182,10 +182,7 @@ public class EditEntryAction extends PortletAction {
 			liferayPortletConfig.getPortletId() +
 				SessionMessages.KEY_SUFFIX_DELETE_SUCCESS_DATA, data);
 
-		SessionMessages.add(
-			actionRequest,
-			liferayPortletConfig.getPortletId() +
-				SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_SUCCESS_MESSAGE);
+		hideDefaultSuccessMessage(liferayPortletConfig, actionRequest);
 	}
 
 	protected void deleteEntries(ActionRequest actionRequest) throws Exception {
@@ -314,7 +311,7 @@ public class EditEntryAction extends PortletAction {
 		if (Validator.isNull(newName)) {
 			String oldName = ParamUtil.getString(actionRequest, "oldName");
 
-			newName = TrashUtil.getNewName(themeDisplay, oldName);
+			newName = TrashUtil.getNewName(themeDisplay, null, 0, oldName);
 		}
 
 		TrashEntry entry = TrashEntryServiceUtil.restoreEntry(

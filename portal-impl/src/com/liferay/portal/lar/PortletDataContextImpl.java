@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.lar.PortletDataContextListener;
 import com.liferay.portal.kernel.lar.PortletDataHandlerControl;
 import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.lar.UserIdStrategy;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -54,6 +55,8 @@ import com.liferay.portal.model.ClassedModel;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.Lock;
+import com.liferay.portal.model.Portlet;
+import com.liferay.portal.model.PortletModel;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.ResourcedModel;
 import com.liferay.portal.model.Role;
@@ -363,14 +366,11 @@ public class PortletDataContextImpl implements PortletDataContext {
 	}
 
 	@Override
-	public void addDeletionSystemEventClassNames(
-		String... deletionSystemEventClassNames) {
+	public void addDeletionSystemEventStagedModelTypes(
+		StagedModelType... stagedModelTypes) {
 
-		for (String deletionSystemEventClassName :
-				deletionSystemEventClassNames) {
-
-			_deletionSystemEventClassNameIds.add(
-				PortalUtil.getClassNameId(deletionSystemEventClassName));
+		for (StagedModelType stagedModelType : stagedModelTypes) {
+			_deletionSystemEventModelTypes.add(stagedModelType);
 		}
 	}
 
@@ -461,7 +461,8 @@ public class PortletDataContextImpl implements PortletDataContext {
 				((type == RoleConstants.TYPE_ORGANIZATION) &&
 				 group.isOrganization()) ||
 				((type == RoleConstants.TYPE_SITE) &&
-				 (group.isLayoutSetPrototype() || group.isSite()))) {
+				 (group.isLayout() || group.isLayoutSetPrototype() ||
+				  group.isSite()))) {
 
 				String name = role.getName();
 
@@ -804,6 +805,20 @@ public class PortletDataContextImpl implements PortletDataContext {
 
 	@Override
 	public boolean getBooleanParameter(String namespace, String name) {
+		return getBooleanParameter(namespace, name, true);
+	}
+
+	@Override
+	public boolean getBooleanParameter(
+		String namespace, String name, boolean useDefaultValue) {
+
+		if (!useDefaultValue) {
+			return MapUtil.getBoolean(
+				getParameterMap(),
+				PortletDataHandlerControl.getNamespacedControlName(
+					namespace, name));
+		}
+
 		boolean defaultValue = MapUtil.getBoolean(
 			getParameterMap(),
 			PortletDataHandlerKeys.PORTLET_DATA_CONTROL_DEFAULT, true);
@@ -840,8 +855,8 @@ public class PortletDataContextImpl implements PortletDataContext {
 	}
 
 	@Override
-	public Set<Long> getDeletionSystemEventClassNameIds() {
-		return _deletionSystemEventClassNameIds;
+	public Set<StagedModelType> getDeletionSystemEventStagedModelTypes() {
+		return _deletionSystemEventModelTypes;
 	}
 
 	@Override
@@ -1965,7 +1980,13 @@ public class PortletDataContextImpl implements PortletDataContext {
 				"referrer-class-name",
 				referrerClassedModel.getModelClassName());
 
-			if (referrerClassedModel instanceof StagedModel) {
+			if (referrerClassedModel instanceof PortletModel) {
+				Portlet portlet = (Portlet)referrerClassedModel;
+
+				referenceElement.addAttribute(
+					"referrer-display-name", portlet.getRootPortletId());
+			}
+			else if (referrerClassedModel instanceof StagedModel) {
 				StagedModel referrerStagedModel =
 					(StagedModel)referrerClassedModel;
 
@@ -2263,7 +2284,8 @@ public class PortletDataContextImpl implements PortletDataContext {
 	private long _companyGroupId;
 	private long _companyId;
 	private String _dataStrategy;
-	private Set<Long> _deletionSystemEventClassNameIds = new HashSet<Long>();
+	private Set<StagedModelType> _deletionSystemEventModelTypes =
+		new HashSet<StagedModelType>();
 	private Date _endDate;
 	private Map<String, List<ExpandoColumn>> _expandoColumnsMap =
 		new HashMap<String, List<ExpandoColumn>>();

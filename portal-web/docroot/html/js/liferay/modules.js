@@ -120,7 +120,6 @@ window.YUI_config = {
 						'event-mouseenter',
 						'liferay-dockbar',
 						'liferay-dockbar-add-base',
-						'liferay-dockbar-add-content-drag-drop',
 						'liferay-dockbar-add-application-search',
 						'liferay-portlet-base'
 					]
@@ -147,7 +146,6 @@ window.YUI_config = {
 						'event-mouseenter',
 						'liferay-dockbar',
 						'liferay-dockbar-add-content-content-preview',
-						'liferay-dockbar-add-content-drag-drop',
 						'liferay-dockbar-add-content-search',
 						'liferay-portlet-base'
 					]
@@ -160,8 +158,8 @@ window.YUI_config = {
 						'event-mouseenter'
 					]
 				},
-				'liferay-dockbar-add-content-drag-drop': {
-					path: 'dockbar_add_content_drag_drop.js',
+				'liferay-dockbar-portlet-dd': {
+					path: 'dockbar_portlet_dd.js',
 					requires: [
 						'aui-base',
 						'dd',
@@ -187,7 +185,8 @@ window.YUI_config = {
 						'aui-toggler-delegate',
 						'liferay-dockbar',
 						'liferay-dockbar-add-base',
-						'liferay-dockbar-add-page-search'
+						'liferay-dockbar-add-page-search',
+						'liferay-toggler-key-filter'
 					]
 				},
 				'liferay-dockbar-add-page-search': {
@@ -205,6 +204,17 @@ window.YUI_config = {
 						'autocomplete-base',
 						'autocomplete-filters',
 						'liferay-dockbar'
+					]
+				},
+				'liferay-dockbar-device-preview': {
+					path: 'dockbar_device_preview.js',
+					requires: [
+						'aui-dialog-iframe-deprecated',
+						'aui-event-input',
+						'aui-modal',
+						'liferay-portlet-base',
+						'liferay-util-window',
+						'liferay-widget-size-animation-plugin'
 					]
 				},
 				'liferay-dockbar-underlay': {
@@ -310,6 +320,12 @@ window.YUI_config = {
 					requires: [
 						'aui-base',
 						'aui-toolbar'
+					]
+				},
+				'liferay-toggler-key-filter': {
+					path: 'toggler_key_filter.js',
+					requires: [
+						'aui-event-base'
 					]
 				},
 				'liferay-layout': {
@@ -575,14 +591,31 @@ window.YUI_config = {
 				'liferay-util-window': {
 					path: 'util_window.js',
 					requires: [
+						'aui-modal',
 						'aui-dialog-iframe-deprecated',
-						'aui-modal'
+						'event-resize',
+						'liferay-widget-zindex'
+					]
+				},
+				'liferay-widget-size-animation-plugin': {
+					path: 'widget_size_animation_plugin.js',
+					requires: [
+						'anim-easing',
+						'plugin',
+						'widget'
 					]
 				},
 				'liferay-xml-formatter': {
 					path: 'xml_formatter.js',
 					requires: [
 						'aui-base'
+					]
+				},
+				'liferay-widget-zindex': {
+					path: 'widget_zindex.js',
+					requires: [
+						'aui-modal',
+						'plugin'
 					]
 				}
 			},

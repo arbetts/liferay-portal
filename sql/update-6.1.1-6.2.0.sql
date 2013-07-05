@@ -40,7 +40,8 @@ create table BackgroundTask (
 	taskContext TEXT null,
 	completed BOOLEAN,
 	completionDate DATE null,
-	status INTEGER
+	status INTEGER,
+	statusMessage TEXT null
 );
 
 alter table Contact_ add classNameId LONG;
@@ -356,7 +357,14 @@ update ExpandoRow set modifiedDate = CURRENT_TIMESTAMP;
 
 alter table Group_ add uuid_ VARCHAR(75) null;
 alter table Group_ add treePath STRING null;
+alter table Group_ add manualMembership BOOLEAN;
+alter table Group_ add membershipRestriction INTEGER;
+alter table Group_ add remoteStagingGroupCount INTEGER;
 
+COMMIT_TRANSACTION;
+
+update Group_ set manualMembership = TRUE;
+update Group_ set membershipRestriction = 0;
 update Group_ set site = FALSE where name = 'Control Panel';
 update Group_ set site = TRUE where friendlyURL = '/global';
 
@@ -538,6 +546,7 @@ create table SystemEvent (
 	classNameId LONG,
 	classPK LONG,
 	classUuid VARCHAR(75) null,
+	referrerClassNameId LONG,
 	type_ INTEGER,
 	extraData TEXT null
 );
@@ -574,6 +583,17 @@ alter table UserGroup add userId LONG;
 alter table UserGroup add userName VARCHAR(75) null;
 alter table UserGroup add createDate DATE null;
 alter table UserGroup add modifiedDate DATE null;
+
+create table UserNotificationDelivery (
+	userNotificationDeliveryId LONG not null primary key,
+	companyId LONG,
+	userId LONG,
+	portletId VARCHAR(200) null,
+	classNameId LONG,
+	notificationType INTEGER,
+	deliveryType INTEGER,
+	deliver BOOLEAN
+);
 
 alter table UserNotificationEvent add delivered BOOLEAN;
 

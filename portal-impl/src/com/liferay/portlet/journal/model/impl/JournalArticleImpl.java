@@ -17,6 +17,7 @@ package com.liferay.portlet.journal.model.impl;
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.templateparser.TransformerListener;
@@ -28,7 +29,10 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Image;
 import com.liferay.portal.service.ImageLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.webserver.WebServerServletTokenUtil;
+import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
+import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.model.JournalArticleResource;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalArticleResourceLocalServiceUtil;
@@ -190,6 +194,11 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 	}
 
 	@Override
+	public StagedModelType getStagedModelType() {
+		return new StagedModelType(JournalArticle.class);
+	}
+
+	@Override
 	public Map<Locale, String> getTitleMap() {
 		Locale defaultLocale = LocaleThreadLocal.getDefaultLocale();
 
@@ -215,6 +224,15 @@ public class JournalArticleImpl extends JournalArticleBaseImpl {
 		}
 
 		return folder.getTrashContainer();
+	}
+
+	@Override
+	public boolean isIndexable() {
+		if (getClassNameId() == PortalUtil.getClassNameId(DDMStructure.class)) {
+			return false;
+		}
+
+		return super.isIndexable();
 	}
 
 	@Override

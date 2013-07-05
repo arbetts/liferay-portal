@@ -45,7 +45,6 @@ import com.liferay.portal.kernel.lock.LockListenerRegistryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.plugin.PluginPackage;
-import com.liferay.portal.kernel.portlet.PortletSecurityUtil;
 import com.liferay.portal.kernel.sanitizer.Sanitizer;
 import com.liferay.portal.kernel.sanitizer.SanitizerUtil;
 import com.liferay.portal.kernel.search.Indexer;
@@ -99,6 +98,7 @@ import com.liferay.portal.security.auth.AuthFailure;
 import com.liferay.portal.security.auth.AuthPipeline;
 import com.liferay.portal.security.auth.AuthToken;
 import com.liferay.portal.security.auth.AuthTokenUtil;
+import com.liferay.portal.security.auth.AuthTokenWhitelistUtil;
 import com.liferay.portal.security.auth.AuthTokenWrapper;
 import com.liferay.portal.security.auth.AuthVerifier;
 import com.liferay.portal.security.auth.AuthVerifierConfiguration;
@@ -140,6 +140,7 @@ import com.liferay.portal.service.persistence.BasePersistence;
 import com.liferay.portal.servlet.filters.autologin.AutoLoginFilter;
 import com.liferay.portal.servlet.filters.cache.CacheUtil;
 import com.liferay.portal.spring.aop.ServiceBeanAopCacheManagerUtil;
+import com.liferay.portal.spring.aop.ServiceBeanAopProxy;
 import com.liferay.portal.struts.AuthPublicPathRegistry;
 import com.liferay.portal.struts.StrutsActionRegistryUtil;
 import com.liferay.portal.upgrade.UpgradeProcessUtil;
@@ -202,6 +203,7 @@ public class HookHotDeployListener
 		"auth.forward.by.last.path", "auth.public.paths",
 		"auth.verifier.pipeline", "auto.deploy.listeners",
 		"application.startup.events", "auth.failure", "auth.max.failures",
+		"auth.token.ignore.actions", "auth.token.ignore.portlets",
 		"auth.token.impl", "auth.pipeline.post", "auth.pipeline.pre",
 		"auto.login.hooks", "captcha.check.portal.create_account",
 		"captcha.engine.impl", "company.default.locale",
@@ -603,7 +605,8 @@ public class HookHotDeployListener
 
 			Object serviceProxy = PortalBeanLocatorUtil.locate(serviceType);
 
-			AdvisedSupport advisedSupport = getAdvisedSupport(serviceProxy);
+			AdvisedSupport advisedSupport =
+				ServiceBeanAopProxy.getAdvisedSupport(serviceProxy);
 
 			Object previousService = serviceBag.getCustomService();
 
@@ -892,22 +895,6 @@ public class HookHotDeployListener
 		if (_log.isInfoEnabled()) {
 			_log.info("Hook for " + servletContextName + " was unregistered");
 		}
-	}
-
-	protected AdvisedSupport getAdvisedSupport(Object serviceProxy)
-		throws Exception {
-
-		InvocationHandler invocationHandler = ProxyUtil.getInvocationHandler(
-			serviceProxy);
-
-		Class<?> invocationHandlerClass = invocationHandler.getClass();
-
-		Field advisedSupportField = invocationHandlerClass.getDeclaredField(
-			"_advisedSupport");
-
-		advisedSupportField.setAccessible(true);
-
-		return (AdvisedSupport)advisedSupportField.get(invocationHandler);
 	}
 
 	protected void getCustomJsps(
@@ -2110,7 +2097,8 @@ public class HookHotDeployListener
 			Constructor<?> serviceImplConstructor, Object serviceProxy)
 		throws Exception {
 
-		AdvisedSupport advisedSupport = getAdvisedSupport(serviceProxy);
+		AdvisedSupport advisedSupport = ServiceBeanAopProxy.getAdvisedSupport(
+			serviceProxy);
 
 		TargetSource targetSource = advisedSupport.getTargetSource();
 
@@ -2468,18 +2456,26 @@ public class HookHotDeployListener
 			LanguageUtil.init();
 		}
 
+		if (containsKey(portalProperties, AUTH_TOKEN_IGNORE_ACTIONS)) {
+			AuthTokenWhitelistUtil.resetPortletCSRFWhitelistActions();
+		}
+
+		if (containsKey(portalProperties, AUTH_TOKEN_IGNORE_PORTLETS)) {
+			AuthTokenWhitelistUtil.resetPortletCSRFWhitelist();
+		}
+
 		if (containsKey(
 				portalProperties,
 				PORTLET_ADD_DEFAULT_RESOURCE_CHECK_WHITELIST)) {
 
-			PortletSecurityUtil.resetWhitelist();
+			AuthTokenWhitelistUtil.resetPortletInvocationWhitelist();
 		}
 
 		if (containsKey(
 				portalProperties,
 				PORTLET_ADD_DEFAULT_RESOURCE_CHECK_WHITELIST_ACTIONS)) {
 
-			PortletSecurityUtil.resetWhitelistActions();
+			AuthTokenWhitelistUtil.resetPortletInvocationWhitelistActions();
 		}
 
 		CacheUtil.clearCache();
@@ -2662,6 +2658,7 @@ public class HookHotDeployListener
 	};
 
 	private static final String[] _PROPS_VALUES_MERGE_STRING_ARRAY = {
+		"auth.token.ignore.actions", "auth.token.ignore.portlets",
 		"admin.default.group.names", "admin.default.role.names",
 		"admin.default.user.group.names", "asset.publisher.display.styles",
 		"company.settings.form.authentication",

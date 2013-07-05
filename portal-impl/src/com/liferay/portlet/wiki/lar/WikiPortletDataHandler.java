@@ -15,18 +15,17 @@
 package com.liferay.portlet.wiki.lar;
 
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
-import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.dao.orm.Property;
-import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BasePortletDataHandler;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataException;
 import com.liferay.portal.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.portal.kernel.lar.PortletDataHandlerControl;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.kernel.lar.StagedModelType;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.model.Portlet;
+import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.service.WikiNodeLocalServiceUtil;
@@ -54,8 +53,10 @@ public class WikiPortletDataHandler extends BasePortletDataHandler {
 	public static final String NAMESPACE = "wiki";
 
 	public WikiPortletDataHandler() {
-		setDeletionSystemEventClassNames(
-			WikiNode.class.getName(), WikiPage.class.getName());
+		setDataPortletPreferences("hiddenNodes, visibleNodes");
+		setDeletionSystemEventStagedModelTypes(
+			new StagedModelType(WikiNode.class),
+			new StagedModelType(WikiPage.class));
 		setExportControls(
 			new PortletDataHandlerBoolean(
 				NAMESPACE, "wiki-pages", true, false,
@@ -126,7 +127,7 @@ public class WikiPortletDataHandler extends BasePortletDataHandler {
 		nodeActionableDynamicQuery.performActions();
 
 		ActionableDynamicQuery pageActionableDynamicQuery =
-			getPageActionableDynamicQuery(portletDataContext);
+			new WikiPageExportActionableDynamicQuery(portletDataContext);
 
 		pageActionableDynamicQuery.performActions();
 
@@ -189,28 +190,51 @@ public class WikiPortletDataHandler extends BasePortletDataHandler {
 		nodeActionableDynamicQuery.performCount();
 
 		ActionableDynamicQuery pageExportActionableDynamicQuery =
-			getPageActionableDynamicQuery(portletDataContext);
+			new WikiPageExportActionableDynamicQuery(portletDataContext);
 
 		pageExportActionableDynamicQuery.performCount();
 	}
 
-	protected ActionableDynamicQuery getPageActionableDynamicQuery(
-			final PortletDataContext portletDataContext)
-		throws SystemException {
+	@Override
+	protected PortletPreferences doProcessExportPortletPreferences(
+			PortletDataContext portletDataContext, String portletId,
+			PortletPreferences portletPreferences, Element rootElement)
+		throws Exception {
 
-		return new WikiPageExportActionableDynamicQuery(portletDataContext) {
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(
+			portletDataContext.getCompanyId(), portletId);
 
-			@Override
-			protected void addCriteria(DynamicQuery dynamicQuery) {
-				super.addCriteria(dynamicQuery);
+		String hiddenNodeNames = portletPreferences.getValue(
+			"hiddenNodes", null);
 
-				Property statusProperty = PropertyFactoryUtil.forName("status");
+		for (String hiddenNodeName : StringUtil.split(hiddenNodeNames)) {
+			WikiNode wikiNode =
+				WikiNodeLocalServiceUtil.getNode(
+					portletDataContext.getScopeGroupId(), hiddenNodeName);
 
-				dynamicQuery.add(
-					statusProperty.eq(WorkflowConstants.STATUS_APPROVED));
-			}
+			portletDataContext.addReferenceElement(
+				portlet, rootElement, wikiNode, WikiNode.class,
+				PortletDataContext.REFERENCE_TYPE_DEPENDENCY,
+				!portletDataContext.getBooleanParameter(
+					NAMESPACE, "wiki-pages"));
+		}
 
-		};
+		String visibleNodeNames = portletPreferences.getValue(
+			"visibleNodes", null);
+
+		for (String visibleNodeName : StringUtil.split(visibleNodeNames)) {
+			WikiNode wikiNode =
+				WikiNodeLocalServiceUtil.getNode(
+					portletDataContext.getScopeGroupId(), visibleNodeName);
+
+			portletDataContext.addReferenceElement(
+				portlet, rootElement, wikiNode, WikiNode.class,
+				PortletDataContext.REFERENCE_TYPE_DEPENDENCY,
+				!portletDataContext.getBooleanParameter(
+					NAMESPACE, "wiki-pages"));
+		}
+
+		return portletPreferences;
 	}
 
 }

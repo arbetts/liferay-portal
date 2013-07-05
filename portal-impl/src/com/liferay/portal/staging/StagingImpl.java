@@ -48,6 +48,7 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -55,6 +56,9 @@ import com.liferay.portal.kernel.workflow.WorkflowTask;
 import com.liferay.portal.kernel.workflow.WorkflowTaskManagerUtil;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.lar.LayoutExporter;
+import com.liferay.portal.lar.backgroundtask.BackgroundTaskContextMapFactory;
+import com.liferay.portal.lar.backgroundtask.LayoutStagingBackgroundTaskExecutor;
+import com.liferay.portal.lar.backgroundtask.PortletStagingBackgroundTaskExecutor;
 import com.liferay.portal.messaging.LayoutsLocalPublisherRequest;
 import com.liferay.portal.messaging.LayoutsRemotePublisherRequest;
 import com.liferay.portal.model.Group;
@@ -73,6 +77,7 @@ import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
+import com.liferay.portal.service.BackgroundTaskLocalServiceUtil;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutBranchLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
@@ -94,7 +99,7 @@ import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.PortalPreferences;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 
-import java.io.File;
+import java.io.Serializable;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -204,17 +209,25 @@ public class StagingImpl implements Staging {
 		Map<String, String[]> parameterMap = getStagingParameters(
 			portletRequest);
 
-		File file = LayoutLocalServiceUtil.exportPortletInfoAsFile(
-			sourcePlid, sourceGroupId, portletId, parameterMap, null, null);
+		DateRange dateRange = ExportImportHelperUtil.getDateRange(
+			portletRequest, sourceGroupId, false, sourcePlid, portletId);
 
-		try {
-			LayoutLocalServiceUtil.importPortletInfo(
-				userId, targetPlid, targetGroupId, portletId, parameterMap,
-				file);
-		}
-		finally {
-			file.delete();
-		}
+		Map<String, Serializable> taskContextMap =
+			BackgroundTaskContextMapFactory.buildTaskContextMap(
+				userId, sourceGroupId, false, null, parameterMap,
+				dateRange.getStartDate(), dateRange.getEndDate(),
+				StringPool.BLANK);
+
+		taskContextMap.put("sourceGroupId", sourceGroupId);
+		taskContextMap.put("sourcePlid", sourcePlid);
+		taskContextMap.put("portletId", portletId);
+		taskContextMap.put("targetGroupId", targetGroupId);
+		taskContextMap.put("targetPlid", targetPlid);
+
+		BackgroundTaskLocalServiceUtil.addBackgroundTask(
+			userId, sourceGroupId, portletId, null,
+			PortletStagingBackgroundTaskExecutor.class, taskContextMap,
+			new ServiceContext());
 	}
 
 	@Override
@@ -420,6 +433,18 @@ public class StagingImpl implements Staging {
 		UnicodeProperties typeSettingsProperties =
 			liveGroup.getTypeSettingsProperties();
 
+		boolean stagedRemotely = GetterUtil.getBoolean(
+			typeSettingsProperties.getProperty("stagedRemotely"));
+
+		if (stagedRemotely) {
+			String remoteURL = buildRemoteURL(typeSettingsProperties);
+
+			long remoteGroupId = GetterUtil.getLong(
+				typeSettingsProperties.getProperty("remoteGroupId"));
+
+			disableRemoteStaging(remoteURL, remoteGroupId);
+		}
+
 		typeSettingsProperties.remove("branchingPrivate");
 		typeSettingsProperties.remove("branchingPublic");
 		typeSettingsProperties.remove("remoteAddress");
@@ -499,6 +524,8 @@ public class StagingImpl implements Staging {
 				liveGroup.getClassName(), liveGroup.getClassPK(),
 				liveGroup.getGroupId(), liveGroup.getDescriptiveName(),
 				liveGroup.getDescription(), liveGroup.getType(),
+				liveGroup.isManualMembership(),
+				liveGroup.getMembershipRestriction(),
 				liveGroup.getFriendlyURL(), false, liveGroup.isActive(),
 				serviceContext);
 
@@ -562,8 +589,34 @@ public class StagingImpl implements Staging {
 			disableStaging(liveGroup, serviceContext);
 		}
 
+		String remoteURL = buildRemoteURL(
+			remoteAddress, remotePort, remotePathContext, secureConnection,
+			GroupConstants.DEFAULT_LIVE_GROUP_ID, false);
+
 		UnicodeProperties typeSettingsProperties =
 			liveGroup.getTypeSettingsProperties();
+
+		boolean stagedRemotely = GetterUtil.getBoolean(
+			typeSettingsProperties.getProperty("stagedRemotely"));
+
+		if (stagedRemotely) {
+			long oldRemoteGroupId = GetterUtil.getLong(
+				typeSettingsProperties.getProperty("remoteGroupId"));
+
+			String oldRemoteURL = buildRemoteURL(typeSettingsProperties);
+
+			if (!remoteURL.equals(oldRemoteURL) ||
+				(remoteGroupId != oldRemoteGroupId)) {
+
+				disableRemoteStaging(oldRemoteURL, oldRemoteGroupId);
+
+				stagedRemotely = false;
+			}
+		}
+
+		if (!stagedRemotely) {
+			enableRemoteStaging(remoteURL, remoteGroupId);
+		}
 
 		typeSettingsProperties.setProperty(
 			"branchingPrivate", String.valueOf(branchingPrivate));
@@ -587,6 +640,8 @@ public class StagingImpl implements Staging {
 
 		GroupLocalServiceUtil.updateGroup(
 			liveGroup.getGroupId(), typeSettingsProperties.toString());
+
+		updateStagedPortlets(remoteURL, remoteGroupId, typeSettingsProperties);
 
 		checkDefaultLayoutSetBranches(
 			userId, liveGroup, branchingPublic, branchingPrivate, true,
@@ -713,6 +768,17 @@ public class StagingImpl implements Staging {
 	public String getSchedulerGroupName(String destinationName, long groupId) {
 		return destinationName.concat(StringPool.SLASH).concat(
 			String.valueOf(groupId));
+	}
+
+	@Override
+	public String getStagedPortletId(String portletId) {
+		String key = portletId;
+
+		if (key.startsWith(StagingConstants.STAGED_PORTLET)) {
+			return key;
+		}
+
+		return StagingConstants.STAGED_PORTLET.concat(portletId);
 	}
 
 	@Override
@@ -961,6 +1027,25 @@ public class StagingImpl implements Staging {
 	}
 
 	@Override
+	public void lockGroup(long userId, long groupId) throws Exception {
+		if (!PropsValues.STAGING_LOCK_ENABLED) {
+			return;
+		}
+
+		if (LockLocalServiceUtil.isLocked(Staging.class.getName(), groupId)) {
+			Lock lock = LockLocalServiceUtil.getLock(
+				Staging.class.getName(), groupId);
+
+			throw new DuplicateLockException(lock);
+		}
+
+		LockLocalServiceUtil.lock(
+			userId, Staging.class.getName(), String.valueOf(groupId),
+			StagingImpl.class.getName(), false,
+			StagingConstants.LOCK_EXPIRATION_TIME);
+	}
+
+	@Override
 	public void publishLayout(
 			long userId, long plid, long liveGroupId, boolean includeChildren)
 		throws Exception {
@@ -997,25 +1082,22 @@ public class StagingImpl implements Staging {
 			Map<String, String[]> parameterMap, Date startDate, Date endDate)
 		throws Exception {
 
-		lockGroup(userId, targetGroupId);
-
 		parameterMap.put(
 			PortletDataHandlerKeys.PERFORM_DIRECT_BINARY_IMPORT,
 			new String[] {Boolean.TRUE.toString()});
 
-		File file = LayoutLocalServiceUtil.exportLayoutsAsFile(
-			sourceGroupId, privateLayout, layoutIds, parameterMap, startDate,
-			endDate);
+		Map<String, Serializable> taskContextMap =
+			BackgroundTaskContextMapFactory.buildTaskContextMap(
+				userId, sourceGroupId, privateLayout, layoutIds, parameterMap,
+				startDate, endDate, StringPool.BLANK);
 
-		try {
-			LayoutLocalServiceUtil.importLayouts(
-				userId, targetGroupId, privateLayout, parameterMap, file);
-		}
-		finally {
-			file.delete();
+		taskContextMap.put("sourceGroupId", sourceGroupId);
+		taskContextMap.put("targetGroupId", targetGroupId);
 
-			unlockGroup(targetGroupId);
-		}
+		BackgroundTaskLocalServiceUtil.addBackgroundTask(
+			userId, sourceGroupId, StringPool.BLANK, null,
+			LayoutStagingBackgroundTaskExecutor.class, taskContextMap,
+			new ServiceContext());
 	}
 
 	@Override
@@ -1257,6 +1339,15 @@ public class StagingImpl implements Staging {
 	}
 
 	@Override
+	public void unlockGroup(long groupId) throws SystemException {
+		if (!PropsValues.STAGING_LOCK_ENABLED) {
+			return;
+		}
+
+		LockLocalServiceUtil.unlock(Staging.class.getName(), groupId);
+	}
+
+	@Override
 	public void unscheduleCopyFromLive(PortletRequest portletRequest)
 		throws Exception {
 
@@ -1433,6 +1524,21 @@ public class StagingImpl implements Staging {
 		}
 	}
 
+	protected String buildRemoteURL(UnicodeProperties typeSettingsProperties) {
+		String remoteAddress = typeSettingsProperties.getProperty(
+			"remoteAddress");
+		int remotePort = GetterUtil.getInteger(
+			typeSettingsProperties.getProperty("remotePort"));
+		String remotePathContext = typeSettingsProperties.getProperty(
+			"remotePathContext");
+		boolean secureConnection = GetterUtil.getBoolean(
+			typeSettingsProperties.getProperty("secureConnection"));
+
+		return buildRemoteURL(
+			remoteAddress, remotePort, remotePathContext, secureConnection,
+			GroupConstants.DEFAULT_LIVE_GROUP_ID, false);
+	}
+
 	protected void checkDefaultLayoutSetBranches(
 			long userId, Group liveGroup, boolean branchingPublic,
 			boolean branchingPrivate, boolean remote,
@@ -1532,6 +1638,88 @@ public class StagingImpl implements Staging {
 		portalPreferences.setValue(
 			Staging.class.getName(),
 			getRecentLayoutRevisionIdKey(layoutSetBranchId, plid), null);
+	}
+
+	protected void disableRemoteStaging(String remoteURL, long remoteGroupId)
+		throws Exception {
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		User user = permissionChecker.getUser();
+
+		HttpPrincipal httpPrincipal = new HttpPrincipal(
+			remoteURL, user.getScreenName(), user.getPassword(),
+			user.getPasswordEncrypted());
+
+		try {
+			GroupServiceHttp.disableStaging(httpPrincipal, remoteGroupId);
+		}
+		catch (NoSuchGroupException nsge) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.NO_GROUP);
+
+			ree.setGroupId(remoteGroupId);
+
+			throw ree;
+		}
+		catch (PrincipalException pe) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.NO_PERMISSIONS);
+
+			ree.setGroupId(remoteGroupId);
+
+			throw ree;
+		}
+		catch (SystemException se) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.BAD_CONNECTION);
+
+			ree.setURL(remoteURL);
+
+			throw ree;
+		}
+	}
+
+	protected void enableRemoteStaging(String remoteURL, long remoteGroupId)
+		throws Exception {
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		User user = permissionChecker.getUser();
+
+		HttpPrincipal httpPrincipal = new HttpPrincipal(
+			remoteURL, user.getScreenName(), user.getPassword(),
+			user.getPasswordEncrypted());
+
+		try {
+			GroupServiceHttp.enableStaging(httpPrincipal, remoteGroupId);
+		}
+		catch (NoSuchGroupException nsge) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.NO_GROUP);
+
+			ree.setGroupId(remoteGroupId);
+
+			throw ree;
+		}
+		catch (PrincipalException pe) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.NO_PERMISSIONS);
+
+			ree.setGroupId(remoteGroupId);
+
+			throw ree;
+		}
+		catch (SystemException se) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.BAD_CONNECTION);
+
+			ree.setURL(remoteURL);
+
+			throw ree;
+		}
 	}
 
 	protected boolean getBoolean(
@@ -1731,24 +1919,6 @@ public class StagingImpl implements Staging {
 			GetterUtil.getString(group.getTypeSettingsProperty(param)));
 	}
 
-	protected void lockGroup(long userId, long groupId) throws Exception {
-		if (!PropsValues.STAGING_LOCK_ENABLED) {
-			return;
-		}
-
-		if (LockLocalServiceUtil.isLocked(Staging.class.getName(), groupId)) {
-			Lock lock = LockLocalServiceUtil.getLock(
-				Staging.class.getName(), groupId);
-
-			throw new DuplicateLockException(lock);
-		}
-
-		LockLocalServiceUtil.lock(
-			userId, Staging.class.getName(), String.valueOf(groupId),
-			StagingImpl.class.getName(), false,
-			StagingConstants.LOCK_EXPIRATION_TIME);
-	}
-
 	protected void publishLayouts(
 			PortletRequest portletRequest, long sourceGroupId,
 			long targetGroupId, Map<String, String[]> parameterMap,
@@ -1798,11 +1968,11 @@ public class StagingImpl implements Staging {
 			int recurrenceType = ParamUtil.getInteger(
 				portletRequest, "recurrenceType");
 
-			Calendar startCal = ExportImportHelperUtil.getDate(
+			Calendar startCalendar = ExportImportHelperUtil.getCalendar(
 				portletRequest, "schedulerStartDate", true);
 
 			String cronText = SchedulerEngineHelperUtil.getCronText(
-				portletRequest, startCal, true, recurrenceType);
+				portletRequest, startCalendar, true, recurrenceType);
 
 			Date schedulerEndDate = null;
 
@@ -1810,10 +1980,10 @@ public class StagingImpl implements Staging {
 				portletRequest, "endDateType");
 
 			if (endDateType == 1) {
-				Calendar endCal = ExportImportHelperUtil.getDate(
+				Calendar endCalendar = ExportImportHelperUtil.getCalendar(
 					portletRequest, "schedulerEndDate", true);
 
-				schedulerEndDate = endCal.getTime();
+				schedulerEndDate = endCalendar.getTime();
 			}
 
 			String description = ParamUtil.getString(
@@ -1822,8 +1992,8 @@ public class StagingImpl implements Staging {
 			LayoutServiceUtil.schedulePublishToLive(
 				sourceGroupId, targetGroupId, privateLayout, layoutIdMap,
 				parameterMap, scope, dateRange.getStartDate(),
-				dateRange.getEndDate(), groupName, cronText, startCal.getTime(),
-				schedulerEndDate, description);
+				dateRange.getEndDate(), groupName, cronText,
+				startCalendar.getTime(), schedulerEndDate, description);
 		}
 		else {
 			MessageStatus messageStatus = new MessageStatus();
@@ -1972,11 +2142,11 @@ public class StagingImpl implements Staging {
 			int recurrenceType = ParamUtil.getInteger(
 				portletRequest, "recurrenceType");
 
-			Calendar startCal = ExportImportHelperUtil.getDate(
+			Calendar startCalendar = ExportImportHelperUtil.getCalendar(
 				portletRequest, "schedulerStartDate", true);
 
 			String cronText = SchedulerEngineHelperUtil.getCronText(
-				portletRequest, startCal, true, recurrenceType);
+				portletRequest, startCalendar, true, recurrenceType);
 
 			Date schedulerEndDate = null;
 
@@ -1984,10 +2154,10 @@ public class StagingImpl implements Staging {
 				portletRequest, "endDateType");
 
 			if (endDateType == 1) {
-				Calendar endCal = ExportImportHelperUtil.getDate(
+				Calendar endCalendar = ExportImportHelperUtil.getCalendar(
 					portletRequest, "schedulerEndDate", true);
 
-				schedulerEndDate = endCal.getTime();
+				schedulerEndDate = endCalendar.getTime();
 			}
 
 			String description = ParamUtil.getString(
@@ -1997,8 +2167,8 @@ public class StagingImpl implements Staging {
 				groupId, privateLayout, layoutIdMap, parameterMap,
 				remoteAddress, remotePort, remotePathContext, secureConnection,
 				remoteGroupId, remotePrivateLayout, dateRange.getStartDate(),
-				dateRange.getEndDate(), groupName, cronText, startCal.getTime(),
-				schedulerEndDate, description);
+				dateRange.getEndDate(), groupName, cronText,
+				startCalendar.getTime(), schedulerEndDate, description);
 		}
 		else {
 			MessageStatus messageStatus = new MessageStatus();
@@ -2124,14 +2294,6 @@ public class StagingImpl implements Staging {
 		return remoteAddress;
 	}
 
-	protected void unlockGroup(long groupId) throws SystemException {
-		if (!PropsValues.STAGING_LOCK_ENABLED) {
-			return;
-		}
-
-		LockLocalServiceUtil.unlock(Staging.class.getName(), groupId);
-	}
-
 	protected void updateGroupTypeSettingsProperties(
 			Group group, String remoteAddress, int remotePort,
 			String remotePathContext, boolean secureConnection,
@@ -2154,6 +2316,59 @@ public class StagingImpl implements Staging {
 		group.setTypeSettingsProperties(typeSettingsProperties);
 
 		GroupLocalServiceUtil.updateGroup(group);
+	}
+
+	protected void updateStagedPortlets(
+			String remoteURL, long remoteGroupId,
+			UnicodeProperties typeSettingsProperties)
+		throws Exception {
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		User user = permissionChecker.getUser();
+
+		HttpPrincipal httpPrincipal = new HttpPrincipal(
+			remoteURL, user.getScreenName(), user.getPassword(),
+			user.getPasswordEncrypted());
+
+		List<String> stagedPortletIds = new ArrayList<String>();
+
+		for (String key : typeSettingsProperties.keySet()) {
+			if (key.startsWith(StagingConstants.STAGED_PORTLET)) {
+				stagedPortletIds.add(key);
+			}
+		}
+
+		try {
+			GroupServiceHttp.updateStagedPortlets(
+				httpPrincipal, remoteGroupId,
+				StringUtil.merge(stagedPortletIds));
+		}
+		catch (NoSuchGroupException nsge) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.NO_GROUP);
+
+			ree.setGroupId(remoteGroupId);
+
+			throw ree;
+		}
+		catch (PrincipalException pe) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.NO_PERMISSIONS);
+
+			ree.setGroupId(remoteGroupId);
+
+			throw ree;
+		}
+		catch (SystemException se) {
+			RemoteExportException ree = new RemoteExportException(
+				RemoteExportException.BAD_CONNECTION);
+
+			ree.setURL(remoteURL);
+
+			throw ree;
+		}
 	}
 
 	protected void validate(
@@ -2209,12 +2424,12 @@ public class StagingImpl implements Staging {
 
 		User user = permissionChecker.getUser();
 
-		String url = buildRemoteURL(
+		String remoteURL = buildRemoteURL(
 			remoteAddress, remotePort, remotePathContext, secureConnection,
 			GroupConstants.DEFAULT_LIVE_GROUP_ID, false);
 
 		HttpPrincipal httpPrincipal = new HttpPrincipal(
-			url, user.getEmailAddress(), user.getPassword(),
+			remoteURL, user.getEmailAddress(), user.getPassword(),
 			user.getPasswordEncrypted());
 
 		// Ping remote host and verify that the group exists in the same company
@@ -2244,7 +2459,7 @@ public class StagingImpl implements Staging {
 			RemoteExportException ree = new RemoteExportException(
 				RemoteExportException.BAD_CONNECTION);
 
-			ree.setURL(url);
+			ree.setURL(remoteURL);
 
 			throw ree;
 		}

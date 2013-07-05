@@ -25,26 +25,20 @@ import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.lar.MissingReferences;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.DateRange;
-import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.LayoutServiceUtil;
-import com.liferay.portal.struts.ActionConstants;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.dynamicdatalists.RecordSetDuplicateRecordSetKeyException;
 import com.liferay.portlet.dynamicdatamapping.StructureDuplicateStructureKeyException;
 import com.liferay.portlet.layoutsadmin.action.ImportLayoutsAction;
 
 import java.io.File;
-import java.io.FileInputStream;
 
 import java.util.Date;
 
@@ -57,9 +51,6 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -78,6 +69,8 @@ public class ExportImportAction extends ImportLayoutsAction {
 			ActionResponse actionResponse)
 		throws Exception {
 
+		actionRequest = ActionUtil.getWrappedActionRequest(actionRequest, null);
+
 		Portlet portlet = null;
 
 		try {
@@ -94,6 +87,9 @@ public class ExportImportAction extends ImportLayoutsAction {
 
 		try {
 			if (Validator.isNotNull(cmd)) {
+				String redirect = ParamUtil.getString(
+					actionRequest, "redirect");
+
 				if (cmd.equals(Constants.ADD_TEMP)) {
 					addTempFileEntry(
 						actionRequest, actionResponse,
@@ -119,7 +115,7 @@ public class ExportImportAction extends ImportLayoutsAction {
 				else if (cmd.equals(Constants.EXPORT)) {
 					exportData(actionRequest, actionResponse, portlet);
 
-					sendRedirect(actionRequest, actionResponse);
+					sendRedirect(actionRequest, actionResponse, redirect);
 				}
 				else if (cmd.equals(Constants.IMPORT)) {
 					importData(
@@ -127,7 +123,7 @@ public class ExportImportAction extends ImportLayoutsAction {
 						ExportImportHelper.TEMP_FOLDER_NAME +
 							portlet.getPortletId());
 
-					sendRedirect(actionRequest, actionResponse);
+					sendRedirect(actionRequest, actionResponse, redirect);
 				}
 				else if (cmd.equals("publish_to_live")) {
 					StagingUtil.publishToLive(actionRequest, portlet);
@@ -211,6 +207,8 @@ public class ExportImportAction extends ImportLayoutsAction {
 
 		renderResponse.setTitle(ActionUtil.getTitle(portlet, renderRequest));
 
+		renderRequest = ActionUtil.getWrappedRenderRequest(renderRequest, null);
+
 		return actionMapping.findForward(
 			getForward(
 				renderRequest, "portlet.portlet_configuration.export_import"));
@@ -223,12 +221,35 @@ public class ExportImportAction extends ImportLayoutsAction {
 			ResourceResponse resourceResponse)
 		throws Exception {
 
+		String cmd = ParamUtil.getString(resourceRequest, Constants.CMD);
+
 		PortletContext portletContext = portletConfig.getPortletContext();
 
-		PortletRequestDispatcher portletRequestDispatcher =
-			portletContext.getRequestDispatcher(
+		PortletRequestDispatcher portletRequestDispatcher = null;
+
+		if (cmd.equals(Constants.EXPORT)) {
+			portletRequestDispatcher = portletContext.getRequestDispatcher(
+				"/html/portlet/portlet_configuration/" +
+					"export_portlet_processes.jsp");
+		}
+		else if (cmd.equals(Constants.IMPORT)) {
+			portletRequestDispatcher = portletContext.getRequestDispatcher(
+				"/html/portlet/portlet_configuration/" +
+					"import_portlet_processes.jsp");
+		}
+		else if (cmd.equals(Constants.PUBLISH)) {
+			portletRequestDispatcher = portletContext.getRequestDispatcher(
+				"/html/portlet/portlet_configuration/" +
+					"publish_portlet_processes.jsp");
+		}
+		else {
+			portletRequestDispatcher = portletContext.getRequestDispatcher(
 				"/html/portlet/portlet_configuration/" +
 					"import_portlet_resources.jsp");
+		}
+
+		resourceRequest = ActionUtil.getWrappedResourceRequest(
+			resourceRequest, null);
 
 		portletRequestDispatcher.include(resourceRequest, resourceResponse);
 	}
@@ -237,8 +258,6 @@ public class ExportImportAction extends ImportLayoutsAction {
 			ActionRequest actionRequest, ActionResponse actionResponse,
 			Portlet portlet)
 		throws Exception {
-
-		File file = null;
 
 		try {
 			long plid = ParamUtil.getLong(actionRequest, "plid");
@@ -249,21 +268,10 @@ public class ExportImportAction extends ImportLayoutsAction {
 			DateRange dateRange = ExportImportHelperUtil.getDateRange(
 				actionRequest, groupId, false, plid, portlet.getPortletId());
 
-			file = LayoutServiceUtil.exportPortletInfoAsFile(
-				plid, groupId, portlet.getPortletId(),
+			LayoutServiceUtil.exportPortletInfoAsFileInBackground(
+				portlet.getPortletId(), plid, groupId, portlet.getPortletId(),
 				actionRequest.getParameterMap(), dateRange.getStartDate(),
-				dateRange.getEndDate());
-
-			HttpServletRequest request = PortalUtil.getHttpServletRequest(
-				actionRequest);
-			HttpServletResponse response = PortalUtil.getHttpServletResponse(
-				actionResponse);
-
-			ServletResponseUtil.sendFile(
-				request, response, fileName, new FileInputStream(file),
-				ContentTypes.APPLICATION_ZIP);
-
-			setForward(actionRequest, ActionConstants.COMMON_NULL);
+				dateRange.getEndDate(), fileName);
 		}
 		catch (Exception e) {
 			if (_log.isDebugEnabled()) {
@@ -271,9 +279,6 @@ public class ExportImportAction extends ImportLayoutsAction {
 			}
 
 			SessionErrors.add(actionRequest, e.getClass(), e);
-		}
-		finally {
-			FileUtil.delete(file);
 		}
 	}
 
@@ -286,8 +291,8 @@ public class ExportImportAction extends ImportLayoutsAction {
 
 		Portlet portlet = ActionUtil.getPortlet(actionRequest);
 
-		LayoutServiceUtil.importPortletInfo(
-			plid, groupId, portlet.getPortletId(),
+		LayoutServiceUtil.importPortletInfoInBackground(
+			portlet.getPortletId(), plid, groupId, portlet.getPortletId(),
 			actionRequest.getParameterMap(), file);
 	}
 

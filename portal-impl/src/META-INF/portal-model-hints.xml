@@ -93,6 +93,9 @@
 		<field name="completed" type="boolean" />
 		<field name="completionDate" type="Date" />
 		<field name="status" type="int" />
+		<field name="statusMessage" type="String">
+			<hint-collection name="CLOB" />
+		</field>
 	</model>
 	<model name="com.liferay.portal.model.BrowserTracker">
 		<field name="browserTrackerId" type="long" />
@@ -225,10 +228,13 @@
 		<field name="typeSettings" type="String">
 			<hint-collection name="CLOB" />
 		</field>
+		<field name="manualMembership" type="boolean" />
+		<field name="membershipRestriction" type="int" />
 		<field name="friendlyURL" type="String">
 			<hint name="max-length">255</hint>
 		</field>
 		<field name="site" type="boolean" />
+		<field name="remoteStagingGroupCount" type="int" />
 		<field name="active" type="boolean" />
 	</model>
 	<model name="com.liferay.portal.model.Image">
@@ -855,6 +861,7 @@
 		<field name="classNameId" type="long" />
 		<field name="classPK" type="long" />
 		<field name="classUuid" type="String" />
+		<field name="referrerClassNameId" type="long" />
 		<field name="type" type="int" />
 		<field name="extraData" type="String">
 			<hint-collection name="CLOB" />
@@ -983,6 +990,18 @@
 		<field name="type" type="String" />
 		<field name="description" type="String" />
 		<field name="externalUserId" type="String" />
+	</model>
+	<model name="com.liferay.portal.model.UserNotificationDelivery">
+		<field name="userNotificationDeliveryId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="portletId" type="String">
+			<hint name="max-length">200</hint>
+		</field>
+		<field name="classNameId" type="long" />
+		<field name="notificationType" type="int" />
+		<field name="deliveryType" type="int" />
+		<field name="deliver" type="boolean" />
 	</model>
 	<model name="com.liferay.portal.model.UserNotificationEvent">
 		<field name="uuid" type="String" />

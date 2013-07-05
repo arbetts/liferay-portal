@@ -16,10 +16,12 @@ package com.liferay.portal.repository.liferayrepository.model;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
@@ -86,6 +88,25 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 
 		return DLFileEntryPermission.contains(
 			permissionChecker, _dlFileEntry, actionId);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof LiferayFileEntry)) {
+			return false;
+		}
+
+		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)obj;
+
+		if (Validator.equals(_dlFileEntry, liferayFileEntry._dlFileEntry)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -276,6 +297,11 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 	}
 
 	@Override
+	public StagedModelType getStagedModelType() {
+		return new StagedModelType(FileEntry.class);
+	}
+
+	@Override
 	public String getTitle() {
 		return _dlFileEntry.getTitle();
 	}
@@ -318,6 +344,11 @@ public class LiferayFileEntry extends LiferayModel implements FileEntry {
 	@Override
 	public String getVersionUserUuid() throws SystemException {
 		return _dlFileEntry.getVersionUserUuid();
+	}
+
+	@Override
+	public int hashCode() {
+		return _dlFileEntry.hashCode();
 	}
 
 	@Override

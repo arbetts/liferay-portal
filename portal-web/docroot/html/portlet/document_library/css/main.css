@@ -238,6 +238,7 @@
 	}
 
 	.lfr-header-row-content {
+		padding-left: 0;
 		padding-top: 0;
 
 		.edit-toolbar {
@@ -294,14 +295,6 @@
 
 	.taglib-workflow-status {
 		margin-bottom: 5px;
-	}
-
-	.workflow-status-draft, .workflow-status-draft a {
-		color: blue;
-	}
-
-	.workflow-status-pending, .workflow-status-pending a {
-		color: orange;
 	}
 
 	.document-library-breadcrumb  ul {
@@ -572,6 +565,10 @@
 		.document-container {
 			background-color: #EEF4FF;
 		}
+	}
+
+	.upload-multiple-file-permissions {
+		overflow: auto;
 	}
 }
 
