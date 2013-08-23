@@ -15,8 +15,9 @@
 package com.liferay.portal.lar.backgroundtask;
 
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
-import com.liferay.portal.kernel.backgroundtask.BaseBackgroundTaskExecutor;
+import com.liferay.portal.kernel.lar.MissingReferences;
 import com.liferay.portal.kernel.staging.StagingUtil;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.model.BackgroundTask;
@@ -32,11 +33,7 @@ import java.util.Map;
  * @author Julio Camarero
  */
 public class LayoutStagingBackgroundTaskExecutor
-	extends BaseBackgroundTaskExecutor {
-
-	public LayoutStagingBackgroundTaskExecutor() {
-		setSerial(true);
-	}
+	extends BaseStagingBackgroundTaskExecutor {
 
 	@Override
 	public BackgroundTaskResult execute(BackgroundTask backgroundTask)
@@ -60,21 +57,32 @@ public class LayoutStagingBackgroundTaskExecutor
 		Date startDate = (Date)taskContextMap.get("startDate");
 		Date endDate = (Date)taskContextMap.get("endDate");
 
-		File larFile = LayoutLocalServiceUtil.exportLayoutsAsFile(
-			sourceGroupId, privateLayout, layoutIds, parameterMap, startDate,
-			endDate);
+		clearBackgroundTaskStatus(backgroundTask);
+
+		File file = null;
+		MissingReferences missingReferences = null;
 
 		try {
+			file = LayoutLocalServiceUtil.exportLayoutsAsFile(
+				sourceGroupId, privateLayout, layoutIds, parameterMap,
+				startDate, endDate);
+
+			missingReferences =
+				LayoutLocalServiceUtil.validateImportLayoutsFile(
+					userId, targetGroupId, privateLayout, parameterMap, file);
+
+			backgroundTask = markValidatedBackgroundTask(backgroundTask);
+
 			LayoutLocalServiceUtil.importLayouts(
-				userId, targetGroupId, privateLayout, parameterMap, larFile);
+				userId, targetGroupId, privateLayout, parameterMap, file);
 		}
 		finally {
-			larFile.delete();
+			FileUtil.delete(file);
 
 			StagingUtil.unlockGroup(targetGroupId);
 		}
 
-		return BackgroundTaskResult.SUCCESS;
+		return processMissingReferences(backgroundTask, missingReferences);
 	}
 
 }

@@ -360,7 +360,7 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 		while (itr.hasNext()) {
 			Portlet portlet = itr.next();
 
-			PortletBag portletBag = initPortlet(portlet, portletBagFactory);
+			PortletBag portletBag = portletBagFactory.create(portlet);
 
 			if (portletBag == null) {
 				itr.remove();
@@ -557,16 +557,9 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			else {
 				_log.info(
 					portlets.size() + " portlets for " + servletContextName +
-						" was unregistered");
+						" were unregistered");
 			}
 		}
-	}
-
-	protected PortletBag initPortlet(
-			Portlet portlet, PortletBagFactory portletBagFactory)
-		throws Exception {
-
-		return portletBagFactory.create(portlet);
 	}
 
 	protected void initPortletApp(

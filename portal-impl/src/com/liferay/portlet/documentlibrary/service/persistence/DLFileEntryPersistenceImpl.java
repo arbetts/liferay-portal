@@ -360,6 +360,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUuid(uuid);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<DLFileEntry> list = findByUuid(uuid, count - 1, count,
 				orderByComparator);
 
@@ -1180,6 +1184,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByUuid_C(uuid, companyId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<DLFileEntry> list = findByUuid_C(uuid, companyId, count - 1,
 				count, orderByComparator);
 
@@ -1709,6 +1717,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 	public DLFileEntry fetchByGroupId_Last(long groupId,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByGroupId(groupId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<DLFileEntry> list = findByGroupId(groupId, count - 1, count,
 				orderByComparator);
@@ -2563,6 +2575,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByCompanyId(companyId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<DLFileEntry> list = findByCompanyId(companyId, count - 1, count,
 				orderByComparator);
 
@@ -3065,6 +3081,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 	public DLFileEntry fetchByMimeType_Last(String mimeType,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByMimeType(mimeType);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<DLFileEntry> list = findByMimeType(mimeType, count - 1, count,
 				orderByComparator);
@@ -3619,6 +3639,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByF_N(folderId, name);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<DLFileEntry> list = findByF_N(folderId, name, count - 1, count,
 				orderByComparator);
 
@@ -4172,6 +4196,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 	public DLFileEntry fetchByG_U_Last(long groupId, long userId,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByG_U(groupId, userId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<DLFileEntry> list = findByG_U(groupId, userId, count - 1, count,
 				orderByComparator);
@@ -5081,6 +5109,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 	public DLFileEntry fetchByG_F_Last(long groupId, long folderId,
 		OrderByComparator orderByComparator) throws SystemException {
 		int count = countByG_F(groupId, folderId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<DLFileEntry> list = findByG_F(groupId, folderId, count - 1, count,
 				orderByComparator);
@@ -6535,6 +6567,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 		long folderId, OrderByComparator orderByComparator)
 		throws SystemException {
 		int count = countByG_U_F(groupId, userId, folderId);
+
+		if (count == 0) {
+			return null;
+		}
 
 		List<DLFileEntry> list = findByG_U_F(groupId, userId, folderId,
 				count - 1, count, orderByComparator);
@@ -8656,6 +8692,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 		throws SystemException {
 		int count = countByG_F_F(groupId, folderId, fileEntryTypeId);
 
+		if (count == 0) {
+			return null;
+		}
+
 		List<DLFileEntry> list = findByG_F_F(groupId, folderId,
 				fileEntryTypeId, count - 1, count, orderByComparator);
 
@@ -9885,6 +9925,10 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 	private static final String _FINDER_COLUMN_G_F_F_FILEENTRYTYPEID_5 = "(" +
 		removeConjunction(_FINDER_COLUMN_G_F_F_FILEENTRYTYPEID_2) + ")";
 
+	public DLFileEntryPersistenceImpl() {
+		setModelClass(DLFileEntry.class);
+	}
+
 	/**
 	 * Caches the document library file entry in the entity cache if it is enabled.
 	 *
@@ -10498,8 +10542,6 @@ public class DLFileEntryPersistenceImpl extends BasePersistenceImpl<DLFileEntry>
 		dlFileEntryImpl.setCompanyId(dlFileEntry.getCompanyId());
 		dlFileEntryImpl.setUserId(dlFileEntry.getUserId());
 		dlFileEntryImpl.setUserName(dlFileEntry.getUserName());
-		dlFileEntryImpl.setVersionUserId(dlFileEntry.getVersionUserId());
-		dlFileEntryImpl.setVersionUserName(dlFileEntry.getVersionUserName());
 		dlFileEntryImpl.setCreateDate(dlFileEntry.getCreateDate());
 		dlFileEntryImpl.setModifiedDate(dlFileEntry.getModifiedDate());
 		dlFileEntryImpl.setClassNameId(dlFileEntry.getClassNameId());

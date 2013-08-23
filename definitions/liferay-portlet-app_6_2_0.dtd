@@ -32,7 +32,8 @@ preferences-owned-by-group?, use-default-template?, show-portlet-access-denied?,
 show-portlet-inactive?, action-url-redirect?, restore-current-view?,
 maximize-edit?, maximize-help?, pop-up-print?, layout-cacheable?, instanceable?,
 remoteable?, scopeable?, user-principal-strategy?, private-request-attributes?,
-private-session-attributes?, autopropagated-parameters?, action-timeout?,
+private-session-attributes?, autopropagated-parameters?,
+requires-namespaced-parameters?, action-timeout?,
 render-timeout?, render-weight?, ajaxable?, header-portal-css*,
 header-portlet-css*, header-portal-javascript*, header-portlet-javascript*,
 footer-portal-css*, footer-portlet-css*, footer-portal-javascript*,
@@ -64,7 +65,7 @@ The default value is "" which means this is not used.
 <!ELEMENT virtual-path (#PCDATA)>
 
 <!--
-Supppose the struts-path value is "mail". This tells the portal that all
+Suppose the struts-path value is "mail". This tells the portal that all
 requests with the path mail/* are considered part of this portlet's scope. Users
 who request paths that match mail/* will only be granted access if they also
 have access to this portlet. This is true for both portlet requests and regular
@@ -367,11 +368,11 @@ Set the control-panel-entry-category value to "my" to make this portlet
 available within the My Account administration of the user. Set the value to
 "apps", "configuration", "sites", or "users" to make it available in the Control
 Panel under that category. Set the value to "site_administration.configuration",
-"site_administration.content", or "site_administration.main" to make it
-available in the Site Administration under that category. Legacy values from
-previous versions of Liferay will be automatically mapped to the new values:
-"content" to "site_administration.content", "portal" to "users", and "server" to
-"apps".
+"site_administration.content", "site_administration.pages" or
+"site_administration.users" to make it available in the Site Administration
+under that category. Legacy values from previous versions of Liferay will be
+automatically mapped to the new values: "content" to
+"site_administration.content", "portal" to "users", and "server" to "apps".
 -->
 <!ELEMENT control-panel-entry-category (#PCDATA)>
 
@@ -646,6 +647,12 @@ Set the autopropagated-parameters value to a comma delimited list of parameter
 names that will be automatically propagated through the portlet.
 -->
 <!ELEMENT autopropagated-parameters (#PCDATA)>
+
+<!--
+Set the requires-namespaced-parameters value to true if the portlet will only
+process namespaced parameters. The default value is true.
+-->
+<!ELEMENT requires-namespaced-parameters (#PCDATA)>
 
 <!--
 The default value of action-timeout is 0. If set to a value greater than 0,

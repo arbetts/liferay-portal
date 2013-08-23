@@ -59,6 +59,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The base model implementation for the ${entity.name} service. Represents a row in the &quot;${entity.table}&quot; database table, with each column mapped to a property of this class.
@@ -428,14 +430,13 @@ public class ${entity.name}ModelImpl extends BaseModelImpl<${entity.name}> imple
 			}
 		</#if>
 
-		@Override
-
 		<#if column.jsonEnabled>
 			@JSON
 		<#elseif entity.jsonEnabled>
 			@JSON(include = false)
 		</#if>
 
+		@Override
 		public ${column.type} get${column.methodName}() {
 			<#if column.type == "String" && column.isConvertNull()>
 				if (_${column.name} == null) {
@@ -565,7 +566,11 @@ public class ${entity.name}ModelImpl extends BaseModelImpl<${entity.name}> imple
 		<#if column.localized>
 			@Override
 			public void set${column.methodName}(String ${column.name}, Locale locale) {
-				set${column.methodName}(${column.name}, locale, LocaleUtil.getDefault());
+				<#if entity.isGroupedModel()>
+					set${column.methodName}(${column.name}, locale, LocaleUtil.getSiteDefault());
+				<#else>
+					set${column.methodName}(${column.name}, locale, LocaleUtil.getDefault());
+				</#if>
 			}
 
 			@Override
@@ -588,7 +593,11 @@ public class ${entity.name}ModelImpl extends BaseModelImpl<${entity.name}> imple
 
 			@Override
 			public void set${column.methodName}Map(Map<Locale, String> ${column.name}Map) {
-				set${column.methodName}Map(${column.name}Map, LocaleUtil.getDefault());
+				<#if entity.isGroupedModel()>
+					set${column.methodName}Map(${column.name}Map, LocaleUtil.getSiteDefault());
+				<#else>
+					set${column.methodName}Map(${column.name}Map, LocaleUtil.getDefault());
+				</#if>
 			}
 
 			@Override
@@ -845,11 +854,65 @@ public class ${entity.name}ModelImpl extends BaseModelImpl<${entity.name}> imple
 
 	<#if entity.hasLocalizedColumn()>
 		@Override
-		@SuppressWarnings("unused")
-		public void prepareLocalizedFieldsForImport(Locale defaultImportLocale) throws LocaleException {
+		public String[] getAvailableLanguageIds() {
+			Set<String> availableLanguageIds = new TreeSet<String>();
+
 			<#list entity.regularColList as column>
 				<#if column.localized>
-					set${column.methodName}(get${column.methodName}(defaultImportLocale), defaultImportLocale, defaultImportLocale);
+					Map<Locale, String> ${column.name}Map = get${column.methodName}Map();
+
+					for (Map.Entry<Locale, String> entry : ${column.name}Map.entrySet()) {
+						Locale locale = entry.getKey();
+						String value = entry.getValue();
+
+						if (Validator.isNotNull(value)) {
+							availableLanguageIds.add(LocaleUtil.toLanguageId(locale));
+						}
+					}
+				</#if>
+			</#list>
+
+			return availableLanguageIds.toArray(new String[availableLanguageIds.size()]);
+		}
+
+		@Override
+		public String getDefaultLanguageId() {
+			<#list entity.regularColList as column>
+				<#if column.localized>
+					String xml = get${column.methodName}();
+
+					if (xml == null) {
+						return StringPool.BLANK;
+					}
+
+					return LocalizationUtil.getDefaultLanguageId(xml);
+					<#break>
+				</#if>
+			</#list>
+		}
+
+		@Override
+		public void prepareLocalizedFieldsForImport() throws LocaleException {
+			prepareLocalizedFieldsForImport (null);
+		}
+
+		@Override
+		@SuppressWarnings("unused")
+		public void prepareLocalizedFieldsForImport(Locale defaultImportLocale) throws LocaleException {
+			Locale defaultLocale = LocaleUtil.getDefault();
+
+			String modelDefaultLanguageId = getDefaultLanguageId();
+
+			<#list entity.regularColList as column>
+				<#if column.localized>
+					String ${column.name} = get${column.methodName}(defaultLocale);
+
+					if (Validator.isNull(${column.name})) {
+						set${column.methodName}(get${column.methodName}(modelDefaultLanguageId), defaultLocale);
+					}
+					else {
+					  set${column.methodName}(get${column.methodName}(defaultLocale), defaultLocale, defaultLocale);
+					}
 				</#if>
 			</#list>
 		}

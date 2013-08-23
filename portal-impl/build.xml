@@ -242,7 +242,13 @@ public class Creole10Parser]]></replacevalue>
 			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
 		</tstamp>
 
-		<unzip dest="${tstamp.value}" src="${project.dir}/tools/icu4j-4_0_1-src.jar" />
+		<unzip dest="${tstamp.value}" src="${project.dir}/tools/icu4j/icu4j-4_0_1-src.jar" />
+
+		<patch
+			dir="${tstamp.value}"
+			patchfile="${project.dir}/tools/icu4j/LPS-36663.patch"
+			strip="1"
+		/>
 
 		<move file="${tstamp.value}/src/com/ibm" todir="${tstamp.value}/src/com/liferay" />
 
@@ -263,6 +269,10 @@ public class Creole10Parser]]></replacevalue>
 
 		<ant dir="${tstamp.value}" target="core" inheritAll="false" />
 		<ant dir="${tstamp.value}" target="jar" inheritAll="false" />-->
+
+		<exec dir="${tstamp.value}" executable="/bin/sh" os="${os.unix}">
+			<arg line="-c 'ant core jar'" />
+		</exec>
 
 		<exec dir="${tstamp.value}" executable="cmd.exe" os="${os.windows}">
 			<arg line="/c ant core jar" />
@@ -718,6 +728,7 @@ public class Creole10Parser]]></replacevalue>
 			classpathref="project.classpath"
 			fork="true"
 			newenvironment="true"
+			outputproperty="build-service.output"
 		>
 			<jvmarg value="-Xms512m" />
 			<jvmarg value="-Xmx1024m" />
@@ -745,6 +756,15 @@ public class Creole10Parser]]></replacevalue>
 		</java>
 
 		<delete file="ServiceBuilder.temp" />
+
+		<echo>${build-service.output}</echo>
+
+		<if>
+			<contains string="${build-service.output}" substring="Error" />
+			<then>
+				<fail>Service Builder generated exceptions.</fail>
+			</then>
+		</if>
 
 		<ant dir="../portal-service" target="compile" inheritAll="false" />
 	</target>
@@ -1038,6 +1058,7 @@ public class Creole10Parser]]></replacevalue>
 			fork="true"
 			maxmemory="512m"
 			newenvironment="true"
+			outputproperty="build-wsdd.output"
 		>
 			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
 			<jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" />
@@ -1046,6 +1067,15 @@ public class Creole10Parser]]></replacevalue>
 			<arg value="wsdd.service.namespace=Portlet" />
 			<arg value="wsdd.input.file=${service.file}" />
 		</java>
+
+		<echo>${build-wsdd.output}</echo>
+
+		<if>
+			<contains string="${build-wsdd.output}" substring="IOException" />
+			<then>
+				<fail>WSDD Builder generated exceptions.</fail>
+			</then>
+		</if>
 	</target>
 
 	<target name="build-wsdd-portal">
@@ -1455,6 +1485,25 @@ public class Creole10Parser]]></replacevalue>
 
 		<echo file="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/osgi/portal/jars.txt">${osgi.portal.jars.list}</echo>
 
+		<for list="1,2,3,4,5,6,7,8,9" param="index">
+			<sequential>
+				<if>
+					<available file="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/plugins@{index}" />
+					<then>
+						<fileset dir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/plugins@{index}" id="plugins@{index}.wars">
+							<include name="*.war" />
+						</fileset>
+
+						<pathconvert property="plugins@{index}.wars.list" pathsep="," refid="plugins@{index}.wars">
+							<flattenmapper />
+						</pathconvert>
+
+						<echo file="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies/plugins@{index}/wars.txt">${plugins@{index}.wars.list}</echo>
+					</then>
+				</if>
+			</sequential>
+		</for>
+
 		<if>
 			<not>
 				<and>
@@ -1467,7 +1516,7 @@ public class Creole10Parser]]></replacevalue>
 
 				<jar
 					basedir="classes"
-					excludes="log4j.properties,logging.properties,portal-*.properties,system-*.properties,**/samplesqlbuilder/dependencies/*.txt"
+					excludes="log4j.properties,logging.properties,portal-*.properties,system-*.properties"
 					jarfile="${jar.file}.jar"
 					manifest="classes/META-INF/MANIFEST.MF"
 				/>

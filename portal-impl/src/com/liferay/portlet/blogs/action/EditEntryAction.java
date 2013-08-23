@@ -132,10 +132,9 @@ public class EditEntryAction extends PortletAction {
 			String redirect = ParamUtil.getString(actionRequest, "redirect");
 			boolean updateRedirect = false;
 
-			if (Validator.isNotNull(oldUrlTitle)) {
-				String portletId = HttpUtil.getParameter(
-					redirect, "p_p_id", false);
+			String portletId = HttpUtil.getParameter(redirect, "p_p_id", false);
 
+			if (Validator.isNotNull(oldUrlTitle)) {
 				String oldRedirectParam =
 					PortalUtil.getPortletNamespace(portletId) + "redirect";
 
@@ -201,11 +200,15 @@ public class EditEntryAction extends PortletAction {
 
 					if (Validator.isNotNull(redirect)) {
 						if (cmd.equals(Constants.ADD) && (entry != null)) {
+							String namespace = PortalUtil.getPortletNamespace(
+								portletId);
+
 							redirect = HttpUtil.addParameter(
-								redirect, "className",
+								redirect, namespace + "className",
 								BlogsEntry.class.getName());
 							redirect = HttpUtil.addParameter(
-								redirect, "classPK", entry.getEntryId());
+								redirect, namespace + "classPK",
+								entry.getEntryId());
 						}
 
 						actionResponse.sendRedirect(redirect);
@@ -307,9 +310,18 @@ public class EditEntryAction extends PortletAction {
 				ParamUtil.getString(actionRequest, "deleteEntryIds"), 0L);
 		}
 
-		for (long deleteEntryId : deleteEntryIds) {
+		String deleteEntryTitle = null;
+
+		for (int i = 0; i < deleteEntryIds.length; i++) {
+			long deleteEntryId = deleteEntryIds[i];
+
 			if (moveToTrash) {
-				BlogsEntryServiceUtil.moveEntryToTrash(deleteEntryId);
+				BlogsEntry entry = BlogsEntryServiceUtil.moveEntryToTrash(
+					deleteEntryId);
+
+				if (i == 0) {
+					deleteEntryTitle = entry.getTitle();
+				}
 			}
 			else {
 				BlogsEntryServiceUtil.deleteEntry(deleteEntryId);
@@ -318,6 +330,14 @@ public class EditEntryAction extends PortletAction {
 
 		if (moveToTrash && (deleteEntryIds.length > 0)) {
 			Map<String, String[]> data = new HashMap<String, String[]>();
+
+			data.put(
+				"deleteEntryClassName",
+				new String[] {BlogsEntry.class.getName()});
+
+			if (Validator.isNotNull(deleteEntryTitle)) {
+				data.put("deleteEntryTitle", new String[] {deleteEntryTitle});
+			}
 
 			data.put(
 				"restoreEntryIds", ArrayUtil.toStringArray(deleteEntryIds));

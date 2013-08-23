@@ -17,7 +17,7 @@
 <%@ include file="/html/portlet/workflow_tasks/init.jsp" %>
 
 <%
-String randomId = PwdGenerator.getPassword(PwdGenerator.KEY3, 4);
+String randomId = StringUtil.randomId();
 
 String redirect = ParamUtil.getString(request, "redirect");
 
@@ -288,7 +288,6 @@ request.setAttribute(WebKeys.WORKFLOW_ASSET_PREVIEW, Boolean.TRUE);
 					formName="fm1"
 					ratingsEnabled="<%= false %>"
 					redirect="<%= currentURL %>"
-					subject="<%= LanguageUtil.get(pageContext, workflowTask.getName()) %>"
 					userId="<%= user.getUserId() %>"
 				/>
 			</liferay-ui:panel>

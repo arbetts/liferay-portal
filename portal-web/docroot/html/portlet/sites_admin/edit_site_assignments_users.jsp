@@ -22,8 +22,6 @@ String tabs2 = (String)request.getAttribute("edit_site_assignments.jsp-tabs2");
 
 int cur = (Integer)request.getAttribute("edit_site_assignments.jsp-cur");
 
-String redirect = ParamUtil.getString(request, "redirect");
-
 Group group = (Group)request.getAttribute("edit_site_assignments.jsp-group");
 
 PortletURL portletURL = (PortletURL)request.getAttribute("edit_site_assignments.jsp-portletURL");
@@ -33,7 +31,7 @@ PortletURL viewUsersURL = renderResponse.createRenderURL();
 viewUsersURL.setParameter("struts_action", "/sites_admin/edit_site_assignments");
 viewUsersURL.setParameter("tabs1", "users");
 viewUsersURL.setParameter("tabs2", tabs2);
-viewUsersURL.setParameter("redirect", redirect);
+viewUsersURL.setParameter("redirect", currentURL);
 viewUsersURL.setParameter("groupId", String.valueOf(group.getGroupId()));
 
 UserGroupChecker userGroupChecker = null;
@@ -91,11 +89,13 @@ searchContainer.setEmptyResultsMessage(emptyResultsMessage);
 			<c:otherwise>
 
 				<%
-				results = UserLocalServiceUtil.getGroupUsers(group.getParentGroupId(), userSearchContainer.getStart(), userSearchContainer.getEnd());
 				total = UserLocalServiceUtil.getGroupUsersCount(group.getParentGroupId());
 
-				pageContext.setAttribute("results", results);
-				pageContext.setAttribute("total", total);
+				searchContainer.setTotal(total);
+
+				results = UserLocalServiceUtil.getGroupUsers(group.getParentGroupId(), userSearchContainer.getStart(), userSearchContainer.getEnd());
+
+				searchContainer.setResults(results);
 				%>
 
 			</c:otherwise>
@@ -183,7 +183,7 @@ searchContainer.setEmptyResultsMessage(emptyResultsMessage);
 
 				List<Team> teams = TeamLocalServiceUtil.getUserTeams(user2.getUserId(), group.getGroupId());
 
-				if (!userGroupRoles.isEmpty()) {
+				if (!teams.isEmpty() && !userGroupRoles.isEmpty()) {
 					buffer.append(StringPool.COMMA_AND_SPACE);
 				}
 
@@ -256,8 +256,6 @@ searchContainer.setEmptyResultsMessage(emptyResultsMessage);
 					<a href="<%= viewUsersURL %>"><liferay-ui:message key="view-more" /> &raquo;</a>
 				</c:if>
 			</liferay-ui:panel>
-
-			<div class="separator"><!-- --></div>
 		</c:when>
 		<c:when test='<%= !tabs1.equals("summary") %>'>
 			<c:if test="<%= total > searchContainer.getDelta() %>">

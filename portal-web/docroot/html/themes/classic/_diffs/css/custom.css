@@ -1,15 +1,16 @@
 @import "compass";
+@import "mixins";
 
 @import url(custom_common.css);
 @import url(color_schemes/common.css);
 @import url(color_schemes/dark.css);
 @import url(color_schemes/light.css);
 
-$dockbarGradientEnd: #0A6BCA;
-$dockbarGradientStart: #0A85E4;
+$dockbarGradientEnd: #1273C7;
+$dockbarGradientStart: #118ADE;
 
-$dockbarOpenGradientEnd: #048BDF;
-$dockbarOpenGradientStart: #00A0FF;
+$dockbarOpenGradientEnd: #0993DD;
+$dockbarOpenGradientStart: #0EA6F9;
 
 /* ---------- Base styles ---------- */
 
@@ -25,6 +26,16 @@ $dockbarOpenGradientStart: #00A0FF;
 		margin: 0 auto;
 		padding: 2em 5em 0;
 		position: relative;
+
+		@include respond-to(phone) {
+			padding-left: 0.5em;
+			padding-right: 0.5em;
+		}
+
+		@include respond-to(tablet) {
+			padding-left: 1em;
+			padding-right: 1em;
+		}
 	}
 
 	.site-title {
@@ -70,71 +81,32 @@ $dockbarOpenGradientStart: #00A0FF;
 
 	/* ---------- Dockbar ---------- */
 
-	.dockbar {
-		position: absolute;
-
+	.dockbar-split .dockbar {
 		.navbar-inner {
-			background-color: transparent;
-			border-width: 0;
-			color: #FFF;
-
 			.nav {
 				background-color: $dockbarGradientEnd;
-				border-bottom-width: 0;
-				border-top: 2px solid #00AEFF;
-				color: #FFF;
-			}
+				border-top: 1px solid #00AEFF;
 
-			.nav-account-controls {
-				left: auto;
-				margin-right: 0;
-				padding: 0 5px;
-				position: fixed;
-				right: 5em;
-				z-index: 325;
-
-				> li > a {
-					padding: 6px 15px;
+				li.dropdown.open > .dropdown-toggle {
+					background-color: $dockbarOpenGradientStart;
 				}
 			}
 
 			.nav-add-controls {
 				background: transparent;
 				border-top-width: 0;
-				position: fixed;
-				top: 10%;
-				z-index: 350;
 
 				> li {
-					float: none;
-					margin: 10px;
-
 					> a {
 						background: #45CBF5;
-						font-size: 0;
-						padding: 6px 8px;
-						text-align: center;
+						line-height: inherit;
 
 						&:hover {
 							background: #5BBAE8;
 						}
 
-						[class^="icon-"], [class^="icon-"], [class*=" icon-"] {
-							font-size: 25px;
-							position: relative;
-							vertical-align: middle;
-						}
-
-						.icon-caret-down {
-							display: none;
-						}
-
-						.icon-desktop {
-							top: 2px;
-						}
-
-						.icon-plus {
-							top: 2px;
+						&.toggle-controls-link {
+							background: #92F545;
 						}
 					}
 				}
@@ -175,8 +147,13 @@ $dockbarOpenGradientStart: #00A0FF;
 
 				&.open {
 					> a {
+						background-color: $dockbarGradientStart;
 						color: #FFF;
 					}
+				}
+
+				&.active > a {
+					background-color: $dockbarGradientStart;
 				}
 			}
 
@@ -230,7 +207,7 @@ $dockbarOpenGradientStart: #00A0FF;
 	}
 
 	.portlet-topper {
-		background: #0A85E4;
+		background: #D3D3D3;
 		color: #FFF;
 		padding: 0;
 
@@ -303,6 +280,33 @@ $dockbarOpenGradientStart: #00A0FF;
 		font-size: 11px;
 	}
 
+	/* ---------- Set Password Reminder Portlet ---------- */
+
+	.update-reminder-query {
+		.control-group {
+			max-width: 350px;
+		}
+
+		.reminder-query-answer {
+			height: 30px;
+			width: 100%;
+		}
+
+		.reminder-query-question {
+			width: 100%;
+		}
+	}
+
+	/* ---------- Staging ---------- */
+
+	.staging-tabview-list {
+		padding: 0 1em;
+	}
+
+	.staging-tabview-content {
+		margin: 0 5em
+	}
+
 
 	/* ---------- Footer ---------- */
 
@@ -349,15 +353,6 @@ $dockbarOpenGradientStart: #00A0FF;
 	#navigation {
 		.nav {
 			li {
-				&.dropdown {
-					&.open {
-						> .dropdown-toggle {
-							@include background-image(linear-gradient($dockbarOpenGradientStart, $dockbarOpenGradientEnd));
-							@include filter-gradient($dockbarOpenGradientStart, $dockbarOpenGradientEnd, vertical);
-						}
-					}
-				}
-
 				&.open {
 					> a {
 						@include background-image(linear-gradient($dockbarGradientStart 0%, $dockbarGradientStart 47%, $dockbarGradientEnd 100%));
@@ -388,6 +383,10 @@ $dockbarOpenGradientStart: #00A0FF;
 		}
 	}
 
+	.update-reminder-query .reminder-query-answer {
+		@include box-sizing(border-box);
+	}
+
 	.modify-pages .delete-tab {
 		@include border-radius(50%);
 		@include text-shadow(none);
@@ -411,7 +410,7 @@ $dockbarOpenGradientStart: #00A0FF;
 		@include border-radius(0 0 3px 3px);
 	}
 
-	.portlet-dynamic-data-list-display, .portlet-journal-content, .portlet-polls-display {
+	.portlet-content {
 		.lfr-icon-actions {
 			@extend %portlet-action-bar-custom;
 		}
@@ -441,7 +440,11 @@ $dockbarOpenGradientStart: #00A0FF;
 		}
 	}
 
-	.dockbar {
+	.staging-bar {
+		@include box-shadow(none);
+	}
+
+	.dockbar-split .dockbar {
 		.navbar-inner {
 			@include box-shadow(none);
 			@include text-shadow(none);
@@ -450,25 +453,11 @@ $dockbarOpenGradientStart: #00A0FF;
 				li.dropdown.open > .dropdown-toggle {
 					@include background-image(linear-gradient($dockbarOpenGradientStart, $dockbarOpenGradientEnd));
 					@include box-shadow(none);
-					@include filter-gradient($dockbarOpenGradientStart, $dockbarOpenGradientEnd, vertical);
 				}
 			}
 
 			.nav-account-controls {
 				@include background-image(linear-gradient($dockbarGradientStart 0%, $dockbarGradientStart 47%, $dockbarGradientEnd 100%));
-				@include filter-gradient($dockbarGradientStart, $dockbarGradientEnd, vertical);
-			}
-
-			.nav-add-controls {
-				> li {
-					a {
-						@include border-radius(4px);
-					}
-
-					&.open a {
-						@include border-radius(4px 4px 0 0);
-					}
-				}
 			}
 		}
 	}

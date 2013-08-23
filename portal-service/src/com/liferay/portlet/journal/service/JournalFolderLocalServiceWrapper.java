@@ -403,6 +403,13 @@ public class JournalFolderLocalServiceWrapper
 
 	@Override
 	public com.liferay.portlet.journal.model.JournalFolder fetchFolder(
+		long folderId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _journalFolderLocalService.fetchFolder(folderId);
+	}
+
+	@Override
+	public com.liferay.portlet.journal.model.JournalFolder fetchFolder(
 		long groupId, long parentFolderId, java.lang.String name)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _journalFolderLocalService.fetchFolder(groupId, parentFolderId,
@@ -556,10 +563,11 @@ public class JournalFolderLocalServiceWrapper
 	}
 
 	@Override
-	public void moveFolderToTrash(long userId, long folderId)
+	public com.liferay.portlet.journal.model.JournalFolder moveFolderToTrash(
+		long userId, long folderId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		_journalFolderLocalService.moveFolderToTrash(userId, folderId);
+		return _journalFolderLocalService.moveFolderToTrash(userId, folderId);
 	}
 
 	@Override

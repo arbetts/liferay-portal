@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Address;
 import com.liferay.portal.model.EmailAddress;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.OrgLabor;
 import com.liferay.portal.model.Organization;
 import com.liferay.portal.model.OrganizationConstants;
@@ -33,6 +34,7 @@ import com.liferay.portal.model.Phone;
 import com.liferay.portal.model.Website;
 import com.liferay.portal.service.AddressLocalServiceUtil;
 import com.liferay.portal.service.EmailAddressLocalServiceUtil;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.OrgLaborLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.PasswordPolicyLocalServiceUtil;
@@ -55,6 +57,22 @@ public class OrganizationStagedModelDataHandler
 	extends BaseStagedModelDataHandler<Organization> {
 
 	public static final String[] CLASS_NAMES = {Organization.class.getName()};
+
+	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+		Organization organization =
+			OrganizationLocalServiceUtil.fetchOrganizationByUuidAndCompanyId(
+				uuid, group.getCompanyId());
+
+		if (organization != null) {
+			OrganizationLocalServiceUtil.deleteOrganization(organization);
+		}
+	}
 
 	@Override
 	public String[] getClassNames() {
@@ -199,12 +217,9 @@ public class OrganizationStagedModelDataHandler
 			organization.getOrganizationId());
 
 		for (Address address : addresses) {
-			portletDataContext.addReferenceElement(
-				organization, organizationElement, address,
-				PortletDataContext.REFERENCE_TYPE_EMBEDDED, false);
-
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, address);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, organization, address,
+				PortletDataContext.REFERENCE_TYPE_EMBEDDED);
 		}
 	}
 
@@ -219,12 +234,9 @@ public class OrganizationStagedModelDataHandler
 				organization.getOrganizationId());
 
 		for (EmailAddress emailAddress : emailAddresses) {
-			portletDataContext.addReferenceElement(
-				organization, organizationElement, emailAddress,
-				PortletDataContext.REFERENCE_TYPE_EMBEDDED, false);
-
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, emailAddress);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, organization, emailAddress,
+				PortletDataContext.REFERENCE_TYPE_EMBEDDED);
 		}
 	}
 
@@ -258,12 +270,9 @@ public class OrganizationStagedModelDataHandler
 			PasswordPolicyLocalServiceUtil.getPasswordPolicy(
 				passwordPolicyRel.getPasswordPolicyId());
 
-		portletDataContext.addReferenceElement(
-			organization, organizationElement, passwordPolicy,
-			PortletDataContext.REFERENCE_TYPE_STRONG, false);
-
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, passwordPolicy);
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, organization, passwordPolicy,
+			PortletDataContext.REFERENCE_TYPE_STRONG);
 	}
 
 	protected void exportPhones(
@@ -276,12 +285,9 @@ public class OrganizationStagedModelDataHandler
 			organization.getOrganizationId());
 
 		for (Phone phone : phones) {
-			portletDataContext.addReferenceElement(
-				organization, organizationElement, phone,
-				PortletDataContext.REFERENCE_TYPE_EMBEDDED, false);
-
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, phone);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, organization, phone,
+				PortletDataContext.REFERENCE_TYPE_EMBEDDED);
 		}
 	}
 
@@ -295,12 +301,9 @@ public class OrganizationStagedModelDataHandler
 			organization.getOrganizationId());
 
 		for (Website website : websites) {
-			portletDataContext.addReferenceElement(
-				organization, organizationElement, website,
-				PortletDataContext.REFERENCE_TYPE_EMBEDDED, false);
-
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, website);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, organization, website,
+				PortletDataContext.REFERENCE_TYPE_EMBEDDED);
 		}
 	}
 

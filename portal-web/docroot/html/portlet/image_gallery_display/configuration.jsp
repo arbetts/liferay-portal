@@ -87,7 +87,8 @@ String redirect = ParamUtil.getString(request, "redirect");
 
 					<liferay-ui:ddm-template-selector
 						classNameId="<%= PortalUtil.getClassNameId(templateHandler.getClassName()) %>"
-						preferenceValue="<%= displayTemplate %>"
+						displayStyle="<%= displayStyle %>"
+						displayStyleGroupId="<%= displayStyleGroupId %>"
 						refreshURL="<%= currentURL %>"
 						showEmptyOption="<%= true %>"
 					/>
@@ -143,7 +144,7 @@ String redirect = ParamUtil.getString(request, "redirect");
 						width: 680
 					},
 					id: '_<%= HtmlUtil.escapeJS(portletResource) %>_selectFolder',
-					title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "folder") %>',
+					title: '<liferay-ui:message arguments="folder" key="select-x" />',
 					uri: '<%= selectFolderURL.toString() %>'
 				},
 				function(event) {

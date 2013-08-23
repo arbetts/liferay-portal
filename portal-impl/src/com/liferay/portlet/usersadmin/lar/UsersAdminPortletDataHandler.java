@@ -46,7 +46,9 @@ public class UsersAdminPortletDataHandler extends BasePortletDataHandler {
 			new StagedModelType(Organization.class));
 		setExportControls(
 			new PortletDataHandlerBoolean(
-				NAMESPACE, "organizations", true, true));
+				NAMESPACE, "organizations", true, true, null,
+				Organization.class.getName()));
+		setSupportsDataStrategyCopyAsNew(false);
 	}
 
 	@Override
@@ -114,7 +116,8 @@ public class UsersAdminPortletDataHandler extends BasePortletDataHandler {
 
 	@Override
 	protected void doPrepareManifestSummary(
-			PortletDataContext portletDataContext)
+			PortletDataContext portletDataContext,
+			PortletPreferences portletPreferences)
 		throws Exception {
 
 		ActionableDynamicQuery actionableDynamicQuery =

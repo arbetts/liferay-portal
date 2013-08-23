@@ -3,20 +3,27 @@
 	<var name="portletName" value="Calendar" />
 
 	<set-up>
-		<execute macro="User#pgFirstLogin" />
+		<execute macro="User#firstLoginPG" />
 
 		<execute macro="Page#addPG">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="Portlet#addPG">
+		<execute macro="Page#gotoPG">
 			<var name="pageName" value="${pageName}" />
+		</execute>
+
+		<execute macro="Portlet#addPG">
 			<var name="portletName" value="${portletName}" />
 		</execute>
 	</set-up>
 
 	<command name="pgAdd">
 		<var name="eventTitle" value="Calendar Test Entry" />
+
+		<execute macro="Page#gotoPG">
+			<var name="pageName" value="${pageName}" />
+		</execute>
 
 		<execute macro="Event#addPG">
 			<var name="eventTitle" value="${eventTitle}" />
@@ -27,6 +34,10 @@
 
 	<command name="pgDelete">
 		<var name="eventTitle" value="Calendar Test Entry" />
+
+		<execute macro="Page#gotoPG">
+			<var name="pageName" value="${pageName}" />
+		</execute>
 
 		<execute macro="Event#addPG">
 			<var name="eventTitle" value="${eventTitle}" />
@@ -42,6 +53,10 @@
 	<command name="pgEdit">
 		<var name="eventTitle" value="Calendar Test Entry" />
 		<var name="eventTitleEdit" value="Calendar Test Entry Edit" />
+
+		<execute macro="Page#gotoPG">
+			<var name="pageName" value="${pageName}" />
+		</execute>
 
 		<execute macro="Event#addPG">
 			<var name="eventTitle" value="${eventTitle}" />
@@ -59,7 +74,5 @@
 		<execute macro="Event#tearDownPG" />
 
 		<execute macro="Page#tearDownPG" />
-
-		<execute macro="User#pgLogout" />
 	</tear-down>
 </definition>

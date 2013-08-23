@@ -113,6 +113,8 @@ if ((group != null) && group.isCompany()) {
 	advancedSections = ArrayUtil.remove(advancedSections, "default-user-associations");
 	advancedSections = ArrayUtil.remove(advancedSections, "analytics");
 	advancedSections = ArrayUtil.remove(advancedSections, "content-sharing");
+
+	miscellaneousSections = new String[0];
 }
 
 String[][] categorySections = {mainSections, seoSections, advancedSections, miscellaneousSections};
@@ -130,9 +132,6 @@ String[][] categorySections = {mainSections, seoSections, advancedSections, misc
 	}
 	%>
 
-	<liferay-util:include page="/html/portlet/sites_admin/toolbar.jsp">
-		<liferay-util:param name="toolbarItem" value='<%= (group == null) ? "add" : "browse" %>' />
-	</liferay-util:include>
 </c:if>
 
 <c:if test="<%= (group == null) || !layout.isTypeControlPanel() %>">
@@ -234,6 +233,10 @@ String[][] categorySections = {mainSections, seoSections, advancedSections, misc
 		</c:if>
 
 		if (ok) {
+			<c:if test="<%= (group != null) && !group.isCompany() %>">
+				<portlet:namespace />saveLocales();
+			</c:if>
+
 			submitForm(document.<portlet:namespace />fm);
 		}
 	}

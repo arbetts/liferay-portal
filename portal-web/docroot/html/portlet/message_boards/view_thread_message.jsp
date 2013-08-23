@@ -332,11 +332,11 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 								for (FileEntry fileEntry : attachmentsFileEntries) {
 								%>
 
-									<portlet:actionURL var="attachmentURL" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>">
+									<portlet:resourceURL var="attachmentURL">
 										<portlet:param name="struts_action" value="/message_boards/get_message_attachment" />
 										<portlet:param name="messageId" value="<%= String.valueOf(message.getMessageId()) %>" />
 										<portlet:param name="attachment" value="<%= fileEntry.getTitle() %>" />
-									</portlet:actionURL>
+									</portlet:resourceURL>
 
 									<li class="message-attachment">
 
@@ -451,12 +451,15 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 								modelResourceDescription="<%= HtmlUtil.escape(message.getSubject()) %>"
 								resourcePrimKey="<%= String.valueOf(message.getMessageId()) %>"
 								var="permissionsURL"
+								windowState="<%= LiferayWindowState.POP_UP.toString() %>"
 							/>
 
 							<liferay-ui:icon
 								image="permissions"
 								label="<%= true %>"
+								method="get"
 								url="<%= permissionsURL %>"
+								useDialog="<%= true %>"
 							/>
 						</li>
 					</c:if>

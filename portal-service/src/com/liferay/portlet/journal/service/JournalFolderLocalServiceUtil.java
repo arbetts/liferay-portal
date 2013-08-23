@@ -375,6 +375,12 @@ public class JournalFolderLocalServiceUtil {
 	}
 
 	public static com.liferay.portlet.journal.model.JournalFolder fetchFolder(
+		long folderId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().fetchFolder(folderId);
+	}
+
+	public static com.liferay.portlet.journal.model.JournalFolder fetchFolder(
 		long groupId, long parentFolderId, java.lang.String name)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().fetchFolder(groupId, parentFolderId, name);
@@ -500,10 +506,11 @@ public class JournalFolderLocalServiceUtil {
 			serviceContext);
 	}
 
-	public static void moveFolderToTrash(long userId, long folderId)
+	public static com.liferay.portlet.journal.model.JournalFolder moveFolderToTrash(
+		long userId, long folderId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		getService().moveFolderToTrash(userId, folderId);
+		return getService().moveFolderToTrash(userId, folderId);
 	}
 
 	public static void restoreFolderFromTrash(long userId, long folderId)

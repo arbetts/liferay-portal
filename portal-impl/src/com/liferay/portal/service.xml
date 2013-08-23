@@ -132,9 +132,22 @@
 
 		<!-- Finder methods -->
 
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+		<finder name="Status" return-type="Collection">
+			<finder-column name="status" />
+		</finder>
 		<finder name="G_T" return-type="Collection">
 			<finder-column name="groupId" />
 			<finder-column name="taskExecutorClassName" />
+		</finder>
+		<finder name="G_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="status" />
 		</finder>
 		<finder name="T_S" return-type="Collection">
 			<finder-column name="taskExecutorClassName" />
@@ -145,10 +158,21 @@
 			<finder-column name="name" />
 			<finder-column name="taskExecutorClassName" />
 		</finder>
+		<finder name="G_T_C" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="taskExecutorClassName" />
+			<finder-column name="completed" />
+		</finder>
 		<finder name="G_T_S" return-type="Collection">
 			<finder-column name="groupId" />
 			<finder-column name="taskExecutorClassName" />
 			<finder-column name="status" />
+		</finder>
+		<finder name="G_N_T_C" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="name" />
+			<finder-column name="taskExecutorClassName" />
+			<finder-column name="completed" />
 		</finder>
 	</entity>
 	<entity name="BrowserTracker" local-service="true" remote-service="false">
@@ -428,6 +452,10 @@
 		</finder>
 		<finder name="LiveGroupId" return-type="Group">
 			<finder-column name="liveGroupId" />
+		</finder>
+		<finder name="C_C" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="classNameId" />
 		</finder>
 		<finder name="C_P" return-type="Collection">
 			<finder-column name="companyId" />
@@ -2001,6 +2029,7 @@
 			<finder-column name="classPK" />
 		</finder>
 	</entity>
+	<entity name="Staging" local-service="true" remote-service="true" />
 	<entity name="Subscription" local-service="true" remote-service="false">
 
 		<!-- PK fields -->
@@ -2071,6 +2100,8 @@
 		<column name="classPK" type="long" />
 		<column name="classUuid" type="String" />
 		<column name="referrerClassNameId" type="long" />
+		<column name="parentSystemEventId" type="long" />
+		<column name="systemEventSetKey" type="long" />
 		<column name="type" type="int" />
 		<column name="extraData" type="String" />
 
@@ -2811,6 +2842,7 @@
 		<exception>OrganizationType</exception>
 		<exception>PasswordExpired</exception>
 		<exception>PasswordPolicyName</exception>
+		<exception>PendingBackgroundTask</exception>
 		<exception>PhoneNumber</exception>
 		<exception>PortletActive</exception>
 		<exception>PortletDefaultPreferences</exception>
@@ -2846,6 +2878,7 @@
 		<exception>TeamName</exception>
 		<exception>UserActive</exception>
 		<exception>UserEmailAddress</exception>
+		<exception>UserField</exception>
 		<exception>UserGroupName</exception>
 		<exception>UserId</exception>
 		<exception>UserLockout</exception>

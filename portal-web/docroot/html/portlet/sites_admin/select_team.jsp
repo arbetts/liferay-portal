@@ -46,14 +46,17 @@ String eventName = ParamUtil.getString(request, "eventName", liferayPortletRespo
 		<div class="separator"><!-- --></div>
 
 		<%
-		TeamSearchTerms searchTerms = (TeamSearchTerms)searchContainer.getSearchTerms();
+		TeamDisplayTerms searchTerms = (TeamDisplayTerms)searchContainer.getSearchTerms();
 
 		portletURL.setParameter(searchContainer.getCurParam(), String.valueOf(searchContainer.getCur()));
+
+		total = TeamLocalServiceUtil.searchCount(groupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>());
+
+		searchContainer.setTotal(total);
 		%>
 
 		<liferay-ui:search-container-results
 			results="<%= TeamLocalServiceUtil.search(groupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-			total="<%= TeamLocalServiceUtil.searchCount(groupId, searchTerms.getName(), searchTerms.getDescription(), new LinkedHashMap<String, Object>()) %>"
 		/>
 
 		<liferay-ui:search-container-row

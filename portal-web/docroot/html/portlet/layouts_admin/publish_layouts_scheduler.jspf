@@ -35,7 +35,7 @@
 <aui:script>
 	<portlet:renderURL var="scheduledEventsURL">
 		<portlet:param name="struts_action" value="/layouts_admin/publish_layouts" />
-		<portlet:param name="tabs2" value="scheduled-events" />
+		<portlet:param name="tabs2" value="scheduled" />
 		<portlet:param name="closeRedirect" value="<%= closeRedirect %>" />
 		<portlet:param name="groupId" value="<%= String.valueOf(stagingGroupId) %>" />
 		<portlet:param name="privateLayout" value="<%= String.valueOf(privateLayout) %>" />
@@ -46,7 +46,7 @@
 		'<portlet:namespace />schedulePublishEvent',
 		function() {
 			document.<portlet:namespace />exportPagesFm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= scheduleCMD %>';
-			document.<portlet:namespace />exportPagesFm.<portlet:namespace />redirect.value = '<%= scheduledEventsURL %>';
+			document.<portlet:namespace />exportPagesFm.<portlet:namespace />redirect.value = '<%= HtmlUtil.escapeJS(scheduledEventsURL) %>';
 
 			submitForm(document.<portlet:namespace />exportPagesFm);
 		}
@@ -58,7 +58,7 @@
 		function(jobName) {
 			if (confirm('<%= UnicodeLanguageUtil.get(pageContext, "are-you-sure-you-want-to-delete-the-scheduled-event") %>')) {
 				document.<portlet:namespace />exportPagesFm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= unscheduleCMD %>';
-				document.<portlet:namespace />exportPagesFm.<portlet:namespace />redirect.value = '<%= scheduledEventsURL %>';
+				document.<portlet:namespace />exportPagesFm.<portlet:namespace />redirect.value = '<%= HtmlUtil.escapeJS(scheduledEventsURL) %>';
 				document.<portlet:namespace />exportPagesFm.<portlet:namespace />jobName.value = jobName;
 
 				submitForm(document.<portlet:namespace />exportPagesFm);

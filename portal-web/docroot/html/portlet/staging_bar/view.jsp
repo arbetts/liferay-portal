@@ -248,7 +248,7 @@ if (layout != null) {
 		%>
 
 		<c:if test="<%= !group.isStagedRemotely() || branchingEnabled %>">
-			<div class="tab-pane staging-tabview-content">
+			<div class="alert alert-block staging-tabview-content tab-pane">
 				<c:choose>
 					<c:when test="<%= (group.isStagingGroup() || group.isStagedRemotely()) && branchingEnabled %>">
 						<div class="layout-set-branch-info">
@@ -548,7 +548,7 @@ if (layout != null) {
 													</span>
 
 													<span class="last-publication-user">
-														<liferay-ui:message arguments="<%= new String[] {LanguageUtil.getTimeDescription(pageContext, (System.currentTimeMillis() - lastImportDate), true), publisherName} %>" key="x-ago-by-x" />
+														<liferay-ui:message arguments="<%= new String[] {LanguageUtil.getTimeDescription(pageContext, (System.currentTimeMillis() - lastImportDate), true), HtmlUtil.escape(publisherName)} %>" key="x-ago-by-x" />
 													</span>
 												</c:if>
 											</c:when>

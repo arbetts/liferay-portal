@@ -56,7 +56,6 @@ import com.liferay.portal.spring.aop.ServiceBeanAopProxy;
 import com.liferay.portal.spring.bean.BeanReferenceAnnotationBeanPostProcessor;
 import com.liferay.portal.spring.context.PortletApplicationContext;
 import com.liferay.portal.spring.util.FilterClassLoader;
-import com.liferay.portal.template.AbstractProcessingTemplate;
 import com.liferay.portal.template.BaseTemplateManager;
 import com.liferay.portal.template.TemplateContextHelper;
 import com.liferay.portal.template.TemplateControlContext;
@@ -100,8 +99,6 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import org.springframework.aop.framework.AdvisedSupport;
-
-import sun.reflect.Reflection;
 
 import sun.security.util.SecurityConstants;
 
@@ -193,7 +190,7 @@ public class PortalSecurityManagerImpl extends SecurityManager
 
 		ClassLoader clazzClassLoader = ClassLoaderUtil.getClassLoader(clazz);
 
-		if (accessibility == Member.PUBLIC) {
+		if ((accessibility == Member.PUBLIC) || PACLUtil.hasSameOrigin(clazz)) {
 			_checkMemberAccessClassLoader.set(clazzClassLoader);
 
 			return;
@@ -297,7 +294,6 @@ public class PortalSecurityManagerImpl extends SecurityManager
 
 		// Other classes
 
-		initClass(AbstractProcessingTemplate.class);
 		initClass(ActivePACLPolicy.class);
 		initClass(BaseTemplateManager.class);
 		initClass(CentralizedThreadLocal.class);
@@ -393,6 +389,7 @@ public class PortalSecurityManagerImpl extends SecurityManager
 
 	protected void initPACLImpls() throws Exception {
 		initPACLImpl(BeanLocatorImpl.class, new DoBeanLocatorImplPACL());
+		initPACLImpl(ClassLoaderUtil.class, new DoClassLoaderUtilPACL());
 		initPACLImpl(
 			DataSourceFactoryImpl.class, new DoDataSourceFactoryImplPACL());
 		initPACLImpl(
@@ -453,7 +450,9 @@ public class PortalSecurityManagerImpl extends SecurityManager
 			}
 
 			if (classLoader == ClassLoaderUtil.getPortalClassLoader()) {
-				Class<?> callerClass = Reflection.getCallerClass(5);
+				int stackIndex = Reflection.getStackIndex(5, 5);
+
+				Class<?> callerClass = Reflection.getCallerClass(stackIndex);
 
 				ClassLoader callerClassLoader = ClassLoaderUtil.getClassLoader(
 					callerClass);
@@ -487,6 +486,104 @@ public class PortalSecurityManagerImpl extends SecurityManager
 			return ProxyUtil.newProxyInstance(
 				classLoader, interfaces, invocationHandler);
 		}
+
+	}
+
+	private static class DoClassLoaderUtilPACL implements ClassLoaderUtil.PACL {
+
+		@Override
+		public ClassLoader getAggregatePluginsClassLoader(
+			final String[] servletContextNames,
+			final boolean addContextClassLoader) {
+
+			return AccessController.doPrivileged(
+				new PrivilegedAction<ClassLoader> () {
+
+					@Override
+					public ClassLoader run() {
+						return _noPacl.getAggregatePluginsClassLoader(
+							servletContextNames, addContextClassLoader);
+					}
+
+				}
+			);
+		}
+
+		@Override
+		public ClassLoader getClassLoader(final Class<?> clazz) {
+			return AccessController.doPrivileged(
+				new PrivilegedAction<ClassLoader>() {
+
+					@Override
+					public ClassLoader run() {
+						return _noPacl.getClassLoader(clazz);
+					}
+
+				}
+			);
+		}
+
+		@Override
+		public ClassLoader getContextClassLoader() {
+			return AccessController.doPrivileged(
+				new PrivilegedAction<ClassLoader>() {
+
+					@Override
+					public ClassLoader run() {
+						return _noPacl.getContextClassLoader();
+					}
+
+				}
+			);
+		}
+
+		@Override
+		public ClassLoader getPluginClassLoader(
+			final String servletContextName) {
+
+			return AccessController.doPrivileged(
+				new PrivilegedAction<ClassLoader> () {
+
+					@Override
+					public ClassLoader run() {
+						return _noPacl.getPluginClassLoader(servletContextName);
+					}
+
+				}
+			);
+		}
+
+		@Override
+		public ClassLoader getPortalClassLoader() {
+			return AccessController.doPrivileged(
+				new PrivilegedAction<ClassLoader>() {
+
+					@Override
+					public ClassLoader run() {
+						return _noPacl.getPortalClassLoader();
+					}
+
+				}
+			);
+		}
+
+		@Override
+		public void setContextClassLoader(final ClassLoader classLoader) {
+			AccessController.doPrivileged(
+				new PrivilegedAction<Void>() {
+
+					@Override
+					public Void run() {
+						_noPacl.setContextClassLoader(classLoader);
+
+						return null;
+					}
+
+				}
+			);
+		}
+
+		private ClassLoaderUtil.PACL _noPacl = new ClassLoaderUtil.NoPACL();
 
 	}
 
@@ -786,7 +883,9 @@ public class PortalSecurityManagerImpl extends SecurityManager
 				return;
 			}
 
-			Class<?> callerClass = Reflection.getCallerClass(5);
+			int stackIndex = Reflection.getStackIndex(5, 5);
+
+			Class<?> callerClass = Reflection.getCallerClass(stackIndex);
 
 			if (clazz == callerClass) {
 

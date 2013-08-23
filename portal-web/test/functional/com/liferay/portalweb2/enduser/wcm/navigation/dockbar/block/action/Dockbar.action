@@ -12,12 +12,24 @@
 		<case locator-key1="ADD_PAGE_LINK">
 			<execute function="AssertClick#assertTextClickAtAddApplication" />
 		</case>
+		<case locator-key1="USER_MY_DASHBOARD">
+			<execute function="AssertClick#assertTextClickAtAndWait" />
+		</case>
 		<case locator-key1="USER_MY_ACCOUNT">
 			<execute function="AssertClick#assertTextClickAtAndWait" />
+		</case>
+		<case comparator="startsWith" locator-key1="ADMIN_SITE_ADMINISTRATION">
+			<execute function="AssertClick#assertTextClickAtAndWait" />
+		</case>
+		<case comparator="contains" locator1="//span[@data-title='">
+			<execute function="AssertClick#pauseMakeVisibleAssertTextEqualsClickAt" />
 		</case>
 	</command>
 
 	<command name="click">
+		<case locator-key1="ADD">
+			<execute function="Click#clickAtSidebarClickAt" />
+		</case>
 		<case locator-key1="ADMIN">
 			<execute function="Click#textClickAtClickDockbar" value1="Admin" />
 		</case>
@@ -34,7 +46,7 @@
 			<execute function="Click#textClickAtAndWait" value1="Sign Out" />
 		</case>
 		<case comparator="startsWith" locator1="//span[@data-title='">
-			<execute function="Click#makeVisibleClickAt" />
+			<execute function="Click#pauseMakeVisibleClickAt" />
 		</case>
 	</command>
 

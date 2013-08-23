@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.journal.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -52,6 +54,20 @@ public class JournalFeedStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {JournalFeed.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		JournalFeed feed =
+			JournalFeedLocalServiceUtil.fetchJournalFeedByUuidAndGroupId(
+				uuid, groupId);
+
+		if (feed != null) {
+			JournalFeedLocalServiceUtil.deleteFeed(feed);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -68,12 +84,9 @@ public class JournalFeedStagedModelDataHandler
 			feed.getStructureId(), true);
 
 		if (ddmStructure != null) {
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, ddmStructure);
-
-			portletDataContext.addReferenceElement(
-				feed, feedElement, ddmStructure,
-				PortletDataContext.REFERENCE_TYPE_STRONG, false);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, feed, ddmStructure,
+				PortletDataContext.REFERENCE_TYPE_STRONG);
 		}
 		else {
 			if (_log.isWarnEnabled()) {
@@ -88,12 +101,9 @@ public class JournalFeedStagedModelDataHandler
 			feed.getTemplateId());
 
 		if (ddmTemplate != null) {
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, ddmTemplate);
-
-			portletDataContext.addReferenceElement(
-				feed, feedElement, ddmTemplate,
-				PortletDataContext.REFERENCE_TYPE_STRONG, false);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, feed, ddmTemplate,
+				PortletDataContext.REFERENCE_TYPE_STRONG);
 		}
 		else {
 			if (_log.isWarnEnabled()) {
@@ -110,13 +120,10 @@ public class JournalFeedStagedModelDataHandler
 				feed.getRendererTemplateId());
 
 		if (rendererDDMTemplate != null) {
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, rendererDDMTemplate);
-
 			Element rendererDDMTemplateElement =
-				portletDataContext.addReferenceElement(
-					feed, feedElement, rendererDDMTemplate,
-					PortletDataContext.REFERENCE_TYPE_STRONG, false);
+				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+					portletDataContext, feed, rendererDDMTemplate,
+					PortletDataContext.REFERENCE_TYPE_STRONG);
 
 			rendererDDMTemplateElement.addAttribute(
 				"rendererDDMTemplate", "true");

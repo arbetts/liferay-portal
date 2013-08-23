@@ -18,6 +18,7 @@
 
 <%
 String redirect = ParamUtil.getString(request, "redirect");
+boolean showBackURL = ParamUtil.getBoolean(request, "showBackURL", true);
 
 String portletResourceNamespace = ParamUtil.getString(request, "portletResourceNamespace");
 
@@ -78,7 +79,9 @@ if (Validator.isNotNull(script)) {
 		LocaleException le = (LocaleException)errorException;
 		%>
 
-		<liferay-ui:message arguments="<%= new String[] {StringUtil.merge(le.getSourceAvailableLocales(), StringPool.COMMA_AND_SPACE), StringUtil.merge(le.getTargetAvailableLocales(), StringPool.COMMA_AND_SPACE)} %>" key="the-default-language-x-does-not-match-the-portal's-available-languages-x" />
+		<c:if test="<%= le.getType() == LocaleException.TYPE_CONTENT %>">
+			<liferay-ui:message arguments="<%= new String[] {StringUtil.merge(le.getSourceAvailableLocales(), StringPool.COMMA_AND_SPACE), StringUtil.merge(le.getTargetAvailableLocales(), StringPool.COMMA_AND_SPACE)} %>" key="the-default-language-x-does-not-match-the-portal's-available-languages-x" />
+		</c:if>
 	</liferay-ui:error>
 
 	<liferay-ui:error exception="<%= StructureDuplicateElementException.class %>" message="please-enter-unique-structure-field-names-(including-field-names-inherited-from-the-parent-structure)" />
@@ -98,13 +101,10 @@ if (Validator.isNotNull(script)) {
 	}
 	%>
 
-	<portlet:renderURL var="viewRecordsURL">
-		<portlet:param name="struts_action" value="/dynamic_data_lists/view" />
-	</portlet:renderURL>
-
 	<liferay-ui:header
-		backURL="<%= viewRecordsURL %>"
+		backURL="<%= redirect %>"
 		localizeTitle="<%= localizeTitle %>"
+		showBackURL="<%= showBackURL %>"
 		title="<%= title %>"
 	/>
 

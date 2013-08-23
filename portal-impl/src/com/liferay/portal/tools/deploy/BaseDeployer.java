@@ -25,11 +25,13 @@ import com.liferay.portal.kernel.plugin.License;
 import com.liferay.portal.kernel.plugin.PluginPackage;
 import com.liferay.portal.kernel.servlet.PluginContextListener;
 import com.liferay.portal.kernel.servlet.PortalClassLoaderServlet;
+import com.liferay.portal.kernel.servlet.PortalDelegateServlet;
 import com.liferay.portal.kernel.servlet.PortletServlet;
 import com.liferay.portal.kernel.servlet.SecurePluginContextListener;
 import com.liferay.portal.kernel.servlet.SecureServlet;
 import com.liferay.portal.kernel.servlet.SerializableSessionAttributeListener;
 import com.liferay.portal.kernel.servlet.filters.invoker.InvokerFilter;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -424,9 +426,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String[] commonsLoggingJars = pluginLibDir.list(
 				new GlobFilenameFilter("commons-logging*.jar"));
 
-			if ((commonsLoggingJars == null) ||
-				(commonsLoggingJars.length == 0)) {
-
+			if (ArrayUtil.isEmpty(commonsLoggingJars)) {
 				String portalJarPath =
 					PortalUtil.getPortalLibDir() + "commons-logging.jar";
 
@@ -442,7 +442,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			String[] log4jJars = pluginLibDir.list(
 				new GlobFilenameFilter("log4j*.jar"));
 
-			if ((log4jJars == null) || (log4jJars.length == 0)) {
+			if (ArrayUtil.isEmpty(log4jJars)) {
 				String portalJarPath =
 					PortalUtil.getPortalLibDir() + "log4j.jar";
 
@@ -1664,6 +1664,32 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 		String wsadminContent = FileUtil.read(
 			DeployUtil.getResourcePath("wsadmin.py"));
 
+		String adminAppListOptions =
+			PropsValues.AUTO_DEPLOY_WEBSPHERE_WSADMIN_APP_MANAGER_LIST_OPTIONS;
+
+		if (Validator.isNotNull(adminAppListOptions)) {
+			adminAppListOptions =
+				StringPool.APOSTROPHE + adminAppListOptions +
+					StringPool.APOSTROPHE;
+		}
+
+		wsadminContent = StringUtil.replace(
+			wsadminContent,
+			new String[] {
+				"${auto.deploy.websphere.wsadmin.app.manager.install.options}",
+				"${auto.deploy.websphere.wsadmin.app.manager.list.options}",
+				"${auto.deploy.websphere.wsadmin.app.manager.query}",
+				"${auto.deploy.websphere.wsadmin.app.manager.update.options}"
+			},
+			new String[] {
+				PropsValues.
+					AUTO_DEPLOY_WEBSPHERE_WSADMIN_APP_MANAGER_INSTALL_OPTIONS,
+				adminAppListOptions,
+				PropsValues.AUTO_DEPLOY_WEBSPHERE_WSADMIN_APP_MANAGER_QUERY,
+				PropsValues.
+					AUTO_DEPLOY_WEBSPHERE_WSADMIN_APP_MANAGER_UPDATE_OPTIONS
+			});
+
 		String pluginServletContextName = deployDir.substring(
 			0, deployDir.length() - 4);
 
@@ -1680,14 +1706,11 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 			wsadminContent,
 			new String[] {
 				"${auto.deploy.dest.dir}",
-				"${auto.deploy.websphere.wsadmin.app.manager.query}",
 				"${auto.deploy.websphere.wsadmin.app.name}",
 				"${plugin.servlet.context.name}"
 			},
 			new String[] {
-				destDir,
-				PropsValues.AUTO_DEPLOY_WEBSPHERE_WSADMIN_APP_MANAGER_QUERY,
-				pluginApplicationName, pluginServletContextName
+				destDir, pluginApplicationName, pluginServletContextName
 			});
 
 		String wsadminFileName = FileUtil.createTempFileName("py");
@@ -1791,8 +1814,8 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 	}
 
 	/**
-	 * @see {@link PluginPackageUtil#_readPluginPackageServletContext(
-	 *      javax.servlet.ServletContext)}
+	 * @see PluginPackageUtil#_readPluginPackageServletContext(
+	 *      javax.servlet.ServletContext)
 	 */
 	@Override
 	public PluginPackage readPluginPackage(File file) {
@@ -2032,6 +2055,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 			if (servletClass.equals(
 					PortalClassLoaderServlet.class.getName()) ||
+				servletClass.equals(PortalDelegateServlet.class.getName()) ||
 				servletClass.equals(PortletServlet.class.getName())) {
 
 				continue;

@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.journal.model;
 
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
 
@@ -1451,6 +1452,22 @@ public class JournalArticleWrapper implements JournalArticle,
 	}
 
 	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _journalArticle.getAvailableLanguageIds();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _journalArticle.getDefaultLanguageId();
+	}
+
+	@Override
+	public void prepareLocalizedFieldsForImport()
+		throws com.liferay.portal.LocaleException {
+		_journalArticle.prepareLocalizedFieldsForImport();
+	}
+
+	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
 		throws com.liferay.portal.LocaleException {
@@ -1524,6 +1541,9 @@ public class JournalArticleWrapper implements JournalArticle,
 		return _journalArticle.getArticleResourceUuid();
 	}
 
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getAvailableLanguageIds}
+	*/
 	@Override
 	public java.lang.String[] getAvailableLocales() {
 		return _journalArticle.getAvailableLocales();
@@ -1534,13 +1554,18 @@ public class JournalArticleWrapper implements JournalArticle,
 		return _journalArticle.getContentByLocale(languageId);
 	}
 
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getDefaultLanguageId}
+	*/
 	@Override
 	public java.lang.String getDefaultLocale() {
 		return _journalArticle.getDefaultLocale();
 	}
 
 	@Override
-	public com.liferay.portlet.journal.model.JournalFolder getFolder() {
+	public com.liferay.portlet.journal.model.JournalFolder getFolder()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
 		return _journalArticle.getFolder();
 	}
 
@@ -1552,17 +1577,22 @@ public class JournalArticleWrapper implements JournalArticle,
 	}
 
 	@Override
-	public com.liferay.portal.kernel.lar.StagedModelType getStagedModelType() {
-		return _journalArticle.getStagedModelType();
-	}
-
-	@Override
-	public com.liferay.portlet.journal.model.JournalFolder getTrashContainer() {
+	public com.liferay.portlet.journal.model.JournalFolder getTrashContainer()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
 		return _journalArticle.getTrashContainer();
 	}
 
 	@Override
-	public boolean isInTrashContainer() {
+	public boolean hasApprovedVersion()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _journalArticle.hasApprovedVersion();
+	}
+
+	@Override
+	public boolean isInTrashContainer()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
 		return _journalArticle.isInTrashContainer();
 	}
 
@@ -1594,6 +1624,11 @@ public class JournalArticleWrapper implements JournalArticle,
 		}
 
 		return false;
+	}
+
+	@Override
+	public StagedModelType getStagedModelType() {
+		return _journalArticle.getStagedModelType();
 	}
 
 	/**

@@ -299,8 +299,20 @@ public class StringUtil_IW {
 		return StringUtil.quote(s, quote);
 	}
 
+	public java.lang.String randomId() {
+		return StringUtil.randomId();
+	}
+
 	public java.lang.String randomize(java.lang.String s) {
 		return StringUtil.randomize(s);
+	}
+
+	public java.lang.String randomString() {
+		return StringUtil.randomString();
+	}
+
+	public java.lang.String randomString(int length) {
+		return StringUtil.randomString(length);
 	}
 
 	public java.lang.String read(java.lang.ClassLoader classLoader,
@@ -600,6 +612,14 @@ public class StringUtil_IW {
 
 	public java.lang.String valueOf(java.lang.Object obj) {
 		return StringUtil.valueOf(obj);
+	}
+
+	public boolean wildcardMatches(java.lang.String s,
+		java.lang.String wildcard, char singleWildcardCharacter,
+		char multipleWildcardCharacter, char escapeWildcardCharacter,
+		boolean caseSensitive) {
+		return StringUtil.wildcardMatches(s, wildcard, singleWildcardCharacter,
+			multipleWildcardCharacter, escapeWildcardCharacter, caseSensitive);
 	}
 
 	public java.lang.String wrap(java.lang.String text) {

@@ -41,8 +41,9 @@ public class BackgroundTaskQueuingMessageListener extends BaseMessageListener {
 
 		int status = (Integer)message.get("status");
 
-		if ((status == BackgroundTaskConstants.STATUS_FAILED) ||
-			(status == BackgroundTaskConstants.STATUS_NEW)) {
+		if ((status == BackgroundTaskConstants.STATUS_CANCELLED) ||
+			(status == BackgroundTaskConstants.STATUS_FAILED) ||
+			(status == BackgroundTaskConstants.STATUS_SUCCESSFUL)) {
 
 			executeQueuedBackgroundTasks(taskExecutorClassName);
 		}

@@ -552,7 +552,9 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 	public Portlet getPortletById(String portletId) {
 		Map<String, Portlet> portletsPool = _getPortletsPool();
 
-		return portletsPool.get(portletId);
+		String rootPortletId = PortletConstants.getRootPortletId(portletId);
+
+		return portletsPool.get(rootPortletId);
 	}
 
 	@Override
@@ -1365,9 +1367,7 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			portletElement.elementText("portlet-data-handler-class"),
 			portletModel.getPortletDataHandlerClass());
 
-		if (Validator.isNull(portletDataHandlerClass) &&
-			Validator.isNotNull(portletModel.getConfigurationActionClass())) {
-
+		if (Validator.isNull(portletDataHandlerClass)) {
 			portletDataHandlerClass =
 				DefaultConfigurationPortletDataHandler.class.getName();
 		}
@@ -1642,6 +1642,10 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 
 		portletModel.setAutopropagatedParameters(autopropagatedParameters);
 
+		portletModel.setRequiresNamespacedParameters(
+			GetterUtil.getBoolean(
+				portletElement.elementText("requires-namespaced-parameters"),
+				portletModel.isRequiresNamespacedParameters()));
 		portletModel.setActionTimeout(
 			GetterUtil.getInteger(
 				portletElement.elementText("action-timeout"),

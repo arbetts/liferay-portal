@@ -993,8 +993,10 @@ AUI.add(
 					},
 
 					portletData: {
+						customTitle: EMPTY,
 						language: 'en_US',
 						portletLinksTarget: EMPTY,
+						showBorders: EMPTY,
 						title: EMPTY,
 						titles: {},
 						useCustomTitle: false
@@ -1341,6 +1343,7 @@ AUI.add(
 							}
 
 							portletData.title = value;
+
 							instance._portletTitles(portletLanguage, value);
 						}
 					}
@@ -1462,10 +1465,13 @@ AUI.add(
 				instance._setSelect(instance._portletLinksTarget, portletData.portletLinksTarget);
 
 				var portletTitles = portletData.titles;
+
 				var portletTitle = instance._portletTitles(portletData.language);
 
 				if (!portletTitle) {
-					portletTitle = instance._defaultPortletTitle;
+					instance._portletTitles(EMPTY);
+
+					portletData.title = EMPTY;
 				}
 
 				instance._setInput(instance._customTitleInput, portletTitle);

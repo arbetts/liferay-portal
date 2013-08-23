@@ -81,7 +81,8 @@ CKEDITOR.config.removePlugins = [
 	'smiley',
 	'showblocks',
 	'stylescombo',
-	'templates'
+	'templates',
+	'video'
 ].join();
 
 <c:if test="<%= resizable %>">
@@ -109,6 +110,20 @@ CKEDITOR.config.toolbar_creole = [
 	['Table', '-', 'HorizontalRule', 'SpecialChar' ],
 	['Find','Replace','-','SelectAll','RemoveFormat'],
 	['Source']
+];
+
+CKEDITOR.config.toolbar_phone = [
+	['Bold', 'Italic', 'Underline'],
+	['NumberedList', 'BulletedList'],
+	['Image', 'Link', 'Unlink']
+];
+
+CKEDITOR.config.toolbar_tablet = [
+	['Bold', 'Italic', 'Underline', 'Strike'],
+	['NumberedList', 'BulletedList'],
+	['Image', 'Link', 'Unlink'],
+	['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+	['Styles', 'FontSize']
 ];
 
 CKEDITOR.on(

@@ -135,18 +135,14 @@ public class BlogsPortletDataHandler extends BasePortletDataHandler {
 
 	@Override
 	protected void doPrepareManifestSummary(
-			PortletDataContext portletDataContext)
+			PortletDataContext portletDataContext,
+			PortletPreferences portletPreferences)
 		throws Exception {
 
 		ActionableDynamicQuery actionableDynamicQuery =
 			new BlogsEntryExportActionableDynamicQuery(portletDataContext);
 
 		actionableDynamicQuery.performCount();
-	}
-
-	@Override
-	protected String getDisplayTemplatePreferenceName() {
-		return "pageDisplayStyle";
 	}
 
 }

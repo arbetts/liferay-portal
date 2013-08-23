@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.journal.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -36,6 +38,20 @@ public class JournalFolderStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {JournalFolder.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		JournalFolder folder =
+			JournalFolderLocalServiceUtil.fetchJournalFolderByUuidAndGroupId(
+				uuid, groupId);
+
+		if (folder != null) {
+			JournalFolderLocalServiceUtil.deleteFolder(folder);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -53,8 +69,9 @@ public class JournalFolderStagedModelDataHandler
 		if (folder.getParentFolderId() !=
 				JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, folder.getParentFolder());
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, folder, folder.getParentFolder(),
+				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
 		Element folderElement = portletDataContext.getExportDataElement(folder);

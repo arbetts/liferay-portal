@@ -233,6 +233,8 @@ public class LuceneHelperImpl implements LuceneHelper {
 					value = value.toLowerCase(queryParser.getLocale());
 
 					query = new TermQuery(term.createTerm(value));
+
+					query.setBoost(termQuery.getBoost());
 				}
 			}
 			catch (Exception e) {
@@ -254,7 +256,9 @@ public class LuceneHelperImpl implements LuceneHelper {
 			_includeIfUnique(booleanQuery, query, occur, like);
 		}
 		catch (Exception e) {
-			_log.error(e, e);
+			if (_log.isWarnEnabled()) {
+				_log.warn(e, e);
+			}
 		}
 	}
 
@@ -372,6 +376,9 @@ public class LuceneHelperImpl implements LuceneHelper {
 				indexAccessor = new IndexAccessorImpl(companyId);
 
 				if (isLoadIndexFromClusterEnabled()) {
+					indexAccessor = new SynchronizedIndexAccessorImpl(
+						indexAccessor);
+
 					boolean clusterForwardMessage = GetterUtil.getBoolean(
 						MessageValuesThreadLocal.getValue(
 							ClusterLink.CLUSTER_FORWARD_MESSAGE));
@@ -384,9 +391,6 @@ public class LuceneHelperImpl implements LuceneHelper {
 						}
 					}
 					else {
-						indexAccessor = new SynchronizedIndexAccessorImpl(
-							indexAccessor);
-
 						try {
 							_loadIndexFromCluster(
 								indexAccessor,
@@ -782,7 +786,11 @@ public class LuceneHelperImpl implements LuceneHelper {
 		if (query instanceof TermQuery) {
 			Set<Term> terms = new HashSet<Term>();
 
-			query.extractTerms(terms);
+			TermQuery termQuery = (TermQuery)query;
+
+			termQuery.extractTerms(terms);
+
+			float boost = termQuery.getBoost();
 
 			for (Term term : terms) {
 				String termValue = term.text();
@@ -797,6 +805,8 @@ public class LuceneHelperImpl implements LuceneHelper {
 				else {
 					query = new TermQuery(term);
 				}
+
+				query.setBoost(boost);
 
 				boolean included = false;
 

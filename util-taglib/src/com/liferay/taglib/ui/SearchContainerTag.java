@@ -41,6 +41,9 @@ public class SearchContainerTag<R> extends ParamAndPropertyAncestorTagImpl {
 
 	@Override
 	public int doEndTag() {
+		pageContext.setAttribute(
+			_searchContainer.getTotalVar(), _searchContainer.getTotal());
+
 		_curParam = SearchContainer.DEFAULT_CUR_PARAM;
 		_delta = SearchContainer.DEFAULT_DELTA;
 		_deltaConfigurable = SearchContainer.DEFAULT_DELTA_CONFIGURABLE;
@@ -60,6 +63,8 @@ public class SearchContainerTag<R> extends ParamAndPropertyAncestorTagImpl {
 		_rowChecker = null;
 		_searchContainer = null;
 		_searchTerms = null;
+		_total = 0;
+		_totalVar = SearchContainer.DEFAULT_TOTAL_VAR;
 		_var = SearchContainer.DEFAULT_VAR;
 
 		return EVAL_PAGE;
@@ -87,32 +92,36 @@ public class SearchContainerTag<R> extends ParamAndPropertyAncestorTagImpl {
 			}
 
 			_searchContainer.setDeltaConfigurable(_deltaConfigurable);
-			_searchContainer.setId(_id);
+
+			if (Validator.isNotNull(_emptyResultsMessage)) {
+				_searchContainer.setEmptyResultsMessage(_emptyResultsMessage);
+			}
 
 			if (_headerNames != null) {
 				_searchContainer.setHeaderNames(_headerNames);
 			}
 
 			_searchContainer.setHover(_hover);
-
-			if (Validator.isNotNull(_orderByColParam)) {
-				_searchContainer.setOrderByColParam(_orderByColParam);
-			}
+			_searchContainer.setId(_id);
 
 			if (Validator.isNotNull(_orderByCol)) {
 				_searchContainer.setOrderByCol(_orderByCol);
+			}
+
+			if (Validator.isNotNull(_orderByColParam)) {
+				_searchContainer.setOrderByColParam(_orderByColParam);
 			}
 
 			if (_orderByComparator != null) {
 				_searchContainer.setOrderByComparator(_orderByComparator);
 			}
 
-			if (Validator.isNotNull(_orderByTypeParam)) {
-				_searchContainer.setOrderByTypeParam(_orderByTypeParam);
-			}
-
 			if (Validator.isNotNull(_orderByType)) {
 				_searchContainer.setOrderByType(_orderByType);
+			}
+
+			if (Validator.isNotNull(_orderByTypeParam)) {
+				_searchContainer.setOrderByTypeParam(_orderByTypeParam);
 			}
 
 			if (_rowChecker != null) {
@@ -123,6 +132,11 @@ public class SearchContainerTag<R> extends ParamAndPropertyAncestorTagImpl {
 				_searchContainer.setTotal(_total);
 			}
 
+			if (Validator.isNotNull(_totalVar)) {
+				_searchContainer.setTotalVar(_totalVar);
+			}
+
+			pageContext.setAttribute(_searchContainer.getTotalVar(), 0);
 			pageContext.setAttribute(_var, _searchContainer);
 
 			SearchContainerReference searchContainerReference =
@@ -200,6 +214,10 @@ public class SearchContainerTag<R> extends ParamAndPropertyAncestorTagImpl {
 
 	public int getTotal() {
 		return _total;
+	}
+
+	public String getTotalVar() {
+		return _totalVar;
 	}
 
 	public String getVar() {
@@ -298,6 +316,10 @@ public class SearchContainerTag<R> extends ParamAndPropertyAncestorTagImpl {
 		_total = total;
 	}
 
+	public void setTotalVar(String totalVar) {
+		_totalVar = totalVar;
+	}
+
 	public void setVar(String var) {
 		_var = var;
 	}
@@ -325,6 +347,7 @@ public class SearchContainerTag<R> extends ParamAndPropertyAncestorTagImpl {
 	private SearchContainer<R> _searchContainer;
 	private DisplayTerms _searchTerms;
 	private int _total;
+	private String _totalVar = SearchContainer.DEFAULT_TOTAL_VAR;
 	private String _var = SearchContainer.DEFAULT_VAR;
 
 }

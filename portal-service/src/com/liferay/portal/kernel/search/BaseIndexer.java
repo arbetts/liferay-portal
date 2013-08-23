@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Address;
 import com.liferay.portal.model.AttachedModel;
 import com.liferay.portal.model.AuditedModel;
@@ -221,7 +222,7 @@ public abstract class BaseIndexer implements Indexer {
 				entryClassNames = ArrayUtil.append(
 					entryClassNames, MBMessage.class.getName());
 
-				searchContext.setAttribute("discussion", true);
+				searchContext.setAttribute("discussion", Boolean.TRUE);
 			}
 
 			searchContext.setEntryClassNames(entryClassNames);
@@ -600,12 +601,12 @@ public abstract class BaseIndexer implements Indexer {
 			BooleanQuery contextQuery, SearchContext searchContext)
 		throws Exception {
 
+		searchContext.setAttribute("relatedClassName", Boolean.TRUE);
+
 		String[] relatedEntryClassNames = (String[])searchContext.getAttribute(
 			"relatedEntryClassNames");
 
-		if ((relatedEntryClassNames == null) ||
-			(relatedEntryClassNames.length == 0)) {
-
+		if (ArrayUtil.isEmpty(relatedEntryClassNames)) {
 			return;
 		}
 
@@ -633,6 +634,8 @@ public abstract class BaseIndexer implements Indexer {
 		}
 
 		contextQuery.add(relatedQueries, BooleanClauseOccur.MUST);
+
+		searchContext.setAttribute("relatedClassName", Boolean.FALSE);
 	}
 
 	protected void addSearchArrayQuery(
@@ -843,11 +846,24 @@ public abstract class BaseIndexer implements Indexer {
 		Set<String> fieldNames = ddmStructure.getFieldNames();
 
 		for (String fieldName : fieldNames) {
+			String indexType = ddmStructure.getFieldProperty(
+				fieldName, "indexType");
+
+			if (Validator.isNull(indexType)) {
+				continue;
+			}
+
 			String name = DDMIndexerUtil.encodeName(
 				ddmStructure.getStructureId(), fieldName,
 				searchContext.getLocale());
 
-			addSearchTerm(searchQuery, searchContext, name, false);
+			boolean like = false;
+
+			if (indexType.equals("text")) {
+				like = true;
+			}
+
+			addSearchTerm(searchQuery, searchContext, name, like);
 		}
 	}
 
@@ -947,21 +963,6 @@ public abstract class BaseIndexer implements Indexer {
 		searchContext.addFacet(multiValueFacet);
 	}
 
-	protected void addSearchLocalizedDDMStructure(
-			BooleanQuery searchQuery, SearchContext searchContext,
-			DDMStructure ddmStructure)
-		throws Exception {
-
-		Set<String> fieldNames = ddmStructure.getFieldNames();
-
-		for (String fieldName : fieldNames) {
-			String name = DDMIndexerUtil.encodeName(
-				ddmStructure.getStructureId(), fieldName);
-
-			addSearchLocalizedTerm(searchQuery, searchContext, name, false);
-		}
-	}
-
 	protected void addSearchLocalizedTerm(
 			BooleanQuery searchQuery, SearchContext searchContext, String field,
 			boolean like)
@@ -1032,6 +1033,13 @@ public abstract class BaseIndexer implements Indexer {
 		multiValueFacet.setFieldName(Field.USER_ID);
 		multiValueFacet.setStatic(true);
 
+		long userId = GetterUtil.getLong(
+			searchContext.getAttribute(Field.USER_ID));
+
+		if (userId > 0) {
+			multiValueFacet.setValues(new long[] {userId});
+		}
+
 		searchContext.addFacet(multiValueFacet);
 	}
 
@@ -1055,6 +1063,28 @@ public abstract class BaseIndexer implements Indexer {
 		}
 
 		document.addKeyword(Field.STAGING_GROUP, stagingGroup);
+	}
+
+	protected void addStatus(
+			BooleanQuery contextQuery, SearchContext searchContext)
+		throws Exception {
+
+		int status = GetterUtil.getInteger(
+			searchContext.getAttribute(Field.STATUS),
+			WorkflowConstants.STATUS_APPROVED);
+
+		if (status != WorkflowConstants.STATUS_ANY) {
+			contextQuery.addRequiredTerm(Field.STATUS, status);
+		}
+		else {
+			BooleanQuery statusQuery = BooleanQueryFactoryUtil.create(
+				searchContext);
+
+			statusQuery.addTerm(
+				Field.STATUS, WorkflowConstants.STATUS_IN_TRASH);
+
+			contextQuery.add(statusQuery, BooleanClauseOccur.MUST_NOT);
+		}
 	}
 
 	protected void addTrashFields(

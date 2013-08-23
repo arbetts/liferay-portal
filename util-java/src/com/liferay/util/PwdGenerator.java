@@ -16,12 +16,11 @@ package com.liferay.util;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.CentralizedThreadLocal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.security.SecureRandom;
-
-import java.util.Random;
 
 /**
  * @author Brian Wing Shun Chan
@@ -36,46 +35,28 @@ public class PwdGenerator {
 	public static final String KEY3 = "abcdefghijklmnopqrstuvwxyz";
 
 	public static String getPassword() {
-		return getPassword(8);
+		return _generate(KEY1 + KEY2 + KEY3, 8, true);
 	}
 
 	public static String getPassword(int length) {
-		return _getPassword(KEY1 + KEY2 + KEY3, length, true);
+		return _generate(KEY1 + KEY2 + KEY3, length, true);
 	}
 
 	public static String getPassword(String key, int length) {
-		return getPassword(key, length, true);
+		return _generate(key, length, true);
 	}
 
 	public static String getPassword(
 		String key, int length, boolean useAllKeys) {
 
-		return _getPassword(key, length, useAllKeys);
+		return _generate(key, length, useAllKeys);
 	}
 
 	public static String getPinNumber() {
-		return _getPassword(KEY1, 4, true);
+		return _generate(KEY1, 4, false);
 	}
 
-	public static String getSecurePassword() {
-		return getSecurePassword(8);
-	}
-
-	public static String getSecurePassword(int length) {
-		return _getPassword(KEY1 + KEY2 + KEY3, length, true);
-	}
-
-	public static String getSecurePassword(String key, int length) {
-		return getSecurePassword(key, length, true);
-	}
-
-	public static String getSecurePassword(
-		String key, int length, boolean useAllKeys) {
-
-		return _getPassword(key, length, useAllKeys);
-	}
-
-	private static String _getPassword(
+	private static String _generate(
 		String key, int length, boolean useAllKeys) {
 
 		int keysCount = 0;
@@ -102,10 +83,10 @@ public class PwdGenerator {
 
 		StringBuilder sb = new StringBuilder(length);
 
-		Random random = new SecureRandom();
+		SecureRandom secureRandom = _secureRandomThreadLocal.get();
 
 		for (int i = 0; i < length; i++) {
-			sb.append(key.charAt((int)(random.nextDouble() * key.length())));
+			sb.append(key.charAt(secureRandom.nextInt(key.length())));
 		}
 
 		String password = sb.toString();
@@ -135,12 +116,22 @@ public class PwdGenerator {
 		}
 
 		if (invalidPassword) {
-			return _getPassword(key, length, useAllKeys);
+			return _generate(key, length, useAllKeys);
 		}
 
 		return password;
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(PwdGenerator.class);
+
+	private static ThreadLocal<SecureRandom> _secureRandomThreadLocal =
+		new CentralizedThreadLocal<SecureRandom>(false) {
+
+			@Override
+			protected SecureRandom initialValue() {
+				return new SecureRandom();
+			}
+
+		};
 
 }
