@@ -370,28 +370,15 @@ public class LoginUtil {
 		screenNameCookie.setMaxAge(loginMaxAge);
 		screenNameCookie.setPath(StringPool.SLASH);
 
-		boolean secure = request.isSecure();
-
-		if (secure) {
-			Boolean httpsInitial = (Boolean)session.getAttribute(
-				WebKeys.HTTPS_INITIAL);
-
-			if (((httpsInitial == null) || !httpsInitial.booleanValue()) &&
-				!PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS) {
-
-				secure = false;
-			}
-		}
-
-		CookieKeys.addCookie(request, response, companyIdCookie, secure);
-		CookieKeys.addCookie(request, response, idCookie, secure);
-		CookieKeys.addCookie(request, response, userUUIDCookie, secure);
+		CookieKeys.addCookie(request, response, companyIdCookie);
+		CookieKeys.addCookie(request, response, idCookie);
+		CookieKeys.addCookie(request, response, userUUIDCookie);
 
 		if (rememberMe) {
-			CookieKeys.addCookie(request, response, loginCookie, secure);
-			CookieKeys.addCookie(request, response, passwordCookie, secure);
-			CookieKeys.addCookie(request, response, rememberMeCookie, secure);
-			CookieKeys.addCookie(request, response, screenNameCookie, secure);
+			CookieKeys.addCookie(request, response, loginCookie);
+			CookieKeys.addCookie(request, response, passwordCookie);
+			CookieKeys.addCookie(request, response, rememberMeCookie);
+			CookieKeys.addCookie(request, response, screenNameCookie);
 		}
 
 		AuthenticatedUserUUIDStoreUtil.register(userUUID);
