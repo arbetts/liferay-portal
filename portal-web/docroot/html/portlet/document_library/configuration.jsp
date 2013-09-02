@@ -132,6 +132,8 @@ String emailBody = PrefsParamUtil.getString(portletPreferences, request, emailBo
 
 						</aui:select>
 
+						<aui:input name="preferences--enableRelatedAssets--" type="checkbox" value="<%= enableRelatedAssets %>" />
+
 						<aui:field-wrapper label="display-style-views">
 
 							<%
@@ -173,10 +175,8 @@ String emailBody = PrefsParamUtil.getString(portletPreferences, request, emailBo
 					</aui:fieldset>
 				</liferay-ui:panel>
 
-				<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="documentLibraryEntriesListingPanel" persistState="<%= true %>" title="entries-listing">
+				<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="documentLibraryEntriesListingPanel" persistState="<%= true %>" title="entries-listing-for-list-display-style">
 					<aui:fieldset>
-						<aui:input name="preferences--enableRelatedAssets--" type="checkbox" value="<%= enableRelatedAssets %>" />
-
 						<aui:field-wrapper label="show-columns">
 
 							<%
@@ -240,7 +240,7 @@ String emailBody = PrefsParamUtil.getString(portletPreferences, request, emailBo
 									width: 600
 								},
 								id: '_<%= HtmlUtil.escapeJS(portletResource) %>_selectFolder',
-								title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "folder") %>',
+								title: '<liferay-ui:message arguments="folder" key="select-x" />',
 								uri: '<%= selectFolderURL.toString() %>'
 							},
 							function(event) {
@@ -334,7 +334,7 @@ String emailBody = PrefsParamUtil.getString(portletPreferences, request, emailBo
 				<aui:select label="language" name="languageId" onChange='<%= renderResponse.getNamespace() + "updateLanguage(this);" %>'>
 
 					<%
-					Locale[] locales = LanguageUtil.getAvailableLocales();
+					Locale[] locales = LanguageUtil.getAvailableLocales(themeDisplay.getSiteGroupId());
 
 					for (int i = 0; i < locales.length; i++) {
 						String style = StringPool.BLANK;

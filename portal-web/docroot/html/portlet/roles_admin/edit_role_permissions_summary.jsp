@@ -21,7 +21,7 @@
 <%
 Role role = (Role)request.getAttribute("edit_role_permissions.jsp-role");
 
-PortletURL permissionsAllURL = renderResponse.createRenderURL();
+PortletURL permissionsAllURL = liferayPortletResponse.createRenderURL();
 
 permissionsAllURL.setParameter("struts_action", "/roles_admin/edit_role_permissions");
 permissionsAllURL.setParameter(Constants.CMD, Constants.VIEW);
@@ -30,9 +30,7 @@ permissionsAllURL.setParameter("roleId", String.valueOf(role.getRoleId()));
 
 List<String> headerNames = new ArrayList<String>();
 
-headerNames.add("resource-set");
-headerNames.add("resource");
-headerNames.add("action");
+headerNames.add("permissions");
 
 if (role.getType() == RoleConstants.TYPE_REGULAR) {
 	headerNames.add("sites");
@@ -40,7 +38,7 @@ if (role.getType() == RoleConstants.TYPE_REGULAR) {
 
 headerNames.add(StringPool.BLANK);
 
-SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, 50, permissionsAllURL, headerNames, "this-role-does-not-have-any-permissions");
+SearchContainer searchContainer = new SearchContainer(liferayPortletRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, 50, permissionsAllURL, headerNames, "this-role-does-not-have-any-permissions");
 
 List<Permission> permissions = PermissionConverterUtil.convertPermissions(role);
 
@@ -61,7 +59,7 @@ for (int i = 0; i < permissions.size(); i++) {
 	String curModelName = null;
 	String curModelLabel = null;
 	String actionId = permission.getActionId();
-	String actionLabel = ResourceActionsUtil.getAction(pageContext, actionId);
+	String actionLabel = _getActionLabel(pageContext, themeDisplay, resource.getName(), actionId);
 
 	if (PortletLocalServiceUtil.hasPortlet(company.getCompanyId(), resource.getName())) {
 		curPortletName = resource.getName();
@@ -162,7 +160,7 @@ for (int i = 0; i < results.size(); i++) {
 		continue;
 	}
 
-	PortletURL editPermissionsURL = renderResponse.createRenderURL();
+	ResourceURL editPermissionsURL = liferayPortletResponse.createResourceURL();
 
 	editPermissionsURL.setParameter("struts_action", "/roles_admin/edit_role_permissions");
 	editPermissionsURL.setParameter(Constants.CMD, Constants.EDIT);
@@ -171,17 +169,35 @@ for (int i = 0; i < results.size(); i++) {
 	editPermissionsURL.setParameter("redirect", permissionsAllURL.toString());
 	editPermissionsURL.setParameter("portletResource", curPortletName);
 
-	row.addText(curPortletLabel, editPermissionsURL);
-	row.addText(curModelLabel);
-	row.addText(actionLabel);
+	StringBundler sb = new StringBundler();
+
+	sb.append("<a class=\"permission-navigation-link\" href=\"");
+	sb.append(editPermissionsURL);
+	sb.append(StringPool.POUND);
+	sb.append(_getResourceHtmlId(curResource));
+	sb.append("\">");
+	sb.append(curPortletLabel);
+
+	if (Validator.isNotNull(curModelLabel)) {
+		sb.append(StringPool.SPACE);
+		sb.append(StringPool.GREATER_THAN);
+		sb.append(StringPool.SPACE);
+		sb.append(curModelLabel);
+	}
+
+	sb.append("</a>: <strong>");
+	sb.append(actionLabel);
+	sb.append("</strong>");
+
+	row.addText(sb.toString());
 
 	if (scope == ResourceConstants.SCOPE_COMPANY) {
-		row.addText(LanguageUtil.get(pageContext, "all-sites"));
+		row.addText(LanguageUtil.get(pageContext, _isShowScope(role, curResource, curPortletName)? "all-sites" : StringPool.BLANK));
 	}
 	else if (scope == ResourceConstants.SCOPE_GROUP_TEMPLATE) {
 	}
 	else if (scope == ResourceConstants.SCOPE_GROUP) {
-		StringBundler sb = new StringBundler(groups.size() * 3 - 2);
+		sb = new StringBundler(groups.size() * 3 - 2);
 
 		for (int j = 0; j < groups.size(); j++) {
 			Group group = (Group)groups.get(j);

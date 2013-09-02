@@ -17,9 +17,11 @@
 <%@ include file="/html/portlet/portlet_configuration/init.jsp" %>
 
 <%
+long groupId = ParamUtil.getLong(request, "groupId", themeDisplay.getScopeGroupId());
+
 PortletURL portletURL = currentURLObj;
 
-portletURL.setParameter("tabs3", "all-export-processes");
+portletURL.setParameter("tabs3", "current-and-previous");
 
 String orderByCol = ParamUtil.getString(request, "orderByCol");
 String orderByType = ParamUtil.getString(request, "orderByType");
@@ -42,38 +44,38 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 	orderByCol="<%= orderByCol %>"
 	orderByComparator="<%= orderByComparator %>"
 	orderByType="<%= orderByType %>"
-	total="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(themeDisplay.getScopeGroupId(), selPortlet.getPortletId(), PortletExportBackgroundTaskExecutor.class.getName()) %>"
+	total="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, selPortlet.getPortletId(), PortletExportBackgroundTaskExecutor.class.getName()) %>"
 >
 	<liferay-ui:search-container-results
-		results="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasks(themeDisplay.getScopeGroupId(), selPortlet.getPortletId(), PortletExportBackgroundTaskExecutor.class.getName(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
+		results="<%= BackgroundTaskLocalServiceUtil.getBackgroundTasks(groupId, selPortlet.getPortletId(), PortletExportBackgroundTaskExecutor.class.getName(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
 	/>
 
 	<liferay-ui:search-container-row
 		className="com.liferay.portal.model.BackgroundTask"
+		keyProperty="backgroundTaskId"
 		modelVar="backgroundTask"
 	>
 		<liferay-ui:search-container-column-text
 			name="user-name"
-			value="<%= backgroundTask.getUserName() %>"
+			value="<%= HtmlUtil.escape(backgroundTask.getUserName()) %>"
 		/>
 
-		<liferay-ui:search-container-column-text
+		<liferay-ui:search-container-column-jsp
+			cssClass="background-task-status-column"
 			name="status"
-			value="<%= LanguageUtil.get(pageContext, backgroundTask.getStatusLabel()) %>"
+			path="/html/portlet/layouts_admin/publish_process_message.jsp"
 		/>
 
-		<liferay-ui:search-container-column-text
+		<liferay-ui:search-container-column-date
 			name="create-date"
 			orderable="<%= true %>"
-			orderableProperty="createDate"
-			value="<%= dateFormatDateTime.format(backgroundTask.getCreateDate()) %>"
+			value="<%= backgroundTask.getCreateDate() %>"
 		/>
 
-		<liferay-ui:search-container-column-text
+		<liferay-ui:search-container-column-date
 			name="completion-date"
 			orderable="<%= true %>"
-			orderableProperty="completionDate"
-			value="<%= backgroundTask.getCompletionDate() != null ? dateFormatDateTime.format(backgroundTask.getCompletionDate()) : StringPool.BLANK %>"
+			value="<%= backgroundTask.getCompletionDate() %>"
 		/>
 
 		<liferay-ui:search-container-column-text
@@ -91,12 +93,6 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 					for (FileEntry fileEntry : attachmentsFileEntries) {
 					%>
 
-						<portlet:actionURL var="attachmentURL" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>">
-							<portlet:param name="struts_action" value="/group_pages/get_background_task_attachment" />
-							<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
-							<portlet:param name="attachment" value="<%= fileEntry.getTitle() %>" />
-						</portlet:actionURL>
-
 						<%
 						StringBundler sb = new StringBundler(4);
 
@@ -110,7 +106,7 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 							image="download"
 							label="<%= true %>"
 							message="<%= sb.toString() %>"
-							url="<%= attachmentURL %>"
+							url="<%= PortletFileRepositoryUtil.getPortletFileEntryURL(themeDisplay, fileEntry, StringPool.BLANK) %>"
 						/>
 
 					<%
@@ -135,18 +131,35 @@ OrderByComparator orderByComparator = BackgroundTaskUtil.getBackgroundTaskOrderB
 		</liferay-ui:search-container-column-text>
 
 		<liferay-ui:search-container-column-text>
-			<portlet:actionURL var="deleteBackgroundTaskURL">
-				<portlet:param name="struts_action" value="/group_pages/delete_background_task" />
-				<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
-				<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
-			</portlet:actionURL>
+			<c:if test="<%= !backgroundTask.isInProgress() %>">
+				<portlet:actionURL var="deleteBackgroundTaskURL">
+					<portlet:param name="struts_action" value="/group_pages/delete_background_task" />
+					<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
+					<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
+				</portlet:actionURL>
 
-			<liferay-ui:icon-delete
-				label="true"
-				url="<%= deleteBackgroundTaskURL %>"
-			/>
+				<%
+				Date completionDate = backgroundTask.getCompletionDate();
+				%>
+
+				<liferay-ui:icon-delete
+					label="true"
+					message='<%= ((completionDate != null) && completionDate.before(new Date())) ? "clear" : "cancel" %>'
+					url="<%= deleteBackgroundTaskURL %>"
+				/>
+			</c:if>
 		</liferay-ui:search-container-column-text>
 	</liferay-ui:search-container-row>
 
 	<liferay-ui:search-iterator />
 </liferay-ui:search-container>
+
+<%
+int incompleteBackgroundTaskCount = BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, selPortlet.getPortletId(), PortletExportBackgroundTaskExecutor.class.getName(), false);
+%>
+
+<div class="hide incomplete-process-message">
+	<liferay-util:include page="/html/portlet/layouts_admin/incomplete_processes_message.jsp">
+		<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+	</liferay-util:include>
+</div>

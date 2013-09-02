@@ -118,6 +118,7 @@ import com.liferay.portal.security.auth.ScreenNameGenerator;
 import com.liferay.portal.security.auth.ScreenNameGeneratorFactory;
 import com.liferay.portal.security.auth.ScreenNameValidator;
 import com.liferay.portal.security.auth.ScreenNameValidatorFactory;
+import com.liferay.portal.security.lang.DoPrivilegedBean;
 import com.liferay.portal.security.ldap.AttributesTransformer;
 import com.liferay.portal.security.ldap.AttributesTransformerFactory;
 import com.liferay.portal.security.membershippolicy.OrganizationMembershipPolicy;
@@ -256,12 +257,13 @@ public class HookHotDeployListener
 		"session.phishing.protected.attributes", "session.store.password",
 		"sites.form.add.advanced", "sites.form.add.main", "sites.form.add.seo",
 		"sites.form.update.advanced", "sites.form.update.main",
-		"sites.form.update.seo", "social.bookmark.*", "terms.of.use.required",
-		"theme.css.fast.load", "theme.images.fast.load",
-		"theme.jsp.override.enabled", "theme.loader.new.theme.id.on.import",
-		"theme.portlet.decorate.default", "theme.portlet.sharing.default",
-		"theme.shortcut.icon", "time.zones", "upgrade.processes",
-		"user.notification.event.confirmation.enabled",
+		"sites.form.update.seo", "social.activity.sets.bundling.enabled",
+		"social.activity.sets.enabled", "social.activity.sets.selector",
+		"social.bookmark.*", "terms.of.use.required", "theme.css.fast.load",
+		"theme.images.fast.load", "theme.jsp.override.enabled",
+		"theme.loader.new.theme.id.on.import", "theme.portlet.decorate.default",
+		"theme.portlet.sharing.default", "theme.shortcut.icon", "time.zones",
+		"upgrade.processes", "user.notification.event.confirmation.enabled",
 		"users.email.address.generator", "users.email.address.validator",
 		"users.email.address.required", "users.form.add.identification",
 		"users.form.add.main", "users.form.add.miscellaneous",
@@ -413,7 +415,18 @@ public class HookHotDeployListener
 		}
 
 		if (portalProperties.containsKey(PropsKeys.CAPTCHA_ENGINE_IMPL)) {
-			CaptchaImpl captchaImpl = (CaptchaImpl)CaptchaUtil.getCaptcha();
+			CaptchaImpl captchaImpl = null;
+
+			Captcha captcha = CaptchaUtil.getCaptcha();
+
+			if (captcha instanceof DoPrivilegedBean) {
+				DoPrivilegedBean doPrivilegedBean = (DoPrivilegedBean)captcha;
+
+				captchaImpl = (CaptchaImpl)doPrivilegedBean.getActualBean();
+			}
+			else {
+				captchaImpl = (CaptchaImpl)captcha;
+			}
 
 			captchaImpl.setCaptcha(null);
 		}
@@ -934,7 +947,6 @@ public class HookHotDeployListener
 			String localeKey = languagePropertiesLocation.substring(x + 1, y);
 
 			locale = LocaleUtil.fromLanguageId(localeKey);
-
 		}
 
 		return locale;
@@ -1197,16 +1209,16 @@ public class HookHotDeployListener
 			Element rootElement)
 		throws Exception {
 
+		String customJspDir = rootElement.elementText("custom-jsp-dir");
+
+		if (Validator.isNull(customJspDir)) {
+			return;
+		}
+
 		if (!checkPermission(
 				PACLConstants.PORTAL_HOOK_PERMISSION_CUSTOM_JSP_DIR,
 				portletClassLoader, null, "Rejecting custom JSP directory")) {
 
-			return;
-		}
-
-		String customJspDir = rootElement.elementText("custom-jsp-dir");
-
-		if (Validator.isNull(customJspDir)) {
 			return;
 		}
 
@@ -1705,7 +1717,19 @@ public class HookHotDeployListener
 			Captcha captcha = (Captcha)newInstance(
 				portletClassLoader, Captcha.class, captchaClassName);
 
-			CaptchaImpl captchaImpl = (CaptchaImpl)CaptchaUtil.getCaptcha();
+			CaptchaImpl captchaImpl = null;
+
+			Captcha currentCaptcha = CaptchaUtil.getCaptcha();
+
+			if (currentCaptcha instanceof DoPrivilegedBean) {
+				DoPrivilegedBean doPrivilegedBean =
+					(DoPrivilegedBean)currentCaptcha;
+
+				captchaImpl = (CaptchaImpl)doPrivilegedBean.getActualBean();
+			}
+			else {
+				captchaImpl = (CaptchaImpl)currentCaptcha;
+			}
 
 			captchaImpl.setCaptcha(captcha);
 		}
@@ -2179,13 +2203,6 @@ public class HookHotDeployListener
 			ClassLoader portletClassLoader, Element parentElement)
 		throws Exception {
 
-		if (!checkPermission(
-				PACLConstants.PORTAL_HOOK_PERMISSION_SERVLET_FILTERS,
-				portletClassLoader, null, "Rejecting servlet filters")) {
-
-			return;
-		}
-
 		ServletFiltersContainer servletFiltersContainer =
 			_servletFiltersContainerMap.get(servletContextName);
 
@@ -2198,6 +2215,14 @@ public class HookHotDeployListener
 
 		List<Element> servletFilterElements = parentElement.elements(
 			"servlet-filter");
+
+		if (!servletFilterElements.isEmpty() &&
+			!checkPermission(
+				PACLConstants.PORTAL_HOOK_PERMISSION_SERVLET_FILTERS,
+				portletClassLoader, null, "Rejecting servlet filters")) {
+
+			return;
+		}
 
 		for (Element servletFilterElement : servletFilterElements) {
 			String servletFilterName = servletFilterElement.elementText(
@@ -2641,7 +2666,8 @@ public class HookHotDeployListener
 		"my.sites.show.user.private.sites.with.no.layouts",
 		"my.sites.show.user.public.sites.with.no.layouts",
 		"portlet.add.default.resource.check.enabled", "rss.feeds.enabled",
-		"session.store.password", "terms.of.use.required",
+		"session.store.password", "social.activity.sets.bundling.enabled",
+		"social.activity.sets.enabled", "terms.of.use.required",
 		"theme.css.fast.load", "theme.images.fast.load",
 		"theme.jsp.override.enabled", "theme.loader.new.theme.id.on.import",
 		"theme.portlet.decorate.default", "theme.portlet.sharing.default",
@@ -2701,7 +2727,8 @@ public class HookHotDeployListener
 		"default.wap.theme.id", "passwords.passwordpolicytoolkit.generator",
 		"passwords.passwordpolicytoolkit.static",
 		"phone.number.format.international.regexp",
-		"phone.number.format.usa.regexp", "theme.shortcut.icon"
+		"phone.number.format.usa.regexp", "social.activity.sets.selector",
+		"theme.shortcut.icon"
 	};
 
 	private static Log _log = LogFactoryUtil.getLog(

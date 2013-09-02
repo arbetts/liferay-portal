@@ -132,6 +132,9 @@
 					},
 				</c:if>
 
+				getBCP47LanguageId: function() {
+					return "<%= LanguageUtil.getBCP47LanguageId(request) %>";
+				},
 				getCDNBaseURL: function() {
 					return "<%= themeDisplay.getCDNBaseURL() %>";
 				},
@@ -148,7 +151,7 @@
 					return "<%= themeDisplay.getCompanyGroupId() %>";
 				},
 				getDefaultLanguageId: function() {
-					return "<%= LocaleUtil.toLanguageId(LocaleUtil.getDefault()) %>";
+					return "<%= LocaleUtil.toLanguageId(themeDisplay.getSiteDefaultLocale()) %>";
 				},
 				getDoAsUserIdEncoded: function() {
 					return "<%= UnicodeFormatter.toString(themeDisplay.getDoAsUserId()) %>";
@@ -245,7 +248,7 @@
 			},
 
 			PropsValues: {
-				NTLM_AUTH_ENABLED: <%= PropsValues.NTLM_AUTH_ENABLED %>
+				NTLM_AUTH_ENABLED: <%= PrefsPropsUtil.getBoolean(themeDisplay.getCompanyId(), PropsKeys.NTLM_AUTH_ENABLED, PropsValues.NTLM_AUTH_ENABLED) %>
 			}
 		};
 
@@ -341,14 +344,14 @@
 		<c:if test="<%= (layoutTypePortlet != null) %>">
 
 			<%
-			List<Portlet> allPortlets = layoutTypePortlet.getAllPortlets();
+			List<Portlet> allPortlets = layoutTypePortlet.getAllPortlets(false);
 
 			Iterator<Portlet> itr = allPortlets.iterator();
 
 			while (itr.hasNext()) {
 				Portlet portlet = itr.next();
 
-				if (portlet.isUndeployedPortlet()) {
+				if (!portlet.isActive() || !portlet.isReady() || portlet.isUndeployedPortlet()) {
 					itr.remove();
 				}
 			}

@@ -32,7 +32,7 @@
 	</c:if>
 </liferay-util:buffer>
 
-<c:if test='<%= !choiceField && !type.equals("hidden") %>'>
+<c:if test='<%= !choiceField && !type.equals("hidden") && !wrappedField %>'>
 	<div class="<%= controlGroupCss %>">
 </c:if>
 
@@ -105,7 +105,7 @@
 			checked = GetterUtil.getBoolean(valueString);
 		}
 
-		String defaultValueString = Boolean.TRUE.toString();
+		String defaultValueString = String.valueOf(checked);
 
 		if (Validator.isNotNull(valueString) && !valueString.equalsIgnoreCase("false") && !valueString.equalsIgnoreCase("true")) {
 			defaultValueString = valueString;
@@ -246,7 +246,7 @@
 	</label>
 </c:if>
 
-<c:if test='<%= !choiceField && !type.equals("hidden") %>'>
+<c:if test='<%= !choiceField && !type.equals("hidden") && !wrappedField %>'>
 	</div>
 </c:if>
 

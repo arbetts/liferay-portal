@@ -176,7 +176,7 @@
 				(Group_.parentGroupId [$PARENT_GROUP_ID_COMPARATOR$] ?) AND
 				(Group_.liveGroupId = 0) AND
 				(Group_.name != 'Control Panel') AND
-				(lower(Group_.name) LIKE ? OR lower(Group_.name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+				(lower(Group_.name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
 				(lower(Group_.description) LIKE ? [$AND_OR_NULL_CHECK$]) AND
 				(Group_.type_ != 4)
 		]]>
@@ -302,7 +302,7 @@
 				(Group_.parentGroupId [$PARENT_GROUP_ID_COMPARATOR$] ?) AND
 				(Group_.liveGroupId = 0) AND
 				(Group_.name != 'Control Panel') AND
-				(lower(Group_.name) LIKE ? OR lower(Group_.name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+				(lower(Group_.name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
 				(lower(Group_.description) LIKE ? [$AND_OR_NULL_CHECK$]) AND
 				(Group_.type_ != 4)
 		]]>
@@ -474,20 +474,15 @@
 				{Layout.*}
 			FROM
 				Layout
+			LEFT JOIN
+				ResourcePermission ON
+					(ResourcePermission.companyId = Layout.companyId) AND
+					(ResourcePermission.name = Layout.name) AND
+					(ResourcePermission.scope = ?) AND
+					(ResourcePermission.primKey = CAST_TEXT(Layout.plid)) AND
+					(ResourcePermission.roleId = ?)
 			WHERE
-				(plid NOT IN (
-					SELECT
-						Layout.plid
-					FROM
-						Layout
-					INNER JOIN
-						ResourcePermission ON
-							(ResourcePermission.companyId = Layout.companyId) AND
-							(ResourcePermission.name = Layout.name) AND
-							(ResourcePermission.scope = ?) AND
-							(ResourcePermission.primKey = CAST_TEXT(Layout.plid)) AND
-							(ResourcePermission.roleId = ?)
-				))
+				ResourcePermission.primKey IS NULL
 		]]>
 	</sql>
 	<sql id="com.liferay.portal.service.persistence.LayoutFinder.findByNullFriendlyURL">
@@ -629,6 +624,23 @@
 					(lower(Address.city) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
 					(lower(Address.zip) LIKE ? [$AND_OR_NULL_CHECK$])
 				)
+		]]>
+	</sql>
+	<sql id="com.liferay.portal.service.persistence.OrganizationFinder.findByNoAssets">
+		<![CDATA[
+			SELECT
+				{Organization_.*}
+			FROM
+				Organization_
+			WHERE
+				(organizationId NOT IN (
+					SELECT
+						classPK
+					FROM
+						AssetEntry
+					WHERE
+						classNameId = [$CLASS_NAME_ID_COM.LIFERAY.PORTAL.MODEL.ORGANIZATION$]
+				))
 		]]>
 	</sql>
 	<sql id="com.liferay.portal.service.persistence.OrganizationFinder.findByCompanyId">
@@ -790,6 +802,22 @@
 				(lower(PasswordPolicy.name) LIKE ? OR ? IS NULL)
 		]]>
 	</sql>
+	<sql id="com.liferay.portal.service.persistence.PortletPreferencesFinder.countByO_O_P">
+		<![CDATA[
+			SELECT
+				COUNT(*) AS COUNT_VALUE
+			FROM
+				PortletPreferences
+			WHERE
+				(PortletPreferences.ownerId = ?) AND
+				(PortletPreferences.ownerType = ?) AND
+				(
+					(PortletPreferences.portletId = ?) OR
+					(PortletPreferences.portletId LIKE ?)
+				) AND
+				(PortletPreferences.preferences != '[$PORTLET_PREFERENCES_PREFERENCES_DEFAULT$]')
+		]]>
+	</sql>
 	<sql id="com.liferay.portal.service.persistence.PortletPreferencesFinder.countByC_G_O_O_P_P_P">
 		<![CDATA[
 			SELECT
@@ -809,7 +837,8 @@
 					(PortletPreferences.portletId LIKE ?)
 				) AND
 				(Layout.plid = ?) AND
-				(Layout.privateLayout = ?)
+				(Layout.privateLayout = ?) AND
+				(PortletPreferences.preferences != '[$PORTLET_PREFERENCES_PREFERENCES_DEFAULT$]')
 		]]>
 	</sql>
 	<sql id="com.liferay.portal.service.persistence.PortletPreferencesFinder.findByPortletId">

@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.bookmarks.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -38,6 +40,20 @@ public class BookmarksEntryStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {BookmarksEntry.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		BookmarksEntry entry =
+			BookmarksEntryLocalServiceUtil.fetchBookmarksEntryByUuidAndGroupId(
+				uuid, groupId);
+
+		if (entry != null) {
+			BookmarksEntryLocalServiceUtil.deleteEntry(entry);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -55,8 +71,9 @@ public class BookmarksEntryStagedModelDataHandler
 		if (entry.getFolderId() !=
 				BookmarksFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, entry.getFolder());
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, entry, entry.getFolder(),
+				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
 		Element entryElement = portletDataContext.getExportDataElement(entry);

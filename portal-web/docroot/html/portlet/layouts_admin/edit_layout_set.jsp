@@ -66,12 +66,14 @@ String[][] categorySections = {mainSections};
 
 boolean hasExportImportLayoutsPermission = GroupPermissionUtil.contains(permissionChecker, liveGroupId, ActionKeys.EXPORT_IMPORT_LAYOUTS);
 
-boolean hasAddPageLayoutsPermission = !group.isLayoutPrototype() && GroupPermissionUtil.contains(permissionChecker, groupId, ActionKeys.ADD_LAYOUT);
+boolean hasAddPageLayoutsPermission = GroupPermissionUtil.contains(permissionChecker, groupId, ActionKeys.ADD_LAYOUT);
 
 boolean hasViewPagesPermission = (pagesCount > 0) && (liveGroup.isStaged() || selGroup.isLayoutSetPrototype() || selGroup.isStagingGroup() || portletName.equals(PortletKeys.MY_SITES) || portletName.equals(PortletKeys.GROUP_PAGES) || portletName.equals(PortletKeys.SITES_ADMIN) || portletName.equals(PortletKeys.USERS_ADMIN));
 %>
 
-<liferay-util:include page="/html/portlet/layouts_admin/add_layout.jsp" />
+<div class="add-content-menu hide" id="<portlet:namespace />addLayout">
+	<liferay-util:include page="/html/portlet/layouts_admin/add_layout.jsp" />
+</div>
 
 <aui:nav-bar>
 	<aui:nav id="layoutsNav">
@@ -101,10 +103,6 @@ boolean hasViewPagesPermission = (pagesCount > 0) && (liveGroup.isStaged() || se
 
 		<c:if test="<%= ree.getType() == RemoteExportException.NO_GROUP %>">
 			<%= LanguageUtil.format(pageContext, "remote-group-with-id-x-does-not-exist", ree.getGroupId()) %>
-		</c:if>
-
-		<c:if test="<%= ree.getType() == RemoteExportException.NO_LAYOUTS %>">
-			<liferay-ui:message key="no-pages-are-selected-for-export" />
 		</c:if>
 
 		<c:if test="<%= ree.getType() == RemoteExportException.NO_PERMISSIONS %>">
@@ -231,7 +229,7 @@ boolean hasViewPagesPermission = (pagesCount > 0) && (liveGroup.isStaged() || se
 	var popup;
 
 	var clickHandler = function(event) {
-		var dataValue = event.target.ancestor().attr('data-value');
+		var dataValue = event.target.ancestor('li').attr('data-value');
 
 		if (dataValue === 'add-page' || dataValue === 'add-child-page') {
 			var content = A.one('#<portlet:namespace />addLayout');
@@ -240,7 +238,9 @@ boolean hasViewPagesPermission = (pagesCount > 0) && (liveGroup.isStaged() || se
 				popup = Liferay.Util.Window.getWindow(
 					{
 						dialog: {
-							bodyContent: content.show()
+							bodyContent: content.show(),
+							cssClass: 'lfr-add-dialog',
+							width: 600
 						},
 						title: '<%= UnicodeLanguageUtil.get(pageContext, "add-page") %>'
 					}
@@ -248,6 +248,17 @@ boolean hasViewPagesPermission = (pagesCount > 0) && (liveGroup.isStaged() || se
 			}
 
 			popup.show();
+
+			var cancelButton = popup.get('contentBox').one('#<portlet:namespace />cancelAddOperation');
+
+			if (cancelButton) {
+				cancelButton.on(
+					'click',
+					function(event) {
+						popup.hide();
+					}
+				);
+			}
 
 			Liferay.Util.focusFormField(content.one('input:text'));
 		}

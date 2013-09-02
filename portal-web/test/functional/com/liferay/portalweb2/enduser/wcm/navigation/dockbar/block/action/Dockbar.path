@@ -79,7 +79,7 @@
 </tr>
 <tr>
 	<td>ADD_PAGE_NAME_FIELD</td>
-	<td>//input[@id='_145_name']</td>
+	<td>//input[@id='_145_addLayoutName']</td>
 	<td></td>
 </tr>
 <tr>
@@ -127,6 +127,26 @@
 <tr>
 	<td>ADMIN_SITE_ADMINISTRATION</td>
 	<td>//li[@id='_145_adminLinks']/ul/li/a[contains(.,'Site Administration')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADMIN_SITE_ADMINISTRATION_PAGES</td>
+	<td>//li[@id='_145_adminLinks']/ul/li/ul/li/a[contains(.,'Pages')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADMIN_SITE_ADMINISTRATION_CONTENT</td>
+	<td>//li[@id='_145_adminLinks']/ul/li/ul/li/a[contains(.,'Content')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADMIN_SITE_ADMINISTRATION_USERS</td>
+	<td>//li[@id='_145_adminLinks']/ul/li/ul/li/a[contains(.,'Users')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADMIN_SITE_ADMINISTRATION_CONFIGURATION</td>
+	<td>//li[@id='_145_adminLinks']/ul/li/ul/li/a[contains(.,'Configuration')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -195,6 +215,11 @@
 <tr>
 	<td>USER_NAME</td>
 	<td>//span[@class='user-full-name']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>USER_MY_DASHBOARD</td>
+	<td>//span[contains(.,'My Dashboard')]</td>
 	<td></td>
 </tr>
 <tr>

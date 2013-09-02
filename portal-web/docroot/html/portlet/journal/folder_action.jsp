@@ -153,11 +153,14 @@ else {
 				modelResourceDescription="<%= modelResourceDescription %>"
 				resourcePrimKey="<%= resourcePrimKey %>"
 				var="permissionsURL"
+				windowState="<%= LiferayWindowState.POP_UP.toString() %>"
 			/>
 
 			<liferay-ui:icon
 				image="permissions"
+				method="get"
 				url="<%= permissionsURL %>"
+				useDialog="<%= true %>"
 			/>
 		</c:if>
 	</liferay-ui:icon-menu>

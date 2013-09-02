@@ -15,10 +15,12 @@
 package com.liferay.portlet.journal.lar;
 
 import com.liferay.portal.kernel.lar.DataLevel;
+import com.liferay.portal.kernel.lar.ManifestSummary;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.portal.kernel.lar.PortletDataHandlerControl;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.documentlibrary.lar.DLPortletDataHandler;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
@@ -96,7 +99,8 @@ public class JournalContentPortletDataHandler
 				dlPortletDataHandler.getExportMetadataControls()));
 
 		setImportControls(getExportControls()[0]);
-		setPublishToLiveByDefault(true);
+		setPublishToLiveByDefault(
+			PropsValues.JOURNAL_CONTENT_PUBLISH_TO_LIVE_BY_DEFAULT);
 	}
 
 	@Override
@@ -153,12 +157,6 @@ public class JournalContentPortletDataHandler
 
 		if (articleGroupId != portletDataContext.getScopeGroupId()) {
 			portletDataContext.setScopeGroupId(articleGroupId);
-		}
-		else if (articleGroupId ==
-					portletDataContext.getSourceCompanyGroupId()) {
-
-			portletDataContext.setScopeGroupId(
-				portletDataContext.getCompanyGroupId());
 		}
 
 		JournalArticle article = null;
@@ -318,6 +316,31 @@ public class JournalContentPortletDataHandler
 		portletDataContext.setScopeGroupId(previousScopeGroupId);
 
 		return portletPreferences;
+	}
+
+	@Override
+	protected void doPrepareManifestSummary(
+			PortletDataContext portletDataContext,
+			PortletPreferences portletPreferences)
+		throws Exception {
+
+		ManifestSummary manifestSummary =
+			portletDataContext.getManifestSummary();
+
+		if ((portletPreferences == null) ||
+			(manifestSummary.getModelAdditionCount(
+				JournalArticle.class) > -1)) {
+
+			return;
+		}
+
+		String articleId = portletPreferences.getValue(
+			"articleId", StringPool.BLANK);
+
+		if (Validator.isNotNull(articleId)) {
+			manifestSummary.addModelAdditionCount(
+				new StagedModelType(JournalArticle.class), 1);
+		}
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

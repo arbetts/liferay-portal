@@ -444,6 +444,12 @@ public class AssetTagLocalServiceUtil {
 		return getService().decrementAssetCount(tagId, classNameId);
 	}
 
+	public static void deleteGroupTags(long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService().deleteGroupTags(groupId);
+	}
+
 	public static void deleteTag(com.liferay.portlet.asset.model.AssetTag tag)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {

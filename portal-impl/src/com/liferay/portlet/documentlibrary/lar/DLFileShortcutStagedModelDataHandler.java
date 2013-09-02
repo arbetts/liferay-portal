@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.documentlibrary.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -41,6 +43,20 @@ public class DLFileShortcutStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {DLFileShortcut.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		DLFileShortcut dlFileShortcut =
+			DLFileShortcutLocalServiceUtil.fetchDLFileShortcutByUuidAndGroupId(
+				uuid, groupId);
+
+		if (dlFileShortcut != null) {
+			DLFileShortcutLocalServiceUtil.deleteFileShortcut(dlFileShortcut);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -58,15 +74,17 @@ public class DLFileShortcutStagedModelDataHandler
 		if (fileShortcut.getFolderId() !=
 				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, fileShortcut.getFolder());
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, fileShortcut, fileShortcut.getFolder(),
+				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
 		FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(
 			fileShortcut.getToFileEntryId());
 
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, fileEntry);
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, fileShortcut, DLFileShortcut.class, fileEntry,
+			FileEntry.class, PortletDataContext.REFERENCE_TYPE_STRONG);
 
 		Element fileShortcutElement = portletDataContext.getExportDataElement(
 			fileShortcut);

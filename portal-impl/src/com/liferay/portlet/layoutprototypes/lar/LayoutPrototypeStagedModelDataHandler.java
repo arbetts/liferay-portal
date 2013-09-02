@@ -15,14 +15,17 @@
 package com.liferay.portlet.layoutprototypes.lar;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutPrototype;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.LayoutPrototypeLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
@@ -39,8 +42,31 @@ public class LayoutPrototypeStagedModelDataHandler
 		{LayoutPrototype.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+		LayoutPrototype layoutPrototype =
+			LayoutPrototypeLocalServiceUtil.
+				fetchLayoutPrototypeByUuidAndCompanyId(
+					uuid, group.getCompanyId());
+
+		if (layoutPrototype != null) {
+			LayoutPrototypeLocalServiceUtil.deleteLayoutPrototype(
+				layoutPrototype);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
+	}
+
+	@Override
+	public String getDisplayName(LayoutPrototype layoutPrototype) {
+		return layoutPrototype.getNameCurrentValue();
 	}
 
 	@Override
@@ -131,13 +157,9 @@ public class LayoutPrototypeStagedModelDataHandler
 			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 
 		for (Layout layout : layouts) {
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, layout);
-
-			portletDataContext.addReferenceElement(
-				layoutPrototype, layoutPrototypeElement, layout,
-				PortletDataContext.REFERENCE_TYPE_EMBEDDED, false);
-
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, layoutPrototype, layout,
+				PortletDataContext.REFERENCE_TYPE_EMBEDDED);
 		}
 	}
 
@@ -169,6 +191,22 @@ public class LayoutPrototypeStagedModelDataHandler
 			portletDataContext.setPrivateLayout(privateLayout);
 			portletDataContext.setScopeGroupId(scopeGroupId);
 		}
+	}
+
+	@Override
+	protected boolean validateMissingReference(
+			String uuid, long companyId, long groupId)
+		throws Exception {
+
+		LayoutPrototype layoutPrototype =
+			LayoutPrototypeLocalServiceUtil.
+				fetchLayoutPrototypeByUuidAndCompanyId(uuid, companyId);
+
+		if (layoutPrototype == null) {
+			return false;
+		}
+
+		return true;
 	}
 
 }

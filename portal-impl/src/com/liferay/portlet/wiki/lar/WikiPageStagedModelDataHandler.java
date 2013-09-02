@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.wiki.lar;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
@@ -44,6 +46,20 @@ public class WikiPageStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {WikiPage.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		WikiPage wikiPage =
+			WikiPageLocalServiceUtil.fetchWikiPageByUuidAndGroupId(
+				uuid, groupId);
+
+		if (wikiPage != null) {
+			WikiPageLocalServiceUtil.deletePage(wikiPage);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -55,8 +71,9 @@ public class WikiPageStagedModelDataHandler
 
 		Element pageElement = portletDataContext.getExportDataElement(page);
 
-		StagedModelDataHandlerUtil.exportStagedModel(
-			portletDataContext, page.getNode());
+		StagedModelDataHandlerUtil.exportReferenceStagedModel(
+			portletDataContext, page, page.getNode(),
+			PortletDataContext.REFERENCE_TYPE_PARENT);
 
 		String content = ExportImportHelperUtil.replaceExportContentReferences(
 			portletDataContext, page, pageElement, page.getContent(),
@@ -67,18 +84,9 @@ public class WikiPageStagedModelDataHandler
 
 		if (page.isHead()) {
 			for (FileEntry fileEntry : page.getAttachmentsFileEntries()) {
-				StagedModelDataHandlerUtil.exportStagedModel(
-					portletDataContext, fileEntry);
-
-				portletDataContext.addReferenceElement(
-					page, pageElement, fileEntry, FileEntry.class,
-					PortletDataContext.REFERENCE_TYPE_WEAK, false);
-			}
-
-			long folderId = page.getAttachmentsFolderId();
-
-			if (folderId != 0) {
-				page.setAttachmentsFolderId(folderId);
+				StagedModelDataHandlerUtil.exportReferenceStagedModel(
+					portletDataContext, page, WikiPage.class, fileEntry,
+					FileEntry.class, PortletDataContext.REFERENCE_TYPE_WEAK);
 			}
 		}
 

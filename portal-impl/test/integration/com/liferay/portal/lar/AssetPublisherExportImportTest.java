@@ -17,6 +17,7 @@ package com.liferay.portal.lar;
 import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
 import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -28,7 +29,6 @@ import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.service.CompanyLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
@@ -55,10 +55,9 @@ import java.util.Map;
 import javax.portlet.PortletPreferences;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.powermock.core.classloader.annotations.PrepareForTest;
 
 /**
  * @author Julio Camarero
@@ -68,11 +67,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 		MainServletExecutionTestListener.class,
 		TransactionalCallbackAwareExecutionTestListener.class
 	})
-@PrepareForTest({PortletLocalServiceUtil.class})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
 @Transactional
 public class AssetPublisherExportImportTest
 	extends BasePortletExportImportTestCase {
+
+	@Override
+	public String getPortletId() {
+		return PortletKeys.ASSET_PUBLISHER;
+	}
 
 	@Test
 	public void testAnyDLFileEntryType() throws Exception {
@@ -160,12 +163,32 @@ public class AssetPublisherExportImportTest
 		Assert.assertEquals(null, portletPreferences.getValue("scopeId", null));
 		Assert.assertTrue(
 			"The child group ID should have been filtered out on import",
-			Validator.isNull(portletPreferences.getValues("scopeIds", null)));
+			ArrayUtil.isEmpty(portletPreferences.getValues("scopeIds", null)));
 	}
 
+	@Test
+	public void testDisplayStyle() throws Exception {
+		Map<String, String[]> preferenceMap = new HashMap<String, String[]>();
+
+		String displayStyle = ServiceTestUtil.randomString();
+
+		preferenceMap.put("displayStyle", new String[] {displayStyle});
+
+		PortletPreferences portletPreferences = getImportedPortletPreferences(
+			preferenceMap);
+
+		Assert.assertEquals(
+			displayStyle, portletPreferences.getValue("displayStyle", null));
+		Assert.assertTrue(
+			"The display style should not be null",
+			Validator.isNotNull(
+				portletPreferences.getValue("displayStyle", null)));
+	}
+
+	@Ignore()
 	@Override
+	@Test
 	public void testExportImportAssetLinks() throws Exception {
-		Assert.assertTrue("This test does not apply", true);
 	}
 
 	@Test
@@ -581,7 +604,7 @@ public class AssetPublisherExportImportTest
 	}
 
 	@Override
-	protected void doExportImportPortlet(String portletId) throws Exception {
+	protected void exportImportPortlet(String portletId) throws Exception {
 		larFile = LayoutLocalServiceUtil.exportLayoutsAsFile(
 			layout.getGroupId(), layout.isPrivateLayout(), null,
 			getExportParameterMap(), null, null);
@@ -617,23 +640,6 @@ public class AssetPublisherExportImportTest
 			new String[] {Boolean.TRUE.toString()});
 
 		return parameterMap;
-	}
-
-	protected PortletPreferences getImportedPortletPreferences(
-			Map<String, String[]> preferenceMap)
-		throws Exception {
-
-		// Export site LAR
-
-		String assetPublisherPortletId = LayoutTestUtil.addPortletToLayout(
-			TestPropsValues.getUserId(), this.layout,
-			PortletKeys.ASSET_PUBLISHER, "column-1", preferenceMap);
-
-		doExportImportPortlet(assetPublisherPortletId);
-
-		return LayoutTestUtil.getPortletPreferences(
-			importedLayout.getCompanyId(), importedLayout.getPlid(),
-			assetPublisherPortletId);
 	}
 
 	@Override

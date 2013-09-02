@@ -91,8 +91,8 @@ import java.io.IOException;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.time.StopWatch;
 
@@ -441,7 +441,10 @@ public class PortletExporter {
 
 		headerElement.addAttribute(
 			"available-locales",
-			StringUtil.merge(LanguageUtil.getAvailableLocales()));
+			StringUtil.merge(
+				LanguageUtil.getAvailableLocales(
+					PortalUtil.getSiteGroupId(
+						portletDataContext.getScopeGroupId()))));
 		headerElement.addAttribute(
 			"build-number", String.valueOf(ReleaseInfo.getBuildNumber()));
 		headerElement.addAttribute("export-date", Time.getRFC822());
@@ -488,7 +491,8 @@ public class PortletExporter {
 		exportExpandoTables(portletDataContext);
 		exportLocks(portletDataContext);
 
-		_deletionSystemEventExporter.export(portletDataContext);
+		_deletionSystemEventExporter.exportDeletionSystemEvents(
+			portletDataContext);
 
 		if (exportPermissions) {
 			_permissionExporter.exportPortletDataPermissions(
@@ -612,12 +616,6 @@ public class PortletExporter {
 
 		Element assetCategoryElement = assetCategoriesElement.addElement(
 			"category");
-
-		if (assetCategory.getGroupId() ==
-				portletDataContext.getCompanyGroupId()) {
-
-			assetCategoryElement.addAttribute("global", "true");
-		}
 
 		assetCategoryElement.addAttribute("path", path);
 
@@ -801,12 +799,6 @@ public class PortletExporter {
 
 		Element assetVocabularyElement = assetVocabulariesElement.addElement(
 			"vocabulary");
-
-		if (assetVocabulary.getGroupId() ==
-				portletDataContext.getCompanyGroupId()) {
-
-			assetVocabularyElement.addAttribute("global", "true");
-		}
 
 		assetVocabularyElement.addAttribute("path", path);
 
@@ -1231,31 +1223,29 @@ public class PortletExporter {
 			"portlet-preferences");
 
 		if (portlet != null) {
-			PortletDataHandler portletDataHandler =
-				portlet.getPortletDataHandlerInstance();
+			Element exportDataRootElement =
+				portletDataContext.getExportDataRootElement();
 
-			if (portletDataHandler != null) {
-				Element exportDataRootElement =
-					portletDataContext.getExportDataRootElement();
+			try {
+				portletDataContext.clearScopedPrimaryKeys();
 
-				try {
-					portletDataContext.clearScopedPrimaryKeys();
+				Element preferenceDataElement =
+					portletPreferencesElement.addElement("preference-data");
 
-					Element preferenceDataElement =
-						portletPreferencesElement.addElement("preference-data");
+				portletDataContext.setExportDataRootElement(
+					preferenceDataElement);
 
-					portletDataContext.setExportDataRootElement(
-						preferenceDataElement);
+				PortletDataHandler portletDataHandler =
+					portlet.getPortletDataHandlerInstance();
 
-					jxPortletPreferences =
-						portletDataHandler.processExportPortletPreferences(
-							portletDataContext, portletId, jxPortletPreferences,
-							parentElement);
-				}
-				finally {
-					portletDataContext.setExportDataRootElement(
-						exportDataRootElement);
-				}
+				jxPortletPreferences =
+					portletDataHandler.processExportPortletPreferences(
+						portletDataContext, portletId, jxPortletPreferences,
+						parentElement);
+			}
+			finally {
+				portletDataContext.setExportDataRootElement(
+					exportDataRootElement);
 			}
 		}
 

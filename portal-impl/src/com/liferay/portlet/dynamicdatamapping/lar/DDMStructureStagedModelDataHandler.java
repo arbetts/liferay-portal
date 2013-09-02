@@ -15,6 +15,7 @@
 package com.liferay.portlet.dynamicdatamapping.lar;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.lar.ExportImportPathUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
@@ -43,6 +44,20 @@ public class DDMStructureStagedModelDataHandler
 	public static final String[] CLASS_NAMES = {DDMStructure.class.getName()};
 
 	@Override
+	public void deleteStagedModel(
+			String uuid, long groupId, String className, String extraData)
+		throws PortalException, SystemException {
+
+		DDMStructure ddmStructure =
+			DDMStructureLocalServiceUtil.fetchDDMStructureByUuidAndGroupId(
+				uuid, groupId);
+
+		if (ddmStructure != null) {
+			DDMStructureLocalServiceUtil.deleteStructure(ddmStructure);
+		}
+	}
+
+	@Override
 	public String[] getClassNames() {
 		return CLASS_NAMES;
 	}
@@ -57,6 +72,9 @@ public class DDMStructureStagedModelDataHandler
 			PortletDataContext portletDataContext, DDMStructure structure)
 		throws Exception {
 
+		Element structureElement = portletDataContext.getExportDataElement(
+			structure);
+
 		if (structure.getParentStructureId() !=
 				DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID) {
 
@@ -64,12 +82,10 @@ public class DDMStructureStagedModelDataHandler
 				DDMStructureLocalServiceUtil.getStructure(
 					structure.getParentStructureId());
 
-			StagedModelDataHandlerUtil.exportStagedModel(
-				portletDataContext, parentStructure);
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, structure, parentStructure,
+				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
-
-		Element structureElement = portletDataContext.getExportDataElement(
-			structure);
 
 		long defaultUserId = UserLocalServiceUtil.getDefaultUserId(
 			structure.getCompanyId());
@@ -95,16 +111,13 @@ public class DDMStructureStagedModelDataHandler
 		if (structure.getParentStructureId() !=
 				DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID) {
 
-			String parentStructurePath = ExportImportPathUtil.getModelPath(
-				portletDataContext, DDMStructure.class.getName(),
-				structure.getParentStructureId());
-
-			DDMStructure parentStructure =
-				(DDMStructure)portletDataContext.getZipEntryAsObject(
-					parentStructurePath);
+			Element structureElement =
+				portletDataContext.getReferenceDataElement(
+					structure, DDMStructure.class,
+					structure.getParentStructureId());
 
 			StagedModelDataHandlerUtil.importStagedModel(
-				portletDataContext, parentStructure);
+				portletDataContext, structureElement);
 		}
 
 		Map<Long, Long> structureIds =
@@ -114,6 +127,10 @@ public class DDMStructureStagedModelDataHandler
 		long parentStructureId = MapUtil.getLong(
 			structureIds, structure.getParentStructureId(),
 			structure.getParentStructureId());
+
+		Map<String, String> structureKeys =
+			(Map<String, String>)portletDataContext.getNewPrimaryKeysMap(
+				DDMStructure.class + ".ddmStructureKey");
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
 			structure, DDMPortletDataHandler.NAMESPACE);
@@ -143,6 +160,14 @@ public class DDMStructureStagedModelDataHandler
 			}
 
 			if (existingStructure == null) {
+				existingStructure =
+					DDMStructureLocalServiceUtil.
+						fetchDDMStructureByUuidAndGroupId(
+							structure.getUuid(),
+							portletDataContext.getCompanyGroupId());
+			}
+
+			if (existingStructure == null) {
 				serviceContext.setUuid(structure.getUuid());
 
 				importedStructure = DDMStructureLocalServiceUtil.addStructure(
@@ -152,6 +177,19 @@ public class DDMStructureStagedModelDataHandler
 					structure.getDescriptionMap(), structure.getXsd(),
 					structure.getStorageType(), structure.getType(),
 					serviceContext);
+			}
+			else if (portletDataContext.isCompanyStagedGroupedModel(
+						existingStructure)) {
+
+				structureIds.put(
+					structure.getStructureId(),
+					existingStructure.getStructureId());
+
+				structureKeys.put(
+					structure.getStructureKey(),
+					existingStructure.getStructureKey());
+
+				return;
 			}
 			else {
 				importedStructure =
@@ -173,8 +211,8 @@ public class DDMStructureStagedModelDataHandler
 		portletDataContext.importClassedModel(
 			structure, importedStructure, DDMPortletDataHandler.NAMESPACE);
 
-		structureIds.put(
-			structure.getStructureId(), importedStructure.getStructureId());
+		structureKeys.put(
+			structure.getStructureKey(), importedStructure.getStructureKey());
 	}
 
 	protected void prepareLanguagesForImport(DDMStructure structure)

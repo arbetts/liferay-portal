@@ -14,15 +14,20 @@
 
 package com.liferay.portlet.journal.lar;
 
+import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.portal.kernel.test.ExecutionTestListeners;
+import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.lar.BaseWorkflowedStagedModelDataHandlerTestCase;
+import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.StagedModel;
+import com.liferay.portal.service.CompanyLocalServiceUtil;
 import com.liferay.portal.service.ServiceTestUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.Sync;
+import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
 import com.liferay.portal.test.TransactionalExecutionTestListener;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.TestPropsValues;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
@@ -31,6 +36,7 @@ import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalServiceUti
 import com.liferay.portlet.dynamicdatamapping.util.DDMStructureTestUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMTemplateTestUtil;
 import com.liferay.portlet.journal.model.JournalArticle;
+import com.liferay.portlet.journal.model.JournalArticleConstants;
 import com.liferay.portlet.journal.model.JournalArticleResource;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalArticleLocalServiceUtil;
@@ -44,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -52,11 +59,71 @@ import org.junit.runner.RunWith;
 @ExecutionTestListeners(
 	listeners = {
 		MainServletExecutionTestListener.class,
+		SynchronousDestinationExecutionTestListener.class,
 		TransactionalExecutionTestListener.class
 	})
 @RunWith(LiferayIntegrationJUnitTestRunner.class)
+@Sync
 public class JournalArticleStagedModelDataHandlerTest
 	extends BaseWorkflowedStagedModelDataHandlerTestCase {
+
+	@Test
+	@Transactional
+	public void testCompanyScopeDependencies() throws Exception {
+		initExport();
+
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			addCompanyDependencies();
+
+		StagedModel stagedModel = addStagedModel(
+			stagingGroup, dependentStagedModelsMap);
+
+		StagedModelDataHandlerUtil.exportStagedModel(
+			portletDataContext, stagedModel);
+
+		initImport();
+
+		StagedModel exportedStagedModel = readExportedStagedModel(stagedModel);
+
+		Assert.assertNotNull(exportedStagedModel);
+
+		StagedModelDataHandlerUtil.importStagedModel(
+			portletDataContext, exportedStagedModel);
+
+		validateCompanyDependenciesImport(dependentStagedModelsMap, liveGroup);
+	}
+
+	protected Map<String, List<StagedModel>> addCompanyDependencies()
+		throws Exception {
+
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			new HashMap<String, List<StagedModel>>();
+
+		Company company = CompanyLocalServiceUtil.fetchCompany(
+			stagingGroup.getCompanyId());
+
+		Group companyGroup = company.getGroup();
+
+		DDMStructure ddmStructure = DDMStructureTestUtil.addStructure(
+			companyGroup.getGroupId(), JournalArticle.class.getName());
+
+		addDependentStagedModel(
+			dependentStagedModelsMap, DDMStructure.class, ddmStructure);
+
+		DDMTemplate ddmTemplate = DDMTemplateTestUtil.addTemplate(
+			companyGroup.getGroupId(), ddmStructure.getStructureId());
+
+		addDependentStagedModel(
+			dependentStagedModelsMap, DDMTemplate.class, ddmTemplate);
+
+		JournalFolder folder = JournalTestUtil.addFolder(
+			stagingGroup.getGroupId(), ServiceTestUtil.randomString());
+
+		addDependentStagedModel(
+			dependentStagedModelsMap, JournalFolder.class, folder);
+
+		return dependentStagedModelsMap;
+	}
 
 	@Override
 	protected Map<String, List<StagedModel>> addDependentStagedModelsMap(
@@ -113,7 +180,7 @@ public class JournalArticleStagedModelDataHandlerTest
 
 		return JournalTestUtil.addArticleWithXMLContent(
 			group.getGroupId(), folder.getFolderId(),
-			PortalUtil.getClassNameId(DDMStructure.class),
+			JournalArticleConstants.CLASSNAME_ID_DEFAULT,
 			DDMStructureTestUtil.getSampleStructuredContent(),
 			ddmStructure.getStructureKey(), ddmTemplate.getTemplateKey());
 	}
@@ -159,6 +226,49 @@ public class JournalArticleStagedModelDataHandlerTest
 		return JournalArticle.class;
 	}
 
+	protected void validateCompanyDependenciesImport(
+			Map<String, List<StagedModel>> dependentStagedModelsMap,
+			Group group)
+		throws Exception {
+
+		List<StagedModel> ddmStructureDependentStagedModels =
+			dependentStagedModelsMap.get(DDMStructure.class.getSimpleName());
+
+		Assert.assertEquals(1, ddmStructureDependentStagedModels.size());
+
+		DDMStructure ddmStructure =
+			(DDMStructure)ddmStructureDependentStagedModels.get(0);
+
+		Assert.assertNull(
+			"Company DDM structure dependency should not be imported",
+			DDMStructureLocalServiceUtil.fetchDDMStructureByUuidAndGroupId(
+				ddmStructure.getUuid(), group.getGroupId()));
+
+		List<StagedModel> ddmTemplateDependentStagedModels =
+			dependentStagedModelsMap.get(DDMTemplate.class.getSimpleName());
+
+		Assert.assertEquals(1, ddmTemplateDependentStagedModels.size());
+
+		DDMTemplate ddmTemplate =
+			(DDMTemplate)ddmTemplateDependentStagedModels.get(0);
+
+		Assert.assertNull(
+			"Company DDM template dependency should not be imported",
+			DDMTemplateLocalServiceUtil.fetchDDMTemplateByUuidAndGroupId(
+				ddmTemplate.getUuid(), group.getGroupId()));
+
+		List<StagedModel> folderDependentStagedModels =
+			dependentStagedModelsMap.get(JournalFolder.class.getSimpleName());
+
+		Assert.assertEquals(1, folderDependentStagedModels.size());
+
+		JournalFolder folder = (JournalFolder)folderDependentStagedModels.get(
+			0);
+
+		JournalFolderLocalServiceUtil.getJournalFolderByUuidAndGroupId(
+			folder.getUuid(), group.getGroupId());
+	}
+
 	@Override
 	protected void validateImport(
 			Map<String, List<StagedModel>> dependentStagedModelsMap,
@@ -201,7 +311,7 @@ public class JournalArticleStagedModelDataHandlerTest
 
 	@Override
 	protected void validateImport(
-			StagedModel stagedModel,
+			StagedModel stagedModel, StagedModelAssets stagedModelAssets,
 			Map<String, List<StagedModel>> dependentStagedModelsMap,
 			Group group)
 		throws Exception {
@@ -216,6 +326,8 @@ public class JournalArticleStagedModelDataHandlerTest
 
 		JournalArticleLocalServiceUtil.getLatestArticle(
 			articleResource.getResourcePrimKey(), article.getStatus(), false);
+
+		validateAssets(articleResource.getUuid(), stagedModelAssets, group);
 
 		validateImport(dependentStagedModelsMap, group);
 	}

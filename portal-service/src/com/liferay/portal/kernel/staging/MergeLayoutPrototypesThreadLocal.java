@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.staging;
 
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.StringBundler;
 
@@ -24,6 +25,10 @@ import java.util.Set;
  * @author Raymond Augé
  */
 public class MergeLayoutPrototypesThreadLocal {
+
+	public static void clearMergeComplete() {
+		_mergeComplete.remove();
+	}
 
 	public static boolean isInProgress() {
 		return _inProgress.get();
@@ -60,7 +65,7 @@ public class MergeLayoutPrototypesThreadLocal {
 	private static String _buildMethodKey(
 		String methodName, Object[] arguments, Class<?>[] parameterTypes) {
 
-		if ((arguments == null) || (arguments.length == 0)) {
+		if (ArrayUtil.isEmpty(arguments)) {
 			return methodName;
 		}
 
@@ -69,9 +74,9 @@ public class MergeLayoutPrototypesThreadLocal {
 		sb.append(methodName);
 
 		for (int i = 0; i < arguments.length; i++) {
-			sb.append(parameterTypes[0].getClass().getName());
+			sb.append(parameterTypes[i].getName());
 
-			sb.append(arguments.toString());
+			sb.append(arguments[i]);
 		}
 
 		return sb.toString();

@@ -318,6 +318,7 @@ public class TrashEntryLocalServiceWrapper implements TrashEntryLocalService,
 	* Deletes the trash entry with the primary key.
 	*
 	* @param entryId the primary key of the trash entry
+	* @return the trash entry with the primary key
 	* @throws PortalException if a trash entry with the primary key could not
 	be found
 	* @throws SystemException if a system exception occurred
@@ -334,6 +335,7 @@ public class TrashEntryLocalServiceWrapper implements TrashEntryLocalService,
 	*
 	* @param className the class name of entity
 	* @param classPK the primary key of the entry
+	* @return the trash entry with the entity class name and primary key
 	* @throws PortalException if a trash entry with the primary key could not
 	be found
 	* @throws SystemException if a system exception occurred
@@ -433,6 +435,13 @@ public class TrashEntryLocalServiceWrapper implements TrashEntryLocalService,
 		return _trashEntryLocalService.getEntries(groupId, start, end, obc);
 	}
 
+	@Override
+	public java.util.List<com.liferay.portlet.trash.model.TrashEntry> getEntries(
+		long groupId, java.lang.String className)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _trashEntryLocalService.getEntries(groupId, className);
+	}
+
 	/**
 	* Returns the number of trash entries with the group ID.
 	*
@@ -478,35 +487,6 @@ public class TrashEntryLocalServiceWrapper implements TrashEntryLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _trashEntryLocalService.getEntry(className, classPK);
-	}
-
-	/**
-	* Returns all the trash versions associated with the trash entry.
-	*
-	* @param entryId the primary key of the trash entry
-	* @return all the trash versions associated with the trash entry
-	* @throws SystemException if a system exception occurred
-	*/
-	@Override
-	public java.util.List<com.liferay.portlet.trash.model.TrashVersion> getVersions(
-		long entryId)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return _trashEntryLocalService.getVersions(entryId);
-	}
-
-	/**
-	* Returns all the trash versions associated with the trash entry.
-	*
-	* @param className the class name of the trash entity
-	* @param classPK the primary key of the trash entity
-	* @return all the trash versions associated with the trash entry
-	* @throws SystemException if a system exception occurred
-	*/
-	@Override
-	public java.util.List<com.liferay.portlet.trash.model.TrashVersion> getVersions(
-		java.lang.String className, long classPK)
-		throws com.liferay.portal.kernel.exception.SystemException {
-		return _trashEntryLocalService.getVersions(className, classPK);
 	}
 
 	@Override

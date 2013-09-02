@@ -18,17 +18,22 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.UnmodifiableList;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Repository;
 import com.liferay.portal.model.User;
@@ -38,13 +43,18 @@ import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.RepositoryLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.theme.PortletDisplay;
+import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.PortletKeys;
+import com.liferay.portal.webserver.WebServerServlet;
 import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.util.DLAppHelperThreadLocal;
+import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +86,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 
 			addPortletFileEntry(
 				groupId, userId, className, classPK, portletId, folderId,
-				inputStream, fileName, StringPool.BLANK);
+				inputStream, fileName, StringPool.BLANK, true);
 		}
 	}
 
@@ -84,7 +94,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 	public FileEntry addPortletFileEntry(
 			long groupId, long userId, String className, long classPK,
 			String portletId, long folderId, File file, String fileName,
-			String mimeType)
+			String mimeType, boolean indexingEnabled)
 		throws PortalException, SystemException {
 
 		if (Validator.isNull(fileName)) {
@@ -101,6 +111,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 
 		serviceContext.setAttribute("className", className);
 		serviceContext.setAttribute("classPK", String.valueOf(classPK));
+		serviceContext.setIndexingEnabled(indexingEnabled);
 
 		if (Validator.isNull(mimeType) ||
 			mimeType.equals(ContentTypes.APPLICATION_OCTET_STREAM)) {
@@ -127,7 +138,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 	public FileEntry addPortletFileEntry(
 			long groupId, long userId, String className, long classPK,
 			String portletId, long folderId, InputStream inputStream,
-			String fileName, String mimeType)
+			String fileName, String mimeType, boolean indexingEnabled)
 		throws PortalException, SystemException {
 
 		if (inputStream == null) {
@@ -141,7 +152,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 
 			return addPortletFileEntry(
 				groupId, userId, className, classPK, portletId, folderId, file,
-				fileName, mimeType);
+				fileName, mimeType, indexingEnabled);
 		}
 		catch (IOException ioe) {
 			throw new SystemException("Unable to write temporary file", ioe);
@@ -364,6 +375,91 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 	}
 
 	@Override
+	public FileEntry getPortletFileEntry(String uuid, long groupId)
+		throws PortalException, SystemException {
+
+		return DLAppLocalServiceUtil.getFileEntryByUuidAndGroupId(
+			uuid, groupId);
+	}
+
+	@Override
+	public String getPortletFileEntryURL(
+			ThemeDisplay themeDisplay, FileEntry fileEntry, String queryString)
+		throws PortalException, SystemException {
+
+		return getPortletFileEntryURL(
+			themeDisplay, fileEntry, queryString, true);
+	}
+
+	@Override
+	public String getPortletFileEntryURL(
+			ThemeDisplay themeDisplay, FileEntry fileEntry, String queryString,
+			boolean absoluteURL)
+		throws PortalException, SystemException {
+
+		StringBundler sb = new StringBundler(10);
+
+		if (themeDisplay != null) {
+			if (absoluteURL) {
+				sb.append(themeDisplay.getPortalURL());
+			}
+		}
+
+		sb.append(PortalUtil.getPathContext());
+		sb.append("/documents/");
+		sb.append(WebServerServlet.PATH_PORTLET_FILE_ENTRY);
+		sb.append(StringPool.SLASH);
+		sb.append(fileEntry.getGroupId());
+		sb.append(StringPool.SLASH);
+
+		String title = fileEntry.getTitle();
+
+		FileVersion fileVersion = fileEntry.getFileVersion();
+
+		if (fileVersion.isInTrash()) {
+			title = TrashUtil.getOriginalTitle(fileEntry.getTitle());
+		}
+
+		sb.append(HttpUtil.encodeURL(HtmlUtil.unescape(title)));
+
+		sb.append(StringPool.SLASH);
+		sb.append(fileEntry.getUuid());
+
+		if (themeDisplay != null) {
+			PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
+
+			if (portletDisplay != null) {
+				String portletId = portletDisplay.getId();
+
+				if (portletId.equals(PortletKeys.TRASH) &&
+					!queryString.contains("status=")) {
+
+					if (Validator.isNotNull(queryString)) {
+						queryString += StringPool.AMPERSAND;
+					}
+
+					queryString +=
+						"status=" + WorkflowConstants.STATUS_IN_TRASH;
+				}
+			}
+		}
+
+		if (Validator.isNotNull(queryString)) {
+			sb.append(StringPool.QUESTION);
+			sb.append(queryString);
+		}
+
+		String portletFileEntryURL = sb.toString();
+
+		if ((themeDisplay != null) && themeDisplay.isAddSessionIdToURL()) {
+			return PortalUtil.getURLWithSessionId(
+				portletFileEntryURL, themeDisplay.getSessionId());
+		}
+
+		return portletFileEntryURL;
+	}
+
+	@Override
 	public Folder getPortletFolder(long folderId)
 		throws PortalException, SystemException {
 
@@ -387,7 +483,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 	}
 
 	@Override
-	public void movePortletFileEntryToTrash(long userId, long fileEntryId)
+	public FileEntry movePortletFileEntryToTrash(long userId, long fileEntryId)
 		throws PortalException, SystemException {
 
 		boolean dlAppHelperEnabled = DLAppHelperThreadLocal.isEnabled();
@@ -395,7 +491,8 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 		try {
 			DLAppHelperThreadLocal.setEnabled(false);
 
-			DLAppLocalServiceUtil.moveFileEntryToTrash(userId, fileEntryId);
+			return DLAppLocalServiceUtil.moveFileEntryToTrash(
+				userId, fileEntryId);
 		}
 		finally {
 			DLAppHelperThreadLocal.setEnabled(dlAppHelperEnabled);
@@ -403,14 +500,14 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 	}
 
 	@Override
-	public void movePortletFileEntryToTrash(
+	public FileEntry movePortletFileEntryToTrash(
 			long groupId, long userId, long folderId, String fileName)
 		throws PortalException, SystemException {
 
 		FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(
 			groupId, folderId, fileName);
 
-		movePortletFileEntryToTrash(userId, fileEntry.getFileEntryId());
+		return movePortletFileEntryToTrash(userId, fileEntry.getFileEntryId());
 	}
 
 	@Override
@@ -442,8 +539,7 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 	}
 
 	/**
-	 * @see {@link
-	 *      com.liferay.portal.repository.liferayrepository.util.LiferayBase#toFileEntries}
+	 * @see com.liferay.portal.repository.liferayrepository.util.LiferayBase#toFileEntries
 	 */
 	protected List<FileEntry> toFileEntries(List<DLFileEntry> dlFileEntries) {
 		List<FileEntry> fileEntries = new ArrayList<FileEntry>(

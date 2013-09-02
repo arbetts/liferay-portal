@@ -51,6 +51,7 @@ import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.model.Contact;
 import com.liferay.portal.model.ContactConstants;
 import com.liferay.portal.model.Group;
+import com.liferay.portal.model.LayoutSetPrototype;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.User;
@@ -1035,20 +1036,35 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 	public void updatePreferences(long companyId, UnicodeProperties properties)
 		throws PortalException, SystemException {
 
-		PortletPreferences preferences = PrefsPropsUtil.getPreferences(
+		PortletPreferences portletPreferences = PrefsPropsUtil.getPreferences(
 			companyId);
 
 		try {
-			String newLocales = properties.getProperty(PropsKeys.LOCALES);
+			String newLanguageIds = properties.getProperty(PropsKeys.LOCALES);
 
-			if (newLocales != null) {
-				String oldLocales = preferences.getValue(
+			if (newLanguageIds != null) {
+				String oldLanguageIds = portletPreferences.getValue(
 					PropsKeys.LOCALES, StringPool.BLANK);
 
-				if (!Validator.equals(oldLocales, newLocales)) {
-					validateLocales(newLocales);
+				if (!Validator.equals(oldLanguageIds, newLanguageIds)) {
+					validateLanguageIds(newLanguageIds);
 
 					LanguageUtil.resetAvailableLocales(companyId);
+
+					// Invalidate cache of all layout set prototypes that belong
+					// to this company. See LPS-36403.
+
+					Date now = new Date();
+
+					for (LayoutSetPrototype layoutSetPrototype :
+							layoutSetPrototypeLocalService.
+								getLayoutSetPrototypes(companyId)) {
+
+						layoutSetPrototype.setModifiedDate(now);
+
+						layoutSetPrototypeLocalService.updateLayoutSetPrototype(
+							layoutSetPrototype);
+					}
 				}
 			}
 
@@ -1065,22 +1081,23 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 				String propsUtilValue = PropsUtil.get(key);
 
 				if (!value.equals(propsUtilValue)) {
-					preferences.setValue(key, value);
+					portletPreferences.setValue(key, value);
 				}
 				else {
-					String preferencesValue = preferences.getValue(key, null);
+					String portletPreferencesValue =
+						portletPreferences.getValue(key, null);
 
-					if (preferencesValue != null) {
+					if (portletPreferencesValue != null) {
 						resetKeys.add(key);
 					}
 				}
 			}
 
 			for (String key : resetKeys) {
-				preferences.reset(key);
+				portletPreferences.reset(key);
 			}
 
-			preferences.store();
+			portletPreferences.store();
 		}
 		catch (LocaleException le) {
 			throw le;
@@ -1299,12 +1316,23 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 		}
 	}
 
-	protected void validateLocales(String locales) throws PortalException {
-		String[] localesArray = StringUtil.split(locales, StringPool.COMMA);
+	protected void validateLanguageIds(String languageIds)
+		throws PortalException {
 
-		for (String locale : localesArray) {
-			if (!ArrayUtil.contains(PropsValues.LOCALES, locale)) {
-				throw new LocaleException();
+		String[] languageIdsArray = StringUtil.split(
+			languageIds, StringPool.COMMA);
+
+		for (String languageId : languageIdsArray) {
+			if (!ArrayUtil.contains(PropsValues.LOCALES, languageId)) {
+				LocaleException le = new LocaleException(
+					LocaleException.TYPE_DISPLAY_SETTINGS);
+
+				le.setSourceAvailableLocales(
+					LocaleUtil.fromLanguageIds(PropsValues.LOCALES));
+				le.setTargetAvailableLocales(
+					LocaleUtil.fromLanguageIds(languageIdsArray));
+
+				throw le;
 			}
 		}
 	}

@@ -35,7 +35,7 @@
 				<aui:nav-item data-url="<%= permissionsURL %>" id="tagsPermissionsButton" label="permissions" />
 			</c:if>
 
-			<aui:nav-item dropdown="<%= true %>" label="actions">
+			<aui:nav-item cssClass="hide" dropdown="<%= true %>" id="tagsActionsButton" label="actions">
 				<aui:nav-item iconClass="icon-remove" id="deleteSelectedTags" label="delete" />
 
 				<aui:nav-item iconClass="icon-random" id="mergeSelectedTags" label="merge" />
@@ -43,9 +43,7 @@
 		</aui:nav>
 
 		<div class="navbar-search pull-right">
-			<div class="form-search">
-				<input class="search-query span9" id="<portlet:namespace/>tagsAdminSearchInput" name="<portlet:namespace/>tagsAdminSearchInput" type="text" />
-			</div>
+			<liferay-ui:input-search cssClass="form-search" id="tagsAdminSearchInput" name="tagsAdminSearchInput" showButton="<%= false %>" />
 		</div>
 	</aui:nav-bar>
 
@@ -53,11 +51,19 @@
 		<div class="tags-admin-content-wrapper">
 			<aui:row cssClass="tags-admin-content">
 				<aui:col cssClass="tags-admin-list-container" width="<%= 35 %>">
-					<span>
-						<aui:input cssClass="select-tags" inline="<%= true %>" label="" name="checkAllTags" title='<%= LanguageUtil.get(pageContext, "check-all-tags") %>' type="checkbox" />
-					</span>
+					<div class="hide selected-tags-wrapper">
+						<h3 class="tags-header"><%= LanguageUtil.get(pageContext, "selected") %></h3>
 
-					<h3 class="tags-header"><%= LanguageUtil.get(pageContext, "tags") %></h3>
+						<div class="tag-staging-area">
+							<div class="token-container"></div>
+						</div>
+					</div>
+
+					<div class="available-tags-wrapper">
+						<aui:input cssClass="select-tags" inline="<%= true %>" label="" name="checkAllTags" title='<%= LanguageUtil.get(pageContext, "check-all-tags") %>' type="checkbox" />
+
+						<h3 class="tags-header"><%= LanguageUtil.get(pageContext, "available") %></h3>
+					</div>
 
 					<div class="tags-admin-list unstyled"></div>
 

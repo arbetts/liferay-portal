@@ -1329,6 +1329,15 @@ public interface Portlet extends PortletModel, PersistedModel {
 	public boolean isRemoteable();
 
 	/**
+	* Returns <code>true</code> if the portlet will only process namespaced
+	* parameters.
+	*
+	* @return <code>true</code> if the portlet will only process namespaced
+	parameters
+	*/
+	public boolean isRequiresNamespacedParameters();
+
+	/**
 	* Returns <code>true</code> if the portlet restores to the current view
 	* from the maximized state.
 	*
@@ -1997,6 +2006,16 @@ public interface Portlet extends PortletModel, PersistedModel {
 	public void setRenderWeight(int renderWeight);
 
 	/**
+	* Set to <code>true</code> if the portlet will only process namespaced
+	* parameters.
+	*
+	* @param requiresNamespacedParameters boolean value for whether the portlet
+	will only process namespaced parameters
+	*/
+	public void setRequiresNamespacedParameters(
+		boolean requiresNamespacedParameters);
+
+	/**
 	* Sets the resource bundle of the portlet.
 	*
 	* @param resourceBundle the resource bundle of the portlet
@@ -2197,8 +2216,8 @@ public interface Portlet extends PortletModel, PersistedModel {
 		java.lang.String userNotificationDefinitions);
 
 	/**
-	* Sets the names of the classes that represent user notification
-	* handlers associated with the portlet.
+	* Sets the names of the classes that represent user notification handlers
+	* associated with the portlet.
 	*
 	* @param userNotificationHandlerClasses the names of the classes that
 	represent user notification handlers associated with the portlet

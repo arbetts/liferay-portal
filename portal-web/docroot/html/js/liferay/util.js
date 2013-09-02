@@ -10,6 +10,8 @@
 
 	var isArray = Lang.isArray;
 	var arrayIndexOf = AArray.indexOf;
+	var prefix = AString.prefix;
+	var startsWith = AString.startsWith;
 
 	var EVENT_CLICK = 'click';
 
@@ -51,6 +53,8 @@
 	var SRC_HIDE_LINK = {
 		src: 'hideLink'
 	};
+
+	var STR_CHECKED = 'checked';
 
 	var Window = {
 		_map: {}
@@ -423,7 +427,7 @@
 
 					parentThemeDisplay = parentWindow.themeDisplay;
 
-					if (!parentThemeDisplay) {
+					if (!parentThemeDisplay || window.name === 'devicePreviewIframe') {
 						break;
 					}
 					else if (!parentThemeDisplay.isStatePopUp() || (parentWindow == parentWindow.parent)) {
@@ -502,6 +506,50 @@
 			return Liferay.EDITORS && Liferay.EDITORS[editorImpl];
 		},
 
+		ns: function(namespace, obj) {
+			var instance = this;
+
+			var value;
+
+			var ns = instance._ns;
+
+			if (!Lang.isObject(obj)) {
+				value = ns(namespace, obj);
+			}
+			else {
+				value = {};
+
+				A.Object.each(
+					obj,
+					function(item, index, collection) {
+						index = ns(namespace, index);
+
+						value[index] = item;
+					}
+				);
+			}
+
+			return value;
+		},
+
+		openInDialog: function(event) {
+			event.preventDefault();
+
+			var currentTarget = event.currentTarget;
+
+			var config = currentTarget.getData();
+
+			if (!config.uri) {
+				config.uri = currentTarget.getData('href') || currentTarget.attr('href');
+			}
+
+			if (!config.title) {
+				config.title = currentTarget.attr('title');
+			}
+
+			Liferay.Util.openWindow(config);
+		},
+
 		openWindow: function(config, callback) {
 			config.openingWindow = window;
 
@@ -518,7 +566,7 @@
 		},
 
 		randomInt: function() {
-			return (Math.ceil(Math.random() * (new Date).getTime()));
+			return (Math.ceil(Math.random() * (new Date()).getTime()));
 		},
 
 		randomMinMax: function(min, max) {
@@ -634,7 +682,7 @@
 
 				}
 				else {
-					document.selection.createRange().text='\t';
+					document.selection.createRange().text = '\t';
 				}
 
 				el.scrollTop = oldscroll;
@@ -693,6 +741,20 @@
 			return str.replace(regex, A.bind('_unescapeHTML', Util, entitiesMap));
 		},
 
+		_defaultPreviewArticleFn: function(event) {
+			var instance = this;
+
+			event.preventDefault();
+
+			Liferay.Util.openWindow(
+				{
+					cache: false,
+					title: event.title,
+					uri: event.uri
+				}
+			);
+		},
+
 		_defaultSubmitFormFn: function(event) {
 			var form = event.form;
 
@@ -716,7 +778,7 @@
 				var action = event.action;
 				var singleSubmit = event.singleSubmit;
 
-				var inputs = form.all('input[type=button], input[type=reset], input[type=submit]');
+				var inputs = form.all('input[type=button], input[type=image], input[type=reset], input[type=submit]');
 
 				Util.disableFormButtons(inputs, form);
 
@@ -829,6 +891,18 @@
 			return editable;
 		},
 
+		_ns: A.cached(
+			function(namespace, str) {
+				var value = str;
+
+				if (!Lang.isUndefined(str) && !startsWith(str, namespace)) {
+					value = prefix(namespace, str);
+				}
+
+				return value;
+			}
+		),
+
 		_unescapeHTML: function(entities, match) {
 			return entities[match];
 		},
@@ -919,7 +993,7 @@
 			var checkbox = A.one(form[name]);
 
 			if (checkbox) {
-				checkbox.set('checked', checked);
+				checkbox.set(STR_CHECKED, checked);
 			}
 		},
 		['aui-base']
@@ -932,7 +1006,7 @@
 			var selector;
 
 			if (isArray(name)) {
-				selector = 'input[name='+ name.join('], input[name=') + STR_RIGHT_SQUARE_BRACKET;
+				selector = 'input[name=' + name.join('], input[name=') + STR_RIGHT_SQUARE_BRACKET;
 			}
 			else {
 				selector = 'input[name=' + name + STR_RIGHT_SQUARE_BRACKET;
@@ -940,10 +1014,10 @@
 
 			form = A.one(form);
 
-			form.all(selector).set('checked', A.one(allBox).get('checked'));
+			form.all(selector).set(STR_CHECKED, A.one(allBox).get(STR_CHECKED));
 
 			if (selectClassName) {
-				form.all(selectClassName).toggleClass('info', A.one(allBox).get('checked'));
+				form.all(selectClassName).toggleClass('info', A.one(allBox).get(STR_CHECKED));
 			}
 		},
 		['aui-base']
@@ -968,14 +1042,14 @@
 					if (!item.compareTo(allBox) && (arrayIndexOf(name, item.attr('name')) > -1)) {
 						totalBoxes++;
 
-						if (item.get('checked')) {
+						if (item.get(STR_CHECKED)) {
 							totalOn++;
 						}
 					}
 				}
 			);
 
-			allBox.set('checked', (totalBoxes == totalOn));
+			allBox.set(STR_CHECKED, (totalBoxes == totalOn));
 		},
 		['aui-base']
 	);
@@ -1144,7 +1218,7 @@
 			var toggleBox = A.one('#' + toggleBoxId);
 
 			if (checkBox && toggleBox) {
-				if (checkBox.get('checked') && checkDisabled) {
+				if (checkBox.get(STR_CHECKED) && checkDisabled) {
 					toggleBox.set('disabled', true);
 				}
 				else {
@@ -1304,6 +1378,10 @@
 
 			if ('showGlobalScope' in config) {
 				ddmURL.setParameter('showGlobalScope', config.showGlobalScope);
+			}
+
+			if ('showHeader' in config) {
+				ddmURL.setParameter('showHeader', config.showHeader);
 			}
 
 			if ('showManageTemplates' in config) {
@@ -1658,15 +1736,15 @@
 		Util,
 		'selectFolder',
 		function(folderData, folderHref, namespace) {
-			A.byIdNS(namespace, folderData['idString']).val(folderData['idValue']);
+			A.byIdNS(namespace, folderData.idString).val(folderData.idValue);
 
-			var nameEl = A.byIdNS(namespace, folderData['nameString']);
+			var nameEl = A.byIdNS(namespace, folderData.nameString);
 
-			Liferay.Util.addParams(namespace + 'folderId=' + folderData['idValue'], folderHref);
+			Liferay.Util.addParams(namespace + 'folderId=' + folderData.idValue, folderHref);
 
 			nameEl.attr('href', folderHref);
 
-			nameEl.setContent(folderData['nameValue'] + '&nbsp;');
+			nameEl.setContent(folderData.nameValue + '&nbsp;');
 
 			var button = A.byIdNS(namespace, 'removeFolderButton');
 
@@ -1755,12 +1833,12 @@
 	Liferay.provide(
 		Util,
 		'toggleBoxes',
-		function(checkBoxId, toggleBoxId, displayWhenUnchecked) {
+		function(checkBoxId, toggleBoxId, displayWhenUnchecked, toggleChildCheckboxes) {
 			var checkBox = A.one('#' + checkBoxId);
 			var toggleBox = A.one('#' + toggleBoxId);
 
 			if (checkBox && toggleBox) {
-				var checked = checkBox.get('checked');
+				var checked = checkBox.get(STR_CHECKED);
 
 				if (checked) {
 					toggleBox.show();
@@ -1777,6 +1855,12 @@
 					EVENT_CLICK,
 					function() {
 						toggleBox.toggle();
+
+						if (toggleChildCheckboxes) {
+							var childCheckboxes = toggleBox.all('input[type=checkbox]');
+
+							childCheckboxes.set(STR_CHECKED, checkBox.get(STR_CHECKED));
+						}
 					}
 				);
 			}
@@ -1796,8 +1880,8 @@
 
 			if (trigger) {
 				var hiddenClass = 'controls-hidden';
-				var iconHiddenClass = 'icon-remove';
-				var iconVisibleClass = 'icon-ok';
+				var iconHiddenClass = 'icon-eye-close';
+				var iconVisibleClass = 'icon-eye-open';
 				var visibleClass = 'controls-visible';
 				var currentClass = visibleClass;
 				var currentIconClass = iconVisibleClass;
@@ -1860,7 +1944,7 @@
 			var radioButton = A.one('#' + radioId);
 
 			if (radioButton) {
-				var checked = radioButton.get('checked');
+				var checked = radioButton.get(STR_CHECKED);
 
 				var showBoxes;
 
@@ -1933,7 +2017,7 @@
 
 			if (searchContainer) {
 				searchContainer.delegate(
-					'change',
+					EVENT_CLICK,
 					function() {
 						Liferay.Util.toggleDisabled(buttonId, !Liferay.Util.listCheckedExcept(form, ignoreFieldName));
 					},
@@ -1951,12 +2035,16 @@
 			checkbox = A.one(checkbox);
 
 			if (checkbox) {
-				var checked = checkbox.attr('checked');
+				var checked = checkbox.attr(STR_CHECKED);
 
 				var value = 'false';
 
 				if (checked) {
 					value = checkbox.val();
+
+					if (value == 'false') {
+						value = 'true';
+					}
 				}
 
 				checkbox.previous().val(value);
@@ -1988,6 +2076,13 @@
 		'submitForm',
 		{
 			defaultFn: Util._defaultSubmitFormFn
+		}
+	);
+
+	Liferay.publish(
+		'previewArticle',
+		{
+			defaultFn: Util._defaultPreviewArticleFn
 		}
 	);
 
@@ -2045,6 +2140,11 @@
 
 	Liferay.Util = Util;
 
+	Liferay.BREAKPOINTS = {
+		PHONE: 768,
+		TABLET: 980
+	};
+
 	Liferay.STATUS_CODE = {
 		BAD_REQUEST: 400,
 		INTERNAL_SERVER_ERROR: 500,
@@ -2064,7 +2164,7 @@
 		DROP_POSITION: 450,
 		DRAG_ITEM: 460,
 		TOOLTIP: 10000,
-		WINDOW: 1000,
+		WINDOW: 1200,
 		MENU: 5000
 	};
 })(AUI(), Liferay);

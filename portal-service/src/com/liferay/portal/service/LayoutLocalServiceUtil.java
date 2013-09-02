@@ -1759,11 +1759,13 @@ public class LayoutLocalServiceUtil {
 	* @param layout the layout to be updated
 	* @param priority the layout's new priority
 	* @return the updated layout
+	* @throws PortalException if a portal exception occurred
 	* @throws SystemException if a system exception occurred
 	*/
 	public static com.liferay.portal.model.Layout updatePriority(
 		com.liferay.portal.model.Layout layout, int priority)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
 		return getService().updatePriority(layout, priority);
 	}
 
@@ -1853,14 +1855,25 @@ public class LayoutLocalServiceUtil {
 			parameterMap, file);
 	}
 
+	public static com.liferay.portal.kernel.lar.MissingReferences validateImportLayoutsFile(
+		long userId, long groupId, boolean privateLayout,
+		java.util.Map<java.lang.String, java.lang.String[]> parameterMap,
+		java.io.InputStream inputStream)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .validateImportLayoutsFile(userId, groupId, privateLayout,
+			parameterMap, inputStream);
+	}
+
 	public static com.liferay.portal.kernel.lar.MissingReferences validateImportPortletInfo(
-		long userId, long groupId, long plid, java.lang.String portletId,
+		long userId, long plid, long groupId, java.lang.String portletId,
 		java.util.Map<java.lang.String, java.lang.String[]> parameterMap,
 		java.io.File file)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return getService()
-				   .validateImportPortletInfo(userId, groupId, plid, portletId,
+				   .validateImportPortletInfo(userId, plid, groupId, portletId,
 			parameterMap, file);
 	}
 

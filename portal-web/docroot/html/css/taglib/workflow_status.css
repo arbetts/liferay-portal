@@ -1,4 +1,5 @@
 .taglib-workflow-status {
+	display: inline-block;
 	margin: 0.5em 0;
 
 	.workflow-id, .workflow-version {
@@ -11,6 +12,14 @@
 
 	.workflow-status {
 		padding: 2px 0 2px 20px;
+	}
+}
+
+.table-cell .taglib-workflow-status {
+	margin: 0;
+
+	.workflow-status {
+		padding-left: 0;
 	}
 }
 

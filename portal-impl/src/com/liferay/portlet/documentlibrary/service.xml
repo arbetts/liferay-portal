@@ -38,8 +38,8 @@
 		<reference package-path="com.liferay.portlet.ratings" entity="RatingsEntry" />
 		<reference package-path="com.liferay.portlet.ratings" entity="RatingsStats" />
 		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
-		<reference package-path="com.liferay.portlet.social" entity="SocialActivityCounter" />
 		<reference package-path="com.liferay.portlet.trash" entity="TrashEntry" />
+		<reference package-path="com.liferay.portlet.trash" entity="TrashVersion" />
 	</entity>
 	<entity name="DLContent" human-name="document library content" local-service="true" remote-service="false">
 
@@ -107,8 +107,6 @@
 		<column name="companyId" type="long" />
 		<column name="userId" type="long" />
 		<column name="userName" type="String" />
-		<column name="versionUserId" type="long" />
-		<column name="versionUserName" type="String" />
 		<column name="createDate" type="Date" />
 		<column name="modifiedDate" type="Date" />
 
@@ -152,6 +150,9 @@
 		<finder name="MimeType" return-type="Collection">
 			<finder-column name="mimeType" />
 		</finder>
+		<finder name="FileEntryTypeId" return-type="Collection">
+			<finder-column name="fileEntryTypeId" />
+		</finder>
 		<finder name="F_N" return-type="Collection">
 			<finder-column name="folderId" />
 			<finder-column name="name" />
@@ -187,6 +188,7 @@
 
 		<!-- References -->
 
+		<reference package-path="com.liferay.portal" entity="Group" />
 		<reference package-path="com.liferay.portal" entity="Image" />
 		<reference package-path="com.liferay.portal" entity="Lock" />
 		<reference package-path="com.liferay.portal" entity="Repository" />
@@ -566,6 +568,37 @@
 		<reference package-path="com.liferay.portlet.asset" entity="AssetEntry" />
 		<reference package-path="com.liferay.portlet.expando" entity="ExpandoRow" />
 		<reference package-path="com.liferay.portlet.trash" entity="TrashEntry" />
+	</entity>
+	<entity name="DLSyncEvent" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="syncEventId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="modifiedTime" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="event" type="String" />
+		<column name="type" type="String" />
+		<column name="typePK" type="long" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="modifiedTime" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="ModifiedTime" return-type="Collection">
+			<finder-column name="modifiedTime" comparator="&gt;" />
+		</finder>
+		<finder name="TypePK" return-type="DLSyncEvent" unique="true">
+			<finder-column name="typePK" />
+		</finder>
 	</entity>
 	<exceptions>
 		<exception>DirectoryName</exception>

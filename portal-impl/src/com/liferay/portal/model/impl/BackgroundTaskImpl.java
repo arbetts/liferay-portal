@@ -163,6 +163,15 @@ public class BackgroundTaskImpl extends BackgroundTaskBaseImpl {
 		return _taskContextMap;
 	}
 
+	@Override
+	public boolean isInProgress() {
+		if (getStatus() == BackgroundTaskConstants.STATUS_IN_PROGRESS) {
+			return true;
+		}
+
+		return false;
+	}
+
 	private long _attachmentsFolderId;
 	private Map<String, Serializable> _taskContextMap;
 

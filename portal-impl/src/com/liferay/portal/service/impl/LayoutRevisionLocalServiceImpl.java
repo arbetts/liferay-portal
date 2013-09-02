@@ -123,16 +123,6 @@ public class LayoutRevisionLocalServiceImpl
 			layoutRevision.getLayoutRevisionId(), layoutRevision,
 			serviceContext);
 
-		boolean explicitCreation = ParamUtil.getBoolean(
-			serviceContext, "explicitCreation");
-
-		if (!explicitCreation) {
-			layoutRevisionLocalService.updateStatus(
-				serviceContext.getUserId(),
-				layoutRevision.getLayoutRevisionId(),
-				WorkflowConstants.STATUS_INCOMPLETE, serviceContext);
-		}
-
 		StagingUtil.setRecentLayoutRevisionId(
 			user, layoutSetBranchId, plid,
 			layoutRevision.getLayoutRevisionId());
@@ -176,6 +166,13 @@ public class LayoutRevisionLocalServiceImpl
 			catch (NoSuchPortletPreferencesException nsppe) {
 			}
 		}
+
+		User user = userPersistence.findByPrimaryKey(
+			layoutRevision.getUserId());
+
+		StagingUtil.deleteRecentLayoutRevisionId(
+			user, layoutRevision.getLayoutSetBranchId(),
+			layoutRevision.getPlid());
 
 		return layoutRevisionPersistence.remove(layoutRevision);
 	}

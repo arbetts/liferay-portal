@@ -40,7 +40,7 @@ List groupNames = (List)objArray[8];
 			for (int i = 0; i < groups.size(); i++) {
 				Group group = (Group)groups.get(i);
 
-				String taglibHREF = "javascript:" + renderResponse.getNamespace() + "removeGroup(" + i + ", '" + target + "');";
+				String taglibHREF = "javascript:" + liferayPortletResponse.getNamespace() + "removeGroup(" + i + ", '" + target + "');";
 		%>
 
 				<span class="lfr-token">
@@ -77,7 +77,7 @@ List groupNames = (List)objArray[8];
 
 		<liferay-ui:icon
 			id="<%= targetId %>"
-			image="edit"
+			image="configuration"
 			label="<%= true %>"
 			message="change"
 			url="javascript:;"
@@ -95,7 +95,7 @@ List groupNames = (List)objArray[8];
 								width: 600
 							},
 							id: '<portlet:namespace />selectGroup<%= targetId %>',
-							title: '<%= UnicodeLanguageUtil.format(pageContext, "select-x", "site") %>',
+							title: '<liferay-ui:message arguments="site" key="select-x" />',
 							uri: '<%= selectCommunityURL.toString() %>'
 						}
 					);

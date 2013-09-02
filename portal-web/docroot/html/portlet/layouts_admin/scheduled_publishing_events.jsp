@@ -31,7 +31,7 @@ headerNames.add("end-date");
 headerNames.add(StringPool.BLANK);
 
 searchContainer.setHeaderNames(headerNames);
-searchContainer.setEmptyResultsMessage("there-are-no-scheduled-events");
+searchContainer.setEmptyResultsMessage("there-are-no-scheduled-publication-processes");
 
 List<SchedulerResponse> scheduledJobs = SchedulerEngineHelperUtil.getScheduledJobs(StagingUtil.getSchedulerGroupName(destinationName, groupId), StorageType.PERSISTED);
 
@@ -48,16 +48,14 @@ for (int i = 0; i < scheduledJobs.size(); i++) {
 
 	// Start date
 
-	Date startDate = SchedulerEngineHelperUtil.getStartTime(schedulerResponse);
-
-	row.addText(dateFormatDateTime.format(startDate));
+	row.addDate(SchedulerEngineHelperUtil.getStartTime(schedulerResponse));
 
 	// End date
 
 	Date endDate = SchedulerEngineHelperUtil.getEndTime(schedulerResponse);
 
 	if (endDate != null) {
-		row.addText(dateFormatDateTime.format(endDate));
+		row.addDate(endDate);
 	}
 	else {
 		row.addText(LanguageUtil.get(pageContext, "no-end-date"));

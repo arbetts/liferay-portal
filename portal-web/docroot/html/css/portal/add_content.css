@@ -8,9 +8,36 @@
 	position: fixed;
 	top: 0;
 	width: 330px;
-	z-index: 450;
+	z-index: 1100;
 
+	.add-content-menu .lfr-add-page-toolbar {
+		bottom: 0;
+		margin-left: -10px;
+		padding: 10px;
+		position: fixed;
+		width: 330px;
+	}
+}
+
+.lfr-add-dialog, .lfr-add-panel {
 	.add-content-menu {
+		.accordion {
+			margin-bottom: 20px;
+
+			.accordion-group .accordion-inner {
+				padding: 6px 0;
+			}
+
+			.nav-list {
+				padding-left: 0;
+				padding-right: 0;
+
+				.lfr-content-item {
+					padding-left: 15px;
+				}
+			}
+		}
+
 		.btn-toolbar {
 			.control-group-inline {
 				display: inline;
@@ -25,13 +52,12 @@
 			}
 		}
 
-		.lfr-add-page-toolbar {
-			background-color: #FFFFFF;
-			bottom: 0;
-			margin-left: -10px;
-			padding: 10px;
-			position: fixed;
-			width: 330px;
+		.lfr-page-template .toggler-header {
+			&.active {
+				&.lfr-page-template-title label{
+					padding: 2px;
+				}
+			}
 		}
 
 		.template-selector {
@@ -66,6 +92,10 @@
 			img {
 				max-height: 128px;
 			}
+		}
+
+		.lfr-add-apps-legend {
+			margin-bottom: 25px;
 		}
 
 		.lfr-content-item {
@@ -228,17 +258,16 @@
 	background-color: #FFF;
 
 	.add-content-menu {
-		.lfr-content-item {
-			color: #3EA9DB;
+		.lfr-add-apps-legend {
+			color: #999;
+		}
 
-			&:hover {
-				background-color: #EEE;
-				color: #006076;
-			}
+		.lfr-add-page-toolbar {
+			background-color: #FFF;
+		}
 
-			&.lfr-portlet-used {
-				color: #BBB;
-			}
+		.lfr-install-more {
+			text-align: center;
 		}
 
 		.lfr-page-template {
@@ -247,7 +276,6 @@
 					&.lfr-page-template-title label{
 						background-color: #0DB5E7;
 						color: #FFFFFF;
-						padding: 2px;
 					}
 				}
 			}
@@ -259,15 +287,6 @@
 
 		.portal-add-content .portlet-msg-info {
 			color: #333;
-		}
-
-		.lfr-install-more {
-			border-top-color: #CCC;
-
-			a {
-				background: url(@theme_image_path@/common/install_more.png) no-repeat 0 50%;
-				font-weight: bold;
-			}
 		}
 	}
 }

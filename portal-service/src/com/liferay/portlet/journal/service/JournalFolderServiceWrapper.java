@@ -166,6 +166,13 @@ public class JournalFolderServiceWrapper implements JournalFolderService,
 	}
 
 	@Override
+	public int getFoldersCount(long groupId, long parentFolderId, int status)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _journalFolderService.getFoldersCount(groupId, parentFolderId,
+			status);
+	}
+
+	@Override
 	public void getSubfolderIds(java.util.List<java.lang.Long> folderIds,
 		long groupId, long folderId)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -200,10 +207,11 @@ public class JournalFolderServiceWrapper implements JournalFolderService,
 	}
 
 	@Override
-	public void moveFolderToTrash(long folderId)
+	public com.liferay.portlet.journal.model.JournalFolder moveFolderToTrash(
+		long folderId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		_journalFolderService.moveFolderToTrash(folderId);
+		return _journalFolderService.moveFolderToTrash(folderId);
 	}
 
 	@Override

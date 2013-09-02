@@ -32,7 +32,7 @@ import java.util.List;
 public class PropertiesSourceProcessor extends BaseSourceProcessor {
 
 	@Override
-	protected void doFormat() throws Exception {
+	protected void format() throws Exception {
 		formatPortalProperties();
 	}
 
@@ -66,7 +66,7 @@ public class PropertiesSourceProcessor extends BaseSourceProcessor {
 			newContent = newContent.substring(0, newContent.length() - 1);
 		}
 
-		if ((newContent != null) &&
+		if (isAutoFix() && (newContent != null) &&
 			!_portalPortalProperties.equals(newContent)) {
 
 			fileUtil.write(file, newContent);
@@ -96,7 +96,7 @@ public class PropertiesSourceProcessor extends BaseSourceProcessor {
 		String[] includes = null;
 
 		if (portalSource) {
-			excludes = new String[] {"**\\classes\\**", "**\\bin\\**"};
+			excludes = new String[] {"**\\bin\\**", "**\\classes\\**"};
 			includes = new String[] {
 				"**\\portal-ext.properties", "**\\portal-legacy-*.properties"
 			};

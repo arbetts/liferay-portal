@@ -80,10 +80,16 @@ create index IX_55F58818 on AssetVocabulary (uuid_);
 create index IX_C4E6FD10 on AssetVocabulary (uuid_, companyId);
 create unique index IX_1B2B8792 on AssetVocabulary (uuid_, groupId);
 
+create index IX_C5A6C78F on BackgroundTask (companyId);
+create index IX_5A09E5D1 on BackgroundTask (groupId);
 create index IX_98CC0AAB on BackgroundTask (groupId, name, taskExecutorClassName);
+create index IX_579C63B0 on BackgroundTask (groupId, name, taskExecutorClassName, completed);
+create index IX_C71C3B7 on BackgroundTask (groupId, status);
 create index IX_A73B688A on BackgroundTask (groupId, taskExecutorClassName);
+create index IX_7A9FF471 on BackgroundTask (groupId, taskExecutorClassName, completed);
 create index IX_7E757D70 on BackgroundTask (groupId, taskExecutorClassName, status);
 create index IX_C07CC7F8 on BackgroundTask (name);
+create index IX_75638CDF on BackgroundTask (status);
 create index IX_2FCFE748 on BackgroundTask (taskExecutorClassName, status);
 
 create index IX_72EF6041 on BlogsEntry (companyId);
@@ -224,6 +230,7 @@ create index IX_EB531760 on DLContent (companyId, repositoryId, path_);
 create unique index IX_FDD1AAA8 on DLContent (companyId, repositoryId, path_, version);
 
 create index IX_4CB1B2B4 on DLFileEntry (companyId);
+create index IX_772ECDE7 on DLFileEntry (fileEntryTypeId);
 create index IX_8F6C75D0 on DLFileEntry (folderId, name);
 create index IX_F4AF5636 on DLFileEntry (groupId);
 create index IX_93CF8193 on DLFileEntry (groupId, folderId);
@@ -293,6 +300,9 @@ create index IX_CBC408D8 on DLFolder (uuid_);
 create index IX_DA448450 on DLFolder (uuid_, companyId);
 create unique index IX_3CC1DED2 on DLFolder (uuid_, groupId);
 
+create index IX_3D8E1607 on DLSyncEvent (modifiedTime);
+create unique index IX_57D82B06 on DLSyncEvent (typePK);
+
 create index IX_1BB072CA on EmailAddress (companyId);
 create index IX_49D2DEC4 on EmailAddress (companyId, classNameId);
 create index IX_551A519F on EmailAddress (companyId, classNameId, classPK);
@@ -322,6 +332,7 @@ create unique index IX_D27B03E7 on ExpandoValue (tableId, columnId, classPK);
 create index IX_B71E92D5 on ExpandoValue (tableId, rowId_);
 
 create index IX_ABA5CEC2 on Group_ (companyId);
+create index IX_B584B5CC on Group_ (companyId, classNameId);
 create unique index IX_D0D5E397 on Group_ (companyId, classNameId, classPK);
 create unique index IX_5DE0BE11 on Group_ (companyId, classNameId, liveGroupId, name);
 create index IX_ABE2D54 on Group_ (companyId, classNameId, parentGroupId);
@@ -352,6 +363,7 @@ create index IX_DFF98523 on JournalArticle (companyId);
 create index IX_323DF109 on JournalArticle (companyId, status);
 create index IX_3D070845 on JournalArticle (companyId, version);
 create index IX_E82F322B on JournalArticle (companyId, version, status);
+create index IX_EA05E9E1 on JournalArticle (displayDate, status);
 create index IX_9356F865 on JournalArticle (groupId);
 create index IX_68C0F69C on JournalArticle (groupId, articleId);
 create index IX_4D5CD982 on JournalArticle (groupId, articleId, status);
@@ -372,6 +384,7 @@ create index IX_D19C1B9F on JournalArticle (groupId, userId);
 create index IX_43A0F80F on JournalArticle (groupId, userId, classNameId);
 create index IX_3F1EA19E on JournalArticle (layoutUuid);
 create index IX_33F49D16 on JournalArticle (resourcePrimKey);
+create index IX_451D63EC on JournalArticle (resourcePrimKey, indexable, status);
 create index IX_3E2765FC on JournalArticle (resourcePrimKey, status);
 create index IX_EF9B7028 on JournalArticle (smallImageId);
 create index IX_8E8710D9 on JournalArticle (structureId);
@@ -868,10 +881,13 @@ create index IX_B2468446 on Ticket (key_);
 create unique index IX_B35F73D5 on TrashEntry (classNameId, classPK);
 create index IX_2674F2A8 on TrashEntry (companyId);
 create index IX_526A032A on TrashEntry (groupId);
+create index IX_FC4EEA64 on TrashEntry (groupId, classNameId);
 create index IX_6CAAE2E8 on TrashEntry (groupId, createDate);
 
 create index IX_630A643B on TrashVersion (classNameId, classPK);
 create index IX_55D44577 on TrashVersion (entryId);
+create index IX_72D58D37 on TrashVersion (entryId, classNameId);
+create unique index IX_D639348C on TrashVersion (entryId, classNameId, classPK);
 
 create index IX_524FEFCE on UserGroup (companyId);
 create unique index IX_23EAD0D on UserGroup (companyId, name);
@@ -986,10 +1002,12 @@ create index IX_997EEDD2 on WikiPage (nodeId, title);
 create index IX_E745EA26 on WikiPage (nodeId, title, head);
 create index IX_BEA33AB8 on WikiPage (nodeId, title, status);
 create unique index IX_3D4AF476 on WikiPage (nodeId, title, version);
+create index IX_85E7CC76 on WikiPage (resourcePrimKey);
 create index IX_B771D67 on WikiPage (resourcePrimKey, nodeId);
 create index IX_E1F55FB on WikiPage (resourcePrimKey, nodeId, head);
 create index IX_94D1054D on WikiPage (resourcePrimKey, nodeId, status);
 create unique index IX_2CD67C81 on WikiPage (resourcePrimKey, nodeId, version);
+create index IX_1725355C on WikiPage (resourcePrimKey, status);
 create index IX_FBBE7C96 on WikiPage (userId, nodeId, status);
 create index IX_9C0E478F on WikiPage (uuid_);
 create index IX_5DC4BD39 on WikiPage (uuid_, companyId);

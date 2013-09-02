@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.servlet.ServletContextPool;
 import com.liferay.portal.kernel.servlet.URLEncoder;
 import com.liferay.portal.kernel.template.TemplateHandler;
 import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ContextPathUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -175,7 +176,8 @@ public class PortletImpl extends PortletBaseImpl {
 		boolean popUpPrint, boolean layoutCacheable, boolean instanceable,
 		boolean remoteable, boolean scopeable, String userPrincipalStrategy,
 		boolean privateRequestAttributes, boolean privateSessionAttributes,
-		Set<String> autopropagatedParameters, int actionTimeout,
+		Set<String> autopropagatedParameters,
+		boolean requiresNamespacedParameters, int actionTimeout,
 		int renderTimeout, int renderWeight, boolean ajaxable,
 		List<String> headerPortalCss, List<String> headerPortletCss,
 		List<String> headerPortalJavaScript,
@@ -260,6 +262,7 @@ public class PortletImpl extends PortletBaseImpl {
 		_privateRequestAttributes = privateRequestAttributes;
 		_privateSessionAttributes = privateSessionAttributes;
 		_autopropagatedParameters = autopropagatedParameters;
+		_requiresNamespacedParameters = requiresNamespacedParameters;
 		_actionTimeout = actionTimeout;
 		_renderTimeout = renderTimeout;
 		_renderWeight = renderWeight;
@@ -388,9 +391,9 @@ public class PortletImpl extends PortletBaseImpl {
 			isPopUpPrint(), isLayoutCacheable(), isInstanceable(),
 			isRemoteable(), isScopeable(), getUserPrincipalStrategy(),
 			isPrivateRequestAttributes(), isPrivateSessionAttributes(),
-			getAutopropagatedParameters(), getActionTimeout(),
-			getRenderTimeout(), getRenderWeight(), isAjaxable(),
-			getHeaderPortalCss(), getHeaderPortletCss(),
+			getAutopropagatedParameters(), isRequiresNamespacedParameters(),
+			getActionTimeout(), getRenderTimeout(), getRenderWeight(),
+			isAjaxable(), getHeaderPortalCss(), getHeaderPortletCss(),
 			getHeaderPortalJavaScript(), getHeaderPortletJavaScript(),
 			getFooterPortalCss(), getFooterPortletCss(),
 			getFooterPortalJavaScript(), getFooterPortletJavaScript(),
@@ -2218,7 +2221,7 @@ public class PortletImpl extends PortletBaseImpl {
 	 */
 	@Override
 	public boolean hasRoleWithName(String roleName) {
-		if ((_rolesArray == null) || (_rolesArray.length == 0)) {
+		if (ArrayUtil.isEmpty(_rolesArray)) {
 			return false;
 		}
 
@@ -2450,6 +2453,18 @@ public class PortletImpl extends PortletBaseImpl {
 	@Override
 	public boolean isRemoteable() {
 		return _remoteable;
+	}
+
+	/**
+	 * Returns <code>true</code> if the portlet will only process namespaced
+	 * parameters.
+	 *
+	 * @return <code>true</code> if the portlet will only process namespaced
+	 *         parameters
+	 */
+	@Override
+	public boolean isRequiresNamespacedParameters() {
+		return _requiresNamespacedParameters;
 	}
 
 	/**
@@ -3391,6 +3406,20 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
+	 * Set to <code>true</code> if the portlet will only process namespaced
+	 * parameters.
+	 *
+	 * @param requiresNamespacedParameters boolean value for whether the portlet
+	 *        will only process namespaced parameters
+	 */
+	@Override
+	public void setRequiresNamespacedParameters(
+		boolean requiresNamespacedParameters) {
+
+		_requiresNamespacedParameters = requiresNamespacedParameters;
+	}
+
+	/**
 	 * Sets the resource bundle of the portlet.
 	 *
 	 * @param resourceBundle the resource bundle of the portlet
@@ -3685,8 +3714,8 @@ public class PortletImpl extends PortletBaseImpl {
 	}
 
 	/**
-	 * Sets the names of the classes that represent user notification
-	 * handlers associated with the portlet.
+	 * Sets the names of the classes that represent user notification handlers
+	 * associated with the portlet.
 	 *
 	 * @param userNotificationHandlerClasses the names of the classes that
 	 *        represent user notification handlers associated with the portlet
@@ -4173,6 +4202,11 @@ public class PortletImpl extends PortletBaseImpl {
 	private int _renderWeight = 1;
 
 	/**
+	 * <code>True</code> if the portlet will only process namespaced parameters.
+	 */
+	private boolean _requiresNamespacedParameters = true;
+
+	/**
 	 * The resource bundle of the portlet.
 	 */
 	private String _resourceBundle;
@@ -4285,7 +4319,7 @@ public class PortletImpl extends PortletBaseImpl {
 	/**
 	 * <code>True</code> if the portlet is an undeployed portlet.
 	 */
-	private boolean _undeployedPortlet = false;
+	private boolean _undeployedPortlet;
 
 	/**
 	 * The unlinked roles of the portlet.

@@ -201,8 +201,22 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 	public int getFoldersCount(long groupId, long parentFolderId)
 		throws SystemException {
 
-		return journalFolderPersistence.filterCountByG_P_S(
+		return getFoldersCount(
 			groupId, parentFolderId, WorkflowConstants.STATUS_APPROVED);
+	}
+
+	@Override
+	public int getFoldersCount(long groupId, long parentFolderId, int status)
+		throws SystemException {
+
+		if (status == WorkflowConstants.STATUS_ANY) {
+			return journalFolderPersistence.filterCountByG_P_NotS(
+				groupId, parentFolderId, WorkflowConstants.STATUS_IN_TRASH);
+		}
+		else {
+			return journalFolderPersistence.filterCountByG_P_S(
+				groupId, parentFolderId, status);
+		}
 	}
 
 	@Override
@@ -266,7 +280,7 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 	}
 
 	@Override
-	public void moveFolderToTrash(long folderId)
+	public JournalFolder moveFolderToTrash(long folderId)
 		throws PortalException, SystemException {
 
 		JournalFolder folder = journalFolderLocalService.getFolder(folderId);
@@ -274,7 +288,8 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 		JournalFolderPermission.check(
 			getPermissionChecker(), folder, ActionKeys.DELETE);
 
-		journalFolderLocalService.moveFolderToTrash(getUserId(), folderId);
+		return journalFolderLocalService.moveFolderToTrash(
+			getUserId(), folderId);
 	}
 
 	@Override

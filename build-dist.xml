@@ -208,15 +208,16 @@
 	</target>
 
 	<target name="build-dist-tcat">
-		<property name="tcat.dir" value="${app.server.parent.dir}/tcat-6.4.5" />
-		<property name="tcat.zip.name" value="TcatServer-6.4.5.zip" />
+		<property name="tcat.version" value="7.0.2" />
+		<property name="tcat.dir" value="${app.server.parent.dir}/tcat-${tcat.version}" />
+		<property name="tcat.zip.name" value="TcatServer-${tcat.version}.zip" />
 		<property name="tcat.zip.url" value="http://files.liferay.com/public/bundles/trunk/${tcat.zip.name}" />
 
 		<echo file="app.server.${user.name}.properties">
 			app.server.type=tomcat
 
-			app.server.tomcat.version=6.0.35
-			app.server.tomcat.zip.url=http://archive.apache.org/dist/tomcat/tomcat-6/v6.0.35/bin/apache-tomcat-6.0.35.zip
+			app.server.tomcat.version=7.0.39
+			app.server.tomcat.zip.url=http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.39/bin/apache-tomcat-7.0.39.zip
 		</echo>
 
 		<antcall target="build-dist-tomcat" inheritAll="false">
@@ -285,6 +286,13 @@
 			/>
 			<flattenmapper />
 		</unzip>
+
+		<replace file="${tcat.dir}/admin/conf/server.xml">
+			<replacefilter token="8005" value="8105" />
+			<replacefilter token="8009" value="8109" />
+			<replacefilter token="8080" value="8180" />
+			<replacefilter token="8443" value="81443" />
+		</replace>
 
 		<mkdir dir="${tcat.dir}/admin/tcat_init/profiles" />
 
@@ -762,11 +770,11 @@ release was successful.</echo>
 			<fileset dir="${lp.plugins.dir}" includes="**/javadocs-all.xml,**/javadocs-rt.xml" />
 		</delete>
 
+		<antcall target="deploy" />
+
 		<ant dir="${lp.plugins.dir}" inheritall="false" target="clean" />
 		<ant dir="${lp.plugins.dir}" inheritall="false" target="compile" />
 		<ant dir="${lp.plugins.dir}" inheritall="false" target="format-javadoc" />
-
-		<antcall target="all" />
 
 		<parallel>
 			<if>
@@ -785,7 +793,7 @@ release was successful.</echo>
 
 			<sequential>
 				<waitfor>
-					<socket server="localhost" port="8080" />
+					<http url="http://localhost:8080" />
 				</waitfor>
 
 				<ant dir="portal-client" target="build-client" inheritAll="false" />
@@ -1554,6 +1562,20 @@ rerun this task.
 			src="${app.server.parent.dir}/${app.server.weblogic.zip.name}"
 		/>
 
+		<if>
+			<equals arg1="${app.server.weblogic.version.build}" arg2="1212" />
+			<then>
+				<move todir="${app.server.weblogic.dir}">
+					<fileset dir="${app.server.weblogic.dir}/wls12120" />
+				</move>
+
+				<property name="app.server.weblogic.template.dir" value="${app.server.weblogic.wlserver.dir}/common/templates/wls" />
+			</then>
+			<else>
+				<property name="app.server.weblogic.template.dir" value="${app.server.weblogic.wlserver.dir}/common/templates/domains" />
+			</else>
+		</if>
+
 		<tstamp>
 			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
 		</tstamp>
@@ -1561,7 +1583,7 @@ rerun this task.
 		<mkdir dir="${tstamp.value}" />
 
 		<echo file="${tstamp.value}/create-weblogic-domain.py">
-readTemplate('${app.server.weblogic.wlserver.dir}/common/templates/domains/wls.jar')
+readTemplate('${app.server.weblogic.template.dir}/wls.jar')
 
 set('Name', '${app.server.weblogic.instance.name}')
 
@@ -1912,12 +1934,14 @@ plugins.includes=</echo>
 		<xmltask source="${lp.plugins.dir}/summary.xml">
 			<call path="plugins-summary/plugin">
 				<param name="plugins.includes.plugin.bundle" path="releng/bundle/text()" />
+				<param name="plugins.includes.plugin.dependent-apps" path="releng/dependent-apps/text()" />
 				<param name="plugins.includes.plugin.marketplace" path="releng/marketplace/text()" />
 				<param name="plugins.includes.plugin.name" path="artifact-id/text()" />
 				<param name="plugins.includes.plugin.public" path="releng/public/text()" />
 				<actions>
 					<antcall target="update-plugins-includes-plugin">
 						<param name="plugins.includes.plugin.bundle" value="@{plugins.includes.plugin.bundle}" />
+						<param name="plugins.includes.plugin.dependent-apps" value="@{plugins.includes.plugin.dependent-apps}" />
 						<param name="plugins.includes.plugin.marketplace" value="@{plugins.includes.plugin.marketplace}" />
 						<param name="plugins.includes.plugin.name" value="@{plugins.includes.plugin.name}" />
 						<param name="plugins.includes.plugin.public" value="@{plugins.includes.plugin.public}" />
@@ -1949,7 +1973,7 @@ plugins.includes=</echo>
 				</or>
 			</and>
 			<then>
-				<echo append="true" file="${lp.plugins.dir}/build.${user.name}.properties">${plugins.includes.plugin.name},</echo>
+				<echo append="true" file="${lp.plugins.dir}/build.${user.name}.properties">${plugins.includes.plugin.dependent-apps},${plugins.includes.plugin.name},</echo>
 			</then>
 		</if>
 	</target>
@@ -2100,10 +2124,29 @@ plugins.includes=</echo>
 						<mkdir dir="${zip.executable.dir}/../patching-tool/logs" />
 						<mkdir dir="${zip.executable.dir}/../patching-tool/patches" />
 
-						<antcall target="exec-patching-tool">
-							<param name="patching.tool.dir" value="${zip.executable.dir}/../patching-tool" />
-							<param name="patching.tool.arg.line" value="auto-discovery" />
-						</antcall>
+						<if>
+							<contains string="${zip.executable.dir}" substring="glassfish" />
+							<then>
+								<echo file="${zip.executable.dir}/../patching-tool/default.properties">
+									global.lib.path=${zip.executable.dir}/domains/domain1/autodeploy/liferay-portal.war/WEB-INF/lib/ext/
+									jdk.version=jdk6
+									patching.mode=binary
+									war.path=${zip.executable.dir}/domains/domain1/autodeploy/liferay-portal.war/
+								</echo>
+							</then>
+							<else>
+								<antcall target="exec-patching-tool">
+									<param name="patching.tool.arg.line" value="auto-discovery ${zip.executable.dir}" />
+									<param name="patching.tool.dir" value="${zip.executable.dir}/../patching-tool" />
+								</antcall>
+							</else>
+						</if>
+
+						<replace
+							file="${zip.executable.dir}/../patching-tool/default.properties"
+							token="${zip.executable.dir}"
+							value="../${zip.executable.dir.name}"
+						/>
 
 						<zip
 							destfile="dist/${zip.executable.file}-${lp.version}.zip"
@@ -2428,7 +2471,7 @@ plugins.includes=</echo>
 	</target>
 
 	<target name="zip-tcat">
-		<property name="tcat.dir" value="${app.server.parent.dir}/tcat-6.4.5" />
+		<property name="tcat.dir" value="${app.server.parent.dir}/tcat-${tcat.version}" />
 
 		<antcall target="zip-executable">
 			<param name="zip.executable.file" value="liferay-portal-tcat-admin" />

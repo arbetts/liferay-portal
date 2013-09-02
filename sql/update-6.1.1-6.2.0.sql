@@ -313,6 +313,9 @@ alter table DDMTemplate add smallImageURL STRING;
 update DDMTemplate set type_ = 'display' where type_ = 'list';
 update DDMTemplate set type_ = 'form' where type_ = 'detail';
 
+alter table DLFileEntry drop column versionUserId;
+alter table DLFileEntry drop column versionUserName;
+
 alter table DLFileEntry add classNameId LONG;
 alter table DLFileEntry add classPK LONG;
 alter table DLFileEntry add manualCheckInRequired BOOLEAN;
@@ -347,6 +350,14 @@ update DLFolder set statusDate = modifiedDate;
 
 drop table DLSync;
 
+create table DLSyncEvent (
+	syncEventId LONG not null primary key,
+	modifiedTime LONG,
+	event VARCHAR(75) null,
+	type_ VARCHAR(75) null,
+	typePK LONG
+);
+
 alter table EmailAddress add uuid_ VARCHAR(75) null;
 
 alter table ExpandoRow add modifiedDate DATE null;
@@ -373,6 +384,10 @@ drop table Groups_Permissions;
 alter table Image drop column text_;
 
 alter table JournalArticle add folderId LONG;
+
+COMMIT_TRANSACTION;
+
+update JournalArticle set folderId = 0;
 
 create table JournalFolder (
 	uuid_ VARCHAR(75) null,
@@ -487,6 +502,10 @@ alter table PollsChoice add modifiedDate DATE null;
 alter table PollsVote add uuid_ VARCHAR(75) null;
 alter table PollsVote add groupId LONG;
 
+update Portlet set active_ = FALSE where portletId = '62';
+update Portlet set active_ = FALSE where portletId = '98';
+update Portlet set active_ = FALSE where portletId = '173';
+
 alter table RepositoryEntry add companyId LONG;
 alter table RepositoryEntry add userId LONG;
 alter table RepositoryEntry add userName VARCHAR(75) null;
@@ -547,6 +566,8 @@ create table SystemEvent (
 	classPK LONG,
 	classUuid VARCHAR(75) null,
 	referrerClassNameId LONG,
+	parentSystemEventId LONG,
+	systemEventSetKey LONG,
 	type_ INTEGER,
 	extraData TEXT null
 );

@@ -77,6 +77,7 @@ import com.liferay.portal.search.lucene.LuceneHelperUtil;
 import com.liferay.portal.search.lucene.LuceneIndexer;
 import com.liferay.portal.search.lucene.cluster.LuceneClusterUtil;
 import com.liferay.portal.security.auth.PrincipalException;
+import com.liferay.portal.security.lang.DoPrivilegedBean;
 import com.liferay.portal.security.membershippolicy.OrganizationMembershipPolicy;
 import com.liferay.portal.security.membershippolicy.OrganizationMembershipPolicyFactoryUtil;
 import com.liferay.portal.security.membershippolicy.RoleMembershipPolicy;
@@ -333,14 +334,14 @@ public class EditServerAction extends PortletAction {
 		throws Exception {
 
 		ProgressTracker progressTracker = new ProgressTracker(
-			actionRequest, WebKeys.XUGGLER_INSTALL_STATUS);
+			WebKeys.XUGGLER_INSTALL_STATUS);
 
 		progressTracker.addProgress(
 			ProgressStatusConstants.DOWNLOADING, 15, "downloading-xuggler");
 		progressTracker.addProgress(
 			ProgressStatusConstants.COPYING, 70, "copying-xuggler-files");
 
-		progressTracker.initialize();
+		progressTracker.initialize(actionRequest);
 
 		String jarName = ParamUtil.getString(actionRequest, "jarName");
 
@@ -362,7 +363,7 @@ public class EditServerAction extends PortletAction {
 			writeJSON(actionRequest, actionResponse, jsonObject);
 		}
 
-		progressTracker.finish();
+		progressTracker.finish(actionRequest);
 	}
 
 	protected void reindex(ActionRequest actionRequest) throws Exception {
@@ -473,7 +474,8 @@ public class EditServerAction extends PortletAction {
 		long[] companyIds = PortalInstances.getCompanyIds();
 
 		for (long companyId : companyIds) {
-			SearchEngineUtil.indexDictionaries(companyId);
+			SearchEngineUtil.indexQuerySuggestionDictionaries(companyId);
+			SearchEngineUtil.indexSpellCheckerDictionaries(companyId);
 		}
 	}
 
@@ -649,7 +651,19 @@ public class EditServerAction extends PortletAction {
 
 			portletPreferences.store();
 
-			CaptchaImpl captchaImpl = (CaptchaImpl)CaptchaUtil.getCaptcha();
+			CaptchaImpl captchaImpl = null;
+
+			Captcha currentCaptcha = CaptchaUtil.getCaptcha();
+
+			if (currentCaptcha instanceof DoPrivilegedBean) {
+				DoPrivilegedBean doPrivilegedBean =
+					(DoPrivilegedBean)currentCaptcha;
+
+				captchaImpl = (CaptchaImpl)doPrivilegedBean.getActualBean();
+			}
+			else {
+				captchaImpl = (CaptchaImpl)currentCaptcha;
+			}
 
 			captchaImpl.setCaptcha(captcha);
 		}
@@ -706,6 +720,8 @@ public class EditServerAction extends PortletAction {
 			ActionRequest actionRequest, PortletPreferences portletPreferences)
 		throws Exception {
 
+		long dlFileEntryPreviewableProcessorMaxSize = ParamUtil.getLong(
+			actionRequest, "dlFileEntryPreviewableProcessorMaxSize");
 		long dlFileEntryThumbnailMaxHeight = ParamUtil.getLong(
 			actionRequest, "dlFileEntryThumbnailMaxHeight");
 		long dlFileEntryThumbnailMaxWidth = ParamUtil.getLong(
@@ -738,6 +754,9 @@ public class EditServerAction extends PortletAction {
 		long usersImageMaxSize = ParamUtil.getLong(
 			actionRequest, "usersImageMaxSize");
 
+		portletPreferences.setValue(
+			PropsKeys.DL_FILE_ENTRY_PREVIEWABLE_PROCESSOR_MAX_SIZE,
+			String.valueOf(dlFileEntryPreviewableProcessorMaxSize));
 		portletPreferences.setValue(
 			PropsKeys.DL_FILE_ENTRY_THUMBNAIL_MAX_HEIGHT,
 			String.valueOf(dlFileEntryThumbnailMaxHeight));

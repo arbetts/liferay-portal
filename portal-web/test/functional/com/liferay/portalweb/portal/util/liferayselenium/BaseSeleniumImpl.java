@@ -68,6 +68,20 @@ public abstract class BaseSeleniumImpl
 	}
 
 	@Override
+	public void assertEmailContent(String index, String content)
+		throws Exception {
+
+		LiferaySeleniumHelper.assertEmailContent(this, index, content);
+	}
+
+	@Override
+	public void assertEmailSubject(String index, String subject)
+		throws Exception {
+
+		LiferaySeleniumHelper.assertEmailSubject(this, index, subject);
+	}
+
+	@Override
 	public void assertLocation(String pattern) {
 		LiferaySeleniumHelper.assertLocation(this, pattern);
 	}
@@ -171,6 +185,14 @@ public abstract class BaseSeleniumImpl
 	}
 
 	@Override
+	public void connectToEmailAccount(String emailAddress, String emailPassword)
+		throws Exception {
+
+		LiferaySeleniumHelper.connectToEmailAccount(
+			emailAddress, emailPassword);
+	}
+
+	@Override
 	public void copyText(String locator) {
 		_clipBoard = super.getText(locator);
 	}
@@ -178,6 +200,11 @@ public abstract class BaseSeleniumImpl
 	@Override
 	public void copyValue(String locator) {
 		_clipBoard = super.getValue(locator);
+	}
+
+	@Override
+	public void deleteAllEmails() throws Exception {
+		LiferaySeleniumHelper.deleteAllEmails();
 	}
 
 	@Override
@@ -203,6 +230,16 @@ public abstract class BaseSeleniumImpl
 	@Override
 	public String getCurrentYear() {
 		return _commandProcessor.getString("getCurrentYear", new String[0]);
+	}
+
+	@Override
+	public String getEmailContent(String index) throws Exception {
+		return LiferaySeleniumHelper.getEmailContent(index);
+	}
+
+	@Override
+	public String getEmailSubject(String index) throws Exception {
+		return LiferaySeleniumHelper.getEmailSubject(index);
 	}
 
 	@Override
@@ -368,23 +405,55 @@ public abstract class BaseSeleniumImpl
 	}
 
 	@Override
-	public void saveScreenShotAndSource() throws Exception {
-		String screenShotName = null;
+	public void replyToEmail(String to, String content) throws Exception {
+		LiferaySeleniumHelper.replyToEmail(this, to, content);
+	}
+
+	@Override
+	public void saveScreenshot(String fileName) throws Exception {
+		if (!TestPropsValues.SAVE_SCREENSHOT) {
+			return;
+		}
+
+		if (_screenshotFileName.equals(fileName)) {
+			_screenshotCount++;
+		}
+		else {
+			_screenshotCount = 0;
+
+			_screenshotFileName = fileName;
+		}
+
+		String screenshotDir = TestPropsValues.OUTPUT_DIR + _screenshotFileName;
+
+		if (!FileUtil.exists(screenshotDir)) {
+			FileUtil.mkdirs(screenshotDir);
+		}
+
+		captureEntirePageScreenshot(
+			screenshotDir + "/" + _screenshotFileName + _screenshotCount +
+				".jpg",
+			"");
+	}
+
+	@Override
+	public void saveScreenshotAndSource() throws Exception {
+		String screenshotName = null;
 
 		if (TestPropsValues.SAVE_SCREENSHOT) {
-			screenShotName = getScreenshotFileName();
+			screenshotName = getScreenshotFileName();
 
 			captureEntirePageScreenshot(
-				_OUTPUT_SCREENSHOTS_DIR + screenShotName + ".jpg", "");
+				_OUTPUT_SCREENSHOTS_DIR + screenshotName + ".jpg", "");
 		}
 
 		if (TestPropsValues.SAVE_SOURCE) {
 			String content = getHtmlSource();
 
-			screenShotName = getScreenshotFileName();
+			screenshotName = getScreenshotFileName();
 
 			FileUtil.write(
-				_OUTPUT_SCREENSHOTS_DIR + screenShotName + ".html", content);
+				_OUTPUT_SCREENSHOTS_DIR + screenshotName + ".html", content);
 		}
 	}
 
@@ -392,6 +461,13 @@ public abstract class BaseSeleniumImpl
 	public void selectAndWait(String selectLocator, String optionLocator) {
 		super.select(selectLocator, optionLocator);
 		super.waitForPageToLoad("30000");
+	}
+
+	@Override
+	public void sendEmail(String to, String subject, String content)
+		throws Exception {
+
+		LiferaySeleniumHelper.sendEmail(this, to, subject, content);
 	}
 
 	@Override
@@ -639,6 +715,8 @@ public abstract class BaseSeleniumImpl
 	private CommandProcessor _commandProcessor;
 	private String _primaryTestSuiteName;
 	private String _projectDir;
+	private int _screenshotCount = 0;
+	private String _screenshotFileName = "";
 	private String _timeout = "90000";
 
 }

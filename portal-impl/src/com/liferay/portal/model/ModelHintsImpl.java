@@ -29,7 +29,6 @@ import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReader;
 import com.liferay.portal.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.util.PropsUtil;
-import com.liferay.util.PwdGenerator;
 
 import java.io.InputStream;
 
@@ -100,7 +99,7 @@ public class ModelHintsImpl implements ModelHints {
 	@Override
 	public String buildCustomValidatorName(String validatorName) {
 		return validatorName.concat(StringPool.UNDERLINE).concat(
-			PwdGenerator.getPassword(PwdGenerator.KEY3, 4));
+			StringUtil.randomId());
 	}
 
 	@Override
@@ -241,6 +240,18 @@ public class ModelHintsImpl implements ModelHints {
 		}
 
 		return GetterUtil.getString(hints.get(name), defaultValue);
+	}
+
+	@Override
+	public boolean hasField(String model, String field) {
+		Map<String, Object> fields = (Map<String, Object>)_modelFields.get(
+			model);
+
+		if (fields == null) {
+			return false;
+		}
+
+		return fields.containsKey(field + _ELEMENTS_SUFFIX);
 	}
 
 	@Override

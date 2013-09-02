@@ -17,6 +17,7 @@ package com.liferay.portal.struts;
 import com.liferay.portal.NoSuchLayoutException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -54,7 +55,7 @@ public abstract class FindAction extends Action {
 	public FindAction() {
 		_portletIds = initPortletIds();
 
-		if ((_portletIds == null) || (_portletIds.length == 0)) {
+		if (ArrayUtil.isEmpty(_portletIds)) {
 			throw new RuntimeException("Portlet IDs cannot be null or empty");
 		}
 	}
@@ -112,8 +113,7 @@ public abstract class FindAction extends Action {
 
 			portletURL = processPortletURL(request, portletURL);
 
-			response.setHeader("Location", portletURL.toString());
-			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+			response.sendRedirect(portletURL.toString());
 
 			return null;
 		}
@@ -124,8 +124,7 @@ public abstract class FindAction extends Action {
 			if (Validator.isNotNull(noSuchEntryRedirect) &&
 				(e instanceof NoSuchLayoutException)) {
 
-				response.setHeader("Location", noSuchEntryRedirect);
-				response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+				response.sendRedirect(noSuchEntryRedirect);
 			}
 			else {
 				PortalUtil.sendError(e, request, response);
