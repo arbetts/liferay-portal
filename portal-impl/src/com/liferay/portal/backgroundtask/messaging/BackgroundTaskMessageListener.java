@@ -18,7 +18,9 @@ import com.liferay.portal.DuplicateLockException;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageTranslator;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusRegistryUtil;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.backgroundtask.ClassLoaderAwareBackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.SerialBackgroundTaskExecutor;
 import com.liferay.portal.kernel.log.Log;
@@ -45,14 +47,22 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 	protected void doReceive(Message message) throws Exception {
 		long backgroundTaskId = (Long)message.get("backgroundTaskId");
 
+		BackgroundTaskThreadLocal.setBackgroundTaskId(backgroundTaskId);
+
 		ServiceContext serviceContext = new ServiceContext();
 
-		BackgroundTaskLocalServiceUtil.updateBackgroundTask(
-			backgroundTaskId, null, BackgroundTaskConstants.STATUS_IN_PROGRESS,
-			serviceContext);
-
 		BackgroundTask backgroundTask =
-			BackgroundTaskLocalServiceUtil.getBackgroundTask(backgroundTaskId);
+			BackgroundTaskLocalServiceUtil.amendBackgroundTask(
+				backgroundTaskId, null,
+				BackgroundTaskConstants.STATUS_IN_PROGRESS, serviceContext);
+
+		if (backgroundTask == null) {
+			return;
+		}
+
+		BackgroundTaskExecutor backgroundTaskExecutor = null;
+		BackgroundTaskStatusMessageListener
+			backgroundTaskStatusMessageListener = null;
 
 		int status = backgroundTask.getStatus();
 		String statusMessage = null;
@@ -68,7 +78,7 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 					StringUtil.split(servletContextNames), false);
 			}
 
-			BackgroundTaskExecutor backgroundTaskExecutor =
+			backgroundTaskExecutor =
 				(BackgroundTaskExecutor)InstanceFactory.newInstance(
 					classLoader, backgroundTask.getTaskExecutorClassName());
 
@@ -77,6 +87,22 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 
 			BackgroundTaskStatusRegistryUtil.registerBackgroundTaskStatus(
 				backgroundTaskId);
+
+			BackgroundTaskStatusMessageTranslator
+				backgroundTaskStatusMessageTranslator =
+				backgroundTaskExecutor.
+					getBackgroundTaskStatusMessageTranslator();
+
+			if (backgroundTaskStatusMessageTranslator != null) {
+				backgroundTaskStatusMessageListener =
+					new BackgroundTaskStatusMessageListener(
+						backgroundTaskId,
+						backgroundTaskStatusMessageTranslator);
+
+				MessageBusUtil.registerMessageListener(
+					DestinationNames.BACKGROUND_TASK_STATUS,
+					backgroundTaskStatusMessageListener);
+			}
 
 			BackgroundTaskResult backgroundTaskResult =
 				backgroundTaskExecutor.execute(backgroundTask);
@@ -89,21 +115,37 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 		}
 		catch (Exception e) {
 			status = BackgroundTaskConstants.STATUS_FAILED;
-			statusMessage =
-				"Unable to executed background task: " + e.getMessage();
 
-			if (_log.isInfoEnabled()) {
-				statusMessage.concat(StackTraceUtil.getStackTrace(e));
+			if (backgroundTaskExecutor != null) {
+				statusMessage = backgroundTaskExecutor.handleException(
+					backgroundTask, e);
 			}
 
-			_log.error("Unable to execute background task", e);
+			if (_log.isInfoEnabled()) {
+				if (statusMessage != null) {
+					statusMessage.concat(StackTraceUtil.getStackTrace(e));
+				}
+				else {
+					statusMessage = StackTraceUtil.getStackTrace(e);
+				}
+			}
+
+			if (_log.isDebugEnabled()) {
+				_log.debug("Unable to execute background task", e);
+			}
 		}
 		finally {
-			BackgroundTaskLocalServiceUtil.updateBackgroundTask(
+			BackgroundTaskLocalServiceUtil.amendBackgroundTask(
 				backgroundTaskId, null, status, statusMessage, serviceContext);
 
 			BackgroundTaskStatusRegistryUtil.unregisterBackgroundTaskStatus(
 				backgroundTaskId);
+
+			if (backgroundTaskStatusMessageListener != null) {
+				MessageBusUtil.unregisterMessageListener(
+					DestinationNames.BACKGROUND_TASK_STATUS,
+					backgroundTaskStatusMessageListener);
+			}
 
 			Message responseMessage = new Message();
 

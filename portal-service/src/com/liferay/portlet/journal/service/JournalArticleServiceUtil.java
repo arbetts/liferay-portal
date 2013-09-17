@@ -752,6 +752,11 @@ public class JournalArticleServiceUtil {
 		return getService().getArticlesCount(groupId, folderId);
 	}
 
+	public static int getArticlesCount(long groupId, long folderId, int status)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getArticlesCount(groupId, folderId, status);
+	}
+
 	/**
 	* Returns the number of web content articles matching the group and article
 	* ID.
@@ -1143,6 +1148,13 @@ public class JournalArticleServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		getService().restoreArticleFromTrash(groupId, articleId);
+	}
+
+	public static com.liferay.portal.kernel.search.Hits search(long groupId,
+		long creatorUserId, int status, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().search(groupId, creatorUserId, status, start, end);
 	}
 
 	/**

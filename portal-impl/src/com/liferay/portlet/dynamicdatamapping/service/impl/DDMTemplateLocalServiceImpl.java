@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -177,7 +178,7 @@ public class DDMTemplateLocalServiceImpl
 			templateKey = String.valueOf(counterLocalService.increment());
 		}
 		else {
-			templateKey = templateKey.trim().toUpperCase();
+			templateKey = StringUtil.toUpperCase(templateKey.trim());
 		}
 
 		script = formatScript(type, language, script);
@@ -387,6 +388,7 @@ public class DDMTemplateLocalServiceImpl
 	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
 	public void deleteTemplate(DDMTemplate template)
 		throws PortalException, SystemException {
 
@@ -431,13 +433,6 @@ public class DDMTemplateLocalServiceImpl
 		resourceLocalService.deleteResource(
 			template.getCompanyId(), DDMTemplate.class.getName(),
 			ResourceConstants.SCOPE_INDIVIDUAL, template.getTemplateId());
-
-		// System event
-
-		systemEventLocalService.addSystemEvent(
-			0, template.getGroupId(), DDMTemplate.class.getName(),
-			template.getTemplateId(), template.getUuid(), null,
-			SystemEventConstants.TYPE_DELETE, null);
 	}
 
 	/**
@@ -454,7 +449,7 @@ public class DDMTemplateLocalServiceImpl
 		DDMTemplate template = ddmTemplatePersistence.findByPrimaryKey(
 			templateId);
 
-		deleteTemplate(template);
+		ddmTemplateLocalService.deleteTemplate(template);
 	}
 
 	/**
@@ -472,7 +467,7 @@ public class DDMTemplateLocalServiceImpl
 			groupId);
 
 		for (DDMTemplate template : templates) {
-			deleteTemplate(template);
+			ddmTemplateLocalService.deleteTemplate(template);
 		}
 	}
 
@@ -492,7 +487,7 @@ public class DDMTemplateLocalServiceImpl
 			long groupId, long classNameId, String templateKey)
 		throws SystemException {
 
-		templateKey = templateKey.trim().toUpperCase();
+		templateKey = StringUtil.toUpperCase(templateKey.trim());
 
 		return ddmTemplatePersistence.fetchByG_C_T(
 			groupId, classNameId, templateKey);
@@ -525,7 +520,7 @@ public class DDMTemplateLocalServiceImpl
 			boolean includeGlobalTemplates)
 		throws PortalException, SystemException {
 
-		templateKey = templateKey.trim().toUpperCase();
+		templateKey = StringUtil.toUpperCase(templateKey.trim());
 
 		DDMTemplate template = ddmTemplatePersistence.fetchByG_C_T(
 			groupId, classNameId, templateKey);
@@ -574,7 +569,7 @@ public class DDMTemplateLocalServiceImpl
 			long groupId, long classNameId, String templateKey)
 		throws PortalException, SystemException {
 
-		templateKey = templateKey.trim().toUpperCase();
+		templateKey = StringUtil.toUpperCase(templateKey.trim());
 
 		return ddmTemplatePersistence.findByG_C_T(
 			groupId, classNameId, templateKey);
@@ -606,7 +601,7 @@ public class DDMTemplateLocalServiceImpl
 			boolean includeGlobalTemplates)
 		throws PortalException, SystemException {
 
-		templateKey = templateKey.trim().toUpperCase();
+		templateKey = StringUtil.toUpperCase(templateKey.trim());
 
 		DDMTemplate template = ddmTemplatePersistence.fetchByG_C_T(
 			groupId, classNameId, templateKey);
@@ -1198,6 +1193,7 @@ public class DDMTemplateLocalServiceImpl
 	 * Updates the template matching the ID.
 	 *
 	 * @param  templateId the primary key of the template
+	 * @param  classPK the primary key of the template's related entity
 	 * @param  nameMap the template's new locales and localized names
 	 * @param  descriptionMap the template's new locales and localized
 	 *         description
@@ -1223,7 +1219,7 @@ public class DDMTemplateLocalServiceImpl
 	 */
 	@Override
 	public DDMTemplate updateTemplate(
-			long templateId, Map<Locale, String> nameMap,
+			long templateId, long classPK, Map<Locale, String> nameMap,
 			Map<Locale, String> descriptionMap, String type, String mode,
 			String language, String script, boolean cacheable,
 			boolean smallImage, String smallImageURL, File smallImageFile,
@@ -1248,6 +1244,17 @@ public class DDMTemplateLocalServiceImpl
 			templateId);
 
 		template.setModifiedDate(serviceContext.getModifiedDate(null));
+
+		if ((template.getClassPK() == 0) && (classPK > 0)) {
+
+			// Allow users to set the structure if and only if it currently does
+			// not have one. Otherwise, you can have bad data because there may
+			// be an existing content that has chosen to use a structure and
+			// template combination that no longer exists.
+
+			template.setClassPK(classPK);
+		}
+
 		template.setNameMap(nameMap);
 		template.setDescriptionMap(descriptionMap);
 		template.setType(type);
@@ -1316,6 +1323,7 @@ public class DDMTemplateLocalServiceImpl
 			language.equals(TemplateConstants.LANG_TYPE_XSL)) {
 
 			try {
+				script = DDMXMLUtil.validateXML(script);
 				script = DDMXMLUtil.formatXML(script);
 			}
 			catch (Exception e) {
@@ -1347,7 +1355,7 @@ public class DDMTemplateLocalServiceImpl
 			String smallImageURL, File smallImageFile, byte[] smallImageBytes)
 		throws PortalException, SystemException {
 
-		templateKey = templateKey.trim().toUpperCase();
+		templateKey = StringUtil.toUpperCase(templateKey.trim());
 
 		DDMTemplate template = ddmTemplatePersistence.fetchByG_C_T(
 			groupId, classNameId, templateKey);
@@ -1416,7 +1424,7 @@ public class DDMTemplateLocalServiceImpl
 	protected void validateName(Map<Locale, String> nameMap)
 		throws PortalException {
 
-		String name = nameMap.get(LocaleUtil.getDefault());
+		String name = nameMap.get(LocaleUtil.getSiteDefault());
 
 		if (Validator.isNull(name)) {
 			throw new TemplateNameException();

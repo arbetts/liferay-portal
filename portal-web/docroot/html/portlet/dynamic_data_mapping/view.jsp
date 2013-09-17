@@ -71,7 +71,7 @@ portletURL.setParameter("tabs1", tabs1);
 
 		<c:if test="<%= showToolbar %>">
 			<liferay-util:include page="/html/portlet/dynamic_data_mapping/toolbar.jsp">
-				<liferay-util:param name="toolbarItem" value="view-all" />
+				<liferay-util:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 			</liferay-util:include>
 		</c:if>
 
@@ -138,19 +138,13 @@ portletURL.setParameter("tabs1", tabs1);
 				</liferay-ui:search-container-column-text>
 			</c:if>
 
-			<liferay-ui:search-container-column-text
-				buffer="buffer"
+			<liferay-ui:search-container-column-date
 				href="<%= rowHREF %>"
 				name="modified-date"
 				orderable="<%= true %>"
 				orderableProperty="modified-date"
-			>
-
-				<%
-				buffer.append(dateFormatDateTime.format(structure.getModifiedDate()));
-				%>
-
-			</liferay-ui:search-container-column-text>
+				value="<%= structure.getModifiedDate() %>"
+			/>
 
 			<liferay-ui:search-container-column-jsp
 				align="right"

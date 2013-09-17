@@ -29,7 +29,9 @@ import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchEngineUtil;
 import com.liferay.portal.kernel.search.Summary;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
@@ -90,13 +92,7 @@ public class JournalFolderIndexer extends BaseIndexer {
 			BooleanQuery contextQuery, SearchContext searchContext)
 		throws Exception {
 
-		int status = GetterUtil.getInteger(
-				searchContext.getAttribute(Field.STATUS),
-				WorkflowConstants.STATUS_APPROVED);
-
-		if (status != WorkflowConstants.STATUS_ANY) {
-			contextQuery.addRequiredTerm(Field.STATUS, status);
-		}
+		addStatus(contextQuery, searchContext);
 	}
 
 	@Override
@@ -125,6 +121,9 @@ public class JournalFolderIndexer extends BaseIndexer {
 		document.addText(Field.DESCRIPTION, folder.getDescription());
 		document.addKeyword(Field.FOLDER_ID, folder.getParentFolderId());
 		document.addText(Field.TITLE, folder.getName());
+		document.addKeyword(
+			Field.TREE_PATH,
+			StringUtil.split(folder.getTreePath(), CharPool.SLASH));
 
 		if (!folder.isInTrash() && folder.isInTrashContainer()) {
 			JournalFolder trashedFolder = folder.getTrashContainer();

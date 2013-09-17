@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackRegistryUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -145,7 +146,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		File file = null;
 
 		try {
-			if ((bytes != null) && (bytes.length > 0)) {
+			if (ArrayUtil.isNotEmpty(bytes)) {
 				file = FileUtil.createTempFile(bytes);
 			}
 
@@ -966,6 +967,17 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 
 		return repository.getFileEntries(
 			folderId, fileEntryTypeId, start, end, obc);
+	}
+
+	@Override
+	public List<FileEntry> getFileEntries(
+			long repositoryId, long folderId, String[] mimeTypes)
+		throws PortalException, SystemException {
+
+		Repository repository = getRepository(repositoryId);
+
+		return repository.getFileEntries(
+			folderId, mimeTypes, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 	}
 
 	/**
@@ -2064,8 +2076,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * @return the temporary file entry names
 	 * @throws PortalException if the folder was invalid
 	 * @throws SystemException if a system exception occurred
-	 * @see    com.liferay.portlet.documentlibrary.service.impl.DLAppServiceImpl#addTempFileEntry(
-	 *         long, long, String, String, File)
+	 * @see    #addTempFileEntry(long, long, String, String, File, String)
 	 * @see    com.liferay.portal.kernel.util.TempFileUtil
 	 */
 	@Override
@@ -2238,6 +2249,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * Moves the file entry with the primary key to the trash portlet.
 	 *
 	 * @param  fileEntryId the primary key of the file entry
+	 * @return the file entry
 	 * @throws PortalException if the file entry could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -2391,6 +2403,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * Moves the folder with the primary key to the trash portlet.
 	 *
 	 * @param  folderId the primary key of the folder
+	 * @return the file entry
 	 * @throws PortalException if the folder could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -2571,6 +2584,29 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		dlAppHelperLocalService.updateFileEntry(
 			getUserId(), fileEntry, fileEntry.getFileVersion(version),
 			fileEntry.getFileVersion(), serviceContext);
+	}
+
+	@Override
+	public Hits search(
+			long repositoryId, long creatorUserId, int status, int start,
+			int end)
+		throws PortalException, SystemException {
+
+		Repository repository = getRepository(repositoryId);
+
+		return repository.search(creatorUserId, status, start, end);
+	}
+
+	@Override
+	public Hits search(
+			long repositoryId, long creatorUserId, long folderId,
+			String[] mimeTypes, int status, int start, int end)
+		throws PortalException, SystemException {
+
+		Repository repository = getRepository(repositoryId);
+
+		return repository.search(
+			creatorUserId, folderId, mimeTypes, status, start, end);
 	}
 
 	@Override
@@ -2791,7 +2827,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		File file = null;
 
 		try {
-			if ((bytes != null) && (bytes.length > 0)) {
+			if (ArrayUtil.isNotEmpty(bytes)) {
 				file = FileUtil.createTempFile(bytes);
 			}
 
@@ -3448,7 +3484,6 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 					moveFolders(
 						currentFolder.getFolderId(), newFolder.getFolderId(),
 						fromRepository, toRepository, serviceContext);
-
 				}
 				else if (folderAndFileEntryAndFileShortcut
 							instanceof DLFileShortcut) {

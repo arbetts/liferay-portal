@@ -16,20 +16,26 @@
 
 <%@ include file="/html/taglib/aui/workflow_status/init.jsp" %>
 
-<div class="taglib-workflow-status">
+<span class="taglib-workflow-status">
 	<c:if test="<%= Validator.isNotNull(id) %>">
-		<span class="workflow-id"><liferay-ui:message key="id" />: <%= HtmlUtil.escape(id) %></span>
+		<span class="workflow-id">
+			<span class="workflow-label"><liferay-ui:message key="id" />:</span>
+			<span class="workflow-value"><%= HtmlUtil.escape(id) %></span>
+		</span>
 	</c:if>
 
 	<c:if test="<%= Validator.isNotNull(version) %>">
-		<span class="workflow-version"><liferay-ui:message key="version" />: <strong><%= version %></strong></span>
+		<span class="workflow-version">
+			<span class="workflow-label"><liferay-ui:message key="version" />:</span>
+			<strong class="workflow-value"><%= version %></strong>
+		</span>
 	</c:if>
 
 	<%
 	String additionalText = StringPool.BLANK;
 
 	if (Validator.isNull(statusMessage)) {
-		statusMessage = WorkflowConstants.toLabel(status);
+		statusMessage = WorkflowConstants.getStatusLabel(status);
 
 		if ((status == WorkflowConstants.STATUS_PENDING) && (bean != null) && (model != null)) {
 			long companyId = BeanPropertiesUtil.getLong(bean, "companyId");
@@ -54,12 +60,12 @@
 	}
 	%>
 
-	<span class='<%= showIcon ? "workflow-status workflow-status-icon" : "workflow-status" %>'>
+	<span class="<%= showIcon ? "workflow-status workflow-status-icon" : "workflow-status" %>">
 		<c:if test="<%= showLabel %>">
-			<liferay-ui:message key="status" />:
+			<span class="workflow-label"><liferay-ui:message key="status" />:</span>
 		</c:if>
 
-		<strong class="<%= _getStatusCssClass(status) %>">
+		<strong class="label workflow-status-<%= WorkflowConstants.getStatusLabel(status) %> <%= WorkflowConstants.getStatusCssClass(status) %> workflow-value">
 			<liferay-ui:message key="<%= statusMessage %>" /><%= additionalText %>
 		</strong>
 	</span>
@@ -67,25 +73,4 @@
 	<c:if test="<%= Validator.isNotNull(helpMessage) %>">
 		<liferay-ui:icon-help message="<%= helpMessage %>" />
 	</c:if>
-</div>
-
-<%!
-private String _getStatusCssClass(int status) {
-	String statusCssClass = "label workflow-status-" + WorkflowConstants.toLabel(status);
-
-	if (status == WorkflowConstants.STATUS_APPROVED) {
-		statusCssClass += " label-success";
-	}
-	else if (status == WorkflowConstants.STATUS_DRAFT) {
-		statusCssClass += " label-info";
-	}
-	else if (status == WorkflowConstants.STATUS_EXPIRED) {
-		statusCssClass += " label-important";
-	}
-	else if (status == WorkflowConstants.STATUS_PENDING) {
-		statusCssClass += " label-warning";
-	}
-
-	return statusCssClass;
-}
-%>
+</span>

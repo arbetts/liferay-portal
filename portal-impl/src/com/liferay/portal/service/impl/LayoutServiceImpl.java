@@ -112,7 +112,7 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	 *             portal exception occurred
 	 * @throws     SystemException if a system exception occurred
 	 * @deprecated As of 6.2.0, replaced by {@link #addLayout(long, boolean,
-	 *             long, Map, Map, Map, Map, Map, String, boolean, Map,
+	 *             long, Map, Map, Map, Map, Map, String, String, boolean, Map,
 	 *             ServiceContext)}
 	 */
 	@Override
@@ -963,6 +963,20 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 			getUserId(), taskName, groupId, privateLayout, parameterMap, file);
 	}
 
+	@Override
+	public long importLayoutsInBackground(
+			String taskName, long groupId, boolean privateLayout,
+			Map<String, String[]> parameterMap, InputStream inputStream)
+		throws PortalException, SystemException {
+
+		GroupPermissionUtil.check(
+			getPermissionChecker(), groupId, ActionKeys.EXPORT_IMPORT_LAYOUTS);
+
+		return layoutLocalService.importLayoutsInBackground(
+			getUserId(), taskName, groupId, privateLayout, parameterMap,
+			inputStream);
+	}
+
 	/**
 	 * Imports the portlet information (categories, permissions, ... etc.) from
 	 * the file.
@@ -1258,39 +1272,36 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	/**
 	 * Updates the layout with additional parameters.
 	 *
-	 * @param      groupId the primary key of the group
-	 * @param      privateLayout whether the layout is private to the group
-	 * @param      layoutId the primary key of the layout
-	 * @param      parentLayoutId the primary key of the layout's new parent
-	 *             layout
-	 * @param      localeNamesMap the layout's locales and localized names
-	 * @param      localeTitlesMap the layout's locales and localized titles
-	 * @param      descriptionMap the locales and localized descriptions to
-	 *             merge (optionally <code>null</code>)
-	 * @param      keywordsMap the locales and localized keywords to merge
-	 *             (optionally <code>null</code>)
-	 * @param      robotsMap the locales and localized robots to merge
-	 *             (optionally <code>null</code>)
-	 * @param      type the layout's new type (optionally {@link
-	 *             com.liferay.portal.model.LayoutConstants#TYPE_PORTLET})
-	 * @param      hidden whether the layout is hidden
-	 * @param      friendlyURLMap the layout's locales and localized friendly
-	 *             URLs. To see how the URL is normalized when accessed see
-	 *             {@link
-	 *             com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
-	 *             String)}.
-	 * @param      iconImage whether the icon image will be updated
-	 * @param      iconBytes the byte array of the layout's new icon image
-	 * @param      serviceContext the service context to be applied. Can set the
-	 *             modification date and expando bridge attributes for the
-	 *             layout.
-	 * @return     the updated layout
-	 * @throws     PortalException if a group or layout with the primary key
-	 *             could not be found, if the user did not have permission to
-	 *             update the layout, if a unique friendly URL could not be
-	 *             generated, if a valid parent layout ID to use could not be
-	 *             found, or if the layout parameters were invalid
-	 * @throws     SystemException if a system exception occurred
+	 * @param  groupId the primary key of the group
+	 * @param  privateLayout whether the layout is private to the group
+	 * @param  layoutId the primary key of the layout
+	 * @param  parentLayoutId the primary key of the layout's new parent layout
+	 * @param  localeNamesMap the layout's locales and localized names
+	 * @param  localeTitlesMap the layout's locales and localized titles
+	 * @param  descriptionMap the locales and localized descriptions to merge
+	 *         (optionally <code>null</code>)
+	 * @param  keywordsMap the locales and localized keywords to merge
+	 *         (optionally <code>null</code>)
+	 * @param  robotsMap the locales and localized robots to merge (optionally
+	 *         <code>null</code>)
+	 * @param  type the layout's new type (optionally {@link
+	 *         com.liferay.portal.model.LayoutConstants#TYPE_PORTLET})
+	 * @param  hidden whether the layout is hidden
+	 * @param  friendlyURLMap the layout's locales and localized friendly URLs.
+	 *         To see how the URL is normalized when accessed see {@link
+	 *         com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
+	 *         String)}.
+	 * @param  iconImage whether the icon image will be updated
+	 * @param  iconBytes the byte array of the layout's new icon image
+	 * @param  serviceContext the service context to be applied. Can set the
+	 *         modification date and expando bridge attributes for the layout.
+	 * @return the updated layout
+	 * @throws PortalException if a group or layout with the primary key could
+	 *         not be found, if the user did not have permission to update the
+	 *         layout, if a unique friendly URL could not be generated, if a
+	 *         valid parent layout ID to use could not be found, or if the
+	 *         layout parameters were invalid
+	 * @throws SystemException if a system exception occurred
 	 */
 	@Override
 	public Layout updateLayout(
@@ -1604,6 +1615,19 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 	}
 
 	@Override
+	public MissingReferences validateImportLayoutsFile(
+			long groupId, boolean privateLayout,
+			Map<String, String[]> parameterMap, InputStream inputStream)
+		throws PortalException, SystemException {
+
+		GroupPermissionUtil.check(
+			getPermissionChecker(), groupId, ActionKeys.EXPORT_IMPORT_LAYOUTS);
+
+		return layoutLocalService.validateImportLayoutsFile(
+			getUserId(), groupId, privateLayout, parameterMap, inputStream);
+	}
+
+	@Override
 	public MissingReferences validateImportPortletInfo(
 			long plid, long groupId, String portletId,
 			Map<String, String[]> parameterMap, File file)
@@ -1614,6 +1638,19 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 
 		return layoutLocalService.validateImportPortletInfo(
 			getUserId(), plid, groupId, portletId, parameterMap, file);
+	}
+
+	@Override
+	public MissingReferences validateImportPortletInfo(
+			long plid, long groupId, String portletId,
+			Map<String, String[]> parameterMap, InputStream inputStream)
+		throws PortalException, SystemException {
+
+		PortletPermissionUtil.check(
+			getPermissionChecker(), plid, portletId, ActionKeys.CONFIGURATION);
+
+		return layoutLocalService.validateImportPortletInfo(
+			getUserId(), plid, groupId, portletId, parameterMap, inputStream);
 	}
 
 	protected List<Layout> filterLayouts(List<Layout> layouts)

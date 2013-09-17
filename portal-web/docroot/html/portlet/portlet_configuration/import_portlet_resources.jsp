@@ -33,7 +33,7 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 <portlet:renderURL var="importPortletRenderURL">
 	<portlet:param name="struts_action" value="/portlet_configuration/export_import" />
 	<portlet:param name="tabs2" value="import" />
-	<portlet:param name="tabs3" value="all-import-processes" />
+	<portlet:param name="tabs3" value="current-and-previous" />
 	<portlet:param name="redirect" value="<%= redirect %>" />
 	<portlet:param name="portletResource" value="<%= portletResource %>" />
 </portlet:renderURL>
@@ -88,14 +88,10 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 			<%
 			PortletDataHandler portletDataHandler = selPortlet.getPortletDataHandlerInstance();
 
-			PortletDataHandlerControl[] configurationControls = null;
-
-			if (portletDataHandler != null) {
-				configurationControls = portletDataHandler.getImportConfigurationControls(selPortlet, manifestSummary);
-			}
+			PortletDataHandlerControl[] configurationControls = portletDataHandler.getImportConfigurationControls(selPortlet, manifestSummary);
 			%>
 
-			<c:if test="<%= (configurationControls != null) && (configurationControls.length > 0) %>">
+			<c:if test="<%= ArrayUtil.isNotEmpty(configurationControls) %>">
 				<aui:fieldset cssClass="options-group" label="application">
 					<ul class="lfr-tree select-options unstyled">
 						<li class="options">
@@ -146,9 +142,11 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 
 			<%
 			long importModelCount = portletDataHandler.getExportModelCount(manifestSummary);
+
+			long modelDeletionCount = manifestSummary.getModelDeletionCount(portletDataHandler.getDeletionSystemEventStagedModelTypes());
 			%>
 
-			<c:if test="<%= (importModelCount != 0) && (portletDataHandler != null) %>">
+			<c:if test="<%= (importModelCount != 0) || (modelDeletionCount != 0) %>">
 				<aui:fieldset cssClass="options-group" label="content">
 					<ul class="lfr-tree select-options unstyled">
 						<li class="options">
@@ -158,22 +156,23 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 
 									<liferay-util:buffer var="badgeHTML">
 										<span class="badge badge-info"><%= importModelCount > 0 ? importModelCount : StringPool.BLANK %></span>
+										<span class="badge badge-warning deletions"><%= modelDeletionCount > 0 ? (modelDeletionCount + StringPool.SPACE + LanguageUtil.get(pageContext, "deletions")) : StringPool.BLANK %></span>
 									</liferay-util:buffer>
 
-									<aui:input label='<%= LanguageUtil.get(pageContext, "content") + badgeHTML %>' name='<%= PortletDataHandlerKeys.PORTLET_DATA + "_" + selPortlet.getRootPortletId() %>' type="checkbox" value="<%= portletDataHandler.isPublishToLiveByDefault() %>" />
+									<aui:input label='<%= LanguageUtil.get(pageContext, "content") + badgeHTML %>' name='<%= PortletDataHandlerKeys.PORTLET_DATA + "_" + selPortlet.getRootPortletId() %>' type="checkbox" value="<%= true %>" />
 
 									<%
 									PortletDataHandlerControl[] importControls = portletDataHandler.getImportControls();
 									PortletDataHandlerControl[] metadataControls = portletDataHandler.getImportMetadataControls();
 
-									if (Validator.isNotNull(importControls) || Validator.isNotNull(metadataControls)) {
+									if (ArrayUtil.isNotEmpty(importControls) || ArrayUtil.isNotEmpty(metadataControls)) {
 									%>
 
 										<div class="hide" id="<portlet:namespace />content_<%= selPortlet.getRootPortletId() %>">
 											<ul class="lfr-tree unstyled">
 												<li class="tree-item">
 													<aui:fieldset cssClass="portlet-type-data-section" label="content">
-														<aui:field-wrapper label='<%= Validator.isNotNull(metadataControls) ? "content" : StringPool.BLANK %>'>
+														<aui:field-wrapper label='<%= ArrayUtil.isNotEmpty(metadataControls) ? "content" : StringPool.BLANK %>'>
 															<ul class="lfr-tree unstyled">
 																<li class="tree-item">
 																	<aui:input data-name='<%= LanguageUtil.get(locale, "delete-portlet-data") %>' label="delete-portlet-data-before-importing" name="<%= PortletDataHandlerKeys.DELETE_PORTLET_DATA %>" type="checkbox" />
@@ -215,7 +214,7 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 
 																PortletDataHandlerControl[] childrenControls = control.getChildren();
 
-																if ((childrenControls != null) && (childrenControls.length > 0)) {
+																if (ArrayUtil.isNotEmpty(childrenControls)) {
 																	request.setAttribute("render_controls.jsp-controls", childrenControls);
 																%>
 
@@ -236,7 +235,7 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 											</ul>
 										</div>
 
-										<ul id="<portlet:namespace />showChangeContent">
+										<ul id="<portlet:namespace />showChangeContent_<%= selPortlet.getRootPortletId() %>">
 											<li class="tree-item">
 												<span class="selected-labels" id="<portlet:namespace />selectedContent_<%= selPortlet.getRootPortletId() %>"></span>
 
@@ -251,7 +250,7 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 										</ul>
 
 										<aui:script>
-											Liferay.Util.toggleBoxes('<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE + selPortlet.getRootPortletId() %>Checkbox', '<portlet:namespace />showChangeContent');
+											Liferay.Util.toggleBoxes('<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE + selPortlet.getRootPortletId() %>Checkbox', '<portlet:namespace />showChangeContent<%= StringPool.UNDERLINE + selPortlet.getRootPortletId() %>');
 										</aui:script>
 
 									<%
@@ -263,16 +262,25 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 
 							<ul>
 								<aui:fieldset cssClass="comments-and-ratings" label="for-each-of-the-selected-content-types,-import-their">
-									<span class="selected-labels" id="<portlet:namespace />selectedCommentsAndRatings"></span>
+									<span class="selected-labels" id="<portlet:namespace />selectedContentOptions"></span>
 
-									<aui:a cssClass="modify-link" href="javascript:;" id="commentsAndRatingsLink" label="change" method="get" />
+									<aui:a cssClass="modify-link" href="javascript:;" id="contentOptionsLink" label="change" method="get" />
 
-									<div class="hide" id="<portlet:namespace />commentsAndRatings">
+									<div class="hide" id="<portlet:namespace />contentOptions">
 										<ul class="lfr-tree unstyled">
 											<li class="tree-item">
 												<aui:input label="comments" name="<%= PortletDataHandlerKeys.COMMENTS %>" type="checkbox" value="<%= true %>" />
 
 												<aui:input label="ratings" name="<%= PortletDataHandlerKeys.RATINGS %>" type="checkbox" value="<%= true %>" />
+
+												<c:if test="<%= modelDeletionCount != 0 %>">
+
+													<%
+													String deletionsLabel = LanguageUtil.get(pageContext, "deletions") + (modelDeletionCount > 0 ? " (" + modelDeletionCount + ")" : StringPool.BLANK);
+													%>
+
+													<aui:input data-name="<%= deletionsLabel %>" helpMessage="deletions-help" label="<%= deletionsLabel %>" name="<%= PortletDataHandlerKeys.DELETIONS %>" type="checkbox" />
+												</c:if>
 											</li>
 										</ul>
 									</div>
@@ -315,7 +323,7 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 
 				<aui:input data-name='<%= LanguageUtil.get(locale, "mirror-with-overwriting") %>' helpMessage="import-data-strategy-mirror-with-overwriting-help" id="mirrorWithOverwriting" label="mirror-with-overwriting" name="<%= PortletDataHandlerKeys.DATA_STRATEGY %>" type="radio" value="<%= PortletDataHandlerKeys.DATA_STRATEGY_MIRROR_OVERWRITE %>" />
 
-				<aui:input data-name='<%= LanguageUtil.get(locale, "copy-as-new") %>' helpMessage="import-data-strategy-copy-as-new-help" id="copyAsNew" label="copy-as-new" name="<%= PortletDataHandlerKeys.DATA_STRATEGY %>" type="radio" value="<%= PortletDataHandlerKeys.DATA_STRATEGY_COPY_AS_NEW %>" />
+				<aui:input data-name='<%= LanguageUtil.get(locale, "copy-as-new") %>' disabled="<%= !portletDataHandler.isSupportsDataStrategyCopyAsNew() %>" helpMessage='<%= portletDataHandler.isSupportsDataStrategyCopyAsNew() ? "import-data-strategy-copy-as-new-help" : "not-supported" %>' id="copyAsNew" label="copy-as-new" name="<%= PortletDataHandlerKeys.DATA_STRATEGY %>" type="radio" value="<%= PortletDataHandlerKeys.DATA_STRATEGY_COPY_AS_NEW %>" />
 			</aui:fieldset>
 
 			<aui:fieldset cssClass="options-group" label="authorship-of-the-content">
@@ -348,6 +356,7 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 
 	A.one(<portlet:namespace />back).on(
 		'click',
+		'click',
 		function() {
 			A.one('#<portlet:namespace />importConfiguration').show()
 			A.one('#<portlet:namespace />importStrategy').hide();
@@ -359,6 +368,8 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 	new Liferay.ExportImport(
 		{
 			commentsNode: '#<%= PortletDataHandlerKeys.COMMENTS %>Checkbox',
+			deletePortletDataNode: '#<%= PortletDataHandlerKeys.DELETE_PORTLET_DATA %>Checkbox',
+			deletionsNode: '#<%= PortletDataHandlerKeys.DELETIONS %>Checkbox',
 			form: document.<portlet:namespace />fm1,
 			namespace: '<portlet:namespace />',
 			ratingsNode: '#<%= PortletDataHandlerKeys.RATINGS %>Checkbox'

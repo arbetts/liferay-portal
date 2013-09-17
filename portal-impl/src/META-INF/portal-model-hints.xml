@@ -4,6 +4,10 @@
 	<hint-collection name="CLOB">
 		<hint name="max-length">2000000</hint>
 	</hint-collection>
+	<hint-collection name="EDITOR">
+		<hint name="editor">true</hint>
+		<hint name="max-length">2000000</hint>
+	</hint-collection>
 	<hint-collection name="URL">
 		<hint name="max-length">4000</hint>
 	</hint-collection>
@@ -215,7 +219,9 @@
 		<field name="classPK" type="long" />
 		<field name="parentGroupId" type="long" />
 		<field name="liveGroupId" type="long" />
-		<field name="treePath" type="String" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="name" type="String">
 			<hint name="display-width">150</hint>
 			<hint name="max-length">150</hint>
@@ -862,6 +868,8 @@
 		<field name="classPK" type="long" />
 		<field name="classUuid" type="String" />
 		<field name="referrerClassNameId" type="long" />
+		<field name="parentSystemEventId" type="long" />
+		<field name="systemEventSetKey" type="long" />
 		<field name="type" type="int" />
 		<field name="extraData" type="String">
 			<hint-collection name="CLOB" />
@@ -1124,7 +1132,7 @@
 		<field name="classPK" type="long" />
 		<field name="title" type="String" />
 		<field name="content" type="String">
-			<hint-collection name="TEXTAREA" />
+			<hint-collection name="CLOB" />
 		</field>
 		<field name="url" type="String">
 			<hint-collection name="URL" />
@@ -1342,6 +1350,9 @@
 		<field name="modifiedDate" type="Date" />
 		<field name="resourceBlockId" type="long" />
 		<field name="folderId" type="long" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="name" type="String">
 			<hint name="max-length">255</hint>
 		</field>
@@ -1373,6 +1384,9 @@
 		<field name="modifiedDate" type="Date" />
 		<field name="resourceBlockId" type="long" />
 		<field name="parentFolderId" type="long" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="name" type="String">
 			<validator name="required" />
 		</field>
@@ -1438,14 +1452,15 @@
 		<field name="companyId" type="long" />
 		<field name="userId" type="long" />
 		<field name="userName" type="String" />
-		<field name="versionUserId" type="long" />
-		<field name="versionUserName" type="String" />
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
 		<field name="classNameId" type="long" />
 		<field name="classPK" type="long" />
 		<field name="repositoryId" type="long" />
 		<field name="folderId" type="long" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="name" type="String">
 			<hint name="max-length">255</hint>
 		</field>
@@ -1518,6 +1533,9 @@
 		<field name="repositoryId" type="long" />
 		<field name="folderId" type="long" />
 		<field name="toFileEntryId" type="long" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="active" type="boolean" />
 		<field name="status" type="int" />
 		<field name="statusByUserId" type="long" />
@@ -1536,6 +1554,9 @@
 		<field name="repositoryId" type="long" />
 		<field name="folderId" type="long" />
 		<field name="fileEntryId" type="long" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="extension" type="String" />
 		<field name="mimeType" type="String" />
 		<field name="title" type="String">
@@ -1569,6 +1590,9 @@
 		<field name="repositoryId" type="long" />
 		<field name="mountPoint" type="boolean" />
 		<field name="parentFolderId" type="long" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="name" type="String">
 			<hint name="max-length">100</hint>
 			<validator name="required" />
@@ -1584,6 +1608,13 @@
 		<field name="statusByUserId" type="long" />
 		<field name="statusByUserName" type="String" />
 		<field name="statusDate" type="Date" />
+	</model>
+	<model name="com.liferay.portlet.documentlibrary.model.DLSyncEvent">
+		<field name="syncEventId" type="long" />
+		<field name="modifiedTime" type="long" />
+		<field name="event" type="String" />
+		<field name="type" type="String" />
+		<field name="typePK" type="long" />
 	</model>
 	<model name="com.liferay.portlet.dynamicdatalists.model.DDLRecord">
 		<field name="uuid" type="String" />
@@ -1783,6 +1814,9 @@
 		<field name="folderId" type="long" />
 		<field name="classNameId" type="long" />
 		<field name="classPK" type="long" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="articleId" type="String">
 			<hint name="auto-escape">false</hint>
 			<hint name="upper-case">true</hint>
@@ -1906,6 +1940,9 @@
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
 		<field name="parentFolderId" type="long" />
+		<field name="treePath" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="name" type="String">
 			<hint name="max-length">100</hint>
 			<validator name="required" />
@@ -2657,6 +2694,7 @@
 		<field name="createDate" type="Date" />
 		<field name="classNameId" type="long" />
 		<field name="classPK" type="long" />
+		<field name="systemEventSetKey" type="long" />
 		<field name="typeSettings" type="String">
 			<hint-collection name="CLOB" />
 		</field>

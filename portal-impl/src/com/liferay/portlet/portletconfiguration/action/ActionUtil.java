@@ -16,6 +16,7 @@ package com.liferay.portlet.portletconfiguration.action;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.portlet.PortletConfigurationLayoutUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
@@ -60,8 +61,13 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Jorge Ferrer
+ * @author Raymond Augé
  */
 public class ActionUtil {
+
+	public static final String ACTION = "_ACTION_";
+
+	public static final String PRESELECTED = "_PRESELECTED_";
 
 	public static PortletPreferences getLayoutPortletSetup(
 			PortletRequest portletRequest, Portlet portlet)
@@ -92,9 +98,7 @@ public class ActionUtil {
 		LayoutTypePortlet layoutTypePortlet =
 			themeDisplay.getLayoutTypePortlet();
 
-		List<Portlet> portlets = layoutTypePortlet.getAllPortlets();
-
-		for (Portlet portlet : portlets) {
+		for (Portlet portlet : layoutTypePortlet.getAllPortlets()) {
 			for (PublicRenderParameter publicRenderParameter :
 					portlet.getPublicRenderParameters()) {
 
@@ -228,9 +232,11 @@ public class ActionUtil {
 		String portletId = ParamUtil.getString(
 			portletRequest, "portletResource");
 
+		Layout layout = PortletConfigurationLayoutUtil.getLayout(themeDisplay);
+
 		if (!PortletPermissionUtil.contains(
-				permissionChecker, themeDisplay.getLayout(), portletId,
-				ActionKeys.CONFIGURATION)) {
+				permissionChecker, themeDisplay.getScopeGroupId(), layout,
+				portletId, ActionKeys.CONFIGURATION)) {
 
 			throw new PrincipalException();
 		}

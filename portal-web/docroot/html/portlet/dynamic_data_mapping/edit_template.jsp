@@ -18,6 +18,7 @@
 
 <%
 String redirect = ParamUtil.getString(request, "redirect");
+boolean showBackURL = ParamUtil.getBoolean(request, "showBackURL", true);
 
 String portletResource = ParamUtil.getString(request, "portletResource");
 
@@ -122,6 +123,7 @@ if (Validator.isNotNull(structureAvailableFields)) {
 	<liferay-ui:header
 		backURL="<%= ddmDisplay.getEditTemplateBackURL(liferayPortletRequest, liferayPortletResponse, classNameId, classPK, portletResource) %>"
 		localizeTitle="<%= false %>"
+		showBackURL="<%= showBackURL %>"
 		title="<%= title %>"
 	/>
 
@@ -134,43 +136,43 @@ if (Validator.isNotNull(structureAvailableFields)) {
 			<liferay-ui:panel collapsible="<%= true %>" defaultState="closed" extended="<%= false %>" id="templateDetailsSectionPanel" persistState="<%= true %>" title="details">
 				<c:if test="<%= ddmDisplay.isShowStructureSelector() %>">
 					<aui:field-wrapper helpMessage="structure-help" label="structure">
-						<c:choose>
-							<c:when test="<%= classPK == 0 %>">
-								<liferay-ui:icon
-									image="add"
-									label="<%= true %>"
-									message="select"
-									url='<%= "javascript:" + renderResponse.getNamespace() + "openDDMStructureSelector();" %>'
-								/>
-							</c:when>
-							<c:otherwise>
-								<%= (structure == null) ? "" : structure.getName(locale) %>
-							</c:otherwise>
-						</c:choose>
+						<c:if test="<%= structure != null %>">
+							<%= HtmlUtil.escape(structure.getName(locale)) %>
+						</c:if>
+						<c:if test="<%= ((template == null) || (template.getClassPK() == 0)) %>">
+							<liferay-ui:icon
+								image="add"
+								label="<%= true %>"
+								message="select"
+								url='<%= "javascript:" + renderResponse.getNamespace() + "openDDMStructureSelector();" %>'
+							/>
+						</c:if>
 					</aui:field-wrapper>
 				</c:if>
 
-				<aui:select helpMessage='<%= (template == null) ? StringPool.BLANK : "changing-the-language-will-not-automatically-translate-the-existing-template-script" %>' label="language" name="language">
+				<c:if test="<%= type.equals(DDMTemplateConstants.TEMPLATE_TYPE_DISPLAY) %>">
+					<aui:select changesContext="<%= true %>" helpMessage='<%= (template == null) ? StringPool.BLANK : "changing-the-language-will-not-automatically-translate-the-existing-template-script" %>' label="language" name="language">
 
-					<%
-					for (String curLangType : ddmDisplay.getTemplateLanguageTypes()) {
-						StringBundler sb = new StringBundler(6);
+						<%
+						for (String curLangType : ddmDisplay.getTemplateLanguageTypes()) {
+							StringBundler sb = new StringBundler(6);
 
-						sb.append(LanguageUtil.get(pageContext, curLangType + "[stands-for]"));
-						sb.append(StringPool.SPACE);
-						sb.append(StringPool.OPEN_PARENTHESIS);
-						sb.append(StringPool.PERIOD);
-						sb.append(curLangType);
-						sb.append(StringPool.CLOSE_PARENTHESIS);
-					%>
+							sb.append(LanguageUtil.get(pageContext, curLangType + "[stands-for]"));
+							sb.append(StringPool.SPACE);
+							sb.append(StringPool.OPEN_PARENTHESIS);
+							sb.append(StringPool.PERIOD);
+							sb.append(curLangType);
+							sb.append(StringPool.CLOSE_PARENTHESIS);
+						%>
 
-						<aui:option label="<%= sb.toString() %>" selected="<%= language.equals(curLangType) %>" value="<%= curLangType %>" />
+							<aui:option label="<%= sb.toString() %>" selected="<%= language.equals(curLangType) %>" value="<%= curLangType %>" />
 
-					<%
-					}
-					%>
+						<%
+						}
+						%>
 
-				</aui:select>
+					</aui:select>
+				</c:if>
 
 				<aui:input name="description" />
 
@@ -308,6 +310,12 @@ if (Validator.isNotNull(structureAvailableFields)) {
 					window.<portlet:namespace />formBuilder.get('fields').each(A.rbind('<portlet:namespace />setFieldsHiddenAttributes', window, mode));
 
 					A.Array.each(window.<portlet:namespace />formBuilder.get('availableFields'), A.rbind('<portlet:namespace />setFieldsHiddenAttributes', window, mode));
+
+					var editingField = window.<portlet:namespace />formBuilder.editingField;
+
+					if (editingField) {
+						window.<portlet:namespace />formBuilder.propertyList.set('data', window.<portlet:namespace />formBuilder.getFieldProperties(editingField));
+					}
 				},
 				['aui-base']
 			);
@@ -377,7 +385,7 @@ if (Validator.isNotNull(structureAvailableFields)) {
 	</c:otherwise>
 </c:choose>
 
-<c:if test="<%= ddmDisplay.isShowStructureSelector() && (classPK == 0) %>">
+<c:if test="<%= ddmDisplay.isShowStructureSelector() && ((template == null) || (template.getClassPK() == 0)) %>">
 	<aui:script>
 		function <portlet:namespace />openDDMStructureSelector() {
 			Liferay.Util.openDDMPortlet(

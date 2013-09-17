@@ -30,6 +30,10 @@ long endDateTime = ParamUtil.getLong(request, "endDate");
 if (endDateTime > 0) {
 	endDate = new Date(endDateTime);
 }
+
+PortletDataContext portletDataContext = PortletDataContextFactoryUtil.createPreparePortletDataContext(themeDisplay, startDate, endDate);
+
+ManifestSummary manifestSummary = portletDataContext.getManifestSummary();
 %>
 
 <ul class="lfr-tree unstyled">
@@ -38,16 +42,19 @@ if (endDateTime > 0) {
 
 		<aui:input checked="<%= true %>" helpMessage="all-content-publish-help" id="allContent" label="all-content" name="<%= PortletDataHandlerKeys.PORTLET_DATA_ALL %>" type="radio" value="<%= true %>" />
 
-		<c:if test="<%= !selGroup.isStagingGroup() || !localPublishing %>">
+		<c:if test="<%= selGroup.isStagingGroup() && localPublishing %>">
 			<div class="hide" id="<portlet:namespace />globalContent">
 				<aui:fieldset cssClass="portlet-data-section" label="all-content">
-					<aui:input helpMessage="delete-portlet-data-help" label="delete-portlet-data-before-importing" name="<%= PortletDataHandlerKeys.DELETE_PORTLET_DATA %>" />
+					<aui:input label="delete-portlet-data-before-importing" name="<%= PortletDataHandlerKeys.DELETE_PORTLET_DATA %>" type="checkbox" />
 
-					<ul id="<portlet:namespace />showDeleteContentWarning">
-						<div class="alert alert-error">
-							<liferay-ui:message key="delete-content-before-importing-warning" />
-							<liferay-ui:message key="delete-content-before-importing-suggestion" />
-						</div>
+					<ul class="unstyled" id="<portlet:namespace />showDeleteContentWarning">
+						<li>
+							<div class="alert alert-block">
+								<liferay-ui:message key="delete-content-before-importing-warning" />
+
+								<liferay-ui:message key="delete-content-before-importing-suggestion" />
+							</div>
+						</li>
 					</ul>
 
 					<aui:script>
@@ -102,8 +109,6 @@ if (endDateTime > 0) {
 												monthParam="startDateMonth"
 												monthValue="<%= yesterday.get(Calendar.MONTH) %>"
 												yearParam="startDateYear"
-												yearRangeEnd="<%= yesterday.get(Calendar.YEAR) %>"
-												yearRangeStart="<%= yesterday.get(Calendar.YEAR) - 100 %>"
 												yearValue="<%= yesterday.get(Calendar.YEAR) %>"
 											/>
 
@@ -115,7 +120,6 @@ if (endDateTime > 0) {
 												disabled="<%= false %>"
 												hourParam='<%= "startDateHour" %>'
 												hourValue="<%= yesterday.get(Calendar.HOUR) %>"
-												minuteInterval="<%= 1 %>"
 												minuteParam='<%= "startDateMinute" %>'
 												minuteValue="<%= yesterday.get(Calendar.MINUTE) %>"
 											/>
@@ -131,8 +135,6 @@ if (endDateTime > 0) {
 												monthParam="endDateMonth"
 												monthValue="<%= today.get(Calendar.MONTH) %>"
 												yearParam="endDateYear"
-												yearRangeEnd="<%= today.get(Calendar.YEAR) %>"
-												yearRangeStart="<%= today.get(Calendar.YEAR) - 100 %>"
 												yearValue="<%= today.get(Calendar.YEAR) %>"
 											/>
 
@@ -144,7 +146,6 @@ if (endDateTime > 0) {
 												disabled="<%= false %>"
 												hourParam='<%= "endDateHour" %>'
 												hourValue="<%= today.get(Calendar.HOUR) %>"
-												minuteInterval="<%= 1 %>"
 												minuteParam='<%= "endDateMinute" %>'
 												minuteValue="<%= today.get(Calendar.MINUTE) %>"
 											/>
@@ -152,13 +153,13 @@ if (endDateTime > 0) {
 									</li>
 								</ul>
 
-								<aui:input cssClass="input-container" id="rangeLast" inlineField="<%= true %>" label="last" name="range" type="radio" value="last" />
+								<aui:input id="rangeLast" inlineField="<%= true %>" label="last" name="range" type="radio" value="last" />
 
-								<aui:select label="" name="last">
-									<aui:option value="12"><%= LanguageUtil.format(pageContext, "x-hours", "12") %></aui:option>
-									<aui:option value="24"><%= LanguageUtil.format(pageContext, "x-hours", "24") %></aui:option>
-									<aui:option value="48"><%= LanguageUtil.format(pageContext, "x-hours", "48") %></aui:option>
-									<aui:option value="168"><%= LanguageUtil.format(pageContext, "x-days", "7") %></aui:option>
+								<aui:select inlineField="<%= true %>" label="" name="last">
+									<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "12") %>' value="12" />
+									<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "24") %>' value="24" />
+									<aui:option label='<%= LanguageUtil.format(pageContext, "x-hours", "48") %>' value="48" />
+									<aui:option label='<%= LanguageUtil.format(pageContext, "x-days", "7") %>' value="168" />
 								</aui:select>
 							</aui:fieldset>
 						</li>
@@ -202,21 +203,20 @@ if (endDateTime > 0) {
 
 						String portletTitle = PortalUtil.getPortletTitle(portlet, application, locale);
 
-						PortletDataContext portletDataContext = PortletDataContextFactoryUtil.createPreparePortletDataContext(themeDisplay, startDate, endDate);
-
 						PortletDataHandler portletDataHandler = portlet.getPortletDataHandlerInstance();
 
 						portletDataHandler.prepareManifestSummary(portletDataContext);
 
-						ManifestSummary manifestSummary = portletDataContext.getManifestSummary();
-
 						long exportModelCount = portletDataHandler.getExportModelCount(manifestSummary);
+
+						long modelDeletionCount = manifestSummary.getModelDeletionCount(portletDataHandler.getDeletionSystemEventStagedModelTypes());
 					%>
 
-						<c:if test="<%= GetterUtil.getBoolean(liveGroupTypeSettings.getProperty(StagingUtil.getStagedPortletId(portlet.getRootPortletId())), portletDataHandler.isPublishToLiveByDefault()) && (exportModelCount != 0) %>">
+						<c:if test="<%= GetterUtil.getBoolean(liveGroupTypeSettings.getProperty(StagingUtil.getStagedPortletId(portlet.getRootPortletId())), portletDataHandler.isPublishToLiveByDefault()) && ((exportModelCount != 0) || (modelDeletionCount !=0)) %>">
 							<li class="tree-item">
 								<liferay-util:buffer var="badgeHTML">
 									<span class="badge badge-info"><%= exportModelCount > 0 ? exportModelCount : StringPool.BLANK %></span>
+									<span class="badge badge-warning deletions"><%= modelDeletionCount > 0 ? (modelDeletionCount + StringPool.SPACE + LanguageUtil.get(pageContext, "deletions")) : StringPool.BLANK %></span>
 								</liferay-util:buffer>
 
 								<aui:input label="<%= portletTitle + badgeHTML %>" name="<%= PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE + portlet.getRootPortletId() %>" type="checkbox" value="<%= true %>" />
@@ -225,7 +225,7 @@ if (endDateTime > 0) {
 								PortletDataHandlerControl[] exportControls = portletDataHandler.getExportControls();
 								PortletDataHandlerControl[] metadataControls = portletDataHandler.getExportMetadataControls();
 
-								if (Validator.isNotNull(exportControls) || Validator.isNotNull(metadataControls)) {
+								if (ArrayUtil.isNotEmpty(exportControls) || ArrayUtil.isNotEmpty(metadataControls)) {
 								%>
 
 									<div class="hide" id="<portlet:namespace />content_<%= portlet.getRootPortletId() %>">
@@ -242,7 +242,7 @@ if (endDateTime > 0) {
 															request.setAttribute("render_controls.jsp-portletDisabled", !portletDataHandler.isPublishToLiveByDefault());
 														%>
 
-															<aui:field-wrapper label='<%= Validator.isNotNull(metadataControls) ? "content" : StringPool.BLANK %>'>
+															<aui:field-wrapper label='<%= ArrayUtil.isNotEmpty(metadataControls) ? "content" : StringPool.BLANK %>'>
 																<ul class="lfr-tree unstyled">
 																	<liferay-util:include page="/html/portlet/layouts_admin/render_controls.jsp" />
 																</ul>
@@ -265,7 +265,7 @@ if (endDateTime > 0) {
 
 															PortletDataHandlerControl[] childrenControls = control.getChildren();
 
-															if ((childrenControls != null) && (childrenControls.length > 0)) {
+															if (ArrayUtil.isNotEmpty(childrenControls)) {
 																request.setAttribute("render_controls.jsp-controls", childrenControls);
 															%>
 
@@ -318,17 +318,30 @@ if (endDateTime > 0) {
 
 				</ul>
 
-				<aui:fieldset cssClass="comments-and-ratings" label="for-each-of-the-selected-content-types,-publish-their">
-					<span class="selected-labels" id="<portlet:namespace />selectedCommentsAndRatings"></span>
+				<aui:fieldset cssClass="content-options" label="for-each-of-the-selected-content-types,-publish-their">
+					<span class="selected-labels" id="<portlet:namespace />selectedContentOptions"></span>
 
-					<aui:a cssClass="modify-link" href="javascript:;" id="commentsAndRatingsLink" label="change" method="get" />
+					<aui:a cssClass="modify-link" href="javascript:;" id="contentOptionsLink" label="change" method="get" />
 
-					<div class="hide" id="<portlet:namespace />commentsAndRatings">
+					<div class="hide" id="<portlet:namespace />contentOptions">
 						<ul class="lfr-tree unstyled">
 							<li class="tree-item">
 								<aui:input label="comments" name="<%= PortletDataHandlerKeys.COMMENTS %>" type="checkbox" value="<%= true %>" />
 
 								<aui:input label="ratings" name="<%= PortletDataHandlerKeys.RATINGS %>" type="checkbox" value="<%= true %>" />
+
+								<%
+								long modelDeletionCount = manifestSummary.getModelDeletionCount();
+								%>
+
+								<c:if test="<%= modelDeletionCount != 0 %>">
+
+									<%
+									String deletionsLabel = LanguageUtil.get(pageContext, "deletions") + (modelDeletionCount > 0 ? " (" + modelDeletionCount + ")" : StringPool.BLANK);
+									%>
+
+									<aui:input data-name="<%= deletionsLabel %>" helpMessage="deletions-help" label="<%= deletionsLabel %>" name="<%= PortletDataHandlerKeys.DELETIONS %>" type="checkbox" value="<%= true %>" />
+								</c:if>
 							</li>
 						</ul>
 					</div>

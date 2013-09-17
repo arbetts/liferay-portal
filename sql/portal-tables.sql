@@ -60,7 +60,7 @@ create table AnnouncementsEntry (
 	classNameId LONG,
 	classPK LONG,
 	title VARCHAR(75) null,
-	content STRING null,
+	content TEXT null,
 	url STRING null,
 	type_ VARCHAR(75) null,
 	displayDate DATE null,
@@ -273,6 +273,7 @@ create table BookmarksEntry (
 	modifiedDate DATE null,
 	resourceBlockId LONG,
 	folderId LONG,
+	treePath STRING null,
 	name VARCHAR(255) null,
 	url STRING null,
 	description STRING null,
@@ -295,6 +296,7 @@ create table BookmarksFolder (
 	modifiedDate DATE null,
 	resourceBlockId LONG,
 	parentFolderId LONG,
+	treePath STRING null,
 	name VARCHAR(75) null,
 	description STRING null,
 	status INTEGER,
@@ -564,14 +566,13 @@ create table DLFileEntry (
 	companyId LONG,
 	userId LONG,
 	userName VARCHAR(75) null,
-	versionUserId LONG,
-	versionUserName VARCHAR(75) null,
 	createDate DATE null,
 	modifiedDate DATE null,
 	classNameId LONG,
 	classPK LONG,
 	repositoryId LONG,
 	folderId LONG,
+	treePath STRING null,
 	name VARCHAR(255) null,
 	extension VARCHAR(75) null,
 	mimeType VARCHAR(75) null,
@@ -647,6 +648,7 @@ create table DLFileShortcut (
 	repositoryId LONG,
 	folderId LONG,
 	toFileEntryId LONG,
+	treePath STRING null,
 	active_ BOOLEAN,
 	status INTEGER,
 	statusByUserId LONG,
@@ -666,6 +668,7 @@ create table DLFileVersion (
 	repositoryId LONG,
 	folderId LONG,
 	fileEntryId LONG,
+	treePath STRING null,
 	extension VARCHAR(75) null,
 	mimeType VARCHAR(75) null,
 	title VARCHAR(255) null,
@@ -694,6 +697,7 @@ create table DLFolder (
 	repositoryId LONG,
 	mountPoint BOOLEAN,
 	parentFolderId LONG,
+	treePath STRING null,
 	name VARCHAR(100) null,
 	description STRING null,
 	lastPostDate DATE null,
@@ -704,6 +708,14 @@ create table DLFolder (
 	statusByUserId LONG,
 	statusByUserName VARCHAR(75) null,
 	statusDate DATE null
+);
+
+create table DLSyncEvent (
+	syncEventId LONG not null primary key,
+	modifiedTime LONG,
+	event VARCHAR(75) null,
+	type_ VARCHAR(75) null,
+	typePK LONG
 );
 
 create table EmailAddress (
@@ -766,7 +778,7 @@ create table Group_ (
 	classPK LONG,
 	parentGroupId LONG,
 	liveGroupId LONG,
-	treePath VARCHAR(75) null,
+	treePath STRING null,
 	name VARCHAR(150) null,
 	description STRING null,
 	type_ INTEGER,
@@ -819,6 +831,7 @@ create table JournalArticle (
 	folderId LONG,
 	classNameId LONG,
 	classPK LONG,
+	treePath STRING null,
 	articleId VARCHAR(75) null,
 	version DOUBLE,
 	title STRING null,
@@ -906,6 +919,7 @@ create table JournalFolder (
 	createDate DATE null,
 	modifiedDate DATE null,
 	parentFolderId LONG,
+	treePath STRING null,
 	name VARCHAR(100) null,
 	description STRING null,
 	status INTEGER,
@@ -2055,6 +2069,8 @@ create table SystemEvent (
 	classPK LONG,
 	classUuid VARCHAR(75) null,
 	referrerClassNameId LONG,
+	parentSystemEventId LONG,
+	systemEventSetKey LONG,
 	type_ INTEGER,
 	extraData TEXT null
 );
@@ -2092,6 +2108,7 @@ create table TrashEntry (
 	createDate DATE null,
 	classNameId LONG,
 	classPK LONG,
+	systemEventSetKey LONG,
 	typeSettings TEXT null,
 	status INTEGER
 );

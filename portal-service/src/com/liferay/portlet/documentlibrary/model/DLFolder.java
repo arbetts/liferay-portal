@@ -31,6 +31,10 @@ public interface DLFolder extends DLFolderModel, PersistedModel {
 	 *
 	 * Never modify this interface directly. Add methods to {@link com.liferay.portlet.documentlibrary.model.impl.DLFolderImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	public java.lang.String buildTreePath()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	public java.util.List<java.lang.Long> getAncestorFolderIds()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
@@ -51,9 +55,6 @@ public interface DLFolder extends DLFolderModel, PersistedModel {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
-	@Override
-	public com.liferay.portal.kernel.lar.StagedModelType getStagedModelType();
-
 	public com.liferay.portlet.documentlibrary.model.DLFolder getTrashContainer();
 
 	public boolean hasInheritableLock();
@@ -61,8 +62,6 @@ public interface DLFolder extends DLFolderModel, PersistedModel {
 	public boolean hasLock();
 
 	public boolean isInHiddenFolder();
-
-	public boolean isInTrashContainer();
 
 	public boolean isLocked();
 

@@ -45,6 +45,7 @@ import com.liferay.portal.util.PropsImpl;
 import com.liferay.portal.util.PropsValues;
 
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -65,6 +66,7 @@ import java.nio.channels.SocketChannel;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -108,7 +110,7 @@ public class HttpClientSPIAgentTest {
 
 		SPIConfiguration spiConfiguration = new SPIConfiguration(
 			null, null, serverSocket.getLocalPort(),
-			_spiConfiguration.getBaseDir(), null, null);
+			_spiConfiguration.getBaseDir(), null, null, null);
 
 		HttpClientSPIAgent httpClientSPIAgent = new HttpClientSPIAgent(
 			spiConfiguration,
@@ -579,7 +581,7 @@ public class HttpClientSPIAgentTest {
 		HttpClientSPIAgent httpClientSPIAgent = new HttpClientSPIAgent(
 			new SPIConfiguration(
 				null, null, serverSocket.getLocalPort(),
-				_spiConfiguration.getBaseDir(), null, null),
+				_spiConfiguration.getBaseDir(), null, null, null),
 			new MockRegistrationReference(new MockIntraband()));
 
 		SocketChannel socketChannel = SocketChannel.open(
@@ -887,7 +889,7 @@ public class HttpClientSPIAgentTest {
 	}
 
 	@Test
-	public void testTransferResponse() throws IOException {
+	public void testTransferResponse() throws Exception {
 
 		// Exception
 
@@ -943,9 +945,18 @@ public class HttpClientSPIAgentTest {
 
 		// Response
 
+		SPIAgentRequest spiAgentRequest = new SPIAgentRequest(
+			new MockHttpServletRequest());
+
+		File tempFile = File.createTempFile(
+			HttpClientSPIAgentTest.class.getName(), null);
+
+		Assert.assertTrue(tempFile.exists());
+
+		spiAgentRequest.requestBodyFile = tempFile;
+
 		mockHttpServletRequest.setAttribute(
-			WebKeys.SPI_AGENT_REQUEST,
-			new SPIAgentRequest(new MockHttpServletRequest()));
+			WebKeys.SPI_AGENT_REQUEST, spiAgentRequest);
 
 		recordSPIAgentResponse = new RecordSPIAgentResponse();
 
@@ -963,6 +974,7 @@ public class HttpClientSPIAgentTest {
 		httpClientSPIAgent.transferResponse(
 			mockHttpServletRequest, bufferCacheServletResponse, null);
 
+		Assert.assertFalse(tempFile.exists());
 		Assert.assertNull(
 			mockHttpServletRequest.getAttribute(WebKeys.SPI_AGENT_REQUEST));
 		Assert.assertNull(
@@ -983,6 +995,46 @@ public class HttpClientSPIAgentTest {
 		Assert.assertSame(
 			mockHttpServletResponse.getOutputStream(),
 			recordSPIAgentResponse._outputStream);
+
+		// Undeletable request body file
+
+		spiAgentRequest = new SPIAgentRequest(new MockHttpServletRequest());
+
+		tempFile = File.createTempFile(
+			HttpClientSPIAgentTest.class.getName(), null);
+
+		Assert.assertTrue(tempFile.exists());
+
+		spiAgentRequest.requestBodyFile = tempFile;
+
+		mockHttpServletRequest.setAttribute(
+			WebKeys.SPI_AGENT_REQUEST, spiAgentRequest);
+
+		recordSPIAgentResponse = new RecordSPIAgentResponse();
+
+		mockHttpServletRequest.setAttribute(
+			WebKeys.SPI_AGENT_RESPONSE, recordSPIAgentResponse);
+
+		mockHttpServletResponse = new MockHttpServletResponse();
+
+		mockHttpServletRequest.setAttribute(
+			WebKeys.SPI_AGENT_ORIGINAL_RESPONSE, mockHttpServletResponse);
+
+		bufferCacheServletResponse = new BufferCacheServletResponse(
+			new MockHttpServletResponse());
+
+		Assert.assertTrue(tempFile.delete());
+
+		httpClientSPIAgent.transferResponse(
+			mockHttpServletRequest, bufferCacheServletResponse, null);
+
+		Class<?> clazz = Class.forName("java.io.DeleteOnExitHook");
+
+		Field filesField = ReflectionUtil.getDeclaredField(clazz, "files");
+
+		Set<String> files = (Set<String>)filesField.get(null);
+
+		Assert.assertTrue(files.contains(tempFile.getPath()));
 	}
 
 	protected void closePeers(Socket socket, ServerSocket serverSocket)
@@ -1038,7 +1090,7 @@ public class HttpClientSPIAgentTest {
 	}
 
 	private SPIConfiguration _spiConfiguration = new SPIConfiguration(
-		null, null, 1234, "baseDir", null, null);
+		null, null, 1234, "baseDir", null, null, null);
 
 	private static class DirectMailboxIntraBand extends MockIntraband {
 

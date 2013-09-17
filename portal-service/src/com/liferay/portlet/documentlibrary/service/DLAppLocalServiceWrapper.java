@@ -563,6 +563,7 @@ public class DLAppLocalServiceWrapper implements DLAppLocalService,
 	*
 	* @param userId the primary key of the user
 	* @param fileEntryId the primary key of the file entry
+	* @return the file entry
 	* @throws PortalException if the file entry could not be found
 	* @throws SystemException if a system exception occurred
 	*/
@@ -572,6 +573,16 @@ public class DLAppLocalServiceWrapper implements DLAppLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _dlAppLocalService.moveFileEntryToTrash(userId, fileEntryId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.repository.model.Folder moveFolder(
+		long userId, long folderId, long parentFolderId,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _dlAppLocalService.moveFolder(userId, folderId, parentFolderId,
+			serviceContext);
 	}
 
 	/**

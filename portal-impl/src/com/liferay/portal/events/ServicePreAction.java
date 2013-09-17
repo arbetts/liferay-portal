@@ -81,6 +81,7 @@ import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.permission.GroupPermissionUtil;
 import com.liferay.portal.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.service.permission.PortalPermissionUtil;
+import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.theme.ThemeDisplayFactory;
 import com.liferay.portal.util.LayoutClone;
@@ -293,13 +294,6 @@ public class ServicePreAction extends Action {
 
 		PermissionThreadLocal.setPermissionChecker(permissionChecker);
 
-		// Locale
-
-		String i18nLanguageId = (String)request.getAttribute(
-			WebKeys.I18N_LANGUAGE_ID);
-
-		Locale locale = PortalUtil.getLocale(request, response, true);
-
 		// Cookie support
 
 		try {
@@ -331,6 +325,8 @@ public class ServicePreAction extends Action {
 
 		long plid = ParamUtil.getLong(request, "p_l_id");
 
+		boolean viewableSourceGroup = true;
+
 		if (plid > 0) {
 			layout = LayoutLocalServiceUtil.getLayout(plid);
 
@@ -347,7 +343,7 @@ public class ServicePreAction extends Action {
 					layout = new VirtualLayout(layout, sourceGroup);
 				}
 				else {
-					layout = null;
+					viewableSourceGroup = false;
 				}
 			}
 		}
@@ -393,7 +389,7 @@ public class ServicePreAction extends Action {
 				String portletControlPanelEntryCategory =
 					portlet.getControlPanelEntryCategory();
 
-				if (!controlPanelCategory.equals(
+				if (!controlPanelCategory.startsWith(
 						PortletCategoryKeys.CURRENT_SITE) &&
 					portletControlPanelEntryCategory.startsWith(
 						PortletCategoryKeys.SITE_ADMINISTRATION)) {
@@ -402,7 +398,7 @@ public class ServicePreAction extends Action {
 						PortletCategoryKeys.SITES;
 				}
 
-				if (!controlPanelCategory.equals(
+				if (!controlPanelCategory.startsWith(
 						PortletCategoryKeys.CURRENT_SITE) &&
 					Validator.isNotNull(portletControlPanelEntryCategory)) {
 
@@ -424,11 +420,13 @@ public class ServicePreAction extends Action {
 					layout.getGroupId(), layout.isPrivateLayout(),
 					LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 			}
-			else if (!viewableGroup && group.isStagingGroup()) {
+			else if ((!viewableGroup || !viewableSourceGroup) &&
+					 group.isStagingGroup()) {
+
 				layout = null;
 			}
 			else if (!isLoginRequest(request) &&
-					 (!viewableGroup ||
+					 ((!viewableGroup || !viewableSourceGroup) ||
 					  (!redirectToDefaultLayout &&
 					   !hasAccessPermission(
 						   permissionChecker, layout, doAsGroupId,
@@ -511,6 +509,7 @@ public class ServicePreAction extends Action {
 		LayoutSet layoutSet = null;
 
 		boolean hasCustomizeLayoutPermission = false;
+		boolean hasDeleteLayoutPermission = false;
 		boolean hasUpdateLayoutPermission = false;
 
 		boolean customizedView = SessionParamUtil.getBoolean(
@@ -520,6 +519,8 @@ public class ServicePreAction extends Action {
 			if (!layout.isTypeControlPanel()) {
 				hasCustomizeLayoutPermission = LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.CUSTOMIZE);
+				hasDeleteLayoutPermission = LayoutPermissionUtil.contains(
+					permissionChecker, layout, ActionKeys.DELETE);
 				hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.UPDATE);
 			}
@@ -591,7 +592,7 @@ public class ServicePreAction extends Action {
 
 				PortalPreferences portalPreferences =
 					PortletPreferencesFactoryUtil.getPortalPreferences(
-						companyId, user.getUserId(), true);
+						user.getUserId(), true);
 
 				layoutTypePortlet.setPortalPreferences(portalPreferences);
 			}
@@ -645,6 +646,13 @@ public class ServicePreAction extends Action {
 			request.setAttribute(WebKeys.LAYOUT, layout);
 			request.setAttribute(WebKeys.LAYOUTS, layouts);
 		}
+
+		// Locale
+
+		String i18nLanguageId = (String)request.getAttribute(
+			WebKeys.I18N_LANGUAGE_ID);
+
+		Locale locale = PortalUtil.getLocale(request, response, true);
 
 		// Scope
 
@@ -738,51 +746,26 @@ public class ServicePreAction extends Action {
 		themeDisplay.setCompanyLogo(companyLogo);
 		themeDisplay.setCompanyLogoHeight(companyLogoHeight);
 		themeDisplay.setCompanyLogoWidth(companyLogoWidth);
-		themeDisplay.setRealCompanyLogo(realCompanyLogo);
-		themeDisplay.setRealCompanyLogoHeight(realCompanyLogoHeight);
-		themeDisplay.setRealCompanyLogoWidth(realCompanyLogoWidth);
-		themeDisplay.setUser(user);
-		themeDisplay.setRealUser(realUser);
+		themeDisplay.setControlPanelCategory(controlPanelCategory);
+		themeDisplay.setDoAsGroupId(doAsGroupId);
 		themeDisplay.setDoAsUserId(doAsUserId);
 		themeDisplay.setDoAsUserLanguageId(doAsUserLanguageId);
-		themeDisplay.setDoAsGroupId(doAsGroupId);
-		themeDisplay.setRefererGroupId(refererGroupId);
-		themeDisplay.setRefererPlid(refererPlid);
-		themeDisplay.setControlPanelCategory(controlPanelCategory);
-		themeDisplay.setLayoutSet(layoutSet);
-		themeDisplay.setLayoutSetLogo(layoutSetLogo);
-		themeDisplay.setLayout(layout);
-		themeDisplay.setLayouts(layouts);
-		themeDisplay.setUnfilteredLayouts(unfilteredLayouts);
-		themeDisplay.setPlid(plid);
-		themeDisplay.setPpid(ppid);
-		themeDisplay.setLayoutTypePortlet(layoutTypePortlet);
-		themeDisplay.setScopeGroupId(scopeGroupId);
-		themeDisplay.setSiteGroupId(siteGroupId);
-		themeDisplay.setSignedIn(signedIn);
-		themeDisplay.setPermissionChecker(permissionChecker);
-		themeDisplay.setLocale(locale);
-		themeDisplay.setLanguageId(LocaleUtil.toLanguageId(locale));
 		themeDisplay.setI18nLanguageId(i18nLanguageId);
 		themeDisplay.setI18nPath(i18nPath);
-		themeDisplay.setTimeZone(timeZone);
-		themeDisplay.setLookAndFeel(theme, colorScheme);
-		themeDisplay.setThemeCssFastLoad(themeCssFastLoad);
-		themeDisplay.setThemeImagesFastLoad(themeImagesFastLoad);
-		themeDisplay.setThemeJsBarebone(themeJsBarebone);
-		themeDisplay.setThemeJsFastLoad(themeJsFastLoad);
-		themeDisplay.setServerName(request.getServerName());
-		themeDisplay.setServerPort(request.getServerPort());
-		themeDisplay.setSecure(request.isSecure());
+		themeDisplay.setIsolated(isolated);
+		themeDisplay.setLanguageId(LocaleUtil.toLanguageId(locale));
+		themeDisplay.setLayout(layout);
+		themeDisplay.setLayouts(layouts);
+		themeDisplay.setLayoutSet(layoutSet);
+		themeDisplay.setLayoutSetLogo(layoutSetLogo);
+		themeDisplay.setLayoutTypePortlet(layoutTypePortlet);
 		themeDisplay.setLifecycle(lifecycle);
 		themeDisplay.setLifecycleAction(lifecycle.equals("1"));
 		themeDisplay.setLifecycleEvent(lifecycle.equals("3"));
 		themeDisplay.setLifecycleRender(lifecycle.equals("0"));
 		themeDisplay.setLifecycleResource(lifecycle.equals("2"));
-		themeDisplay.setStateExclusive(LiferayWindowState.isExclusive(request));
-		themeDisplay.setStateMaximized(LiferayWindowState.isMaximized(request));
-		themeDisplay.setStatePopUp(LiferayWindowState.isPopUp(request));
-		themeDisplay.setIsolated(isolated);
+		themeDisplay.setLocale(locale);
+		themeDisplay.setLookAndFeel(theme, colorScheme);
 		themeDisplay.setPathApplet(contextPath.concat("/applets"));
 		themeDisplay.setPathCms(contextPath.concat("/cms"));
 		themeDisplay.setPathContext(contextPath);
@@ -795,6 +778,33 @@ public class ServicePreAction extends Action {
 		themeDisplay.setPathJavaScript(contextPath.concat("/html/js"));
 		themeDisplay.setPathMain(mainPath);
 		themeDisplay.setPathSound(contextPath.concat("/html/sound"));
+		themeDisplay.setPermissionChecker(permissionChecker);
+		themeDisplay.setPlid(plid);
+		themeDisplay.setPpid(ppid);
+		themeDisplay.setRealCompanyLogo(realCompanyLogo);
+		themeDisplay.setRealCompanyLogoHeight(realCompanyLogoHeight);
+		themeDisplay.setRealCompanyLogoWidth(realCompanyLogoWidth);
+		themeDisplay.setRealUser(realUser);
+		themeDisplay.setRefererGroupId(refererGroupId);
+		themeDisplay.setRefererPlid(refererPlid);
+		themeDisplay.setScopeGroupId(scopeGroupId);
+		themeDisplay.setSecure(request.isSecure());
+		themeDisplay.setServerName(request.getServerName());
+		themeDisplay.setServerPort(request.getServerPort());
+		themeDisplay.setSignedIn(signedIn);
+		themeDisplay.setSiteDefaultLocale(
+			PortalUtil.getSiteDefaultLocale(siteGroupId));
+		themeDisplay.setSiteGroupId(siteGroupId);
+		themeDisplay.setStateExclusive(LiferayWindowState.isExclusive(request));
+		themeDisplay.setStateMaximized(LiferayWindowState.isMaximized(request));
+		themeDisplay.setStatePopUp(LiferayWindowState.isPopUp(request));
+		themeDisplay.setThemeCssFastLoad(themeCssFastLoad);
+		themeDisplay.setThemeImagesFastLoad(themeImagesFastLoad);
+		themeDisplay.setThemeJsBarebone(themeJsBarebone);
+		themeDisplay.setThemeJsFastLoad(themeJsFastLoad);
+		themeDisplay.setTimeZone(timeZone);
+		themeDisplay.setUnfilteredLayouts(unfilteredLayouts);
+		themeDisplay.setUser(user);
 
 		// Icons
 
@@ -813,10 +823,18 @@ public class ServicePreAction extends Action {
 
 		themeDisplay.setShowHomeIcon(true);
 		themeDisplay.setShowMyAccountIcon(signedIn);
-		themeDisplay.setShowPageSettingsIcon(false);
+		themeDisplay.setShowPageSettingsIcon(hasDeleteLayoutPermission);
 		themeDisplay.setShowPortalIcon(true);
 		themeDisplay.setShowSignInIcon(!signedIn);
-		themeDisplay.setShowSignOutIcon(signedIn);
+
+		boolean showSignOutIcon = signedIn;
+
+		if (themeDisplay.isImpersonated()) {
+			showSignOutIcon = false;
+		}
+
+		themeDisplay.setShowSignOutIcon(showSignOutIcon);
+
 		themeDisplay.setShowStagingIcon(false);
 
 		boolean showSiteAdministrationIcon = false;
@@ -901,6 +919,8 @@ public class ServicePreAction extends Action {
 
 		themeDisplay.setURLSiteAdministration(siteAdministrationURL);
 
+		long controlPanelPlid = PortalUtil.getControlPanelPlid(companyId);
+
 		if (layout != null) {
 			if (layout.isTypePortlet()) {
 				boolean freeformLayout =
@@ -936,8 +956,6 @@ public class ServicePreAction extends Action {
 						"Liferay.Dockbar.loadAddPanel();");
 				}
 			}
-
-			long controlPanelPlid = PortalUtil.getControlPanelPlid(companyId);;
 
 			if (hasUpdateLayoutPermission) {
 				themeDisplay.setShowPageSettingsIcon(true);
@@ -1132,7 +1150,6 @@ public class ServicePreAction extends Action {
 			if (group.hasStagingGroup() && !group.isStagingGroup()) {
 				themeDisplay.setShowAddContentIcon(false);
 				themeDisplay.setShowLayoutTemplatesIcon(false);
-				themeDisplay.setShowPageSettingsIcon(false);
 				themeDisplay.setURLPublishToLive(null);
 			}
 
@@ -1239,15 +1256,24 @@ public class ServicePreAction extends Action {
 		if (group.hasStagingGroup() && !group.isStagingGroup()) {
 			themeDisplay.setShowLayoutTemplatesIcon(false);
 			themeDisplay.setShowPageCustomizationIcon(false);
-			themeDisplay.setShowPageSettingsIcon(false);
-			themeDisplay.setShowSiteAdministrationIcon(false);
 			themeDisplay.setShowSiteMapSettingsIcon(false);
 			themeDisplay.setShowSiteSettingsIcon(false);
 		}
 
 		themeDisplay.setURLPortal(portalURL.concat(contextPath));
 
-		String urlSignIn = mainPath.concat(_PATH_PORTAL_LOGIN);
+		boolean secure = false;
+
+		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS ||
+			request.isSecure()) {
+
+			secure = true;
+		}
+
+		String securePortalURL = PortalUtil.getPortalURL(request, secure);
+
+		String urlSignIn = securePortalURL.concat(mainPath).concat(
+			_PATH_PORTAL_LOGIN);
 
 		if (layout != null) {
 			urlSignIn = HttpUtil.addParameter(
@@ -1259,14 +1285,61 @@ public class ServicePreAction extends Action {
 		themeDisplay.setURLSignOut(mainPath.concat(_PATH_PORTAL_LOGOUT));
 
 		PortletURL updateManagerURL = new PortletURLImpl(
-			request, PortletKeys.UPDATE_MANAGER, plid,
+			request, PortletKeys.MARKETPLACE_STORE, controlPanelPlid,
 			PortletRequest.RENDER_PHASE);
 
-		updateManagerURL.setParameter("struts_action", "/update_manager/view");
-		updateManagerURL.setPortletMode(PortletMode.VIEW);
-		updateManagerURL.setWindowState(WindowState.MAXIMIZED);
-
 		themeDisplay.setURLUpdateManager(updateManagerURL);
+
+		// Control Panel redirects
+
+		if (group.isControlPanel() && Validator.isNull(ppid)) {
+			if (controlPanelCategory.startsWith(
+					PortletCategoryKeys.CURRENT_SITE)) {
+
+				if (controlPanelCategory.indexOf(StringPool.PERIOD) == -1) {
+					controlPanelCategory = StringUtil.replace(
+						controlPanelCategory, PortletCategoryKeys.CURRENT_SITE,
+						PortletCategoryKeys.SITE_ADMINISTRATION);
+				}
+				else {
+					controlPanelCategory = StringUtil.replace(
+						controlPanelCategory,
+						PortletCategoryKeys.CURRENT_SITE + StringPool.PERIOD,
+						PortletCategoryKeys.SITE_ADMINISTRATION);
+				}
+			}
+
+			if (controlPanelCategory.equals(
+					PortletCategoryKeys.SITE_ADMINISTRATION)) {
+
+				Portlet firstPortlet =
+					PortalUtil.getFirstSiteAdministrationPortlet(themeDisplay);
+
+				String redirect = HttpUtil.setParameter(
+					currentURL, "p_p_id", firstPortlet.getPortletId());
+
+				response.sendRedirect(
+					PortalUtil.getAbsoluteURL(request, redirect));
+			}
+			else {
+				List<Portlet> portlets = PortalUtil.getControlPanelPortlets(
+					controlPanelCategory, themeDisplay);
+
+				for (Portlet portlet : portlets) {
+					if (PortletPermissionUtil.hasControlPanelAccessPermission(
+							permissionChecker, scopeGroupId, portlet)) {
+
+						String redirect = HttpUtil.setParameter(
+							currentURL, "p_p_id", portlet.getPortletId());
+
+						response.sendRedirect(
+							PortalUtil.getAbsoluteURL(request, redirect));
+
+						break;
+					}
+				}
+			}
+		}
 
 		return themeDisplay;
 	}
@@ -1751,7 +1824,9 @@ public class ServicePreAction extends Action {
 				return false;
 			}
 
-			if (controlPanelCategory.equals(PortletCategoryKeys.CURRENT_SITE)) {
+			if (controlPanelCategory.startsWith(
+					PortletCategoryKeys.CURRENT_SITE)) {
+
 				if (doAsGroupId <= 0) {
 					return false;
 				}

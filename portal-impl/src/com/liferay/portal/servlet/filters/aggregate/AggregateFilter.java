@@ -37,7 +37,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.servlet.filters.IgnoreModuleRequestFilter;
 import com.liferay.portal.servlet.filters.dynamiccss.DynamicCSSUtil;
 import com.liferay.portal.util.JavaScriptBundleUtil;
-import com.liferay.portal.util.LimitedFilesCache;
 import com.liferay.portal.util.MinifierUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
@@ -60,11 +59,12 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Brian Wing Shun Chan
  * @author Raymond Augé
+ * @author Eduardo Lundgren
  */
 public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 	/**
-	 * @see DynamicCSSUtil#_propagateQueryString(String, String)
+	 * @see DynamicCSSUtil#propagateQueryString(String, String)
 	 */
 	public static String aggregateCss(
 			AggregateContext aggregateContext, String content)
@@ -137,46 +137,31 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 					importContent = StringPool.BLANK;
 				}
 
-				String importDir = StringPool.BLANK;
+				String importDirName = StringPool.BLANK;
 
 				int slashPos = importFileName.lastIndexOf(CharPool.SLASH);
 
 				if (slashPos != -1) {
-					importDir = StringPool.SLASH.concat(
-						importFileName.substring(0, slashPos + 1));
+					importDirName = importFileName.substring(0, slashPos + 1);
 				}
 
-				aggregateContext.pushPath(importDir);
+				aggregateContext.pushPath(importDirName);
 
 				importContent = aggregateCss(aggregateContext, importContent);
 
-				aggregateContext.popPath(importDir);
-
-				int importDepth = StringUtil.count(
-					importFileName, StringPool.SLASH);
+				if (Validator.isNotNull(importDirName)) {
+					aggregateContext.popPath();
+				}
 
 				// LEP-7540
 
-				String relativePath = StringPool.BLANK;
+				String baseURL = _BASE_URL;
 
-				for (int i = 0; i < importDepth; i++) {
-					relativePath += "../";
-				}
+				baseURL = baseURL.concat(
+					aggregateContext.getResourcePath(StringPool.BLANK));
+				baseURL = baseURL.concat(importDirName);
 
-				importContent = StringUtil.replace(
-					importContent,
-					new String[] {
-						"url('" + relativePath, "url(\"" + relativePath,
-						"url(" + relativePath
-					},
-					new String[] {
-						"url('[$TEMP_RELATIVE_PATH$]",
-						"url(\"[$TEMP_RELATIVE_PATH$]",
-						"url([$TEMP_RELATIVE_PATH$]"
-					});
-
-				importContent = StringUtil.replace(
-					importContent, "[$TEMP_RELATIVE_PATH$]", StringPool.BLANK);
+				importContent = updateCssRelativeUrls(importContent, baseURL);
 
 				if (Validator.isNotNull(mediaQuery)) {
 					sb.append(_CSS_MEDIA_QUERY);
@@ -230,21 +215,31 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 		_tempDir = new File(tempDir, _TEMP_DIR);
 
 		_tempDir.mkdirs();
-
-		if (PropsValues.MINIFIER_FILES_LIMIT > 0) {
-			_limitedFilesCache = new LimitedFilesCache<String>(
-				PropsValues.MINIFIER_FILES_LIMIT);
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					"Aggregate files limit " +
-						PropsValues.MINIFIER_FILES_LIMIT);
-			}
-		}
 	}
 
 	protected static String getJavaScriptContent(String content) {
 		return MinifierUtil.minifyJavaScript(content);
+	}
+
+	protected static String updateCssRelativeUrls(
+		String content, String baseURL) {
+
+		content = StringUtil.replace(
+			content, _CSS_PATH_TYPES, _CSS_PATH_PLACEHOLDERS);
+
+		content = StringUtil.replace(
+			content,
+			new String[] {
+				"[$RELATIVE_1$]", "[$RELATIVE_2$]", "[$RELATIVE_3$]"
+			},
+			new String[] {
+				"url('" + baseURL, "url(\"" + baseURL, "url(" + baseURL
+			});
+
+		content = StringUtil.replace(
+			content, _CSS_PATH_PLACEHOLDERS, _CSS_PATH_TYPES);
+
+		return content;
 	}
 
 	protected Object getBundleContent(
@@ -263,31 +258,27 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 			return null;
 		}
 
-		String bundleDir = PropsUtil.get(
+		String bundleDirName = PropsUtil.get(
 			PropsKeys.JAVASCRIPT_BUNDLE_DIR, new Filter(bundleId));
 
-		URL bundleDirURL = _servletContext.getResource(bundleDir);
+		URL bundleDirURL = _servletContext.getResource(bundleDirName);
 
 		if (bundleDirURL == null) {
 			return null;
 		}
 
-		String cacheFileName = getCacheFileName(request);
+		String cacheFileName = bundleId;
 
 		String[] fileNames = JavaScriptBundleUtil.getFileNames(bundleId);
 
 		File cacheFile = new File(_tempDir, cacheFileName);
-
-		if (_limitedFilesCache != null) {
-			_limitedFilesCache.put(cacheFileName);
-		}
 
 		if (cacheFile.exists()) {
 			boolean staleCache = false;
 
 			for (String fileName : fileNames) {
 				URL resourceURL = _servletContext.getResource(
-					bundleDir.concat(StringPool.SLASH).concat(fileName));
+					bundleDirName.concat(StringPool.SLASH).concat(fileName));
 
 				if (resourceURL == null) {
 					continue;
@@ -324,7 +315,7 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 			AggregateContext aggregateContext = new ServletAggregateContext(
 				_servletContext, StringPool.SLASH);
 
-			aggregateContext.pushPath(bundleDir);
+			aggregateContext.pushPath(bundleDirName);
 
 			content = aggregateJavaScript(aggregateContext, fileNames);
 		}
@@ -360,12 +351,12 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 		String minifierType = ParamUtil.getString(request, "minifierType");
 		String minifierBundleId = ParamUtil.getString(
 			request, "minifierBundleId");
-		String minifierBundleDir = ParamUtil.getString(
+		String minifierBundleDirName = ParamUtil.getString(
 			request, "minifierBundleDir");
 
 		if (Validator.isNull(minifierType) ||
 			Validator.isNotNull(minifierBundleId) ||
-			Validator.isNotNull(minifierBundleDir)) {
+			Validator.isNotNull(minifierBundleDirName)) {
 
 			return null;
 		}
@@ -568,6 +559,21 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 	private static final String _CSS_MEDIA_QUERY = "@media";
 
+	private static final String[] _CSS_PATH_PLACEHOLDERS = new String[] {
+		"[$EMPTY_1$]", "[$EMPTY_2$]", "[$EMPTY_3$]", "[$TOKEN_1$]",
+		"[$TOKEN_2$]", "[$TOKEN_3$]", "[$ABSOLUTE_1$]", "[$ABSOLUTE_2$]",
+		"[$ABSOLUTE_3$]", "[$ABSOLUTE_4$]", "[$ABSOLUTE_5$]", "[$ABSOLUTE_6$]",
+		"[$ABSOLUTE_7$]", "[$ABSOLUTE_8$]", "[$ABSOLUTE_9$]", "[$RELATIVE_1$]",
+		"[$RELATIVE_2$]", "[$RELATIVE_3$]"
+	};
+
+	private static final String[] _CSS_PATH_TYPES = new String[] {
+		"url('')", "url(\"\")", "url()", "url('@theme_image_path@",
+		"url(\"@", "url(@", "url('http://", "url(\"http://", "url(http://",
+		"url('https://", "url(\"https://", "url(https://", "url('/", "url(\"/",
+		"url(/", "url('", "url(\"", "url("
+	};
+
 	private static final String _JAVASCRIPT_EXTENSION = ".js";
 
 	private static final String _JSP_EXTENSION = ".jsp";
@@ -576,10 +582,11 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 	private static Log _log = LogFactoryUtil.getLog(AggregateFilter.class);
 
+	private static String _BASE_URL = "@base_url@";
+
 	private static Pattern _pattern = Pattern.compile(
 		"^(\\.ie|\\.js\\.ie)([^}]*)}", Pattern.MULTILINE);
 
-	private LimitedFilesCache<String> _limitedFilesCache;
 	private ServletContext _servletContext;
 	private File _tempDir;
 

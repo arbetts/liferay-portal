@@ -89,7 +89,9 @@ public class JournalArticleIndexableTest {
 	}
 
 	@Test
-	public void testJournalArticleIsUnindexableByDefault() throws Exception {
+	public void testJournalArticleWithClassNameDDMStructureIsUnindexable()
+		throws Exception {
+
 		Group group = GroupTestUtil.addGroup();
 
 		AssetEntryQuery assetEntryQuery =
@@ -108,16 +110,12 @@ public class JournalArticleIndexableTest {
 
 		int total = hits.getLength();
 
-		JournalArticle article = JournalTestUtil.addArticle(
+		JournalTestUtil.addArticle(
 			group.getGroupId(), JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 			PortalUtil.getClassNameId(DDMStructure.class),
 			ServiceTestUtil.randomString(), ServiceTestUtil.randomString(),
-			ServiceTestUtil.randomString(), LocaleUtil.getDefault(), false,
+			ServiceTestUtil.randomString(), LocaleUtil.getSiteDefault(), false,
 			true, ServiceTestUtil.getServiceContext(group.getGroupId()));
-
-		Assert.assertFalse(
-			"Unindexable articles should not be indexable",
-			article.isIndexable());
 
 		hits = AssetUtil.search(
 			searchContext, assetEntryQuery, QueryUtil.ALL_POS,

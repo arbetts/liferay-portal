@@ -139,6 +139,8 @@
 	<bean id="com.liferay.portal.service.persistence.ServiceComponentPersistence" class="com.liferay.portal.service.persistence.ServiceComponentPersistenceImpl" parent="basePersistence" />
 	<bean id="com.liferay.portal.service.ShardLocalService" class="com.liferay.portal.service.impl.ShardLocalServiceImpl" />
 	<bean id="com.liferay.portal.service.persistence.ShardPersistence" class="com.liferay.portal.service.persistence.ShardPersistenceImpl" parent="basePersistence" />
+	<bean id="com.liferay.portal.service.StagingLocalService" class="com.liferay.portal.service.impl.StagingLocalServiceImpl" />
+	<bean id="com.liferay.portal.service.StagingService" class="com.liferay.portal.service.impl.StagingServiceImpl" />
 	<bean id="com.liferay.portal.service.SubscriptionLocalService" class="com.liferay.portal.service.impl.SubscriptionLocalServiceImpl" />
 	<bean id="com.liferay.portal.service.persistence.SubscriptionPersistence" class="com.liferay.portal.service.persistence.SubscriptionPersistenceImpl" parent="basePersistence" />
 	<bean id="com.liferay.portal.service.SystemEventLocalService" class="com.liferay.portal.service.impl.SystemEventLocalServiceImpl" />
@@ -211,7 +213,6 @@
 	<bean id="com.liferay.portlet.asset.service.persistence.AssetEntryFinder" class="com.liferay.portlet.asset.service.persistence.AssetEntryFinderImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.asset.service.AssetLinkLocalService" class="com.liferay.portlet.asset.service.impl.AssetLinkLocalServiceImpl" />
 	<bean id="com.liferay.portlet.asset.service.persistence.AssetLinkPersistence" class="com.liferay.portlet.asset.service.persistence.AssetLinkPersistenceImpl" parent="basePersistence" />
-	<bean id="com.liferay.portlet.asset.service.persistence.AssetLinkFinder" class="com.liferay.portlet.asset.service.persistence.AssetLinkFinderImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.asset.service.AssetTagLocalService" class="com.liferay.portlet.asset.service.impl.AssetTagLocalServiceImpl" />
 	<bean id="com.liferay.portlet.asset.service.AssetTagService" class="com.liferay.portlet.asset.service.impl.AssetTagServiceImpl" />
 	<bean id="com.liferay.portlet.asset.service.persistence.AssetTagPersistence" class="com.liferay.portlet.asset.service.persistence.AssetTagPersistenceImpl" parent="basePersistence" />
@@ -273,6 +274,8 @@
 	<bean id="com.liferay.portlet.documentlibrary.service.DLFolderService" class="com.liferay.portlet.documentlibrary.service.impl.DLFolderServiceImpl" />
 	<bean id="com.liferay.portlet.documentlibrary.service.persistence.DLFolderPersistence" class="com.liferay.portlet.documentlibrary.service.persistence.DLFolderPersistenceImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.documentlibrary.service.persistence.DLFolderFinder" class="com.liferay.portlet.documentlibrary.service.persistence.DLFolderFinderImpl" parent="basePersistence" />
+	<bean id="com.liferay.portlet.documentlibrary.service.DLSyncEventLocalService" class="com.liferay.portlet.documentlibrary.service.impl.DLSyncEventLocalServiceImpl" />
+	<bean id="com.liferay.portlet.documentlibrary.service.persistence.DLSyncEventPersistence" class="com.liferay.portlet.documentlibrary.service.persistence.DLSyncEventPersistenceImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.dynamicdatalists.service.DDLRecordLocalService" class="com.liferay.portlet.dynamicdatalists.service.impl.DDLRecordLocalServiceImpl" />
 	<bean id="com.liferay.portlet.dynamicdatalists.service.DDLRecordService" class="com.liferay.portlet.dynamicdatalists.service.impl.DDLRecordServiceImpl" />
 	<bean id="com.liferay.portlet.dynamicdatalists.service.persistence.DDLRecordPersistence" class="com.liferay.portlet.dynamicdatalists.service.persistence.DDLRecordPersistenceImpl" parent="basePersistence" />
@@ -444,6 +447,7 @@
 	<bean id="com.liferay.portlet.trash.service.TrashEntryLocalService" class="com.liferay.portlet.trash.service.impl.TrashEntryLocalServiceImpl" />
 	<bean id="com.liferay.portlet.trash.service.TrashEntryService" class="com.liferay.portlet.trash.service.impl.TrashEntryServiceImpl" />
 	<bean id="com.liferay.portlet.trash.service.persistence.TrashEntryPersistence" class="com.liferay.portlet.trash.service.persistence.TrashEntryPersistenceImpl" parent="basePersistence" />
+	<bean id="com.liferay.portlet.trash.service.TrashVersionLocalService" class="com.liferay.portlet.trash.service.impl.TrashVersionLocalServiceImpl" />
 	<bean id="com.liferay.portlet.trash.service.persistence.TrashVersionPersistence" class="com.liferay.portlet.trash.service.persistence.TrashVersionPersistenceImpl" parent="basePersistence" />
 	<bean id="com.liferay.portlet.wiki.service.WikiNodeLocalService" class="com.liferay.portlet.wiki.service.impl.WikiNodeLocalServiceImpl" />
 	<bean id="com.liferay.portlet.wiki.service.WikiNodeService" class="com.liferay.portlet.wiki.service.impl.WikiNodeServiceImpl" />

@@ -71,10 +71,12 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 			{ "classPK", Types.BIGINT },
 			{ "classUuid", Types.VARCHAR },
 			{ "referrerClassNameId", Types.BIGINT },
+			{ "parentSystemEventId", Types.BIGINT },
+			{ "systemEventSetKey", Types.BIGINT },
 			{ "type_", Types.INTEGER },
 			{ "extraData", Types.CLOB }
 		};
-	public static final String TABLE_SQL_CREATE = "create table SystemEvent (systemEventId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,classNameId LONG,classPK LONG,classUuid VARCHAR(75) null,referrerClassNameId LONG,type_ INTEGER,extraData TEXT null)";
+	public static final String TABLE_SQL_CREATE = "create table SystemEvent (systemEventId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,classNameId LONG,classPK LONG,classUuid VARCHAR(75) null,referrerClassNameId LONG,parentSystemEventId LONG,systemEventSetKey LONG,type_ INTEGER,extraData TEXT null)";
 	public static final String TABLE_SQL_DROP = "drop table SystemEvent";
 	public static final String ORDER_BY_JPQL = " ORDER BY systemEvent.createDate DESC";
 	public static final String ORDER_BY_SQL = " ORDER BY SystemEvent.createDate DESC";
@@ -93,8 +95,9 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 	public static long CLASSNAMEID_COLUMN_BITMASK = 1L;
 	public static long CLASSPK_COLUMN_BITMASK = 2L;
 	public static long GROUPID_COLUMN_BITMASK = 4L;
-	public static long TYPE_COLUMN_BITMASK = 8L;
-	public static long CREATEDATE_COLUMN_BITMASK = 16L;
+	public static long SYSTEMEVENTSETKEY_COLUMN_BITMASK = 8L;
+	public static long TYPE_COLUMN_BITMASK = 16L;
+	public static long CREATEDATE_COLUMN_BITMASK = 32L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.portal.util.PropsUtil.get(
 				"lock.expiration.time.com.liferay.portal.model.SystemEvent"));
 
@@ -145,6 +148,8 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 		attributes.put("classPK", getClassPK());
 		attributes.put("classUuid", getClassUuid());
 		attributes.put("referrerClassNameId", getReferrerClassNameId());
+		attributes.put("parentSystemEventId", getParentSystemEventId());
+		attributes.put("systemEventSetKey", getSystemEventSetKey());
 		attributes.put("type", getType());
 		attributes.put("extraData", getExtraData());
 
@@ -211,6 +216,18 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 
 		if (referrerClassNameId != null) {
 			setReferrerClassNameId(referrerClassNameId);
+		}
+
+		Long parentSystemEventId = (Long)attributes.get("parentSystemEventId");
+
+		if (parentSystemEventId != null) {
+			setParentSystemEventId(parentSystemEventId);
+		}
+
+		Long systemEventSetKey = (Long)attributes.get("systemEventSetKey");
+
+		if (systemEventSetKey != null) {
+			setSystemEventSetKey(systemEventSetKey);
 		}
 
 		Integer type = (Integer)attributes.get("type");
@@ -405,6 +422,38 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 	}
 
 	@Override
+	public long getParentSystemEventId() {
+		return _parentSystemEventId;
+	}
+
+	@Override
+	public void setParentSystemEventId(long parentSystemEventId) {
+		_parentSystemEventId = parentSystemEventId;
+	}
+
+	@Override
+	public long getSystemEventSetKey() {
+		return _systemEventSetKey;
+	}
+
+	@Override
+	public void setSystemEventSetKey(long systemEventSetKey) {
+		_columnBitmask |= SYSTEMEVENTSETKEY_COLUMN_BITMASK;
+
+		if (!_setOriginalSystemEventSetKey) {
+			_setOriginalSystemEventSetKey = true;
+
+			_originalSystemEventSetKey = _systemEventSetKey;
+		}
+
+		_systemEventSetKey = systemEventSetKey;
+	}
+
+	public long getOriginalSystemEventSetKey() {
+		return _originalSystemEventSetKey;
+	}
+
+	@Override
 	public int getType() {
 		return _type;
 	}
@@ -482,6 +531,8 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 		systemEventImpl.setClassPK(getClassPK());
 		systemEventImpl.setClassUuid(getClassUuid());
 		systemEventImpl.setReferrerClassNameId(getReferrerClassNameId());
+		systemEventImpl.setParentSystemEventId(getParentSystemEventId());
+		systemEventImpl.setSystemEventSetKey(getSystemEventSetKey());
 		systemEventImpl.setType(getType());
 		systemEventImpl.setExtraData(getExtraData());
 
@@ -548,6 +599,10 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 
 		systemEventModelImpl._setOriginalClassPK = false;
 
+		systemEventModelImpl._originalSystemEventSetKey = systemEventModelImpl._systemEventSetKey;
+
+		systemEventModelImpl._setOriginalSystemEventSetKey = false;
+
 		systemEventModelImpl._originalType = systemEventModelImpl._type;
 
 		systemEventModelImpl._setOriginalType = false;
@@ -598,6 +653,10 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 
 		systemEventCacheModel.referrerClassNameId = getReferrerClassNameId();
 
+		systemEventCacheModel.parentSystemEventId = getParentSystemEventId();
+
+		systemEventCacheModel.systemEventSetKey = getSystemEventSetKey();
+
 		systemEventCacheModel.type = getType();
 
 		systemEventCacheModel.extraData = getExtraData();
@@ -613,7 +672,7 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(25);
+		StringBundler sb = new StringBundler(29);
 
 		sb.append("{systemEventId=");
 		sb.append(getSystemEventId());
@@ -635,6 +694,10 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 		sb.append(getClassUuid());
 		sb.append(", referrerClassNameId=");
 		sb.append(getReferrerClassNameId());
+		sb.append(", parentSystemEventId=");
+		sb.append(getParentSystemEventId());
+		sb.append(", systemEventSetKey=");
+		sb.append(getSystemEventSetKey());
 		sb.append(", type=");
 		sb.append(getType());
 		sb.append(", extraData=");
@@ -646,7 +709,7 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(40);
+		StringBundler sb = new StringBundler(46);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.model.SystemEvent");
@@ -693,6 +756,14 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 		sb.append(getReferrerClassNameId());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>parentSystemEventId</column-name><column-value><![CDATA[");
+		sb.append(getParentSystemEventId());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>systemEventSetKey</column-name><column-value><![CDATA[");
+		sb.append(getSystemEventSetKey());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>type</column-name><column-value><![CDATA[");
 		sb.append(getType());
 		sb.append("]]></column-value></column>");
@@ -727,6 +798,10 @@ public class SystemEventModelImpl extends BaseModelImpl<SystemEvent>
 	private boolean _setOriginalClassPK;
 	private String _classUuid;
 	private long _referrerClassNameId;
+	private long _parentSystemEventId;
+	private long _systemEventSetKey;
+	private long _originalSystemEventSetKey;
+	private boolean _setOriginalSystemEventSetKey;
 	private int _type;
 	private int _originalType;
 	private boolean _setOriginalType;

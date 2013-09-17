@@ -1174,7 +1174,8 @@ public class ClusterSchedulerEngineTest {
 			long timestamp = System.currentTimeMillis();
 
 			_localAddress = new AddressImpl(new MockAddress(timestamp));
-			_anotherAddress= new AddressImpl(new MockAddress(timestamp + 1000));
+			_anotherAddress = new AddressImpl(
+				new MockAddress(timestamp + 1000));
 
 			_addresses.add(_localAddress);
 			_addresses.add(_anotherAddress);
@@ -1392,10 +1393,7 @@ public class ClusterSchedulerEngineTest {
 		}
 
 		@Override
-		public Lock lock(
-			String className, String key, String owner,
-			boolean retrieveFromCache) {
-
+		public Lock lock(String className, String key, String owner) {
 			if (_lock == null) {
 				Lock lock = new LockImpl();
 
@@ -1411,7 +1409,7 @@ public class ClusterSchedulerEngineTest {
 		@Override
 		public Lock lock(
 			String className, String key, String expectedOwner,
-			String updatedOwner, boolean retrieveFromCache) {
+			String updatedOwner) {
 
 			Lock lock = new LockImpl();
 
@@ -1424,10 +1422,7 @@ public class ClusterSchedulerEngineTest {
 		}
 
 		@Override
-		public void unlock(
-			String className, String key, String owner,
-			boolean retrieveFromCache) {
-
+		public void unlock(String className, String key, String owner) {
 			_lock = null;
 		}
 

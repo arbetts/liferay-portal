@@ -15,7 +15,7 @@
 package com.liferay.portal.lar.backgroundtask;
 
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
-import com.liferay.portal.kernel.backgroundtask.BaseBackgroundTaskExecutor;
+import com.liferay.portal.kernel.lar.MissingReferences;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
@@ -30,11 +30,7 @@ import java.util.Map;
  * @author Julio Camarero
  */
 public class PortletStagingBackgroundTaskExecutor
-	extends BaseBackgroundTaskExecutor {
-
-	public PortletStagingBackgroundTaskExecutor() {
-		setSerial(true);
-	}
+	extends BaseStagingBackgroundTaskExecutor {
 
 	@Override
 	public BackgroundTaskResult execute(BackgroundTask backgroundTask)
@@ -59,7 +55,18 @@ public class PortletStagingBackgroundTaskExecutor
 			sourcePlid, sourceGroupId, portletId, parameterMap, startDate,
 			endDate);
 
+		backgroundTask = markBackgroundTask(backgroundTask, "exported");
+
+		MissingReferences missingReferences = null;
+
 		try {
+			missingReferences =
+				LayoutLocalServiceUtil.validateImportPortletInfo(
+					userId, targetGroupId, targetPlid, portletId, parameterMap,
+					larFile);
+
+			backgroundTask = markBackgroundTask(backgroundTask, "validated");
+
 			LayoutLocalServiceUtil.importPortletInfo(
 				userId, targetPlid, targetGroupId, portletId, parameterMap,
 				larFile);
@@ -68,7 +75,7 @@ public class PortletStagingBackgroundTaskExecutor
 			larFile.delete();
 		}
 
-		return BackgroundTaskResult.SUCCESS;
+		return processMissingReferences(backgroundTask, missingReferences);
 	}
 
 }

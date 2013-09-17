@@ -25,7 +25,9 @@ import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.lar.MissingReferences;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.DateRange;
@@ -38,7 +40,7 @@ import com.liferay.portlet.dynamicdatalists.RecordSetDuplicateRecordSetKeyExcept
 import com.liferay.portlet.dynamicdatamapping.StructureDuplicateStructureKeyException;
 import com.liferay.portlet.layoutsadmin.action.ImportLayoutsAction;
 
-import java.io.File;
+import java.io.InputStream;
 
 import java.util.Date;
 
@@ -122,6 +124,15 @@ public class ExportImportAction extends ImportLayoutsAction {
 						actionRequest, actionResponse,
 						ExportImportHelper.TEMP_FOLDER_NAME +
 							portlet.getPortletId());
+
+					LiferayPortletConfig liferayPortletConfig =
+						(LiferayPortletConfig)portletConfig;
+
+					SessionMessages.add(
+						actionRequest,
+						liferayPortletConfig.getPortletId() +
+							SessionMessages.KEY_SUFFIX_CLOSE_REFRESH_PORTLET,
+						portlet.getPortletId());
 
 					sendRedirect(actionRequest, actionResponse, redirect);
 				}
@@ -283,7 +294,9 @@ public class ExportImportAction extends ImportLayoutsAction {
 	}
 
 	@Override
-	protected void importData(ActionRequest actionRequest, File file)
+	protected void importData(
+			ActionRequest actionRequest, String fileName,
+			InputStream inputStream)
 		throws Exception {
 
 		long plid = ParamUtil.getLong(actionRequest, "plid");
@@ -293,12 +306,12 @@ public class ExportImportAction extends ImportLayoutsAction {
 
 		LayoutServiceUtil.importPortletInfoInBackground(
 			portlet.getPortletId(), plid, groupId, portlet.getPortletId(),
-			actionRequest.getParameterMap(), file);
+			actionRequest.getParameterMap(), inputStream);
 	}
 
 	@Override
 	protected MissingReferences validateFile(
-			ActionRequest actionRequest, File file)
+			ActionRequest actionRequest, InputStream inputStream)
 		throws Exception {
 
 		long plid = ParamUtil.getLong(actionRequest, "plid");
@@ -308,7 +321,7 @@ public class ExportImportAction extends ImportLayoutsAction {
 
 		return LayoutServiceUtil.validateImportPortletInfo(
 			plid, groupId, portlet.getPortletId(),
-			actionRequest.getParameterMap(), file);
+			actionRequest.getParameterMap(), inputStream);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(ExportImportAction.class);

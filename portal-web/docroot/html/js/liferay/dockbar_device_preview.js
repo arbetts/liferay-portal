@@ -86,9 +86,7 @@ AUI.add(
 
 						instance._dialogId = A.guid();
 
-						var devicePreviewContainer = instance.byId('devicePreviewContainer');
-
-						instance._closePanelButton = devicePreviewContainer.one('#closePanel');
+						instance._closePanelButton = instance.byId('closePanelPreview');
 
 						instance._devicePreviewNode = A.Node.create(Lang.sub(TPL_DEVICE_PREVIEW));
 						instance._deviceSkin = A.Node.create(TPL_DEVICE_SKIN);
@@ -109,6 +107,8 @@ AUI.add(
 								return selected;
 							}
 						);
+
+						var devicePreviewContainer = instance.byId('devicePreviewContainer');
 
 						instance._deviceItems = devicePreviewContainer.all(SELECTOR_DEVICE_ITEM);
 
@@ -235,6 +235,7 @@ AUI.add(
 									dialog: A.merge(DIALOG_DEFAULTS, dialogConfig),
 									dialogIframe: DIALOG_IFRAME_DEFAULTS,
 									id: instance._dialogId,
+									iframeId: 'devicePreviewIframe',
 									uri: WIN.location.href
 								},
 								function(dialogWindow) {

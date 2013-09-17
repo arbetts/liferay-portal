@@ -7,6 +7,7 @@
 		<permissions>
 			<supports>
 				<action-key>ACCESS_IN_CONTROL_PANEL</action-key>
+				<action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
 				<action-key>ADD_TO_PAGE</action-key>
 				<action-key>CONFIGURATION</action-key>
 				<action-key>VIEW</action-key>
@@ -19,6 +20,7 @@
 			</guest-defaults>
 			<guest-unsupported>
 				<action-key>ACCESS_IN_CONTROL_PANEL</action-key>
+				<action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
 				<action-key>CONFIGURATION</action-key>
 			</guest-unsupported>
 		</permissions>
@@ -45,6 +47,9 @@
 				<action-key>VIEW</action-key>
 			</supports>
 			<site-member-defaults>
+				<action-key>ADD_DOCUMENT</action-key>
+				<action-key>ADD_FOLDER</action-key>
+				<action-key>ADD_SHORTCUT</action-key>
 				<action-key>SUBSCRIBE</action-key>
 				<action-key>VIEW</action-key>
 			</site-member-defaults>
@@ -61,24 +66,6 @@
 				<action-key>PERMISSIONS</action-key>
 				<action-key>SUBSCRIBE</action-key>
 				<action-key>UPDATE</action-key>
-			</guest-unsupported>
-		</permissions>
-	</model-resource>
-	<model-resource>
-		<model-name>com.liferay.portlet.documentlibrary.template</model-name>
-		<portlet-ref>
-			<portlet-name>20</portlet-name>
-			<portlet-name>183</portlet-name>
-		</portlet-ref>
-		<weight>1.5</weight>
-		<permissions>
-			<supports>
-				<action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
-			</supports>
-			<site-member-defaults />
-			<guest-defaults />
-			<guest-unsupported>
-				<action-key>ADD_PORTLET_DISPLAY_TEMPLATE</action-key>
 			</guest-unsupported>
 		</permissions>
 	</model-resource>

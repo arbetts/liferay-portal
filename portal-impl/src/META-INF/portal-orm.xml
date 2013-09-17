@@ -1173,6 +1173,8 @@
 			<basic name="classPK" />
 			<basic name="classUuid" />
 			<basic name="referrerClassNameId" />
+			<basic name="parentSystemEventId" />
+			<basic name="systemEventSetKey" />
 			<basic name="type">
 				<column name="TYPE_" />
 			</basic>
@@ -1906,6 +1908,7 @@
 			</basic>
 			<basic name="resourceBlockId" />
 			<basic name="folderId" />
+			<basic name="treePath" />
 			<basic name="name" />
 			<basic name="url" />
 			<basic name="description" />
@@ -1942,6 +1945,7 @@
 			</basic>
 			<basic name="resourceBlockId" />
 			<basic name="parentFolderId" />
+			<basic name="treePath" />
 			<basic name="name" />
 			<basic name="description" />
 			<basic name="status" />
@@ -2033,8 +2037,6 @@
 			<basic name="companyId" />
 			<basic name="userId" />
 			<basic name="userName" />
-			<basic name="versionUserId" />
-			<basic name="versionUserName" />
 			<basic name="createDate">
 				<temporal>TIMESTAMP</temporal>
 			</basic>
@@ -2045,6 +2047,7 @@
 			<basic name="classPK" />
 			<basic name="repositoryId" />
 			<basic name="folderId" />
+			<basic name="treePath" />
 			<basic name="name" />
 			<basic name="extension" />
 			<basic name="mimeType" />
@@ -2067,7 +2070,6 @@
 			<transient name="primaryKey" />
 			<transient name="primaryKeyObj" />
 			<transient name="userUuid" />
-			<transient name="versionUserUuid" />
 		</attributes>
 	</mapped-superclass>
 	<mapped-superclass class="com.liferay.portlet.documentlibrary.model.impl.DLFileEntryMetadataModelImpl">
@@ -2153,6 +2155,7 @@
 			<basic name="repositoryId" />
 			<basic name="folderId" />
 			<basic name="toFileEntryId" />
+			<basic name="treePath" />
 			<basic name="active">
 				<column name="ACTIVE_" />
 			</basic>
@@ -2188,6 +2191,7 @@
 			<basic name="repositoryId" />
 			<basic name="folderId" />
 			<basic name="fileEntryId" />
+			<basic name="treePath" />
 			<basic name="extension" />
 			<basic name="mimeType" />
 			<basic name="title" />
@@ -2232,6 +2236,7 @@
 			<basic name="repositoryId" />
 			<basic name="mountPoint" />
 			<basic name="parentFolderId" />
+			<basic name="treePath" />
 			<basic name="name" />
 			<basic name="description" />
 			<basic name="lastPostDate">
@@ -2255,6 +2260,20 @@
 			<transient name="primaryKeyObj" />
 			<transient name="statusByUserUuid" />
 			<transient name="userUuid" />
+		</attributes>
+	</mapped-superclass>
+	<mapped-superclass class="com.liferay.portlet.documentlibrary.model.impl.DLSyncEventModelImpl">
+		<attributes>
+			<id name="syncEventId" />
+			<basic name="modifiedTime" />
+			<basic name="event" />
+			<basic name="type">
+				<column name="TYPE_" />
+			</basic>
+			<basic name="typePK" />
+			<transient name="modelAttributes" />
+			<transient name="primaryKey" />
+			<transient name="primaryKeyObj" />
 		</attributes>
 	</mapped-superclass>
 	<mapped-superclass class="com.liferay.portlet.dynamicdatalists.model.impl.DDLRecordModelImpl">
@@ -2570,6 +2589,7 @@
 			<basic name="folderId" />
 			<basic name="classNameId" />
 			<basic name="classPK" />
+			<basic name="treePath" />
 			<basic name="articleId" />
 			<basic name="version" />
 			<basic name="title" />
@@ -2713,6 +2733,7 @@
 				<temporal>TIMESTAMP</temporal>
 			</basic>
 			<basic name="parentFolderId" />
+			<basic name="treePath" />
 			<basic name="name" />
 			<basic name="description" />
 			<basic name="status" />
@@ -3770,6 +3791,7 @@
 			</basic>
 			<basic name="classNameId" />
 			<basic name="classPK" />
+			<basic name="systemEventSetKey" />
 			<basic name="typeSettings" />
 			<basic name="status" />
 			<transient name="className" />
@@ -4107,6 +4129,7 @@
 			<transient name="remoteable" />
 			<transient name="renderTimeout" />
 			<transient name="renderWeight" />
+			<transient name="requiresNamespacedParameters" />
 			<transient name="resourceBundle" />
 			<transient name="restoreCurrentView" />
 			<transient name="roleMappers" />
@@ -4381,6 +4404,10 @@
 		<table name="DLFolder" />
 		<attributes />
 	</entity>
+	<entity class="com.liferay.portlet.documentlibrary.model.impl.DLSyncEventImpl" name="DLSyncEvent">
+		<table name="DLSyncEvent" />
+		<attributes />
+	</entity>
 	<entity class="com.liferay.portlet.dynamicdatalists.model.impl.DDLRecordImpl" name="DDLRecord">
 		<table name="DDLRecord" />
 		<attributes />
@@ -4597,6 +4624,7 @@
 		<table name="SocialActivity" />
 		<attributes>
 			<transient name="assetEntry" />
+			<transient name="extraDataValue" />
 		</attributes>
 	</entity>
 	<entity class="com.liferay.portlet.social.model.impl.SocialActivityAchievementImpl" name="SocialActivityAchievement">

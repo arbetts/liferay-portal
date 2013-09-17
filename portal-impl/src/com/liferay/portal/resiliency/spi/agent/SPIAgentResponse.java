@@ -17,8 +17,8 @@ package com.liferay.portal.resiliency.spi.agent;
 import com.liferay.portal.kernel.resiliency.PortalResiliencyException;
 import com.liferay.portal.kernel.resiliency.spi.agent.annotation.Direction;
 import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
-import com.liferay.portal.kernel.servlet.MetaInfoCacheServletResponse.MetaData;
 import com.liferay.portal.kernel.servlet.MetaInfoCacheServletResponse;
+import com.liferay.portal.kernel.servlet.MetaInfoCacheServletResponse.MetaData;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -129,10 +129,10 @@ public class SPIAgentResponse extends SPIAgentSerializable {
 		}
 
 		if (ParamUtil.get(
-				request, "prpsf",
+				request, "portalResiliencyPortletShowFooter",
 				PropsValues.PORTAL_RESILIENCY_PORTLET_SHOW_FOOTER)) {
 
-			int index = content.lastIndexOf("</");
+			int index = content.lastIndexOf("</div>");
 
 			if (index > 0) {
 				StringBundler sb = new StringBundler(6);

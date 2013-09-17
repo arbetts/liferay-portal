@@ -97,11 +97,13 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
 				"value.object.column.bitmask.enabled.com.liferay.portal.model.BackgroundTask"),
 			true);
-	public static long GROUPID_COLUMN_BITMASK = 1L;
-	public static long NAME_COLUMN_BITMASK = 2L;
-	public static long STATUS_COLUMN_BITMASK = 4L;
-	public static long TASKEXECUTORCLASSNAME_COLUMN_BITMASK = 8L;
-	public static long CREATEDATE_COLUMN_BITMASK = 16L;
+	public static long COMPANYID_COLUMN_BITMASK = 1L;
+	public static long COMPLETED_COLUMN_BITMASK = 2L;
+	public static long GROUPID_COLUMN_BITMASK = 4L;
+	public static long NAME_COLUMN_BITMASK = 8L;
+	public static long STATUS_COLUMN_BITMASK = 16L;
+	public static long TASKEXECUTORCLASSNAME_COLUMN_BITMASK = 32L;
+	public static long CREATEDATE_COLUMN_BITMASK = 64L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -309,8 +311,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		}
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getBackgroundTaskId() {
 		return _backgroundTaskId;
 	}
@@ -320,8 +322,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		_backgroundTaskId = backgroundTaskId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getGroupId() {
 		return _groupId;
 	}
@@ -343,19 +345,31 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		return _originalGroupId;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
 
 	@Override
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
 	}
 
-	@Override
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
+	}
+
 	@JSON
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
@@ -375,8 +389,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		_userUuid = userUuid;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getUserName() {
 		if (_userName == null) {
 			return StringPool.BLANK;
@@ -391,8 +405,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		_userName = userName;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -404,8 +418,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		_createDate = createDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
@@ -415,8 +429,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		_modifiedDate = modifiedDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getName() {
 		if (_name == null) {
 			return StringPool.BLANK;
@@ -441,8 +455,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		return GetterUtil.getString(_originalName);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getServletContextNames() {
 		if (_servletContextNames == null) {
 			return StringPool.BLANK;
@@ -457,8 +471,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		_servletContextNames = servletContextNames;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTaskExecutorClassName() {
 		if (_taskExecutorClassName == null) {
 			return StringPool.BLANK;
@@ -483,8 +497,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		return GetterUtil.getString(_originalTaskExecutorClassName);
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getTaskContext() {
 		if (_taskContext == null) {
 			return StringPool.BLANK;
@@ -499,8 +513,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		_taskContext = taskContext;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public boolean getCompleted() {
 		return _completed;
 	}
@@ -512,11 +526,23 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 
 	@Override
 	public void setCompleted(boolean completed) {
+		_columnBitmask |= COMPLETED_COLUMN_BITMASK;
+
+		if (!_setOriginalCompleted) {
+			_setOriginalCompleted = true;
+
+			_originalCompleted = _completed;
+		}
+
 		_completed = completed;
 	}
 
-	@Override
+	public boolean getOriginalCompleted() {
+		return _originalCompleted;
+	}
+
 	@JSON
+	@Override
 	public Date getCompletionDate() {
 		return _completionDate;
 	}
@@ -526,8 +552,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		_completionDate = completionDate;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public int getStatus() {
 		return _status;
 	}
@@ -549,8 +575,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 		return _originalStatus;
 	}
 
-	@Override
 	@JSON
+	@Override
 	public String getStatusMessage() {
 		if (_statusMessage == null) {
 			return StringPool.BLANK;
@@ -666,9 +692,17 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 
 		backgroundTaskModelImpl._setOriginalGroupId = false;
 
+		backgroundTaskModelImpl._originalCompanyId = backgroundTaskModelImpl._companyId;
+
+		backgroundTaskModelImpl._setOriginalCompanyId = false;
+
 		backgroundTaskModelImpl._originalName = backgroundTaskModelImpl._name;
 
 		backgroundTaskModelImpl._originalTaskExecutorClassName = backgroundTaskModelImpl._taskExecutorClassName;
+
+		backgroundTaskModelImpl._originalCompleted = backgroundTaskModelImpl._completed;
+
+		backgroundTaskModelImpl._setOriginalCompleted = false;
 
 		backgroundTaskModelImpl._originalStatus = backgroundTaskModelImpl._status;
 
@@ -895,6 +929,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 	private long _originalGroupId;
 	private boolean _setOriginalGroupId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _userId;
 	private String _userUuid;
 	private String _userName;
@@ -907,6 +943,8 @@ public class BackgroundTaskModelImpl extends BaseModelImpl<BackgroundTask>
 	private String _originalTaskExecutorClassName;
 	private String _taskContext;
 	private boolean _completed;
+	private boolean _originalCompleted;
+	private boolean _setOriginalCompleted;
 	private Date _completionDate;
 	private int _status;
 	private int _originalStatus;

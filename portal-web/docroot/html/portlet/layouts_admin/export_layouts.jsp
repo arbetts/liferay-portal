@@ -56,10 +56,28 @@ if (endDateTime > 0) {
 	endDate = new Date(endDateTime);
 }
 
+String treeId = "layoutsExportTree";
+
+long[] selectedLayoutIds = GetterUtil.getLongValues(StringUtil.split(SessionTreeJSClicks.getOpenNodes(request, treeId + "SelectedNode"), ','));
+
+List<Layout> selectedLayouts = new ArrayList<Layout>();
+
+for (int i = 0; i < selectedLayoutIds.length; i++) {
+	try {
+		selectedLayouts.add(LayoutLocalServiceUtil.getLayout(groupId, privateLayout, selectedLayoutIds[i]));
+	}
+	catch (NoSuchLayoutException nsle) {
+	}
+}
+
+if (selectedLayouts.isEmpty()) {
+	selectedLayouts = LayoutLocalServiceUtil.getLayouts(groupId, privateLayout);
+}
+
 PortletURL portletURL = renderResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/layouts_admin/export_layouts");
-portletURL.setParameter("tabs2", "all-export-processes");
+portletURL.setParameter("tabs2", "current-and-previous");
 portletURL.setParameter("groupId", String.valueOf(groupId));
 portletURL.setParameter("liveGroupId", String.valueOf(liveGroupId));
 portletURL.setParameter("privateLayout", String.valueOf(privateLayout));
@@ -67,12 +85,23 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 %>
 
 <liferay-ui:tabs
-	names="new-export-process,all-export-processes"
+	names="new-export-process,current-and-previous"
 	param="tabs2"
 	refresh="<%= false %>"
 >
 	<liferay-ui:section>
 		<div id="<portlet:namespace />exportImportOptions">
+
+			<%
+			int incompleteBackgroundTaskCount = BackgroundTaskLocalServiceUtil.getBackgroundTasksCount(groupId, LayoutExportBackgroundTaskExecutor.class.getName(), false);
+			%>
+
+			<div class="<%= (incompleteBackgroundTaskCount == 0) ? "hide" : "in-progress" %>" id="<portlet:namespace />incompleteProcessMessage">
+				<liferay-util:include page="/html/portlet/layouts_admin/incomplete_processes_message.jsp">
+					<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+				</liferay-util:include>
+			</div>
+
 			<portlet:actionURL var="exportPagesURL">
 				<portlet:param name="struts_action" value="/layouts_admin/export_layouts" />
 				<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
@@ -89,7 +118,7 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 
 					<aui:input name="layoutIds" type="hidden" />
 
-					<c:if test="<%= !group.isLayoutPrototype() %>">
+					<c:if test="<%= !group.isLayoutPrototype() && !group.isCompany() %>">
 						<aui:fieldset cssClass="options-group" label="pages">
 							<span class="selected-labels" id="<portlet:namespace />selectedPages"></span>
 
@@ -99,10 +128,8 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 								<aui:fieldset cssClass="portlet-data-section" label="pages-to-export">
 									<liferay-util:include page="/html/portlet/layouts_admin/tree_js.jsp">
 										<liferay-util:param name="tabs1" value='<%= privateLayout ? "private-pages" : "public-pages" %>' />
-										<liferay-util:param name="treeId" value="layoutsExportTree" />
+										<liferay-util:param name="treeId" value="<%= treeId %>" />
 										<liferay-util:param name="defaultStateChecked" value="1" />
-										<liferay-util:param name="expandFirstNode" value="1" />
-										<liferay-util:param name="saveState" value="0" />
 										<liferay-util:param name="selectableTree" value="1" />
 									</liferay-util:include>
 
@@ -121,7 +148,7 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 					</c:if>
 
 					<%
-					List<Portlet> portletDataHandlerPortlets = LayoutExporter.getPortletDataHandlerPortlets(liveGroupId, privateLayout);
+					List<Portlet> portletDataHandlerPortlets = LayoutExporter.getPortletDataHandlerPortlets(selectedLayouts);
 					%>
 
 					<c:if test="<%= !portletDataHandlerPortlets.isEmpty() %>">
@@ -162,50 +189,48 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 
 												PortletDataHandlerControl[] configurationControls = portletDataHandler.getExportConfigurationControls(company.getCompanyId(), groupId, portlet, privateLayout);
 
-												if ((configurationControls != null) && (configurationControls.length > 0)) {
-													String portletTitle = PortalUtil.getPortletTitle(portlet, application, locale);
+												String portletTitle = PortalUtil.getPortletTitle(portlet, application, locale);
 											%>
 
-													<li class="tree-item">
-														<aui:input label="<%= portletTitle %>" name="<%= PortletDataHandlerKeys.PORTLET_CONFIGURATION + StringPool.UNDERLINE + portlet.getRootPortletId() %>" type="checkbox" value="<%= portletDataHandler.isPublishToLiveByDefault() %>" />
+												<li class="tree-item">
+													<aui:input label="<%= portletTitle %>" name="<%= PortletDataHandlerKeys.PORTLET_CONFIGURATION + StringPool.UNDERLINE + portlet.getRootPortletId() %>" type="checkbox" value="<%= true %>" />
 
-														<div class="hide" id="<portlet:namespace />configuration_<%= portlet.getRootPortletId() %>">
-															<aui:fieldset cssClass="portlet-type-data-section" label="<%= portletTitle %>">
-																<ul class="lfr-tree unstyled">
-
-																	<%
-																	request.setAttribute("render_controls.jsp-action", Constants.EXPORT);
-																	request.setAttribute("render_controls.jsp-controls", configurationControls);
-																	request.setAttribute("render_controls.jsp-portletId", portlet.getRootPortletId());
-																	%>
-
-																	<liferay-util:include page="/html/portlet/layouts_admin/render_controls.jsp" />
-																</ul>
-															</aui:fieldset>
-														 </div>
-
-														<ul class="hide" id="<portlet:namespace />showChangeConfiguration_<%= portlet.getRootPortletId() %>">
-															<li>
-																<span class="selected-labels" id="<portlet:namespace />selectedConfiguration_<%= portlet.getRootPortletId() %>"></span>
+													<div class="hide" id="<portlet:namespace />configuration_<%= portlet.getRootPortletId() %>">
+														<aui:fieldset cssClass="portlet-type-data-section" label="<%= portletTitle %>">
+															<ul class="lfr-tree unstyled">
 
 																<%
-																Map<String,Object> data = new HashMap<String,Object>();
-
-																data.put("portletid", portlet.getRootPortletId());
-																data.put("portlettitle", portletTitle);
+																request.setAttribute("render_controls.jsp-action", Constants.EXPORT);
+																request.setAttribute("render_controls.jsp-controls", configurationControls);
+																request.setAttribute("render_controls.jsp-portletId", portlet.getRootPortletId());
 																%>
 
-																<aui:a cssClass="configuration-link modify-link" data="<%= data %>" href="javascript:;" label="change" method="get" />
-															</li>
-														</ul>
+																<liferay-util:include page="/html/portlet/layouts_admin/render_controls.jsp" />
+															</ul>
+														</aui:fieldset>
+													 </div>
 
-														<aui:script>
-															Liferay.Util.toggleBoxes('<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_CONFIGURATION + StringPool.UNDERLINE + portlet.getRootPortletId() %>Checkbox', '<portlet:namespace />showChangeConfiguration<%= StringPool.UNDERLINE + portlet.getRootPortletId() %>');
-														</aui:script>
-													</li>
+													<ul class="hide" id="<portlet:namespace />showChangeConfiguration_<%= portlet.getRootPortletId() %>">
+														<li>
+															<span class="selected-labels" id="<portlet:namespace />selectedConfiguration_<%= portlet.getRootPortletId() %>"></span>
+
+															<%
+															Map<String,Object> data = new HashMap<String,Object>();
+
+															data.put("portletid", portlet.getRootPortletId());
+															data.put("portlettitle", portletTitle);
+															%>
+
+															<aui:a cssClass="configuration-link modify-link" data="<%= data %>" href="javascript:;" label="change" method="get" />
+														</li>
+													</ul>
+
+													<aui:script>
+														Liferay.Util.toggleBoxes('<portlet:namespace /><%= PortletDataHandlerKeys.PORTLET_CONFIGURATION + StringPool.UNDERLINE + portlet.getRootPortletId() %>Checkbox', '<portlet:namespace />showChangeConfiguration<%= StringPool.UNDERLINE + portlet.getRootPortletId() %>');
+													</aui:script>
+												</li>
 
 											<%
-												}
 											}
 											%>
 
@@ -218,6 +243,10 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 
 					<%
 					List<Portlet> dataSiteLevelPortlets = LayoutExporter.getDataSiteLevelPortlets(company.getCompanyId());
+
+					PortletDataContext portletDataContext = PortletDataContextFactoryUtil.createPreparePortletDataContext(themeDisplay, startDate, endDate);
+
+					ManifestSummary manifestSummary = portletDataContext.getManifestSummary();
 					%>
 
 					<c:if test="<%= !dataSiteLevelPortlets.isEmpty() %>">
@@ -240,8 +269,6 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 														<aui:fieldset cssClass="portlet-data-section" label="date-range">
 															<aui:input checked="<%= true %>" id="rangeAll" label="all" name="range" type="radio" value="all" />
 
-															<aui:input id="rangeLastPublish" label="from-last-publish-date" name="range" type="radio" value="fromLastPublishDate" />
-
 															<aui:input helpMessage="export-date-range-help" id="rangeDateRange" label="date-range" name="range" type="radio" value="dateRange" />
 
 															<%
@@ -262,9 +289,8 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 																			firstDayOfWeek="<%= yesterday.getFirstDayOfWeek() - 1 %>"
 																			monthParam="startDateMonth"
 																			monthValue="<%= yesterday.get(Calendar.MONTH) %>"
+																			name="startDate"
 																			yearParam="startDateYear"
-																			yearRangeEnd="<%= yesterday.get(Calendar.YEAR) %>"
-																			yearRangeStart="<%= yesterday.get(Calendar.YEAR) - 100 %>"
 																			yearValue="<%= yesterday.get(Calendar.YEAR) %>"
 																		/>
 
@@ -273,12 +299,14 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 																		<liferay-ui:input-time
 																			amPmParam='<%= "startDateAmPm" %>'
 																			amPmValue="<%= yesterday.get(Calendar.AM_PM) %>"
+																			dateParam="startDateTime"
+																			dateValue="<%= yesterday.getTime() %>"
 																			disabled="<%= false %>"
 																			hourParam='<%= "startDateHour" %>'
 																			hourValue="<%= yesterday.get(Calendar.HOUR) %>"
-																			minuteInterval="<%= 1 %>"
 																			minuteParam='<%= "startDateMinute" %>'
 																			minuteValue="<%= yesterday.get(Calendar.MINUTE) %>"
+																			name="startTime"
 																		/>
 																	</aui:fieldset>
 																</li>
@@ -292,9 +320,8 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 																			firstDayOfWeek="<%= today.getFirstDayOfWeek() - 1 %>"
 																			monthParam="endDateMonth"
 																			monthValue="<%= today.get(Calendar.MONTH) %>"
+																			name="endDate"
 																			yearParam="endDateYear"
-																			yearRangeEnd="<%= today.get(Calendar.YEAR) %>"
-																			yearRangeStart="<%= today.get(Calendar.YEAR) - 100 %>"
 																			yearValue="<%= today.get(Calendar.YEAR) %>"
 																		/>
 
@@ -303,12 +330,14 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 																		<liferay-ui:input-time
 																			amPmParam='<%= "endDateAmPm" %>'
 																			amPmValue="<%= today.get(Calendar.AM_PM) %>"
+																			dateParam="startDateTime"
+																			dateValue="<%= today.getTime() %>"
 																			disabled="<%= false %>"
 																			hourParam='<%= "endDateHour" %>'
 																			hourValue="<%= today.get(Calendar.HOUR) %>"
-																			minuteInterval="<%= 1 %>"
 																			minuteParam='<%= "endDateMinute" %>'
 																			minuteValue="<%= today.get(Calendar.MINUTE) %>"
+																			name="endTime"
 																		/>
 																	</aui:fieldset>
 																</li>
@@ -350,8 +379,6 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 												Set<String> displayedControls = new HashSet<String>();
 												Set<String> portletDataHandlerClasses = new HashSet<String>();
 
-												PortletDataContext portletDataContext = PortletDataContextFactoryUtil.createPreparePortletDataContext(themeDisplay, startDate, endDate);
-
 												dataSiteLevelPortlets = ListUtil.sort(dataSiteLevelPortlets, new PortletTitleComparator(application, locale));
 
 												for (Portlet portlet : dataSiteLevelPortlets) {
@@ -370,15 +397,16 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 
 													portletDataHandler.prepareManifestSummary(portletDataContext);
 
-													ManifestSummary manifestSummary = portletDataContext.getManifestSummary();
-
 													long exportModelCount = portletDataHandler.getExportModelCount(manifestSummary);
+
+													long modelDeletionCount = manifestSummary.getModelDeletionCount(portletDataHandler.getDeletionSystemEventStagedModelTypes());
 												%>
 
-													<c:if test="<%= exportModelCount != 0 %>">
+													<c:if test="<%= (exportModelCount != 0) || (modelDeletionCount != 0) %>">
 														<li class="tree-item">
 															<liferay-util:buffer var="badgeHTML">
 																<span class="badge badge-info"><%= exportModelCount > 0 ? exportModelCount : StringPool.BLANK %></span>
+																<span class="badge badge-warning deletions"><%= modelDeletionCount > 0 ? (modelDeletionCount + StringPool.SPACE + LanguageUtil.get(pageContext, "deletions")) : StringPool.BLANK %></span>
 															</liferay-util:buffer>
 
 															<aui:input checked="<%= portletDataHandler.isPublishToLiveByDefault() %>" label="<%= portletTitle + badgeHTML %>" name="<%= PortletDataHandlerKeys.PORTLET_DATA + StringPool.UNDERLINE + portlet.getPortletId() %>" type="checkbox" />
@@ -387,7 +415,7 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 															PortletDataHandlerControl[] exportControls = portletDataHandler.getExportControls();
 															PortletDataHandlerControl[] metadataControls = portletDataHandler.getExportMetadataControls();
 
-															if (Validator.isNotNull(exportControls) || Validator.isNotNull(metadataControls)) {
+															if (ArrayUtil.isNotEmpty(exportControls) || ArrayUtil.isNotEmpty(metadataControls)) {
 															%>
 
 																<div class="hide" id="<portlet:namespace />content_<%= portlet.getPortletId() %>">
@@ -403,7 +431,7 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 																					request.setAttribute("render_controls.jsp-portletDisabled", !portletDataHandler.isPublishToLiveByDefault());
 																				%>
 
-																					<aui:field-wrapper label='<%= Validator.isNotNull(metadataControls) ? "content" : StringPool.BLANK %>'>
+																					<aui:field-wrapper label='<%= ArrayUtil.isNotEmpty(metadataControls) ? "content" : StringPool.BLANK %>'>
 																						<ul class="lfr-tree unstyled">
 																							<liferay-util:include page="/html/portlet/layouts_admin/render_controls.jsp" />
 																						</ul>
@@ -425,7 +453,7 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 
 																						PortletDataHandlerControl[] childrenControls = control.getChildren();
 
-																						if ((childrenControls != null) && (childrenControls.length > 0)) {
+																						if (ArrayUtil.isNotEmpty(childrenControls)) {
 																							request.setAttribute("render_controls.jsp-controls", childrenControls);
 																						%>
 
@@ -478,17 +506,30 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 
 											</ul>
 
-											<aui:fieldset cssClass="comments-and-ratings" label="for-each-of-the-selected-content-types,-export-their">
-												<span class="selected-labels" id="<portlet:namespace />selectedCommentsAndRatings"></span>
+											<aui:fieldset cssClass="content-options" label="for-each-of-the-selected-content-types,-export-their">
+												<span class="selected-labels" id="<portlet:namespace />selectedContentOptions"></span>
 
-												<aui:a cssClass="modify-link" href="javascript:;" id="commentsAndRatingsLink" label="change" method="get" />
+												<aui:a cssClass="modify-link" href="javascript:;" id="contentOptionsLink" label="change" method="get" />
 
-												<div class="hide" id="<portlet:namespace />commentsAndRatings">
+												<div class="hide" id="<portlet:namespace />contentOptions">
 													<ul class="lfr-tree unstyled">
 														<li class="tree-item">
 															<aui:input label="comments" name="<%= PortletDataHandlerKeys.COMMENTS %>" type="checkbox" value="<%= true %>" />
 
 															<aui:input label="ratings" name="<%= PortletDataHandlerKeys.RATINGS %>" type="checkbox" value="<%= true %>" />
+
+															<%
+															long modelDeletionCount = manifestSummary.getModelDeletionCount();
+															%>
+
+															<c:if test="<%= modelDeletionCount != 0 %>">
+
+																<%
+																String deletionsLabel = LanguageUtil.get(pageContext, "deletions") + (modelDeletionCount > 0 ? " (" + modelDeletionCount + ")" : StringPool.BLANK);
+																%>
+
+																<aui:input data-name="<%= deletionsLabel %>" helpMessage="deletions-help" label="<%= deletionsLabel %>" name="<%= PortletDataHandlerKeys.DELETIONS %>" type="checkbox" />
+															</c:if>
 														</li>
 													</ul>
 												</div>
@@ -521,13 +562,15 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 
 				<aui:button-row>
 					<aui:button type="submit" value="export" />
+
+					<aui:button href="<%= currentURL %>" type="cancel" />
 				</aui:button-row>
 			</aui:form>
 		</div>
 	</liferay-ui:section>
 
 	<liferay-ui:section>
-		<div id="<portlet:namespace />exportProcesses">
+		<div class="process-list" id="<portlet:namespace />exportProcesses">
 			<liferay-util:include page="/html/portlet/layouts_admin/export_layouts_processes.jsp" />
 		</div>
 	</liferay-ui:section>
@@ -536,6 +579,8 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 <aui:script use="liferay-export-import">
 	<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" var="exportProcessesURL">
 		<portlet:param name="struts_action" value="/layouts_admin/export_layouts" />
+		<portlet:param name="<%= SearchContainer.DEFAULT_CUR_PARAM %>" value="<%= ParamUtil.getString(request, SearchContainer.DEFAULT_CUR_PARAM) %>" />
+		<portlet:param name="<%= SearchContainer.DEFAULT_DELTA_PARAM %>" value="<%= ParamUtil.getString(request, SearchContainer.DEFAULT_DELTA_PARAM) %>" />
 		<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 	</liferay-portlet:resourceURL>
 
@@ -543,16 +588,18 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 		{
 			archivedSetupsNode: '#<%= PortletDataHandlerKeys.PORTLET_ARCHIVED_SETUPS_ALL %>Checkbox',
 			commentsNode: '#<%= PortletDataHandlerKeys.COMMENTS %>Checkbox',
+			deletionsNode: '#<%= PortletDataHandlerKeys.DELETIONS %>Checkbox',
 			form: document.<portlet:namespace />fm1,
+			incompleteProcessMessageNode: '#<portlet:namespace />incompleteProcessMessage',
 			layoutSetSettingsNode: '#<%= PortletDataHandlerKeys.LAYOUT_SET_SETTINGS %>Checkbox',
 			logoNode: '#<%= PortletDataHandlerKeys.LOGO %>Checkbox',
 			namespace: '<portlet:namespace />',
+			pageTreeId: '<%= treeId %>',
 			processesNode: '#exportProcesses',
 			processesResourceURL: '<%= exportProcessesURL.toString() %>',
 			rangeAllNode: '#rangeAll',
 			rangeDateRangeNode: '#rangeDateRange',
 			rangeLastNode: '#rangeLast',
-			rangeLastPublishNode: '#rangeLastPublish',
 			ratingsNode: '#<%= PortletDataHandlerKeys.RATINGS %>Checkbox',
 			setupNode: '#<%= PortletDataHandlerKeys.PORTLET_SETUP_ALL %>Checkbox',
 			themeNode: '#<%= PortletDataHandlerKeys.THEME %>Checkbox',
@@ -579,7 +626,6 @@ portletURL.setParameter("rootNodeName", rootNodeName);
 
 	Liferay.Util.toggleRadio('<portlet:namespace />rangeDateRange', '<portlet:namespace />startEndDate');
 	Liferay.Util.toggleRadio('<portlet:namespace />rangeAll', '', ['<portlet:namespace />startEndDate']);
-	Liferay.Util.toggleRadio('<portlet:namespace />rangeLastPublish', '', ['<portlet:namespace />startEndDate']);
 	Liferay.Util.toggleRadio('<portlet:namespace />rangeLast', '', ['<portlet:namespace />startEndDate']);
 
 	Liferay.Util.toggleRadio('<portlet:namespace />chooseContent', '<portlet:namespace />selectContents', ['<portlet:namespace />showChangeGlobalContent']);

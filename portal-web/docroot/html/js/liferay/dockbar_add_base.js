@@ -266,7 +266,7 @@ AUI.add(
 
 						var focusItem = instance.get('focusItem');
 
-						if (focusItem && event.tabSection.contains(focusItem)) {
+						if (focusItem && event.tabSection && event.tabSection.contains(focusItem)) {
 							focusItem.focus();
 						}
 					}
@@ -412,6 +412,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['liferay-dockbar']
+		requires: ['liferay-dockbar', 'liferay-layout']
 	}
 );

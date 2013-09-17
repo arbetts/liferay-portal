@@ -21,9 +21,11 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.InstancePool;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -190,10 +192,13 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 
 		WikiNode node = wikiNodePersistence.findByPrimaryKey(nodeId);
 
-		deleteNode(node);
+		wikiNodeLocalService.deleteNode(node);
 	}
 
 	@Override
+	@SystemEvent(
+		action = SystemEventConstants.ACTION_SKIP,
+		type = SystemEventConstants.TYPE_DELETE)
 	public void deleteNode(WikiNode node)
 		throws PortalException, SystemException {
 
@@ -210,12 +215,6 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 		resourceLocalService.deleteResource(
 			node.getCompanyId(), WikiNode.class.getName(),
 			ResourceConstants.SCOPE_INDIVIDUAL, node.getNodeId());
-
-		// System event
-
-		systemEventLocalService.addSystemEvent(
-			0, node.getGroupId(), WikiNode.class.getName(), node.getNodeId(),
-			node.getUuid(), null, SystemEventConstants.TYPE_DELETE, null);
 
 		// Attachments
 
@@ -261,7 +260,7 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 		List<WikiNode> nodes = wikiNodePersistence.findByGroupId(groupId);
 
 		for (WikiNode node : nodes) {
-			deleteNode(node);
+			wikiNodeLocalService.deleteNode(node);
 		}
 
 		PortletFileRepositoryUtil.deletePortletRepository(
@@ -509,7 +508,8 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 
 			trashEntryLocalService.addTrashEntry(
 				userId, node.getGroupId(), WikiNode.class.getName(),
-				node.getNodeId(), oldStatus, null, typeSettingsProperties);
+				node.getNodeId(), node.getUuid(), null, oldStatus, null,
+				typeSettingsProperties);
 		}
 
 		// Indexer
@@ -589,11 +589,6 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 						false);
 				}
 
-				// Social
-
-				socialActivityCounterLocalService.disableActivityCounters(
-					WikiPage.class.getName(), page.getResourcePrimKey());
-
 				// Index
 
 				Indexer indexer = IndexerRegistryUtil.nullSafeGetIndexer(
@@ -627,11 +622,6 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 						true);
 				}
 
-				// Social
-
-				socialActivityCounterLocalService.enableActivityCounters(
-					WikiPage.class.getName(), page.getResourcePrimKey());
-
 				// Index
 
 				Indexer indexer = IndexerRegistryUtil.nullSafeGetIndexer(
@@ -645,7 +635,7 @@ public class WikiNodeLocalServiceImpl extends WikiNodeLocalServiceBaseImpl {
 	protected void validate(long nodeId, long groupId, String name)
 		throws PortalException, SystemException {
 
-		if (name.equalsIgnoreCase("tag")) {
+		if (StringUtil.equalsIgnoreCase(name, "tag")) {
 			throw new NodeNameException(name + " is reserved");
 		}
 

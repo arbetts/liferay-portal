@@ -284,6 +284,7 @@ public class VerifyProperties extends VerifyProcess {
 		"lucene.store.jdbc.dialect.microsoft",
 		"lucene.store.jdbc.dialect.mysql", "lucene.store.jdbc.dialect.oracle",
 		"lucene.store.jdbc.dialect.postgresql",
+		"memory.cluster.scheduler.lock.cache.enabled",
 		"message.boards.thread.locking.enabled", "portal.ctx",
 		"portal.security.manager.enable", "permissions.user.check.algorithm",
 		"scheduler.classes", "shard.available.names",
@@ -417,6 +418,14 @@ public class VerifyProperties extends VerifyProcess {
 				"edit_configuration.jsp",
 			"editor.wysiwyg.portal-web.docroot.html.portlet.shopping." +
 				"configuration.jsp"
+		},
+		new String[] {
+			"field.editable.com.liferay.portal.model.User.emailAddress",
+			"field.editable.user.types"
+		},
+		new String[] {
+			"field.editable.com.liferay.portal.model.User.screenName",
+			"field.editable.user.types"
 		},
 		new String[] {
 			"journal.error.template.freemarker", "journal.error.template[ftl]"

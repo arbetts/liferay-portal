@@ -22,6 +22,7 @@ import com.liferay.portal.LayoutSetVirtualHostException;
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.NoSuchGroupException;
 import com.liferay.portal.NoSuchLayoutException;
+import com.liferay.portal.PendingBackgroundTaskException;
 import com.liferay.portal.RemoteExportException;
 import com.liferay.portal.RemoteOptionsException;
 import com.liferay.portal.RequiredGroupException;
@@ -184,16 +185,13 @@ public class EditGroupAction extends PortletAction {
 					 e instanceof GroupParentException ||
 					 e instanceof LayoutSetVirtualHostException ||
 					 e instanceof LocaleException ||
+					 e instanceof PendingBackgroundTaskException ||
 					 e instanceof RemoteExportException ||
 					 e instanceof RemoteOptionsException ||
 					 e instanceof RequiredGroupException ||
 					 e instanceof SystemException) {
 
 				SessionErrors.add(actionRequest, e.getClass(), e);
-
-				sendRedirect(
-					portletConfig, actionRequest, actionResponse, redirect,
-					closeRedirect);
 			}
 			else {
 				throw e;
@@ -294,7 +292,7 @@ public class EditGroupAction extends PortletAction {
 
 		List<Team> teams = new UniqueList<Team>();
 
-		long[] teamsTeamIds= StringUtil.split(
+		long[] teamsTeamIds = StringUtil.split(
 			ParamUtil.getString(portletRequest, "teamsTeamIds"), 0L);
 
 		for (long teamsTeamId : teamsTeamIds) {
@@ -582,7 +580,7 @@ public class EditGroupAction extends PortletAction {
 			StringPool.NEW_LINE);
 
 		for (String analyticsType : analyticsTypes) {
-			if (analyticsType.equalsIgnoreCase("google")) {
+			if (StringUtil.equalsIgnoreCase(analyticsType, "google")) {
 				String googleAnalyticsId = ParamUtil.getString(
 					actionRequest, "googleAnalyticsId",
 					typeSettingsProperties.getProperty("googleAnalyticsId"));

@@ -181,13 +181,14 @@ if (!selectableTree) {
 								<c:if test="<%= selectableTree %>">
 									checkedChange: function(event) {
 										if (this === event.originalTarget) {
+											var newVal = event.newVal;
 											var target = event.target;
 
 											var plid = TreeUtil.extractPlid(target);
 
-											TreeUtil.updateSessionTreeCheckedState('<%= HtmlUtil.escape(treeId) %>SelectedNode', plid, event.newVal);
+											TreeUtil.updateSessionTreeCheckedState('<%= HtmlUtil.escape(treeId) %>SelectedNode', plid, newVal);
 
-											TreeUtil.updateCheckedNodes(target, event.newVal);
+											TreeUtil.updateCheckedNodes(target, newVal);
 										}
 									},
 								</c:if>
@@ -287,7 +288,10 @@ if (!selectableTree) {
 					newNode.label = Util.escapeHTML(node.name);
 
 					if (node.layoutRevisionId) {
-						if (node.layoutBranchName) {
+						if (!node.layoutRevisionHead) {
+							title = '<%= UnicodeLanguageUtil.get(pageContext, "there-is-not-a-version-of-this-page-marked-as-ready-for-publication") %>';
+						}
+						else if (node.layoutBranchName) {
 							node.layoutBranchName = Util.escapeHTML(node.layoutBranchName);
 
 							newNode.label += Lang.sub(' <span class="layout-branch-name" title="<%= UnicodeLanguageUtil.get(pageContext, "this-is-the-page-variation-that-is-marked-as-ready-for-publication") %>">[{layoutBranchName}]</span>', node);
@@ -544,9 +548,11 @@ if (!selectableTree) {
 				after: {
 					<c:if test="<%= selectableTree %>">
 						checkedChange: function(event) {
-							TreeUtil.updateSessionTreeCheckedState('<%= HtmlUtil.escape(treeId) %>SelectedNode', <%= LayoutConstants.DEFAULT_PLID %>, event.newVal);
+							var newVal = event.newVal;
 
-							TreeUtil.updateCheckedNodes(event.target, event.newVal);
+							TreeUtil.updateSessionTreeCheckedState('<%= HtmlUtil.escape(treeId) %>SelectedNode', <%= LayoutConstants.DEFAULT_PLID %>, newVal);
+
+							TreeUtil.updateCheckedNodes(event.target, newVal);
 						},
 					</c:if>
 

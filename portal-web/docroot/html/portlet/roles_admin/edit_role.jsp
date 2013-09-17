@@ -28,10 +28,6 @@ int type = ParamUtil.getInteger(request, "type");
 String subtype = BeanParamUtil.getString(role, request, "subtype");
 %>
 
-<liferay-util:include page="/html/portlet/roles_admin/toolbar.jsp">
-	<liferay-util:param name="toolbarItem" value='<%= (role == null) ? "add" : "view-all" %>' />
-</liferay-util:include>
-
 <liferay-ui:header
 	backURL="<%= backURL %>"
 	localizeTitle="<%= (role == null) %>"
@@ -47,6 +43,7 @@ String subtype = BeanParamUtil.getString(role, request, "subtype");
 
 <portlet:renderURL var="editRoleRenderURL">
 	<portlet:param name="struts_action" value="/roles_admin/edit_role" />
+	<portlet:param name="backURL" value="<%= backURL %>" />
 </portlet:renderURL>
 
 <portlet:actionURL var="editRoleActionURL">
@@ -55,7 +52,7 @@ String subtype = BeanParamUtil.getString(role, request, "subtype");
 
 <aui:form action="<%= editRoleActionURL %>" method="post" name="fm">
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= (role == null) ? Constants.ADD : Constants.UPDATE %>" />
-	<aui:input name="redirect" type="hidden" value="<%= editRoleRenderURL %>" />
+	<aui:input name="redirect" type="hidden" value="<%= (role == null) ? editRoleRenderURL : redirect %>" />
 	<aui:input name="roleId" type="hidden" value="<%= roleId %>" />
 
 	<liferay-ui:error exception="<%= DuplicateRoleException.class %>" message="please-enter-a-unique-name" />

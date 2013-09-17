@@ -32,9 +32,7 @@ import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.xml.Element;
-import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Portlet;
-import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
@@ -112,8 +110,7 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences)
 		throws Exception {
 
-		portletDataContext.addPermissions(
-			DLPermission.RESOURCE_NAME, portletDataContext.getScopeGroupId());
+		portletDataContext.addPortletPermissions(DLPermission.RESOURCE_NAME);
 
 		Element rootElement = addExportDataRootElement(portletDataContext);
 
@@ -153,9 +150,7 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 			PortletPreferences portletPreferences, String data)
 		throws Exception {
 
-		portletDataContext.importPermissions(
-			DLPermission.RESOURCE_NAME, portletDataContext.getSourceGroupId(),
-			portletDataContext.getScopeGroupId());
+		portletDataContext.importPortletPermissions(DLPermission.RESOURCE_NAME);
 
 		Element fileEntryTypesElement =
 			portletDataContext.getImportDataGroupElement(DLFileEntryType.class);
@@ -208,7 +203,8 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 
 	@Override
 	protected void doPrepareManifestSummary(
-			final PortletDataContext portletDataContext)
+			final PortletDataContext portletDataContext,
+			PortletPreferences portletPreferences)
 		throws Exception {
 
 		ActionableDynamicQuery dlFileShortcutActionableDynamicQuery =
@@ -289,9 +285,6 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 			final PortletDataContext portletDataContext)
 		throws Exception {
 
-		final Group companyGroup = GroupLocalServiceUtil.getCompanyGroup(
-			portletDataContext.getCompanyId());
-
 		return new DLFileEntryTypeExportActionableDynamicQuery(
 			portletDataContext) {
 
@@ -304,8 +297,7 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 				dynamicQuery.add(
 					property.in(
 						new Long[] {
-							portletDataContext.getScopeGroupId(),
-							companyGroup.getGroupId()
+							portletDataContext.getScopeGroupId()
 						}));
 			}
 
@@ -348,6 +340,16 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 		return new DLFileEntryExportActionableDynamicQuery(portletDataContext) {
 
 			@Override
+			protected void addCriteria(DynamicQuery dynamicQuery) {
+				super.addCriteria(dynamicQuery);
+
+				Property property = PropertyFactoryUtil.forName("repositoryId");
+
+				dynamicQuery.add(
+					property.eq(portletDataContext.getScopeGroupId()));
+			}
+
+			@Override
 			protected StagedModelType getStagedModelType() {
 				return new StagedModelType(FileEntry.class);
 			}
@@ -357,6 +359,12 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 				throws PortalException, SystemException {
 
 				DLFileEntry dlFileEntry = (DLFileEntry)object;
+
+				if (dlFileEntry.isInTrash() ||
+					dlFileEntry.isInTrashContainer()) {
+
+					return;
+				}
 
 				FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(
 					dlFileEntry.getFileEntryId());
@@ -375,6 +383,16 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 		return new DLFolderExportActionableDynamicQuery(portletDataContext) {
 
 			@Override
+			protected void addCriteria(DynamicQuery dynamicQuery) {
+				super.addCriteria(dynamicQuery);
+
+				Property property = PropertyFactoryUtil.forName("repositoryId");
+
+				dynamicQuery.add(
+					property.eq(portletDataContext.getScopeGroupId()));
+			}
+
+			@Override
 			protected StagedModelType getStagedModelType() {
 				return new StagedModelType(Folder.class);
 			}
@@ -384,6 +402,10 @@ public class DLPortletDataHandler extends BasePortletDataHandler {
 				throws PortalException, SystemException {
 
 				DLFolder dlFolder = (DLFolder)object;
+
+				if (dlFolder.isInTrash() || dlFolder.isInTrashContainer()) {
+					return;
+				}
 
 				Folder folder = DLAppLocalServiceUtil.getFolder(
 					dlFolder.getFolderId());
