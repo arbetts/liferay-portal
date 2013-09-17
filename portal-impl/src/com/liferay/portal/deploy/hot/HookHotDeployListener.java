@@ -2639,7 +2639,7 @@ public class HookHotDeployListener
 		}
 
 		Map<String, LayoutSettings> layoutSettingsMap =
-			LayoutSettings.getCurrentLayoutSettings();
+			LayoutSettings.getLayoutSettingsMap();
 
 		for (String layoutType : layoutSettingsMap.keySet()) {
 			if (!layoutType.equals(LayoutConstants.TYPE_CONTROL_PANEL) &&
@@ -2651,7 +2651,7 @@ public class HookHotDeployListener
 
 		for (String type : value) {
 			if (!layoutSettingsMap.containsKey(type)) {
-				LayoutSettings.setLayoutSetting(type);
+				LayoutSettings.addLayoutSetting(type);
 			}
 		}
 	}
