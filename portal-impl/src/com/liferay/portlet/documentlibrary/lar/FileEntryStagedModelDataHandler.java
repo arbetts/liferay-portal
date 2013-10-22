@@ -546,6 +546,17 @@ public class FileEntryStagedModelDataHandler
 		List<DDMStructure> ddmStructures = dlFileEntryType.getDDMStructures();
 
 		for (DDMStructure ddmStructure : ddmStructures) {
+			FileVersion fileVersion = fileEntry.getFileVersion();
+
+			DLFileEntryMetadata dlFileEntryMetadata =
+				DLFileEntryMetadataLocalServiceUtil.fetchFileEntryMetadata(
+					ddmStructure.getStructureId(),
+					fileVersion.getFileVersionId());
+
+			if (Validator.isNull(dlFileEntryMetadata)) {
+				continue;
+			}
+
 			Element structureFields = fileEntryElement.addElement(
 				"structure-fields");
 
@@ -556,13 +567,6 @@ public class FileEntryStagedModelDataHandler
 
 			structureFields.addAttribute(
 				"structureUuid", ddmStructure.getUuid());
-
-			FileVersion fileVersion = fileEntry.getFileVersion();
-
-			DLFileEntryMetadata dlFileEntryMetadata =
-				DLFileEntryMetadataLocalServiceUtil.getFileEntryMetadata(
-					ddmStructure.getStructureId(),
-					fileVersion.getFileVersionId());
 
 			Fields fields = StorageEngineUtil.getFields(
 				dlFileEntryMetadata.getDDMStorageId());
