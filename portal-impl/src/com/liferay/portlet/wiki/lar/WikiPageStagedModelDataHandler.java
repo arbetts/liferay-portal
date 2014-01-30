@@ -153,12 +153,8 @@ public class WikiPageStagedModelDataHandler
 				page.getUuid(), portletDataContext.getScopeGroupId());
 
 		if (existingPage == null) {
-			try {
-				existingPage = WikiPageLocalServiceUtil.getPage(
-					nodeId, page.getTitle());
-			}
-			catch (NoSuchPageException nspe) {
-			}
+			existingPage = WikiPageLocalServiceUtil.fetchPage(
+				nodeId, page.getTitle(), page.getVersion());
 		}
 
 		if (existingPage == null) {
