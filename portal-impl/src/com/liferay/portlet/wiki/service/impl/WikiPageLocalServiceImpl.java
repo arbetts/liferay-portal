@@ -1909,7 +1909,9 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		WikiPage currentPageVersion = wikiPagePersistence.fetchByN_T_V(
 			nodeId, title, version);
 
-		if ((currentPageVersion != null) && !currentPageVersion.equals(oldPage)) {
+		if ((currentPageVersion != null) &&
+			!currentPageVersion.equals(oldPage)) {
+
 			throw new PageVersionException();
 		}
 
@@ -1932,7 +1934,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		Boolean importing = (Boolean)serviceContext.getAttribute("importing");
 
-		if (importing != null){
+		if (importing != null) {
 			newVersion = version;
 		}
 
