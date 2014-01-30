@@ -139,6 +139,8 @@ public class WikiPageStagedModelDataHandler
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
 			page);
 
+		serviceContext.setAttribute("importing", true);
+
 		Map<Long, Long> nodeIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
 				WikiNode.class);
