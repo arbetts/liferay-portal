@@ -128,6 +128,11 @@ public abstract class BaseAssetRendererFactory implements AssetRendererFactory {
 	}
 
 	@Override
+	public String getIconCssClass() {
+		return null;
+	}
+
+	@Override
 	public String getIconPath(PortletRequest portletRequest) {
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -146,8 +151,7 @@ public abstract class BaseAssetRendererFactory implements AssetRendererFactory {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by {@link
-	 *             #getTypeName(Locale)}
+	 * @deprecated As of 7.0.0, replaced by {@link #getTypeName(Locale)}
 	 */
 	@Deprecated
 	@Override

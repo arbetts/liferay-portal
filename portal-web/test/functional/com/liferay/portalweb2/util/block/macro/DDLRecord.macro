@@ -73,7 +73,7 @@
 		<if>
 			<equals arg1="${fieldShowLabel}" arg2="No" />
 			<then>
-				<execute action="CPDynamicdatalistsListAddrecord#assertElementNotPresent" locator-key1="FIELD_LABEL" />
+				<execute action="CPDynamicdatalistsListAddrecord#assertNotVisible" locator-key1="FIELD_LABEL_HIDDEN" />
 			</then>
 			<else>
 				<execute action="CPDynamicdatalistsListAddrecord#assertTextEquals" locator-key1="FIELD_LABEL" value1="${fieldFieldLabel}" />
@@ -199,6 +199,34 @@
 				<execute action="CPDynamicdatalistsListAddrecord#type" locator-key1="TEXT_BOX_FIELD" value1="${ddlRecordFieldData}" />
 			</then>
 		</if>
+	</command>
+
+	<command name="populateFieldSelectViaSpreadsheetView">
+		<var name="key_ddlRecordRow" value="${ddlRecordRow}" />
+		<var name="key_fieldName" value="${fieldName}" />
+
+		<execute action="PGDynamicdatalistsSpreadsheetview#doubleClick" locator-key1="RECORD_TABLE_FIELD_ENTRY" />
+		<execute action="PGDynamicdatalistsSpreadsheetview#select" locator-key1="CELL_EDITOR_SELECT" value1="${ddlRecordFieldData}" />
+		<execute action="PGDynamicdatalistsSpreadsheetview#click" locator-key1="SAVE_BUTTON" value1="Save" />
+		<execute action="PGDynamicdatalistsSpreadsheetview#assertTextEquals" locator-key1="RECORD_TABLE_FIELD_ENTRY" value1="${ddlRecordFieldData}" />
+	</command>
+
+	<command name="populateFieldTextViaSpreadsheetView">
+		<execute macro="DDLRecord#populateFieldTextViaSpreadsheetViewCmd">
+			<var name="ddlRecordFieldData" value="${ddlRecordFieldData}" />
+			<var name="ddlRecordRow" value="${ddlRecordRow}" />
+			<var name="fieldName" value="${fieldName}" />
+		</execute>
+	</command>
+
+	<command name="populateFieldTextViaSpreadsheetViewCmd">
+		<var name="key_ddlRecordRow" value="${ddlRecordRow}" />
+		<var name="key_fieldName" value="${fieldName}" />
+
+		<execute action="PGDynamicdatalistsSpreadsheetview#doubleClick" locator-key1="RECORD_TABLE_FIELD_ENTRY" />
+		<execute action="PGDynamicdatalistsSpreadsheetview#type" locator-key1="CELL_EDITOR_FIELD" value1="${ddlRecordFieldData}" />
+		<execute action="PGDynamicdatalistsSpreadsheetview#click" locator-key1="SAVE_BUTTON" value1="Save" />
+		<execute action="PGDynamicdatalistsSpreadsheetview#assertTextEquals" locator-key1="RECORD_TABLE_FIELD_ENTRY" value1="${ddlRecordFieldData}" />
 	</command>
 
 	<command name="publishCP">
@@ -436,6 +464,24 @@
 			</else>
 		</if>
 
-		<execute action="PGDynamicdatalistsDisplayrecord#assertTextEquals" locator-key1="FIELD_1" value1="Text ${ddlRecordFieldData}" />
+		<if>
+			<equals arg1="${field}" arg2="Boolean" />
+			<then>
+				<if>
+					<equals arg1="${ddlRecordFieldData}" arg2="true" />
+					<then>
+						<var name="ddlRecordFieldData" value="Yes" />
+					</then>
+					<elseif>
+						<equals arg1="${ddlRecordFieldData}" arg2="false" />
+						<then>
+							<var name="ddlRecordFieldData" value="No" />
+						</then>
+					</elseif>
+				</if>
+			</then>
+		</if>
+
+		<execute action="PGDynamicdatalistsDisplayrecord#assertTextEquals" locator-key1="FIELD_1" value1="${fieldFieldLabel} ${ddlRecordFieldData}" />
 	</command>
 </definition>

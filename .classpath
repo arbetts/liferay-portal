@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="definitions"/>
-	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="osgi/bootstrap/src"/>
-	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="osgi/modules/registry/registry-api/src/main/java"/>
-	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="osgi/modules/registry/registry-impl/src/main/java"/>
-	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="osgi/modules/registry/registry-test/src/main/java"/>
+	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="modules/core/registry-api/src"/>
+	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="modules/core/registry-impl/src"/>
 	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="portal-impl/src"/>
 	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="portal-impl/test/integration"/>
 	<classpathentry excluding="**/.svn/**|.svn/" kind="src" path="portal-impl/test/unit"/>
@@ -118,7 +116,7 @@
 	<classpathentry kind="lib" path="lib/portal/cas-client-core.jar"/>
 	<classpathentry kind="lib" path="lib/portal/ccpp.jar"/>
 	<classpathentry kind="lib" path="lib/portal/ccpp-ri.jar"/>
-	<classpathentry kind="lib" path="lib/portal/cglib.jar"/>
+	<classpathentry kind="lib" path="lib/portal/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="lib/portal/chardet.jar"/>
 	<classpathentry kind="lib" path="lib/portal/chemistry-opencmis-client-api.jar"/>
 	<classpathentry kind="lib" path="lib/portal/chemistry-opencmis-client-bindings.jar"/>
@@ -318,7 +316,6 @@
 	<classpathentry kind="lib" path="lib/portal/xstream.jar"/>
 	<classpathentry kind="lib" path="lib/portal/xuggle-xuggler-noarch.jar"/>
 	<classpathentry kind="lib" path="lib/portal/xz.jar"/>
-	<classpathentry kind="lib" path="osgi/lib/common/core/osgi.cmpn.jar"/>
-	<classpathentry kind="lib" path="osgi/lib/common/core/osgi.core.jar"/>
+	<classpathentry kind="lib" path="modules/core/registry-impl/lib/org.eclipse.osgi.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

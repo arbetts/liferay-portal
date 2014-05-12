@@ -36,7 +36,6 @@ import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.softwarecatalog.model.SCProductEntry;
 import com.liferay.portlet.softwarecatalog.model.SCProductVersion;
 import com.liferay.portlet.softwarecatalog.service.SCProductEntryLocalServiceUtil;
-import com.liferay.portlet.softwarecatalog.service.persistence.SCProductEntryActionableDynamicQuery;
 
 import java.util.Locale;
 
@@ -58,6 +57,9 @@ public class SCIndexer extends BaseIndexer {
 	public static final String PORTLET_ID = PortletKeys.SOFTWARE_CATALOG;
 
 	public SCIndexer() {
+		setDefaultSelectedFieldNames(
+			Field.COMPANY_ID, Field.CONTENT, Field.ENTRY_CLASS_NAME,
+			Field.ENTRY_CLASS_PK, Field.TITLE, Field.UID);
 		setStagingAware(false);
 	}
 
@@ -209,21 +211,25 @@ public class SCIndexer extends BaseIndexer {
 	protected void reindexProductEntries(long companyId)
 		throws PortalException, SystemException {
 
-		ActionableDynamicQuery actionableDynamicQuery =
-			new SCProductEntryActionableDynamicQuery() {
-
-			@Override
-			protected void performAction(Object object) throws PortalException {
-				SCProductEntry productEntry = (SCProductEntry)object;
-
-				Document document = getDocument(productEntry);
-
-				addDocument(document);
-			}
-
-		};
+		final ActionableDynamicQuery actionableDynamicQuery =
+			SCProductEntryLocalServiceUtil.getActionableDynamicQuery();
 
 		actionableDynamicQuery.setCompanyId(companyId);
+		actionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod() {
+
+				@Override
+				public void performAction(Object object)
+					throws PortalException {
+
+					SCProductEntry productEntry = (SCProductEntry)object;
+
+					Document document = getDocument(productEntry);
+
+					actionableDynamicQuery.addDocument(document);
+				}
+
+			});
 		actionableDynamicQuery.setSearchEngineId(getSearchEngineId());
 
 		actionableDynamicQuery.performActions();

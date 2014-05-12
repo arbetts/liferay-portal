@@ -20,7 +20,7 @@ feature or API will be dropped in an upcoming version.
 replaces an old API, in spite of the old API being kept in Liferay Portal for
 backwards compatibility.
 
-*This document has been reviewed through commit `6524623`.*
+*This document has been reviewed through commit `4aa4510`.*
 
 ## Breaking Changes Contribution Guidelines
 
@@ -178,5 +178,49 @@ modify or delete it.
 #### Why was this change made?
 This change gives users the flexibility to modify the default structure and
 template.
+
+---------------------------------------
+
+### Changed the AssetRenderer and Indexer APIs to Include the `PortletRequest` and `PortletResponse` Parameters
+- **Date:** 2014-May-07
+- **JIRA Ticket:** LPS-44639 and LPS-44894
+
+#### What changed?
+The `getSummary()` method in the AssetRenderer API and the `doGetSummary()`
+method in the Indexer API have changed and must include a `PortletRequest`
+and `PortletResponse` parameter as part of their signatures.
+
+#### Who is affected?
+These methods must be updated in all AssetRenderer and Indexer implementations.
+
+#### How should I update my code?
+Add a `PortletRequest` and `PortletResponse` parameter to the signatures of
+these methods.
+
+**Example**
+
+Replace:
+```
+protected Summary doGetSummary(Document document, Locale locale, String snippet, PortletURL portletURL)
+```
+
+With:
+```
+protected Summary doGetSummary(Document document, Locale locale, String snippet, PortletURL portletURL, PortletRequest portletRequest, PortletResponse portletResponse)
+```
+
+and replace:
+```
+public String getSummary(Locale locale)
+```
+
+With:
+```
+public String getSummary(PortletRequest portletRequest, PortletResponse portletResponse)
+```
+
+#### Why was this change made?
+Some content (such as web content) needs the `PortletRequest` and
+`PortletResponse` parameters in order to be rendered.
 
 ---------------------------------------

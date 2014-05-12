@@ -363,4 +363,21 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 			mergeWithParentFolder, serviceContext);
 	}
 
+	@Override
+	public JournalFolder updateFolder(
+			long folderId, long parentFolderId, String name, String description,
+			long[] ddmStructureIds, int restrictionType,
+			boolean mergeWithParentFolder, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		JournalFolderPermission.check(
+			getPermissionChecker(), serviceContext.getScopeGroupId(), folderId,
+			ActionKeys.UPDATE);
+
+		return journalFolderLocalService.updateFolder(
+			getUserId(), folderId, parentFolderId, name, description,
+			ddmStructureIds, restrictionType, mergeWithParentFolder,
+			serviceContext);
+	}
+
 }

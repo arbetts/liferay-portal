@@ -119,6 +119,10 @@ import org.apache.commons.lang.time.StopWatch;
  */
 public class PortletImporter {
 
+	public static PortletImporter getInstance() {
+		return _instance;
+	}
+
 	public String importPortletData(
 			PortletDataContext portletDataContext, String portletId,
 			PortletPreferences portletPreferences, Element portletDataElement)
@@ -215,16 +219,25 @@ public class PortletImporter {
 
 			ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
 
+			validateFile(layout.getCompanyId(), groupId, portletId, zipReader);
+
+			String userIdStrategyString = MapUtil.getString(
+				parameterMap, PortletDataHandlerKeys.USER_ID_STRATEGY);
+
+			UserIdStrategy userIdStrategy =
+				ExportImportHelperUtil.getUserIdStrategy(
+					userId, userIdStrategyString);
+
 			PortletDataContext portletDataContext =
 				PortletDataContextFactoryUtil.createImportPortletDataContext(
-					layout.getCompanyId(), groupId, parameterMap, null,
-					zipReader);
+					layout.getCompanyId(), groupId, parameterMap,
+					userIdStrategy, zipReader);
 
-			validateFile(portletDataContext, portletId);
+			portletDataContext.setPrivateLayout(layout.isPrivateLayout());
 
 			MissingReferences missingReferences =
 				ExportImportHelperUtil.validateMissingReferences(
-					userId, groupId, parameterMap, file);
+					portletDataContext);
 
 			Map<String, MissingReference> dependencyMissingReferences =
 				missingReferences.getDependencyMissingReferences();
@@ -355,29 +368,30 @@ public class PortletImporter {
 
 		Layout layout = LayoutLocalServiceUtil.getLayout(plid);
 
-		UserIdStrategy userIdStrategy = getUserIdStrategy(
-			user, userIdStrategyString);
-
 		ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
+
+		// LAR validation
+
+		validateFile(layout.getCompanyId(), groupId, portletId, zipReader);
+
+		// PortletDataContext
+
+		UserIdStrategy userIdStrategy =
+			ExportImportHelperUtil.getUserIdStrategy(
+				userId, userIdStrategyString);
 
 		PortletDataContext portletDataContext =
 			PortletDataContextFactoryUtil.createImportPortletDataContext(
 				layout.getCompanyId(), groupId, parameterMap, userIdStrategy,
 				zipReader);
 
-		portletDataContext.setPortetDataContextListener(
-			new PortletDataContextListenerImpl(portletDataContext));
-
 		portletDataContext.setPlid(plid);
 		portletDataContext.setPrivateLayout(layout.isPrivateLayout());
 
 		// Manifest
 
-		validateFile(portletDataContext, portletId);
-
 		ManifestSummary manifestSummary =
-			ExportImportHelperUtil.getManifestSummary(
-				userId, groupId, parameterMap, file);
+			ExportImportHelperUtil.getManifestSummary(portletDataContext);
 
 		if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
 			PortletDataHandlerStatusMessageSenderUtil.sendStatusMessage(
@@ -386,42 +400,15 @@ public class PortletImporter {
 
 		portletDataContext.setManifestSummary(manifestSummary);
 
-		// Company id
-
-		long sourceCompanyId = GetterUtil.getLong(
-			_headerElement.attributeValue("company-id"));
-
-		portletDataContext.setSourceCompanyId(sourceCompanyId);
-
-		// Company group id
-
-		long sourceCompanyGroupId = GetterUtil.getLong(
-			_headerElement.attributeValue("company-group-id"));
-
-		portletDataContext.setSourceCompanyGroupId(sourceCompanyGroupId);
-
-		// Group id
-
-		long sourceGroupId = GetterUtil.getLong(
-			_headerElement.attributeValue("group-id"));
-
-		portletDataContext.setSourceGroupId(sourceGroupId);
-
-		// User personal site group id
-
-		long sourceUserPersonalSiteGroupId = GetterUtil.getLong(
-			_headerElement.attributeValue("user-personal-site-group-id"));
-
-		portletDataContext.setSourceUserPersonalSiteGroupId(
-			sourceUserPersonalSiteGroupId);
-
 		// Read asset tags, expando tables, locks and permissions to make them
 		// available to the data handlers through the context
 
 		Element portletElement = null;
 
 		try {
-			portletElement = _rootElement.element("portlet");
+			Element rootElement = portletDataContext.getImportDataRootElement();
+
+			portletElement = rootElement.element("portlet");
 
 			Document portletDocument = SAXReaderUtil.read(
 				portletDataContext.getZipEntryAsString(
@@ -534,16 +521,6 @@ public class PortletImporter {
 		}
 
 		zipReader.close();
-	}
-
-	protected UserIdStrategy getUserIdStrategy(
-		User user, String userIdStrategy) {
-
-		if (UserIdStrategy.ALWAYS_CURRENT_USER_ID.equals(userIdStrategy)) {
-			return new AlwaysCurrentUserIdStrategy(user);
-		}
-
-		return new CurrentUserIdStrategy(user);
 	}
 
 	protected void importAssetTag(
@@ -1068,33 +1045,6 @@ public class PortletImporter {
 		}
 	}
 
-	protected void readXML(PortletDataContext portletDataContext)
-		throws Exception {
-
-		if ((_rootElement != null) && (_headerElement != null)) {
-			return;
-		}
-
-		String xml = portletDataContext.getZipEntryAsString("/manifest.xml");
-
-		if (xml == null) {
-			throw new LARFileException("manifest.xml not found in the LAR");
-		}
-
-		try {
-			Document document = SAXReaderUtil.read(xml);
-
-			_rootElement = document.getRootElement();
-
-			portletDataContext.setImportDataRootElement(_rootElement);
-		}
-		catch (Exception e) {
-			throw new LARFileException(e);
-		}
-
-		_headerElement = _rootElement.element("header");
-	}
-
 	protected void resetPortletScope(
 		PortletDataContext portletDataContext, long groupId) {
 
@@ -1173,17 +1123,36 @@ public class PortletImporter {
 	}
 
 	protected void validateFile(
-			PortletDataContext portletDataContext, String portletId)
+			long companyId, long groupId, String portletId, ZipReader zipReader)
 		throws Exception {
+
+		// XML
+
+		String xml = zipReader.getEntryAsString("/manifest.xml");
+
+		if (xml == null) {
+			throw new LARFileException("manifest.xml not found in the LAR");
+		}
+
+		Element rootElement = null;
+
+		try {
+			Document document = SAXReaderUtil.read(xml);
+
+			rootElement = document.getRootElement();
+		}
+		catch (Exception e) {
+			throw new LARFileException(e);
+		}
 
 		// Build compatibility
 
-		readXML(portletDataContext);
-
 		int buildNumber = ReleaseInfo.getBuildNumber();
 
+		Element headerElement = rootElement.element("header");
+
 		int importBuildNumber = GetterUtil.getInteger(
-			_headerElement.attributeValue("build-number"));
+			headerElement.attributeValue("build-number"));
 
 		if (buildNumber != importBuildNumber) {
 			throw new LayoutImportException(
@@ -1193,7 +1162,7 @@ public class PortletImporter {
 
 		// Type
 
-		String larType = _headerElement.attributeValue("type");
+		String larType = headerElement.attributeValue("type");
 
 		if (!larType.equals("portlet")) {
 			throw new LARTypeException(larType);
@@ -1201,7 +1170,7 @@ public class PortletImporter {
 
 		// Portlet compatibility
 
-		String rootPortletId = _headerElement.attributeValue("root-portlet-id");
+		String rootPortletId = headerElement.attributeValue("root-portlet-id");
 
 		if (!PortletConstants.getRootPortletId(portletId).equals(
 				rootPortletId)) {
@@ -1212,7 +1181,7 @@ public class PortletImporter {
 		// Available locales
 
 		Portlet portlet = PortletLocalServiceUtil.getPortletById(
-			portletDataContext.getCompanyId(), portletId);
+			companyId, portletId);
 
 		PortletDataHandler portletDataHandler =
 			portlet.getPortletDataHandlerInstance();
@@ -1220,11 +1189,10 @@ public class PortletImporter {
 		if (portletDataHandler.isDataLocalized()) {
 			Locale[] sourceAvailableLocales = LocaleUtil.fromLanguageIds(
 				StringUtil.split(
-					_headerElement.attributeValue("available-locales")));
+					headerElement.attributeValue("available-locales")));
 
 			Locale[] targetAvailableLocales = LanguageUtil.getAvailableLocales(
-				PortalUtil.getSiteGroupId(
-					portletDataContext.getScopeGroupId()));
+				PortalUtil.getSiteGroupId(groupId));
 
 			for (Locale sourceAvailableLocale : sourceAvailableLocales) {
 				if (!ArrayUtil.contains(
@@ -1233,8 +1201,7 @@ public class PortletImporter {
 					LocaleException le = new LocaleException(
 						LocaleException.TYPE_EXPORT_IMPORT,
 						"Locale " + sourceAvailableLocale + " is not " +
-							"available in company " +
-								portletDataContext.getCompanyId());
+							"available in company " + companyId);
 
 					le.setSourceAvailableLocales(sourceAvailableLocales);
 					le.setTargetAvailableLocales(targetAvailableLocales);
@@ -1245,12 +1212,16 @@ public class PortletImporter {
 		}
 	}
 
+	private PortletImporter() {
+	}
+
 	private static Log _log = LogFactoryUtil.getLog(PortletImporter.class);
 
+	private static PortletImporter _instance = new PortletImporter();
+
 	private DeletionSystemEventImporter _deletionSystemEventImporter =
-		new DeletionSystemEventImporter();
-	private Element _headerElement;
-	private PermissionImporter _permissionImporter = new PermissionImporter();
-	private Element _rootElement;
+		DeletionSystemEventImporter.getInstance();
+	private PermissionImporter _permissionImporter =
+		PermissionImporter.getInstance();
 
 }

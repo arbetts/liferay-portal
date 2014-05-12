@@ -143,16 +143,16 @@
 
 	.control-group {
 		margin-bottom: 30px;
+
+		.input-resource-wrapper {
+			margin-bottom: 0;
+		}
 	}
 
 	.lfr-ddm-container, .portlet-staging-bar {
 		.control-group {
 			margin-bottom: 15px;
 		}
-	}
-
-	.lfr-search .control-group {
-		margin-bottom: 0;
 	}
 
 	.navbar .nav > li > a {
@@ -381,7 +381,7 @@
 								}
 
 								li.active > a {
-									background: #3B6DCC;
+									background: #0066B3;
 								}
 							}
 
@@ -548,6 +548,39 @@
 	}
 
 	/* ---------- Form navigator ---------- */
+
+	.taglib-form-navigator > .form-steps > ul.form-navigator.well .tab {
+		&.active {
+			.tab-label {
+				.message {
+					color: #000;
+				}
+
+				.number {
+					background: #60BFEF;
+				}
+
+				.tab-icon {
+					color: #60BFEF;
+				}
+			}
+		}
+
+		&.section-error .tab-label .message {
+			color: #B50303;
+		}
+
+		.tab-label {
+			.message {
+				color: #000;
+			}
+
+			.number {
+				background: #CCC;
+				color: #FFF;
+			}
+		}
+	}
 
 	@include respond-to(phone, tablet) {
 		.taglib-form-navigator {
@@ -745,6 +778,19 @@
 		}
 	}
 
+	/* ---------- Portlet wrapper and icons ---------- */
+
+	.dropdown-menu > li.item-remove > a {
+		color: #C00;
+		font-weight: bold;
+
+		&:focus, &:hover {
+			background-color: #C00;
+			background-image: none;
+			color: #FFF;
+		}
+	}
+
 	/* ---------- Quick access ---------- */
 
 	.quick-access-nav {
@@ -907,6 +953,32 @@
 		@include text-shadow(none);
 	}
 
+	.taglib-form-navigator > .form-steps > ul.form-navigator.well .tab {
+		&.section-error, &.section-success {
+			.tab-label .number {
+				@include transition-duration(0.25s);
+				@include transition-property(box-shadow);
+				@include transition-timing-function(ease-out);
+			}
+		}
+
+		&.section-error .tab-label .number {
+			@include box-shadow(0 0 5px 0 #B50303);
+		}
+
+		&.section-success .tab-label .number {
+			@include box-shadow(0 0 5px 0 #488F06);
+		}
+
+		.tab-label {
+			&:hover, &:focus {
+				.number {
+					@include box-shadow(0 0 5px 0 #60BFEF);
+				}
+			}
+		}
+	}
+
 	.modify-pages .delete-tab {
 		@include border-radius(50%);
 		@include text-shadow(none);
@@ -945,10 +1017,6 @@
 
 	.tagselector-focused .tagselector-content .textboxlistentry-holder {
 		@include box-shadow(inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6));
-	}
-
-	.taglib-user-display.display-style-3 .user-profile-image {
-		@include user-avatar-circle();
 	}
 
 	.dockbar {

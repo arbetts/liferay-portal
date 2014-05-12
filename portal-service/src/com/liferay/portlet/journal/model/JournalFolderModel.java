@@ -276,6 +276,20 @@ public interface JournalFolderModel extends BaseModel<JournalFolder>,
 	public void setDescription(String description);
 
 	/**
+	 * Returns the restriction type of this journal folder.
+	 *
+	 * @return the restriction type of this journal folder
+	 */
+	public int getRestrictionType();
+
+	/**
+	 * Sets the restriction type of this journal folder.
+	 *
+	 * @param restrictionType the restriction type of this journal folder
+	 */
+	public void setRestrictionType(int restrictionType);
+
+	/**
 	 * Returns the status of this journal folder.
 	 *
 	 * @return the status of this journal folder
@@ -401,6 +415,9 @@ public interface JournalFolderModel extends BaseModel<JournalFolder>,
 
 	@Override
 	public boolean isInTrashExplicitly() throws SystemException;
+
+	@Override
+	public boolean isInTrashImplicitly() throws SystemException;
 
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #isApproved()}

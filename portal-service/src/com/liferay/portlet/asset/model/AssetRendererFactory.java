@@ -74,6 +74,8 @@ public interface AssetRendererFactory {
 	public Map<Long, String> getClassTypes(long[] groupIds, Locale locale)
 		throws Exception;
 
+	public String getIconCssClass();
+
 	public String getIconPath(PortletRequest portletRequest);
 
 	public String getPortletId();
@@ -83,8 +85,7 @@ public interface AssetRendererFactory {
 	public String getTypeName(Locale locale);
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by {@link
-	 *             #getTypeName(Locale)}
+	 * @deprecated As of 7.0.0, replaced by {@link #getTypeName(Locale)}
 	 */
 	@Deprecated
 	public String getTypeName(Locale locale, boolean hasSubtypes);

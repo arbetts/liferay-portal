@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PredicateFilter;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
@@ -28,8 +29,6 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Tuple;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.theme.PortletDisplay;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortletKeys;
@@ -37,14 +36,15 @@ import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.model.AssetEntry;
+import com.liferay.portlet.asset.model.AssetRenderer;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
-import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
 import com.liferay.portlet.asset.service.persistence.AssetEntryQuery;
 import com.liferay.portlet.asset.util.AssetUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMIndexerUtil;
 import com.liferay.portlet.portletdisplaytemplate.util.PortletDisplayTemplateUtil;
 import com.liferay.util.RSSUtil;
 
+import java.util.Locale;
 import java.util.Set;
 
 import javax.portlet.PortletConfig;
@@ -99,16 +99,13 @@ public class AssetPublisherDisplayContext {
 
 	public String[] getAllAssetTagNames() throws Exception {
 		if (_allAssetTagNames == null) {
-			ThemeDisplay themeDisplay = (ThemeDisplay)_request.getAttribute(
-				WebKeys.THEME_DISPLAY);
-
 			_allAssetTagNames = new String[0];
 
 			String selectionStyle = getSelectionStyle();
 
 			if (selectionStyle.equals("dynamic")) {
 				_allAssetTagNames = AssetPublisherUtil.getAssetTagNames(
-					_portletPreferences, themeDisplay.getScopeGroupId());
+					_portletPreferences);
 			}
 
 			String assetTagName = ParamUtil.getString(_request, "tag");
@@ -136,67 +133,21 @@ public class AssetPublisherDisplayContext {
 		ThemeDisplay themeDisplay = (ThemeDisplay)_request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		long[] groupIds = getGroupIds();
-
-		if (!ArrayUtil.contains(groupIds, themeDisplay.getScopeGroupId())) {
-			groupIds = ArrayUtil.append(
-				groupIds, themeDisplay.getScopeGroupId());
-		}
-
 		AssetEntryQuery assetEntryQuery = AssetPublisherUtil.getAssetEntryQuery(
-			_portletPreferences, groupIds);
-
-		long[] classNameIds = getClassNameIds();
-		long[] classTypeIds = getClassTypeIds();
-
-		if (isSubtypeFieldsFilterEnabled() && (classNameIds.length == 1) &&
-			(classTypeIds.length == 1) &&
-			Validator.isNotNull(getDDMStructureFieldName()) &&
-			Validator.isNotNull(getDDMStructureFieldValue())) {
-
-			AssetRendererFactory assetRendererFactory =
-				AssetRendererFactoryRegistryUtil.
-					getAssetRendererFactoryByClassNameId(classNameIds[0]);
-
-			Tuple classTypeFieldName =
-				assetRendererFactory.getClassTypeFieldName(
-					classTypeIds[0], getDDMStructureFieldName(),
-					themeDisplay.getLocale());
-
-			long ddmStructureId = GetterUtil.getLong(
-				classTypeFieldName.getObject(3));
-
-			assetEntryQuery.setAttribute(
-				"ddmStructureFieldName",
-				DDMIndexerUtil.encodeName(
-					ddmStructureId, getDDMStructureFieldName(),
-					themeDisplay.getLocale()));
-			assetEntryQuery.setAttribute(
-				"ddmStructureFieldValue", getDDMStructureFieldValue());
-		}
-
-		assetEntryQuery.setAllCategoryIds(getAllAssetCategoryIds());
-
-		if (hasLayoutGroup(groupIds)) {
-			assetEntryQuery.setAllTagIds(
-				AssetTagLocalServiceUtil.getTagIds(
-					groupIds, getAllAssetTagNames()));
-		}
-		else {
-			assetEntryQuery.setAllTagIds(
-				AssetTagLocalServiceUtil.getTagIds(
-					getGroupIds(), getAllAssetTagNames()));
-		}
-
-		assetEntryQuery.setClassTypeIds(classTypeIds);
-		assetEntryQuery.setEnablePermissions(isEnablePermissions());
-		assetEntryQuery.setExcludeZeroViewCount(isExcludeZeroViewCount());
+			_portletPreferences, getGroupIds(), getAllAssetCategoryIds(),
+			getAllAssetTagNames());
 
 		String portletName = getPortletName();
 
 		if (!portletName.equals(PortletKeys.RELATED_ASSETS)) {
 			assetEntryQuery.setGroupIds(getGroupIds());
 		}
+
+		assetEntryQuery.setClassTypeIds(getClassTypeIds());
+		assetEntryQuery.setEnablePermissions(isEnablePermissions());
+		assetEntryQuery.setExcludeZeroViewCount(isExcludeZeroViewCount());
+
+		configureSubtypeFieldFilter(assetEntryQuery, themeDisplay.getLocale());
 
 		if (isShowOnlyLayoutAssets()) {
 			assetEntryQuery.setLayout(themeDisplay.getLayout());
@@ -369,6 +320,26 @@ public class AssetPublisherDisplayContext {
 		}
 
 		return _extensions;
+	}
+
+	public String[] getExtensions(AssetRenderer assetRenderer) {
+		final String[] supportedConversions =
+			assetRenderer.getSupportedConversions();
+
+		if (supportedConversions == null) {
+			return getExtensions();
+		}
+
+		return ArrayUtil.filter(
+			getExtensions(),
+			new PredicateFilter<String>() {
+
+				@Override
+				public boolean filter(String extension) {
+					return ArrayUtil.contains(supportedConversions, extension);
+				}
+
+			});
 	}
 
 	public long[] getGroupIds() {
@@ -825,6 +796,40 @@ public class AssetPublisherDisplayContext {
 		_showContextLink = showContextLink;
 	}
 
+	protected void configureSubtypeFieldFilter(
+			AssetEntryQuery assetEntryQuery, Locale locale)
+		throws Exception {
+
+		long[] classNameIds = getClassNameIds();
+		long[] classTypeIds = getClassTypeIds();
+
+		if (!isSubtypeFieldsFilterEnabled() || (classNameIds.length != 1) ||
+			(classTypeIds.length != 1) ||
+			Validator.isNull(getDDMStructureFieldName()) ||
+			Validator.isNull(getDDMStructureFieldValue())) {
+
+			return;
+		}
+
+		AssetRendererFactory assetRendererFactory =
+			AssetRendererFactoryRegistryUtil.
+				getAssetRendererFactoryByClassNameId(classNameIds[0]);
+
+		Tuple classTypeFieldName =
+			assetRendererFactory.getClassTypeFieldName(
+				classTypeIds[0], getDDMStructureFieldName(), locale);
+
+		long ddmStructureId = GetterUtil.getLong(
+			classTypeFieldName.getObject(3));
+
+		assetEntryQuery.setAttribute(
+			"ddmStructureFieldName",
+			DDMIndexerUtil.encodeName(
+				ddmStructureId, getDDMStructureFieldName(), locale));
+		assetEntryQuery.setAttribute(
+			"ddmStructureFieldValue", getDDMStructureFieldValue());
+	}
+
 	protected String getPortletName() {
 		PortletConfig portletConfig = (PortletConfig)_request.getAttribute(
 			JavaConstants.JAVAX_PORTLET_CONFIG);
@@ -834,18 +839,6 @@ public class AssetPublisherDisplayContext {
 		}
 
 		return portletConfig.getPortletName();
-	}
-
-	protected boolean hasLayoutGroup(long[] groupIds) throws SystemException {
-		for (long groupId : groupIds) {
-			Group group = GroupLocalServiceUtil.fetchGroup(groupId);
-
-			if ((group != null) && group.isLayout()) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	protected void setDDMStructure() throws Exception {

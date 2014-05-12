@@ -42,8 +42,18 @@ public interface Group extends GroupModel, PersistedModel, TreeModel {
 		boolean site)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link
+	#getChildrenWithLayouts(boolean, int, int, OrderByComparator}
+	*/
+	@java.lang.Deprecated()
 	public java.util.List<com.liferay.portal.model.Group> getChildrenWithLayouts(
 		boolean site, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	public java.util.List<com.liferay.portal.model.Group> getChildrenWithLayouts(
+		boolean site, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator obc)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
 	public int getChildrenWithLayoutsCount(boolean site)
@@ -64,6 +74,8 @@ public interface Group extends GroupModel, PersistedModel, TreeModel {
 	public java.lang.String getDescriptiveName(java.util.Locale locale)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
+
+	public java.lang.String getIconCssClass();
 
 	public java.lang.String getIconURL(
 		com.liferay.portal.theme.ThemeDisplay themeDisplay);

@@ -63,9 +63,9 @@ OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBac
 		>
 			<liferay-ui:user-display
 				displayStyle="3"
-				height="30"
+				showUserDetails="<%= false %>"
+				showUserName="<%= false %>"
 				userId="<%= backgroundTask.getUserId() %>"
-				width="30"
 			/>
 		</liferay-ui:search-container-column-text>
 
@@ -165,7 +165,7 @@ OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBac
 						<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
 					</portlet:actionURL>
 
-					<liferay-ui:icon image="submit" message='<%= LanguageUtil.get(pageContext, "relaunch") %>' url="<%= relaunchURL %>" />
+					<liferay-ui:icon image="submit" message="relaunch" url="<%= relaunchURL %>" />
 				</liferay-ui:icon-menu>
 			</c:if>
 		</liferay-ui:search-container-column-text>

@@ -204,6 +204,11 @@ public class ResourceActionLocalServiceUtil {
 		return getService().getResourceAction(resourceActionId);
 	}
 
+	public static com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getActionableDynamicQuery();
+	}
+
 	public static com.liferay.portal.model.PersistedModel getPersistedModel(
 		java.io.Serializable primaryKeyObj)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -303,6 +308,11 @@ public class ResourceActionLocalServiceUtil {
 		java.lang.String name)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService().getResourceActions(name);
+	}
+
+	public static int getResourceActionsCount(java.lang.String name)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getResourceActionsCount(name);
 	}
 
 	public static ResourceActionLocalService getService() {

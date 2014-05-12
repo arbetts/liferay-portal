@@ -242,19 +242,18 @@ public class PortletDataContextImpl implements PortletDataContext {
 			auditedModel.setUserUuid(auditedModel.getUserUuid());
 		}
 
-		if (!isResourceMain(classedModel)) {
-			addZipEntry(path, classedModel);
+		if (isResourceMain(classedModel)) {
+			long classPK = ExportImportClassedModelUtil.getClassPK(
+				classedModel);
 
-			return;
+			addAssetLinks(clazz, classPK);
+			addAssetTags(clazz, classPK);
+			addExpando(element, path, classedModel, clazz);
+			addLocks(clazz, String.valueOf(classPK));
+			addPermissions(clazz, classPK);
 		}
 
-		long classPK = ExportImportClassedModelUtil.getClassPK(classedModel);
-
-		addAssetLinks(clazz, classPK);
-		addAssetTags(clazz, classPK);
-		addExpando(element, path, classedModel, clazz);
-		addLocks(clazz, String.valueOf(classPK));
-		addPermissions(clazz, classPK);
+		_references.add(getReferenceKey(classedModel));
 
 		addZipEntry(path, classedModel);
 	}
@@ -547,11 +546,10 @@ public class PortletDataContextImpl implements PortletDataContext {
 				return referenceElement;
 			}
 
+			referenceElement.addAttribute("missing", Boolean.TRUE.toString());
+
 			if (!_missingReferences.contains(referenceKey)) {
 				_missingReferences.add(referenceKey);
-
-				referenceElement.addAttribute(
-					"missing", Boolean.TRUE.toString());
 
 				doAddReferenceElement(
 					referrerClassedModel, null, classedModel, className,

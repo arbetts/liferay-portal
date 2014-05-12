@@ -91,8 +91,8 @@
 							<liferay-ui:message key="scope" />:
 							<liferay-ui:icon-menu direction="down" icon="" message="<%= scopeLabel %>">
 								<liferay-ui:icon
+									iconCssClass="<%= curSite.getIconCssClass() %>"
 									message="default"
-									src="<%= curSite.getIconURL(themeDisplay) %>"
 									url='<%= HttpUtil.setParameter(PortalUtil.getCurrentURL(request), "doAsGroupId", curSite.getGroupId()) %>'
 								/>
 
@@ -102,10 +102,10 @@
 								%>
 
 									<liferay-ui:icon
+										iconCssClass="<%= scopeGroup.getIconCssClass() %>"
 										message="<%= HtmlUtil.escape(curScopeLayout.getName(locale)) %>"
-										src="<%= scopeGroup.getIconURL(themeDisplay) %>"
 										url='<%= HttpUtil.setParameter(PortalUtil.getCurrentURL(request), "doAsGroupId", scopeGroup.getGroupId()) %>'
-										/>
+									/>
 
 								<%
 								}
@@ -154,12 +154,12 @@
 							%>
 
 							<%
-							if (portletClassName.equals(AlloyPortlet.class.getName())) {
+							if (portletClassName.equals("com.liferay.alloy.mvc.AlloyPortlet")) {
 								PortletConfig alloyPortletConfig = PortletConfigFactoryUtil.create(portlet, application);
 
 								PortletContext alloyPortletContext = alloyPortletConfig.getPortletContext();
 
-								if (alloyPortletContext.getAttribute(BaseAlloyControllerImpl.TOUCH + portlet.getRootPortletId()) != Boolean.FALSE) {
+								if (alloyPortletContext.getAttribute("com.liferay.alloy.mvc.BaseAlloyControllerImpl#TOUCH#" + portlet.getRootPortletId()) != Boolean.FALSE) {
 							%>
 
 								<iframe height="0" src="<%= portletURL %>" style="display: none; visibility: hidden;" width="0"></iframe>

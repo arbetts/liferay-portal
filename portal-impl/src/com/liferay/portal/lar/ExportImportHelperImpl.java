@@ -14,7 +14,6 @@
 
 package com.liferay.portal.lar;
 
-import com.liferay.portal.LARFileException;
 import com.liferay.portal.NoSuchLayoutException;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Disjunction;
@@ -91,9 +90,9 @@ import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.LayoutServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.PortletLocalServiceUtil;
+import com.liferay.portal.service.SystemEventLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.persistence.OrganizationUtil;
-import com.liferay.portal.service.persistence.SystemEventActionableDynamicQuery;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
@@ -119,7 +118,6 @@ import com.liferay.portlet.journal.model.JournalArticle;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.StringReader;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -655,6 +653,11 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		return getLayoutIds(getLayoutIdMap(portletRequest), targetGroupId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getManifestSummary(PortletDataContext)}
+	 */
+	@Deprecated
 	@Override
 	public ManifestSummary getManifestSummary(
 			long userId, long groupId, Map<String, String[]> parameterMap,
@@ -671,28 +674,7 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 				group.getCompanyId(), groupId, parameterMap,
 				getUserIdStrategy(userId, userIdStrategy), zipReader);
 
-		final ManifestSummary manifestSummary = new ManifestSummary();
-
-		SAXParser saxParser = new SAXParser();
-
-		ElementHandler elementHandler = new ElementHandler(
-			new ManifestSummaryElementProcessor(group, manifestSummary),
-			new String[] {"header", "portlet", "staged-model"});
-
-		saxParser.setContentHandler(elementHandler);
-
-		InputStream is = portletDataContext.getZipEntryAsInputStream(
-			"/manifest.xml");
-
-		if (is == null) {
-			throw new LARFileException("manifest.xml is not in the LAR");
-		}
-
-		String manifestXMLContent = StringUtil.read(is);
-
-		saxParser.parse(new InputSource(new StringReader(manifestXMLContent)));
-
-		return manifestSummary;
+		return getManifestSummary(portletDataContext);
 	}
 
 	@Override
@@ -710,14 +692,47 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		try {
 			FileUtil.write(file, inputStream);
 
-			manifestSummary = getManifestSummary(
-				userId, groupId, parameterMap, file);
+			Group group = GroupLocalServiceUtil.getGroup(groupId);
+			String userIdStrategy = MapUtil.getString(
+				parameterMap, PortletDataHandlerKeys.USER_ID_STRATEGY);
+			ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
+
+			PortletDataContext portletDataContext =
+				PortletDataContextFactoryUtil.createImportPortletDataContext(
+					group.getCompanyId(), groupId, parameterMap,
+					getUserIdStrategy(userId, userIdStrategy), zipReader);
+
+			manifestSummary = getManifestSummary(portletDataContext);
 		}
 		finally {
 			StreamUtil.cleanUp(inputStream);
 
 			FileUtil.delete(file);
 		}
+
+		return manifestSummary;
+	}
+
+	@Override
+	public ManifestSummary getManifestSummary(
+			PortletDataContext portletDataContext)
+		throws Exception {
+
+		SAXParser saxParser = new SAXParser();
+
+		Group group = GroupLocalServiceUtil.getGroup(
+			portletDataContext.getGroupId());
+		ManifestSummary manifestSummary = new ManifestSummary();
+
+		ElementHandler elementHandler = new ElementHandler(
+			new ManifestSummaryElementProcessor(group, manifestSummary),
+			new String[] {"header", "portlet", "staged-model"});
+
+		saxParser.setContentHandler(elementHandler);
+
+		saxParser.parse(
+			new InputSource(
+				portletDataContext.getZipEntryAsInputStream("/manifest.xml")));
 
 		return manifestSummary;
 	}
@@ -766,67 +781,18 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		throws PortalException, SystemException {
 
 		ActionableDynamicQuery actionableDynamicQuery =
-			new SystemEventActionableDynamicQuery() {
+			SystemEventLocalServiceUtil.getActionableDynamicQuery();
 
-			protected void addCreateDateProperty(DynamicQuery dynamicQuery) {
-				if (!portletDataContext.hasDateRange()) {
-					return;
+		actionableDynamicQuery.setAddCriteriaMethod(
+			new ActionableDynamicQuery.AddCriteriaMethod() {
+
+				@Override
+				public void addCriteria(DynamicQuery dynamicQuery) {
+					doAddCriteria(
+						portletDataContext, stagedModelType, dynamicQuery);
 				}
 
-				Property createDateProperty = PropertyFactoryUtil.forName(
-					"createDate");
-
-				Date startDate = portletDataContext.getStartDate();
-
-				dynamicQuery.add(createDateProperty.ge(startDate));
-
-				Date endDate = portletDataContext.getEndDate();
-
-				dynamicQuery.add(createDateProperty.le(endDate));
-			}
-
-			@Override
-			protected void addCriteria(DynamicQuery dynamicQuery) {
-				Disjunction disjunction = RestrictionsFactoryUtil.disjunction();
-
-				Property groupIdProperty = PropertyFactoryUtil.forName(
-					"groupId");
-
-				disjunction.add(groupIdProperty.eq(0L));
-				disjunction.add(
-					groupIdProperty.eq(portletDataContext.getScopeGroupId()));
-
-				dynamicQuery.add(disjunction);
-
-				Property classNameIdProperty = PropertyFactoryUtil.forName(
-					"classNameId");
-
-				dynamicQuery.add(
-					classNameIdProperty.eq(stagedModelType.getClassNameId()));
-
-				if (stagedModelType.getReferrerClassNameId() >= 0) {
-					Property referrerClassNameIdProperty =
-						PropertyFactoryUtil.forName("referrerClassNameId");
-
-					dynamicQuery.add(
-						referrerClassNameIdProperty.eq(
-							stagedModelType.getReferrerClassNameId()));
-				}
-
-				Property typeProperty = PropertyFactoryUtil.forName("type");
-
-				dynamicQuery.add(
-					typeProperty.eq(SystemEventConstants.TYPE_DELETE));
-
-				addCreateDateProperty(dynamicQuery);
-			}
-
-			@Override
-			protected void performAction(Object object) {
-			}
-
-		};
-
+			});
 		actionableDynamicQuery.setCompanyId(portletDataContext.getCompanyId());
 
 		return actionableDynamicQuery.performCount();
@@ -846,6 +812,19 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 
 		return TempFileUtil.getTempFile(
 			groupId, userId, tempFileEntryNames[0], folderName);
+	}
+
+	@Override
+	public UserIdStrategy getUserIdStrategy(long userId, String userIdStrategy)
+		throws PortalException, SystemException {
+
+		User user = UserLocalServiceUtil.getUserById(userId);
+
+		if (UserIdStrategy.ALWAYS_CURRENT_USER_ID.equals(userIdStrategy)) {
+			return new AlwaysCurrentUserIdStrategy(user);
+		}
+
+		return new CurrentUserIdStrategy(user);
 	}
 
 	@Override
@@ -1271,11 +1250,11 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 						"Unable to get layout with ID " + layoutId +
 							" in group " + portletDataContext.getScopeGroupId();
 
-					if (_log.isWarnEnabled()) {
-						_log.warn(message);
+					if (_log.isDebugEnabled()) {
+						_log.debug(message, e);
 					}
 					else {
-						_log.debug(message, e);
+						_log.warn(message);
 					}
 				}
 			}
@@ -1516,7 +1495,7 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		Matcher matcher = _importLinksToLayoutPattern.matcher(content);
 
 		while (matcher.find()) {
-			long oldGroupId = GetterUtil.getLong(matcher.group(6));
+			long oldGroupId = GetterUtil.getLong(matcher.group(7));
 
 			long newGroupId = oldGroupId;
 
@@ -1528,8 +1507,8 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 
 			boolean privateLayout = type.startsWith("private");
 
-			String layoutUuid = matcher.group(3);
-			String friendlyURL = matcher.group(4);
+			String layoutUuid = matcher.group(4);
+			String friendlyURL = matcher.group(5);
 
 			try {
 				Layout layout =
@@ -1572,11 +1551,11 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 						"Unable to get layout in group " +
 							portletDataContext.getScopeGroupId();
 
-					if (_log.isWarnEnabled()) {
-						_log.warn(message);
+					if (_log.isDebugEnabled()) {
+						_log.debug(message, se);
 					}
 					else {
-						_log.debug(message, se);
+						_log.warn(message);
 					}
 				}
 			}
@@ -1739,21 +1718,10 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 
 	@Override
 	public MissingReferences validateMissingReferences(
-			long userId, long groupId, Map<String, String[]> parameterMap,
-			File file)
+			final PortletDataContext portletDataContext)
 		throws Exception {
 
 		final MissingReferences missingReferences = new MissingReferences();
-
-		Group group = GroupLocalServiceUtil.getGroup(groupId);
-		String userIdStrategy = MapUtil.getString(
-			parameterMap, PortletDataHandlerKeys.USER_ID_STRATEGY);
-		ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
-
-		final PortletDataContext portletDataContext =
-			PortletDataContextFactoryUtil.createImportPortletDataContext(
-				group.getCompanyId(), groupId, parameterMap,
-				getUserIdStrategy(userId, userIdStrategy), zipReader);
 
 		SAXParser saxParser = new SAXParser();
 
@@ -1780,6 +1748,30 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 				portletDataContext.getZipEntryAsInputStream("/manifest.xml")));
 
 		return missingReferences;
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #validateMissingReferences(PortletDataContext)}
+	 */
+	@Deprecated
+	@Override
+	public MissingReferences validateMissingReferences(
+			long userId, long groupId, Map<String, String[]> parameterMap,
+			File file)
+		throws Exception {
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+		String userIdStrategy = MapUtil.getString(
+			parameterMap, PortletDataHandlerKeys.USER_ID_STRATEGY);
+		ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(file);
+
+		PortletDataContext portletDataContext =
+			PortletDataContextFactoryUtil.createImportPortletDataContext(
+				group.getCompanyId(), groupId, parameterMap,
+				getUserIdStrategy(userId, userIdStrategy), zipReader);
+
+		return validateMissingReferences(portletDataContext);
 	}
 
 	@Override
@@ -1816,6 +1808,24 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		}
 	}
 
+	protected void addCreateDateProperty(
+		PortletDataContext portletDataContext, DynamicQuery dynamicQuery) {
+
+		if (!portletDataContext.hasDateRange()) {
+			return;
+		}
+
+		Property createDateProperty = PropertyFactoryUtil.forName("createDate");
+
+		Date startDate = portletDataContext.getStartDate();
+
+		dynamicQuery.add(createDateProperty.ge(startDate));
+
+		Date endDate = portletDataContext.getEndDate();
+
+		dynamicQuery.add(createDateProperty.le(endDate));
+	}
+
 	protected void deleteTimestampParameters(StringBuilder sb, int beginPos) {
 		beginPos = sb.indexOf(StringPool.CLOSE_BRACKET, beginPos);
 
@@ -1837,6 +1847,42 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		urlParams = HttpUtil.removeParameter(urlParams, "t");
 
 		sb.replace(beginPos + 1, endPos, urlParams);
+	}
+
+	protected void doAddCriteria(
+		PortletDataContext portletDataContext, StagedModelType stagedModelType,
+		DynamicQuery dynamicQuery) {
+
+		Disjunction disjunction = RestrictionsFactoryUtil.disjunction();
+
+		Property groupIdProperty = PropertyFactoryUtil.forName("groupId");
+
+		disjunction.add(groupIdProperty.eq(0L));
+		disjunction.add(
+			groupIdProperty.eq(portletDataContext.getScopeGroupId()));
+
+		dynamicQuery.add(disjunction);
+
+		Property classNameIdProperty = PropertyFactoryUtil.forName(
+			"classNameId");
+
+		dynamicQuery.add(
+			classNameIdProperty.eq(stagedModelType.getClassNameId()));
+
+		if (stagedModelType.getReferrerClassNameId() >= 0) {
+			Property referrerClassNameIdProperty = PropertyFactoryUtil.forName(
+				"referrerClassNameId");
+
+			dynamicQuery.add(
+				referrerClassNameIdProperty.eq(
+					stagedModelType.getReferrerClassNameId()));
+		}
+
+		Property typeProperty = PropertyFactoryUtil.forName("type");
+
+		dynamicQuery.add(typeProperty.eq(SystemEventConstants.TYPE_DELETE));
+
+		addCreateDateProperty(portletDataContext, dynamicQuery);
 	}
 
 	protected Map<String, String[]> getDLReferenceParameters(
@@ -2147,19 +2193,6 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		return null;
 	}
 
-	protected UserIdStrategy getUserIdStrategy(
-			long userId, String userIdStrategy)
-		throws Exception {
-
-		User user = UserLocalServiceUtil.getUserById(userId);
-
-		if (UserIdStrategy.ALWAYS_CURRENT_USER_ID.equals(userIdStrategy)) {
-			return new AlwaysCurrentUserIdStrategy(user);
-		}
-
-		return new CurrentUserIdStrategy(user);
-	}
-
 	protected String replaceExportHostname(
 			PortletDataContext portletDataContext, String url,
 			StringBundler urlSB)
@@ -2306,10 +2339,11 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		ExportImportHelperImpl.class);
 
 	private Pattern _exportLinksToLayoutPattern = Pattern.compile(
-		"\\[([\\d]+)@(public|private)(@([\\d]+))?\\]");
+		"\\[([\\d]+)@(private(-group|-user)?|public)(@([\\d]+))?\\]");
 	private Pattern _importLinksToLayoutPattern = Pattern.compile(
-		"\\[([\\d]+)@(public|private)@(\\p{XDigit}{8}\\-(?:\\p{XDigit}{4}\\-)" +
-			"{3}\\p{XDigit}{12})@([a-z0-9./_-]*)(@([\\d]+))?\\]");
+		"\\[([\\d]+)@(private(-group|-user)?|public)@(\\p{XDigit}{8}\\-" +
+			"(?:\\p{XDigit}{4}\\-){3}\\p{XDigit}{12})@([a-z0-9./_-]*)" +
+				"(@([\\d]+))?\\]");
 
 	private class ManifestSummaryElementProcessor implements ElementProcessor {
 

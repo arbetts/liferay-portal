@@ -271,6 +271,19 @@ public class JournalFolderServiceWrapper implements JournalFolderService,
 			name, description, mergeWithParentFolder, serviceContext);
 	}
 
+	@Override
+	public com.liferay.portlet.journal.model.JournalFolder updateFolder(
+		long folderId, long parentFolderId, java.lang.String name,
+		java.lang.String description, long[] ddmStructureIds,
+		int restrictionType, boolean mergeWithParentFolder,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _journalFolderService.updateFolder(folderId, parentFolderId,
+			name, description, ddmStructureIds, restrictionType,
+			mergeWithParentFolder, serviceContext);
+	}
+
 	/**
 	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
 	 */

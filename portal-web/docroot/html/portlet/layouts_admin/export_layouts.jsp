@@ -219,6 +219,11 @@ if (!cmd.equals(Constants.ADD)) {
 
 					<c:if test="<%= !group.isLayoutPrototype() && !group.isCompany() %>">
 						<aui:fieldset cssClass="options-group" label="pages">
+
+							<%
+							request.setAttribute("select_pages.jsp-parameterMap", parameterMap);
+							%>
+
 							<liferay-util:include page="/html/portlet/layouts_admin/export_configuration/select_pages.jsp">
 								<liferay-util:param name="<%= Constants.CMD %>" value="<%= Constants.EXPORT %>" />
 								<liferay-util:param name="privateLayout" value="<%= String.valueOf(privateLayout) %>" />
@@ -474,7 +479,7 @@ if (!cmd.equals(Constants.ADD)) {
 											<liferay-ui:icon
 												image="calendar"
 												label="<%= true %>"
-												message='<%= LanguageUtil.get(locale, "date-range") + selectedLabelsHTML %>'
+												message='<%= LanguageUtil.get(pageContext, "date-range") + selectedLabelsHTML %>'
 											/>
 										</li>
 
@@ -704,6 +709,7 @@ if (!cmd.equals(Constants.ADD)) {
 			archivedSetupsNode: '#<%= PortletDataHandlerKeys.PORTLET_ARCHIVED_SETUPS_ALL %>Checkbox',
 			commentsNode: '#<%= PortletDataHandlerKeys.COMMENTS %>Checkbox',
 			deletionsNode: '#<%= PortletDataHandlerKeys.DELETIONS %>Checkbox',
+			exportLAR: true,
 			form: document.<portlet:namespace />fm1,
 			incompleteProcessMessageNode: '#<portlet:namespace />incompleteProcessMessage',
 			layoutSetSettingsNode: '#<%= PortletDataHandlerKeys.LAYOUT_SET_SETTINGS %>Checkbox',

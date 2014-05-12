@@ -209,6 +209,12 @@ public class ResourceActionLocalServiceWrapper
 	}
 
 	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _resourceActionLocalService.getActionableDynamicQuery();
+	}
+
+	@Override
 	public com.liferay.portal.model.PersistedModel getPersistedModel(
 		java.io.Serializable primaryKeyObj)
 		throws com.liferay.portal.kernel.exception.PortalException,
@@ -320,6 +326,12 @@ public class ResourceActionLocalServiceWrapper
 		java.lang.String name)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _resourceActionLocalService.getResourceActions(name);
+	}
+
+	@Override
+	public int getResourceActionsCount(java.lang.String name)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _resourceActionLocalService.getResourceActionsCount(name);
 	}
 
 	/**

@@ -39,7 +39,6 @@ import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.Node;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.xml.XPath;
-import com.liferay.portal.model.Group;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.model.User;
@@ -60,6 +59,8 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants;
 import com.liferay.portlet.dynamicdatamapping.service.base.DDMStructureLocalServiceBaseImpl;
 import com.liferay.portlet.dynamicdatamapping.util.DDMTemplateHelperUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMXMLUtil;
+import com.liferay.portlet.journal.model.JournalArticle;
+import com.liferay.portlet.journal.model.JournalFolderConstants;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -551,15 +552,15 @@ public class DDMStructureLocalServiceImpl
 	 *
 	 * <p>
 	 * This method first searches in the group. If the structure is still not
-	 * found and <code>includeGlobalStructures</code> is set to
-	 * <code>true</code>, this method searches the global group.
+	 * found and <code>includeAncestorStructures</code> is set to
+	 * <code>true</code>, this method searches the parent sites.
 	 * </p>
 	 *
 	 * @param  groupId the primary key of the group
 	 * @param  classNameId the primary key of the class name for the structure's
 	 *         related model
 	 * @param  structureKey the unique string identifying the structure
-	 * @param  includeGlobalStructures whether to include the global scope in
+	 * @param  includeAncestorStructures whether to include the parent sites in
 	 *         the search
 	 * @return the matching structure, or <code>null</code> if a matching
 	 *         structure could not be found
@@ -569,7 +570,7 @@ public class DDMStructureLocalServiceImpl
 	@Override
 	public DDMStructure fetchStructure(
 			long groupId, long classNameId, String structureKey,
-			boolean includeGlobalStructures)
+			boolean includeAncestorStructures)
 		throws PortalException, SystemException {
 
 		structureKey = getStructureKey(structureKey);
@@ -577,17 +578,26 @@ public class DDMStructureLocalServiceImpl
 		DDMStructure structure = ddmStructurePersistence.fetchByG_C_S(
 			groupId, classNameId, structureKey);
 
-		if ((structure != null) || !includeGlobalStructures) {
+		if (structure != null) {
 			return structure;
 		}
 
-		Group group = groupPersistence.findByPrimaryKey(groupId);
+		if (!includeAncestorStructures) {
+			return null;
+		}
 
-		Group companyGroup = groupLocalService.getCompanyGroup(
-			group.getCompanyId());
+		for (long ancestorSiteGroupId :
+				PortalUtil.getAncestorSiteGroupIds(groupId)) {
 
-		return ddmStructurePersistence.fetchByG_C_S(
-			companyGroup.getGroupId(), classNameId, structureKey);
+			structure = ddmStructurePersistence.fetchByG_C_S(
+				ancestorSiteGroupId, classNameId, structureKey);
+
+			if (structure != null) {
+				return structure;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -716,6 +726,41 @@ public class DDMStructureLocalServiceImpl
 		throws SystemException {
 
 		return dlFileEntryTypePersistence.getDDMStructures(dlFileEntryTypeId);
+	}
+
+	@Override
+	public List<DDMStructure> getJournalFolderStructures(
+			long[] groupIds, long journalFolderId, int restrictionType)
+		throws PortalException, SystemException {
+
+		if (restrictionType ==
+				JournalFolderConstants.
+					RESTRICTION_TYPE_DDM_STRUCTURES_AND_WORKFLOW) {
+
+			return journalFolderPersistence.getDDMStructures(journalFolderId);
+		}
+
+		List<DDMStructure> structures = null;
+
+		journalFolderId =
+			journalFolderLocalService.getOverridedDDMStructuresFolderId(
+				journalFolderId);
+
+		if (journalFolderId !=
+				JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+
+			structures = journalFolderPersistence.getDDMStructures(
+				journalFolderId);
+		}
+		else {
+			long classNameId = classNameLocalService.getClassNameId(
+				JournalArticle.class);
+
+			structures = ddmStructurePersistence.findByG_C(
+				groupIds, classNameId);
+		}
+
+		return structures;
 	}
 
 	/**

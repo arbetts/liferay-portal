@@ -92,14 +92,6 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 			PortletPreferences portletPreferences)
 		throws SystemException {
 
-		removeDefaultValue(
-			portletRequest, portletPreferences, "emailFromAddress",
-			AssetPublisherUtil.getEmailFromAddress(
-				portletPreferences, companyId));
-		removeDefaultValue(
-			portletRequest, portletPreferences, "emailFromName",
-			AssetPublisherUtil.getEmailFromName(portletPreferences, companyId));
-
 		String languageId = LocaleUtil.toLanguageId(
 			LocaleUtil.getSiteDefault());
 
@@ -367,12 +359,10 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
 				className);
 
-		long[] groupIds = {
-			themeDisplay.getCompanyGroupId(), themeDisplay.getSiteGroupId()
-		};
-
 		Map<Long, String> classTypes = assetRendererFactory.getClassTypes(
-			groupIds, themeDisplay.getLocale());
+			PortalUtil.getCurrentAndAncestorSiteGroupIds(
+				themeDisplay.getSiteGroupId()),
+			themeDisplay.getLocale());
 
 		if (classTypes.isEmpty()) {
 			return null;

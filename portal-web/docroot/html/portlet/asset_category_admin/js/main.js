@@ -184,7 +184,7 @@ AUI.add(
 				'<a href="javascript:;" data-vocabularyId="{vocabularyId}" tabIndex="-1">' +
 					'<input type="checkbox" class="vocabulary-item-check" name="vocabulary-item-check" data-vocabularyId="{vocabularyId}" data-vocabularyName="{titleCurrentValue}">' +
 					'<span class="vocabulary-item-name" data-vocabularyId="{vocabularyId}">{titleCurrentValue}</span>' +
-					'<span tabindex="0" class="vocabulary-item-actions-trigger" data-vocabularyId="{vocabularyId}"></span>' +
+					'<span tabindex="0" class="icon-edit vocabulary-item-actions-trigger" data-vocabularyId="{vocabularyId}"></span>' +
 				'</a>' +
 			'</li>';
 
@@ -1187,7 +1187,7 @@ AUI.add(
 								null,
 								{
 									autoLoad: false,
-									dataType: 'json',
+									dataType: 'JSON',
 									on: {
 										success: function(event, id, obj) {
 											var response = this.get(STR_RESPONSE_DATA);
@@ -1217,7 +1217,7 @@ AUI.add(
 								null,
 								{
 									autoLoad: false,
-									dataType: 'html',
+									dataType: 'HTML',
 									on: {
 										success: function(event, id, obj) {
 											var response = this.get(STR_RESPONSE_DATA);
@@ -1248,7 +1248,7 @@ AUI.add(
 								{
 									'arguments': {},
 									autoLoad: false,
-									dataType: 'json',
+									dataType: 'JSON',
 									on: {
 										success: function(event, id, obj, args) {
 											var response = this.get(STR_RESPONSE_DATA);
@@ -1278,7 +1278,7 @@ AUI.add(
 								null,
 								{
 									autoLoad: false,
-									dataType: 'json',
+									dataType: 'JSON',
 									on: {
 										success: function(event, id, obj) {
 											var response = this.get(STR_RESPONSE_DATA);
@@ -1568,7 +1568,7 @@ AUI.add(
 									start: 0,
 									vocabularyId: vocabularyId
 								},
-								dataType: 'json',
+								dataType: 'JSON',
 								on: {
 									success: function(event) {
 										callback(this.get(STR_RESPONSE_DATA));

@@ -325,7 +325,7 @@ create table CalEvent (
 	createDate DATE null,
 	modifiedDate DATE null,
 	title VARCHAR(75) null,
-	description STRING null,
+	description TEXT null,
 	location STRING null,
 	startDate DATE null,
 	endDate DATE null,
@@ -776,7 +776,7 @@ create table ExpandoValue (
 	rowId_ LONG,
 	classNameId LONG,
 	classPK LONG,
-	data_ STRING null
+	data_ TEXT null
 );
 
 create table ExportImportConfiguration (
@@ -953,10 +953,17 @@ create table JournalFolder (
 	treePath STRING null,
 	name VARCHAR(100) null,
 	description STRING null,
+	restrictionType INTEGER,
 	status INTEGER,
 	statusByUserId LONG,
 	statusByUserName VARCHAR(75) null,
 	statusDate DATE null
+);
+
+create table JournalFolders_DDMStructures (
+	structureId LONG not null,
+	folderId LONG not null,
+	primary key (structureId, folderId)
 );
 
 create table Layout (
@@ -2300,6 +2307,7 @@ create table UserNotificationEvent (
 	userId LONG,
 	type_ VARCHAR(75) null,
 	timestamp LONG,
+	deliveryType INTEGER,
 	deliverBy LONG,
 	delivered BOOLEAN,
 	payload TEXT null,

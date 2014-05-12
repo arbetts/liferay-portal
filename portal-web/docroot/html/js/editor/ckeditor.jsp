@@ -136,10 +136,17 @@ if (!inlineEdit) {
 		},
 
 		getCkData: function() {
-			var data = CKEDITOR.instances['<%= name %>'].getData();
+			var data;
 
-			if (CKEDITOR.env.gecko && (CKEDITOR.tools.trim(data) == '<br />')) {
-				data = '';
+			if (!window['<%= name %>'].instanceReady && window['<%= HtmlUtil.escapeJS(namespace + initMethod) %>']) {
+				data = window['<%= HtmlUtil.escapeJS(namespace + initMethod) %>']();
+			}
+			else {
+				data = CKEDITOR.instances['<%= name %>'].getData();
+
+				if (CKEDITOR.env.gecko && (CKEDITOR.tools.trim(data) == '<br />')) {
+					data = '';
+				}
 			}
 
 			return data;
@@ -152,6 +159,8 @@ if (!inlineEdit) {
 		getText: function() {
 			return window['<%= name %>'].getCkData();
 		},
+
+		instanceReady: false,
 
 		<c:if test="<%= Validator.isNotNull(onBlurMethod) %>">
 			onBlurCallback: function() {
@@ -209,9 +218,7 @@ if (inlineEdit && (inlineEditSaveURL != null)) {
 </script>
 
 <aui:script use="<%= modules %>">
-	window['<%= name %>']._setStyles = function() {
-		var iframe = A.one('#cke_<%= name %> iframe');
-
+	var addAUIClass = function(iframe) {
 		if (iframe) {
 			var iframeWin = iframe.getDOM().contentWindow;
 
@@ -219,6 +226,36 @@ if (inlineEdit && (inlineEditSaveURL != null)) {
 				var iframeDoc = iframeWin.document.documentElement;
 
 				A.one(iframeDoc).addClass('aui');
+			}
+		}
+	};
+
+	window['<%= name %>']._setStyles = function() {
+		var ckEditor = A.one('#cke_<%= name %>');
+
+		if (ckEditor) {
+			var iframe = ckEditor.one('iframe');
+
+			addAUIClass(iframe);
+
+			var ckePanelDelegate = Liferay.Data['<%= name %>Handle'];
+
+			if (!ckePanelDelegate) {
+				var ckePanelDelegate = ckEditor.delegate(
+					'click',
+					function(event) {
+						var panelFrame = A.one('.cke_combopanel .cke_panel_frame');
+
+						addAUIClass(panelFrame);
+
+						ckePanelDelegate.detach();
+
+						Liferay.Data['<%= name %>Handle'] = null;
+					},
+					'.cke_combo'
+				);
+
+				Liferay.Data['<%= name %>Handle'] = ckePanelDelegate;
 			}
 		}
 	};
@@ -282,6 +319,8 @@ if (inlineEdit && (inlineEditSaveURL != null)) {
 			</c:if>
 
 			window['<%= name %>']._setStyles();
+
+			window['<%= name %>'].instanceReady = true;
 		}
 
 		<%

@@ -271,12 +271,13 @@ public interface VelocityTaglib {
 	public void language() throws Exception;
 
 	public void language(
-			String formName, String formAction, String name, int displayStyle)
+			String formName, String formAction, String name,
+			String displayStyle)
 		throws Exception;
 
 	public void language(
 			String formName, String formAction, String name,
-			String[] languageIds, int displayStyle)
+			String[] languageIds, String displayStyle)
 		throws Exception;
 
 	public void layoutIcon(Layout layout) throws Exception;
@@ -418,6 +419,7 @@ public interface VelocityTaglib {
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link #stagingMenu}
 	 */
+	@Deprecated
 	public void staging() throws Exception;
 
 	public void stagingMenu() throws Exception;

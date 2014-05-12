@@ -362,7 +362,7 @@ dateFormatDateTime.setTimeZone(timeZone);
 
 					<div id="node_<%= clusterNode.getClusterNodeId() %>_serverInfo">
 						<div style="text-align: center;">
-							<img src="<%= themeDisplay.getPathThemeImages() %>/aui/loading_indicator.gif" />
+							<img alt="<liferay-ui:message key="loading" />" src="<%= themeDisplay.getPathThemeImages() %>/aui/loading_indicator.gif" />
 						</div>
 					</div>
 				</td>
@@ -398,7 +398,7 @@ dateFormatDateTime.setTimeZone(timeZone);
 
 					<div id="node_<%= clusterNode.getClusterNodeId() %>_licenseProperties">
 						<div style="text-align: center;">
-							<img src="<%= themeDisplay.getPathThemeImages() %>/aui/loading_indicator.gif" />
+							<img alt="<liferay-ui:message key="loading" />" src="<%= themeDisplay.getPathThemeImages() %>/aui/loading_indicator.gif" />
 						</div>
 					</div>
 				</td>
@@ -430,7 +430,7 @@ dateFormatDateTime.setTimeZone(timeZone);
 								<%= Constants.CMD %>: cmd,
 								clusterNodeId: clusterNodeId
 							},
-							dataType: 'json',
+							dataType: 'JSON',
 							on: {
 								failure: function() {
 									var errorMessage = A.Lang.sub(Liferay.Language.get('error-contacting-x'), [ip]);

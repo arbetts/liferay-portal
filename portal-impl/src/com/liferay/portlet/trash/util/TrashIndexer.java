@@ -49,6 +49,10 @@ public class TrashIndexer extends BaseIndexer {
 	public static final String PORTLET_ID = PortletKeys.TRASH;
 
 	public TrashIndexer() {
+		setDefaultSelectedFieldNames(
+			Field.ENTRY_CLASS_NAME, Field.ENTRY_CLASS_PK,
+			Field.REMOVED_BY_USER_NAME, Field.REMOVED_DATE,
+			Field.ROOT_ENTRY_CLASS_NAME, Field.ROOT_ENTRY_CLASS_PK);
 		setFilterSearch(true);
 		setPermissionAware(true);
 	}

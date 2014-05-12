@@ -15,6 +15,7 @@
 package com.liferay.portlet.asset.service.impl;
 
 import com.liferay.portal.kernel.cache.ThreadLocalCachable;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
@@ -27,6 +28,7 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
+import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackRegistryUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -39,6 +41,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelHintsUtil;
 import com.liferay.portal.model.ResourceConstants;
+import com.liferay.portal.model.SystemEventConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.asset.AssetCategoryNameException;
@@ -49,6 +52,7 @@ import com.liferay.portlet.asset.model.AssetCategoryProperty;
 import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.asset.service.base.AssetCategoryLocalServiceBaseImpl;
 import com.liferay.portlet.asset.util.AssetCategoryUtil;
+import com.liferay.portlet.asset.util.comparator.AssetCategoryLeftCategoryIdComparator;
 
 import java.io.Serializable;
 
@@ -214,12 +218,71 @@ public class AssetCategoryLocalServiceImpl
 			category.getCategoryId(), groupPermissions, guestPermissions);
 	}
 
-	@Indexable(type = IndexableType.DELETE)
 	@Override
+	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
 	public AssetCategory deleteCategory(AssetCategory category)
 		throws PortalException, SystemException {
 
-		return deleteCategory(category, false);
+		return assetCategoryLocalService.deleteCategory(category, false);
+	}
+
+	@Indexable(type = IndexableType.DELETE)
+	@Override
+	public AssetCategory deleteCategory(
+			AssetCategory category, boolean childCategory)
+		throws PortalException, SystemException {
+
+		// Categories
+
+		List<AssetCategory> categories =
+			assetCategoryPersistence.findByParentCategoryId(
+				category.getCategoryId());
+
+		for (AssetCategory curCategory : categories) {
+			deleteCategory(curCategory, true);
+		}
+
+		if (!categories.isEmpty() && !childCategory) {
+			final long groupId = category.getGroupId();
+
+			TransactionCommitCallbackRegistryUtil.registerCallback(
+				new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						assetCategoryLocalService.rebuildTree(groupId, true);
+
+						return null;
+					}
+
+				});
+		}
+
+		// Category
+
+		assetCategoryPersistence.remove(category);
+
+		// Resources
+
+		resourceLocalService.deleteResource(
+			category.getCompanyId(), AssetCategory.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL, category.getCategoryId());
+
+		// Entries
+
+		List<AssetEntry> entries = assetTagPersistence.getAssetEntries(
+			category.getCategoryId());
+
+		// Properties
+
+		assetCategoryPropertyLocalService.deleteCategoryProperties(
+			category.getCategoryId());
+
+		// Indexer
+
+		assetEntryLocalService.reindex(entries);
+
+		return category;
 	}
 
 	@Override
@@ -237,15 +300,13 @@ public class AssetCategoryLocalServiceImpl
 		throws PortalException, SystemException {
 
 		List<AssetCategory> categories =
-			assetCategoryPersistence.findByVocabularyId(vocabularyId);
+			assetCategoryPersistence.findByP_V(
+				AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID, vocabularyId,
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				new AssetCategoryLeftCategoryIdComparator(false));
 
 		for (AssetCategory category : categories) {
-			if (category.getParentCategoryId() ==
-					AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
-
-				assetCategoryLocalService.deleteCategory(
-					category.getCategoryId());
-			}
+			assetCategoryLocalService.deleteCategory(category);
 		}
 	}
 
@@ -359,7 +420,16 @@ public class AssetCategoryLocalServiceImpl
 	public List<Long> getSubcategoryIds(long parentCategoryId)
 		throws SystemException {
 
-		return assetCategoryFinder.findByG_L(parentCategoryId);
+		AssetCategory parentAssetCategory =
+			assetCategoryPersistence.fetchByPrimaryKey(parentCategoryId);
+
+		if (parentAssetCategory == null) {
+			return Collections.emptyList();
+		}
+
+		return ListUtil.toList(
+			assetCategoryPersistence.getDescendants(parentAssetCategory),
+			AssetCategory.CATEGORY_ID_ACCESSOR);
 	}
 
 	@Override
@@ -667,63 +737,6 @@ public class AssetCategoryLocalServiceImpl
 		queryConfig.setScoreEnabled(false);
 
 		return searchContext;
-	}
-
-	protected AssetCategory deleteCategory(
-			AssetCategory category, boolean childCategory)
-		throws PortalException, SystemException {
-
-		// Categories
-
-		List<AssetCategory> categories =
-			assetCategoryPersistence.findByParentCategoryId(
-				category.getCategoryId());
-
-		for (AssetCategory curCategory : categories) {
-			deleteCategory(curCategory, true);
-		}
-
-		if (!categories.isEmpty() && !childCategory) {
-			final long groupId = category.getGroupId();
-
-			TransactionCommitCallbackRegistryUtil.registerCallback(
-				new Callable<Void>() {
-
-					@Override
-					public Void call() throws Exception {
-						assetCategoryLocalService.rebuildTree(groupId, true);
-
-						return null;
-					}
-
-				});
-		}
-
-		// Category
-
-		assetCategoryPersistence.remove(category);
-
-		// Resources
-
-		resourceLocalService.deleteResource(
-			category.getCompanyId(), AssetCategory.class.getName(),
-			ResourceConstants.SCOPE_INDIVIDUAL, category.getCategoryId());
-
-		// Entries
-
-		List<AssetEntry> entries = assetTagPersistence.getAssetEntries(
-			category.getCategoryId());
-
-		// Properties
-
-		assetCategoryPropertyLocalService.deleteCategoryProperties(
-			category.getCategoryId());
-
-		// Indexer
-
-		assetEntryLocalService.reindex(entries);
-
-		return category;
 	}
 
 	protected long[] getCategoryIds(List<AssetCategory> categories) {

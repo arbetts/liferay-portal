@@ -665,6 +665,8 @@ public class LiferaySeleniumHelper {
 			Validator.equals(
 				TestPropsValues.LIFERAY_PORTAL_BUNDLE, "6.2.10.3") ||
 			Validator.equals(
+				TestPropsValues.LIFERAY_PORTAL_BUNDLE, "6.2.10.4") ||
+			Validator.equals(
 				TestPropsValues.LIFERAY_PORTAL_BRANCH, "ee-6.2.10")) {
 
 			if (line.contains(
@@ -807,6 +809,8 @@ public class LiferaySeleniumHelper {
 		_screen.click(
 			liferaySelenium.getProjectDirName() +
 			liferaySelenium.getSikuliImagesDirName() + image);
+
+		liferaySelenium.pause("1000");
 
 		_screen.type(value);
 	}

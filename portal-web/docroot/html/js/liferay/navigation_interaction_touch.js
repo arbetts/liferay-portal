@@ -15,23 +15,58 @@ AUI.add(
 
 					var menuOpen = menuNew.hasClass(STR_OPEN);
 
-					if (menuOpen) {
-						Liferay.fire('hideNavigationMenu', mapHover);
-					}
-					else {
+					var handleId = menuNew.attr('id') + 'Handle';
+
+					var handle = Liferay.Data[handleId];
+
+					if (!menuOpen) {
 						Liferay.fire('showNavigationMenu', mapHover);
 
-						if ((menuOld && menuOld.hasClass(STR_OPEN)) && (menuOld != menuNew)) {
-							menuOld.removeClass(STR_OPEN);
-							menuOld.removeClass('hover');
+						handle = menuNew.on(
+							['clickoutside', 'touchstartoutside'],
+							function() {
+								Liferay.fire(
+									'hideNavigationMenu',
+									{
+										menu: menuNew
+									}
+								);
+
+								Liferay.Data[handleId] = null;
+
+								handle.detach();
+							}
+						);
+					}
+					else {
+						Liferay.fire('hideNavigationMenu', mapHover);
+
+						if (handle) {
+							handle.detach();
+
+							handle = null;
 						}
 					}
+
+					Liferay.Data[handleId] = handle;
 				},
 
 				_initChildMenuHandlers: function(navigation) {
 					var instance = this;
 
+					var android = A.UA.android;
+
+					var delay = 0;
+
+					if (android && android < 4.4) {
+						delay = 400;
+					}
+
+					instance._handleShowNavigationMenuFn = A.throttle(A.bind('_handleShowNavigationMenu', instance), delay);
+
 					if (navigation) {
+						A.Event.defineOutside('touchstart');
+
 						navigation.delegate(['click', 'touchstart'], instance._onTouchClick, '> li > a', instance);
 					}
 				},
@@ -48,7 +83,7 @@ AUI.add(
 					if (menuNew.one('.child-menu') && target.ancestor('.lfr-nav-child-toggle', true, '.lfr-nav-item')) {
 						event.preventDefault();
 
-						instance._handleShowNavigationMenu(menuNew, instance.MAP_HOVER.menu, event);
+						instance._handleShowNavigationMenuFn(menuNew, instance.MAP_HOVER.menu, event);
 					}
 				}
 			},

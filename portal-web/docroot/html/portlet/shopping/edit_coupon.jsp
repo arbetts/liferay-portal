@@ -72,9 +72,7 @@ String discountType = BeanParamUtil.getString(coupon, request, "discountType");
 				<aui:input label="autogenerate-code" name="autoCode" type="checkbox" />
 			</c:when>
 			<c:otherwise>
-				<aui:field-wrapper label="code">
-					<liferay-ui:input-resource url="<%= code %>" />
-				</aui:field-wrapper>
+				<aui:input name="code" type="resource" value="<%= code %>" />
 			</c:otherwise>
 		</c:choose>
 
@@ -158,7 +156,7 @@ String discountType = BeanParamUtil.getString(coupon, request, "discountType");
 
 <aui:script>
 	function <portlet:namespace />saveCoupon() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (coupon == null) ? Constants.ADD : Constants.UPDATE %>";
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (coupon == null) ? Constants.ADD : Constants.UPDATE %>';
 
 		submitForm(document.<portlet:namespace />fm);
 	}

@@ -36,6 +36,7 @@ import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
 import com.liferay.portlet.assetpublisher.util.AssetPublisherUtil;
+import com.liferay.portlet.dynamicdatamapping.storage.Fields;
 import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.util.Date;
@@ -93,6 +94,11 @@ public abstract class BaseAssetRenderer implements AssetRenderer {
 	}
 
 	@Override
+	public DDMFieldReader getDDMFieldReader() {
+		return _nullDDMFieldReader;
+	}
+
+	@Override
 	public String getDiscussionPath() {
 		return null;
 	}
@@ -100,6 +106,12 @@ public abstract class BaseAssetRenderer implements AssetRenderer {
 	@Override
 	public Date getDisplayDate() {
 		return null;
+	}
+
+	@Override
+	@SuppressWarnings("unused")
+	public String getIconCssClass() throws PortalException, SystemException {
+		return getAssetRendererFactory().getIconCssClass();
 	}
 
 	@Override
@@ -141,6 +153,11 @@ public abstract class BaseAssetRenderer implements AssetRenderer {
 	@Override
 	public String getSummary(Locale locale) {
 		return getSummary(null, null);
+	}
+
+	@Override
+	public String[] getSupportedConversions() {
+		return null;
 	}
 
 	@Override
@@ -400,7 +417,24 @@ public abstract class BaseAssetRenderer implements AssetRenderer {
 		return PortalUtil.addPreservedParameters(themeDisplay, sb.toString());
 	}
 
+	private static final class NullDDMFieldReader implements DDMFieldReader {
+
+		@Override
+		public Fields getFields() {
+			return new Fields();
+		}
+
+		@Override
+		public Fields getFields(String ddmType) {
+			return getFields();
+		}
+
+	}
+
 	private static final String[] _AVAILABLE_LANGUAGE_IDS = new String[0];
+
+	private static DDMFieldReader _nullDDMFieldReader =
+		new NullDDMFieldReader();
 
 	private AssetRendererFactory _assetRendererFactory;
 	private int _assetRendererType = AssetRendererFactory.TYPE_LATEST_APPROVED;

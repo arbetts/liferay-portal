@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.service.base.DDMTemplateServiceBaseImpl;
 import com.liferay.portlet.dynamicdatamapping.service.permission.DDMPermission;
@@ -28,6 +29,7 @@ import com.liferay.portlet.dynamicdatamapping.util.DDMUtil;
 
 import java.io.File;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -343,7 +345,7 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 	 *
 	 * <p>
 	 * This method first searches in the group. If the template is still not
-	 * found and <code>includeGlobalTemplates</code> is set to
+	 * found and <code>includeAncestorTemplates</code> is set to
 	 * <code>true</code>, this method searches the global group.
 	 * </p>
 	 *
@@ -351,7 +353,7 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 	 * @param  classNameId the primary key of the class name for template's
 	 *         related model
 	 * @param  templateKey the unique string identifying the template
-	 * @param  includeGlobalTemplates whether to include the global scope in the
+	 * @param  includeAncestorTemplates whether to include the global scope in the
 	 *         search
 	 * @return the matching template
 	 * @throws PortalException if a matching template could not be found
@@ -360,11 +362,11 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 	@Override
 	public DDMTemplate getTemplate(
 			long groupId, long classNameId, String templateKey,
-			boolean includeGlobalTemplates)
+			boolean includeAncestorTemplates)
 		throws PortalException, SystemException {
 
 		DDMTemplate ddmTemplate = ddmTemplateLocalService.getTemplate(
-			groupId, classNameId, templateKey, includeGlobalTemplates);
+			groupId, classNameId, templateKey, includeAncestorTemplates);
 
 		DDMTemplatePermission.check(
 			getPermissionChecker(), ddmTemplate, ActionKeys.VIEW);
@@ -406,6 +408,30 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 
 		return ddmTemplatePersistence.filterFindByG_C_C(
 			groupId, classNameId, classPK);
+	}
+
+	@Override
+	public List<DDMTemplate> getTemplates(
+			long groupId, long classNameId, long classPK,
+			boolean includeAncestorTemplates)
+		throws PortalException, SystemException {
+
+		List<DDMTemplate> ddmTemplates = new ArrayList<DDMTemplate>();
+
+		ddmTemplates.addAll(
+			ddmTemplatePersistence.filterFindByG_C_C(
+				groupId, classNameId, classPK));
+
+		if (!includeAncestorTemplates) {
+			return ddmTemplates;
+		}
+
+		ddmTemplates.addAll(
+			ddmTemplatePersistence.filterFindByG_C_C(
+				PortalUtil.getAncestorSiteGroupIds(groupId), classNameId,
+				classPK));
+
+		return ddmTemplates;
 	}
 
 	/**
@@ -901,6 +927,46 @@ public class DDMTemplateServiceImpl extends DDMTemplateServiceBaseImpl {
 			templateId, classPK, nameMap, descriptionMap, type, mode, language,
 			script, cacheable, smallImage, smallImageURL, smallImageFile,
 			serviceContext);
+	}
+
+	/**
+	 * Updates the template matching the ID.
+	 *
+	 * @param  templateId the primary key of the template
+	 * @param  classPK the primary key of the template's related entity
+	 * @param  nameMap the template's new locales and localized names
+	 * @param  descriptionMap the template's new locales and localized
+	 *         description
+	 * @param  type the template's type. For more information, see {@link
+	 *         com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants}.
+	 * @param  mode the template's mode. For more information, see {@link
+	 *         com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants}.
+	 * @param  language the template's script language. For more information,
+	 *         see {@link
+	 *         com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants}.
+	 * @param  script the template's script
+	 * @param  cacheable whether the template is cacheable
+	 * @param  serviceContext the service context to be applied. Can set the
+	 *         modification date.
+	 * @return the updated template
+	 * @throws PortalException if the user did not have permission to update the
+	 *         template or if a portal exception occurred
+	 * @throws SystemException if a system exception occurred
+	 */
+	@Override
+	public DDMTemplate updateTemplate(
+			long templateId, long classPK, Map<Locale, String> nameMap,
+			Map<Locale, String> descriptionMap, String type, String mode,
+			String language, String script, boolean cacheable,
+			ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		DDMTemplatePermission.check(
+			getPermissionChecker(), templateId, ActionKeys.UPDATE);
+
+		return ddmTemplateLocalService.updateTemplate(
+			templateId, classPK, nameMap, descriptionMap, type, mode, language,
+			script, cacheable, serviceContext);
 	}
 
 }

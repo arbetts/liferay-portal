@@ -66,6 +66,7 @@ public class JournalFolderWrapper implements JournalFolder,
 		attributes.put("treePath", getTreePath());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
+		attributes.put("restrictionType", getRestrictionType());
 		attributes.put("status", getStatus());
 		attributes.put("statusByUserId", getStatusByUserId());
 		attributes.put("statusByUserName", getStatusByUserName());
@@ -146,6 +147,12 @@ public class JournalFolderWrapper implements JournalFolder,
 
 		if (description != null) {
 			setDescription(description);
+		}
+
+		Integer restrictionType = (Integer)attributes.get("restrictionType");
+
+		if (restrictionType != null) {
+			setRestrictionType(restrictionType);
 		}
 
 		Integer status = (Integer)attributes.get("status");
@@ -456,6 +463,26 @@ public class JournalFolderWrapper implements JournalFolder,
 	}
 
 	/**
+	* Returns the restriction type of this journal folder.
+	*
+	* @return the restriction type of this journal folder
+	*/
+	@Override
+	public int getRestrictionType() {
+		return _journalFolder.getRestrictionType();
+	}
+
+	/**
+	* Sets the restriction type of this journal folder.
+	*
+	* @param restrictionType the restriction type of this journal folder
+	*/
+	@Override
+	public void setRestrictionType(int restrictionType) {
+		_journalFolder.setRestrictionType(restrictionType);
+	}
+
+	/**
 	* Returns the status of this journal folder.
 	*
 	* @return the status of this journal folder
@@ -615,6 +642,12 @@ public class JournalFolderWrapper implements JournalFolder,
 	public boolean isInTrashExplicitly()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _journalFolder.isInTrashExplicitly();
+	}
+
+	@Override
+	public boolean isInTrashImplicitly()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _journalFolder.isInTrashImplicitly();
 	}
 
 	/**

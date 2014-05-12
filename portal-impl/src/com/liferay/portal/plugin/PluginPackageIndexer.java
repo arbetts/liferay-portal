@@ -58,6 +58,9 @@ public class PluginPackageIndexer extends BaseIndexer {
 	public static final String PORTLET_ID = "PluginPackageIndexer";
 
 	public PluginPackageIndexer() {
+		setDefaultSelectedFieldNames(
+			Field.COMPANY_ID, Field.CONTENT, Field.ENTRY_CLASS_NAME,
+			Field.ENTRY_CLASS_PK, Field.TITLE, Field.UID);
 		setStagingAware(false);
 	}
 

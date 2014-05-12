@@ -34,14 +34,16 @@ import com.liferay.portal.model.Portlet;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
-import com.liferay.portal.settings.LocalizedValuesMap;
 import com.liferay.portal.settings.Settings;
 import com.liferay.portal.settings.SettingsFactoryUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.PortletConfigFactoryUtil;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
@@ -95,6 +97,8 @@ public class SettingsConfigurationAction
 			ActionResponse actionResponse)
 		throws Exception {
 
+		updateMultiValuedKeys(actionRequest);
+
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
 		if (!cmd.equals(Constants.UPDATE)) {
@@ -122,7 +126,11 @@ public class SettingsConfigurationAction
 			String name = entry.getKey();
 			String value = entry.getValue();
 
-			settings.setValue(name, value);
+			String oldValue = settings.getValue(name, null);
+
+			if (!StringUtil.equalsIgnoreBreakLine(value, oldValue)) {
+				settings.setValue(name, value);
+			}
 		}
 
 		Map<String, String[]> portletPreferencesMap =
@@ -136,7 +144,11 @@ public class SettingsConfigurationAction
 				String name = entry.getKey();
 				String[] values = entry.getValue();
 
-				settings.setValues(name, values);
+				String[] oldValues = settings.getValues(name, null);
+
+				if (!Validator.equals(values, oldValues)) {
+					settings.setValues(name, values);
+				}
 			}
 		}
 
@@ -227,6 +239,10 @@ public class SettingsConfigurationAction
 		portletPreferencesMap.put(name, values);
 	}
 
+	protected void addMultiValuedKeys(String... multiValuedKeys) {
+		Collections.addAll(_multiValuedKeys, multiValuedKeys);
+	}
+
 	protected PortletConfig getSelPortletConfig(PortletRequest portletRequest)
 		throws SystemException {
 
@@ -285,30 +301,21 @@ public class SettingsConfigurationAction
 		throws PortalException, SystemException {
 	}
 
-	protected void removeDefaultValue(
-		PortletRequest portletRequest, Settings settings, String key,
-		LocalizedValuesMap localizedValuesMap) {
-
-		removeDefaultValue(
-			portletRequest, settings, key,
-			localizedValuesMap.getDefaultValue());
-	}
-
-	protected void removeDefaultValue(
-		PortletRequest portletRequest, Settings settings, String key,
-		String defaultValue) {
-
-		String value = getParameter(portletRequest, key);
-
-		if (defaultValue.equals(value) ||
-			StringUtil.equalsIgnoreBreakLine(defaultValue, value)) {
-
-			settings.reset(key);
-		}
-	}
-
 	protected void setParameterNamePrefix(String parameterNamePrefix) {
 		_parameterNamePrefix = parameterNamePrefix;
+	}
+
+	protected void updateMultiValuedKeys(ActionRequest actionRequest) {
+		for (String multiValuedKey : _multiValuedKeys) {
+			String multiValuedValue = getParameter(
+				actionRequest, multiValuedKey);
+
+			if (multiValuedValue != null) {
+				setPreference(
+					actionRequest, multiValuedKey,
+					StringUtil.split(multiValuedValue));
+			}
+		}
 	}
 
 	protected void validateEmail(
@@ -352,6 +359,7 @@ public class SettingsConfigurationAction
 		}
 	}
 
+	private List<String> _multiValuedKeys = new ArrayList<String>();
 	private String _parameterNamePrefix;
 
 }

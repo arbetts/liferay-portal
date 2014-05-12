@@ -56,7 +56,7 @@ AUI.add(
 			'<a href="javascript:;" data-tagId="{tagId}" tabIndex="-1">' +
 				'<input type="checkbox" class="tag-item-check" name="tag-item-check" data-tagId="{tagId}" data-tagName="{name}">' +
 				'<span class="tag-item-name" data-tagId="{tagId}">{name}</span>' +
-				'<span tabindex="0" class="tag-item-actions-trigger" data-tagId="{tagId}"></span>' +
+				'<span tabindex="0" class="icon-edit tag-item-actions-trigger" data-tagId="{tagId}"></span>' +
 			'</a>' +
 		'</li>';
 
@@ -682,7 +682,7 @@ AUI.add(
 								null,
 								{
 									autoLoad: false,
-									dataType: 'json',
+									dataType: 'JSON',
 									on: {
 										failure: function(event, id, obj) {
 											instance._onTagUpdateFailure(obj);
@@ -712,7 +712,7 @@ AUI.add(
 								null,
 								{
 									autoLoad: false,
-									dataType: 'html',
+									dataType: 'HTML',
 									on: {
 										success: function(event, id, obj) {
 											var response = this.get('responseData');

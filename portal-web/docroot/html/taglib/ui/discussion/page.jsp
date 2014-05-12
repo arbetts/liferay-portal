@@ -110,7 +110,7 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 								</c:when>
 								<c:otherwise>
 									<liferay-ui:icon
-										image="reply"
+										iconCssClass="icon-reply"
 										label="<%= true %>"
 										message="add-comment"
 										url="<%= taglibPostReplyURL %>"
@@ -131,7 +131,7 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 							<c:when test="<%= subscribed %>">
 								<liferay-ui:icon
 									cssClass="subscribe-link"
-									image="unsubscribe"
+									iconCssClass="icon-remove-sign"
 									label="<%= true %>"
 									message="unsubscribe-from-comments"
 									url="<%= subscriptionURL %>"
@@ -140,7 +140,7 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 							<c:otherwise>
 								<liferay-ui:icon
 									cssClass="subscribe-link"
-									image="subscribe"
+									iconCssClass="icon-ok-sign"
 									label="<%= true %>"
 									message="subscribe-to-comments"
 									url="<%= subscriptionURL %>"
@@ -187,7 +187,7 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 				<a name="<%= randomNamespace %>messages_top"></a>
 
 				<c:if test="<%= treeWalker != null %>">
-				<table class="tree-walker table table-bordered table-hover table-striped">
+				<table class="table table-bordered table-hover table-striped tree-walker">
 					<thead class="table-columns">
 					<tr>
 						<th class="table-header" colspan="2">
@@ -351,7 +351,7 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 														%>
 
 														<liferay-ui:icon
-															image="reply"
+															iconCssClass="icon-reply"
 															label="<%= true %>"
 															message="post-reply"
 															url="<%= taglibPostReplyURL %>"
@@ -367,10 +367,11 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 
 													<li class="lfr-discussion-top-link">
 														<liferay-ui:icon
-															image="top"
+															iconCssClass="icon-long-arrow-up"
 															label="<%= true %>"
+															message="top"
 															url="<%= taglibTopURL %>"
-															/>
+														/>
 													</li>
 
 													<c:if test="<%= MBDiscussionPermission.contains(permissionChecker, company.getCompanyId(), scopeGroupId, permissionClassName, permissionClassPK, message.getMessageId(), message.getUserId(), ActionKeys.UPDATE_DISCUSSION) %>">
@@ -381,8 +382,9 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 
 														<li class="lfr-discussion-edit">
 															<liferay-ui:icon
-																image="edit"
+																iconCssClass="icon-edit"
 																label="<%= true %>"
+																message="edit"
 																url="<%= taglibEditURL %>"
 															/>
 														</li>
@@ -412,12 +414,12 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 								<div class="lfr-discussion-form lfr-discussion-form-reply span12" id="<%= randomNamespace %>postReplyForm<%= i %>" style='<%= "display: none; max-width: " + ModelHintsConstants.TEXTAREA_DISPLAY_WIDTH + "px;" %>'>
 
 									<liferay-ui:user-display
-										displayStyle="<%= 2 %>"
+										displayStyle="2"
 										userId="<%= user.getUserId() %>"
 										userName="<%= HtmlUtil.escape(PortalUtil.getUserName(user.getUserId(), StringPool.BLANK)) %>"
 									/>
 
-									<aui:input id='<%= randomNamespace + "postReplyBody" + i %>' label="" name='<%= "postReplyBody" + i %>' style='<%= "height: " + ModelHintsConstants.TEXTAREA_DISPLAY_HEIGHT + "px;" %>' type="textarea" wrap="soft" />
+									<aui:input id='<%= randomNamespace + "postReplyBody" + i %>' label="" name='<%= "postReplyBody" + i %>' style='<%= "height: " + ModelHintsConstants.TEXTAREA_DISPLAY_HEIGHT + "px;" %>' title="reply-body" type="textarea" wrap="soft" />
 
 									<aui:button-row>
 										<aui:button cssClass="btn-comment btn-primary" id='<%= namespace + randomNamespace + "postReplyButton" + i %>' onClick='<%= randomNamespace + "postReply(" + i + ");" %>' value='<%= themeDisplay.isSignedIn() ? "reply" : "reply-as" %>' />
@@ -432,7 +434,7 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 
 								<c:if test="<%= !hideControls && MBDiscussionPermission.contains(permissionChecker, company.getCompanyId(), scopeGroupId, permissionClassName, permissionClassPK, message.getMessageId(), message.getUserId(), ActionKeys.UPDATE_DISCUSSION) %>">
 									<div class="lfr-discussion-form lfr-discussion-form-edit span12" id="<%= randomNamespace %>editForm<%= i %>" style='<%= "display: none; max-width: " + ModelHintsConstants.TEXTAREA_DISPLAY_WIDTH + "px;" %>'>
-										<aui:input id='<%= randomNamespace + "editReplyBody" + i %>' label="" name='<%= "editReplyBody" + i %>' style='<%= "height: " + ModelHintsConstants.TEXTAREA_DISPLAY_HEIGHT + "px;" %>' type="textarea" value="<%= message.getBody() %>" wrap="soft" />
+										<aui:input id='<%= randomNamespace + "editReplyBody" + i %>' label="" name='<%= "editReplyBody" + i %>' style='<%= "height: " + ModelHintsConstants.TEXTAREA_DISPLAY_HEIGHT + "px;" %>' title="reply-body" type="textarea" value="<%= message.getBody() %>" wrap="soft" />
 
 										<%
 										boolean pending = message.isPending();
@@ -540,16 +542,16 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 
 	<aui:script>
 		function <%= randomNamespace %>hideForm(rowId, textAreaId, textAreaValue) {
-			document.getElementById(rowId).style.display = "none";
+			document.getElementById(rowId).style.display = 'none';
 			document.getElementById(textAreaId).value = textAreaValue;
 		}
 
 		function <%= randomNamespace %>scrollIntoView(messageId) {
-			document.getElementById("<%= randomNamespace %>messageScroll" + messageId).scrollIntoView();
+			document.getElementById('<%= randomNamespace %>messageScroll' + messageId).scrollIntoView();
 		}
 
 		function <%= randomNamespace %>showForm(rowId, textAreaId) {
-			document.getElementById(rowId).style.display = "block";
+			document.getElementById(rowId).style.display = 'block';
 			document.getElementById(textAreaId).focus();
 		}
 
@@ -664,7 +666,7 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 				A.io.request(
 					form.attr('action'),
 					{
-						dataType: 'json',
+						dataType: 'JSON',
 						form: {
 							id: form
 						},

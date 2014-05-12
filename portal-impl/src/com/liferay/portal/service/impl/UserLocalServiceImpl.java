@@ -73,6 +73,7 @@ import com.liferay.portal.kernel.util.Digester;
 import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.KeyValuePair;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -781,7 +782,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			firstName, middleName, lastName);
 
 		String greeting = LanguageUtil.format(
-			locale, "welcome-x", " " + fullName, false);
+			locale, "welcome-x", fullName, false);
 
 		User user = userPersistence.create(userId);
 
@@ -4403,7 +4404,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 				firstName, middleName, lastName);
 
 			String greeting = LanguageUtil.format(
-				locale, "welcome-x", " " + fullName, false);
+				locale, "welcome-x", fullName, false);
 
 			if (Validator.isNotNull(password1)) {
 				user.setPassword(PasswordEncryptorUtil.encrypt(password1));
@@ -6185,9 +6186,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			List<UserGroupRole> previousUserGroupRoles)
 		throws PortalException, SystemException {
 
-		if (userGroupRoles == null) {
+		if (ListUtil.isEmpty(userGroupRoles)) {
 			return;
 		}
+
+		userGroupRoles = new ArrayList<UserGroupRole>(userGroupRoles);
 
 		for (UserGroupRole userGroupRole : previousUserGroupRoles) {
 			if (userGroupRoles.contains(userGroupRole)) {

@@ -62,6 +62,16 @@
 		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_ACTIVE" value1="${pageTemplateActive}" />
 	</command>
 
+	<command name="gotoPageTemplateViaEdit">
+		<var name="key_pageTemplateName" value="${pageTemplateName}" />
+
+		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_NAME" value1="${pageTemplateName}" />
+		<execute action="CPPagetemplates#assertClick" locator-key1="PAGE_TEMPLATE_TABLE_ACTIONS" value1="Actions" />
+		<execute action="CPPagetemplates#assertClick" locator-key1="PAGE_TEMPLATE_MENULIST_EDIT" value1="Edit" />
+
+		<execute action="CPPagetemplatesEdit#assertClick" locator-key1="OPEN_PAGE_TEMPLATE" value1="Open Page Template" />
+	</command>
+
 	<command name="tearDownCP">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Page Templates" />
@@ -83,6 +93,15 @@
 		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_NAME_2" value1="Content Display Page" />
 		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_NAME_3" value1="Wiki" />
 		<execute action="CPPagetemplates#assertElementNotPresent" locator-key1="PAGE_TEMPLATE_TABLE_NAME_4" />
+	</command>
+
+	<command name="viewDefaultLocalizedCP">
+		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_NAME_1" value1="${blogTranslation}" />
+		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_NAME_2" value1="${contentDisplayPageTranslation}" />
+		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_NAME_3" value1="${wikiTranslation}" />
+		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_DESCRITPION_1" value1="${blogDescriptionTranslation}" />
+		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_DESCRIPTION_2" value1="${contentDisplayPageDescriptionTranslation}" />
+		<execute action="CPPagetemplates#assertTextEquals" locator-key1="PAGE_TEMPLATE_TABLE_DESCRIPTION_3" value1="${wikiDescripionTranslation}" />
 	</command>
 
 	<command name="viewDefaultPortletPG">

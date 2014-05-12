@@ -17,6 +17,7 @@ package com.liferay.portlet.asset.model;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.util.Accessor;
+import com.liferay.portal.model.NestedSetsTreeNodeModel;
 import com.liferay.portal.model.PersistedModel;
 
 /**
@@ -29,7 +30,8 @@ import com.liferay.portal.model.PersistedModel;
  * @generated
  */
 @ProviderType
-public interface AssetCategory extends AssetCategoryModel, PersistedModel {
+public interface AssetCategory extends AssetCategoryModel,
+	NestedSetsTreeNodeModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -40,6 +42,16 @@ public interface AssetCategory extends AssetCategoryModel, PersistedModel {
 			public String get(AssetCategory assetCategory) {
 				return assetCategory.getUuid();
 			}
+
+			@Override
+			public Class<String> getAttributeClass() {
+				return String.class;
+			}
+
+			@Override
+			public Class<AssetCategory> getTypeClass() {
+				return AssetCategory.class;
+			}
 		};
 
 	public static final Accessor<AssetCategory, Long> CATEGORY_ID_ACCESSOR = new Accessor<AssetCategory, Long>() {
@@ -47,12 +59,32 @@ public interface AssetCategory extends AssetCategoryModel, PersistedModel {
 			public Long get(AssetCategory assetCategory) {
 				return assetCategory.getCategoryId();
 			}
+
+			@Override
+			public Class<Long> getAttributeClass() {
+				return Long.class;
+			}
+
+			@Override
+			public Class<AssetCategory> getTypeClass() {
+				return AssetCategory.class;
+			}
 		};
 
 	public static final Accessor<AssetCategory, String> NAME_ACCESSOR = new Accessor<AssetCategory, String>() {
 			@Override
 			public String get(AssetCategory assetCategory) {
 				return assetCategory.getName();
+			}
+
+			@Override
+			public Class<String> getAttributeClass() {
+				return String.class;
+			}
+
+			@Override
+			public Class<AssetCategory> getTypeClass() {
+				return AssetCategory.class;
 			}
 		};
 

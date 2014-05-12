@@ -126,7 +126,13 @@ ArticleSearch searchContainer = new ArticleSearch(liferayPortletRequest, entryEn
 				</span>
 			</c:if>
 
-			<liferay-ui:icon cssClass="close-search" id="closeSearch" image="../aui/remove" url="javascript:;" />
+			<liferay-ui:icon
+				cssClass="close-search"
+				iconCssClass="icon-remove"
+				id="closeSearch"
+				message="remove"
+				url="javascript:;"
+			/>
 		</div>
 
 		<aui:script use="aui-base">
@@ -198,12 +204,12 @@ ArticleSearch searchContainer = new ArticleSearch(liferayPortletRequest, entryEn
 							indexer = IndexerRegistryUtil.nullSafeGetIndexer(JournalArticle.class);
 
 							searchContext.setAndSearch(searchTerms.isAndOperator());
+							searchContext.setAttribute(Field.ARTICLE_ID, searchTerms.getArticleId());
 							searchContext.setAttribute(Field.CONTENT, searchTerms.getContent());
 							searchContext.setAttribute(Field.DESCRIPTION, searchTerms.getDescription());
-							searchContext.setAttribute(Field.STATUS, searchTerms.getStatusCode());
+							searchContext.setAttribute(Field.STATUS, searchTerms.getStatus());
 							searchContext.setAttribute(Field.TITLE, searchTerms.getTitle());
 							searchContext.setAttribute(Field.TYPE, searchTerms.getType());
-							searchContext.setAttribute("articleId", searchTerms.getArticleId());
 						}
 						else {
 							indexer = JournalSearcher.getInstance();
@@ -211,10 +217,10 @@ ArticleSearch searchContainer = new ArticleSearch(liferayPortletRequest, entryEn
 							searchContext.setAttribute(Field.STATUS, WorkflowConstants.STATUS_ANY);
 
 							if (Validator.isNotNull(keywords)) {
+								searchContext.setAttribute(Field.ARTICLE_ID, keywords);
 								searchContext.setAttribute(Field.CONTENT, keywords);
 								searchContext.setAttribute(Field.DESCRIPTION, keywords);
 								searchContext.setAttribute(Field.TITLE, keywords);
-								searchContext.setAttribute("articleId", keywords);
 								searchContext.setKeywords(keywords);
 							}
 							else {
