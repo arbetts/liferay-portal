@@ -35,6 +35,8 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserGroup;
 import com.liferay.portal.model.impl.UserImpl;
 import com.liferay.portal.service.GroupLocalServiceUtil;
+import com.liferay.portal.service.OrganizationLocalServiceUtil;
+import com.liferay.portal.service.UserGroupLocalServiceUtil;
 import com.liferay.portal.service.persistence.GroupUtil;
 import com.liferay.portal.service.persistence.RoleUtil;
 import com.liferay.portal.service.persistence.UserFinder;
@@ -282,17 +284,12 @@ public class UserFinderImpl
 					userGroupIds.add(group.getClassPK());
 				}
 				else {
-					for (Organization organization :
-							GroupUtil.getOrganizations(groupId)) {
+					organizationIds.addAll(
+						OrganizationLocalServiceUtil.getGroupOrganizationIds(
+							groupId));
 
-						organizationIds.add(organization.getOrganizationId());
-					}
-
-					for (UserGroup userGroup :
-							GroupUtil.getUserGroups(groupId)) {
-
-						userGroupIds.add(userGroup.getUserGroupId());
-					}
+					userGroupIds.addAll(
+						UserGroupLocalServiceUtil.getGroupUserGroupIds(groupId));
 				}
 			}
 
@@ -335,19 +332,13 @@ public class UserFinderImpl
 					else {
 						roleGroupIds.add(group.getGroupId());
 
-						for (Organization organization :
-								GroupUtil.getOrganizations(
-									group.getGroupId())) {
+						organizationIds.addAll(
+							OrganizationLocalServiceUtil.getGroupOrganizationIds(
+								group.getGroupId()));
 
-							organizationIds.add(
-								organization.getOrganizationId());
-						}
-
-						for (UserGroup userGroup :
-								GroupUtil.getUserGroups(group.getGroupId())) {
-
-							userGroupIds.add(userGroup.getUserGroupId());
-						}
+						userGroupIds.addAll(
+							UserGroupLocalServiceUtil.getGroupUserGroupIds(
+								group.getGroupId()));
 					}
 				}
 			}
@@ -625,17 +616,12 @@ public class UserFinderImpl
 					userGroupIds.add(group.getClassPK());
 				}
 				else {
-					for (Organization organization :
-							GroupUtil.getOrganizations(groupId)) {
+					organizationIds.addAll(
+						OrganizationLocalServiceUtil.getGroupOrganizationIds(
+							groupId));
 
-						organizationIds.add(organization.getOrganizationId());
-					}
-
-					for (UserGroup userGroup :
-							GroupUtil.getUserGroups(groupId)) {
-
-						userGroupIds.add(userGroup.getUserGroupId());
-					}
+					userGroupIds.addAll(
+						UserGroupLocalServiceUtil.getGroupUserGroupIds(groupId));
 				}
 			}
 
@@ -678,19 +664,13 @@ public class UserFinderImpl
 					else {
 						roleGroupIds.add(group.getGroupId());
 
-						for (Organization organization :
-								GroupUtil.getOrganizations(
-									group.getGroupId())) {
+						organizationIds.addAll(
+							OrganizationLocalServiceUtil.getGroupOrganizationIds(
+								group.getGroupId()));
 
-							organizationIds.add(
-								organization.getOrganizationId());
-						}
-
-						for (UserGroup userGroup :
-								GroupUtil.getUserGroups(group.getGroupId())) {
-
-							userGroupIds.add(userGroup.getUserGroupId());
-						}
+						userGroupIds.addAll(
+							UserGroupLocalServiceUtil.getGroupUserGroupIds(
+								group.getGroupId()));
 					}
 				}
 			}
