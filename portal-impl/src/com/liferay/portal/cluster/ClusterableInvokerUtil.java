@@ -15,6 +15,8 @@
 package com.liferay.portal.cluster;
 
 import com.liferay.portal.bean.IdentifiableBeanInvokerUtil;
+import com.liferay.portal.kernel.cache.Lifecycle;
+import com.liferay.portal.kernel.cache.ThreadLocalCacheManager;
 import com.liferay.portal.kernel.cluster.ClusterInvokeAcceptor;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.GroupThreadLocal;
@@ -88,9 +90,14 @@ public class ClusterableInvokerUtil {
 			}
 		}
 
-		_populateThreadLocalsFromContext(context);
+		try {
+			_populateThreadLocalsFromContext(context);
 
-		return methodHandler.invoke();
+			return methodHandler.invoke();
+		}
+		finally {
+			ThreadLocalCacheManager.clearAll(Lifecycle.REQUEST);
+		}
 	}
 
 	private static void _populateContextFromThreadLocals(
