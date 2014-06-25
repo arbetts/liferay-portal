@@ -16,6 +16,13 @@
 
 <%@ include file="/html/taglib/aui/form/init.jsp" %>
 
+	<c:if test="<%= (checkboxNames != null) && !checkboxNames.isEmpty() %>">
+		<aui:input name="checkboxNames" type="hidden" value="<%= StringUtil.merge(checkboxNames) %>" />
+	</c:if>
+
+	<c:if test="<%= Validator.isNotNull(onSubmit) %>">
+		</fieldset>
+	</c:if>
 </form>
 
 <aui:script use="liferay-form">
@@ -40,7 +47,7 @@
 							{
 								body: <%= validatorTag.getBody() %>,
 								custom: <%= validatorTag.isCustom() %>,
-								errorMessage: '<%= UnicodeLanguageUtil.get(pageContext, validatorTag.getErrorMessage()) %>',
+								errorMessage: '<%= UnicodeLanguageUtil.get(request, validatorTag.getErrorMessage()) %>',
 								fieldName: '<%= namespace + HtmlUtil.escapeJS(fieldName) %>',
 								validatorName: '<%= validatorTag.getName() %>'
 							}
@@ -61,4 +68,8 @@
 			</c:if>
 		}
 	);
+
+	<c:if test="<%= Validator.isNotNull(onSubmit) %>">
+		A.all('#<%= namespace + name %> .input-container').removeAttribute('disabled');
+	</c:if>
 </aui:script>

@@ -284,11 +284,9 @@ public class AnnouncementsEntryWrapper implements AnnouncementsEntry,
 	* Returns the user uuid of this announcements entry.
 	*
 	* @return the user uuid of this announcements entry
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _announcementsEntry.getUserUuid();
 	}
 
@@ -687,15 +685,13 @@ public class AnnouncementsEntryWrapper implements AnnouncementsEntry,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_announcementsEntry.persist();
 	}
 
 	@Override
 	public long getGroupId()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _announcementsEntry.getGroupId();
 	}
 

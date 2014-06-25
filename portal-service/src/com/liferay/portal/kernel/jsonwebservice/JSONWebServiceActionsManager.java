@@ -34,8 +34,9 @@ public interface JSONWebServiceActionsManager {
 		HttpServletRequest request);
 
 	public JSONWebServiceAction getJSONWebServiceAction(
-		HttpServletRequest request, String path, String method,
-		Map<String, Object> parameters);
+			HttpServletRequest request, String path, String method,
+			Map<String, Object> parameters)
+		throws NoSuchJSONWebServiceException;
 
 	public JSONWebServiceActionMapping getJSONWebServiceActionMapping(
 		String signature);
@@ -44,6 +45,8 @@ public interface JSONWebServiceActionsManager {
 		String contextPath);
 
 	public int getJSONWebServiceActionsCount(String contextPath);
+
+	public JSONWebServiceNaming getJSONWebServiceNaming();
 
 	public void registerJSONWebServiceAction(
 		String contextPath, Class<?> actionClass, Method actionMethod,

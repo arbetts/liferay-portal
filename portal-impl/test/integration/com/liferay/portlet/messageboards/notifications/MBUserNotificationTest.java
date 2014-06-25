@@ -25,7 +25,7 @@ import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.service.MBCategoryLocalServiceUtil;
-import com.liferay.portlet.messageboards.util.MBTestUtil;
+import com.liferay.portlet.messageboards.util.test.MBTestUtil;
 
 import org.junit.runner.RunWith;
 
@@ -68,7 +68,7 @@ public class MBUserNotificationTest extends BaseUserNotificationTestCase {
 	protected BaseModel<?> updateBaseModel(BaseModel<?> baseModel)
 		throws Exception {
 
-		return MBTestUtil.updateMessage((MBMessage)baseModel);
+		return MBTestUtil.updateMessage((MBMessage)baseModel, true);
 	}
 
 	private MBCategory _category;

@@ -5,18 +5,17 @@
 
 	<property name="war.file" value="${ant.project.name}" />
 
-	<property name="alloy.version" value="2.0.0" />
+	<property name="alloy.version" value="2.5.0" />
 	<property name="alloy-font-awesome.version" value="1.0.0" />
-	<property name="ckeditor.file" value="ckeditor_4.0.3_liferay.zip" />
+	<property name="ckeditor.file" value="ckeditor_4.3.5_liferay.zip" />
 	<property name="fckeditor.file" value="FCKeditor_2.6.3.zip" />
-	<property name="scayt.file" value="scayt_4.0.3.zip" />
+	<property name="scayt.file" value="scayt_4.3.5.zip" />
 	<property name="tinymce.file" value="tinymce_3.5.6.zip" />
 	<property name="vaadin.file" value="vaadin-6.8.12-liferay.zip" />
-	<property name="wsc.file" value="wsc_4.0.3.zip" />
+	<property name="wsc.file" value="wsc_4.3.5.zip" />
 
 	<path id="jspc.common.classpath">
 		<pathelement path="docroot/WEB-INF/classes" />
-		<pathelement path="${classpath.jsp}" />
 		<pathelement location="${project.dir}/portal-impl/portal-impl.jar" />
 		<pathelement location="${project.dir}/portal-pacl/portal-pacl.jar" />
 		<pathelement location="${project.dir}/portal-service/portal-service.jar" />
@@ -167,10 +166,6 @@
 				<!-- Images -->
 
 				<copy todir="docroot/html/themes/_unstyled/images/aui" preservelastmodified="true">
-					<fileset dir="${alloy.build.dir}/aui-css/img" />
-				</copy>
-
-				<copy todir="docroot/html/themes/_unstyled/images/aui" preservelastmodified="true">
 					<fileset dir="${alloy.build.dir}/aui-skin-deprecated/images" />
 				</copy>
 
@@ -182,11 +177,11 @@
 	</target>
 
 	<target name="build-alloy-bootstrap">
-		<property name="alloy.bootstrap.version" value="2.3.2" />
+		<property name="alloy.bootstrap.version" value="3.1.1" />
 
 		<property name="alloy.bootstrap.deploy" value="docroot/html/themes/_unstyled/css/aui" />
 
-		<property name="alloy.bootstrap.file" value="alloy-bootstrap-${alloy.bootstrap.version}.zip" />
+		<property name="alloy.bootstrap.file" value="bootstrap-sass-${alloy.bootstrap.version}.zip" />
 
 		<property name="alloy.bootstrap.tmp.dir" value="docroot/html/ALLOY_BOOTSTRAP_ZIP" />
 
@@ -208,9 +203,7 @@
 
 				<!-- CSS -->
 
-				<property name="alloy.bootstrap.lib.dir" value="${alloy.bootstrap.tmp.dir}/lib" />
-
-				<delete dir="${alloy.bootstrap.lib.dir}/tests" />
+				<property name="alloy.bootstrap.lib.dir" value="${alloy.bootstrap.tmp.dir}/bootstrap-sass-${alloy.bootstrap.version}/vendor/assets/stylesheets/bootstrap" />
 
 				<copy todir="${alloy.bootstrap.deploy}" overwrite="true" preservelastmodified="true">
 					<fileset dir="${alloy.bootstrap.lib.dir}/" />
@@ -285,6 +278,8 @@
 				</copy>
 			</else>
 		</if>
+
+		<antcall target="build-fckeditor" />
 	</target>
 
 	<target name="build-ckeditor-plugins-bbcode">
@@ -813,56 +808,6 @@
 				<!-- EOL -->
 
 				<fixcrlf includes="**/*.html" srcdir="docroot/html/js/editor/fckeditor/editor/filemanager/browser/liferay" eol="unix" />
-
-				<!-- CKEditor -->
-
-				<mkdir dir="docroot/html/js/editor/ckeditor/editor/filemanager/browser/liferay" />
-
-				<copy todir="docroot/html/js/editor/ckeditor/editor/filemanager/browser/liferay">
-					<fileset dir="docroot/html/js/editor/fckeditor/editor/filemanager/browser/liferay" />
-				</copy>
-
-				<replace file="docroot/html/js/editor/ckeditor/editor/filemanager/browser/liferay/browser.html">
-					<replacefilter token="FCKeditor" value="CKeditor" />
-				</replace>
-
-				<replace file="docroot/html/js/editor/ckeditor/editor/filemanager/browser/liferay/browser.html">
-					<replacetoken><![CDATA[<meta http-equiv="Content-Type" content="text/html; charset=utf-8">]]></replacetoken>
-					<replacevalue>
-						<![CDATA[
-							<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-							<meta content="IE=EmulateIE9" http-equiv="X-UA-Compatible">
-						]]>
-					</replacevalue>
-				</replace>
-
-				<replace file="docroot/html/js/editor/ckeditor/editor/filemanager/browser/liferay/frmresourceslist.html">
-					<replacetoken><![CDATA[function OpenFile( fileUrl )]]></replacetoken>
-					<replacevalue><![CDATA[function OpenFile( fileUrl, errorMessage )]]></replacevalue>
-				</replace>
-
-				<replace file="docroot/html/js/editor/ckeditor/editor/filemanager/browser/liferay/frmresourceslist.html">
-					<replacetoken><![CDATA[window.top.opener.SetUrl( encodeURI( fileUrl ).replace( '#', '%23' ) ) ;]]></replacetoken>
-					<replacevalue>
-						<![CDATA[
-							if (!errorMessage) {
-								var match = window.top.location.search.match(/(?:[\?&]|&amp;)CKEditorFuncNum=([^&]+)/i);
-
-								var funcNum = (match && match.length) ? match[1] : '';
-
-								window.top.opener.CKEDITOR.tools.callFunction(funcNum, fileUrl);
-							}
-							else {
-								alert(errorMessage);
-							}
-						]]>
-					</replacevalue>
-				</replace>
-
-				<replace file="docroot/html/js/editor/ckeditor/editor/filemanager/browser/liferay/frmresourceslist.html">
-					<replacetoken><![CDATA[var sCurrentFolderPath	= oFolderNode.attributes.getNamedItem('path').value ;]]></replacetoken>
-					<replacevalue><![CDATA[var sCurrentFolderPath	= oFolderNode.attributes.getNamedItem('path').value.replace( /"/g, '') ;]]></replacevalue>
-				</replace>
 			</then>
 			<else>
 				<copy todir="docroot/html/js/editor/fckeditor">
@@ -1466,7 +1411,6 @@ Please set the property "jdk.6.home" in build.properties.
 		<antcall target="build-alloy" />
 		<antcall target="build-ckeditor" />
 		<antcall target="build-dtd" />
-		<antcall target="build-fckeditor" />
 		<antcall target="build-tinymce" />
 		<antcall target="build-vaadin" />
 
@@ -1592,7 +1536,6 @@ Please set the property "jdk.6.home" in build.properties.
 		<antcall target="build-alloy" />
 		<antcall target="build-ckeditor" />
 		<antcall target="build-dtd" />
-		<antcall target="build-fckeditor" />
 		<antcall target="build-tinymce" />
 		<antcall target="build-vaadin" />
 

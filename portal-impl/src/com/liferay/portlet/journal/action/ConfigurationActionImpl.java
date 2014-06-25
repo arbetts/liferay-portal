@@ -14,11 +14,9 @@
 
 package com.liferay.portlet.journal.action;
 
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.portlet.DefaultConfigurationAction;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.journal.util.JournalUtil;
 import com.liferay.util.ContentUtil;
 
 import javax.portlet.ActionRequest;
@@ -34,16 +32,8 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 
 	@Override
 	public void postProcess(
-			long companyId, PortletRequest portletRequest,
-			PortletPreferences portletPreferences)
-		throws SystemException {
-
-		removeDefaultValue(
-			portletRequest, portletPreferences, "emailFromAddress",
-			JournalUtil.getEmailFromAddress(portletPreferences, companyId));
-		removeDefaultValue(
-			portletRequest, portletPreferences, "emailFromName",
-			JournalUtil.getEmailFromName(portletPreferences, companyId));
+		long companyId, PortletRequest portletRequest,
+		PortletPreferences portletPreferences) {
 
 		String languageId = LocaleUtil.toLanguageId(
 			LocaleUtil.getSiteDefault());

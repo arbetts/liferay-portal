@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
+import com.liferay.portal.kernel.upload.LiferayFileItemException;
 import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.Constants;
@@ -119,20 +120,19 @@ public class EditArticleAction extends PortletAction {
 		String oldUrlTitle = StringPool.BLANK;
 
 		try {
-			if (Validator.isNull(cmd)) {
-				UploadException uploadException =
-					(UploadException)actionRequest.getAttribute(
-						WebKeys.UPLOAD_EXCEPTION);
+			UploadException uploadException =
+				(UploadException)actionRequest.getAttribute(
+					WebKeys.UPLOAD_EXCEPTION);
 
-				if (uploadException != null) {
-					if (uploadException.isExceededSizeLimit()) {
-						throw new ArticleContentSizeException();
-					}
-
-					throw new PortalException(uploadException.getCause());
+			if (uploadException != null) {
+				if (uploadException.isExceededLiferayFileItemSizeLimit()) {
+					throw new LiferayFileItemException();
+				}
+				else if (uploadException.isExceededSizeLimit()) {
+					throw new ArticleContentSizeException();
 				}
 
-				return;
+				throw new PortalException(uploadException.getCause());
 			}
 			else if (cmd.equals(Constants.ADD) ||
 					 cmd.equals(Constants.PREVIEW) ||
@@ -285,6 +285,7 @@ public class EditArticleAction extends PortletAction {
 					 e instanceof ArticleTypeException ||
 					 e instanceof ArticleVersionException ||
 					 e instanceof DuplicateArticleIdException ||
+					 e instanceof LiferayFileItemException ||
 					 e instanceof StorageFieldRequiredException) {
 
 				SessionErrors.add(actionRequest, e.getClass());
@@ -530,11 +531,6 @@ public class EditArticleAction extends PortletAction {
 				uploadPortletRequest, "description_" + toLanguageId);
 		}
 
-		String content = ParamUtil.getString(
-			uploadPortletRequest, "articleContent");
-
-		Map<String, byte[]> images = new HashMap<String, byte[]>();
-
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			JournalArticle.class.getName(), uploadPortletRequest);
 
@@ -555,8 +551,9 @@ public class EditArticleAction extends PortletAction {
 			ddmStructure, LocaleUtil.fromLanguageId(languageId),
 			serviceContext);
 
-		content = (String)contentAndImages[0];
-		images = (HashMap<String, byte[]>)contentAndImages[1];
+		String content = (String)contentAndImages[0];
+		Map<String, byte[]> images =
+			(HashMap<String, byte[]>)contentAndImages[1];
 
 		Boolean fileItemThresholdSizeExceeded =
 			(Boolean)uploadPortletRequest.getAttribute(

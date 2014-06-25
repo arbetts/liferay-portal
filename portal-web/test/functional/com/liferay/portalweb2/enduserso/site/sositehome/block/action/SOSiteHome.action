@@ -17,6 +17,12 @@
 		</case>
 	</command>
 
+	<command name="assertElementNotPresent">
+		<case locator-key1="RSS_OPTIONS">
+			<execute function="AssertElementNotPresent#assertNotVisible" />
+		</case>
+	</command>
+
 	<command name="assertTextEquals">
 		<case locator-key1="BOOKMARKS_NO_ENTRIES_MESSAGE">
 			<execute function="AssertTextEquals#assertPartialText" />
@@ -56,7 +62,7 @@
 			<execute function="Close#closeWindow" />
 		</case>
 
-		<case locator-key1="BOOKMARKS_POP_UP_BING">
+		<case locator-key1="BOOKMARKS_POP_UP_MSN">
 			<execute function="Close#closeWindow" />
 		</case>
 

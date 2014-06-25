@@ -168,7 +168,17 @@ String toolbarSet = (String)request.getAttribute("liferay-ui:input-editor:toolba
 			if (Validator.isNotNull(onChangeMethod)) {
 			%>
 
-				setInterval(
+				var clearContentChangeHandle = function(event) {
+					if (event.portletId === '<%= portletId %>') {
+						clearInterval(contentChangeHandle);
+
+						Liferay.detach('destroyPortlet', clearContentChangeHandle);
+					}
+				};
+
+				Liferay.on('destroyPortlet', clearContentChangeHandle);
+
+				var contentChangeHandle = setInterval(
 					function() {
 						try {
 							window['<%= name %>'].onChangeCallback();
@@ -183,7 +193,10 @@ String toolbarSet = (String)request.getAttribute("liferay-ui:input-editor:toolba
 			}
 			%>
 
+			window['<%= name %>'].instanceReady = true;
 		},
+
+		instanceReady: false,
 
 		<%
 		if (Validator.isNotNull(onChangeMethod)) {

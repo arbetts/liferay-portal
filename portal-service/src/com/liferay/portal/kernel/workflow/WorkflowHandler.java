@@ -15,10 +15,10 @@
 package com.liferay.portal.kernel.workflow;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.model.WorkflowDefinitionLink;
+import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.asset.model.AssetRenderer;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
 
@@ -39,14 +39,15 @@ import javax.portlet.RenderResponse;
  * @author Juan Fernández
  * @author Julio Camarero
  */
-public interface WorkflowHandler {
+public interface WorkflowHandler<T> {
 
-	public AssetRenderer getAssetRenderer(long classPK)
-		throws PortalException, SystemException;
+	public AssetRenderer getAssetRenderer(long classPK) throws PortalException;
 
 	public AssetRendererFactory getAssetRendererFactory();
 
 	public String getClassName();
+
+	public String getIconCssClass();
 
 	public String getIconPath(LiferayPortletRequest liferayPortletRequest);
 
@@ -69,6 +70,10 @@ public interface WorkflowHandler {
 		long classPK, LiferayPortletRequest liferayPortletRequest,
 		LiferayPortletResponse liferayPortletResponse);
 
+	public String getURLEditWorkflowTask(
+			long workflowTaskId, ServiceContext serviceContext)
+		throws PortalException;
+
 	public PortletURL getURLViewDiffs(
 		long classPK, LiferayPortletRequest liferayPortletRequest,
 		LiferayPortletResponse liferayPortletResponse);
@@ -80,7 +85,7 @@ public interface WorkflowHandler {
 
 	public WorkflowDefinitionLink getWorkflowDefinitionLink(
 			long companyId, long groupId, long classPK)
-		throws PortalException, SystemException;
+		throws PortalException;
 
 	public boolean isAssetTypeSearchable();
 
@@ -93,12 +98,11 @@ public interface WorkflowHandler {
 		RenderResponse renderResponse, String template);
 
 	public void startWorkflowInstance(
-			long companyId, long groupId, long userId, long classPK,
-			Object model, Map<String, Serializable> workflowContext)
-		throws PortalException, SystemException;
+			long companyId, long groupId, long userId, long classPK, T model,
+			Map<String, Serializable> workflowContext)
+		throws PortalException;
 
-	public Object updateStatus(
-			int status, Map<String, Serializable> workflowContext)
-		throws PortalException, SystemException;
+	public T updateStatus(int status, Map<String, Serializable> workflowContext)
+		throws PortalException;
 
 }

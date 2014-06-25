@@ -16,6 +16,7 @@ package com.liferay.portal.servlet;
 
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.SingleVMPoolUtil;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
@@ -25,6 +26,7 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ServerDetector;
@@ -33,12 +35,18 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.language.AggregateResourceBundle;
+import com.liferay.portal.language.LanguageResources;
 import com.liferay.portal.minifier.MinifierUtil;
+import com.liferay.portal.model.Portlet;
+import com.liferay.portal.model.PortletApp;
+import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.servlet.filters.dynamiccss.DynamicCSSUtil;
 import com.liferay.portal.util.AggregateUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.portlet.PortletConfigFactoryUtil;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -50,8 +58,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
+
+import javax.portlet.PortletConfig;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -82,6 +95,26 @@ public class ComboServlet extends HttpServlet {
 				HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, request,
 				response);
 		}
+	}
+
+	protected static String getModuleContextPath(String modulePath) {
+		int index = modulePath.indexOf(CharPool.COLON);
+
+		if (index > 0) {
+			return modulePath.substring(0, index);
+		}
+
+		return StringPool.BLANK;
+	}
+
+	protected static String getResourcePath(String modulePath) {
+		int index = modulePath.indexOf(CharPool.COLON);
+
+		if (index > 0) {
+			return modulePath.substring(index + 1);
+		}
+
+		return modulePath;
 	}
 
 	protected void doService(
@@ -213,13 +246,9 @@ public class ComboServlet extends HttpServlet {
 			URL resourceURL, String resourcePath, String minifierType)
 		throws IOException {
 
-		int colonIndex = resourcePath.indexOf(CharPool.COLON);
+		String moduleContextPath = getModuleContextPath(resourcePath);
 
-		if (colonIndex > 0) {
-			resourcePath =
-				resourcePath.substring(0, colonIndex) +
-					resourcePath.substring(colonIndex + 1);
-		}
+		resourcePath = moduleContextPath.concat(getResourcePath(resourcePath));
 
 		String fileContentKey = resourcePath.concat(StringPool.QUESTION).concat(
 			minifierType);
@@ -298,6 +327,9 @@ public class ComboServlet extends HttpServlet {
 						stringFileContent);
 				}
 				else if (minifierType.equals("js")) {
+					stringFileContent = translate(
+						request, moduleContextPath, stringFileContent);
+
 					stringFileContent = MinifierUtil.minifyJavaScript(
 						resourcePath, stringFileContent);
 				}
@@ -320,20 +352,18 @@ public class ComboServlet extends HttpServlet {
 	}
 
 	protected URL getResourceURL(String modulePath) throws Exception {
-		ModulePathContainer modulePathContainer = new ModulePathContainer(
-			modulePath);
+		String moduleContextPath = getModuleContextPath(modulePath);
 
-		ServletContext servletContext = getServletContext(
-			modulePathContainer.getModuleContextPath());
+		ServletContext servletContext = getServletContext(moduleContextPath);
 
-		URL url = servletContext.getResource(
-			modulePathContainer.getResourcePath());
+		String resourcePath = getResourcePath(modulePath);
+
+		URL url = servletContext.getResource(resourcePath);
 
 		if (url == null) {
 			throw new ServletException(
-				"Resource " + modulePathContainer.getResourcePath() +
-					" does not exist in " +
-						modulePathContainer.getModuleContextPath());
+				"Resource " + resourcePath + " does not exist in " +
+					moduleContextPath);
 		}
 
 		return url;
@@ -356,6 +386,43 @@ public class ComboServlet extends HttpServlet {
 			"Servlet context " + contextName + " does not exist");
 	}
 
+	protected String translate(
+		HttpServletRequest request, String contextPath,
+		String stringFileContent) {
+
+		String languageId = LanguageUtil.getLanguageId(request);
+
+		Locale locale = LocaleUtil.fromLanguageId(languageId);
+
+		ResourceBundle resourceBundle = LanguageResources.getResourceBundle(
+			locale);
+
+		PortletApp portletApp = PortletLocalServiceUtil.getPortletApp(
+			contextPath);
+
+		Portlet portlet = null;
+
+		if ((portletApp != null) && portletApp.isWARFile()) {
+			List<Portlet> portlets = portletApp.getPortlets();
+
+			if (!portlets.isEmpty()) {
+				portlet = portlets.get(0);
+			}
+		}
+
+		if (portlet != null) {
+			PortletConfig portletConfig = PortletConfigFactoryUtil.create(
+				portlet, getServletContext());
+
+			if (portletConfig != null) {
+				resourceBundle = new AggregateResourceBundle(
+					portletConfig.getResourceBundle(locale), resourceBundle);
+			}
+		}
+
+		return LanguageUtil.process(resourceBundle, locale, stringFileContent);
+	}
+
 	protected boolean validateModuleExtension(String moduleName)
 		throws Exception {
 
@@ -375,37 +442,6 @@ public class ComboServlet extends HttpServlet {
 		}
 
 		return validModuleExtension;
-	}
-
-	protected static class ModulePathContainer {
-
-		public String getModuleContextPath() {
-			return _moduleContextPath;
-		}
-
-		public String getResourcePath() {
-			return _resourcePath;
-		}
-
-		ModulePathContainer(String modulePathString) {
-			int index = modulePathString.indexOf(CharPool.COLON);
-
-			if (index > 0) {
-				String moduleContextPath = modulePathString.substring(0, index);
-
-				String resourcePath = modulePathString.substring(index + 1);
-
-				_moduleContextPath = moduleContextPath;
-				_resourcePath = resourcePath;
-			}
-			else {
-				_moduleContextPath = StringPool.BLANK;
-				_resourcePath = modulePathString;
-			}
-		}
-
-		private String _moduleContextPath;
-		private String _resourcePath;
 	}
 
 	private static final String _CSS_EXTENSION = "css";

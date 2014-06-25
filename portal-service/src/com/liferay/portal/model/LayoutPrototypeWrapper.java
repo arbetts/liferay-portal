@@ -268,11 +268,9 @@ public class LayoutPrototypeWrapper implements LayoutPrototype,
 	* Returns the user uuid of this layout prototype.
 	*
 	* @return the user uuid of this layout prototype
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _layoutPrototype.getUserUuid();
 	}
 
@@ -801,29 +799,25 @@ public class LayoutPrototypeWrapper implements LayoutPrototype,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_layoutPrototype.persist();
 	}
 
 	@Override
 	public com.liferay.portal.model.Group getGroup()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutPrototype.getGroup();
 	}
 
 	@Override
 	public long getGroupId()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutPrototype.getGroupId();
 	}
 
 	@Override
 	public com.liferay.portal.model.Layout getLayout()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutPrototype.getLayout();
 	}
 

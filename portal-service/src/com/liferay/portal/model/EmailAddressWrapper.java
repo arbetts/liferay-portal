@@ -275,11 +275,9 @@ public class EmailAddressWrapper implements EmailAddress,
 	* Returns the user uuid of this email address.
 	*
 	* @return the user uuid of this email address
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _emailAddress.getUserUuid();
 	}
 
@@ -577,15 +575,13 @@ public class EmailAddressWrapper implements EmailAddress,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_emailAddress.persist();
 	}
 
 	@Override
 	public com.liferay.portal.model.ListType getType()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _emailAddress.getType();
 	}
 

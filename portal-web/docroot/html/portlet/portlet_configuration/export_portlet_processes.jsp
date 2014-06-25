@@ -61,9 +61,9 @@ OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBac
 		>
 			<liferay-ui:user-display
 				displayStyle="3"
-				height="30"
+				showUserDetails="<%= false %>"
+				showUserName="<%= false %>"
 				userId="<%= backgroundTask.getUserId() %>"
-				width="30"
 			/>
 		</liferay-ui:search-container-column-text>
 
@@ -110,10 +110,10 @@ OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBac
 						%>
 
 						<liferay-ui:icon
-							image="download"
+							iconCssClass="icon-download"
 							label="<%= true %>"
 							message="<%= sb.toString() %>"
-							url="<%= PortletFileRepositoryUtil.getPortletFileEntryURL(themeDisplay, fileEntry, StringPool.BLANK) %>"
+							url="<%= PortletFileRepositoryUtil.getDownloadPortletFileEntryURL(themeDisplay, fileEntry, StringPool.BLANK) %>"
 						/>
 
 					<%
@@ -128,7 +128,7 @@ OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBac
 					%>
 
 					<liferay-ui:icon
-						image="download"
+						iconCssClass="icon-download"
 						label="<%= true %>"
 						message='<%= HtmlUtil.escape(MapUtil.getString(taskContextMap, "fileName")) %>'
 					/>
@@ -139,15 +139,16 @@ OrderByComparator orderByComparator = BackgroundTaskComparatorFactoryUtil.getBac
 
 		<liferay-ui:search-container-column-text>
 			<c:if test="<%= !backgroundTask.isInProgress() %>">
+
+				<%
+				Date completionDate = backgroundTask.getCompletionDate();
+				%>
+
 				<portlet:actionURL var="deleteBackgroundTaskURL">
 					<portlet:param name="struts_action" value="/group_pages/delete_background_task" />
 					<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
 					<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />
 				</portlet:actionURL>
-
-				<%
-				Date completionDate = backgroundTask.getCompletionDate();
-				%>
 
 				<liferay-ui:icon-delete
 					label="true"

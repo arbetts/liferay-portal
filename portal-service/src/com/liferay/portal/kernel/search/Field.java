@@ -32,6 +32,8 @@ public class Field implements Serializable {
 
 	public static final String ANY = StringPool.STAR;
 
+	public static final String ARTICLE_ID = "articleId";
+
 	public static final String ASSET_CATEGORY_ID = "assetCategoryId";
 
 	public static final String ASSET_CATEGORY_IDS = "assetCategoryIds";
@@ -41,6 +43,8 @@ public class Field implements Serializable {
 	 */
 	@Deprecated
 	public static final String ASSET_CATEGORY_NAMES = "assetCategoryNames";
+
+	public static final String ASSET_CATEGORY_TITLE = "assetCategoryTitle";
 
 	public static final String ASSET_CATEGORY_TITLES = "assetCategoryTitles";
 
@@ -67,6 +71,10 @@ public class Field implements Serializable {
 	public static final String CONTENT = "content";
 
 	public static final String CREATE_DATE = "createDate";
+
+	public static final String DECK_TITLE = "deckTitle";
+
+	public static final String DEFAULT_LANGUAGE_ID = "defaultLanguageId";
 
 	public static final String DESCRIPTION = "description";
 

@@ -255,11 +255,9 @@ public class MDRRuleGroupWrapper implements MDRRuleGroup,
 	* Returns the user uuid of this m d r rule group.
 	*
 	* @return the user uuid of this m d r rule group
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _mdrRuleGroup.getUserUuid();
 	}
 
@@ -738,14 +736,12 @@ public class MDRRuleGroupWrapper implements MDRRuleGroup,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_mdrRuleGroup.persist();
 	}
 
 	@Override
-	public java.util.List<com.liferay.portlet.mobiledevicerules.model.MDRRule> getRules()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.util.List<com.liferay.portlet.mobiledevicerules.model.MDRRule> getRules() {
 		return _mdrRuleGroup.getRules();
 	}
 

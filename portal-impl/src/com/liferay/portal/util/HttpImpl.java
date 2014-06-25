@@ -261,13 +261,17 @@ public class HttpImpl implements Http {
 		return decodeURL(url, false);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #decodeURL(String)}
+	 */
+	@Deprecated
 	@Override
 	public String decodeURL(String url, boolean unescapeSpaces) {
 		if (Validator.isNull(url)) {
 			return url;
 		}
 
-		return URLCodec.decodeURL(url, StringPool.UTF8, unescapeSpaces);
+		return URLCodec.decodeURL(url, StringPool.UTF8);
 	}
 
 	public void destroy() {
@@ -742,7 +746,19 @@ public class HttpImpl implements Http {
 				String value = StringPool.BLANK;
 
 				if (kvp.length > 1) {
-					value = decodeURL(kvp[1]);
+					try {
+						value = decodeURL(kvp[1]);
+					}
+					catch (IllegalArgumentException iae) {
+						if (_log.isInfoEnabled()) {
+							_log.info(
+								"Skipping parameter with key " + key +
+									" because of invalid value " + kvp[1],
+								iae);
+						}
+
+						continue;
+					}
 				}
 
 				List<String> values = tempParameterMap.get(key);
@@ -1084,7 +1100,17 @@ public class HttpImpl implements Http {
 
 				String redirect = param.substring(pos + 1);
 
-				redirect = decodeURL(redirect);
+				try {
+					redirect = decodeURL(redirect);
+				}
+				catch (IllegalArgumentException iae) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(
+							"Skipping undecodable parameter " + param, iae);
+					}
+
+					continue;
+				}
 
 				String newURL = shortenURL(redirect, count - 1);
 

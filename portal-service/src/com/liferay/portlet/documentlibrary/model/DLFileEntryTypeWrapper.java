@@ -262,11 +262,9 @@ public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	* Returns the user uuid of this document library file entry type.
 	*
 	* @return the user uuid of this document library file entry type
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _dlFileEntryType.getUserUuid();
 	}
 
@@ -765,15 +763,22 @@ public class DLFileEntryTypeWrapper implements DLFileEntryType,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_dlFileEntryType.persist();
 	}
 
 	@Override
-	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> getDDMStructures()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> getDDMStructures() {
 		return _dlFileEntryType.getDDMStructures();
+	}
+
+	@Override
+	public java.lang.String getUnambiguousName(
+		java.util.List<com.liferay.portlet.documentlibrary.model.DLFileEntryType> dlFileEntryTypes,
+		long groupId, java.util.Locale locale)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlFileEntryType.getUnambiguousName(dlFileEntryTypes, groupId,
+			locale);
 	}
 
 	@Override

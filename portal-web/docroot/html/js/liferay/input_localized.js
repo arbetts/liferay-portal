@@ -56,14 +56,6 @@ AUI.add(
 						validator: Lang.isString
 					},
 
-					name: {
-						validator: Lang.isString
-					},
-
-					namespace: {
-						validator: Lang.isString
-					},
-
 					inputPlaceholder: {
 						setter: A.one
 					},
@@ -74,6 +66,14 @@ AUI.add(
 
 					itemsError: {
 						validator: Lang.isArray
+					},
+
+					name: {
+						validator: Lang.isString
+					},
+
+					namespace: {
+						validator: Lang.isString
 					},
 
 					selected: {
@@ -122,12 +122,12 @@ AUI.add(
 
 					INPUT_HIDDEN_TEMPLATE: '<input id="{namespace}{id}_{value}" name="{namespace}{fieldNamePrefix}{name}_{value}{fieldNameSuffix}" type="hidden" value="" />',
 
-					ITEM_TEMPLATE: '<td class="palette-item {selectedClassName}" data-column={column} data-index={index} data-row={row} data-value="{value}">' +
+					ITEM_TEMPLATE: '<li class="palette-item {selectedClassName}" data-column={column} data-index={index} data-row={row} data-value="{value}">' +
 						'<a href="" class="palette-item-inner" onclick="return false;">' +
 							'<img class="lfr-input-localized-flag" data-languageId="{value}" src="' + themeDisplay.getPathThemeImages() + '/language/{value}.png" />' +
 							'<div class="lfr-input-localized-state {stateClass}"></div>' +
 						'</a>' +
-					'</td>',
+					'</li>',
 
 					initializer: function() {
 						var instance = this;
@@ -423,7 +423,7 @@ AUI.add(
 
 						AArray.each(
 							flags,
-							function(item, index, collection) {
+							function(item, index) {
 								var flagNode = instance.getItemByIndex(index);
 
 								flagNode.toggleClass(

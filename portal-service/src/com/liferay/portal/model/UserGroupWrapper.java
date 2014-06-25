@@ -267,11 +267,9 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	* Returns the user uuid of this user group.
 	*
 	* @return the user uuid of this user group
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _userGroup.getUserUuid();
 	}
 
@@ -534,50 +532,43 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_userGroup.persist();
 	}
 
 	@Override
 	public com.liferay.portal.model.Group getGroup()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.getGroup();
 	}
 
 	@Override
 	public long getGroupId()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.getGroupId();
 	}
 
 	@Override
 	public int getPrivateLayoutsPageCount()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.getPrivateLayoutsPageCount();
 	}
 
 	@Override
 	public int getPublicLayoutsPageCount()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.getPublicLayoutsPageCount();
 	}
 
 	@Override
 	public boolean hasPrivateLayouts()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.hasPrivateLayouts();
 	}
 
 	@Override
 	public boolean hasPublicLayouts()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userGroup.hasPublicLayouts();
 	}
 

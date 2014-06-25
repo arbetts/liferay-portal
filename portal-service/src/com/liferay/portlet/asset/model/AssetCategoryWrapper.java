@@ -290,11 +290,9 @@ public class AssetCategoryWrapper implements AssetCategory,
 	* Returns the user uuid of this asset category.
 	*
 	* @return the user uuid of this asset category
-	* @throws SystemException if a system exception occurred
 	*/
 	@Override
-	public java.lang.String getUserUuid()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public java.lang.String getUserUuid() {
 		return _assetCategory.getUserUuid();
 	}
 
@@ -873,22 +871,19 @@ public class AssetCategoryWrapper implements AssetCategory,
 	}
 
 	@Override
-	public void persist()
-		throws com.liferay.portal.kernel.exception.SystemException {
+	public void persist() {
 		_assetCategory.persist();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.asset.model.AssetCategory> getAncestors()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _assetCategory.getAncestors();
 	}
 
 	@Override
 	public java.lang.String getPath(java.util.Locale locale)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _assetCategory.getPath(locale);
 	}
 
@@ -914,6 +909,31 @@ public class AssetCategoryWrapper implements AssetCategory,
 		}
 
 		return false;
+	}
+
+	@Override
+	public long getNestedSetsTreeNodeLeft() {
+		return _assetCategory.getNestedSetsTreeNodeLeft();
+	}
+
+	@Override
+	public long getNestedSetsTreeNodeRight() {
+		return _assetCategory.getNestedSetsTreeNodeRight();
+	}
+
+	@Override
+	public long getNestedSetsTreeNodeScopeId() {
+		return _assetCategory.getNestedSetsTreeNodeScopeId();
+	}
+
+	@Override
+	public void setNestedSetsTreeNodeLeft(long nestedSetsTreeNodeLeft) {
+		_assetCategory.setNestedSetsTreeNodeLeft(nestedSetsTreeNodeLeft);
+	}
+
+	@Override
+	public void setNestedSetsTreeNodeRight(long nestedSetsTreeNodeRight) {
+		_assetCategory.setNestedSetsTreeNodeRight(nestedSetsTreeNodeRight);
 	}
 
 	@Override

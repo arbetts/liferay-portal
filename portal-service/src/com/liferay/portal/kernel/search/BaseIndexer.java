@@ -19,7 +19,6 @@ import com.liferay.portal.NoSuchModelException;
 import com.liferay.portal.NoSuchRegionException;
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -33,6 +32,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.SetUtil;
@@ -70,14 +70,12 @@ import com.liferay.portlet.asset.model.AssetTag;
 import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
-import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.util.DDMIndexerUtil;
 import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.model.ExpandoColumnConstants;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 import com.liferay.portlet.expando.util.ExpandoBridgeIndexerUtil;
-import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.ratings.model.RatingsStats;
 import com.liferay.portlet.ratings.service.RatingsStatsLocalServiceUtil;
 import com.liferay.portlet.trash.model.TrashEntry;
@@ -207,28 +205,20 @@ public abstract class BaseIndexer implements Indexer {
 		try {
 			searchContext.setSearchEngineId(getSearchEngineId());
 
-			String[] entryClassNames = getClassNames();
+			resetFullQuery(searchContext);
 
-			if (searchContext.isIncludeAttachments()) {
-				entryClassNames = ArrayUtil.append(
-					entryClassNames, DLFileEntry.class.getName());
-			}
+			String[] fullQueryEntryClassNames =
+				searchContext.getFullQueryEntryClassNames();
 
-			if (searchContext.isIncludeDiscussions()) {
-				entryClassNames = ArrayUtil.append(
-					entryClassNames, MBMessage.class.getName());
-
-				searchContext.setAttribute("discussion", Boolean.TRUE);
-			}
-
-			searchContext.setEntryClassNames(entryClassNames);
-
-			if (searchContext.isIncludeAttachments() ||
-				searchContext.isIncludeDiscussions()) {
-
+			if (ArrayUtil.isNotEmpty(fullQueryEntryClassNames)) {
 				searchContext.setAttribute(
 					"relatedEntryClassNames", getClassNames());
 			}
+
+			String[] entryClassNames = ArrayUtil.append(
+				getClassNames(), fullQueryEntryClassNames);
+
+			searchContext.setEntryClassNames(entryClassNames);
 
 			BooleanQuery contextQuery = BooleanQueryFactoryUtil.create(
 				searchContext);
@@ -318,8 +308,8 @@ public abstract class BaseIndexer implements Indexer {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by {@link #getSummary(Document, Locale,
-	 *             String, PortletURL, PortletRequest, PortletResponse)}
+	 * @deprecated As of 7.0.0, replaced by {@link #getSummary(Document, String,
+	 *             PortletURL, PortletRequest, PortletResponse)}
 	 */
 	@Deprecated
 	@Override
@@ -328,17 +318,18 @@ public abstract class BaseIndexer implements Indexer {
 			PortletURL portletURL)
 		throws SearchException {
 
-		return getSummary(document, locale, snippet, portletURL, null, null);
+		return getSummary(document, snippet, portletURL, null, null);
 	}
 
 	@Override
 	public Summary getSummary(
-			Document document, Locale locale, String snippet,
-			PortletURL portletURL, PortletRequest portletRequest,
-			PortletResponse portletResponse)
+			Document document, String snippet, PortletURL portletURL,
+			PortletRequest portletRequest, PortletResponse portletResponse)
 		throws SearchException {
 
 		try {
+			Locale locale = getLocale(portletRequest);
+
 			Summary summary = doGetSummary(
 				document, locale, snippet, portletURL, portletRequest,
 				portletResponse);
@@ -381,6 +372,10 @@ public abstract class BaseIndexer implements Indexer {
 	@Override
 	public boolean isPermissionAware() {
 		return _permissionAware;
+	}
+
+	public boolean isSelectAllLocales() {
+		return _selectAllLocales;
 	}
 
 	@Override
@@ -460,9 +455,7 @@ public abstract class BaseIndexer implements Indexer {
 			doReindex(className, classPK);
 		}
 		catch (NoSuchModelException nsme) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to index " + className + " " + classPK);
-			}
+			_log.error("Unable to index " + className + " " + classPK, nsme);
 		}
 		catch (SearchException se) {
 			throw se;
@@ -515,11 +508,8 @@ public abstract class BaseIndexer implements Indexer {
 
 			QueryConfig queryConfig = searchContext.getQueryConfig();
 
-			if (ArrayUtil.isEmpty(queryConfig.getSelectedFieldNames()) &&
-				!ArrayUtil.isEmpty(getDefaultSelectedFieldNames())) {
-
-				queryConfig.setSelectedFieldNames(
-					getDefaultSelectedFieldNames());
+			if (ArrayUtil.isEmpty(queryConfig.getSelectedFieldNames())) {
+				addDefaultSelectedFieldNames(searchContext);
 			}
 
 			addFacetSelectedFieldNames(searchContext, queryConfig);
@@ -564,6 +554,10 @@ public abstract class BaseIndexer implements Indexer {
 		return search(searchContext);
 	}
 
+	public void setSelectAllLocales(boolean selectAllLocales) {
+		_selectAllLocales = selectAllLocales;
+	}
+
 	@Override
 	public void unregisterIndexerPostProcessor(
 		IndexerPostProcessor indexerPostProcessor) {
@@ -577,9 +571,12 @@ public abstract class BaseIndexer implements Indexer {
 			new IndexerPostProcessor[indexerPostProcessorsList.size()]);
 	}
 
+	@Override
+	public void updateFullQuery(SearchContext searchContext) {
+	}
+
 	protected void addAssetFields(
-			Document document, String className, long classPK)
-		throws SystemException {
+		Document document, String className, long classPK) {
 
 		AssetRendererFactory assetRendererFactory =
 			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
@@ -633,6 +630,48 @@ public abstract class BaseIndexer implements Indexer {
 		document.addLocalizedKeyword(
 			"localized_title", assetEntry.getTitleMap(), true);
 		document.addKeyword("visible", assetEntry.isVisible());
+	}
+
+	protected void addDefaultSelectedFieldNames(SearchContext searchContext) {
+		QueryConfig queryConfig = searchContext.getQueryConfig();
+
+		Set<String> selectedFieldNames = null;
+
+		if (!ArrayUtil.isEmpty(getDefaultSelectedFieldNames())) {
+			selectedFieldNames = SetUtil.fromArray(
+				getDefaultSelectedFieldNames());
+
+			if (searchContext.isIncludeAttachments() ||
+				searchContext.isIncludeDiscussions()) {
+
+				selectedFieldNames.add(Field.CLASS_NAME_ID);
+				selectedFieldNames.add(Field.CLASS_PK);
+			}
+		}
+
+		if (!ArrayUtil.isEmpty(getDefaultSelectedLocalizedFieldNames())) {
+			if (selectedFieldNames == null) {
+				selectedFieldNames = new HashSet<String>();
+			}
+
+			if (isSelectAllLocales()) {
+				addSelectedLocalizedFieldNames(
+					selectedFieldNames,
+					LocaleUtil.toLanguageIds(
+						LanguageUtil.getSupportedLocales()));
+			}
+			else {
+				addSelectedLocalizedFieldNames(
+					selectedFieldNames,
+					LocaleUtil.toLanguageId(queryConfig.getLocale()));
+			}
+		}
+
+		if ((selectedFieldNames != null) && !selectedFieldNames.isEmpty()) {
+			queryConfig.setSelectedFieldNames(
+				selectedFieldNames.toArray(
+					new String[selectedFieldNames.size()]));
+		}
 	}
 
 	protected void addFacetSelectedFieldNames(
@@ -1120,6 +1159,24 @@ public abstract class BaseIndexer implements Indexer {
 		searchContext.addFacet(multiValueFacet);
 	}
 
+	protected void addSelectedLocalizedFieldNames(
+		Set<String> selectedFieldNames, String... languageIds) {
+
+		for (String defaultLocalizedSelectedFieldName :
+				getDefaultSelectedLocalizedFieldNames()) {
+
+			selectedFieldNames.add(defaultLocalizedSelectedFieldName);
+
+			for (String languageId : languageIds) {
+				String localizedFieldName =
+					LocalizationUtil.getLocalizedName(
+						defaultLocalizedSelectedFieldName, languageId);
+
+				selectedFieldNames.add(localizedFieldName);
+			}
+		}
+	}
+
 	protected void addStagingGroupKeyword(Document document, long groupId)
 		throws Exception {
 
@@ -1164,8 +1221,8 @@ public abstract class BaseIndexer implements Indexer {
 		}
 	}
 
-	protected void addTrashFields(Document document, TrashedModel trashedModel)
-		throws SystemException {
+	protected void addTrashFields(
+		Document document, TrashedModel trashedModel) {
 
 		TrashEntry trashEntry = null;
 
@@ -1403,16 +1460,14 @@ public abstract class BaseIndexer implements Indexer {
 	}
 
 	protected Document getBaseModelDocument(
-			String portletId, BaseModel<?> baseModel)
-		throws SystemException {
+		String portletId, BaseModel<?> baseModel) {
 
 		return getBaseModelDocument(portletId, baseModel, baseModel);
 	}
 
 	protected Document getBaseModelDocument(
-			String portletId, BaseModel<?> baseModel,
-			BaseModel<?> workflowedBaseModel)
-		throws SystemException {
+		String portletId, BaseModel<?> baseModel,
+		BaseModel<?> workflowedBaseModel) {
 
 		Document document = newDocument();
 
@@ -1536,6 +1591,18 @@ public abstract class BaseIndexer implements Indexer {
 		return _defaultSelectedFieldNames;
 	}
 
+	protected String[] getDefaultSelectedLocalizedFieldNames() {
+		return _defaultSelectedLocalizedFieldNames;
+	}
+
+	protected Locale getLocale(PortletRequest portletRequest) {
+		if (portletRequest != null) {
+			return portletRequest.getLocale();
+		}
+
+		return LocaleUtil.getMostRelevantLocale();
+	}
+
 	protected Set<String> getLocalizedCountryNames(Country country) {
 		Set<String> countryNames = new HashSet<String>();
 
@@ -1622,7 +1689,7 @@ public abstract class BaseIndexer implements Indexer {
 	protected void populateAddresses(
 			Document document, List<Address> addresses, long regionId,
 			long countryId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		List<String> cities = new ArrayList<String>();
 
@@ -1693,10 +1760,24 @@ public abstract class BaseIndexer implements Indexer {
 		}
 	}
 
-	protected void setDefaultSelectedFieldNames(
-		String[] getDefaultSelectedFieldNames) {
+	protected void resetFullQuery(SearchContext searchContext) {
+		searchContext.clearFullQueryEntryClassNames();
 
-		_defaultSelectedFieldNames = getDefaultSelectedFieldNames;
+		for (Indexer indexer : IndexerRegistryUtil.getIndexers()) {
+			indexer.updateFullQuery(searchContext);
+		}
+	}
+
+	protected void setDefaultSelectedFieldNames(
+		String... defaultLocalizedFieldNames) {
+
+		_defaultSelectedFieldNames = defaultLocalizedFieldNames;
+	}
+
+	protected void setDefaultSelectedLocalizedFieldNames(
+		String... defaultLocalizedFieldNames) {
+
+		_defaultSelectedLocalizedFieldNames = defaultLocalizedFieldNames;
 	}
 
 	protected void setFilterSearch(boolean filterSearch) {
@@ -1722,6 +1803,7 @@ public abstract class BaseIndexer implements Indexer {
 	private static Log _log = LogFactoryUtil.getLog(BaseIndexer.class);
 
 	private String[] _defaultSelectedFieldNames;
+	private String[] _defaultSelectedLocalizedFieldNames;
 	private Document _document = new DocumentImpl();
 	private boolean _filterSearch;
 	private boolean _indexerEnabled = true;
@@ -1729,6 +1811,7 @@ public abstract class BaseIndexer implements Indexer {
 		new IndexerPostProcessor[0];
 	private boolean _permissionAware;
 	private String _searchEngineId;
+	private boolean _selectAllLocales;
 	private boolean _stagingAware = true;
 
 }

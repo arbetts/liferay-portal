@@ -130,7 +130,7 @@ folderStart = GetterUtil.getInteger(request.getAttribute("view_folders.jsp-folde
 
 			var actionsButton = A.one('#<portlet:namespace />actionsButtonContainer');
 
-			var hide = (Liferay.Util.listCheckedExcept(document.<portlet:namespace />fm, '<portlet:namespace /><%= RowChecker.ALL_ROW_IDS %>Checkbox').length == 0);
+			var hide = (Liferay.Util.listCheckedExcept(document.<portlet:namespace />fm, '<portlet:namespace /><%= RowChecker.ALL_ROW_IDS %>').length == 0);
 
 			if (actionsButton) {
 				actionsButton.toggle(!hide);
@@ -165,7 +165,7 @@ folderStart = GetterUtil.getInteger(request.getAttribute("view_folders.jsp-folde
 				folderIdRegEx: /&?<portlet:namespace />folderId=([\d]+)/i,
 				folderIdHashRegEx: /#.*&?<portlet:namespace />folderId=([\d]+)/i,
 				form: {
-					method: 'post',
+					method: 'POST',
 					node: A.one(document.<portlet:namespace />fm)
 				},
 				moveEntryRenderUrl: '<portlet:renderURL><portlet:param name="struts_action" value="/journal/move_entry" /></portlet:renderURL>',
