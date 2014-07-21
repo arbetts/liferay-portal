@@ -403,7 +403,7 @@ AUI.add(
 							}
 						}
 						else {
-							listItem.addClass('lfr-nav-sortable lfr-nav-updateable sortable-item');
+							listItem.addClass('lfr-nav-deletable lfr-nav-sortable lfr-nav-updateable sortable-item');
 
 							instance._createDeleteButton(listItem);
 
@@ -815,7 +815,7 @@ AUI.add(
 
 								var newTitle = oldTitle.replace(regex, pageTitle);
 
-								doc.set('title', newTitle);
+								doc.attr('title', newTitle);
 							};
 						}
 						else {

@@ -145,8 +145,7 @@ public abstract class JournalFeedLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return journalFeedPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -163,8 +162,8 @@ public abstract class JournalFeedLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return journalFeedPersistence.findWithDynamicQuery(dynamicQuery, start,
 			end);
 	}
@@ -183,9 +182,8 @@ public abstract class JournalFeedLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return journalFeedPersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -218,19 +216,6 @@ public abstract class JournalFeedLocalServiceBaseImpl
 	@Override
 	public JournalFeed fetchJournalFeed(long id) {
 		return journalFeedPersistence.fetchByPrimaryKey(id);
-	}
-
-	/**
-	 * Returns the journal feed with the matching UUID and company.
-	 *
-	 * @param uuid the journal feed's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching journal feed, or <code>null</code> if a matching journal feed could not be found
-	 */
-	@Override
-	public JournalFeed fetchJournalFeedByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return journalFeedPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -341,7 +326,7 @@ public abstract class JournalFeedLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteJournalFeed((JournalFeed)persistedModel);
+		return journalFeedLocalService.deleteJournalFeed((JournalFeed)persistedModel);
 	}
 
 	@Override
@@ -350,18 +335,18 @@ public abstract class JournalFeedLocalServiceBaseImpl
 		return journalFeedPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the journal feed with the matching UUID and company.
-	 *
-	 * @param uuid the journal feed's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching journal feed
-	 * @throws PortalException if a matching journal feed could not be found
-	 */
 	@Override
-	public JournalFeed getJournalFeedByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return journalFeedPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<JournalFeed> getJournalFeedsByUuidAndCompanyId(String uuid,
+		long companyId) {
+		return journalFeedPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<JournalFeed> getJournalFeedsByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<JournalFeed> orderByComparator) {
+		return journalFeedPersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**

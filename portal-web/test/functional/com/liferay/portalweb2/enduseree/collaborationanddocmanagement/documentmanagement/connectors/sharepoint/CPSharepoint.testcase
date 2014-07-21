@@ -1,9 +1,11 @@
-<definition component-name="portal-document-management">
+<definition component-name="portal-document-management-ee">
 	<property name="custom.properties" value="session.store.password=true$${line.separator}company.security.auth.type=screenName" />
 	<property name="hook.plugins.includes" value="sharepoint-hook" />
 	<property name="testray.main.component.name" value="Documents Management" />
 
 	<set-up>
+		<execute action="BaseLiferay#antCommand" locator1="build-test-sharepoint.xml" value1="clean-sharepoint-repository" />
+
 		<execute macro="User#firstLoginPG">
 			<var name="authenticationMethod" value="By Screen Name" />
 			<var name="userScreenName" value="test" />

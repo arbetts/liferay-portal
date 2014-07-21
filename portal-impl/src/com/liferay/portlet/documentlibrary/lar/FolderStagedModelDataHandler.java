@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Repository;
+import com.liferay.portal.model.RepositoryEntry;
 import com.liferay.portal.repository.liferayrepository.LiferayRepository;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFolder;
 import com.liferay.portal.service.RepositoryLocalServiceUtil;
@@ -65,7 +66,7 @@ public class FolderStagedModelDataHandler
 			String uuid, long groupId, String className, String extraData)
 		throws PortalException {
 
-		Folder folder = FolderUtil.fetchByUUID_R(uuid, groupId);
+		Folder folder = fetchExistingStagedModel(uuid, groupId);
 
 		if (folder != null) {
 			DLAppLocalServiceUtil.deleteFolder(folder.getFolderId());
@@ -125,12 +126,17 @@ public class FolderStagedModelDataHandler
 	}
 
 	@Override
+	protected Folder doFetchExistingStagedModel(String uuid, long groupId) {
+		return FolderUtil.fetchByUUID_R(uuid, groupId);
+	}
+
+	@Override
 	protected void doImportMissingReference(
 			PortletDataContext portletDataContext, String uuid, long groupId,
 			long folderId)
 		throws Exception {
 
-		Folder existingFolder = FolderUtil.fetchByUUID_R(uuid, groupId);
+		Folder existingFolder = fetchExistingStagedModel(uuid, groupId);
 
 		Map<Long, Long> folderIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -144,10 +150,22 @@ public class FolderStagedModelDataHandler
 			PortletDataContext portletDataContext, Folder folder)
 		throws Exception {
 
+		Map<Long, Long> folderIdsAndRepositoryEntryIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				Folder.class + ".folderIdsAndRepositoryEntryIds");
+
 		if (!folder.isDefaultRepository()) {
 			StagedModelDataHandlerUtil.importReferenceStagedModel(
 				portletDataContext, folder, Repository.class,
 				folder.getRepositoryId());
+
+			Map<Long, Long> repositoryEntryIds =
+				(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+					RepositoryEntry.class);
+
+			folderIdsAndRepositoryEntryIds.put(
+				folder.getFolderId(),
+				repositoryEntryIds.get(folder.getFolderId()));
 
 			return;
 		}
@@ -177,7 +195,7 @@ public class FolderStagedModelDataHandler
 		Folder importedFolder = null;
 
 		if (portletDataContext.isDataStrategyMirror()) {
-			Folder existingFolder = FolderUtil.fetchByUUID_R(
+			Folder existingFolder = fetchExistingStagedModel(
 				folder.getUuid(), portletDataContext.getScopeGroupId());
 
 			if (existingFolder == null) {
@@ -222,6 +240,8 @@ public class FolderStagedModelDataHandler
 			folder, importedFolder, DLFolder.class);
 
 		folderIds.put(folder.getFolderId(), importedFolder.getFolderId());
+		folderIdsAndRepositoryEntryIds.put(
+			folder.getFolderId(), importedFolder.getFolderId());
 	}
 
 	@Override
@@ -231,7 +251,7 @@ public class FolderStagedModelDataHandler
 
 		long userId = portletDataContext.getUserId(folder.getUserUuid());
 
-		Folder existingFolder = FolderUtil.fetchByUUID_R(
+		Folder existingFolder = fetchExistingStagedModel(
 			folder.getUuid(), portletDataContext.getScopeGroupId());
 
 		if ((existingFolder == null) ||
@@ -439,29 +459,16 @@ public class FolderStagedModelDataHandler
 				throw pde;
 			}
 			catch (Exception e) {
-				if (_log.isWarnEnabled()) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(e, e);
+				}
+				else if (_log.isWarnEnabled()) {
 					_log.warn(
-						"Unable to check trash status for " +
-							DLFolder.class.getName());
+						"Unable to check trash status for folder " +
+							folder.getFolderId());
 				}
 			}
 		}
-	}
-
-	@Override
-	protected boolean validateMissingReference(
-			String uuid, long companyId, long groupId)
-		throws Exception {
-
-		DLFolder dlFolder =
-			DLFolderLocalServiceUtil.fetchDLFolderByUuidAndGroupId(
-				uuid, groupId);
-
-		if (dlFolder == null) {
-			return false;
-		}
-
-		return true;
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

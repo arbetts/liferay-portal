@@ -141,8 +141,7 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return mdrRulePersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -159,8 +158,8 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return mdrRulePersistence.findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -178,9 +177,8 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return mdrRulePersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -212,18 +210,6 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public MDRRule fetchMDRRule(long ruleId) {
 		return mdrRulePersistence.fetchByPrimaryKey(ruleId);
-	}
-
-	/**
-	 * Returns the m d r rule with the matching UUID and company.
-	 *
-	 * @param uuid the m d r rule's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching m d r rule, or <code>null</code> if a matching m d r rule could not be found
-	 */
-	@Override
-	public MDRRule fetchMDRRuleByUuidAndCompanyId(String uuid, long companyId) {
-		return mdrRulePersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -333,7 +319,7 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteMDRRule((MDRRule)persistedModel);
+		return mdrRuleLocalService.deleteMDRRule((MDRRule)persistedModel);
 	}
 
 	@Override
@@ -342,18 +328,18 @@ public abstract class MDRRuleLocalServiceBaseImpl extends BaseLocalServiceImpl
 		return mdrRulePersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the m d r rule with the matching UUID and company.
-	 *
-	 * @param uuid the m d r rule's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching m d r rule
-	 * @throws PortalException if a matching m d r rule could not be found
-	 */
 	@Override
-	public MDRRule getMDRRuleByUuidAndCompanyId(String uuid, long companyId)
-		throws PortalException {
-		return mdrRulePersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<MDRRule> getMDRRulesByUuidAndCompanyId(String uuid,
+		long companyId) {
+		return mdrRulePersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<MDRRule> getMDRRulesByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<MDRRule> orderByComparator) {
+		return mdrRulePersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**

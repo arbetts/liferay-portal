@@ -44,6 +44,48 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 		return _mdrRuleLocalService.addMDRRule(mdrRule);
 	}
 
+	@Override
+	public com.liferay.portlet.mobiledevicerules.model.MDRRule addRule(
+		long ruleGroupId,
+		java.util.Map<java.util.Locale, java.lang.String> nameMap,
+		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
+		java.lang.String type, java.lang.String typeSettings,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mdrRuleLocalService.addRule(ruleGroupId, nameMap,
+			descriptionMap, type, typeSettings, serviceContext);
+	}
+
+	@Override
+	public com.liferay.portlet.mobiledevicerules.model.MDRRule addRule(
+		long ruleGroupId,
+		java.util.Map<java.util.Locale, java.lang.String> nameMap,
+		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
+		java.lang.String type,
+		com.liferay.portal.kernel.util.UnicodeProperties typeSettingsProperties,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mdrRuleLocalService.addRule(ruleGroupId, nameMap,
+			descriptionMap, type, typeSettingsProperties, serviceContext);
+	}
+
+	@Override
+	public com.liferay.portlet.mobiledevicerules.model.MDRRule copyRule(
+		com.liferay.portlet.mobiledevicerules.model.MDRRule rule,
+		long ruleGroupId,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mdrRuleLocalService.copyRule(rule, ruleGroupId, serviceContext);
+	}
+
+	@Override
+	public com.liferay.portlet.mobiledevicerules.model.MDRRule copyRule(
+		long ruleId, long ruleGroupId,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mdrRuleLocalService.copyRule(ruleId, ruleGroupId, serviceContext);
+	}
+
 	/**
 	* Creates a new m d r rule with the primary key. Does not add the m d r rule to the database.
 	*
@@ -54,6 +96,18 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	public com.liferay.portlet.mobiledevicerules.model.MDRRule createMDRRule(
 		long ruleId) {
 		return _mdrRuleLocalService.createMDRRule(ruleId);
+	}
+
+	/**
+	* Deletes the m d r rule from the database. Also notifies the appropriate model listeners.
+	*
+	* @param mdrRule the m d r rule
+	* @return the m d r rule that was removed
+	*/
+	@Override
+	public com.liferay.portlet.mobiledevicerules.model.MDRRule deleteMDRRule(
+		com.liferay.portlet.mobiledevicerules.model.MDRRule mdrRule) {
+		return _mdrRuleLocalService.deleteMDRRule(mdrRule);
 	}
 
 	/**
@@ -70,15 +124,29 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	}
 
 	/**
-	* Deletes the m d r rule from the database. Also notifies the appropriate model listeners.
-	*
-	* @param mdrRule the m d r rule
-	* @return the m d r rule that was removed
+	* @throws PortalException
 	*/
 	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule deleteMDRRule(
-		com.liferay.portlet.mobiledevicerules.model.MDRRule mdrRule) {
-		return _mdrRuleLocalService.deleteMDRRule(mdrRule);
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mdrRuleLocalService.deletePersistedModel(persistedModel);
+	}
+
+	@Override
+	public void deleteRule(
+		com.liferay.portlet.mobiledevicerules.model.MDRRule rule) {
+		_mdrRuleLocalService.deleteRule(rule);
+	}
+
+	@Override
+	public void deleteRule(long ruleId) {
+		_mdrRuleLocalService.deleteRule(ruleId);
+	}
+
+	@Override
+	public void deleteRules(long ruleGroupId) {
+		_mdrRuleLocalService.deleteRules(ruleGroupId);
 	}
 
 	@Override
@@ -93,8 +161,7 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	* @return the matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _mdrRuleLocalService.dynamicQuery(dynamicQuery);
 	}
@@ -112,8 +179,7 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	* @return the range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end) {
 		return _mdrRuleLocalService.dynamicQuery(dynamicQuery, start, end);
@@ -133,11 +199,10 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	* @return the ordered range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		com.liferay.portal.kernel.util.OrderByComparator<T> orderByComparator) {
 		return _mdrRuleLocalService.dynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
 	}
@@ -175,20 +240,6 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	}
 
 	/**
-	* Returns the m d r rule with the matching UUID and company.
-	*
-	* @param uuid the m d r rule's UUID
-	* @param companyId the primary key of the company
-	* @return the matching m d r rule, or <code>null</code> if a matching m d r rule could not be found
-	*/
-	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule fetchMDRRuleByUuidAndCompanyId(
-		java.lang.String uuid, long companyId) {
-		return _mdrRuleLocalService.fetchMDRRuleByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
 	* Returns the m d r rule matching the UUID and group.
 	*
 	* @param uuid the m d r rule's UUID
@@ -199,6 +250,33 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	public com.liferay.portlet.mobiledevicerules.model.MDRRule fetchMDRRuleByUuidAndGroupId(
 		java.lang.String uuid, long groupId) {
 		return _mdrRuleLocalService.fetchMDRRuleByUuidAndGroupId(uuid, groupId);
+	}
+
+	@Override
+	public com.liferay.portlet.mobiledevicerules.model.MDRRule fetchRule(
+		long ruleId) {
+		return _mdrRuleLocalService.fetchRule(ruleId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _mdrRuleLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* Returns the Spring bean ID for this bean.
+	*
+	* @return the Spring bean ID for this bean
+	*/
+	@Override
+	public java.lang.String getBeanIdentifier() {
+		return _mdrRuleLocalService.getBeanIdentifier();
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
+		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
+		return _mdrRuleLocalService.getExportActionableDynamicQuery(portletDataContext);
 	}
 
 	/**
@@ -212,49 +290,6 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	public com.liferay.portlet.mobiledevicerules.model.MDRRule getMDRRule(
 		long ruleId) throws com.liferay.portal.kernel.exception.PortalException {
 		return _mdrRuleLocalService.getMDRRule(ruleId);
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
-		return _mdrRuleLocalService.getActionableDynamicQuery();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
-		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
-		return _mdrRuleLocalService.getExportActionableDynamicQuery(portletDataContext);
-	}
-
-	/**
-	* @throws PortalException
-	*/
-	@Override
-	public com.liferay.portal.model.PersistedModel deletePersistedModel(
-		com.liferay.portal.model.PersistedModel persistedModel)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mdrRuleLocalService.deletePersistedModel(persistedModel);
-	}
-
-	@Override
-	public com.liferay.portal.model.PersistedModel getPersistedModel(
-		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mdrRuleLocalService.getPersistedModel(primaryKeyObj);
-	}
-
-	/**
-	* Returns the m d r rule with the matching UUID and company.
-	*
-	* @param uuid the m d r rule's UUID
-	* @param companyId the primary key of the company
-	* @return the matching m d r rule
-	* @throws PortalException if a matching m d r rule could not be found
-	*/
-	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule getMDRRuleByUuidAndCompanyId(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mdrRuleLocalService.getMDRRuleByUuidAndCompanyId(uuid, companyId);
 	}
 
 	/**
@@ -289,6 +324,21 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 		return _mdrRuleLocalService.getMDRRules(start, end);
 	}
 
+	@Override
+	public java.util.List<com.liferay.portlet.mobiledevicerules.model.MDRRule> getMDRRulesByUuidAndCompanyId(
+		java.lang.String uuid, long companyId) {
+		return _mdrRuleLocalService.getMDRRulesByUuidAndCompanyId(uuid,
+			companyId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.mobiledevicerules.model.MDRRule> getMDRRulesByUuidAndCompanyId(
+		java.lang.String uuid, long companyId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portlet.mobiledevicerules.model.MDRRule> orderByComparator) {
+		return _mdrRuleLocalService.getMDRRulesByUuidAndCompanyId(uuid,
+			companyId, start, end, orderByComparator);
+	}
+
 	/**
 	* Returns the number of m d r rules.
 	*
@@ -299,100 +349,11 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 		return _mdrRuleLocalService.getMDRRulesCount();
 	}
 
-	/**
-	* Updates the m d r rule in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
-	*
-	* @param mdrRule the m d r rule
-	* @return the m d r rule that was updated
-	*/
 	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule updateMDRRule(
-		com.liferay.portlet.mobiledevicerules.model.MDRRule mdrRule) {
-		return _mdrRuleLocalService.updateMDRRule(mdrRule);
-	}
-
-	/**
-	* Returns the Spring bean ID for this bean.
-	*
-	* @return the Spring bean ID for this bean
-	*/
-	@Override
-	public java.lang.String getBeanIdentifier() {
-		return _mdrRuleLocalService.getBeanIdentifier();
-	}
-
-	/**
-	* Sets the Spring bean ID for this bean.
-	*
-	* @param beanIdentifier the Spring bean ID for this bean
-	*/
-	@Override
-	public void setBeanIdentifier(java.lang.String beanIdentifier) {
-		_mdrRuleLocalService.setBeanIdentifier(beanIdentifier);
-	}
-
-	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule addRule(
-		long ruleGroupId,
-		java.util.Map<java.util.Locale, java.lang.String> nameMap,
-		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
-		java.lang.String type, java.lang.String typeSettings,
-		com.liferay.portal.service.ServiceContext serviceContext)
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mdrRuleLocalService.addRule(ruleGroupId, nameMap,
-			descriptionMap, type, typeSettings, serviceContext);
-	}
-
-	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule addRule(
-		long ruleGroupId,
-		java.util.Map<java.util.Locale, java.lang.String> nameMap,
-		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
-		java.lang.String type,
-		com.liferay.portal.kernel.util.UnicodeProperties typeSettingsProperties,
-		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mdrRuleLocalService.addRule(ruleGroupId, nameMap,
-			descriptionMap, type, typeSettingsProperties, serviceContext);
-	}
-
-	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule copyRule(
-		long ruleId, long ruleGroupId,
-		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mdrRuleLocalService.copyRule(ruleId, ruleGroupId, serviceContext);
-	}
-
-	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule copyRule(
-		com.liferay.portlet.mobiledevicerules.model.MDRRule rule,
-		long ruleGroupId,
-		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mdrRuleLocalService.copyRule(rule, ruleGroupId, serviceContext);
-	}
-
-	@Override
-	public void deleteRule(long ruleId) {
-		_mdrRuleLocalService.deleteRule(ruleId);
-	}
-
-	@Override
-	public void deleteRule(
-		com.liferay.portlet.mobiledevicerules.model.MDRRule rule) {
-		_mdrRuleLocalService.deleteRule(rule);
-	}
-
-	@Override
-	public void deleteRules(long ruleGroupId) {
-		_mdrRuleLocalService.deleteRules(ruleGroupId);
-	}
-
-	@Override
-	public com.liferay.portlet.mobiledevicerules.model.MDRRule fetchRule(
-		long ruleId) {
-		return _mdrRuleLocalService.fetchRule(ruleId);
+		return _mdrRuleLocalService.getPersistedModel(primaryKeyObj);
 	}
 
 	@Override
@@ -416,6 +377,28 @@ public class MDRRuleLocalServiceWrapper implements MDRRuleLocalService,
 	@Override
 	public int getRulesCount(long ruleGroupId) {
 		return _mdrRuleLocalService.getRulesCount(ruleGroupId);
+	}
+
+	/**
+	* Sets the Spring bean ID for this bean.
+	*
+	* @param beanIdentifier the Spring bean ID for this bean
+	*/
+	@Override
+	public void setBeanIdentifier(java.lang.String beanIdentifier) {
+		_mdrRuleLocalService.setBeanIdentifier(beanIdentifier);
+	}
+
+	/**
+	* Updates the m d r rule in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param mdrRule the m d r rule
+	* @return the m d r rule that was updated
+	*/
+	@Override
+	public com.liferay.portlet.mobiledevicerules.model.MDRRule updateMDRRule(
+		com.liferay.portlet.mobiledevicerules.model.MDRRule mdrRule) {
+		return _mdrRuleLocalService.updateMDRRule(mdrRule);
 	}
 
 	@Override

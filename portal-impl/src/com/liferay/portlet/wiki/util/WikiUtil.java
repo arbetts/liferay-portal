@@ -555,7 +555,7 @@ public class WikiUtil {
 		return nodes;
 	}
 
-	public static OrderByComparator getPageOrderByComparator(
+	public static OrderByComparator<WikiPage> getPageOrderByComparator(
 		String orderByCol, String orderByType) {
 
 		boolean orderByAsc = false;
@@ -564,7 +564,7 @@ public class WikiUtil {
 			orderByAsc = true;
 		}
 
-		OrderByComparator orderByComparator = null;
+		OrderByComparator<WikiPage> orderByComparator = null;
 
 		if (orderByCol.equals("modifiedDate")) {
 			orderByComparator = new PageCreateDateComparator(orderByAsc);
@@ -608,9 +608,9 @@ public class WikiUtil {
 	}
 
 	public static String processContent(String content) {
-		content = content.replaceAll("</p>", "</p>\n");
-		content = content.replaceAll("</br>", "</br>\n");
-		content = content.replaceAll("</div>", "</div>\n");
+		content = StringUtil.replace(content, "</p>", "</p>\n");
+		content = StringUtil.replace(content, "</br>", "</br>\n");
+		content = StringUtil.replace(content, "</div>", "</div>\n");
 
 		return content;
 	}

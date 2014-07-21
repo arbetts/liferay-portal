@@ -170,10 +170,6 @@
 	</command>
 
 	<command name="banUser">
-		<execute macro="MessageboardsThread#gotoPG">
-			<var name="threadSubject" value="${threadSubject}" />
-		</execute>
-
 		<var name="key_userName" value="${userName}" />
 
 		<execute action="PGMessageboardsThread#assertClick" locator-key1="MESSAGE_BAN_THIS_USER" value1="Ban This User" />
@@ -237,10 +233,6 @@
 	</command>
 
 	<command name="editPG">
-		<execute macro="MessageboardsThread#gotoPG">
-			<var name="threadSubject" value="${threadSubject}" />
-		</execute>
-
 		<if>
 			<condition action="PGMessageboardsThread#isElementNotPresent" locator-key1="MESSAGE_EDIT_1" />
 			<then>
@@ -297,7 +289,24 @@
 	<command name="gotoPG">
 		<var name="key_threadSubject" value="${threadSubject}" />
 
-		<execute action="PGMessageboards#assertClick" locator-key1="THREAD_TABLE_THREAD" value1="${threadSubject}" />
+		<if>
+			<isset var="messageBoardsThreadURL" />
+			<then>
+				<var method="selenium#getLocation()" name="currentURL" />
+
+				<execute macro="TestUtils#assertEquals">
+					<var name="actual" value="${currentURL}" />
+					<var name="expected" value="${messageBoardsThreadURL}" />
+				</execute>
+			</then>
+			<else>
+				<execute action="PGMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_THREAD" value1="${threadSubject}" />
+				<execute action="PGMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_STARTED_BY" value1="${userName}" />
+				<execute action="PGMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_POSTS" value1="${postCount}" />
+				<execute action="PGMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_LAST_POST" value1="${userName}" />
+				<execute action="PGMessageboards#click" locator-key1="THREAD_TABLE_THREAD" value1="${threadSubject}" />
+			</else>
+		</if>
 	</command>
 
 	<command name="lockPG">
@@ -578,14 +587,16 @@
 		<var name="key_mbAttachmentFile" value="${mbAttachmentFile}" />
 
 		<execute action="CPMessageboardsRemovedAttachments#assertTextEquals" locator-key1="ATTACHMENT_TABLE_NAME" value1="${mbAttachmentFile}" />
-		<execute action="CPMessageboardsRemovedAttachments#assertClick" locator-key1="ATTACHMENT_TABLE_ACTIONS" value1="Actions" />
+		<execute action="CPMessageboardsRemovedAttachments#click" locator-key1="ATTACHMENT_TABLE_ACTIONS" />
 		<execute action="CPMessageboardsRemovedAttachments#assertClick" locator-key1="ATTACHMENT_MENULIST_RESTORE" value1="Restore" />
 		<execute action="CPMessageboardsRemovedAttachments#assertTextEquals" locator-key1="INFO_MESSAGE" value1="This message does not have file attachments in the Recycle Bin." />
 	</command>
 
 	<command name="splitThreadPG">
 		<execute macro="MessageboardsThread#gotoPG">
+			<var name="postCount" value="${postCount}" />
 			<var name="threadSubject" value="${threadSubject}" />
+			<var name="userName" value="${userName}" />
 		</execute>
 
 		<var name="key_threadBody" value="${threadReplyBody}" />
@@ -653,6 +664,10 @@
 			</then>
 		</while>
 
+		<execute macro="Page#gotoContentCP">
+			<var name="portletName" value="Recycle Bin" />
+		</execute>
+
 		<execute macro="RecycleBin#emptyCP" />
 	</command>
 
@@ -671,7 +686,7 @@
 		<execute action="CPMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_STARTED_BY" value1="${userName}" />
 		<execute action="CPMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_POSTS" value1="${postsNumber}" />
 		<execute action="CPMessageboards#assertElementPresent" locator-key1="THREAD_TABLE_VIEWS" />
-		<execute action="CPMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_LAST_POST" value1="By: ${userName}" />
+		<execute action="CPMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_LAST_POST" value1="${userName}" />
 		<execute action="CPMessageboards#assertElementPresent" locator-key1="THREAD_TABLE_ACTIONS" />
 		<execute action="CPMessageboards#assertClick" locator-key1="THREAD_TABLE_THREAD" value1="${threadSubject}" />
 
@@ -762,27 +777,6 @@
 	</command>
 
 	<command name="viewPG">
-		<var name="key_threadSubject" value="${threadSubject}" />
-
-		<if>
-			<isset var="messageBoardsThreadURL" />
-			<then>
-				<var method="selenium#getLocation()" name="currentURL" />
-
-				<execute macro="TestUtils#assertEquals">
-					<var name="actual" value="${currentURL}" />
-					<var name="expected" value="${messageBoardsThreadURL}" />
-				</execute>
-			</then>
-			<else>
-				<execute action="PGMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_THREAD" value1="${threadSubject}" />
-				<execute action="PGMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_STARTED_BY" value1="${userName}" />
-				<execute action="PGMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_POSTS" value1="${postCount}" />
-				<execute action="PGMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_LAST_POST" value1="${userName}" />
-				<execute action="PGMessageboards#click" locator-key1="THREAD_TABLE_THREAD" value1="${threadSubject}" />
-			</else>
-		</if>
-
 		<execute action="PGMessageboardsThread#assertTextEquals" locator-key1="TITLE_HEADER" value1="${threadSubject}" />
 		<execute action="PGMessageboardsThread#assertTextEquals" locator-key1="MESSAGE_USERNAME_1" value1="${userName}" />
 		<execute action="PGMessageboardsThread#assertTextEquals" locator-key1="MESSAGE_SUBJECT_1" value1="${threadSubject}" />
@@ -845,7 +839,7 @@
 		<execute action="CPMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_STARTED_BY" value1="${userName}" />
 		<execute action="CPMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_POSTS" value1="${postsNumber}" />
 		<execute action="CPMessageboards#assertElementPresent" locator-key1="THREAD_TABLE_VIEWS" />
-		<execute action="CPMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_LAST_POST" value1="By: ${userName}" />
+		<execute action="CPMessageboards#assertTextEquals" locator-key1="THREAD_TABLE_LAST_POST" value1="${userName}" />
 		<execute action="CPMessageboards#assertElementPresent" locator-key1="THREAD_TABLE_ACTIONS" />
 		<execute action="CPMessageboards#assertClick" locator-key1="THREAD_TABLE_THREAD" value1="${threadSubject}" />
 

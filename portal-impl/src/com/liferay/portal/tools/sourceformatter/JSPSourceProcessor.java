@@ -325,18 +325,18 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 		String content = fileUtil.read(file);
 
-		String oldContent = content;
-		String newContent = StringPool.BLANK;
+		String newContent = format(fileName, absolutePath, content);
 
-		while (true) {
-			newContent = formatJSP(fileName, absolutePath, oldContent);
+		compareAndAutoFixContent(file, fileName, content, newContent);
 
-			if (oldContent.equals(newContent)) {
-				break;
-			}
+		return newContent;
+	}
 
-			oldContent = newContent;
-		}
+	protected String format(
+			String fileName, String absolutePath, String content)
+		throws Exception {
+
+		String newContent = formatJSP(fileName, absolutePath, content);
 
 		newContent = StringUtil.replace(
 			newContent,
@@ -434,9 +434,23 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 		checkXSS(fileName, newContent);
 
-		compareAndAutoFixContent(file, fileName, content, newContent);
+		// LPS-47682
 
-		return newContent;
+		newContent = fixIncorrectParameterTypeForLanguageUtil(
+			newContent, true, fileName);
+
+		Matcher matcher = _javaClassPattern.matcher(newContent);
+
+		if (matcher.find()) {
+			newContent = formatJavaTerms(
+				fileName, newContent, matcher.group(), null, null);
+		}
+
+		if (content.equals(newContent)) {
+			return newContent;
+		}
+
+		return format(fileName, absolutePath, newContent);
 	}
 
 	protected String formatJSP(
@@ -640,15 +654,23 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			}
 
 			if (!hasUnsortedExceptions) {
-				int i = line.indexOf("<liferay-ui:error exception=\"<%=");
+				int x = line.indexOf("<liferay-ui:error exception=\"<%=");
 
-				if (i != -1) {
-					currentException = line.substring(i + 33);
+				if (x != -1) {
+					int y = line.indexOf(".class %>", x);
 
-					if (Validator.isNotNull(previousException) &&
-						(previousException.compareTo(currentException) > 0)) {
+					if (y != -1) {
+						currentException = line.substring(x, y);
 
-						hasUnsortedExceptions = true;
+						if (Validator.isNotNull(previousException) &&
+							(previousException.compareTo(currentException) >
+								0)) {
+
+							currentException = line;
+							previousException = previousLine;
+
+							hasUnsortedExceptions = true;
+						}
 					}
 				}
 
@@ -1177,6 +1199,8 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 	private List<String> _importClassNames = new ArrayList<String>();
 	private Map<String, Integer> _importCountMap =
 		new HashMap<String, Integer>();
+	private Pattern _javaClassPattern = Pattern.compile(
+		"\n(private|protected|public).* class ([\\s\\S]*?)\n\\}\n");
 	private Map<String, String> _jspContents = new HashMap<String, String>();
 	private Pattern _jspImportPattern = Pattern.compile(
 		"(<.*\n*page.import=\".*>\n*)+", Pattern.MULTILINE);

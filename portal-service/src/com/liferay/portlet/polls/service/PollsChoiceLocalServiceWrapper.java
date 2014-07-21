@@ -33,6 +33,15 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 		_pollsChoiceLocalService = pollsChoiceLocalService;
 	}
 
+	@Override
+	public com.liferay.portlet.polls.model.PollsChoice addChoice(long userId,
+		long questionId, java.lang.String name, java.lang.String description,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _pollsChoiceLocalService.addChoice(userId, questionId, name,
+			description, serviceContext);
+	}
+
 	/**
 	* Adds the polls choice to the database. Also notifies the appropriate model listeners.
 	*
@@ -55,6 +64,16 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 	public com.liferay.portlet.polls.model.PollsChoice createPollsChoice(
 		long choiceId) {
 		return _pollsChoiceLocalService.createPollsChoice(choiceId);
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	@Override
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _pollsChoiceLocalService.deletePersistedModel(persistedModel);
 	}
 
 	/**
@@ -95,8 +114,7 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 	* @return the matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _pollsChoiceLocalService.dynamicQuery(dynamicQuery);
 	}
@@ -114,8 +132,7 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 	* @return the range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end) {
 		return _pollsChoiceLocalService.dynamicQuery(dynamicQuery, start, end);
@@ -135,11 +152,10 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 	* @return the ordered range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		com.liferay.portal.kernel.util.OrderByComparator<T> orderByComparator) {
 		return _pollsChoiceLocalService.dynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
 	}
@@ -178,20 +194,6 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 	}
 
 	/**
-	* Returns the polls choice with the matching UUID and company.
-	*
-	* @param uuid the polls choice's UUID
-	* @param companyId the primary key of the company
-	* @return the matching polls choice, or <code>null</code> if a matching polls choice could not be found
-	*/
-	@Override
-	public com.liferay.portlet.polls.model.PollsChoice fetchPollsChoiceByUuidAndCompanyId(
-		java.lang.String uuid, long companyId) {
-		return _pollsChoiceLocalService.fetchPollsChoiceByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
 	* Returns the polls choice matching the UUID and group.
 	*
 	* @param uuid the polls choice's UUID
@@ -203,6 +205,51 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 		java.lang.String uuid, long groupId) {
 		return _pollsChoiceLocalService.fetchPollsChoiceByUuidAndGroupId(uuid,
 			groupId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _pollsChoiceLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* Returns the Spring bean ID for this bean.
+	*
+	* @return the Spring bean ID for this bean
+	*/
+	@Override
+	public java.lang.String getBeanIdentifier() {
+		return _pollsChoiceLocalService.getBeanIdentifier();
+	}
+
+	@Override
+	public com.liferay.portlet.polls.model.PollsChoice getChoice(long choiceId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _pollsChoiceLocalService.getChoice(choiceId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.polls.model.PollsChoice> getChoices(
+		long questionId) {
+		return _pollsChoiceLocalService.getChoices(questionId);
+	}
+
+	@Override
+	public int getChoicesCount(long questionId) {
+		return _pollsChoiceLocalService.getChoicesCount(questionId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
+		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
+		return _pollsChoiceLocalService.getExportActionableDynamicQuery(portletDataContext);
+	}
+
+	@Override
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _pollsChoiceLocalService.getPersistedModel(primaryKeyObj);
 	}
 
 	/**
@@ -217,50 +264,6 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 		long choiceId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _pollsChoiceLocalService.getPollsChoice(choiceId);
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
-		return _pollsChoiceLocalService.getActionableDynamicQuery();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
-		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
-		return _pollsChoiceLocalService.getExportActionableDynamicQuery(portletDataContext);
-	}
-
-	/**
-	* @throws PortalException
-	*/
-	@Override
-	public com.liferay.portal.model.PersistedModel deletePersistedModel(
-		com.liferay.portal.model.PersistedModel persistedModel)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _pollsChoiceLocalService.deletePersistedModel(persistedModel);
-	}
-
-	@Override
-	public com.liferay.portal.model.PersistedModel getPersistedModel(
-		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _pollsChoiceLocalService.getPersistedModel(primaryKeyObj);
-	}
-
-	/**
-	* Returns the polls choice with the matching UUID and company.
-	*
-	* @param uuid the polls choice's UUID
-	* @param companyId the primary key of the company
-	* @return the matching polls choice
-	* @throws PortalException if a matching polls choice could not be found
-	*/
-	@Override
-	public com.liferay.portlet.polls.model.PollsChoice getPollsChoiceByUuidAndCompanyId(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _pollsChoiceLocalService.getPollsChoiceByUuidAndCompanyId(uuid,
-			companyId);
 	}
 
 	/**
@@ -296,6 +299,21 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 		return _pollsChoiceLocalService.getPollsChoices(start, end);
 	}
 
+	@Override
+	public java.util.List<com.liferay.portlet.polls.model.PollsChoice> getPollsChoicesByUuidAndCompanyId(
+		java.lang.String uuid, long companyId) {
+		return _pollsChoiceLocalService.getPollsChoicesByUuidAndCompanyId(uuid,
+			companyId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.polls.model.PollsChoice> getPollsChoicesByUuidAndCompanyId(
+		java.lang.String uuid, long companyId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portlet.polls.model.PollsChoice> orderByComparator) {
+		return _pollsChoiceLocalService.getPollsChoicesByUuidAndCompanyId(uuid,
+			companyId, start, end, orderByComparator);
+	}
+
 	/**
 	* Returns the number of polls choices.
 	*
@@ -304,28 +322,6 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 	@Override
 	public int getPollsChoicesCount() {
 		return _pollsChoiceLocalService.getPollsChoicesCount();
-	}
-
-	/**
-	* Updates the polls choice in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
-	*
-	* @param pollsChoice the polls choice
-	* @return the polls choice that was updated
-	*/
-	@Override
-	public com.liferay.portlet.polls.model.PollsChoice updatePollsChoice(
-		com.liferay.portlet.polls.model.PollsChoice pollsChoice) {
-		return _pollsChoiceLocalService.updatePollsChoice(pollsChoice);
-	}
-
-	/**
-	* Returns the Spring bean ID for this bean.
-	*
-	* @return the Spring bean ID for this bean
-	*/
-	@Override
-	public java.lang.String getBeanIdentifier() {
-		return _pollsChoiceLocalService.getBeanIdentifier();
 	}
 
 	/**
@@ -339,32 +335,6 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 	}
 
 	@Override
-	public com.liferay.portlet.polls.model.PollsChoice addChoice(long userId,
-		long questionId, java.lang.String name, java.lang.String description,
-		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _pollsChoiceLocalService.addChoice(userId, questionId, name,
-			description, serviceContext);
-	}
-
-	@Override
-	public com.liferay.portlet.polls.model.PollsChoice getChoice(long choiceId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _pollsChoiceLocalService.getChoice(choiceId);
-	}
-
-	@Override
-	public java.util.List<com.liferay.portlet.polls.model.PollsChoice> getChoices(
-		long questionId) {
-		return _pollsChoiceLocalService.getChoices(questionId);
-	}
-
-	@Override
-	public int getChoicesCount(long questionId) {
-		return _pollsChoiceLocalService.getChoicesCount(questionId);
-	}
-
-	@Override
 	public com.liferay.portlet.polls.model.PollsChoice updateChoice(
 		long choiceId, long questionId, java.lang.String name,
 		java.lang.String description,
@@ -372,6 +342,18 @@ public class PollsChoiceLocalServiceWrapper implements PollsChoiceLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _pollsChoiceLocalService.updateChoice(choiceId, questionId,
 			name, description, serviceContext);
+	}
+
+	/**
+	* Updates the polls choice in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param pollsChoice the polls choice
+	* @return the polls choice that was updated
+	*/
+	@Override
+	public com.liferay.portlet.polls.model.PollsChoice updatePollsChoice(
+		com.liferay.portlet.polls.model.PollsChoice pollsChoice) {
+		return _pollsChoiceLocalService.updatePollsChoice(pollsChoice);
 	}
 
 	/**

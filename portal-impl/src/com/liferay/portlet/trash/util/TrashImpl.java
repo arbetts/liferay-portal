@@ -275,7 +275,7 @@ public class TrashImpl implements Trash {
 	}
 
 	@Override
-	public OrderByComparator getEntryOrderByComparator(
+	public OrderByComparator<TrashEntry> getEntryOrderByComparator(
 		String orderByCol, String orderByType) {
 
 		boolean orderByAsc = false;
@@ -284,7 +284,7 @@ public class TrashImpl implements Trash {
 			orderByAsc = true;
 		}
 
-		OrderByComparator orderByComparator = null;
+		OrderByComparator<TrashEntry> orderByComparator = null;
 
 		if (orderByCol.equals("removed-by")) {
 			orderByComparator = new EntryUserNameComparator(orderByAsc);
@@ -459,9 +459,7 @@ public class TrashImpl implements Trash {
 	}
 
 	@Override
-	public boolean isTrashEnabled(long groupId) throws PortalException {
-		Group group = GroupLocalServiceUtil.getGroup(groupId);
-
+	public boolean isTrashEnabled(Group group) {
 		boolean companyTrashEnabled = PrefsPropsUtil.getBoolean(
 			group.getCompanyId(), PropsKeys.TRASH_ENABLED);
 
@@ -474,6 +472,11 @@ public class TrashImpl implements Trash {
 
 		return GetterUtil.getBoolean(
 			typeSettingsProperties.getProperty("trashEnabled"), true);
+	}
+
+	@Override
+	public boolean isTrashEnabled(long groupId) throws PortalException {
+		return isTrashEnabled(GroupLocalServiceUtil.getGroup(groupId));
 	}
 
 	protected void addBreadcrumbEntries(

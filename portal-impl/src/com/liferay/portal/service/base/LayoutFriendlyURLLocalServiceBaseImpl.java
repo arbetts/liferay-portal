@@ -141,8 +141,7 @@ public abstract class LayoutFriendlyURLLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return layoutFriendlyURLPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -159,8 +158,8 @@ public abstract class LayoutFriendlyURLLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return layoutFriendlyURLPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -179,9 +178,8 @@ public abstract class LayoutFriendlyURLLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return layoutFriendlyURLPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -214,20 +212,6 @@ public abstract class LayoutFriendlyURLLocalServiceBaseImpl
 	@Override
 	public LayoutFriendlyURL fetchLayoutFriendlyURL(long layoutFriendlyURLId) {
 		return layoutFriendlyURLPersistence.fetchByPrimaryKey(layoutFriendlyURLId);
-	}
-
-	/**
-	 * Returns the layout friendly u r l with the matching UUID and company.
-	 *
-	 * @param uuid the layout friendly u r l's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching layout friendly u r l, or <code>null</code> if a matching layout friendly u r l could not be found
-	 */
-	@Override
-	public LayoutFriendlyURL fetchLayoutFriendlyURLByUuidAndCompanyId(
-		String uuid, long companyId) {
-		return layoutFriendlyURLPersistence.fetchByUuid_C_First(uuid,
-			companyId, null);
 	}
 
 	/**
@@ -339,7 +323,7 @@ public abstract class LayoutFriendlyURLLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteLayoutFriendlyURL((LayoutFriendlyURL)persistedModel);
+		return layoutFriendlyURLLocalService.deleteLayoutFriendlyURL((LayoutFriendlyURL)persistedModel);
 	}
 
 	@Override
@@ -348,19 +332,18 @@ public abstract class LayoutFriendlyURLLocalServiceBaseImpl
 		return layoutFriendlyURLPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the layout friendly u r l with the matching UUID and company.
-	 *
-	 * @param uuid the layout friendly u r l's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching layout friendly u r l
-	 * @throws PortalException if a matching layout friendly u r l could not be found
-	 */
 	@Override
-	public LayoutFriendlyURL getLayoutFriendlyURLByUuidAndCompanyId(
-		String uuid, long companyId) throws PortalException {
-		return layoutFriendlyURLPersistence.findByUuid_C_First(uuid, companyId,
-			null);
+	public List<LayoutFriendlyURL> getLayoutFriendlyURLsByUuidAndCompanyId(
+		String uuid, long companyId) {
+		return layoutFriendlyURLPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<LayoutFriendlyURL> getLayoutFriendlyURLsByUuidAndCompanyId(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<LayoutFriendlyURL> orderByComparator) {
+		return layoutFriendlyURLPersistence.findByUuid_C(uuid, companyId,
+			start, end, orderByComparator);
 	}
 
 	/**

@@ -23,9 +23,9 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
-import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.TransactionalTestRule;
+import com.liferay.portal.test.listeners.MainServletExecutionTestListener;
+import com.liferay.portal.test.runners.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.util.test.GroupTestUtil;
 import com.liferay.portal.util.test.ServiceContextTestUtil;
 import com.liferay.portal.util.test.TestPropsValues;
@@ -98,7 +98,7 @@ public class DLFolderFinderTest {
 
 	@Test
 	public void testCountF_FE_FS_ByG_F_M_M() throws Exception {
-		QueryDefinition queryDefinition = new QueryDefinition();
+		QueryDefinition<?> queryDefinition = new QueryDefinition<Object>();
 
 		queryDefinition.setStatus(WorkflowConstants.STATUS_ANY);
 
@@ -153,7 +153,7 @@ public class DLFolderFinderTest {
 
 	@Test
 	public void testCountFE_ByG_F() throws Exception {
-		QueryDefinition queryDefinition = new QueryDefinition();
+		QueryDefinition<?> queryDefinition = new QueryDefinition<Object>();
 
 		queryDefinition.setStatus(WorkflowConstants.STATUS_ANY);
 
@@ -179,7 +179,7 @@ public class DLFolderFinderTest {
 
 	@Test
 	public void testCountFE_FS_ByG_F() throws Exception {
-		QueryDefinition queryDefinition = new QueryDefinition();
+		QueryDefinition<?> queryDefinition = new QueryDefinition<Object>();
 
 		queryDefinition.setStatus(WorkflowConstants.STATUS_ANY);
 
@@ -212,7 +212,7 @@ public class DLFolderFinderTest {
 
 	@Test
 	public void testCountFE_FS_ByG_F_M() throws Exception {
-		QueryDefinition queryDefinition = new QueryDefinition();
+		QueryDefinition<?> queryDefinition = new QueryDefinition<Object>();
 
 		queryDefinition.setStatus(WorkflowConstants.STATUS_ANY);
 
@@ -269,7 +269,7 @@ public class DLFolderFinderTest {
 
 	@Test
 	public void testFindF_FE_FS_ByG_F_M_M() throws Exception {
-		QueryDefinition queryDefinition = new QueryDefinition();
+		QueryDefinition<?> queryDefinition = new QueryDefinition<Object>();
 
 		queryDefinition.setStatus(WorkflowConstants.STATUS_APPROVED);
 

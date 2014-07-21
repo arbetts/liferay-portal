@@ -28,8 +28,8 @@ import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.xml.XPath;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.User;
-import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
-import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.listeners.MainServletExecutionTestListener;
+import com.liferay.portal.test.runners.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.test.LayoutTestUtil;
 import com.liferay.portal.util.test.RandomTestUtil;
@@ -38,6 +38,7 @@ import com.liferay.portal.xml.XMLSchemaImpl;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.util.DLUtil;
 import com.liferay.portlet.documentlibrary.util.test.DLAppTestUtil;
+import com.liferay.portlet.dynamicdatamapping.io.DDMFormXSDDeserializerUtil;
 import com.liferay.portlet.dynamicdatamapping.model.DDMForm;
 import com.liferay.portlet.dynamicdatamapping.model.DDMFormField;
 import com.liferay.portlet.dynamicdatamapping.model.DDMFormFieldOptions;
@@ -48,7 +49,6 @@ import com.liferay.portlet.dynamicdatamapping.service.BaseDDMServiceTestCase;
 import com.liferay.portlet.dynamicdatamapping.storage.Field;
 import com.liferay.portlet.dynamicdatamapping.storage.Fields;
 import com.liferay.portlet.dynamicdatamapping.storage.StorageType;
-import com.liferay.portlet.dynamicdatamapping.util.DDMFormXSDDeserializerUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMImpl;
 import com.liferay.portlet.dynamicdatamapping.util.DDMXMLImpl;
 import com.liferay.portlet.journal.model.JournalArticle;
@@ -64,6 +64,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -591,10 +593,12 @@ public class JournalConverterUtilTest extends BaseDDMServiceTestCase {
 		String expectedFieldsDisplayFieldValue =
 			(String)expectedFieldsDisplayField.getValue();
 
-		String regex = DDMImpl.INSTANCE_SEPARATOR.concat("\\w{8}");
+		Pattern pattern = Pattern.compile(
+			DDMImpl.INSTANCE_SEPARATOR.concat("\\w{8}"));
 
-		expectedFieldsDisplayFieldValue =
-			expectedFieldsDisplayFieldValue.replaceAll(regex, StringPool.BLANK);
+		Matcher matcher = pattern.matcher(expectedFieldsDisplayFieldValue);
+
+		expectedFieldsDisplayFieldValue = matcher.replaceAll(StringPool.BLANK);
 
 		expectedFieldsDisplayField.setValue(expectedFieldsDisplayFieldValue);
 
@@ -604,8 +608,9 @@ public class JournalConverterUtilTest extends BaseDDMServiceTestCase {
 		String actualFieldsDisplayFieldValue =
 			(String)actualFieldsDisplayField.getValue();
 
-		actualFieldsDisplayFieldValue =
-			actualFieldsDisplayFieldValue.replaceAll(regex, StringPool.BLANK);
+		matcher = pattern.matcher(actualFieldsDisplayFieldValue);
+
+		actualFieldsDisplayFieldValue = matcher.replaceAll(StringPool.BLANK);
 
 		actualFieldsDisplayField.setValue(actualFieldsDisplayFieldValue);
 

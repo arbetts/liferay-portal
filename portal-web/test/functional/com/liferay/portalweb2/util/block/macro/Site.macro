@@ -317,7 +317,7 @@
 		<execute action="CPSitemembershipsUsergroups#assertClick" locator-key1="SEARCH_BUTTON" value1="Search" />
 
 		<execute action="CPSitemembershipsUsergroups#assertTextEquals" locator-key1="USER_GROUP_TABLE_NAME" value1="${userGroupName}" />
-		<execute action="CPSitemembershipsUsergroups#assertClick" locator-key1="USER_GROUP_TABLE_ACTIONS" value1="Actions" />
+		<execute action="CPSitemembershipsUsergroups#click" locator-key1="USER_GROUP_TABLE_ACTIONS" />
 		<execute action="CPSitemembershipsUsergroups#assertClick" locator-key1="USER_GROUP_MENULIST_ASSIGN_SITE_ROLES" value1="Assign Site Roles" />
 
 		<execute action="CPSitemembershipsUsergroups#check" locator-key1="SITE_OWNER_CHECKBOX" />
@@ -365,7 +365,7 @@
 		<var name="key_siteName" value="${siteName}" />
 
 		<execute action="CPUsersandorganizationsUser#type" locator-key1="SITES_SELECT_SEARCH_FIELD" value1="${siteName}" />
-		<execute action="CPUsersandorganizationsUser#keyPress" locator-key1="SITES_SELECT_SEARCH_BUTTON" value1="\\13" />
+		<execute action="CPUsersandorganizationsUser#keyPress" locator-key1="SITES_SELECT_SEARCH_FIELD" value1="\13" />
 		<execute action="CPUsersandorganizationsUser#assertTextEquals" locator-key1="SITES_SELECT_TABLE_NAME" value1="${siteName}" />
 		<execute action="CPUsersandorganizationsUser#assertClick" locator-key1="SITES_SELECT_CHOOSE_BUTTON" value1="Choose" />
 		<execute action="CPUsersandorganizationsUser#selectFrame" value1="relative=top" />
@@ -377,7 +377,7 @@
 		<var name="key_displaySettings" value="${displaySettings}" />
 
 		<if>
-			<condition action="CPSitesettings#isTextEqual" locator-key1="MENU_MISCELLANEOUS_DISPLAY_SETTINGS" value1="Display Settings" />
+			<condition action="CPSitesettings#isElementPresent" locator-key1="MENU_MISCELLANEOUS_DISPLAY_SETTINGS" value1="Display Settings" />
 			<then>
 				<execute action="CPSitesettings#assertClick" locator-key1="MENU_MISCELLANEOUS_DISPLAY_SETTINGS" value1="Display Settings" />
 			</then>
@@ -663,7 +663,7 @@
 		<execute action="CPSitemembershipsUsergroups#assertClick" locator-key1="SEARCH_BUTTON" value1="Search" />
 
 		<execute action="CPSitemembershipsUsergroups#assertTextEquals" locator-key1="USER_GROUP_TABLE_NAME" value1="${userGroupName}" />
-		<execute action="CPSitemembershipsUsergroups#assertClick" locator-key1="USER_GROUP_TABLE_ACTIONS" value1="Actions" />
+		<execute action="CPSitemembershipsUsergroups#click" locator-key1="USER_GROUP_TABLE_ACTIONS" />
 		<execute action="CPSitemembershipsUsergroups#assertClick" locator-key1="USER_GROUP_MENULIST_ASSIGN_SITE_ROLES" value1="Assign Site Roles" />
 
 		<execute action="CPSitemembershipsUsergroups#uncheck" locator-key1="SITE_OWNER_CHECKBOX" />
@@ -700,7 +700,7 @@
 		<execute action="CPSites#assertTextEquals" locator-key1="SITE_TABLE_ACTIVE" value1="Yes" />
 		<execute action="CPSites#assertTextEquals" locator-key1="SITE_TABLE_PENDING_REQUESTS" value1="" />
 		<execute action="CPSites#assertTextEquals" locator-key1="SITE_TABLE_TAGS" value1="" />
-		<execute action="CPSites#assertTextEquals" locator-key1="SITE_TABLE_ACTIONS" value1="Actions" />
+		<execute action="CPSites#assertVisible" locator-key1="SITE_TABLE_ACTIONS" />
 	</command>
 
 	<command name="searchMemberCP">
@@ -844,7 +844,7 @@
 		<execute action="CPSitesChildChild#assertTextEquals" locator-key1="SITE_TABLE_ACTIVE" value1="Yes" />
 		<execute action="CPSitesChildChild#assertTextEquals" locator-key1="SITE_TABLE_PENDING_REQUESTS" value1="" />
 		<execute action="CPSitesChildChild#assertTextEquals" locator-key1="SITE_TABLE_TAGS" value1="" />
-		<execute action="CPSitesChild#assertElementPresent" locator-key1="SITE_TABLE_ACTIONS" />
+		<execute action="CPSitesChildChild#assertVisible" locator-key1="SITE_TABLE_ACTIONS" />
 	</command>
 
 	<command name="viewChildCP">
@@ -855,7 +855,7 @@
 		<execute action="CPSites#assertTextEquals" locator-key1="SITE_TABLE_ACTIVE" value1="Yes" />
 		<execute action="CPSites#assertTextEquals" locator-key1="SITE_TABLE_PENDING_REQUESTS" value1="" />
 		<execute action="CPSites#assertTextEquals" locator-key1="SITE_TABLE_TAGS" value1="" />
-		<execute action="CPSitesChild#assertElementPresent" locator-key1="SITE_TABLE_ACTIONS" />
+		<execute action="CPSites#assertVisible" locator-key1="SITE_TABLE_ACTIONS" />
 		<execute action="CPSites#assertClick" locator-key1="SITE_TABLE_CHILD_SITE" value1="This site has 1 child site." />
 
 		<var name="key_childSiteName" value="${childSiteName}" />
@@ -993,7 +993,7 @@
 				<execute action="PGMysites#assertTextEquals" locator-key1="NAVIGATION_MY_SITES" value1="My Sites" />
 				<execute action="PGMysites#assertTextEquals" locator-key1="SITE_TABLE_SITE_NAME" value1="${siteName}" />
 				<execute action="PGMysites#assertTextEquals" locator-key1="SITE_TABLE_SITE_NAME_MEMBERS" value1="2" />
-				<execute action="PGMysites#assertTextEquals" locator-key1="SITE_TABLE_SITE_ACTIONS" value1="Actions" />
+				<execute action="PGMysites#assertElementPresent" locator-key1="SITE_TABLE_SITE_ACTIONS" />
 			</else>
 		</if>
 	</command>
@@ -1037,6 +1037,19 @@
 		<execute action="Home#assertTextEquals" locator-key1="BREADCRUMB_2" value1="${sitePageName}" />
 		<execute action="Home#assertTextEquals" locator-key1="SITE_NAME" value1="${siteName}" />
 		<execute action="Home#assertLocation" value1="${sitePageURL}" />
+	</command>
+
+	<command name="viewSiteHierarchyInBreadcrumbPG">
+		<if>
+			<isset var="breadcrumbListVisible" />
+			<then>
+				<for list="${breadcrumbListVisible}" param="breadcrumbName">
+					<var name="key_breadcrumbName" value="${breadcrumbName}" />
+
+					<execute action="PGSitesdirectory#assertTextEquals" locator-key1="BREADCRUMB" value1="${breadcrumbName}" />
+				</for>
+			</then>
+		</if>
 	</command>
 
 	<command name="viewSiteNotClonedFromSiteTemplateCP">

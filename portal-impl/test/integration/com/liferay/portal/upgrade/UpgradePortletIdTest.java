@@ -35,8 +35,8 @@ import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.service.ResourcePermissionServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
-import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
-import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.listeners.MainServletExecutionTestListener;
+import com.liferay.portal.test.runners.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.upgrade.util.UpgradePortletId;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.test.GroupTestUtil;
@@ -236,8 +236,7 @@ public class UpgradePortletIdTest extends UpgradePortletId {
 			return new String[][] {
 				new String[] {_PORTLET_IDS[0], _PORTLET_IDS[0] + "_test"},
 				new String[] {_PORTLET_IDS[1], _PORTLET_IDS[1] + "_test"},
-				new String[] {_PORTLET_IDS[2], _PORTLET_IDS[2] + "_test"},
-				new String[] {_PORTLET_IDS[3], _PORTLET_IDS[3] + "_test"}
+				new String[] {_PORTLET_IDS[2], _PORTLET_IDS[2] + "_test"}
 			};
 		}
 
@@ -255,9 +254,7 @@ public class UpgradePortletIdTest extends UpgradePortletId {
 
 	private static final String _INSTANCE_ID = "_INSTANCE_LhZwzy867qfr";
 
-	private static final String[] _PORTLET_IDS = {
-		"7", "20", "47", "71"
-	};
+	private static final String[] _PORTLET_IDS = {"20", "47", "71"};
 
 	private boolean _testInstanceable = true;
 

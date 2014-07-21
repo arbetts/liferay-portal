@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletRequestModel;
@@ -80,6 +81,8 @@ import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portal.webserver.WebServerServletTokenUtil;
+import com.liferay.portlet.PortalPreferences;
+import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletURLFactoryUtil;
 import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
@@ -556,7 +559,25 @@ public class JournalUtil {
 		return sb.toString();
 	}
 
-	public static OrderByComparator getArticleOrderByComparator(
+	public static Layout getArticleLayout(String layoutUuid, long groupId) {
+		if (Validator.isNull(layoutUuid)) {
+			return null;
+		}
+
+		// The target page and the article must belong to the same group
+
+		Layout layout = LayoutLocalServiceUtil.fetchLayoutByUuidAndGroupId(
+			layoutUuid, groupId, false);
+
+		if (layout == null) {
+			layout = LayoutLocalServiceUtil.fetchLayoutByUuidAndGroupId(
+				layoutUuid, groupId, true);
+		}
+
+		return layout;
+	}
+
+	public static OrderByComparator<JournalArticle> getArticleOrderByComparator(
 		String orderByCol, String orderByType) {
 
 		boolean orderByAsc = false;
@@ -565,7 +586,7 @@ public class JournalUtil {
 			orderByAsc = true;
 		}
 
-		OrderByComparator orderByComparator = null;
+		OrderByComparator<JournalArticle> orderByComparator = null;
 
 		if (orderByCol.equals("create-date")) {
 			orderByComparator = new ArticleCreateDateComparator(orderByAsc);
@@ -665,6 +686,40 @@ public class JournalUtil {
 		}
 
 		return new DiffVersionsInfo(diffVersions, nextVersion, previousVersion);
+	}
+
+	public static String getDisplayStyle(
+		LiferayPortletRequest liferayPortletRequest, String[] displayViews) {
+
+		PortalPreferences portalPreferences =
+			PortletPreferencesFactoryUtil.getPortalPreferences(
+				liferayPortletRequest);
+
+		String displayStyle = ParamUtil.getString(
+			liferayPortletRequest, "displayStyle");
+
+		if (Validator.isNull(displayStyle)) {
+			displayStyle = portalPreferences.getValue(
+				PortletKeys.JOURNAL, "display-style",
+				PropsValues.JOURNAL_DEFAULT_DISPLAY_VIEW);
+		}
+		else {
+			boolean saveDisplayStyle = ParamUtil.getBoolean(
+				liferayPortletRequest, "saveDisplayStyle");
+
+			if (saveDisplayStyle &&
+				ArrayUtil.contains(displayViews, displayStyle)) {
+
+				portalPreferences.setValue(
+					PortletKeys.JOURNAL, "display-style", displayStyle);
+			}
+		}
+
+		if (!ArrayUtil.contains(displayViews, displayStyle)) {
+			displayStyle = displayViews[0];
+		}
+
+		return displayStyle;
 	}
 
 	public static Map<Locale, String> getEmailArticleAddedBodyMap(
@@ -965,12 +1020,12 @@ public class JournalUtil {
 			JournalArticle article, ThemeDisplay themeDisplay)
 		throws Exception {
 
-		if ((article != null) && Validator.isNotNull(article.getLayoutUuid())) {
-			Layout layout =
-				LayoutLocalServiceUtil.getLayoutByUuidAndCompanyId(
-					article.getLayoutUuid(), themeDisplay.getCompanyId());
+		if (article != null) {
+			Layout layout = article.getLayout();
 
-			return layout.getPlid();
+			if (layout != null) {
+				return layout.getPlid();
+			}
 		}
 
 		Layout layout = LayoutLocalServiceUtil.fetchFirstLayout(

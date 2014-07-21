@@ -173,8 +173,7 @@ public abstract class LayoutLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return layoutPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -191,8 +190,8 @@ public abstract class LayoutLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return layoutPersistence.findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -210,9 +209,8 @@ public abstract class LayoutLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return layoutPersistence.findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
 	}
@@ -244,18 +242,6 @@ public abstract class LayoutLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public Layout fetchLayout(long plid) {
 		return layoutPersistence.fetchByPrimaryKey(plid);
-	}
-
-	/**
-	 * Returns the layout with the matching UUID and company.
-	 *
-	 * @param uuid the layout's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching layout, or <code>null</code> if a matching layout could not be found
-	 */
-	@Override
-	public Layout fetchLayoutByUuidAndCompanyId(String uuid, long companyId) {
-		return layoutPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -367,7 +353,7 @@ public abstract class LayoutLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteLayout((Layout)persistedModel);
+		return layoutLocalService.deleteLayout((Layout)persistedModel);
 	}
 
 	@Override
@@ -376,18 +362,17 @@ public abstract class LayoutLocalServiceBaseImpl extends BaseLocalServiceImpl
 		return layoutPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the layout with the matching UUID and company.
-	 *
-	 * @param uuid the layout's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching layout
-	 * @throws PortalException if a matching layout could not be found
-	 */
 	@Override
-	public Layout getLayoutByUuidAndCompanyId(String uuid, long companyId)
-		throws PortalException {
-		return layoutPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<Layout> getLayoutsByUuidAndCompanyId(String uuid, long companyId) {
+		return layoutPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<Layout> getLayoutsByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<Layout> orderByComparator) {
+		return layoutPersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**

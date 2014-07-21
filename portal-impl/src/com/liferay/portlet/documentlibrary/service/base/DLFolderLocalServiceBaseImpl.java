@@ -159,8 +159,7 @@ public abstract class DLFolderLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return dlFolderPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -177,8 +176,8 @@ public abstract class DLFolderLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return dlFolderPersistence.findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -196,9 +195,8 @@ public abstract class DLFolderLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return dlFolderPersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -231,18 +229,6 @@ public abstract class DLFolderLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public DLFolder fetchDLFolder(long folderId) {
 		return dlFolderPersistence.fetchByPrimaryKey(folderId);
-	}
-
-	/**
-	 * Returns the document library folder with the matching UUID and company.
-	 *
-	 * @param uuid the document library folder's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching document library folder, or <code>null</code> if a matching document library folder could not be found
-	 */
-	@Override
-	public DLFolder fetchDLFolderByUuidAndCompanyId(String uuid, long companyId) {
-		return dlFolderPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -360,7 +346,7 @@ public abstract class DLFolderLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteDLFolder((DLFolder)persistedModel);
+		return dlFolderLocalService.deleteDLFolder((DLFolder)persistedModel);
 	}
 
 	@Override
@@ -369,18 +355,18 @@ public abstract class DLFolderLocalServiceBaseImpl extends BaseLocalServiceImpl
 		return dlFolderPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the document library folder with the matching UUID and company.
-	 *
-	 * @param uuid the document library folder's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching document library folder
-	 * @throws PortalException if a matching document library folder could not be found
-	 */
 	@Override
-	public DLFolder getDLFolderByUuidAndCompanyId(String uuid, long companyId)
-		throws PortalException {
-		return dlFolderPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<DLFolder> getDLFoldersByUuidAndCompanyId(String uuid,
+		long companyId) {
+		return dlFolderPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<DLFolder> getDLFoldersByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<DLFolder> orderByComparator) {
+		return dlFolderPersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**
@@ -536,7 +522,7 @@ public abstract class DLFolderLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 */
 	@Override
 	public List<DLFolder> getDLFileEntryTypeDLFolders(long fileEntryTypeId,
-		int start, int end, OrderByComparator orderByComparator) {
+		int start, int end, OrderByComparator<DLFolder> orderByComparator) {
 		return dlFileEntryTypePersistence.getDLFolders(fileEntryTypeId, start,
 			end, orderByComparator);
 	}

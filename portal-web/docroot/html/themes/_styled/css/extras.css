@@ -162,12 +162,6 @@
 	}
 }
 
-.portlet-asset-category-admin {
-	.tree-node-selected, .tree-node-over, .category-item {
-		@include border-radius(5px);
-	}
-}
-
 .lfr-translation-manager-translation.lfr-translation-manager-translation-editing {
 	@include box-shadow(inset 0 0 2px #224FA8);
 }
@@ -537,5 +531,30 @@ body:first-of-type {
 .quick-access-nav {
 	a {
 		@include box-shadow(rgba(0, 0, 0, 0.1) 1px 1px 1px);
+	}
+}
+
+.cke_toolbar {
+	&.cke_toolbar__a11yhelpbtn {
+		.cke_toolgroup, .cke_toolgroup:hover {
+			@include box-shadow(initial);
+		}
+
+		.cke_button {
+			&:hover {
+				@include box-shadow(none);
+			}
+
+			.cke_button_label {
+				&:after {
+					@include background-image(linear-gradient(#FFF, #E4E4E4));
+					@include border-radius(2px);
+				}
+
+				&:hover:after {
+					@include background-image(linear-gradient(#F2F2F2, #CCC));
+				}
+			}
+		}
 	}
 }

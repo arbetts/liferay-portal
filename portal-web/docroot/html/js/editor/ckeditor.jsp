@@ -43,6 +43,7 @@ if (!ckEditorConfigFileName.equals("ckconfig.jsp")) {
 
 boolean hideImageResizing = ParamUtil.getBoolean(request, "hideImageResizing");
 
+boolean allowBrowseDocuments = GetterUtil.getBoolean((String)request.getAttribute("liferay-ui:input-editor:allowBrowseDocuments"));
 Map<String, String> configParamsMap = (Map<String, String>)request.getAttribute("liferay-ui:input-editor:configParams");
 Map<String, String> fileBrowserParamsMap = (Map<String, String>)request.getAttribute("liferay-ui:input-editor:fileBrowserParams");
 
@@ -333,27 +334,37 @@ if (inlineEdit && (inlineEditSaveURL != null)) {
 
 			'<%= name %>',
 			{
-				customConfig: '<%= PortalUtil.getPathContext() %>/html/js/editor/ckeditor/<%= HtmlUtil.escapeJS(ckEditorConfigFileName) %>?p_p_id=<%= HttpUtil.encodeURL(portletId) %>&p_main_path=<%= HttpUtil.encodeURL(mainPath) %>&contentsLanguageId=<%= HttpUtil.encodeURL(contentsLanguageId) %>&cssClasses=<%= HttpUtil.encodeURL(cssClasses) %>&cssPath=<%= HttpUtil.encodeURL(themeDisplay.getPathThemeCss()) %>&doAsGroupId=<%= HttpUtil.encodeURL(String.valueOf(doAsGroupId)) %>&doAsUserId=<%= HttpUtil.encodeURL(doAsUserId) %>&imagesPath=<%= HttpUtil.encodeURL(themeDisplay.getPathThemeImages()) %>&inlineEdit=<%= inlineEdit %><%= configParams %>&languageId=<%= HttpUtil.encodeURL(LocaleUtil.toLanguageId(locale)) %>&name=<%= name %>&resizable=<%= resizable %>',
+				customConfig: '<%= PortalUtil.getPathContext() %>/html/js/editor/ckeditor/<%= HtmlUtil.escapeJS(ckEditorConfigFileName) %>?p_p_id=<%= HttpUtil.encodeURL(portletId) %>&p_main_path=<%= HttpUtil.encodeURL(mainPath) %>&contentsLanguageId=<%= HttpUtil.encodeURL(contentsLanguageId) %>&colorSchemeCssClass=<%= HttpUtil.encodeURL(themeDisplay.getColorScheme().getCssClass()) %>&cssClasses=<%= HttpUtil.encodeURL(cssClasses) %>&cssPath=<%= HttpUtil.encodeURL(themeDisplay.getPathThemeCss()) %>&doAsGroupId=<%= HttpUtil.encodeURL(String.valueOf(doAsGroupId)) %>&doAsUserId=<%= HttpUtil.encodeURL(doAsUserId) %>&imagesPath=<%= HttpUtil.encodeURL(themeDisplay.getPathThemeImages()) %>&inlineEdit=<%= inlineEdit %><%= configParams %>&languageId=<%= HttpUtil.encodeURL(LocaleUtil.toLanguageId(locale)) %>&name=<%= name %>&resizable=<%= resizable %>',
 
-				<liferay-portlet:renderURL portletName="<%= PortletKeys.DOCUMENT_SELECTOR %>" varImpl="documentSelectorURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
-					<portlet:param name="struts_action" value="/document_selector/view" />
-					<portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" />
-					<portlet:param name="eventName" value='<%= name + "selectDocument" %>' />
-					<portlet:param name="showGroupsSelector" value="true" />
-				</liferay-portlet:renderURL>
+				<c:choose>
+					<c:when test="<%= allowBrowseDocuments %>">
+						<liferay-portlet:renderURL portletName="<%= PortletKeys.DOCUMENT_SELECTOR %>" varImpl="documentSelectorURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+							<portlet:param name="struts_action" value="/document_selector/view" />
+							<portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" />
+							<portlet:param name="eventName" value='<%= name + "selectDocument" %>' />
+							<portlet:param name="showGroupsSelector" value="true" />
+						</liferay-portlet:renderURL>
 
-				<%
-				if (fileBrowserParamsMap != null) {
-					for (Map.Entry<String, String> entry : fileBrowserParamsMap.entrySet()) {
-						documentSelectorURL.setParameter(entry.getKey(), entry.getValue());
-					}
-				}
-				%>
+						<%
+						if (fileBrowserParamsMap != null) {
+							for (Map.Entry<String, String> entry : fileBrowserParamsMap.entrySet()) {
+								documentSelectorURL.setParameter(entry.getKey(), entry.getValue());
+							}
+						}
+						%>
 
-				filebrowserBrowseUrl: '<%= documentSelectorURL %>',
-				filebrowserImageBrowseUrl: '<%= documentSelectorURL %>&Type=image',
-				filebrowserImageBrowseLinkUrl: '<%= documentSelectorURL %>',
-				filebrowserFlashBrowseUrl: '<%= documentSelectorURL %>&Type=flash',
+						filebrowserBrowseUrl: '<%= documentSelectorURL %>',
+						filebrowserImageBrowseUrl: '<%= documentSelectorURL %>&Type=image',
+						filebrowserImageBrowseLinkUrl: '<%= documentSelectorURL %>&Type=image',
+						filebrowserFlashBrowseUrl: '<%= documentSelectorURL %>&Type=flash',
+					</c:when>
+					<c:otherwise>
+						filebrowserBrowseUrl: '',
+						filebrowserImageBrowseUrl: '',
+						filebrowserImageBrowseLinkUrl: '',
+						filebrowserFlashBrowseUrl: '',
+					</c:otherwise>
+				</c:choose>
 
 				filebrowserUploadUrl: null,
 				toolbar: getToolbarSet('<%= TextFormatter.format(HtmlUtil.escapeJS(toolbarSet), TextFormatter.M) %>')
@@ -452,24 +463,24 @@ if (inlineEdit && (inlineEditSaveURL != null)) {
 				var destroyInstance = function(event) {
 					if (event.portletId === '<%= portletId %>') {
 						try {
-		 					var ckeditorInstances = window.CKEDITOR.instances;
+							var ckeditorInstances = window.CKEDITOR.instances;
 
-			 				A.Object.each(
-			 					ckeditorInstances,
-			 					function(value, key) {
-			 						var inst = ckeditorInstances[key];
+							A.Object.each(
+								ckeditorInstances,
+								function(value, key) {
+									var inst = ckeditorInstances[key];
 
-			 						delete ckeditorInstances[key];
+									delete ckeditorInstances[key];
 
-			 						inst.destroy();
-			 					}
-			 				);
-		 				}
-		 				catch(error) {
-		 				}
+									inst.destroy();
+								}
+							);
+						}
+						catch (error) {
+						}
 
-		 				Liferay.detach('destroyPortlet', destroyInstance);
-		 			}
+						Liferay.detach('destroyPortlet', destroyInstance);
+					}
 				};
 
 				Liferay.on('destroyPortlet', destroyInstance);
@@ -549,7 +560,7 @@ if (inlineEdit && (inlineEditSaveURL != null)) {
 	};
 
 	<%
-	String toogleControlsStatus = GetterUtil.getString(SessionClicks.get(request, "liferay_toggle_controls", ""));
+	String toogleControlsStatus = GetterUtil.getString(SessionClicks.get(request, "liferay_toggle_controls", "visible"));
 	%>
 
 	<c:if test='<%= (inlineEdit && toogleControlsStatus.equals("visible")) || !inlineEdit %>'>;

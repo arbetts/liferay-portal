@@ -3039,6 +3039,18 @@
 			<finder-column name="actionRequired" />
 			<finder-column name="archived" />
 		</finder>
+		<finder name="U_DT_D_A" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="deliveryType" />
+			<finder-column name="delivered" />
+			<finder-column name="actionRequired" />
+		</finder>
+		<finder name="U_DT_A_A" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="deliveryType" />
+			<finder-column name="actionRequired" />
+			<finder-column name="archived" />
+		</finder>
 
 		<!-- References -->
 
@@ -3345,10 +3357,7 @@
 		<exception>DuplicatePasswordPolicy</exception>
 		<exception>DuplicateRole</exception>
 		<exception>DuplicateTeam</exception>
-		<exception>DuplicateUserEmailAddress</exception>
 		<exception>DuplicateUserGroup</exception>
-		<exception>DuplicateUserId</exception>
-		<exception>DuplicateUserScreenName</exception>
 		<exception>EmailAddress</exception>
 		<exception>ExpiredLock</exception>
 		<exception>GroupFriendlyURL</exception>

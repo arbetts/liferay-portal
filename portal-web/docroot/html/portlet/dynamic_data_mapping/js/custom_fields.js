@@ -4,7 +4,7 @@ AUI.add(
 		var AArray = A.Array;
 
 		var FormBuilderTextField = A.FormBuilderTextField;
-		var FormBuilderTypes = A.FormBuilder.types;
+		var FormBuilderTypes = A.FormBuilderField.types;
 
 		var Lang = A.Lang;
 
@@ -37,6 +37,34 @@ AUI.add(
 		var TPL_TEXT_HTML = '<textarea class="form-builder-field-node lfr-ddm-text-html"></textarea>';
 
 		var TPL_WCM_IMAGE = '<div class="lfr-wcm-image"></div>';
+
+		var DEFAULTS_FORM_VALIDATOR = A.config.FormValidator;
+
+		var UNIQUE_FIELD_NAMES_MAP = Liferay.FormBuilder.UNIQUE_FIELD_NAMES_MAP;
+
+		DEFAULTS_FORM_VALIDATOR.STRINGS.structureDuplicateFieldName = Liferay.Language.get('please-enter-a-unique-field-name');
+
+		DEFAULTS_FORM_VALIDATOR.RULES.structureDuplicateFieldName = function(value, editorNode) {
+			var instance = this;
+
+			var editingField = UNIQUE_FIELD_NAMES_MAP.getValue(value);
+
+			var duplicate = editingField && !editingField.get('selected');
+
+			if (duplicate) {
+				editorNode.selectText(0, value.length);
+
+				instance.resetField(editorNode);
+			}
+
+			return !duplicate;
+		};
+
+		DEFAULTS_FORM_VALIDATOR.STRINGS.structureFieldName = Liferay.Language.get('please-enter-only-alphanumeric-characters');
+
+		DEFAULTS_FORM_VALIDATOR.RULES.structureFieldName = function(value) {
+			return (/^[\w\-]+$/).test(value);
+		};
 
 		var applyStyles = function(node, styleContent) {
 			var styles = styleContent.replace(/\n/g, STR_BLANK).split(';');
@@ -378,10 +406,19 @@ AUI.add(
 
 			name: {
 				setter: Liferay.FormBuilder.normalizeKey,
+				validator: function(val) {
+					return !UNIQUE_FIELD_NAMES_MAP.has(val);
+				},
 				valueFn: function() {
 					var instance = this;
 
-					return A.FormBuilderField.buildFieldName(instance.get('label'));
+					var name = instance.get('label');
+
+					while (UNIQUE_FIELD_NAMES_MAP.has(name)) {
+						name = A.FormBuilderField.buildFieldName(name);
+					}
+
+					return name;
 				}
 			},
 
@@ -389,6 +426,33 @@ AUI.add(
 				setter: booleanParse,
 				value: false
 			}
+		};
+
+		LiferayFormBuilderField.prototype.initializer = function() {
+			var instance = this;
+
+			instance.after('destroy', instance._afterDestroy);
+			instance.after('nameChange', instance._afterNameChange);
+			instance.after('render', instance._afterRender);
+		};
+
+		LiferayFormBuilderField.prototype._afterDestroy = function(event) {
+			var instance = this;
+
+			UNIQUE_FIELD_NAMES_MAP.remove(instance.get('name'));
+		};
+
+		LiferayFormBuilderField.prototype._afterNameChange = function(event) {
+			var instance = this;
+
+			UNIQUE_FIELD_NAMES_MAP.remove(event.prevVal);
+			UNIQUE_FIELD_NAMES_MAP.put(event.newVal, instance);
+		};
+
+		LiferayFormBuilderField.prototype._afterRender = function(event) {
+			var instance = this;
+
+			UNIQUE_FIELD_NAMES_MAP.put(instance.get('name'), instance);
 		};
 
 		A.Base.mix(A.FormBuilderField, [LiferayFormBuilderField]);
@@ -421,6 +485,27 @@ AUI.add(
 				'false': Liferay.Language.get('no'),
 				'true': Liferay.Language.get('yes')
 			};
+
+			AArray.each(
+				model,
+				function(item, index) {
+					if (item.attributeName == 'name') {
+						item.editor = new A.TextCellEditor(
+							{
+								validator: {
+									rules: {
+										value: {
+											required: true,
+											structureDuplicateFieldName: true,
+											structureFieldName: true
+										}
+									}
+								}
+							}
+						);
+					}
+				}
+			);
 
 			return model.concat(
 				[

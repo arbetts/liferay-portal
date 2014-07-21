@@ -901,6 +901,10 @@ $dockbarOpenGradientStart: #0EA6F9;
 		vertical-align: middle;
 	}
 
+	.site-group.selected {
+		display: none;
+	}
+
 	.lfr-ctrl-panel {
 		li.publish-link-container a:before {
 			padding-left: 0;
@@ -912,12 +916,6 @@ $dockbarOpenGradientStart: #0EA6F9;
 	}
 
 	/* ---------- Vocabularies select box in sites categories ---------- */
-
-	.portlet-asset-category-admin {
-		.form-group {
-			margin-bottom: 0;
-		}
-	}
 
 	.textboxlistentry-holder {
 		margin-left: 0;

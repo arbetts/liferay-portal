@@ -301,13 +301,16 @@
 
 	<command name="addPGViaWCD">
 		<execute action="PGWebcontentdisplay#click" locator-key1="ADD_WEB_CONTENT" />
-		<execute action="PGWebcontentdisplay#assertClick" locator-key1="ADD_BASIC_WEB_CONTENT" value1="Basic Web Content" />
-
-		<execute action="PGWebcontentdisplayAddwebcontent#selectFrame" locator-key1="WEB_CONTENT_IFRAME" />
 
 		<if>
 			<equals arg1="${localizedTitle}" arg2="true" />
 			<then>
+				<var name="key_localizedBasicWebContent" value="${localizedBasicWebContent}" />
+
+				<execute action="PGWebcontentdisplay#assertClick" locator-key1="ADD_BASIC_WEB_CONTENT_LOCALIZED" value1="${localizedBasicWebContent}" />
+
+				<execute action="PGWebcontentdisplayAddwebcontent#selectFrame" locator-key1="WEB_CONTENT_IFRAME" />
+
 				<var name="key_lowercaseLanguageCode" value="${lowercaseLanguageCode}" />
 
 				<execute action="PGWebcontentdisplayAddwebcontent#type" locator-key1="TITLE_FIELD_LOCALIZED" value1="${webContentTitle}" />
@@ -315,6 +318,10 @@
 				<execute action="PGWebcontentdisplayAddwebcontent#click" locator-key1="LOCALIZED_PUBLISH_BUTTON" />
 			</then>
 			<else>
+				<execute action="PGWebcontentdisplay#assertClick" locator-key1="ADD_BASIC_WEB_CONTENT" value1="Basic Web Content" />
+
+				<execute action="PGWebcontentdisplayAddwebcontent#selectFrame" locator-key1="WEB_CONTENT_IFRAME" />
+
 				<execute action="PGWebcontentdisplayAddwebcontent#type" locator-key1="TITLE_FIELD" value1="${webContentTitle}" />
 				<execute action="PGWebcontentdisplayAddwebcontent#type" locator-key1="CONTENT_FIELD" value1="${webContentContent}" />
 				<execute action="PGWebcontentdisplayAddwebcontent#click" locator-key1="PUBLISH_BUTTON" />
@@ -729,10 +736,19 @@
 	</command>
 
 	<command name="addWithWorkflowPGViaWCD">
-		<var name="key_selectStructureName" value="${selectStructureName}" />
+		<if>
+			<isset var="selectStructureName" />
+			<then>
+				<var name="key_selectStructureName" value="${selectStructureName}" />
 
-		<execute action="PGWebcontentdisplay#click" locator-key1="ADD_WEB_CONTENT" />
-		<execute action="PGWebcontentdisplay#assertClick" locator-key1="ADD_MENU_WEB_CONTENT_STRUCTURE" value1="${selectStructureName}" />
+				<execute action="PGWebcontentdisplay#click" locator-key1="ADD_WEB_CONTENT" />
+				<execute action="PGWebcontentdisplay#assertClick" locator-key1="ADD_MENU_WEB_CONTENT_STRUCTURE" value1="${selectStructureName}" />
+			</then>
+			<else>
+				<execute action="PGWebcontentdisplay#click" locator-key1="ADD_WEB_CONTENT" />
+				<execute action="PGWebcontentdisplay#click" locator-key1="ADD_BASIC_WEB_CONTENT" />
+			</else>
+		</if>
 
 		<execute action="PGWebcontentdisplayAddwebcontent#selectFrame" locator-key1="WEB_CONTENT_IFRAME" />
 		<execute action="PGWebcontentdisplayAddwebcontent#type" locator-key1="TITLE_FIELD" value1="${webContentTitle}" />

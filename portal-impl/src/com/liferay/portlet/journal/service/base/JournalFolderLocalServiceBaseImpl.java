@@ -163,8 +163,7 @@ public abstract class JournalFolderLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return journalFolderPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -181,8 +180,8 @@ public abstract class JournalFolderLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return journalFolderPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -201,9 +200,8 @@ public abstract class JournalFolderLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return journalFolderPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -236,20 +234,6 @@ public abstract class JournalFolderLocalServiceBaseImpl
 	@Override
 	public JournalFolder fetchJournalFolder(long folderId) {
 		return journalFolderPersistence.fetchByPrimaryKey(folderId);
-	}
-
-	/**
-	 * Returns the journal folder with the matching UUID and company.
-	 *
-	 * @param uuid the journal folder's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching journal folder, or <code>null</code> if a matching journal folder could not be found
-	 */
-	@Override
-	public JournalFolder fetchJournalFolderByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return journalFolderPersistence.fetchByUuid_C_First(uuid, companyId,
-			null);
 	}
 
 	/**
@@ -369,7 +353,7 @@ public abstract class JournalFolderLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteJournalFolder((JournalFolder)persistedModel);
+		return journalFolderLocalService.deleteJournalFolder((JournalFolder)persistedModel);
 	}
 
 	@Override
@@ -378,18 +362,18 @@ public abstract class JournalFolderLocalServiceBaseImpl
 		return journalFolderPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the journal folder with the matching UUID and company.
-	 *
-	 * @param uuid the journal folder's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching journal folder
-	 * @throws PortalException if a matching journal folder could not be found
-	 */
 	@Override
-	public JournalFolder getJournalFolderByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return journalFolderPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<JournalFolder> getJournalFoldersByUuidAndCompanyId(
+		String uuid, long companyId) {
+		return journalFolderPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<JournalFolder> getJournalFoldersByUuidAndCompanyId(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<JournalFolder> orderByComparator) {
+		return journalFolderPersistence.findByUuid_C(uuid, companyId, start,
+			end, orderByComparator);
 	}
 
 	/**
@@ -542,7 +526,7 @@ public abstract class JournalFolderLocalServiceBaseImpl
 	 */
 	@Override
 	public List<JournalFolder> getDDMStructureJournalFolders(long structureId,
-		int start, int end, OrderByComparator orderByComparator) {
+		int start, int end, OrderByComparator<JournalFolder> orderByComparator) {
 		return ddmStructurePersistence.getJournalFolders(structureId, start,
 			end, orderByComparator);
 	}

@@ -14,15 +14,7 @@
  */
 --%>
 
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
-<%@ page import="com.liferay.portal.kernel.language.LanguageUtil" %>
-<%@ page import="com.liferay.portal.kernel.util.ContentTypes" %>
-<%@ page import="com.liferay.portal.kernel.util.HtmlUtil" %>
-<%@ page import="com.liferay.portal.kernel.util.LocaleUtil" %>
-<%@ page import="com.liferay.portal.kernel.util.ParamUtil" %>
-
-<%@ page import="java.util.Locale" %>
+<%@ include file="/html/js/editor/ckeditor_init.jsp" %>
 
 <%
 String attachmentURLPrefix = ParamUtil.getString(request, "attachmentURLPrefix");
@@ -74,7 +66,7 @@ response.setContentType(ContentTypes.TEXT_JAVASCRIPT);
 
 	config.disableObjectResizing = true;
 
-	config.extraPlugins = 'creole,lfrpopup,wikilink';
+	config.extraPlugins = 'a11yhelpbtn,creole,lfrpopup,wikilink';
 
 	config.filebrowserWindowFeatures = 'title=<%= LanguageUtil.get(locale, "browse") %>';
 
@@ -135,7 +127,8 @@ response.setContentType(ContentTypes.TEXT_JAVASCRIPT);
 
 		['Table', '-', 'HorizontalRule', 'SpecialChar' ],
 		['Find','Replace','-','SelectAll','RemoveFormat'],
-		['Source']
+		['Source'],
+		['A11YBtn']
 	];
 
 	config.toolbar_phone = [
@@ -200,6 +193,8 @@ response.setContentType(ContentTypes.TEXT_JAVASCRIPT);
 			}
 		}
 	);
+
+	<%@ include file="/html/js/editor/ckeditor/ckconfig_creole-ext.jsp" %>
 };
 
 window['<%= HtmlUtil.escapeJS(name) %>Config']();

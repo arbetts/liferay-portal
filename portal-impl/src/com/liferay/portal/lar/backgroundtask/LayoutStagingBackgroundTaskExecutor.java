@@ -20,6 +20,8 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.ExportImportDateUtil;
 import com.liferay.portal.kernel.lar.MissingReferences;
 import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.DateRange;
@@ -97,12 +99,20 @@ public class LayoutStagingBackgroundTaskExecutor
 				_transactionAttribute, layoutStagingCallable);
 		}
 		catch (Throwable t) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(t, t);
+			}
+			else if (_log.isWarnEnabled()) {
+				_log.warn("Unable to publish layout: " + t.getMessage());
+			}
+
 			Group sourceGroup = GroupLocalServiceUtil.getGroup(sourceGroupId);
 
-			ServiceContext serviceContext = (ServiceContext)taskContextMap.get(
-				"serviceContext");
-
 			if (sourceGroup.hasStagingGroup()) {
+				ServiceContext serviceContext = new ServiceContext();
+
+				serviceContext.setUserId(userId);
+
 				StagingLocalServiceUtil.disableStaging(
 					sourceGroup, serviceContext);
 			}
@@ -149,23 +159,14 @@ public class LayoutStagingBackgroundTaskExecutor
 			serviceContext);
 	}
 
+	private static Log _log = LogFactoryUtil.getLog(
+		LayoutStagingBackgroundTaskExecutor.class);
+
 	private TransactionAttribute _transactionAttribute =
 		TransactionAttributeBuilder.build(
 			Propagation.REQUIRED, new Class<?>[] {Exception.class});
 
 	private class LayoutStagingCallable implements Callable<MissingReferences> {
-
-		private LayoutStagingCallable(
-			long backgroundTaskId,
-			ExportImportConfiguration exportImportConfiguration,
-			long sourceGroupId, long targetGroupId, long userId) {
-
-			_backgroundTaskId = backgroundTaskId;
-			_exportImportConfiguration = exportImportConfiguration;
-			_sourceGroupId = sourceGroupId;
-			_targetGroupId = targetGroupId;
-			_userId = userId;
-		}
 
 		@Override
 		public MissingReferences call() throws PortalException {
@@ -183,7 +184,8 @@ public class LayoutStagingBackgroundTaskExecutor
 				Map<String, String[]> parameterMap =
 					(Map<String, String[]>)settingsMap.get("parameterMap");
 				DateRange dateRange = ExportImportDateUtil.getDateRange(
-					_exportImportConfiguration);
+					_exportImportConfiguration,
+					ExportImportDateUtil.RANGE_FROM_LAST_PUBLISH_DATE);
 
 				file = LayoutLocalServiceUtil.exportLayoutsAsFile(
 					_sourceGroupId, privateLayout, layoutIds, parameterMap,
@@ -228,6 +230,18 @@ public class LayoutStagingBackgroundTaskExecutor
 			}
 
 			return missingReferences;
+		}
+
+		private LayoutStagingCallable(
+			long backgroundTaskId,
+			ExportImportConfiguration exportImportConfiguration,
+			long sourceGroupId, long targetGroupId, long userId) {
+
+			_backgroundTaskId = backgroundTaskId;
+			_exportImportConfiguration = exportImportConfiguration;
+			_sourceGroupId = sourceGroupId;
+			_targetGroupId = targetGroupId;
+			_userId = userId;
 		}
 
 		private long _backgroundTaskId;

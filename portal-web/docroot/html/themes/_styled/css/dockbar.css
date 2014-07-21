@@ -14,7 +14,7 @@ $editLayoutPanelWidth: 460px;
 			left: 0;
 			position: absolute;
 			right: 0;
-			top: -5px;
+			top: 0;
 			z-index: 301;
 
 			&.open {
@@ -37,6 +37,12 @@ $editLayoutPanelWidth: 460px;
 
 			.nav {
 				margin: 0;
+			}
+
+			.navbar-nav {
+				&, > li {
+					float: none;
+				}
 			}
 		}
 	}
@@ -78,6 +84,8 @@ $editLayoutPanelWidth: 460px;
 
 			@include respond-to(phone, tablet) {
 				@include flexbox;
+
+				padding: 0;
 			}
 
 			> .nav {
@@ -198,10 +206,15 @@ $editLayoutPanelWidth: 460px;
 
 							> a {
 								float: right;
+								font-weight: bold;
 								width: auto;
 
 								& > .nav-item-label {
 									display: block;
+								}
+
+								@include respond-to(desktop) {
+									font-weight: normal;
 								}
 							}
 						}

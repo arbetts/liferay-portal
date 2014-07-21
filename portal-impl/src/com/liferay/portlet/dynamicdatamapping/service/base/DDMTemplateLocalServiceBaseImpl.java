@@ -150,8 +150,7 @@ public abstract class DDMTemplateLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return ddmTemplatePersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -168,8 +167,8 @@ public abstract class DDMTemplateLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return ddmTemplatePersistence.findWithDynamicQuery(dynamicQuery, start,
 			end);
 	}
@@ -188,9 +187,8 @@ public abstract class DDMTemplateLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return ddmTemplatePersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -223,19 +221,6 @@ public abstract class DDMTemplateLocalServiceBaseImpl
 	@Override
 	public DDMTemplate fetchDDMTemplate(long templateId) {
 		return ddmTemplatePersistence.fetchByPrimaryKey(templateId);
-	}
-
-	/**
-	 * Returns the d d m template with the matching UUID and company.
-	 *
-	 * @param uuid the d d m template's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching d d m template, or <code>null</code> if a matching d d m template could not be found
-	 */
-	@Override
-	public DDMTemplate fetchDDMTemplateByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return ddmTemplatePersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -357,7 +342,7 @@ public abstract class DDMTemplateLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteDDMTemplate((DDMTemplate)persistedModel);
+		return ddmTemplateLocalService.deleteDDMTemplate((DDMTemplate)persistedModel);
 	}
 
 	@Override
@@ -366,18 +351,18 @@ public abstract class DDMTemplateLocalServiceBaseImpl
 		return ddmTemplatePersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the d d m template with the matching UUID and company.
-	 *
-	 * @param uuid the d d m template's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching d d m template
-	 * @throws PortalException if a matching d d m template could not be found
-	 */
 	@Override
-	public DDMTemplate getDDMTemplateByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return ddmTemplatePersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<DDMTemplate> getDDMTemplatesByUuidAndCompanyId(String uuid,
+		long companyId) {
+		return ddmTemplatePersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<DDMTemplate> getDDMTemplatesByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<DDMTemplate> orderByComparator) {
+		return ddmTemplatePersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**

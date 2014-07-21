@@ -23,10 +23,10 @@ import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.ClassedModel;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
-import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.test.Sync;
 import com.liferay.portal.test.SynchronousDestinationExecutionTestListener;
+import com.liferay.portal.test.listeners.MainServletExecutionTestListener;
+import com.liferay.portal.test.runners.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.util.test.RandomTestUtil;
 import com.liferay.portal.util.test.ServiceContextTestUtil;
 import com.liferay.portal.util.test.TestPropsValues;
@@ -63,8 +63,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		ServiceContext serviceContext = ServiceContextTestUtil.getServiceContext(
-			group.getGroupId());
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(group.getGroupId());
 
 		_node = (WikiNode)getParentBaseModel(group, serviceContext);
 	}
@@ -92,7 +92,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testMoveExplicitlyChildPageAndParentPageWithRedirectPageToTrash()
+	public void
+			testMoveExplicitlyChildPageAndParentPageWithRedirectPageToTrash()
 		throws Exception {
 
 		WikiPage[] pages =
@@ -323,7 +324,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testMoveParentPageWithRedirectAndChildPageAndgrandchildPageToTrash()
+	public void
+			testMoveParentPageWithRedirectAndChildPageAndgrandchildPageToTrash()
 		throws Exception {
 
 		int initialBaseModelsCount = getNotInTrashBaseModelsCount(_node);
@@ -383,7 +385,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreExplicitlyTrashedChildPageAndPageWithRedirectFromTrash()
+	public void
+			testRestoreExplicitlyTrashedChildPageAndPageWithRedirectFromTrash()
 		throws Exception {
 
 		WikiPage[] pages = WikiTestUtil.addTrashedParentPageWithRedirectPage(
@@ -405,7 +408,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreExplicitlyTrashedChildPageAndParentPageWithRedirectPageFromTrash()
+	public void
+			testRestoreExplicitlyTrashedChildPageAndParentPageWithRedirectPageFromTrash()
 		throws Exception {
 
 		WikiPage[] pages = WikiTestUtil.addTrashedParentPageWithRedirectPage(
@@ -460,7 +464,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreExplicitlyTrashedChildPageWithTrashedParentFromTrash()
+	public void
+			testRestoreExplicitlyTrashedChildPageWithTrashedParentFromTrash()
 		throws Exception {
 
 		int initialBaseModelsCount = getNotInTrashBaseModelsCount(_node);
@@ -515,7 +520,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreExplicitlyTrashedParentPageAndChildPageAndRedirectPageFromTrash()
+	public void
+			testRestoreExplicitlyTrashedParentPageAndChildPageAndRedirectPageFromTrash()
 		throws Exception {
 
 		WikiPage[] pages = WikiTestUtil.addTrashedParentPageWithRedirectPage(
@@ -608,7 +614,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreExplicitlyTrashedParentPageWitExplicitlyTrashedChildPageFromTrash()
+	public void
+			testRestoreExplicitlyTrashedParentPageWitExplicitlyTrashedChildPageFromTrash()
 		throws Exception {
 
 		WikiPage[] pages = WikiTestUtil.addTrashedPageWithChildPage(
@@ -630,7 +637,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreExplicitlyTrashedParentPageWithChildPageAndgrandchildPageFromTrash()
+	public void
+			testRestoreExplicitlyTrashedParentPageWithChildPageAndgrandchildPageFromTrash()
 		throws Exception {
 
 		int initialBaseModelsCount = getNotInTrashBaseModelsCount(_node);
@@ -663,7 +671,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreExplicitlyTrashedParentPageWithRedirectPageFromTrash()
+	public void
+			testRestoreExplicitlyTrashedParentPageWithRedirectPageFromTrash()
 		throws Exception {
 
 		WikiPage[] pages = WikiTestUtil.addTrashedParentPageWithRedirectPage(
@@ -721,7 +730,8 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreExplicitlyTrashedRedirectPageWithRestoredPageFromTrash()
+	public void
+			testRestoreExplicitlyTrashedRedirectPageWithRestoredPageFromTrash()
 		throws Exception {
 
 		WikiPage[] pages = WikiTestUtil.addTrashedPageWithRedirectPage(
@@ -742,7 +752,36 @@ public class WikiPageTrashHandlerTest extends BaseTrashHandlerTestCase {
 	}
 
 	@Test
-	public void testRestoreParentPageWithExplicitlyTrashedRrdirectPageFromTrash()
+	public void testRestorePageWithParentPageInTrash() throws Exception {
+		WikiPage[] pages = WikiTestUtil.addTrashedPageWithChildPage(
+			group.getGroupId(), _node.getNodeId(), false);
+
+		WikiPage childPage = pages[1];
+
+		WikiPage newParentPage = WikiTestUtil.addPage(
+			group.getGroupId(), _node.getNodeId(), true);
+
+		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
+			getBaseModelClassName());
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+		trashHandler.moveEntry(
+			TestPropsValues.getUserId(), childPage.getResourcePrimKey(),
+			newParentPage.getResourcePrimKey(), serviceContext);
+
+		childPage = WikiPageLocalServiceUtil.getPage(
+			childPage.getResourcePrimKey());
+
+		Assert.assertTrue(childPage.isApproved());
+		Assert.assertEquals(
+			newParentPage.getTitle(), childPage.getParentTitle());
+	}
+
+	@Test
+	public void
+			testRestoreParentPageWithExplicitlyTrashedRrdirectPageFromTrash()
 		throws Exception {
 
 		WikiPage[] pages = WikiTestUtil.addTrashedParentPageWithRedirectPage(

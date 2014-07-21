@@ -44,6 +44,16 @@ public class RepositoryEntryLocalServiceWrapper
 		return _repositoryEntryLocalService.addRepositoryEntry(repositoryEntry);
 	}
 
+	@Override
+	public com.liferay.portal.model.RepositoryEntry addRepositoryEntry(
+		long userId, long groupId, long repositoryId,
+		java.lang.String mappedId,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _repositoryEntryLocalService.addRepositoryEntry(userId, groupId,
+			repositoryId, mappedId, serviceContext);
+	}
+
 	/**
 	* Creates a new repository entry with the primary key. Does not add the repository entry to the database.
 	*
@@ -54,6 +64,28 @@ public class RepositoryEntryLocalServiceWrapper
 	public com.liferay.portal.model.RepositoryEntry createRepositoryEntry(
 		long repositoryEntryId) {
 		return _repositoryEntryLocalService.createRepositoryEntry(repositoryEntryId);
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	@Override
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _repositoryEntryLocalService.deletePersistedModel(persistedModel);
+	}
+
+	/**
+	* Deletes the repository entry from the database. Also notifies the appropriate model listeners.
+	*
+	* @param repositoryEntry the repository entry
+	* @return the repository entry that was removed
+	*/
+	@Override
+	public com.liferay.portal.model.RepositoryEntry deleteRepositoryEntry(
+		com.liferay.portal.model.RepositoryEntry repositoryEntry) {
+		return _repositoryEntryLocalService.deleteRepositoryEntry(repositoryEntry);
 	}
 
 	/**
@@ -70,18 +102,6 @@ public class RepositoryEntryLocalServiceWrapper
 		return _repositoryEntryLocalService.deleteRepositoryEntry(repositoryEntryId);
 	}
 
-	/**
-	* Deletes the repository entry from the database. Also notifies the appropriate model listeners.
-	*
-	* @param repositoryEntry the repository entry
-	* @return the repository entry that was removed
-	*/
-	@Override
-	public com.liferay.portal.model.RepositoryEntry deleteRepositoryEntry(
-		com.liferay.portal.model.RepositoryEntry repositoryEntry) {
-		return _repositoryEntryLocalService.deleteRepositoryEntry(repositoryEntry);
-	}
-
 	@Override
 	public com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery() {
 		return _repositoryEntryLocalService.dynamicQuery();
@@ -94,8 +114,7 @@ public class RepositoryEntryLocalServiceWrapper
 	* @return the matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _repositoryEntryLocalService.dynamicQuery(dynamicQuery);
 	}
@@ -113,8 +132,7 @@ public class RepositoryEntryLocalServiceWrapper
 	* @return the range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end) {
 		return _repositoryEntryLocalService.dynamicQuery(dynamicQuery, start,
@@ -135,11 +153,10 @@ public class RepositoryEntryLocalServiceWrapper
 	* @return the ordered range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		com.liferay.portal.kernel.util.OrderByComparator<T> orderByComparator) {
 		return _repositoryEntryLocalService.dynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -178,20 +195,6 @@ public class RepositoryEntryLocalServiceWrapper
 	}
 
 	/**
-	* Returns the repository entry with the matching UUID and company.
-	*
-	* @param uuid the repository entry's UUID
-	* @param companyId the primary key of the company
-	* @return the matching repository entry, or <code>null</code> if a matching repository entry could not be found
-	*/
-	@Override
-	public com.liferay.portal.model.RepositoryEntry fetchRepositoryEntryByUuidAndCompanyId(
-		java.lang.String uuid, long companyId) {
-		return _repositoryEntryLocalService.fetchRepositoryEntryByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
 	* Returns the repository entry matching the UUID and group.
 	*
 	* @param uuid the repository entry's UUID
@@ -205,39 +208,25 @@ public class RepositoryEntryLocalServiceWrapper
 			groupId);
 	}
 
-	/**
-	* Returns the repository entry with the primary key.
-	*
-	* @param repositoryEntryId the primary key of the repository entry
-	* @return the repository entry
-	* @throws PortalException if a repository entry with the primary key could not be found
-	*/
-	@Override
-	public com.liferay.portal.model.RepositoryEntry getRepositoryEntry(
-		long repositoryEntryId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _repositoryEntryLocalService.getRepositoryEntry(repositoryEntryId);
-	}
-
 	@Override
 	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
 		return _repositoryEntryLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* Returns the Spring bean ID for this bean.
+	*
+	* @return the Spring bean ID for this bean
+	*/
+	@Override
+	public java.lang.String getBeanIdentifier() {
+		return _repositoryEntryLocalService.getBeanIdentifier();
 	}
 
 	@Override
 	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
 		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
 		return _repositoryEntryLocalService.getExportActionableDynamicQuery(portletDataContext);
-	}
-
-	/**
-	* @throws PortalException
-	*/
-	@Override
-	public com.liferay.portal.model.PersistedModel deletePersistedModel(
-		com.liferay.portal.model.PersistedModel persistedModel)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _repositoryEntryLocalService.deletePersistedModel(persistedModel);
 	}
 
 	@Override
@@ -247,36 +236,10 @@ public class RepositoryEntryLocalServiceWrapper
 		return _repositoryEntryLocalService.getPersistedModel(primaryKeyObj);
 	}
 
-	/**
-	* Returns the repository entry with the matching UUID and company.
-	*
-	* @param uuid the repository entry's UUID
-	* @param companyId the primary key of the company
-	* @return the matching repository entry
-	* @throws PortalException if a matching repository entry could not be found
-	*/
 	@Override
-	public com.liferay.portal.model.RepositoryEntry getRepositoryEntryByUuidAndCompanyId(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _repositoryEntryLocalService.getRepositoryEntryByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
-	* Returns the repository entry matching the UUID and group.
-	*
-	* @param uuid the repository entry's UUID
-	* @param groupId the primary key of the group
-	* @return the matching repository entry
-	* @throws PortalException if a matching repository entry could not be found
-	*/
-	@Override
-	public com.liferay.portal.model.RepositoryEntry getRepositoryEntryByUuidAndGroupId(
-		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _repositoryEntryLocalService.getRepositoryEntryByUuidAndGroupId(uuid,
-			groupId);
+	public java.util.List<com.liferay.portal.model.RepositoryEntry> getRepositoryEntries(
+		long repositoryId) {
+		return _repositoryEntryLocalService.getRepositoryEntries(repositoryId);
 	}
 
 	/**
@@ -296,6 +259,21 @@ public class RepositoryEntryLocalServiceWrapper
 		return _repositoryEntryLocalService.getRepositoryEntries(start, end);
 	}
 
+	@Override
+	public java.util.List<com.liferay.portal.model.RepositoryEntry> getRepositoryEntriesByUuidAndCompanyId(
+		java.lang.String uuid, long companyId) {
+		return _repositoryEntryLocalService.getRepositoryEntriesByUuidAndCompanyId(uuid,
+			companyId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portal.model.RepositoryEntry> getRepositoryEntriesByUuidAndCompanyId(
+		java.lang.String uuid, long companyId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portal.model.RepositoryEntry> orderByComparator) {
+		return _repositoryEntryLocalService.getRepositoryEntriesByUuidAndCompanyId(uuid,
+			companyId, start, end, orderByComparator);
+	}
+
 	/**
 	* Returns the number of repository entries.
 	*
@@ -307,25 +285,33 @@ public class RepositoryEntryLocalServiceWrapper
 	}
 
 	/**
-	* Updates the repository entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	* Returns the repository entry with the primary key.
 	*
-	* @param repositoryEntry the repository entry
-	* @return the repository entry that was updated
+	* @param repositoryEntryId the primary key of the repository entry
+	* @return the repository entry
+	* @throws PortalException if a repository entry with the primary key could not be found
 	*/
 	@Override
-	public com.liferay.portal.model.RepositoryEntry updateRepositoryEntry(
-		com.liferay.portal.model.RepositoryEntry repositoryEntry) {
-		return _repositoryEntryLocalService.updateRepositoryEntry(repositoryEntry);
+	public com.liferay.portal.model.RepositoryEntry getRepositoryEntry(
+		long repositoryEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _repositoryEntryLocalService.getRepositoryEntry(repositoryEntryId);
 	}
 
 	/**
-	* Returns the Spring bean ID for this bean.
+	* Returns the repository entry matching the UUID and group.
 	*
-	* @return the Spring bean ID for this bean
+	* @param uuid the repository entry's UUID
+	* @param groupId the primary key of the group
+	* @return the matching repository entry
+	* @throws PortalException if a matching repository entry could not be found
 	*/
 	@Override
-	public java.lang.String getBeanIdentifier() {
-		return _repositoryEntryLocalService.getBeanIdentifier();
+	public com.liferay.portal.model.RepositoryEntry getRepositoryEntryByUuidAndGroupId(
+		java.lang.String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _repositoryEntryLocalService.getRepositoryEntryByUuidAndGroupId(uuid,
+			groupId);
 	}
 
 	/**
@@ -338,20 +324,16 @@ public class RepositoryEntryLocalServiceWrapper
 		_repositoryEntryLocalService.setBeanIdentifier(beanIdentifier);
 	}
 
+	/**
+	* Updates the repository entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param repositoryEntry the repository entry
+	* @return the repository entry that was updated
+	*/
 	@Override
-	public com.liferay.portal.model.RepositoryEntry addRepositoryEntry(
-		long userId, long groupId, long repositoryId,
-		java.lang.String mappedId,
-		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _repositoryEntryLocalService.addRepositoryEntry(userId, groupId,
-			repositoryId, mappedId, serviceContext);
-	}
-
-	@Override
-	public java.util.List<com.liferay.portal.model.RepositoryEntry> getRepositoryEntries(
-		long repositoryId) {
-		return _repositoryEntryLocalService.getRepositoryEntries(repositoryId);
+	public com.liferay.portal.model.RepositoryEntry updateRepositoryEntry(
+		com.liferay.portal.model.RepositoryEntry repositoryEntry) {
+		return _repositoryEntryLocalService.updateRepositoryEntry(repositoryEntry);
 	}
 
 	@Override

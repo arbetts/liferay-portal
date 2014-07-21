@@ -140,8 +140,7 @@ public abstract class MBThreadFlagLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return mbThreadFlagPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -158,8 +157,8 @@ public abstract class MBThreadFlagLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return mbThreadFlagPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -178,9 +177,8 @@ public abstract class MBThreadFlagLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return mbThreadFlagPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -213,19 +211,6 @@ public abstract class MBThreadFlagLocalServiceBaseImpl
 	@Override
 	public MBThreadFlag fetchMBThreadFlag(long threadFlagId) {
 		return mbThreadFlagPersistence.fetchByPrimaryKey(threadFlagId);
-	}
-
-	/**
-	 * Returns the message boards thread flag with the matching UUID and company.
-	 *
-	 * @param uuid the message boards thread flag's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message boards thread flag, or <code>null</code> if a matching message boards thread flag could not be found
-	 */
-	@Override
-	public MBThreadFlag fetchMBThreadFlagByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return mbThreadFlagPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -337,7 +322,7 @@ public abstract class MBThreadFlagLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteMBThreadFlag((MBThreadFlag)persistedModel);
+		return mbThreadFlagLocalService.deleteMBThreadFlag((MBThreadFlag)persistedModel);
 	}
 
 	@Override
@@ -346,18 +331,18 @@ public abstract class MBThreadFlagLocalServiceBaseImpl
 		return mbThreadFlagPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the message boards thread flag with the matching UUID and company.
-	 *
-	 * @param uuid the message boards thread flag's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message boards thread flag
-	 * @throws PortalException if a matching message boards thread flag could not be found
-	 */
 	@Override
-	public MBThreadFlag getMBThreadFlagByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return mbThreadFlagPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<MBThreadFlag> getMBThreadFlagsByUuidAndCompanyId(String uuid,
+		long companyId) {
+		return mbThreadFlagPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<MBThreadFlag> getMBThreadFlagsByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<MBThreadFlag> orderByComparator) {
+		return mbThreadFlagPersistence.findByUuid_C(uuid, companyId, start,
+			end, orderByComparator);
 	}
 
 	/**

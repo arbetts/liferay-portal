@@ -139,8 +139,7 @@ public abstract class MBBanLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return mbBanPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -157,8 +156,8 @@ public abstract class MBBanLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return mbBanPersistence.findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -176,9 +175,8 @@ public abstract class MBBanLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return mbBanPersistence.findWithDynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
 	}
@@ -210,18 +208,6 @@ public abstract class MBBanLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public MBBan fetchMBBan(long banId) {
 		return mbBanPersistence.fetchByPrimaryKey(banId);
-	}
-
-	/**
-	 * Returns the message boards ban with the matching UUID and company.
-	 *
-	 * @param uuid the message boards ban's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message boards ban, or <code>null</code> if a matching message boards ban could not be found
-	 */
-	@Override
-	public MBBan fetchMBBanByUuidAndCompanyId(String uuid, long companyId) {
-		return mbBanPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -331,7 +317,7 @@ public abstract class MBBanLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteMBBan((MBBan)persistedModel);
+		return mbBanLocalService.deleteMBBan((MBBan)persistedModel);
 	}
 
 	@Override
@@ -340,18 +326,16 @@ public abstract class MBBanLocalServiceBaseImpl extends BaseLocalServiceImpl
 		return mbBanPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the message boards ban with the matching UUID and company.
-	 *
-	 * @param uuid the message boards ban's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message boards ban
-	 * @throws PortalException if a matching message boards ban could not be found
-	 */
 	@Override
-	public MBBan getMBBanByUuidAndCompanyId(String uuid, long companyId)
-		throws PortalException {
-		return mbBanPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<MBBan> getMBBansByUuidAndCompanyId(String uuid, long companyId) {
+		return mbBanPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<MBBan> getMBBansByUuidAndCompanyId(String uuid, long companyId,
+		int start, int end, OrderByComparator<MBBan> orderByComparator) {
+		return mbBanPersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**

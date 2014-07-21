@@ -115,8 +115,7 @@
 			<elseif>
 				<equals arg1="${userScreenNameVariation}" arg2="Invalid" />
 				<then>
-					<execute action="CPUsersandorganizationsAdduser#assertTextEquals" locator-key1="ERROR_MESSAGE_1" value1="Your request failed to complete." />
-					<execute action="CPUsersandorganizationsAdduser#assertTextEquals" locator-key1="ERROR_MESSAGE_2" value1="Please enter a valid screen name." />
+					<execute action="CPUsersandorganizationsAdduser#assertTextEquals" locator-key1="SCREEN_NAME_FIELD_ALERT" value1="Please enter only alphanumeric characters." />
 				</then>
 			</elseif>
 			<else>
@@ -844,6 +843,8 @@
 		<if>
 			<equals arg1="${userPassword}" arg2="Invalid" />
 			<then>
+				<execute action="Myaccount#selectFrame" locator-key1="MY_ACCOUNT_IFRAME" />
+
 				<execute action="Myaccount#assertClick" locator-key1="MENU_USER_INFORMATION_PASSWORD" value1="Password" />
 				<execute action="Myaccount#type" locator-key1="PASSWORD_CURRENT_PASSWORD_FIELD" value1="" />
 				<execute action="Myaccount#type" locator-key1="PASSWORD_NEW_PASSWORD_FIELD" value1="test1" />
@@ -869,6 +870,8 @@
 				</execute>
 			</then>
 			<else>
+				<execute action="Myaccount#selectFrame" locator-key1="MY_ACCOUNT_IFRAME" />
+
 				<execute action="Myaccount#assertClick" locator-key1="MENU_USER_INFORMATION_PASSWORD" value1="Password" />
 				<execute action="Myaccount#type" locator-key1="PASSWORD_CURRENT_PASSWORD_FIELD" value1="test" />
 				<execute action="Myaccount#type" locator-key1="PASSWORD_NEW_PASSWORD_FIELD" value1="test1" />
@@ -955,7 +958,6 @@
 			</then>
 		</if>
 
-		<execute action="CPUsersandorganizationsViewusers#assertTextEquals" locator-key1="INFO_MESSAGE" value1="No users were found." />
 		<execute action="CPUsersandorganizationsViewusers#assertElementNotPresent" locator-key1="DELETE" value1="Delete" />
 	</command>
 
@@ -963,6 +965,18 @@
 		<execute action="Myaccount#click" locator-key1="DETAILS_PICTURE_DELETE_BUTTON" />
 		<execute action="Myaccount#pause" value1="1000" />
 		<execute action="Myaccount#click" locator-key1="SAVE_BUTTON" />
+		<execute action="Myaccount#assertTextEquals" locator-key1="SUCCESS_MESSAGE" value1="Your request completed successfully." />
+		<execute action="Myaccount#selectFrame" value1="relative=top" />
+	</command>
+
+	<command name="editAnnouncementNotificationsViaMyAccount">
+		<execute action="Myaccount#assertClick" locator-key1="MENU_MISCELLANEOUS_ANNOUNCEMENTS" value1="Announcements" />
+
+		<var name="key_announcementType" value="${announcementType}" />
+		<var name="key_notificationType" value="${notificationType}" />
+
+		<execute action="Myaccount#check" locator-key1="ANNOUNCEMENTS_NOTIFICATION_CHECKBOX" />
+		<execute action="Myaccount#assertClick" locator-key1="SAVE_BUTTON" value1="Save" />
 		<execute action="Myaccount#assertTextEquals" locator-key1="SUCCESS_MESSAGE" value1="Your request completed successfully." />
 		<execute action="Myaccount#selectFrame" value1="relative=top" />
 	</command>
@@ -1005,6 +1019,7 @@
 
 		<var name="key_userScreenName" value="${userScreenName}" />
 
+		<execute action="CPUsersandorganizationsViewusers#pause" locator1="1000" />
 		<execute action="CPUsersandorganizationsViewusers#type" locator-key1="BASIC_SEARCH_FIELD" value1="${userScreenName}" />
 		<execute action="CPUsersandorganizationsViewusers#assertClick" locator-key1="BASIC_SEARCH_BUTTON" value1="Search" />
 		<execute action="CPUsersandorganizationsViewusers#assertTextEquals" locator-key1="USER_TABLE_SCREEN_NAME" value1="${userScreenName}" />
@@ -1254,9 +1269,9 @@
 
 		<execute action="Home#selectWindow" locator1="title=Welcome - Liferay" />
 
-		<execute action="Dockbar#assertElementPresent" locator-key1="ADMIN_SITE_ADMINISTRATION_IMPERSONATE_USER_ICON" />
-		<execute action="Dockbar#assertClick" locator-key1="ADMIN_SITE_ADMINISTRATION_IMPERSONATE_USER_ICON" />
-		<execute action="Dockbar#assertElementPresent" locator-key1="ADMIN_SITE_ADMINISTRATION_IMPERSONATE_USER_MESSAGE" />
+		<execute action="Dockbar#assertElementPresent" locator-key1="IMPERSONATE_USER_ICON" />
+		<execute action="Dockbar#assertClick" locator-key1="IMPERSONATE_USER_ICON" />
+		<execute action="Dockbar#assertElementPresent" locator-key1="USER_IMPERSONATE_USER_MESSAGE" />
 	</command>
 
 	<command name="loginPG">

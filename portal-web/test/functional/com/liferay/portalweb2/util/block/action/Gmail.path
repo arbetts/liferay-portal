@@ -18,6 +18,16 @@
 	<td></td>
 	<td></td>
 </tr>
+<tr>
+	<td>SUCCESS_MESSAGE</td>
+	<td>//b[contains(.,'Your message has been sent.')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
 <!--LOGIN-->
 <tr>
 	<td>LOGIN_EMAIL_FIELD</td>
@@ -171,6 +181,16 @@
 <tr>
 	<td>GMAIL_HTML_MODE_MESSAGE_BODY_SOCIAL_OFFICE_MESSAGE_LINK</td>
 	<td>//tr[contains(.,'message')]//td/div[@class='msg']//a[contains(.,'messages')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>GMAIL_HTML_MODE_MESSAGE_BODY_SOCIAL_OFFICE_SITE_INVITE_CONFIRMATION_LINK</td>
+	<td>//tr[contains(.,'members')]//td/div[@class='msg']//a[contains(.,'portal')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>GMAIL_HTML_MODE_MESSAGE_BODY_SOCIAL_OFFICE_SITE_INVITE_CREATE_ACCOUNT_LINK</td>
+	<td>//tr[contains(.,'members')]//td/div[@class='msg']//a[contains(.,'guest')]</td>
 	<td></td>
 </tr>
 <tr>

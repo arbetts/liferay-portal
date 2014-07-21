@@ -46,6 +46,16 @@ public class BookmarksEntryLocalServiceWrapper
 		return _bookmarksEntryLocalService.addBookmarksEntry(bookmarksEntry);
 	}
 
+	@Override
+	public com.liferay.portlet.bookmarks.model.BookmarksEntry addEntry(
+		long userId, long groupId, long folderId, java.lang.String name,
+		java.lang.String url, java.lang.String description,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _bookmarksEntryLocalService.addEntry(userId, groupId, folderId,
+			name, url, description, serviceContext);
+	}
+
 	/**
 	* Creates a new bookmarks entry with the primary key. Does not add the bookmarks entry to the database.
 	*
@@ -56,6 +66,18 @@ public class BookmarksEntryLocalServiceWrapper
 	public com.liferay.portlet.bookmarks.model.BookmarksEntry createBookmarksEntry(
 		long entryId) {
 		return _bookmarksEntryLocalService.createBookmarksEntry(entryId);
+	}
+
+	/**
+	* Deletes the bookmarks entry from the database. Also notifies the appropriate model listeners.
+	*
+	* @param bookmarksEntry the bookmarks entry
+	* @return the bookmarks entry that was removed
+	*/
+	@Override
+	public com.liferay.portlet.bookmarks.model.BookmarksEntry deleteBookmarksEntry(
+		com.liferay.portlet.bookmarks.model.BookmarksEntry bookmarksEntry) {
+		return _bookmarksEntryLocalService.deleteBookmarksEntry(bookmarksEntry);
 	}
 
 	/**
@@ -72,16 +94,42 @@ public class BookmarksEntryLocalServiceWrapper
 		return _bookmarksEntryLocalService.deleteBookmarksEntry(entryId);
 	}
 
+	@Override
+	public void deleteEntries(long groupId, long folderId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_bookmarksEntryLocalService.deleteEntries(groupId, folderId);
+	}
+
+	@Override
+	public void deleteEntries(long groupId, long folderId,
+		boolean includeTrashedEntries)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_bookmarksEntryLocalService.deleteEntries(groupId, folderId,
+			includeTrashedEntries);
+	}
+
+	@Override
+	public com.liferay.portlet.bookmarks.model.BookmarksEntry deleteEntry(
+		com.liferay.portlet.bookmarks.model.BookmarksEntry entry)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _bookmarksEntryLocalService.deleteEntry(entry);
+	}
+
+	@Override
+	public com.liferay.portlet.bookmarks.model.BookmarksEntry deleteEntry(
+		long entryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _bookmarksEntryLocalService.deleteEntry(entryId);
+	}
+
 	/**
-	* Deletes the bookmarks entry from the database. Also notifies the appropriate model listeners.
-	*
-	* @param bookmarksEntry the bookmarks entry
-	* @return the bookmarks entry that was removed
+	* @throws PortalException
 	*/
 	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry deleteBookmarksEntry(
-		com.liferay.portlet.bookmarks.model.BookmarksEntry bookmarksEntry) {
-		return _bookmarksEntryLocalService.deleteBookmarksEntry(bookmarksEntry);
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _bookmarksEntryLocalService.deletePersistedModel(persistedModel);
 	}
 
 	@Override
@@ -96,8 +144,7 @@ public class BookmarksEntryLocalServiceWrapper
 	* @return the matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _bookmarksEntryLocalService.dynamicQuery(dynamicQuery);
 	}
@@ -115,8 +162,7 @@ public class BookmarksEntryLocalServiceWrapper
 	* @return the range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end) {
 		return _bookmarksEntryLocalService.dynamicQuery(dynamicQuery, start, end);
@@ -136,11 +182,10 @@ public class BookmarksEntryLocalServiceWrapper
 	* @return the ordered range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		com.liferay.portal.kernel.util.OrderByComparator<T> orderByComparator) {
 		return _bookmarksEntryLocalService.dynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -179,20 +224,6 @@ public class BookmarksEntryLocalServiceWrapper
 	}
 
 	/**
-	* Returns the bookmarks entry with the matching UUID and company.
-	*
-	* @param uuid the bookmarks entry's UUID
-	* @param companyId the primary key of the company
-	* @return the matching bookmarks entry, or <code>null</code> if a matching bookmarks entry could not be found
-	*/
-	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry fetchBookmarksEntryByUuidAndCompanyId(
-		java.lang.String uuid, long companyId) {
-		return _bookmarksEntryLocalService.fetchBookmarksEntryByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
 	* Returns the bookmarks entry matching the UUID and group.
 	*
 	* @param uuid the bookmarks entry's UUID
@@ -206,78 +237,19 @@ public class BookmarksEntryLocalServiceWrapper
 			groupId);
 	}
 
-	/**
-	* Returns the bookmarks entry with the primary key.
-	*
-	* @param entryId the primary key of the bookmarks entry
-	* @return the bookmarks entry
-	* @throws PortalException if a bookmarks entry with the primary key could not be found
-	*/
-	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry getBookmarksEntry(
-		long entryId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _bookmarksEntryLocalService.getBookmarksEntry(entryId);
-	}
-
 	@Override
 	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
 		return _bookmarksEntryLocalService.getActionableDynamicQuery();
 	}
 
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
-		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
-		return _bookmarksEntryLocalService.getExportActionableDynamicQuery(portletDataContext);
-	}
-
 	/**
-	* @throws PortalException
-	*/
-	@Override
-	public com.liferay.portal.model.PersistedModel deletePersistedModel(
-		com.liferay.portal.model.PersistedModel persistedModel)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _bookmarksEntryLocalService.deletePersistedModel(persistedModel);
-	}
-
-	@Override
-	public com.liferay.portal.model.PersistedModel getPersistedModel(
-		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _bookmarksEntryLocalService.getPersistedModel(primaryKeyObj);
-	}
-
-	/**
-	* Returns the bookmarks entry with the matching UUID and company.
+	* Returns the Spring bean ID for this bean.
 	*
-	* @param uuid the bookmarks entry's UUID
-	* @param companyId the primary key of the company
-	* @return the matching bookmarks entry
-	* @throws PortalException if a matching bookmarks entry could not be found
+	* @return the Spring bean ID for this bean
 	*/
 	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry getBookmarksEntryByUuidAndCompanyId(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _bookmarksEntryLocalService.getBookmarksEntryByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
-	* Returns the bookmarks entry matching the UUID and group.
-	*
-	* @param uuid the bookmarks entry's UUID
-	* @param groupId the primary key of the group
-	* @return the matching bookmarks entry
-	* @throws PortalException if a matching bookmarks entry could not be found
-	*/
-	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry getBookmarksEntryByUuidAndGroupId(
-		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _bookmarksEntryLocalService.getBookmarksEntryByUuidAndGroupId(uuid,
-			groupId);
+	public java.lang.String getBeanIdentifier() {
+		return _bookmarksEntryLocalService.getBeanIdentifier();
 	}
 
 	/**
@@ -297,6 +269,21 @@ public class BookmarksEntryLocalServiceWrapper
 		return _bookmarksEntryLocalService.getBookmarksEntries(start, end);
 	}
 
+	@Override
+	public java.util.List<com.liferay.portlet.bookmarks.model.BookmarksEntry> getBookmarksEntriesByUuidAndCompanyId(
+		java.lang.String uuid, long companyId) {
+		return _bookmarksEntryLocalService.getBookmarksEntriesByUuidAndCompanyId(uuid,
+			companyId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.bookmarks.model.BookmarksEntry> getBookmarksEntriesByUuidAndCompanyId(
+		java.lang.String uuid, long companyId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portlet.bookmarks.model.BookmarksEntry> orderByComparator) {
+		return _bookmarksEntryLocalService.getBookmarksEntriesByUuidAndCompanyId(uuid,
+			companyId, start, end, orderByComparator);
+	}
+
 	/**
 	* Returns the number of bookmarks entries.
 	*
@@ -308,73 +295,33 @@ public class BookmarksEntryLocalServiceWrapper
 	}
 
 	/**
-	* Updates the bookmarks entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	* Returns the bookmarks entry with the primary key.
 	*
-	* @param bookmarksEntry the bookmarks entry
-	* @return the bookmarks entry that was updated
+	* @param entryId the primary key of the bookmarks entry
+	* @return the bookmarks entry
+	* @throws PortalException if a bookmarks entry with the primary key could not be found
 	*/
 	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry updateBookmarksEntry(
-		com.liferay.portlet.bookmarks.model.BookmarksEntry bookmarksEntry) {
-		return _bookmarksEntryLocalService.updateBookmarksEntry(bookmarksEntry);
-	}
-
-	/**
-	* Returns the Spring bean ID for this bean.
-	*
-	* @return the Spring bean ID for this bean
-	*/
-	@Override
-	public java.lang.String getBeanIdentifier() {
-		return _bookmarksEntryLocalService.getBeanIdentifier();
-	}
-
-	/**
-	* Sets the Spring bean ID for this bean.
-	*
-	* @param beanIdentifier the Spring bean ID for this bean
-	*/
-	@Override
-	public void setBeanIdentifier(java.lang.String beanIdentifier) {
-		_bookmarksEntryLocalService.setBeanIdentifier(beanIdentifier);
-	}
-
-	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry addEntry(
-		long userId, long groupId, long folderId, java.lang.String name,
-		java.lang.String url, java.lang.String description,
-		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _bookmarksEntryLocalService.addEntry(userId, groupId, folderId,
-			name, url, description, serviceContext);
-	}
-
-	@Override
-	public void deleteEntries(long groupId, long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_bookmarksEntryLocalService.deleteEntries(groupId, folderId);
-	}
-
-	@Override
-	public void deleteEntries(long groupId, long folderId,
-		boolean includeTrashedEntries)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_bookmarksEntryLocalService.deleteEntries(groupId, folderId,
-			includeTrashedEntries);
-	}
-
-	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry deleteEntry(
-		com.liferay.portlet.bookmarks.model.BookmarksEntry entry)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _bookmarksEntryLocalService.deleteEntry(entry);
-	}
-
-	@Override
-	public com.liferay.portlet.bookmarks.model.BookmarksEntry deleteEntry(
+	public com.liferay.portlet.bookmarks.model.BookmarksEntry getBookmarksEntry(
 		long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _bookmarksEntryLocalService.deleteEntry(entryId);
+		return _bookmarksEntryLocalService.getBookmarksEntry(entryId);
+	}
+
+	/**
+	* Returns the bookmarks entry matching the UUID and group.
+	*
+	* @param uuid the bookmarks entry's UUID
+	* @param groupId the primary key of the group
+	* @return the matching bookmarks entry
+	* @throws PortalException if a matching bookmarks entry could not be found
+	*/
+	@Override
+	public com.liferay.portlet.bookmarks.model.BookmarksEntry getBookmarksEntryByUuidAndGroupId(
+		java.lang.String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _bookmarksEntryLocalService.getBookmarksEntryByUuidAndGroupId(uuid,
+			groupId);
 	}
 
 	@Override
@@ -382,6 +329,14 @@ public class BookmarksEntryLocalServiceWrapper
 		long groupId, long folderId, int start, int end) {
 		return _bookmarksEntryLocalService.getEntries(groupId, folderId, start,
 			end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.bookmarks.model.BookmarksEntry> getEntries(
+		long groupId, long folderId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portlet.bookmarks.model.BookmarksEntry> orderByComparator) {
+		return _bookmarksEntryLocalService.getEntries(groupId, folderId, start,
+			end, orderByComparator);
 	}
 
 	@Override
@@ -394,17 +349,9 @@ public class BookmarksEntryLocalServiceWrapper
 	@Override
 	public java.util.List<com.liferay.portlet.bookmarks.model.BookmarksEntry> getEntries(
 		long groupId, long folderId, int status, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portlet.bookmarks.model.BookmarksEntry> orderByComparator) {
 		return _bookmarksEntryLocalService.getEntries(groupId, folderId,
 			status, start, end, orderByComparator);
-	}
-
-	@Override
-	public java.util.List<com.liferay.portlet.bookmarks.model.BookmarksEntry> getEntries(
-		long groupId, long folderId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
-		return _bookmarksEntryLocalService.getEntries(groupId, folderId, start,
-			end, orderByComparator);
 	}
 
 	@Override
@@ -423,6 +370,12 @@ public class BookmarksEntryLocalServiceWrapper
 		long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _bookmarksEntryLocalService.getEntry(entryId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
+		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
+		return _bookmarksEntryLocalService.getExportActionableDynamicQuery(portletDataContext);
 	}
 
 	@Override
@@ -458,6 +411,13 @@ public class BookmarksEntryLocalServiceWrapper
 	@Override
 	public java.util.List<com.liferay.portlet.bookmarks.model.BookmarksEntry> getNoAssetEntries() {
 		return _bookmarksEntryLocalService.getNoAssetEntries();
+	}
+
+	@Override
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _bookmarksEntryLocalService.getPersistedModel(primaryKeyObj);
 	}
 
 	@Override
@@ -522,6 +482,16 @@ public class BookmarksEntryLocalServiceWrapper
 			creatorUserId, status, start, end);
 	}
 
+	/**
+	* Sets the Spring bean ID for this bean.
+	*
+	* @param beanIdentifier the Spring bean ID for this bean
+	*/
+	@Override
+	public void setBeanIdentifier(java.lang.String beanIdentifier) {
+		_bookmarksEntryLocalService.setBeanIdentifier(beanIdentifier);
+	}
+
 	@Override
 	public void subscribeEntry(long userId, long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -542,6 +512,18 @@ public class BookmarksEntryLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_bookmarksEntryLocalService.updateAsset(userId, entry,
 			assetCategoryIds, assetTagNames, assetLinkEntryIds);
+	}
+
+	/**
+	* Updates the bookmarks entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param bookmarksEntry the bookmarks entry
+	* @return the bookmarks entry that was updated
+	*/
+	@Override
+	public com.liferay.portlet.bookmarks.model.BookmarksEntry updateBookmarksEntry(
+		com.liferay.portlet.bookmarks.model.BookmarksEntry bookmarksEntry) {
+		return _bookmarksEntryLocalService.updateBookmarksEntry(bookmarksEntry);
 	}
 
 	@Override

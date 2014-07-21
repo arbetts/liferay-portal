@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.repository.cmis.search.CMISSearchQueryBuilderUt
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.search.DocumentHelper;
 import com.liferay.portal.kernel.search.DocumentImpl;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Hits;
@@ -445,7 +446,7 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public List<FileEntry> getFileEntries(
-		long folderId, int start, int end, OrderByComparator obc) {
+		long folderId, int start, int end, OrderByComparator<FileEntry> obc) {
 
 		List<FileEntry> fileEntries = getFileEntries(folderId);
 
@@ -455,7 +456,7 @@ public class CMISRepository extends BaseCmisRepository {
 	@Override
 	public List<FileEntry> getFileEntries(
 		long folderId, long fileEntryTypeId, int start, int end,
-		OrderByComparator obc) {
+		OrderByComparator<FileEntry> obc) {
 
 		return new ArrayList<FileEntry>();
 	}
@@ -463,7 +464,7 @@ public class CMISRepository extends BaseCmisRepository {
 	@Override
 	public List<FileEntry> getFileEntries(
 			long folderId, String[] mimeTypes, int start, int end,
-			OrderByComparator obc)
+			OrderByComparator<FileEntry> obc)
 		throws PortalException {
 
 		Map<Long, List<FileEntry>> fileEntriesCache = _fileEntriesCache.get();
@@ -692,7 +693,7 @@ public class CMISRepository extends BaseCmisRepository {
 	@Override
 	public List<Folder> getFolders(
 			long parentFolderId, boolean includeMountfolders, int start,
-			int end, OrderByComparator obc)
+			int end, OrderByComparator<Folder> obc)
 		throws PortalException {
 
 		List<Folder> folders = getFolders(parentFolderId);
@@ -702,17 +703,18 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public List<Object> getFoldersAndFileEntries(
-		long folderId, int start, int end, OrderByComparator obc) {
+		long folderId, int start, int end, OrderByComparator<?> obc) {
 
 		List<Object> foldersAndFileEntries = getFoldersAndFileEntries(folderId);
 
-		return subList(foldersAndFileEntries, start, end, obc);
+		return subList(
+			foldersAndFileEntries, start, end, (OrderByComparator<Object>)obc);
 	}
 
 	@Override
 	public List<Object> getFoldersAndFileEntries(
 			long folderId, String[] mimeTypes, int start, int end,
-			OrderByComparator obc)
+			OrderByComparator<?> obc)
 		throws PortalException {
 
 		Map<Long, List<Object>> foldersAndFileEntriesCache =
@@ -735,7 +737,8 @@ public class CMISRepository extends BaseCmisRepository {
 			}
 		}
 
-		return subList(foldersAndFileEntries, start, end, obc);
+		return subList(
+			foldersAndFileEntries, start, end, (OrderByComparator<Object>)obc);
 	}
 
 	@Override
@@ -807,7 +810,8 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public List<Folder> getMountFolders(
-		long parentFolderId, int start, int end, OrderByComparator obc) {
+		long parentFolderId, int start, int end,
+		OrderByComparator<Folder> obc) {
 
 		return new ArrayList<Folder>();
 	}
@@ -1741,10 +1745,11 @@ public class CMISRepository extends BaseCmisRepository {
 				continue;
 			}
 
-			document.addKeyword(
-				Field.ENTRY_CLASS_NAME, fileEntry.getModelClassName());
-			document.addKeyword(
-				Field.ENTRY_CLASS_PK, fileEntry.getFileEntryId());
+			DocumentHelper documentHelper = new DocumentHelper(document);
+
+			documentHelper.setEntryKey(
+				fileEntry.getModelClassName(), fileEntry.getFileEntryId());
+
 			document.addKeyword(Field.TITLE, fileEntry.getTitle());
 
 			documents.add(document);
@@ -2138,7 +2143,7 @@ public class CMISRepository extends BaseCmisRepository {
 	}
 
 	protected <E> List<E> subList(
-		List<E> list, int start, int end, OrderByComparator obc) {
+		List<E> list, int start, int end, OrderByComparator<E> obc) {
 
 		if ((obc != null) &&
 			((obc instanceof RepositoryModelCreateDateComparator) ||

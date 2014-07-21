@@ -152,8 +152,7 @@ public abstract class DLFileShortcutLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return dlFileShortcutPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -170,8 +169,8 @@ public abstract class DLFileShortcutLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return dlFileShortcutPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -190,9 +189,8 @@ public abstract class DLFileShortcutLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return dlFileShortcutPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -225,20 +223,6 @@ public abstract class DLFileShortcutLocalServiceBaseImpl
 	@Override
 	public DLFileShortcut fetchDLFileShortcut(long fileShortcutId) {
 		return dlFileShortcutPersistence.fetchByPrimaryKey(fileShortcutId);
-	}
-
-	/**
-	 * Returns the document library file shortcut with the matching UUID and company.
-	 *
-	 * @param uuid the document library file shortcut's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching document library file shortcut, or <code>null</code> if a matching document library file shortcut could not be found
-	 */
-	@Override
-	public DLFileShortcut fetchDLFileShortcutByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return dlFileShortcutPersistence.fetchByUuid_C_First(uuid, companyId,
-			null);
 	}
 
 	/**
@@ -358,7 +342,7 @@ public abstract class DLFileShortcutLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteDLFileShortcut((DLFileShortcut)persistedModel);
+		return dlFileShortcutLocalService.deleteDLFileShortcut((DLFileShortcut)persistedModel);
 	}
 
 	@Override
@@ -367,19 +351,18 @@ public abstract class DLFileShortcutLocalServiceBaseImpl
 		return dlFileShortcutPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the document library file shortcut with the matching UUID and company.
-	 *
-	 * @param uuid the document library file shortcut's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching document library file shortcut
-	 * @throws PortalException if a matching document library file shortcut could not be found
-	 */
 	@Override
-	public DLFileShortcut getDLFileShortcutByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return dlFileShortcutPersistence.findByUuid_C_First(uuid, companyId,
-			null);
+	public List<DLFileShortcut> getDLFileShortcutsByUuidAndCompanyId(
+		String uuid, long companyId) {
+		return dlFileShortcutPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<DLFileShortcut> getDLFileShortcutsByUuidAndCompanyId(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<DLFileShortcut> orderByComparator) {
+		return dlFileShortcutPersistence.findByUuid_C(uuid, companyId, start,
+			end, orderByComparator);
 	}
 
 	/**

@@ -173,8 +173,7 @@ public abstract class MBMessageLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return mbMessagePersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -191,8 +190,8 @@ public abstract class MBMessageLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return mbMessagePersistence.findWithDynamicQuery(dynamicQuery, start,
 			end);
 	}
@@ -211,9 +210,8 @@ public abstract class MBMessageLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return mbMessagePersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -246,19 +244,6 @@ public abstract class MBMessageLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public MBMessage fetchMBMessage(long messageId) {
 		return mbMessagePersistence.fetchByPrimaryKey(messageId);
-	}
-
-	/**
-	 * Returns the message-boards message with the matching UUID and company.
-	 *
-	 * @param uuid the message-boards message's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message-boards message, or <code>null</code> if a matching message-boards message could not be found
-	 */
-	@Override
-	public MBMessage fetchMBMessageByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return mbMessagePersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -386,7 +371,7 @@ public abstract class MBMessageLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteMBMessage((MBMessage)persistedModel);
+		return mbMessageLocalService.deleteMBMessage((MBMessage)persistedModel);
 	}
 
 	@Override
@@ -395,18 +380,18 @@ public abstract class MBMessageLocalServiceBaseImpl extends BaseLocalServiceImpl
 		return mbMessagePersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the message-boards message with the matching UUID and company.
-	 *
-	 * @param uuid the message-boards message's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message-boards message
-	 * @throws PortalException if a matching message-boards message could not be found
-	 */
 	@Override
-	public MBMessage getMBMessageByUuidAndCompanyId(String uuid, long companyId)
-		throws PortalException {
-		return mbMessagePersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<MBMessage> getMBMessagesByUuidAndCompanyId(String uuid,
+		long companyId) {
+		return mbMessagePersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<MBMessage> getMBMessagesByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<MBMessage> orderByComparator) {
+		return mbMessagePersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**

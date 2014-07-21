@@ -17,7 +17,9 @@
 <%@ include file="/html/portlet/document_selector/init.jsp" %>
 
 <%
-long groupId = ParamUtil.getLong(request, "groupId");
+String[] tabs1Names = DocumentSelectorUtil.getTabs1Names(request);
+
+long groupId = ParamUtil.getLong(request, "groupId", scopeGroupId);
 
 Folder folder = (Folder)request.getAttribute(WebKeys.DOCUMENT_LIBRARY_FOLDER);
 
@@ -36,20 +38,19 @@ if (folderId > 0) {
 String ckEditorFuncNum = DocumentSelectorUtil.getCKEditorFuncNum(request);
 String eventName = ParamUtil.getString(request, "eventName");
 boolean showGroupsSelector = ParamUtil.getBoolean(request, "showGroupsSelector");
-
-long repositoryId = groupId;
+String type = DocumentSelectorUtil.getType(request);
 
 if (folder != null) {
-	repositoryId = folder.getRepositoryId();
-
 	PortletURL breadcrumbURL = renderResponse.createRenderURL();
 
 	breadcrumbURL.setParameter("struts_action", "/document_selector/view");
+	breadcrumbURL.setParameter("tabs1Names", StringUtil.merge(tabs1Names));
 	breadcrumbURL.setParameter("groupId", String.valueOf(groupId));
 	breadcrumbURL.setParameter("folderId", String.valueOf(DLFolderConstants.DEFAULT_PARENT_FOLDER_ID));
 	breadcrumbURL.setParameter("ckEditorFuncNum", ckEditorFuncNum);
 	breadcrumbURL.setParameter("eventName", eventName);
 	breadcrumbURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector));
+	breadcrumbURL.setParameter("type", type);
 
 	PortalUtil.addPortletBreadcrumbEntry(request, themeDisplay.translate("home"), breadcrumbURL.toString());
 
@@ -61,15 +62,19 @@ if (folder != null) {
 PortletURL portletURL = renderResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/document_selector/view");
+portletURL.setParameter("tabs1Names", StringUtil.merge(tabs1Names));
 portletURL.setParameter("groupId", String.valueOf(groupId));
 portletURL.setParameter("folderId", String.valueOf(folderId));
 portletURL.setParameter("ckEditorFuncNum", ckEditorFuncNum);
 portletURL.setParameter("eventName", eventName);
 portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector));
+portletURL.setParameter("type", type);
 %>
 
 <c:if test="<%= showGroupsSelector %>">
-	<liferay-util:include page="/html/portlet/document_selector/group_selector.jsp" />
+	<liferay-util:include page="/html/portlet/document_selector/group_selector.jsp">
+		<liferay-util:param name="tabs1" value="documents" />
+	</liferay-util:include>
 </c:if>
 
 <aui:form method="post" name="selectDocumentFm">
@@ -89,11 +94,11 @@ portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector)
 				iconCssClass="icon-plus"
 				label="add"
 			>
-				<c:if test="<%= DLFolderPermission.contains(permissionChecker, scopeGroupId, folderId, ActionKeys.ADD_FOLDER) %>">
+				<c:if test="<%= DLFolderPermission.contains(permissionChecker, groupId, folderId, ActionKeys.ADD_FOLDER) %>">
 					<liferay-portlet:renderURL portletName="<%= PortletKeys.DOCUMENT_LIBRARY %>" var="addFolderURL">
 						<portlet:param name="struts_action" value="/document_library/edit_folder" />
-						<portlet:param name="redirect" value="<%= currentURL %>" />
-						<portlet:param name="repositoryId" value="<%= String.valueOf(repositoryId) %>" />
+						<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
+						<portlet:param name="repositoryId" value="<%= String.valueOf(groupId) %>" />
 						<portlet:param name="parentFolderId" value="<%= String.valueOf(folderId) %>" />
 					</liferay-portlet:renderURL>
 
@@ -108,24 +113,23 @@ portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector)
 					/>
 				</c:if>
 
-				<c:if test="<%= DLFolderPermission.contains(permissionChecker, scopeGroupId, folderId, ActionKeys.ADD_DOCUMENT) %>">
+				<c:if test="<%= DLFolderPermission.contains(permissionChecker, groupId, folderId, ActionKeys.ADD_DOCUMENT) %>">
 
 					<%
 					List<DLFileEntryType> fileEntryTypes = Collections.emptyList();
 
 					if ((folder == null) || folder.isSupportsMetadata()) {
-						fileEntryTypes = DLFileEntryTypeLocalServiceUtil.getFolderFileEntryTypes(PortalUtil.getCurrentAndAncestorSiteGroupIds(scopeGroupId), folderId, true);
+						fileEntryTypes = DLFileEntryTypeLocalServiceUtil.getFolderFileEntryTypes(PortalUtil.getCurrentAndAncestorSiteGroupIds(groupId), folderId, true);
 					}
 					%>
 
 					<c:if test="<%= fileEntryTypes.isEmpty() %>">
-						<liferay-portlet:renderURL portletName="<%= PortletKeys.DOCUMENT_LIBRARY %>" var="editFileEntryURL">
-							<portlet:param name="struts_action" value="/document_library/edit_file_entry" />
+						<liferay-portlet:renderURL var="editFileEntryURL">
+							<portlet:param name="struts_action" value="/document_selector/add_file_entry" />
 							<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD %>" />
-							<portlet:param name="redirect" value="<%= currentURL %>" />
-							<portlet:param name="backURL" value="<%= currentURL %>" />
-							<portlet:param name="repositoryId" value="<%= String.valueOf(repositoryId) %>" />
+							<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
 							<portlet:param name="folderId" value="<%= String.valueOf(folderId) %>" />
+							<portlet:param name="type" value="<%= type %>" />
 						</liferay-portlet:renderURL>
 
 						<%
@@ -143,13 +147,13 @@ portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector)
 					for (DLFileEntryType fileEntryType : fileEntryTypes) {
 					%>
 
-						<liferay-portlet:renderURL portletName="<%= PortletKeys.DOCUMENT_LIBRARY %>" var="addFileEntryTypeURL">
-							<portlet:param name="struts_action" value="/document_library/edit_file_entry" />
+						<liferay-portlet:renderURL var="addFileEntryTypeURL">
+							<portlet:param name="struts_action" value="/document_selector/add_file_entry" />
 							<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD %>" />
-							<portlet:param name="redirect" value="<%= currentURL %>" />
-							<portlet:param name="repositoryId" value="<%= String.valueOf(repositoryId) %>" />
+							<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
 							<portlet:param name="folderId" value="<%= String.valueOf(folderId) %>" />
 							<portlet:param name="fileEntryTypeId" value="<%= String.valueOf(fileEntryType.getFileEntryTypeId()) %>" />
+							<portlet:param name="type" value="<%= type %>" />
 						</liferay-portlet:renderURL>
 
 						<%
@@ -188,7 +192,7 @@ portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector)
 			iteratorURL="<%= portletURL %>"
 		>
 			<liferay-ui:search-container-results
-				results="<%= DLAppServiceUtil.getFolders(repositoryId, folderId, searchContainer.getStart(), searchContainer.getEnd()) %>"
+				results="<%= DLAppServiceUtil.getFolders(groupId, folderId, searchContainer.getStart(), searchContainer.getEnd()) %>"
 				total="<%= DLAppServiceUtil.getFoldersCount(groupId, folderId) %>"
 			/>
 
@@ -199,11 +203,13 @@ portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector)
 			>
 				<portlet:renderURL var="rowURL">
 					<portlet:param name="struts_action" value="/document_selector/view" />
+					<portlet:param name="tabs1Names" value="<%= StringUtil.merge(tabs1Names) %>" />
 					<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 					<portlet:param name="folderId" value="<%= String.valueOf(curFolder.getFolderId()) %>" />
 					<portlet:param name="ckEditorFuncNum" value="<%= ckEditorFuncNum %>" />
 					<portlet:param name="eventName" value="<%= eventName %>" />
 					<portlet:param name="showGroupsSelector" value="<%= String.valueOf(showGroupsSelector) %>" />
+					<portlet:param name="type" value="<%= type %>" />
 				</portlet:renderURL>
 
 				<liferay-ui:search-container-column-text
@@ -254,10 +260,12 @@ portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector)
 	PortletURL backURL = renderResponse.createRenderURL();
 
 	backURL.setParameter("struts_action", "/document_selector/view");
+	backURL.setParameter("tabs1Names", StringUtil.merge(tabs1Names));
 	backURL.setParameter("groupId", String.valueOf(groupId));
 	backURL.setParameter("ckEditorFuncNum", ckEditorFuncNum);
 	backURL.setParameter("eventName", eventName);
 	backURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector));
+	backURL.setParameter("type", type);
 	%>
 
 	<liferay-ui:header
@@ -270,11 +278,13 @@ portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector)
 	PortletURL iteratorURL = renderResponse.createRenderURL();
 
 	iteratorURL.setParameter("struts_action", "/document_selector/view");
+	iteratorURL.setParameter("tabs1Names", StringUtil.merge(tabs1Names));
 	iteratorURL.setParameter("groupId", String.valueOf(groupId));
 	iteratorURL.setParameter("folderId", String.valueOf(folderId));
 	iteratorURL.setParameter("ckEditorFuncNum", ckEditorFuncNum);
 	iteratorURL.setParameter("eventName", eventName);
 	iteratorURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector));
+	iteratorURL.setParameter("type", type);
 	%>
 
 	<liferay-ui:search-container
@@ -283,36 +293,45 @@ portletURL.setParameter("showGroupsSelector", String.valueOf(showGroupsSelector)
 	>
 
 		<%
-		SearchContext searchContext = SearchContextFactory.getInstance(request);
-
-		searchContext.setAttribute("groupId", groupId);
-		searchContext.setAttribute("mimeTypes", DocumentSelectorUtil.getMimeTypes(request));
-		searchContext.setAttribute("paginationType", "regular");
-
-		int entryEnd = ParamUtil.getInteger(request, "entryEnd", PropsValues.SEARCH_CONTAINER_PAGE_DEFAULT_DELTA);
-
-		searchContext.setEnd(entryEnd);
-
-		searchContext.setFolderIds(new long[]{folderId});
-		searchContext.setGroupIds(new long[] {groupId});
-		searchContext.setIncludeFolders(false);
-
 		String keywords = ParamUtil.getString(request, "keywords");
 
-		searchContext.setKeywords(keywords);
+		if (Validator.isNotNull(keywords)) {
+			SearchContext searchContext = SearchContextFactory.getInstance(request);
 
-		searchContext.setScopeStrict(false);
+			searchContext.setAttribute("groupId", groupId);
+			searchContext.setAttribute("mimeTypes", DocumentSelectorUtil.getMimeTypes(request));
+			searchContext.setAttribute("paginationType", "regular");
 
-		int entryStart = ParamUtil.getInteger(request, "entryStart");
+			int entryEnd = ParamUtil.getInteger(request, "entryEnd", PropsValues.SEARCH_CONTAINER_PAGE_DEFAULT_DELTA);
 
-		searchContext.setStart(entryStart);
+			searchContext.setEnd(entryEnd);
 
-		Hits hits = DLAppServiceUtil.search(repositoryId, searchContext);
+			searchContext.setFolderIds(new long[]{folderId});
+			searchContext.setGroupIds(new long[]{groupId});
+			searchContext.setIncludeFolders(false);
+
+			searchContext.setKeywords(keywords);
+
+			searchContext.setScopeStrict(false);
+
+			int entryStart = ParamUtil.getInteger(request, "entryStart");
+
+			searchContext.setStart(entryStart);
+
+			Hits hits = DLAppServiceUtil.search(groupId, searchContext);
+
+			searchContainer.setTotal(hits.getLength());
+
+			searchContainer.setResults(DLUtil.getFileEntries(hits));
+		}
+		else {
+			String[] mimeTypes = DocumentSelectorUtil.getMimeTypes(request);
+
+			searchContainer.setTotal(DLAppServiceUtil.getFileEntriesCount(groupId, folderId, mimeTypes));
+
+			searchContainer.setResults(DLAppServiceUtil.getFileEntries(groupId, folderId, mimeTypes, searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()));
+		}
 		%>
-
-		<liferay-ui:search-container-results
-			results="<%= DLUtil.getFileEntries(hits) %>"
-		/>
 
 		<liferay-ui:search-container-row
 			className="com.liferay.portal.kernel.repository.model.FileEntry"

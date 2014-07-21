@@ -140,8 +140,7 @@ public abstract class MBMailingListLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return mbMailingListPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -158,8 +157,8 @@ public abstract class MBMailingListLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return mbMailingListPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -178,9 +177,8 @@ public abstract class MBMailingListLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return mbMailingListPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -213,20 +211,6 @@ public abstract class MBMailingListLocalServiceBaseImpl
 	@Override
 	public MBMailingList fetchMBMailingList(long mailingListId) {
 		return mbMailingListPersistence.fetchByPrimaryKey(mailingListId);
-	}
-
-	/**
-	 * Returns the message boards mailing list with the matching UUID and company.
-	 *
-	 * @param uuid the message boards mailing list's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message boards mailing list, or <code>null</code> if a matching message boards mailing list could not be found
-	 */
-	@Override
-	public MBMailingList fetchMBMailingListByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return mbMailingListPersistence.fetchByUuid_C_First(uuid, companyId,
-			null);
 	}
 
 	/**
@@ -338,7 +322,7 @@ public abstract class MBMailingListLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteMBMailingList((MBMailingList)persistedModel);
+		return mbMailingListLocalService.deleteMBMailingList((MBMailingList)persistedModel);
 	}
 
 	@Override
@@ -347,18 +331,18 @@ public abstract class MBMailingListLocalServiceBaseImpl
 		return mbMailingListPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the message boards mailing list with the matching UUID and company.
-	 *
-	 * @param uuid the message boards mailing list's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message boards mailing list
-	 * @throws PortalException if a matching message boards mailing list could not be found
-	 */
 	@Override
-	public MBMailingList getMBMailingListByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return mbMailingListPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<MBMailingList> getMBMailingListsByUuidAndCompanyId(
+		String uuid, long companyId) {
+		return mbMailingListPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<MBMailingList> getMBMailingListsByUuidAndCompanyId(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<MBMailingList> orderByComparator) {
+		return mbMailingListPersistence.findByUuid_C(uuid, companyId, start,
+			end, orderByComparator);
 	}
 
 	/**

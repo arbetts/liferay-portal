@@ -451,6 +451,11 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 	}
 
 	@Override
+	public Company deleteCompany(Company company) throws PortalException {
+		return deleteCompany(company.getCompanyId());
+	}
+
+	@Override
 	public Company deleteCompany(long companyId) throws PortalException {
 		if (companyId == PortalInstances.getDefaultCompanyId()) {
 			throw new RequiredCompanyException();
@@ -1628,6 +1633,10 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 
 	protected class DeleteOrganizationActionableDynamicQuery {
 
+		public void setParentOrganizationId(long parentOrganizationId) {
+			_parentOrganizationId = parentOrganizationId;
+		}
+
 		protected DeleteOrganizationActionableDynamicQuery() {
 			_actionableDynamicQuery =
 				organizationLocalService.getActionableDynamicQuery();
@@ -1682,10 +1691,6 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 
 		protected void setCompanyId(long companyId) {
 			_actionableDynamicQuery.setCompanyId(companyId);
-		}
-
-		public void setParentOrganizationId(long parentOrganizationId) {
-			_parentOrganizationId = parentOrganizationId;
 		}
 
 		private ActionableDynamicQuery _actionableDynamicQuery;

@@ -140,8 +140,7 @@ public abstract class RepositoryEntryLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return repositoryEntryPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -158,8 +157,8 @@ public abstract class RepositoryEntryLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return repositoryEntryPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -178,9 +177,8 @@ public abstract class RepositoryEntryLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return repositoryEntryPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -213,20 +211,6 @@ public abstract class RepositoryEntryLocalServiceBaseImpl
 	@Override
 	public RepositoryEntry fetchRepositoryEntry(long repositoryEntryId) {
 		return repositoryEntryPersistence.fetchByPrimaryKey(repositoryEntryId);
-	}
-
-	/**
-	 * Returns the repository entry with the matching UUID and company.
-	 *
-	 * @param uuid the repository entry's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching repository entry, or <code>null</code> if a matching repository entry could not be found
-	 */
-	@Override
-	public RepositoryEntry fetchRepositoryEntryByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return repositoryEntryPersistence.fetchByUuid_C_First(uuid, companyId,
-			null);
 	}
 
 	/**
@@ -338,7 +322,7 @@ public abstract class RepositoryEntryLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteRepositoryEntry((RepositoryEntry)persistedModel);
+		return repositoryEntryLocalService.deleteRepositoryEntry((RepositoryEntry)persistedModel);
 	}
 
 	@Override
@@ -347,19 +331,18 @@ public abstract class RepositoryEntryLocalServiceBaseImpl
 		return repositoryEntryPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the repository entry with the matching UUID and company.
-	 *
-	 * @param uuid the repository entry's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching repository entry
-	 * @throws PortalException if a matching repository entry could not be found
-	 */
 	@Override
-	public RepositoryEntry getRepositoryEntryByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return repositoryEntryPersistence.findByUuid_C_First(uuid, companyId,
-			null);
+	public List<RepositoryEntry> getRepositoryEntriesByUuidAndCompanyId(
+		String uuid, long companyId) {
+		return repositoryEntryPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<RepositoryEntry> getRepositoryEntriesByUuidAndCompanyId(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<RepositoryEntry> orderByComparator) {
+		return repositoryEntryPersistence.findByUuid_C(uuid, companyId, start,
+			end, orderByComparator);
 	}
 
 	/**

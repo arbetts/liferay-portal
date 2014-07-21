@@ -45,6 +45,16 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 		return _mbThreadLocalService.addMBThread(mbThread);
 	}
 
+	@Override
+	public com.liferay.portlet.messageboards.model.MBThread addThread(
+		long categoryId,
+		com.liferay.portlet.messageboards.model.MBMessage message,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbThreadLocalService.addThread(categoryId, message,
+			serviceContext);
+	}
+
 	/**
 	* Creates a new message boards thread with the primary key. Does not add the message boards thread to the database.
 	*
@@ -55,6 +65,18 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 	public com.liferay.portlet.messageboards.model.MBThread createMBThread(
 		long threadId) {
 		return _mbThreadLocalService.createMBThread(threadId);
+	}
+
+	/**
+	* Deletes the message boards thread from the database. Also notifies the appropriate model listeners.
+	*
+	* @param mbThread the message boards thread
+	* @return the message boards thread that was removed
+	*/
+	@Override
+	public com.liferay.portlet.messageboards.model.MBThread deleteMBThread(
+		com.liferay.portlet.messageboards.model.MBThread mbThread) {
+		return _mbThreadLocalService.deleteMBThread(mbThread);
 	}
 
 	/**
@@ -72,15 +94,40 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 	}
 
 	/**
-	* Deletes the message boards thread from the database. Also notifies the appropriate model listeners.
-	*
-	* @param mbThread the message boards thread
-	* @return the message boards thread that was removed
+	* @throws PortalException
 	*/
 	@Override
-	public com.liferay.portlet.messageboards.model.MBThread deleteMBThread(
-		com.liferay.portlet.messageboards.model.MBThread mbThread) {
-		return _mbThreadLocalService.deleteMBThread(mbThread);
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbThreadLocalService.deletePersistedModel(persistedModel);
+	}
+
+	@Override
+	public void deleteThread(
+		com.liferay.portlet.messageboards.model.MBThread thread)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_mbThreadLocalService.deleteThread(thread);
+	}
+
+	@Override
+	public void deleteThread(long threadId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_mbThreadLocalService.deleteThread(threadId);
+	}
+
+	@Override
+	public void deleteThreads(long groupId, long categoryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_mbThreadLocalService.deleteThreads(groupId, categoryId);
+	}
+
+	@Override
+	public void deleteThreads(long groupId, long categoryId,
+		boolean includeTrashedEntries)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_mbThreadLocalService.deleteThreads(groupId, categoryId,
+			includeTrashedEntries);
 	}
 
 	@Override
@@ -95,8 +142,7 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 	* @return the matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
 		return _mbThreadLocalService.dynamicQuery(dynamicQuery);
 	}
@@ -114,8 +160,7 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 	* @return the range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end) {
 		return _mbThreadLocalService.dynamicQuery(dynamicQuery, start, end);
@@ -135,11 +180,10 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 	* @return the ordered range of matching rows
 	*/
 	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
+	public <T> java.util.List<T> dynamicQuery(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
 		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
+		com.liferay.portal.kernel.util.OrderByComparator<T> orderByComparator) {
 		return _mbThreadLocalService.dynamicQuery(dynamicQuery, start, end,
 			orderByComparator);
 	}
@@ -177,20 +221,6 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 	}
 
 	/**
-	* Returns the message boards thread with the matching UUID and company.
-	*
-	* @param uuid the message boards thread's UUID
-	* @param companyId the primary key of the company
-	* @return the matching message boards thread, or <code>null</code> if a matching message boards thread could not be found
-	*/
-	@Override
-	public com.liferay.portlet.messageboards.model.MBThread fetchMBThreadByUuidAndCompanyId(
-		java.lang.String uuid, long companyId) {
-		return _mbThreadLocalService.fetchMBThreadByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
 	* Returns the message boards thread matching the UUID and group.
 	*
 	* @param uuid the message boards thread's UUID
@@ -203,116 +233,15 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 		return _mbThreadLocalService.fetchMBThreadByUuidAndGroupId(uuid, groupId);
 	}
 
-	/**
-	* Returns the message boards thread with the primary key.
-	*
-	* @param threadId the primary key of the message boards thread
-	* @return the message boards thread
-	* @throws PortalException if a message boards thread with the primary key could not be found
-	*/
 	@Override
-	public com.liferay.portlet.messageboards.model.MBThread getMBThread(
-		long threadId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mbThreadLocalService.getMBThread(threadId);
+	public com.liferay.portlet.messageboards.model.MBThread fetchThread(
+		long threadId) {
+		return _mbThreadLocalService.fetchThread(threadId);
 	}
 
 	@Override
 	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
 		return _mbThreadLocalService.getActionableDynamicQuery();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
-		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
-		return _mbThreadLocalService.getExportActionableDynamicQuery(portletDataContext);
-	}
-
-	/**
-	* @throws PortalException
-	*/
-	@Override
-	public com.liferay.portal.model.PersistedModel deletePersistedModel(
-		com.liferay.portal.model.PersistedModel persistedModel)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mbThreadLocalService.deletePersistedModel(persistedModel);
-	}
-
-	@Override
-	public com.liferay.portal.model.PersistedModel getPersistedModel(
-		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mbThreadLocalService.getPersistedModel(primaryKeyObj);
-	}
-
-	/**
-	* Returns the message boards thread with the matching UUID and company.
-	*
-	* @param uuid the message boards thread's UUID
-	* @param companyId the primary key of the company
-	* @return the matching message boards thread
-	* @throws PortalException if a matching message boards thread could not be found
-	*/
-	@Override
-	public com.liferay.portlet.messageboards.model.MBThread getMBThreadByUuidAndCompanyId(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mbThreadLocalService.getMBThreadByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
-	* Returns the message boards thread matching the UUID and group.
-	*
-	* @param uuid the message boards thread's UUID
-	* @param groupId the primary key of the group
-	* @return the matching message boards thread
-	* @throws PortalException if a matching message boards thread could not be found
-	*/
-	@Override
-	public com.liferay.portlet.messageboards.model.MBThread getMBThreadByUuidAndGroupId(
-		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mbThreadLocalService.getMBThreadByUuidAndGroupId(uuid, groupId);
-	}
-
-	/**
-	* Returns a range of all the message boards threads.
-	*
-	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	* </p>
-	*
-	* @param start the lower bound of the range of message boards threads
-	* @param end the upper bound of the range of message boards threads (not inclusive)
-	* @return the range of message boards threads
-	*/
-	@Override
-	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getMBThreads(
-		int start, int end) {
-		return _mbThreadLocalService.getMBThreads(start, end);
-	}
-
-	/**
-	* Returns the number of message boards threads.
-	*
-	* @return the number of message boards threads
-	*/
-	@Override
-	public int getMBThreadsCount() {
-		return _mbThreadLocalService.getMBThreadsCount();
-	}
-
-	/**
-	* Updates the message boards thread in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
-	*
-	* @param mbThread the message boards thread
-	* @return the message boards thread that was updated
-	*/
-	@Override
-	public com.liferay.portlet.messageboards.model.MBThread updateMBThread(
-		com.liferay.portlet.messageboards.model.MBThread mbThread) {
-		return _mbThreadLocalService.updateMBThread(mbThread);
 	}
 
 	/**
@@ -325,63 +254,23 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 		return _mbThreadLocalService.getBeanIdentifier();
 	}
 
-	/**
-	* Sets the Spring bean ID for this bean.
-	*
-	* @param beanIdentifier the Spring bean ID for this bean
-	*/
-	@Override
-	public void setBeanIdentifier(java.lang.String beanIdentifier) {
-		_mbThreadLocalService.setBeanIdentifier(beanIdentifier);
-	}
-
-	@Override
-	public com.liferay.portlet.messageboards.model.MBThread addThread(
-		long categoryId,
-		com.liferay.portlet.messageboards.model.MBMessage message,
-		com.liferay.portal.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mbThreadLocalService.addThread(categoryId, message,
-			serviceContext);
-	}
-
-	@Override
-	public void deleteThread(long threadId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_mbThreadLocalService.deleteThread(threadId);
-	}
-
-	@Override
-	public void deleteThread(
-		com.liferay.portlet.messageboards.model.MBThread thread)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_mbThreadLocalService.deleteThread(thread);
-	}
-
-	@Override
-	public void deleteThreads(long groupId, long categoryId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_mbThreadLocalService.deleteThreads(groupId, categoryId);
-	}
-
-	@Override
-	public void deleteThreads(long groupId, long categoryId,
-		boolean includeTrashedEntries)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_mbThreadLocalService.deleteThreads(groupId, categoryId,
-			includeTrashedEntries);
-	}
-
-	@Override
-	public com.liferay.portlet.messageboards.model.MBThread fetchThread(
-		long threadId) {
-		return _mbThreadLocalService.fetchThread(threadId);
-	}
-
 	@Override
 	public int getCategoryThreadsCount(long groupId, long categoryId, int status) {
 		return _mbThreadLocalService.getCategoryThreadsCount(groupId,
 			categoryId, status);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
+		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
+		return _mbThreadLocalService.getExportActionableDynamicQuery(portletDataContext);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getGroupThreads(
+		long groupId,
+		com.liferay.portal.kernel.dao.orm.QueryDefinition<com.liferay.portlet.messageboards.model.MBThread> queryDefinition) {
+		return _mbThreadLocalService.getGroupThreads(groupId, queryDefinition);
 	}
 
 	/**
@@ -397,19 +286,22 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 
 	@Override
 	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getGroupThreads(
-		long groupId, long userId, boolean subscribed,
-		boolean includeAnonymous,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
+		long groupId, long userId,
+		com.liferay.portal.kernel.dao.orm.QueryDefinition<com.liferay.portlet.messageboards.model.MBThread> queryDefinition) {
 		return _mbThreadLocalService.getGroupThreads(groupId, userId,
-			subscribed, includeAnonymous, queryDefinition);
+			queryDefinition);
 	}
 
+	/**
+	* @deprecated As of 6.2.0, replaced by {@link #getGroupThreads(long, long,
+	QueryDefinition)}
+	*/
+	@Deprecated
 	@Override
 	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getGroupThreads(
-		long groupId, long userId, boolean subscribed,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
-		return _mbThreadLocalService.getGroupThreads(groupId, userId,
-			subscribed, queryDefinition);
+		long groupId, long userId, int status, int start, int end) {
+		return _mbThreadLocalService.getGroupThreads(groupId, userId, status,
+			start, end);
 	}
 
 	/**
@@ -438,31 +330,28 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 			subscribed, start, end);
 	}
 
-	/**
-	* @deprecated As of 6.2.0, replaced by {@link #getGroupThreads(long, long,
-	QueryDefinition)}
-	*/
-	@Deprecated
 	@Override
 	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getGroupThreads(
-		long groupId, long userId, int status, int start, int end) {
-		return _mbThreadLocalService.getGroupThreads(groupId, userId, status,
-			start, end);
-	}
-
-	@Override
-	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getGroupThreads(
-		long groupId, long userId,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
+		long groupId, long userId, boolean subscribed,
+		boolean includeAnonymous,
+		com.liferay.portal.kernel.dao.orm.QueryDefinition<com.liferay.portlet.messageboards.model.MBThread> queryDefinition) {
 		return _mbThreadLocalService.getGroupThreads(groupId, userId,
-			queryDefinition);
+			subscribed, includeAnonymous, queryDefinition);
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getGroupThreads(
-		long groupId,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
-		return _mbThreadLocalService.getGroupThreads(groupId, queryDefinition);
+		long groupId, long userId, boolean subscribed,
+		com.liferay.portal.kernel.dao.orm.QueryDefinition<com.liferay.portlet.messageboards.model.MBThread> queryDefinition) {
+		return _mbThreadLocalService.getGroupThreads(groupId, userId,
+			subscribed, queryDefinition);
+	}
+
+	@Override
+	public int getGroupThreadsCount(long groupId,
+		com.liferay.portal.kernel.dao.orm.QueryDefinition<com.liferay.portlet.messageboards.model.MBThread> queryDefinition) {
+		return _mbThreadLocalService.getGroupThreadsCount(groupId,
+			queryDefinition);
 	}
 
 	/**
@@ -477,18 +366,9 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 
 	@Override
 	public int getGroupThreadsCount(long groupId, long userId,
-		boolean subscribed, boolean includeAnonymous,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
+		com.liferay.portal.kernel.dao.orm.QueryDefinition<com.liferay.portlet.messageboards.model.MBThread> queryDefinition) {
 		return _mbThreadLocalService.getGroupThreadsCount(groupId, userId,
-			subscribed, includeAnonymous, queryDefinition);
-	}
-
-	@Override
-	public int getGroupThreadsCount(long groupId, long userId,
-		boolean subscribed,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
-		return _mbThreadLocalService.getGroupThreadsCount(groupId, userId,
-			subscribed, queryDefinition);
+			queryDefinition);
 	}
 
 	/**
@@ -528,21 +408,101 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 
 	@Override
 	public int getGroupThreadsCount(long groupId, long userId,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
+		boolean subscribed, boolean includeAnonymous,
+		com.liferay.portal.kernel.dao.orm.QueryDefinition<com.liferay.portlet.messageboards.model.MBThread> queryDefinition) {
 		return _mbThreadLocalService.getGroupThreadsCount(groupId, userId,
-			queryDefinition);
+			subscribed, includeAnonymous, queryDefinition);
 	}
 
 	@Override
-	public int getGroupThreadsCount(long groupId,
-		com.liferay.portal.kernel.dao.orm.QueryDefinition queryDefinition) {
-		return _mbThreadLocalService.getGroupThreadsCount(groupId,
-			queryDefinition);
+	public int getGroupThreadsCount(long groupId, long userId,
+		boolean subscribed,
+		com.liferay.portal.kernel.dao.orm.QueryDefinition<com.liferay.portlet.messageboards.model.MBThread> queryDefinition) {
+		return _mbThreadLocalService.getGroupThreadsCount(groupId, userId,
+			subscribed, queryDefinition);
+	}
+
+	/**
+	* Returns the message boards thread with the primary key.
+	*
+	* @param threadId the primary key of the message boards thread
+	* @return the message boards thread
+	* @throws PortalException if a message boards thread with the primary key could not be found
+	*/
+	@Override
+	public com.liferay.portlet.messageboards.model.MBThread getMBThread(
+		long threadId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbThreadLocalService.getMBThread(threadId);
+	}
+
+	/**
+	* Returns the message boards thread matching the UUID and group.
+	*
+	* @param uuid the message boards thread's UUID
+	* @param groupId the primary key of the group
+	* @return the matching message boards thread
+	* @throws PortalException if a matching message boards thread could not be found
+	*/
+	@Override
+	public com.liferay.portlet.messageboards.model.MBThread getMBThreadByUuidAndGroupId(
+		java.lang.String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbThreadLocalService.getMBThreadByUuidAndGroupId(uuid, groupId);
+	}
+
+	/**
+	* Returns a range of all the message boards threads.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.messageboards.model.impl.MBThreadModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param start the lower bound of the range of message boards threads
+	* @param end the upper bound of the range of message boards threads (not inclusive)
+	* @return the range of message boards threads
+	*/
+	@Override
+	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getMBThreads(
+		int start, int end) {
+		return _mbThreadLocalService.getMBThreads(start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getMBThreadsByUuidAndCompanyId(
+		java.lang.String uuid, long companyId) {
+		return _mbThreadLocalService.getMBThreadsByUuidAndCompanyId(uuid,
+			companyId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getMBThreadsByUuidAndCompanyId(
+		java.lang.String uuid, long companyId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portlet.messageboards.model.MBThread> orderByComparator) {
+		return _mbThreadLocalService.getMBThreadsByUuidAndCompanyId(uuid,
+			companyId, start, end, orderByComparator);
+	}
+
+	/**
+	* Returns the number of message boards threads.
+	*
+	* @return the number of message boards threads
+	*/
+	@Override
+	public int getMBThreadsCount() {
+		return _mbThreadLocalService.getMBThreadsCount();
 	}
 
 	@Override
 	public java.util.List<com.liferay.portlet.messageboards.model.MBThread> getNoAssetThreads() {
 		return _mbThreadLocalService.getNoAssetThreads();
+	}
+
+	@Override
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbThreadLocalService.getPersistedModel(primaryKeyObj);
 	}
 
 	@Override
@@ -614,9 +574,10 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 	}
 
 	@Override
-	public void moveThreadsToTrash(long groupId, long userId)
+	public com.liferay.portlet.messageboards.model.MBThread moveThreadToTrash(
+		long userId, com.liferay.portlet.messageboards.model.MBThread thread)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		_mbThreadLocalService.moveThreadsToTrash(groupId, userId);
+		return _mbThreadLocalService.moveThreadToTrash(userId, thread);
 	}
 
 	@Override
@@ -627,10 +588,9 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 	}
 
 	@Override
-	public com.liferay.portlet.messageboards.model.MBThread moveThreadToTrash(
-		long userId, com.liferay.portlet.messageboards.model.MBThread thread)
+	public void moveThreadsToTrash(long groupId, long userId)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mbThreadLocalService.moveThreadToTrash(userId, thread);
+		_mbThreadLocalService.moveThreadsToTrash(groupId, userId);
 	}
 
 	@Override
@@ -649,19 +609,29 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 
 	@Override
 	public com.liferay.portal.kernel.search.Hits search(long groupId,
+		long userId, long creatorUserId, long startDate, long endDate,
+		int status, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _mbThreadLocalService.search(groupId, userId, creatorUserId,
+			startDate, endDate, status, start, end);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.search.Hits search(long groupId,
 		long userId, long creatorUserId, int status, int start, int end)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbThreadLocalService.search(groupId, userId, creatorUserId,
 			status, start, end);
 	}
 
+	/**
+	* Sets the Spring bean ID for this bean.
+	*
+	* @param beanIdentifier the Spring bean ID for this bean
+	*/
 	@Override
-	public com.liferay.portal.kernel.search.Hits search(long groupId,
-		long userId, long creatorUserId, long startDate, long endDate,
-		int status, int start, int end)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _mbThreadLocalService.search(groupId, userId, creatorUserId,
-			startDate, endDate, status, start, end);
+	public void setBeanIdentifier(java.lang.String beanIdentifier) {
+		_mbThreadLocalService.setBeanIdentifier(beanIdentifier);
 	}
 
 	@Override
@@ -671,6 +641,18 @@ public class MBThreadLocalServiceWrapper implements MBThreadLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _mbThreadLocalService.splitThread(messageId, subject,
 			serviceContext);
+	}
+
+	/**
+	* Updates the message boards thread in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param mbThread the message boards thread
+	* @return the message boards thread that was updated
+	*/
+	@Override
+	public com.liferay.portlet.messageboards.model.MBThread updateMBThread(
+		com.liferay.portlet.messageboards.model.MBThread mbThread) {
+		return _mbThreadLocalService.updateMBThread(mbThread);
 	}
 
 	@Override

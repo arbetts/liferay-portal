@@ -138,8 +138,7 @@ public abstract class ExpandoValueLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return expandoValuePersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -156,8 +155,8 @@ public abstract class ExpandoValueLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return expandoValuePersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -176,9 +175,8 @@ public abstract class ExpandoValueLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return expandoValuePersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -253,7 +251,7 @@ public abstract class ExpandoValueLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteExpandoValue((ExpandoValue)persistedModel);
+		return expandoValueLocalService.deleteExpandoValue((ExpandoValue)persistedModel);
 	}
 
 	@Override

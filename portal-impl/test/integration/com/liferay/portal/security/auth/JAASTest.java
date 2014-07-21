@@ -30,8 +30,8 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.security.jaas.JAASHelper;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.servlet.MainServlet;
-import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
-import com.liferay.portal.test.MainServletExecutionTestListener;
+import com.liferay.portal.test.listeners.MainServletExecutionTestListener;
+import com.liferay.portal.test.runners.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.test.TestPropsValues;
 
@@ -427,15 +427,15 @@ public class JAASTest extends MainServletExecutionTestListener {
 
 	private class JAASAction extends Action {
 
+		public boolean isRan() {
+			return _ran;
+		}
+
 		@Override
 		public void run(
 			HttpServletRequest request, HttpServletResponse response) {
 
 			_ran = true;
-		}
-
-		public boolean isRan() {
-			return _ran;
 		}
 
 		private boolean _ran;

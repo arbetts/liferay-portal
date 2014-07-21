@@ -46,299 +46,6 @@ public class DLFileShortcutLocalServiceWrapper
 		return _dlFileShortcutLocalService.addDLFileShortcut(dlFileShortcut);
 	}
 
-	/**
-	* Creates a new document library file shortcut with the primary key. Does not add the document library file shortcut to the database.
-	*
-	* @param fileShortcutId the primary key for the new document library file shortcut
-	* @return the new document library file shortcut
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut createDLFileShortcut(
-		long fileShortcutId) {
-		return _dlFileShortcutLocalService.createDLFileShortcut(fileShortcutId);
-	}
-
-	/**
-	* Deletes the document library file shortcut with the primary key from the database. Also notifies the appropriate model listeners.
-	*
-	* @param fileShortcutId the primary key of the document library file shortcut
-	* @return the document library file shortcut that was removed
-	* @throws PortalException if a document library file shortcut with the primary key could not be found
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut deleteDLFileShortcut(
-		long fileShortcutId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _dlFileShortcutLocalService.deleteDLFileShortcut(fileShortcutId);
-	}
-
-	/**
-	* Deletes the document library file shortcut from the database. Also notifies the appropriate model listeners.
-	*
-	* @param dlFileShortcut the document library file shortcut
-	* @return the document library file shortcut that was removed
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut deleteDLFileShortcut(
-		com.liferay.portlet.documentlibrary.model.DLFileShortcut dlFileShortcut) {
-		return _dlFileShortcutLocalService.deleteDLFileShortcut(dlFileShortcut);
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery() {
-		return _dlFileShortcutLocalService.dynamicQuery();
-	}
-
-	/**
-	* Performs a dynamic query on the database and returns the matching rows.
-	*
-	* @param dynamicQuery the dynamic query
-	* @return the matching rows
-	*/
-	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
-		return _dlFileShortcutLocalService.dynamicQuery(dynamicQuery);
-	}
-
-	/**
-	* Performs a dynamic query on the database and returns a range of the matching rows.
-	*
-	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	* </p>
-	*
-	* @param dynamicQuery the dynamic query
-	* @param start the lower bound of the range of model instances
-	* @param end the upper bound of the range of model instances (not inclusive)
-	* @return the range of matching rows
-	*/
-	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
-		int end) {
-		return _dlFileShortcutLocalService.dynamicQuery(dynamicQuery, start, end);
-	}
-
-	/**
-	* Performs a dynamic query on the database and returns an ordered range of the matching rows.
-	*
-	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	* </p>
-	*
-	* @param dynamicQuery the dynamic query
-	* @param start the lower bound of the range of model instances
-	* @param end the upper bound of the range of model instances (not inclusive)
-	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	* @return the ordered range of matching rows
-	*/
-	@Override
-	@SuppressWarnings("rawtypes")
-	public java.util.List dynamicQuery(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
-		int end,
-		com.liferay.portal.kernel.util.OrderByComparator orderByComparator) {
-		return _dlFileShortcutLocalService.dynamicQuery(dynamicQuery, start,
-			end, orderByComparator);
-	}
-
-	/**
-	* Returns the number of rows that match the dynamic query.
-	*
-	* @param dynamicQuery the dynamic query
-	* @return the number of rows that match the dynamic query
-	*/
-	@Override
-	public long dynamicQueryCount(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
-		return _dlFileShortcutLocalService.dynamicQueryCount(dynamicQuery);
-	}
-
-	/**
-	* Returns the number of rows that match the dynamic query.
-	*
-	* @param dynamicQuery the dynamic query
-	* @param projection the projection to apply to the query
-	* @return the number of rows that match the dynamic query
-	*/
-	@Override
-	public long dynamicQueryCount(
-		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
-		com.liferay.portal.kernel.dao.orm.Projection projection) {
-		return _dlFileShortcutLocalService.dynamicQueryCount(dynamicQuery,
-			projection);
-	}
-
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut fetchDLFileShortcut(
-		long fileShortcutId) {
-		return _dlFileShortcutLocalService.fetchDLFileShortcut(fileShortcutId);
-	}
-
-	/**
-	* Returns the document library file shortcut with the matching UUID and company.
-	*
-	* @param uuid the document library file shortcut's UUID
-	* @param companyId the primary key of the company
-	* @return the matching document library file shortcut, or <code>null</code> if a matching document library file shortcut could not be found
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut fetchDLFileShortcutByUuidAndCompanyId(
-		java.lang.String uuid, long companyId) {
-		return _dlFileShortcutLocalService.fetchDLFileShortcutByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
-	* Returns the document library file shortcut matching the UUID and group.
-	*
-	* @param uuid the document library file shortcut's UUID
-	* @param groupId the primary key of the group
-	* @return the matching document library file shortcut, or <code>null</code> if a matching document library file shortcut could not be found
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut fetchDLFileShortcutByUuidAndGroupId(
-		java.lang.String uuid, long groupId) {
-		return _dlFileShortcutLocalService.fetchDLFileShortcutByUuidAndGroupId(uuid,
-			groupId);
-	}
-
-	/**
-	* Returns the document library file shortcut with the primary key.
-	*
-	* @param fileShortcutId the primary key of the document library file shortcut
-	* @return the document library file shortcut
-	* @throws PortalException if a document library file shortcut with the primary key could not be found
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut getDLFileShortcut(
-		long fileShortcutId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _dlFileShortcutLocalService.getDLFileShortcut(fileShortcutId);
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
-		return _dlFileShortcutLocalService.getActionableDynamicQuery();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
-		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
-		return _dlFileShortcutLocalService.getExportActionableDynamicQuery(portletDataContext);
-	}
-
-	/**
-	* @throws PortalException
-	*/
-	@Override
-	public com.liferay.portal.model.PersistedModel deletePersistedModel(
-		com.liferay.portal.model.PersistedModel persistedModel)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _dlFileShortcutLocalService.deletePersistedModel(persistedModel);
-	}
-
-	@Override
-	public com.liferay.portal.model.PersistedModel getPersistedModel(
-		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _dlFileShortcutLocalService.getPersistedModel(primaryKeyObj);
-	}
-
-	/**
-	* Returns the document library file shortcut with the matching UUID and company.
-	*
-	* @param uuid the document library file shortcut's UUID
-	* @param companyId the primary key of the company
-	* @return the matching document library file shortcut
-	* @throws PortalException if a matching document library file shortcut could not be found
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut getDLFileShortcutByUuidAndCompanyId(
-		java.lang.String uuid, long companyId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _dlFileShortcutLocalService.getDLFileShortcutByUuidAndCompanyId(uuid,
-			companyId);
-	}
-
-	/**
-	* Returns the document library file shortcut matching the UUID and group.
-	*
-	* @param uuid the document library file shortcut's UUID
-	* @param groupId the primary key of the group
-	* @return the matching document library file shortcut
-	* @throws PortalException if a matching document library file shortcut could not be found
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut getDLFileShortcutByUuidAndGroupId(
-		java.lang.String uuid, long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _dlFileShortcutLocalService.getDLFileShortcutByUuidAndGroupId(uuid,
-			groupId);
-	}
-
-	/**
-	* Returns a range of all the document library file shortcuts.
-	*
-	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	* </p>
-	*
-	* @param start the lower bound of the range of document library file shortcuts
-	* @param end the upper bound of the range of document library file shortcuts (not inclusive)
-	* @return the range of document library file shortcuts
-	*/
-	@Override
-	public java.util.List<com.liferay.portlet.documentlibrary.model.DLFileShortcut> getDLFileShortcuts(
-		int start, int end) {
-		return _dlFileShortcutLocalService.getDLFileShortcuts(start, end);
-	}
-
-	/**
-	* Returns the number of document library file shortcuts.
-	*
-	* @return the number of document library file shortcuts
-	*/
-	@Override
-	public int getDLFileShortcutsCount() {
-		return _dlFileShortcutLocalService.getDLFileShortcutsCount();
-	}
-
-	/**
-	* Updates the document library file shortcut in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
-	*
-	* @param dlFileShortcut the document library file shortcut
-	* @return the document library file shortcut that was updated
-	*/
-	@Override
-	public com.liferay.portlet.documentlibrary.model.DLFileShortcut updateDLFileShortcut(
-		com.liferay.portlet.documentlibrary.model.DLFileShortcut dlFileShortcut) {
-		return _dlFileShortcutLocalService.updateDLFileShortcut(dlFileShortcut);
-	}
-
-	/**
-	* Returns the Spring bean ID for this bean.
-	*
-	* @return the Spring bean ID for this bean
-	*/
-	@Override
-	public java.lang.String getBeanIdentifier() {
-		return _dlFileShortcutLocalService.getBeanIdentifier();
-	}
-
-	/**
-	* Sets the Spring bean ID for this bean.
-	*
-	* @param beanIdentifier the Spring bean ID for this bean
-	*/
-	@Override
-	public void setBeanIdentifier(java.lang.String beanIdentifier) {
-		_dlFileShortcutLocalService.setBeanIdentifier(beanIdentifier);
-	}
-
 	@Override
 	public com.liferay.portlet.documentlibrary.model.DLFileShortcut addFileShortcut(
 		long userId, long groupId, long folderId, long toFileEntryId,
@@ -382,6 +89,44 @@ public class DLFileShortcutLocalServiceWrapper
 			groupPermissions, guestPermissions);
 	}
 
+	/**
+	* Creates a new document library file shortcut with the primary key. Does not add the document library file shortcut to the database.
+	*
+	* @param fileShortcutId the primary key for the new document library file shortcut
+	* @return the new document library file shortcut
+	*/
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFileShortcut createDLFileShortcut(
+		long fileShortcutId) {
+		return _dlFileShortcutLocalService.createDLFileShortcut(fileShortcutId);
+	}
+
+	/**
+	* Deletes the document library file shortcut from the database. Also notifies the appropriate model listeners.
+	*
+	* @param dlFileShortcut the document library file shortcut
+	* @return the document library file shortcut that was removed
+	*/
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFileShortcut deleteDLFileShortcut(
+		com.liferay.portlet.documentlibrary.model.DLFileShortcut dlFileShortcut) {
+		return _dlFileShortcutLocalService.deleteDLFileShortcut(dlFileShortcut);
+	}
+
+	/**
+	* Deletes the document library file shortcut with the primary key from the database. Also notifies the appropriate model listeners.
+	*
+	* @param fileShortcutId the primary key of the document library file shortcut
+	* @return the document library file shortcut that was removed
+	* @throws PortalException if a document library file shortcut with the primary key could not be found
+	*/
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFileShortcut deleteDLFileShortcut(
+		long fileShortcutId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlFileShortcutLocalService.deleteDLFileShortcut(fileShortcutId);
+	}
+
 	@Override
 	public void deleteFileShortcut(
 		com.liferay.portlet.documentlibrary.model.DLFileShortcut fileShortcut)
@@ -393,12 +138,6 @@ public class DLFileShortcutLocalServiceWrapper
 	public void deleteFileShortcut(long fileShortcutId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_dlFileShortcutLocalService.deleteFileShortcut(fileShortcutId);
-	}
-
-	@Override
-	public void deleteFileShortcuts(long toFileEntryId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_dlFileShortcutLocalService.deleteFileShortcuts(toFileEntryId);
 	}
 
 	@Override
@@ -416,13 +155,227 @@ public class DLFileShortcutLocalServiceWrapper
 	}
 
 	@Override
+	public void deleteFileShortcuts(long toFileEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_dlFileShortcutLocalService.deleteFileShortcuts(toFileEntryId);
+	}
+
+	/**
+	* @throws PortalException
+	*/
+	@Override
+	public com.liferay.portal.model.PersistedModel deletePersistedModel(
+		com.liferay.portal.model.PersistedModel persistedModel)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlFileShortcutLocalService.deletePersistedModel(persistedModel);
+	}
+
+	@Override
 	public void disableFileShortcuts(long toFileEntryId) {
 		_dlFileShortcutLocalService.disableFileShortcuts(toFileEntryId);
 	}
 
 	@Override
+	public com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery() {
+		return _dlFileShortcutLocalService.dynamicQuery();
+	}
+
+	/**
+	* Performs a dynamic query on the database and returns the matching rows.
+	*
+	* @param dynamicQuery the dynamic query
+	* @return the matching rows
+	*/
+	@Override
+	public <T> java.util.List<T> dynamicQuery(
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
+		return _dlFileShortcutLocalService.dynamicQuery(dynamicQuery);
+	}
+
+	/**
+	* Performs a dynamic query on the database and returns a range of the matching rows.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param dynamicQuery the dynamic query
+	* @param start the lower bound of the range of model instances
+	* @param end the upper bound of the range of model instances (not inclusive)
+	* @return the range of matching rows
+	*/
+	@Override
+	public <T> java.util.List<T> dynamicQuery(
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
+		int end) {
+		return _dlFileShortcutLocalService.dynamicQuery(dynamicQuery, start, end);
+	}
+
+	/**
+	* Performs a dynamic query on the database and returns an ordered range of the matching rows.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param dynamicQuery the dynamic query
+	* @param start the lower bound of the range of model instances
+	* @param end the upper bound of the range of model instances (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching rows
+	*/
+	@Override
+	public <T> java.util.List<T> dynamicQuery(
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery, int start,
+		int end,
+		com.liferay.portal.kernel.util.OrderByComparator<T> orderByComparator) {
+		return _dlFileShortcutLocalService.dynamicQuery(dynamicQuery, start,
+			end, orderByComparator);
+	}
+
+	/**
+	* Returns the number of rows that match the dynamic query.
+	*
+	* @param dynamicQuery the dynamic query
+	* @return the number of rows that match the dynamic query
+	*/
+	@Override
+	public long dynamicQueryCount(
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
+		return _dlFileShortcutLocalService.dynamicQueryCount(dynamicQuery);
+	}
+
+	/**
+	* Returns the number of rows that match the dynamic query.
+	*
+	* @param dynamicQuery the dynamic query
+	* @param projection the projection to apply to the query
+	* @return the number of rows that match the dynamic query
+	*/
+	@Override
+	public long dynamicQueryCount(
+		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
+		com.liferay.portal.kernel.dao.orm.Projection projection) {
+		return _dlFileShortcutLocalService.dynamicQueryCount(dynamicQuery,
+			projection);
+	}
+
+	@Override
 	public void enableFileShortcuts(long toFileEntryId) {
 		_dlFileShortcutLocalService.enableFileShortcuts(toFileEntryId);
+	}
+
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFileShortcut fetchDLFileShortcut(
+		long fileShortcutId) {
+		return _dlFileShortcutLocalService.fetchDLFileShortcut(fileShortcutId);
+	}
+
+	/**
+	* Returns the document library file shortcut matching the UUID and group.
+	*
+	* @param uuid the document library file shortcut's UUID
+	* @param groupId the primary key of the group
+	* @return the matching document library file shortcut, or <code>null</code> if a matching document library file shortcut could not be found
+	*/
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFileShortcut fetchDLFileShortcutByUuidAndGroupId(
+		java.lang.String uuid, long groupId) {
+		return _dlFileShortcutLocalService.fetchDLFileShortcutByUuidAndGroupId(uuid,
+			groupId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _dlFileShortcutLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* Returns the Spring bean ID for this bean.
+	*
+	* @return the Spring bean ID for this bean
+	*/
+	@Override
+	public java.lang.String getBeanIdentifier() {
+		return _dlFileShortcutLocalService.getBeanIdentifier();
+	}
+
+	/**
+	* Returns the document library file shortcut with the primary key.
+	*
+	* @param fileShortcutId the primary key of the document library file shortcut
+	* @return the document library file shortcut
+	* @throws PortalException if a document library file shortcut with the primary key could not be found
+	*/
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFileShortcut getDLFileShortcut(
+		long fileShortcutId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlFileShortcutLocalService.getDLFileShortcut(fileShortcutId);
+	}
+
+	/**
+	* Returns the document library file shortcut matching the UUID and group.
+	*
+	* @param uuid the document library file shortcut's UUID
+	* @param groupId the primary key of the group
+	* @return the matching document library file shortcut
+	* @throws PortalException if a matching document library file shortcut could not be found
+	*/
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFileShortcut getDLFileShortcutByUuidAndGroupId(
+		java.lang.String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlFileShortcutLocalService.getDLFileShortcutByUuidAndGroupId(uuid,
+			groupId);
+	}
+
+	/**
+	* Returns a range of all the document library file shortcuts.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.liferay.portlet.documentlibrary.model.impl.DLFileShortcutModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param start the lower bound of the range of document library file shortcuts
+	* @param end the upper bound of the range of document library file shortcuts (not inclusive)
+	* @return the range of document library file shortcuts
+	*/
+	@Override
+	public java.util.List<com.liferay.portlet.documentlibrary.model.DLFileShortcut> getDLFileShortcuts(
+		int start, int end) {
+		return _dlFileShortcutLocalService.getDLFileShortcuts(start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.documentlibrary.model.DLFileShortcut> getDLFileShortcutsByUuidAndCompanyId(
+		java.lang.String uuid, long companyId) {
+		return _dlFileShortcutLocalService.getDLFileShortcutsByUuidAndCompanyId(uuid,
+			companyId);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portlet.documentlibrary.model.DLFileShortcut> getDLFileShortcutsByUuidAndCompanyId(
+		java.lang.String uuid, long companyId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portlet.documentlibrary.model.DLFileShortcut> orderByComparator) {
+		return _dlFileShortcutLocalService.getDLFileShortcutsByUuidAndCompanyId(uuid,
+			companyId, start, end, orderByComparator);
+	}
+
+	/**
+	* Returns the number of document library file shortcuts.
+	*
+	* @return the number of document library file shortcuts
+	*/
+	@Override
+	public int getDLFileShortcutsCount() {
+		return _dlFileShortcutLocalService.getDLFileShortcutsCount();
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
+		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
+		return _dlFileShortcutLocalService.getExportActionableDynamicQuery(portletDataContext);
 	}
 
 	@Override
@@ -448,8 +401,25 @@ public class DLFileShortcutLocalServiceWrapper
 	}
 
 	@Override
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _dlFileShortcutLocalService.getPersistedModel(primaryKeyObj);
+	}
+
+	@Override
 	public void rebuildTree(long companyId) {
 		_dlFileShortcutLocalService.rebuildTree(companyId);
+	}
+
+	/**
+	* Sets the Spring bean ID for this bean.
+	*
+	* @param beanIdentifier the Spring bean ID for this bean
+	*/
+	@Override
+	public void setBeanIdentifier(java.lang.String beanIdentifier) {
+		_dlFileShortcutLocalService.setBeanIdentifier(beanIdentifier);
 	}
 
 	@Override
@@ -459,6 +429,18 @@ public class DLFileShortcutLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_dlFileShortcutLocalService.updateAsset(userId, fileShortcut,
 			assetCategoryIds, assetTagNames);
+	}
+
+	/**
+	* Updates the document library file shortcut in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param dlFileShortcut the document library file shortcut
+	* @return the document library file shortcut that was updated
+	*/
+	@Override
+	public com.liferay.portlet.documentlibrary.model.DLFileShortcut updateDLFileShortcut(
+		com.liferay.portlet.documentlibrary.model.DLFileShortcut dlFileShortcut) {
+		return _dlFileShortcutLocalService.updateDLFileShortcut(dlFileShortcut);
 	}
 
 	@Override

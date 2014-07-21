@@ -97,7 +97,7 @@ public class TrashUtil {
 		return getTrash().getEntries(hits);
 	}
 
-	public static OrderByComparator getEntryOrderByComparator(
+	public static OrderByComparator<TrashEntry> getEntryOrderByComparator(
 		String orderByCol, String orderByType) {
 
 		return getTrash().getEntryOrderByComparator(orderByCol, orderByType);
@@ -148,6 +148,10 @@ public class TrashUtil {
 		throws PortalException {
 
 		return getTrash().isInTrash(className, classPK);
+	}
+
+	public static boolean isTrashEnabled(Group group) {
+		return getTrash().isTrashEnabled(group);
 	}
 
 	public static boolean isTrashEnabled(long groupId) throws PortalException {

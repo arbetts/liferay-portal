@@ -861,36 +861,12 @@ public class DDMStructureModelImpl extends BaseModelImpl<DDMStructure>
 		_type = type;
 	}
 
-	public com.liferay.portlet.dynamicdatamapping.model.DDMForm getDdmForm() {
+	public com.liferay.portlet.dynamicdatamapping.model.DDMForm getDDMForm() {
 		return null;
 	}
 
-	public void setDdmForm(
+	public void setDDMForm(
 		com.liferay.portlet.dynamicdatamapping.model.DDMForm ddmForm) {
-	}
-
-	public java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.String>>> getLocalizedFieldsMap() {
-		return null;
-	}
-
-	public void setLocalizedFieldsMap(
-		java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.String>>> localizedFieldsMap) {
-	}
-
-	public java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.String>>> getLocalizedPersistentFieldsMap() {
-		return null;
-	}
-
-	public void setLocalizedPersistentFieldsMap(
-		java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.String>>> localizedPersistentFieldsMap) {
-	}
-
-	public java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.String>>> getLocalizedTransientFieldsMap() {
-		return null;
-	}
-
-	public void setLocalizedTransientFieldsMap(
-		java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.String>>> localizedTransientFieldsMap) {
 	}
 
 	@Override
@@ -1114,13 +1090,7 @@ public class DDMStructureModelImpl extends BaseModelImpl<DDMStructure>
 
 		ddmStructureModelImpl._originalDescription = ddmStructureModelImpl._description;
 
-		setDdmForm(null);
-
-		setLocalizedFieldsMap(null);
-
-		setLocalizedPersistentFieldsMap(null);
-
-		setLocalizedTransientFieldsMap(null);
+		setDDMForm(null);
 
 		ddmStructureModelImpl._columnBitmask = 0;
 	}
@@ -1217,13 +1187,7 @@ public class DDMStructureModelImpl extends BaseModelImpl<DDMStructure>
 
 		ddmStructureCacheModel.type = getType();
 
-		ddmStructureCacheModel._ddmForm = getDdmForm();
-
-		ddmStructureCacheModel._localizedFieldsMap = getLocalizedFieldsMap();
-
-		ddmStructureCacheModel._localizedPersistentFieldsMap = getLocalizedPersistentFieldsMap();
-
-		ddmStructureCacheModel._localizedTransientFieldsMap = getLocalizedTransientFieldsMap();
+		ddmStructureCacheModel._ddmForm = getDDMForm();
 
 		return ddmStructureCacheModel;
 	}

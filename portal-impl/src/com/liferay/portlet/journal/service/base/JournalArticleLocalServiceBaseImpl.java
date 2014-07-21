@@ -182,8 +182,7 @@ public abstract class JournalArticleLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return journalArticlePersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -200,8 +199,8 @@ public abstract class JournalArticleLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return journalArticlePersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -220,9 +219,8 @@ public abstract class JournalArticleLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return journalArticlePersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -255,20 +253,6 @@ public abstract class JournalArticleLocalServiceBaseImpl
 	@Override
 	public JournalArticle fetchJournalArticle(long id) {
 		return journalArticlePersistence.fetchByPrimaryKey(id);
-	}
-
-	/**
-	 * Returns the journal article with the matching UUID and company.
-	 *
-	 * @param uuid the journal article's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching journal article, or <code>null</code> if a matching journal article could not be found
-	 */
-	@Override
-	public JournalArticle fetchJournalArticleByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return journalArticlePersistence.fetchByUuid_C_First(uuid, companyId,
-			null);
 	}
 
 	/**
@@ -403,7 +387,7 @@ public abstract class JournalArticleLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteJournalArticle((JournalArticle)persistedModel);
+		return journalArticleLocalService.deleteJournalArticle((JournalArticle)persistedModel);
 	}
 
 	@Override
@@ -412,19 +396,18 @@ public abstract class JournalArticleLocalServiceBaseImpl
 		return journalArticlePersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the journal article with the matching UUID and company.
-	 *
-	 * @param uuid the journal article's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching journal article
-	 * @throws PortalException if a matching journal article could not be found
-	 */
 	@Override
-	public JournalArticle getJournalArticleByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return journalArticlePersistence.findByUuid_C_First(uuid, companyId,
-			null);
+	public List<JournalArticle> getJournalArticlesByUuidAndCompanyId(
+		String uuid, long companyId) {
+		return journalArticlePersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<JournalArticle> getJournalArticlesByUuidAndCompanyId(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<JournalArticle> orderByComparator) {
+		return journalArticlePersistence.findByUuid_C(uuid, companyId, start,
+			end, orderByComparator);
 	}
 
 	/**

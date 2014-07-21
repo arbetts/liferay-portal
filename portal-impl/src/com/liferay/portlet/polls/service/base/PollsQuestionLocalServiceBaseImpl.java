@@ -143,8 +143,7 @@ public abstract class PollsQuestionLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return pollsQuestionPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -161,8 +160,8 @@ public abstract class PollsQuestionLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return pollsQuestionPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end);
 	}
@@ -181,9 +180,8 @@ public abstract class PollsQuestionLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return pollsQuestionPersistence.findWithDynamicQuery(dynamicQuery,
 			start, end, orderByComparator);
 	}
@@ -216,20 +214,6 @@ public abstract class PollsQuestionLocalServiceBaseImpl
 	@Override
 	public PollsQuestion fetchPollsQuestion(long questionId) {
 		return pollsQuestionPersistence.fetchByPrimaryKey(questionId);
-	}
-
-	/**
-	 * Returns the polls question with the matching UUID and company.
-	 *
-	 * @param uuid the polls question's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching polls question, or <code>null</code> if a matching polls question could not be found
-	 */
-	@Override
-	public PollsQuestion fetchPollsQuestionByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return pollsQuestionPersistence.fetchByUuid_C_First(uuid, companyId,
-			null);
 	}
 
 	/**
@@ -341,7 +325,7 @@ public abstract class PollsQuestionLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deletePollsQuestion((PollsQuestion)persistedModel);
+		return pollsQuestionLocalService.deletePollsQuestion((PollsQuestion)persistedModel);
 	}
 
 	@Override
@@ -350,18 +334,18 @@ public abstract class PollsQuestionLocalServiceBaseImpl
 		return pollsQuestionPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the polls question with the matching UUID and company.
-	 *
-	 * @param uuid the polls question's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching polls question
-	 * @throws PortalException if a matching polls question could not be found
-	 */
 	@Override
-	public PollsQuestion getPollsQuestionByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return pollsQuestionPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<PollsQuestion> getPollsQuestionsByUuidAndCompanyId(
+		String uuid, long companyId) {
+		return pollsQuestionPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<PollsQuestion> getPollsQuestionsByUuidAndCompanyId(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<PollsQuestion> orderByComparator) {
+		return pollsQuestionPersistence.findByUuid_C(uuid, companyId, start,
+			end, orderByComparator);
 	}
 
 	/**

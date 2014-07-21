@@ -265,14 +265,14 @@
 		},
 
 		disableFormButtons: function(inputs, form) {
-			inputs.set('disabled', true);
+			inputs.attr('disabled', true);
 			inputs.setStyle('opacity', 0.5);
 
 			if (A.UA.gecko) {
 				A.getWin().on(
 					'unload',
 					function(event) {
-						inputs.set('disabled', false);
+						inputs.attr('disabled', false);
 					}
 				);
 			}
@@ -283,12 +283,8 @@
 
 			document.body.style.cursor = 'auto';
 
-			inputs.set('disabled', false);
+			inputs.attr('disabled', false);
 			inputs.setStyle('opacity', 1);
-		},
-
-		endsWith: function(str, x) {
-			return (str.lastIndexOf(x) === (str.length - x.length));
 		},
 
 		escapeCDATA: function(str) {
@@ -538,8 +534,53 @@
 			return (window.innerWidth > 0) ? window.innerWidth : screen.width;
 		},
 
-		isArray: function(object) {
-			return !!(window.Array && object.constructor == window.Array);
+		inBrowserView: function(node, win, nodeRegion) {
+			var DOM = A.DOM;
+
+			var viewable = false;
+
+			node = A.one(node);
+
+			if (node) {
+				if (!nodeRegion) {
+					nodeRegion = node.get('region');
+				}
+
+				if (!win) {
+					win = window;
+				}
+
+				var winRegion = DOM.viewportRegion(win);
+
+				var viewable = (
+					nodeRegion.bottom <= winRegion.bottom &&
+					nodeRegion.left >= winRegion.left &&
+					nodeRegion.right <= winRegion.right &&
+					nodeRegion.top >= winRegion.top
+				);
+
+				if (viewable) {
+					var frameEl = win.frameElement;
+
+					if (frameEl) {
+						var frameXY = DOM.getXY(frameEl);
+
+						var xOffset = frameXY[0] - DOM.docScrollX(win);
+
+						nodeRegion.left += xOffset;
+						nodeRegion.right += xOffset;
+
+						var yOffset = frameXY[1] - DOM.docScrollY(win);
+
+						nodeRegion.top += yOffset;
+						nodeRegion.bottom += yOffset;
+
+						viewable = Util.inBrowserView(node, win.parent, nodeRegion);
+					}
+				}
+			}
+
+			return viewable;
 		},
 
 		isEditorPresent: function(editorImpl) {
@@ -1049,7 +1090,7 @@
 			var checkbox = A.one(form[name]);
 
 			if (checkbox) {
-				checkbox.set(STR_CHECKED, checked);
+				checkbox.attr(STR_CHECKED, checked);
 			}
 		},
 		['aui-base']
@@ -1070,7 +1111,7 @@
 
 			form = A.one(form);
 
-			form.all(selector).set(STR_CHECKED, A.one(allBox).get(STR_CHECKED));
+			form.all(selector).attr(STR_CHECKED, A.one(allBox).get(STR_CHECKED));
 
 			if (selectClassName) {
 				form.all(selectClassName).toggleClass('info', A.one(allBox).get(STR_CHECKED));
@@ -1105,7 +1146,7 @@
 				}
 			);
 
-			allBox.set(STR_CHECKED, (totalBoxes == totalOn));
+			allBox.attr(STR_CHECKED, (totalBoxes == totalOn));
 		},
 		['aui-base']
 	);
@@ -1240,7 +1281,7 @@
 						visible = value(currentValue, value);
 					}
 
-					toggleBox.set('disabled', !visible);
+					toggleBox.attr('disabled', !visible);
 				};
 
 				disabled();
@@ -1275,16 +1316,16 @@
 
 			if (checkBox && toggleBox) {
 				if (checkBox.get(STR_CHECKED) && checkDisabled) {
-					toggleBox.set('disabled', true);
+					toggleBox.attr('disabled', true);
 				}
 				else {
-					toggleBox.set('disabled', false);
+					toggleBox.attr('disabled', false);
 				}
 
 				checkBox.on(
 					EVENT_CLICK,
 					function() {
-						toggleBox.set('disabled', !toggleBox.get('disabled'));
+						toggleBox.attr('disabled', !toggleBox.get('disabled'));
 					}
 				);
 			}
@@ -1324,14 +1365,8 @@
 				}
 			);
 
-			if (!interacting) {
-				el = A.one(el);
-
-				try {
-					el.focus();
-				}
-				catch (e) {
-				}
+			if (!interacting && Util.inBrowserView(el)) {
+				A.one(el).focus();
 			}
 		},
 		['aui-base']
@@ -1605,7 +1640,7 @@
 			var selectedIndex = box.get('selectedIndex');
 
 			if (selectedIndex == -1) {
-				box.set('selectedIndex', 0);
+				box.attr('selectedIndex', 0);
 			}
 			else {
 				var selectedItems = box.all(':selected');
@@ -1861,7 +1896,7 @@
 			var option = A.one(col).one('option[value=' + value + STR_RIGHT_SQUARE_BRACKET);
 
 			if (option) {
-				option.set('selected', true);
+				option.attr('selected', true);
 			}
 		},
 		['aui-base']
@@ -1956,7 +1991,7 @@
 						if (toggleChildCheckboxes) {
 							var childCheckboxes = toggleBox.all('input[type=checkbox]');
 
-							childCheckboxes.set(STR_CHECKED, checkBox.get(STR_CHECKED));
+							childCheckboxes.attr(STR_CHECKED, checkBox.get(STR_CHECKED));
 						}
 					}
 				);

@@ -170,8 +170,7 @@ public abstract class DLFileEntryLocalServiceBaseImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return dlFileEntryPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -188,8 +187,8 @@ public abstract class DLFileEntryLocalServiceBaseImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return dlFileEntryPersistence.findWithDynamicQuery(dynamicQuery, start,
 			end);
 	}
@@ -208,9 +207,8 @@ public abstract class DLFileEntryLocalServiceBaseImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return dlFileEntryPersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -243,19 +241,6 @@ public abstract class DLFileEntryLocalServiceBaseImpl
 	@Override
 	public DLFileEntry fetchDLFileEntry(long fileEntryId) {
 		return dlFileEntryPersistence.fetchByPrimaryKey(fileEntryId);
-	}
-
-	/**
-	 * Returns the document library file entry with the matching UUID and company.
-	 *
-	 * @param uuid the document library file entry's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching document library file entry, or <code>null</code> if a matching document library file entry could not be found
-	 */
-	@Override
-	public DLFileEntry fetchDLFileEntryByUuidAndCompanyId(String uuid,
-		long companyId) {
-		return dlFileEntryPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -377,7 +362,7 @@ public abstract class DLFileEntryLocalServiceBaseImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteDLFileEntry((DLFileEntry)persistedModel);
+		return dlFileEntryLocalService.deleteDLFileEntry((DLFileEntry)persistedModel);
 	}
 
 	@Override
@@ -386,18 +371,18 @@ public abstract class DLFileEntryLocalServiceBaseImpl
 		return dlFileEntryPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the document library file entry with the matching UUID and company.
-	 *
-	 * @param uuid the document library file entry's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching document library file entry
-	 * @throws PortalException if a matching document library file entry could not be found
-	 */
 	@Override
-	public DLFileEntry getDLFileEntryByUuidAndCompanyId(String uuid,
-		long companyId) throws PortalException {
-		return dlFileEntryPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<DLFileEntry> getDLFileEntriesByUuidAndCompanyId(String uuid,
+		long companyId) {
+		return dlFileEntryPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<DLFileEntry> getDLFileEntriesByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<DLFileEntry> orderByComparator) {
+		return dlFileEntryPersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**

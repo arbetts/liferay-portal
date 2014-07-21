@@ -24,6 +24,16 @@ import java.util.List;
  */
 public class ServiceTrackerMapFactory {
 
+	public static <S> ServiceTrackerMap<String, List<S>>
+		createListServiceTracker(Class<S> clazz, String propertyKey) {
+
+		return new ServiceTrackerMapImpl<String, S, List<S>>(
+			clazz,"(" + propertyKey + "=*)",
+			new PropertyServiceReferenceMapper<String>(propertyKey),
+			new ListServiceTrackerBucketFactory<S>(
+				new PropertyServiceReferenceComparator<S>("service.ranking")));
+	}
+
 	public static <K, S> ServiceTrackerMap<K, List<S>>
 		createListServiceTrackerMap(
 			Class<S> clazz, String filterString,
@@ -46,13 +56,13 @@ public class ServiceTrackerMapFactory {
 				new ListServiceTrackerBucketFactory<S>(comparator));
 	}
 
-	public static <S> ServiceTrackerMap<String, List<S>>
-		createListServiceTracker(Class<S> clazz, String propertyKey) {
+	public static <S> ServiceTrackerMap<String, S>
+		createObjectServiceTrackerMap(Class<S> clazz, String propertyKey) {
 
-		return new ServiceTrackerMapImpl<String, S, List<S>>(
-			clazz,"(" + propertyKey + "=*)",
+		return new ServiceTrackerMapImpl<String, S, S>(
+			clazz, "(" + propertyKey + "=*)",
 			new PropertyServiceReferenceMapper<String>(propertyKey),
-			new ListServiceTrackerBucketFactory<S>(
+			new ObjectServiceTrackerBucketFactory<S>(
 				new PropertyServiceReferenceComparator<S>("service.ranking")));
 	}
 
@@ -76,17 +86,7 @@ public class ServiceTrackerMapFactory {
 			new ObjectServiceTrackerBucketFactory<S>(comparator));
 	}
 
-	public static <S> ServiceTrackerMap<String, S>
-		createObjectServiceTrackerMap(Class<S> clazz, String propertyKey) {
-
-		return new ServiceTrackerMapImpl<String, S, S>(
-			clazz, "(" + propertyKey + "=*)",
-			new PropertyServiceReferenceMapper<String>(propertyKey),
-			new ObjectServiceTrackerBucketFactory<S>(
-				new PropertyServiceReferenceComparator<S>("service.ranking")));
-	}
-
-	private static class PropertyServiceReferenceComparator <T>
+	public static class PropertyServiceReferenceComparator <T>
 		implements Comparator<ServiceReference<T>> {
 
 		public PropertyServiceReferenceComparator(String propertyKey) {
@@ -113,7 +113,7 @@ public class ServiceTrackerMapFactory {
 			Object propertyValue1 = serviceReference1.getProperty(_propertyKey);
 
 			if (!(propertyValue1 instanceof Comparable)) {
-				return 0;
+				return -(serviceReference1.compareTo(serviceReference2));
 			}
 
 			Comparable<Object> propertyValueComparable1 =
@@ -136,7 +136,7 @@ public class ServiceTrackerMapFactory {
 
 	}
 
-	private static class PropertyServiceReferenceMapper <T>
+	public static class PropertyServiceReferenceMapper <T>
 		implements ServiceReferenceMapper<T> {
 
 		public PropertyServiceReferenceMapper(String propertyKey) {

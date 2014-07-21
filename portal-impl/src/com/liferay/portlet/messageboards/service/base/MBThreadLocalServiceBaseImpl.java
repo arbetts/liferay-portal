@@ -163,8 +163,7 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery) {
 		return mbThreadPersistence.findWithDynamicQuery(dynamicQuery);
 	}
 
@@ -181,8 +180,8 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end) {
 		return mbThreadPersistence.findWithDynamicQuery(dynamicQuery, start, end);
 	}
 
@@ -200,9 +199,8 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	 * @return the ordered range of matching rows
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List dynamicQuery(DynamicQuery dynamicQuery, int start, int end,
-		OrderByComparator orderByComparator) {
+	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
+		int end, OrderByComparator<T> orderByComparator) {
 		return mbThreadPersistence.findWithDynamicQuery(dynamicQuery, start,
 			end, orderByComparator);
 	}
@@ -235,18 +233,6 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public MBThread fetchMBThread(long threadId) {
 		return mbThreadPersistence.fetchByPrimaryKey(threadId);
-	}
-
-	/**
-	 * Returns the message boards thread with the matching UUID and company.
-	 *
-	 * @param uuid the message boards thread's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message boards thread, or <code>null</code> if a matching message boards thread could not be found
-	 */
-	@Override
-	public MBThread fetchMBThreadByUuidAndCompanyId(String uuid, long companyId) {
-		return mbThreadPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
 	/**
@@ -364,7 +350,7 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 	@Override
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException {
-		return deleteMBThread((MBThread)persistedModel);
+		return mbThreadLocalService.deleteMBThread((MBThread)persistedModel);
 	}
 
 	@Override
@@ -373,18 +359,18 @@ public abstract class MBThreadLocalServiceBaseImpl extends BaseLocalServiceImpl
 		return mbThreadPersistence.findByPrimaryKey(primaryKeyObj);
 	}
 
-	/**
-	 * Returns the message boards thread with the matching UUID and company.
-	 *
-	 * @param uuid the message boards thread's UUID
-	 * @param  companyId the primary key of the company
-	 * @return the matching message boards thread
-	 * @throws PortalException if a matching message boards thread could not be found
-	 */
 	@Override
-	public MBThread getMBThreadByUuidAndCompanyId(String uuid, long companyId)
-		throws PortalException {
-		return mbThreadPersistence.findByUuid_C_First(uuid, companyId, null);
+	public List<MBThread> getMBThreadsByUuidAndCompanyId(String uuid,
+		long companyId) {
+		return mbThreadPersistence.findByUuid_C(uuid, companyId);
+	}
+
+	@Override
+	public List<MBThread> getMBThreadsByUuidAndCompanyId(String uuid,
+		long companyId, int start, int end,
+		OrderByComparator<MBThread> orderByComparator) {
+		return mbThreadPersistence.findByUuid_C(uuid, companyId, start, end,
+			orderByComparator);
 	}
 
 	/**

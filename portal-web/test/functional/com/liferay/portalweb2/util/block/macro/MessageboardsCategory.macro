@@ -16,7 +16,7 @@
 		<execute action="PGMessageboardsAddcategory#type" locator-key1="NAME_FIELD" value1="${categoryName}" />
 
 		<if>
-			<equals arg1="categoryDescriptionEnabled" arg2="true" />
+			<equals arg1="${categoryDescriptionEnabled}" arg2="true" />
 			<then>
 				<execute action="PGMessageboardsAddcategory#type" locator-key1="DESCRIPTION_FIELD" value1="${categoryDescription}" />
 			</then>
@@ -151,7 +151,7 @@
 		<if>
 			<equals arg1="${categoryDescriptionEnabled}" arg2="true" />
 			<then>
-				<var name="key_categoryDescription" value="${categoryDescription}" />
+				<var name="key_categoryName" value="${categoryName}" />
 
 				<execute action="PGMessageboards#assertClick" locator-key1="CATEGORY_TABLE_CATEGORY_DESCRIPTION" value1="${categoryDescription}" />
 			</then>
@@ -185,6 +185,15 @@
 		<execute action="Permissions#assertClick" locator-key1="SAVE_BUTTON" value1="Save" />
 		<execute action="Permissions#assertTextEquals" locator-key1="SUCCESS_MESSAGE" value1="Your request completed successfully." />
 		<execute action="Permissions#selectFrame" value1="relative=top" />
+	</command>
+
+	<command name="subscribePG">
+		<var name="key_categoryName" value="${categoryName}" />
+
+		<execute action="PGMessageboards#assertTextEquals" locator-key1="CATEGORY_TABLE_CATEGORY" value1="${categoryName}" />
+		<execute action="PGMessageboards#click" locator-key1="CATEGORY_TABLE_ACTIONS" />
+		<execute action="PGMessageboards#assertClick" locator-key1="CATEGORY_MENULIST_SUBSCRIBE" value1="Subscribe" />
+		<execute action="PGMessageboards#assertTextEquals" locator-key1="SUCCESS_MESSAGE" value1="Your request completed successfully." />
 	</command>
 
 	<command name="tearDownCP">
