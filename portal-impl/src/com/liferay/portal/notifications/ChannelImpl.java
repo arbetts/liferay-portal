@@ -247,14 +247,14 @@ public class ChannelImpl extends BaseChannelImpl {
 		try {
 			long currentTime = System.currentTimeMillis();
 
-			storeNotificationEvent(notificationEvent, currentTime);
-
 			if (PropsValues.USER_NOTIFICATION_EVENT_CONFIRMATION_ENABLED &&
 				notificationEvent.isDeliveryRequired()) {
 
 				UserNotificationEventLocalServiceUtil.addUserNotificationEvent(
 					getUserId(), notificationEvent);
 			}
+
+			storeNotificationEvent(notificationEvent, currentTime);
 		}
 		catch (Exception e) {
 			throw new ChannelException("Unable to send event", e);
