@@ -15,6 +15,7 @@
 package com.liferay.portal.notifications;
 
 import com.liferay.portal.json.JSONObjectImpl;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.notifications.Channel;
@@ -56,6 +57,8 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
+import javax.management.remote.NotificationResult;
+
 /**
  * Created by liferay on 12/3/2014.
  */
@@ -71,11 +74,12 @@ public class ChannelImplTest {
 	public void setUp() throws Exception {
 		_channel = new ChannelImpl();
 
-		_channelListener = new TestChannelListener();
-		_channel.registerChannelListener(_channelListener);
+		_testChannelListener = new TestChannelListener();
+		_channel.registerChannelListener(_testChannelListener);
 
-		_throwUNELSUException = new AtomicBoolean();
-		_throwJSONFUException = new AtomicBoolean();
+		_throwUNELSUAdviceRuntimeException = new AtomicBoolean();
+		_throwJSONAdviceJSONException = new AtomicBoolean();
+		_throwUNELSUAdviceSystemException = new AtomicBoolean();
 
 		_notificationEvents = ReflectionTestUtil.getFieldValue(
 			_channel, "_notificationEvents");
@@ -118,7 +122,7 @@ public class ChannelImplTest {
 
 		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
 
-		_throwUNELSUException.set(true);
+		_throwUNELSUAdviceRuntimeException.set(true);
 
 		try {
 			_channel.confirmDelivery(uuidStack.pop());
@@ -175,7 +179,7 @@ public class ChannelImplTest {
 
 		Assert.assertEquals(2, _unconfirmedNotificationEvents.size());
 
-		_throwUNELSUException.set(true);
+		_throwUNELSUAdviceRuntimeException.set(true);
 
 		try {
 			_channel.deleteUserNotificiationEvent(uuidStack.pop());
@@ -226,30 +230,93 @@ public class ChannelImplTest {
 	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testGetNotifications() throws Exception {
-		NotificationEvent expiredNotificationEvent = _createNotificationEvent();
+		NotificationEvent expiredNotificationEvent =
+			_createNotificationEvent();
 
 		expiredNotificationEvent.setDeliverBy(1);
 
 		_notificationEvents.add(expiredNotificationEvent);
 		_notificationEvents.add(_createNotificationEvent());
 
-		NotificationEvent expiredNotificationEvent1 = _createNotificationEvent();
+		NotificationEvent expiredUnconfirmedEvent =
+			_createNotificationEvent();
 
-		expiredNotificationEvent1.setDeliverBy(1);
-
-		_unconfirmedNotificationEvents.put(
-			expiredNotificationEvent1.getUuid(), expiredNotificationEvent1);
-
-		NotificationEvent unconfirmedNotificaitonEvent = _createNotificationEvent();
+		expiredUnconfirmedEvent.setDeliverBy(1);
 
 		_unconfirmedNotificationEvents.put(
-			unconfirmedNotificaitonEvent.getUuid(), unconfirmedNotificaitonEvent);
+			expiredUnconfirmedEvent.getUuid(), expiredUnconfirmedEvent);
 
-		List<NotificationEvent> notificationEvents = _channel.getNotificationEvents();
+		NotificationEvent unconfirmedNotificaitonEvent =
+			_createNotificationEvent();
+
+		_unconfirmedNotificationEvents.put(
+			unconfirmedNotificaitonEvent.getUuid(),
+			unconfirmedNotificaitonEvent);
+
+		List<NotificationEvent> notificationEvents =
+			_channel.getNotificationEvents(false);
 
 		Assert.assertEquals(2, notificationEvents.size());
 		Assert.assertEquals(1, _notificationEvents.size());
 		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+
+		expiredNotificationEvent = _createNotificationEvent();
+		expiredNotificationEvent.setDeliverBy(1);
+
+		_notificationEvents.add(expiredNotificationEvent);
+
+		expiredUnconfirmedEvent = _createNotificationEvent();
+		expiredUnconfirmedEvent.setDeliverBy(1);
+
+		_unconfirmedNotificationEvents.put(
+			expiredUnconfirmedEvent.getUuid(), expiredUnconfirmedEvent);
+
+		_throwUNELSUAdviceRuntimeException.set(true);
+
+		try {
+			_channel.getNotificationEvents(false);
+
+			Assert.fail();
+		}
+		catch (ChannelException e) {
+		}
+
+		_throwUNELSUAdviceRuntimeException.set(false);
+
+		notificationEvents = _channel.getNotificationEvents(false);
+
+		Assert.assertEquals(2, notificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+
+		expiredNotificationEvent = _createNotificationEvent();
+		expiredNotificationEvent.setDeliverBy(1);
+
+		_notificationEvents.add(expiredNotificationEvent);
+
+		expiredUnconfirmedEvent = _createNotificationEvent();
+		expiredUnconfirmedEvent.setDeliverBy(1);
+
+		_unconfirmedNotificationEvents.put(
+			expiredUnconfirmedEvent.getUuid(), expiredUnconfirmedEvent);
+
+		NotificationEvent archivedNotificationEvent =
+			_createNotificationEvent();
+
+		archivedNotificationEvent.setDeliverBy(1);
+		archivedNotificationEvent.setArchived(true);
+
+		_unconfirmedNotificationEvents.put(
+			archivedNotificationEvent.getUuid(),
+			archivedNotificationEvent);
+
+		Assert.assertEquals(3, _unconfirmedNotificationEvents.size());
+
+		notificationEvents = _channel.getNotificationEvents(true);
+
+		Assert.assertEquals(3, notificationEvents.size());
+		Assert.assertEquals(0, _notificationEvents.size());
+		Assert.assertEquals(2, _unconfirmedNotificationEvents.size());
 	}
 
 	@AdviseWith(
@@ -261,10 +328,55 @@ public class ChannelImplTest {
 		})
 	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
-	public void testInit() throws Exception {
+	public void testInit0() throws Exception {
 		_channel.init();
 
-		Assert.assertEquals(2, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(3, _unconfirmedNotificationEvents.size());
+
+		_throwUNELSUAdviceSystemException.set(true);
+
+		try {
+			_channel.init();
+
+			Assert.fail();
+		}
+		catch (ChannelException e) {
+		}
+
+		_throwUNELSUAdviceSystemException.set(false);
+
+		_throwJSONAdviceJSONException.set(true);
+
+		try{
+			_channel.init();
+
+			Assert.fail();
+		}
+		catch (ChannelException ce) {
+
+		}
+
+	}
+
+	@AdviseWith(
+		adviceClasses = {DisableUserNotificationEventConfirmationAdvice.class})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
+	@Test
+	public void testInit1() throws Exception {
+		_channel.init();
+
+		Assert.assertTrue(_unconfirmedNotificationEvents.isEmpty());
+		Assert.assertTrue(_notificationEvents.isEmpty());
+	}
+
+	@AdviseWith(
+		adviceClasses = {DisableUserNotificationEventConfirmationAdvice.class})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
+	@Test
+	public void testInit2() throws Exception {
+
+		Assert.assertTrue(_unconfirmedNotificationEvents.isEmpty());
+		Assert.assertTrue(_notificationEvents.isEmpty());
 	}
 
 	@AdviseWith(
@@ -274,7 +386,7 @@ public class ChannelImplTest {
 		})
 	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
-	public void testCleanUp() throws Exception {
+	public void testCleanUp0() throws Exception {
 		NotificationEvent expiredNotificationEvent = _createNotificationEvent();
 
 		expiredNotificationEvent.setDeliverBy(1);
@@ -282,17 +394,125 @@ public class ChannelImplTest {
 		_notificationEvents.add(expiredNotificationEvent);
 		_notificationEvents.add(_createNotificationEvent());
 
-		NotificationEvent expiredNotificationEvent1 = _createNotificationEvent();
+		NotificationEvent expiredNotificationEvent1 =
+			_createNotificationEvent();
 
 		expiredNotificationEvent1.setDeliverBy(1);
 
+		NotificationEvent unconfirmedNotificaitonEvent =
+			_createNotificationEvent();
+
 		_unconfirmedNotificationEvents.put(
 			expiredNotificationEvent1.getUuid(), expiredNotificationEvent1);
+		_unconfirmedNotificationEvents.put(
+			unconfirmedNotificaitonEvent.getUuid(),
+			unconfirmedNotificaitonEvent);
 
-		NotificationEvent unconfirmedNotificaitonEvent = _createNotificationEvent();
+		_channel.cleanUp();
+
+		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+
+		NotificationEvent expiredNotificationEvent2 =
+			_createNotificationEvent();
+
+		expiredNotificationEvent2.setDeliverBy(1);
+
+		_notificationEvents.add(expiredNotificationEvent2);
+
+		NotificationEvent expiredNotificationEvent3 =
+			_createNotificationEvent();
+
+		expiredNotificationEvent3.setDeliverBy(1);
 
 		_unconfirmedNotificationEvents.put(
-			unconfirmedNotificaitonEvent.getUuid(), unconfirmedNotificaitonEvent);
+			expiredNotificationEvent3.getUuid(), expiredNotificationEvent3);
+
+		_throwUNELSUAdviceRuntimeException.set(true);
+
+		try {
+			_channel.cleanUp();
+
+			Assert.fail();
+		}
+		catch (ChannelException ce) {
+		}
+
+		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+	}
+
+	@AdviseWith(
+		adviceClasses = {
+			EnableUserNotificationEventConfirmationAdvice.class,
+		})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
+	@Test
+	public void testCleanUp2() throws Exception {
+		_notificationEvents.add(_createNotificationEvent());
+
+		NotificationEvent unconfirmedNotificaitonEvent =
+			_createNotificationEvent();
+
+		_unconfirmedNotificationEvents.put(
+			unconfirmedNotificaitonEvent.getUuid(),
+			unconfirmedNotificaitonEvent);
+
+		_channel.cleanUp();
+
+		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+	}
+
+	@AdviseWith(
+		adviceClasses = {
+			DisableUserNotificationEventConfirmationAdvice.class,
+		})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
+	@Test
+	public void testCleanUp3() throws Exception {
+		NotificationEvent expiredNotificationEvent = _createNotificationEvent();
+
+		expiredNotificationEvent.setDeliverBy(1);
+
+		_notificationEvents.add(expiredNotificationEvent);
+		_notificationEvents.add(_createNotificationEvent());
+
+		NotificationEvent expiredNotificationEvent1 =
+			_createNotificationEvent();
+
+		expiredNotificationEvent1.setDeliverBy(1);
+
+		NotificationEvent unconfirmedNotificaitonEvent =
+			_createNotificationEvent();
+
+		_unconfirmedNotificationEvents.put(
+			expiredNotificationEvent1.getUuid(), expiredNotificationEvent1);
+		_unconfirmedNotificationEvents.put(
+			unconfirmedNotificaitonEvent.getUuid(),
+			unconfirmedNotificaitonEvent);
+
+		_channel.cleanUp();
+
+		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+	}
+
+	@AdviseWith(
+		adviceClasses = {
+			DisableUserNotificationEventConfirmationAdvice.class,
+		})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
+	@Test
+	public void testCleanUp1() throws Exception {
+		_notificationEvents.add(_createNotificationEvent());
+
+		NotificationEvent unconfirmedNotificaitonEvent =
+			_createNotificationEvent();
+
+		_unconfirmedNotificationEvents.put(
+			unconfirmedNotificaitonEvent.getUuid(),
+			unconfirmedNotificaitonEvent);
 
 		_channel.cleanUp();
 
@@ -302,8 +522,6 @@ public class ChannelImplTest {
 
 	@Test
 	public void testRemoveTransientNotificationEvents() {
-		Assert.assertEquals(0, _notificationEvents.size());
-
 		Set<NotificationEvent> notificationEventSet =
 			new HashSet<NotificationEvent>(3);
 
@@ -318,12 +536,15 @@ public class ChannelImplTest {
 		_channel.removeTransientNotificationEvents(notificationEventSet);
 
 		Assert.assertEquals(0, _notificationEvents.size());
+
+		ReflectionTestUtil.setFieldValue(
+			_channel, "_notificationEvents", null);
+
+		_channel.removeTransientNotificationEvents(notificationEventSet);
 	}
 
 	@Test
 	public void testRemoveTransientNotificationEventsByUuid() {
-		Assert.assertEquals(0, _notificationEvents.size());
-
 		Set<String> notificationEventSet = new HashSet<String>(3);
 
 		for (int i = 0; i < 3; i++) {
@@ -334,16 +555,97 @@ public class ChannelImplTest {
 			notificationEventSet.add(notificationEvent.getUuid());
 		}
 
-		Assert.assertEquals(3, _notificationEvents.size());
+		_notificationEvents.add(_createNotificationEvent());
+
+		Assert.assertEquals(4, _notificationEvents.size());
 
 		_channel.removeTransientNotificationEventsByUuid(notificationEventSet);
 
-		Assert.assertEquals(0, _notificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+
+		notificationEventSet.clear();
+
+		notificationEventSet.add(_createNotificationEvent().getUuid());
+
+		_channel.removeTransientNotificationEventsByUuid(notificationEventSet);
+
+		Assert.assertEquals(1, _notificationEvents.size());
+
+		ReflectionTestUtil.setFieldValue(
+			_channel, "_notificationEvents", null);
+
+		_channel.removeTransientNotificationEventsByUuid(notificationEventSet);
+
+		Assert.assertEquals(1, _notificationEvents.size());
 	}
 
+	@AdviseWith(
+		adviceClasses = {
+			EnableUserNotificationEventConfirmationAdvice.class,
+			UserNotificationEventLocalServiceUtilAdvice.class
+		})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
-	public void testSendNotificationEvent() {
-		Assert.assertNotNull(_createNotificationEvent().getDeliverBy());
+	public void testSendNotificationEvent0() throws Exception {
+		NotificationEvent notificationEvent = _createNotificationEvent();
+
+		notificationEvent.setDeliveryRequired(0);
+
+		_channel.sendNotificationEvent(notificationEvent);
+
+		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(0, _notificationEvents.size());
+		Assert.assertEquals(1, _testChannelListener.getNofityListnerCount());
+
+		NotificationEvent notificationEvent1 = _createNotificationEvent();
+
+		_channel.sendNotificationEvent(notificationEvent1);
+
+		Assert.assertEquals(2, _testChannelListener.getNofityListnerCount());
+		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+
+		_throwUNELSUAdviceRuntimeException.set(true);
+
+		try {
+			NotificationEvent notificationEvent2 = _createNotificationEvent();
+
+			notificationEvent2.setDeliveryRequired(0);
+
+			_channel.sendNotificationEvent(notificationEvent2);
+
+			Assert.fail();
+		}
+		catch (ChannelException ce) {
+		}
+
+		Assert.assertEquals(2, _testChannelListener.getNofityListnerCount());
+		Assert.assertEquals(1, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+	}
+
+	@AdviseWith(
+		adviceClasses = {DisableUserNotificationEventConfirmationAdvice.class})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
+	@Test
+	public void testSendNotificationEvent1() throws Exception {
+		NotificationEvent notificationEvent = _createNotificationEvent();
+
+		notificationEvent.setDeliveryRequired(0);
+
+		_channel.sendNotificationEvent(notificationEvent);
+
+		Assert.assertEquals(1, _testChannelListener.getNofityListnerCount());
+		Assert.assertEquals(0, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(1, _notificationEvents.size());
+
+		NotificationEvent notificationEvent1 = _createNotificationEvent();
+
+		_channel.sendNotificationEvent(notificationEvent1);
+
+		Assert.assertEquals(2, _testChannelListener.getNofityListnerCount());
+		Assert.assertEquals(0, _unconfirmedNotificationEvents.size());
+		Assert.assertEquals(2, _notificationEvents.size());
 	}
 
 	@AdviseWith(
@@ -351,9 +653,6 @@ public class ChannelImplTest {
 	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testStoreNotificationEvent0() throws Exception {
-		Assert.assertEquals(0, _unconfirmedNotificationEvents.size());
-		Assert.assertEquals(0, _notificationEvents.size());
-
 		for (int i = 0; i < 3; i++) {
 			NotificationEvent notificationEvent = _createNotificationEvent();
 
@@ -403,9 +702,6 @@ public class ChannelImplTest {
 
 	@Test
 	public void testStorNotificationEventExpired() throws ChannelException {
-		Assert.assertEquals(0, _unconfirmedNotificationEvents.size());
-		Assert.assertEquals(0, _notificationEvents.size());
-
 		for (int i = 0; i < 3; i++) {
 			NotificationEvent notificationEvent = _createNotificationEvent();
 
@@ -458,7 +754,7 @@ public class ChannelImplTest {
 				"createJSONObject(String)) && args(json)"
 		)
 		public JSONObject createJSONObject(String json) throws JSONException {
-			if (_throwJSONFUException.get()) {
+			if (_throwJSONAdviceJSONException.get()) {
 				throw new JSONException();
 			}
 
@@ -505,12 +801,12 @@ public class ChannelImplTest {
 			"execution(" +
 				"public static com.liferay.portal.model.UserNotificationEvent " +
 				"com.liferay.portal.service.UserNotificationEventLocalServiceUtil." +
-				"addUserNotificationEvent(long, NotificationEvent)) && " +
+				"addUserNotificationEvent(long, com.liferay.portal.kernel.notifications.NotificationEvent)) && " +
 			"args(userId, notificationEvent)")
 		public UserNotificationEvent addUserNotificationEvent(
 			long userId, NotificationEvent notificationEvent) {
 
-			if (_throwUNELSUException.get()) {
+			if (_throwUNELSUAdviceRuntimeException.get()) {
 				throw new RuntimeException();
 			}
 
@@ -524,7 +820,7 @@ public class ChannelImplTest {
 				"deleteUserNotificationEvent(String, long)) && " +
 			"args(uuid, companyId)")
 		public void deleteUserNotificationEvent(String uuid, long companyId) {
-			if (_throwUNELSUException.get()) {
+			if (_throwUNELSUAdviceRuntimeException.get()) {
 				throw new RuntimeException();
 			}
 		}
@@ -538,7 +834,7 @@ public class ChannelImplTest {
 		public void deleteUserNotificationEvents(
 			Collection<String> uuids, long companyId) {
 
-			if (_throwUNELSUException.get()) {
+			if (_throwUNELSUAdviceRuntimeException.get()) {
 				throw new RuntimeException();
 			}
 		}
@@ -552,24 +848,30 @@ public class ChannelImplTest {
 		public List<UserNotificationEvent> getDeliveredUserNotificationEvents(
 			long userId, boolean delivered) {
 
-			if (_throwUNELSUException.get()) {
+			if (_throwUNELSUAdviceRuntimeException.get()) {
 				throw new RuntimeException();
 			}
 
-			List<UserNotificationEvent> events =
+			if (_throwUNELSUAdviceSystemException.get()) {
+				throw new SystemException();
+			}
+
+			List<UserNotificationEvent> userNotificationEvents =
 				new ArrayList<UserNotificationEvent>();
 
 			for (int i = 0; i < 3; i++) {
-				events.add(_createUserNotificationEventProxy());
+				userNotificationEvents.add(_createUserNotificationEventProxy());
 			}
 
-			NotificationEvent expiredNotificationEvent = _createNotificationEvent();
+			NotificationEvent expiredNotificationEvent =
+				_createNotificationEvent();
 
 			expiredNotificationEvent.setDeliverBy(1);
 
-			events.add(_createUserNotificationEventProxy(expiredNotificationEvent));
+			userNotificationEvents.add(
+				_createUserNotificationEventProxy(expiredNotificationEvent));
 
-			return events;
+			return userNotificationEvents;
 		}
 
 		@Around(
@@ -582,7 +884,7 @@ public class ChannelImplTest {
 		public UserNotificationEvent updateUserNotificationEvent(
 			String uuid, long companyId, boolean archive) {
 
-			if (_throwUNELSUException.get()) {
+			if (_throwUNELSUAdviceRuntimeException.get()) {
 				throw new RuntimeException();
 			}
 
@@ -628,11 +930,12 @@ public class ChannelImplTest {
 			new TestUserNotificationInvocationHandler(notificationEvent));
 	}
 
-	private static AtomicBoolean _throwUNELSUException;
-	private static AtomicBoolean _throwJSONFUException;
+	private static AtomicBoolean _throwUNELSUAdviceRuntimeException;
+	private static AtomicBoolean _throwJSONAdviceJSONException;
+	private static AtomicBoolean _throwUNELSUAdviceSystemException;
 
 	private Channel _channel;
-	private ChannelListener _channelListener;
+	private TestChannelListener _testChannelListener;
 	private TreeSet<NotificationEvent> _notificationEvents;
 	private Map<String, NotificationEvent> _unconfirmedNotificationEvents;
 
@@ -677,23 +980,23 @@ public class ChannelImplTest {
 	private class TestChannelListener implements ChannelListener {
 
 		public TestChannelListener() {
-			_notificationEventsCount = 0;
+			notifyListenerCount = 0;
 		}
 
 		@Override
 		public void channelListenerRemoved(long channelId) {
 		}
 
-		public int getNotificationEventsCount() {
-			return _notificationEventsCount;
+		public int getNofityListnerCount() {
+			return notifyListenerCount;
 		}
 
 		@Override
 		public void notificationEventsAvailable(long channelId) {
-			_notificationEventsCount++;
+			notifyListenerCount++;
 		}
 
-		private int _notificationEventsCount;
+		private int notifyListenerCount;
 
 	}
 
