@@ -44,6 +44,7 @@ import org.apache.tika.metadata.Property;
 import org.apache.tika.metadata.TIFF;
 import org.apache.tika.metadata.TikaMetadataKeys;
 import org.apache.tika.metadata.TikaMimeKeys;
+import org.apache.tika.metadata.XMPDM;
 
 /**
  * @author Alexander Chow
@@ -171,10 +172,10 @@ public abstract class BaseRawMetadataProcessor implements RawMetadataProcessor {
 		}
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		BaseRawMetadataProcessor.class);
 
-	private static Map<String, Field[]> _fields =
+	private static final Map<String, Field[]> _fields =
 		new HashMap<String, Field[]>();
 
 	static {

@@ -36,8 +36,8 @@ import org.junit.Test;
 public class SPIAgentFactoryUtilTest {
 
 	@ClassRule
-	public static CodeCoverageAssertor codeCoverageAssertor =
-		new CodeCoverageAssertor();
+	public static final CodeCoverageAssertor codeCoverageAssertor =
+		CodeCoverageAssertor.INSTANCE;
 
 	@Test
 	public void testCreateSPIAgent() {
@@ -119,9 +119,8 @@ public class SPIAgentFactoryUtilTest {
 		spiAgentFactoryUtil.setSPIAgentClasses(agentClassNames);
 
 		Map<String, Class<? extends SPIAgent>> spiAgentClasses =
-			(Map<String, Class<? extends SPIAgent>>)
-				ReflectionTestUtil.getFieldValue(
-					SPIAgentFactoryUtil.class, "_spiAgentClasses");
+			ReflectionTestUtil.getFieldValue(
+				SPIAgentFactoryUtil.class, "_spiAgentClasses");
 
 		Assert.assertEquals(2, spiAgentClasses.size());
 		Assert.assertSame(

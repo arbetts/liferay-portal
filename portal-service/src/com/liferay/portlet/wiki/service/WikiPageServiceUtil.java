@@ -81,6 +81,20 @@ public class WikiPageServiceUtil {
 		getService().addPageAttachments(nodeId, title, inputStreamOVPs);
 	}
 
+	public static void addTempFileEntry(long nodeId,
+		java.lang.String folderName, java.lang.String fileName,
+		java.io.InputStream inputStream, java.lang.String mimeType)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService()
+			.addTempFileEntry(nodeId, folderName, fileName, inputStream,
+			mimeType);
+	}
+
+	/**
+	* @deprecated As of 7.0.0 replaced by {@link #addTempFileEntry(long,
+	String, String, InputStream, String)}
+	*/
+	@Deprecated
 	public static void addTempPageAttachment(long nodeId,
 		java.lang.String fileName, java.lang.String tempFolderName,
 		java.io.InputStream inputStream, java.lang.String mimeType)
@@ -137,10 +151,10 @@ public class WikiPageServiceUtil {
 		getService().deletePageAttachments(nodeId, title);
 	}
 
-	public static void deleteTempPageAttachment(long nodeId,
-		java.lang.String fileName, java.lang.String tempFolderName)
+	public static void deleteTempFileEntry(long nodeId,
+		java.lang.String folderName, java.lang.String fileName)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		getService().deleteTempPageAttachment(nodeId, fileName, tempFolderName);
+		getService().deleteTempFileEntry(nodeId, folderName, fileName);
 	}
 
 	public static void deleteTrashPageAttachments(long nodeId,
@@ -305,16 +319,17 @@ public class WikiPageServiceUtil {
 		return getService().getRecentChangesCount(groupId, nodeId);
 	}
 
-	public static java.lang.String[] getTempPageAttachmentNames(long nodeId,
-		java.lang.String tempFolderName)
+	public static java.lang.String[] getTempFileNames(long nodeId,
+		java.lang.String folderName)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return getService().getTempPageAttachmentNames(nodeId, tempFolderName);
+		return getService().getTempFileNames(nodeId, folderName);
 	}
 
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link #renamePage(long, String,
-	String, ServiceContext)}
+	String, ServiceContext)} *
 	*/
+	@Deprecated
 	public static void movePage(long nodeId, java.lang.String title,
 		java.lang.String newTitle,
 		com.liferay.portal.service.ServiceContext serviceContext)

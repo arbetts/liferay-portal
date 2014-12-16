@@ -15,6 +15,8 @@
 package com.liferay.portlet.documentlibrary;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.resource.manager.ClassLoaderResourceManager;
+import com.liferay.portal.kernel.resource.manager.ResourceManager;
 import com.liferay.portal.kernel.settings.FallbackKeys;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.settings.ParameterMapSettings;
@@ -36,7 +38,7 @@ public class DLSettings {
 		"emailFileEntryAddedBody", "emailFileEntryAddedSubject",
 		"emailFileEntryUpdatedBody", "emailFileEntryUpdatedSubject",
 		"emailFromAddress", "emailFromName", "emailFileEntryAddedEnabled",
-		"emailFileEntryUpdatedEnabled"
+		"emailFileEntryUpdatedEnabled", "showHiddenMountFolders"
 	};
 
 	public static DLSettings getInstance(long groupId) throws PortalException {
@@ -126,6 +128,10 @@ public class DLSettings {
 		return _typedSettings.getBooleanValue("emailFileEntryUpdatedEnabled");
 	}
 
+	public boolean isShowHiddenMountFolders() {
+		return _typedSettings.getBooleanValue("showHiddenMountFolders");
+	}
+
 	private static FallbackKeys _getFallbackKeys() {
 		FallbackKeys fallbackKeys = new FallbackKeys();
 
@@ -170,6 +176,8 @@ public class DLSettings {
 			PropsKeys.SEARCH_CONTAINER_PAGE_DEFAULT_DELTA);
 		fallbackKeys.add(
 			"showFoldersSearch", PropsKeys.DL_FOLDERS_SEARCH_VISIBLE);
+		fallbackKeys.add(
+			"showHiddenMountFolders", PropsKeys.DL_SHOW_HIDDEN_MOUNT_FOLDERS);
 		fallbackKeys.add("showSubfolders", PropsKeys.DL_SUBFOLDERS_VISIBLE);
 
 		return fallbackKeys;
@@ -177,14 +185,18 @@ public class DLSettings {
 
 	private static final String[] _MULTI_VALUED_KEYS = {};
 
+	private static final ResourceManager _resourceManager =
+		new ClassLoaderResourceManager(DLSettings.class.getClassLoader());
+
 	static {
 		SettingsFactory settingsFactory =
 			SettingsFactoryUtil.getSettingsFactory();
 
 		settingsFactory.registerSettingsMetadata(
-			DLConstants.SERVICE_NAME, _getFallbackKeys(), _MULTI_VALUED_KEYS);
+			DLConstants.SERVICE_NAME, _getFallbackKeys(), _MULTI_VALUED_KEYS,
+			_resourceManager);
 	}
 
-	private TypedSettings _typedSettings;
+	private final TypedSettings _typedSettings;
 
 }

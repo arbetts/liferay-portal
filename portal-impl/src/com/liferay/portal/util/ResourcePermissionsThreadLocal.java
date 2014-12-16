@@ -42,13 +42,15 @@ public class ResourcePermissionsThreadLocal {
 				resourcePermissionMap.put(
 					resourcePermission.getRoleId(), resourcePermission);
 			}
+
+			_resourcePermissions.set(resourcePermissionMap);
 		}
 		else {
 			_resourcePermissions.remove();
 		}
 	}
 
-	private static ThreadLocal<Map<Long, ResourcePermission>>
+	private static final ThreadLocal<Map<Long, ResourcePermission>>
 		_resourcePermissions = new InitialThreadLocal
 			<Map<Long, ResourcePermission>>(
 				ResourcePermissionsThreadLocal.class + "._resourcePermissions",

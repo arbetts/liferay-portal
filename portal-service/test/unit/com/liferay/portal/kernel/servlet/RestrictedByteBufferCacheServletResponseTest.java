@@ -36,8 +36,8 @@ import org.junit.Test;
 public class RestrictedByteBufferCacheServletResponseTest {
 
 	@ClassRule
-	public static CodeCoverageAssertor codeCoverageAssertor =
-		new CodeCoverageAssertor();
+	public static final CodeCoverageAssertor codeCoverageAssertor =
+		CodeCoverageAssertor.INSTANCE;
 
 	@Test
 	public void testConstructor() {
@@ -117,9 +117,8 @@ public class RestrictedByteBufferCacheServletResponseTest {
 				new RestrictedByteBufferCacheServletResponse(
 					stubHttpServletResponse, 1024);
 
-		ByteBuffer emptyByteBuffer =
-			(ByteBuffer)ReflectionTestUtil.getFieldValue(
-				restrictedByteBufferCacheServletResponse, "_emptyByteBuffer");
+		ByteBuffer emptyByteBuffer = ReflectionTestUtil.getFieldValue(
+			restrictedByteBufferCacheServletResponse, "_emptyByteBuffer");
 
 		Assert.assertSame(
 			emptyByteBuffer,

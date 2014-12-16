@@ -40,8 +40,8 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.model.Repository;
-import com.liferay.portal.repository.liferayrepository.LiferayRepository;
 import com.liferay.portal.repository.liferayrepository.model.LiferayFileEntry;
+import com.liferay.portal.repository.portletrepository.PortletRepository;
 import com.liferay.portal.service.RepositoryLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -51,7 +51,6 @@ import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryMetadata;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
 import com.liferay.portlet.documentlibrary.model.DLFileVersion;
-import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
@@ -65,6 +64,7 @@ import com.liferay.portlet.documentlibrary.util.DLUtil;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.storage.Fields;
 import com.liferay.portlet.dynamicdatamapping.storage.StorageEngineUtil;
+import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,6 +131,10 @@ public class FileEntryStagedModelDataHandler
 
 	@Override
 	public String getDisplayName(FileEntry fileEntry) {
+		if (fileEntry.isInTrash()) {
+			return TrashUtil.getOriginalTitle(fileEntry.getTitle());
+		}
+
 		return fileEntry.getTitle();
 	}
 
@@ -172,18 +176,12 @@ public class FileEntryStagedModelDataHandler
 			portletDataContext.addClassedModel(
 				fileEntryElement, fileEntryPath, fileEntry);
 
-			long liferayRepositoryClassNameId = PortalUtil.getClassNameId(
-				LiferayRepository.class.getName());
+			long portletRepositoryClassNameId = PortalUtil.getClassNameId(
+				PortletRepository.class.getName());
 
-			if (repository.getClassNameId() != liferayRepositoryClassNameId) {
+			if (repository.getClassNameId() != portletRepositoryClassNameId) {
 				return;
 			}
-		}
-
-		FileVersion fileVersion = fileEntry.getFileVersion();
-
-		if (!fileVersion.isApproved() && !fileEntry.isInTrash()) {
-			return;
 		}
 
 		if (fileEntry.getFolderId() !=
@@ -196,7 +194,7 @@ public class FileEntryStagedModelDataHandler
 
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
 
-		liferayFileEntry.setCachedFileVersion(fileVersion);
+		liferayFileEntry.setCachedFileVersion(fileEntry.getFileVersion());
 
 		if (!portletDataContext.isPerformDirectBinaryImport()) {
 			InputStream is = null;
@@ -259,6 +257,12 @@ public class FileEntryStagedModelDataHandler
 
 		FileEntry existingFileEntry = fetchMissingReference(uuid, groupId);
 
+		Map<Long, Long> dlFileEntryIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				DLFileEntry.class);
+
+		dlFileEntryIds.put(fileEntryId, existingFileEntry.getFileEntryId());
+
 		Map<Long, Long> fileEntryIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
 				FileEntry.class);
@@ -274,19 +278,10 @@ public class FileEntryStagedModelDataHandler
 		long userId = portletDataContext.getUserId(fileEntry.getUserUuid());
 
 		if (!fileEntry.isDefaultRepository()) {
-			StagedModelDataHandlerUtil.importReferenceStagedModel(
-				portletDataContext, fileEntry, Repository.class,
-				fileEntry.getRepositoryId());
+
+			// References has been automatically imported, nothing to do here
 
 			return;
-		}
-
-		if (fileEntry.getFolderId() !=
-				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-
-			StagedModelDataHandlerUtil.importReferenceStagedModel(
-				portletDataContext, fileEntry, DLFolder.class,
-				fileEntry.getFolderId());
 		}
 
 		Map<Long, Long> folderIds =
@@ -616,10 +611,6 @@ public class FileEntryStagedModelDataHandler
 		LiferayFileEntry liferayFileEntry = (LiferayFileEntry)fileEntry;
 
 		DLFileEntry dlFileEntry = liferayFileEntry.getDLFileEntry();
-
-		StagedModelDataHandlerUtil.importReferenceStagedModel(
-			portletDataContext, fileEntry, DLFileEntryType.class,
-			dlFileEntry.getFileEntryTypeId());
 
 		Map<Long, Long> dlFileEntryTypeIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(

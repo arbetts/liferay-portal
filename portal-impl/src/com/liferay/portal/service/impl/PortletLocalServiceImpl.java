@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.portlet.FriendlyURLMapper;
 import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletLayoutListener;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.scheduler.SchedulerEntry;
 import com.liferay.portal.kernel.scheduler.SchedulerEntryImpl;
 import com.liferay.portal.kernel.scheduler.TimeUnit;
@@ -85,7 +86,6 @@ import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletQNameUtil;
 import com.liferay.portlet.expando.model.CustomAttributesDisplay;
 import com.liferay.util.ContentUtil;
-import com.liferay.util.bridges.mvc.MVCPortlet;
 
 import java.net.URL;
 
@@ -142,6 +142,18 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 
 	@Override
 	public void checkPortlet(Portlet portlet) throws PortalException {
+		long companyId = portlet.getCompanyId();
+		String name = portlet.getRootPortletId();
+
+		int resourcePermissionsCount =
+			resourcePermissionLocalService.getResourcePermissionsCount(
+				companyId, name, ResourceConstants.SCOPE_INDIVIDUAL, name);
+
+		if (resourcePermissionsCount == 0) {
+			resourceLocalService.addResources(
+				companyId, 0, 0, name, name, true, false, false);
+		}
+
 		if (portlet.isSystem()) {
 			return;
 		}
@@ -152,8 +164,6 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			return;
 		}
 
-		long companyId = portlet.getCompanyId();
-		String name = portlet.getPortletId();
 		int scope = ResourceConstants.SCOPE_COMPANY;
 		String primKey = String.valueOf(companyId);
 		String actionId = ActionKeys.ADD_TO_PAGE;
@@ -165,15 +175,9 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			for (String roleName : roleNames) {
 				Role role = roleLocalService.getRole(companyId, roleName);
 
-				if (resourceBlockLocalService.isSupported(name)) {
-					resourceBlockLocalService.addCompanyScopePermission(
-						companyId, name, role.getRoleId(), actionId);
-				}
-				else {
-					resourcePermissionLocalService.addResourcePermission(
-						companyId, name, scope, primKey, role.getRoleId(),
-						actionId);
-				}
+				resourcePermissionLocalService.addResourcePermission(
+					companyId, name, scope, primKey, role.getRoleId(),
+					actionId);
 			}
 		}
 
@@ -2403,16 +2407,16 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			PortletConstants.INSTANCE_SEPARATOR.length() +
 				PortletConstants.USER_SEPARATOR.length() + 39;
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		PortletLocalServiceImpl.class);
 
-	private static Map<Long, Map<String, Portlet>> _companyPortletsPool =
+	private static final Map<Long, Map<String, Portlet>> _companyPortletsPool =
 		new ConcurrentHashMap<Long, Map<String, Portlet>>();
-	private static Map<String, PortletApp> _portletAppsPool =
+	private static final Map<String, PortletApp> _portletAppsPool =
 		new ConcurrentHashMap<String, PortletApp>();
-	private static Map<String, String> _portletIdsByStrutsPath =
+	private static final Map<String, String> _portletIdsByStrutsPath =
 		new ConcurrentHashMap<String, String>();
-	private static Map<String, Portlet> _portletsPool =
+	private static final Map<String, Portlet> _portletsPool =
 		new ConcurrentHashMap<String, Portlet>();
 
 }

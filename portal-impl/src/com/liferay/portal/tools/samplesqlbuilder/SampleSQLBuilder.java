@@ -101,11 +101,11 @@ public class SampleSQLBuilder {
 
 		// Generic
 
-		Reader reader = generateSQL();
-
 		File tempDir = new File(_outputDir, "temp");
 
 		tempDir.mkdirs();
+
+		Reader reader = generateSQL();
 
 		try {
 
@@ -216,28 +216,28 @@ public class SampleSQLBuilder {
 			new HashMap<String, StringBundler>();
 		List<String> miscSQLs = new ArrayList<String>();
 
-		UnsyncBufferedReader unsyncBufferedReader = new UnsyncBufferedReader(
-			reader);
+		try (UnsyncBufferedReader unsyncBufferedReader =
+				new UnsyncBufferedReader(reader)) {
 
-		String s = null;
+			String s = null;
 
-		while ((_freemarkerException == null) &&
-			   ((s = unsyncBufferedReader.readLine()) != null)) {
+			while ((_freemarkerException == null) &&
+				   ((s = unsyncBufferedReader.readLine()) != null)) {
 
-			s = s.trim();
+				s = s.trim();
 
-			if (s.length() > 0) {
-				if (s.startsWith("insert into ")) {
-					compressSQL(
-						db, dir, insertSQLWriters, insertSQLs, s.substring(12));
-				}
-				else {
-					miscSQLs.add(s);
+				if (s.length() > 0) {
+					if (s.startsWith("insert into ")) {
+						compressSQL(
+							db, dir, insertSQLWriters, insertSQLs,
+							s.substring(12));
+					}
+					else {
+						miscSQLs.add(s);
+					}
 				}
 			}
 		}
-
-		unsyncBufferedReader.close();
 
 		if (_freemarkerException != null) {
 			throw new Exception(
@@ -248,31 +248,26 @@ public class SampleSQLBuilder {
 			String tableName = entry.getKey();
 			StringBundler sb = entry.getValue();
 
-			if (sb.index() == 0) {
-				continue;
+			if (sb.index() > 0) {
+				String insertSQL = db.buildSQL(sb.toString());
+
+				writeToInsertSQLFile(
+					dir, tableName, insertSQLWriters, insertSQL);
 			}
 
-			String insertSQL = db.buildSQL(sb.toString());
-
-			writeToInsertSQLFile(dir, tableName, insertSQLWriters, insertSQL);
-
-			Writer insertSQLWriter = insertSQLWriters.remove(tableName);
-
-			insertSQLWriter.write(";\n");
-
-			insertSQLWriter.close();
+			try (Writer insertSQLWriter = insertSQLWriters.remove(tableName)) {
+				insertSQLWriter.write(";\n");
+			}
 		}
 
-		Writer miscSQLWriter = new FileWriter(new File(dir, "misc.sql"));
+		try (Writer miscSQLWriter = new FileWriter(new File(dir, "misc.sql"))) {
+			for (String miscSQL : miscSQLs) {
+				miscSQL = db.buildSQL(miscSQL);
 
-		for (String miscSQL : miscSQLs) {
-			miscSQL = db.buildSQL(miscSQL);
-
-			miscSQLWriter.write(miscSQL);
-			miscSQLWriter.write(StringPool.NEW_LINE);
+				miscSQLWriter.write(miscSQL);
+				miscSQLWriter.write(StringPool.NEW_LINE);
+			}
 		}
-
-		miscSQLWriter.close();
 	}
 
 	protected Writer createFileWriter(File file) throws IOException {
@@ -396,27 +391,27 @@ public class SampleSQLBuilder {
 		FileOutputStream outputSQLFileOutputStream = new FileOutputStream(
 			outputSQLFile);
 
-		FileChannel outputFileChannel = outputSQLFileOutputStream.getChannel();
+		try (FileChannel outputFileChannel =
+				outputSQLFileOutputStream.getChannel()) {
 
-		File miscSQLFile = null;
+			File miscSQLFile = null;
 
-		for (File inputFile : inputDir.listFiles()) {
-			String inputFileName = inputFile.getName();
+			for (File inputFile : inputDir.listFiles()) {
+				String inputFileName = inputFile.getName();
 
-			if (inputFileName.equals("misc.sql")) {
-				miscSQLFile = inputFile;
+				if (inputFileName.equals("misc.sql")) {
+					miscSQLFile = inputFile;
 
-				continue;
+					continue;
+				}
+
+				mergeSQL(inputFile, outputFileChannel);
 			}
 
-			mergeSQL(inputFile, outputFileChannel);
+			if (miscSQLFile != null) {
+				mergeSQL(miscSQLFile, outputFileChannel);
+			}
 		}
-
-		if (miscSQLFile != null) {
-			mergeSQL(miscSQLFile, outputFileChannel);
-		}
-
-		outputFileChannel.close();
 	}
 
 	protected void mergeSQL(File inputFile, FileChannel outputFileChannel)
@@ -424,12 +419,10 @@ public class SampleSQLBuilder {
 
 		FileInputStream inputFileInputStream = new FileInputStream(inputFile);
 
-		FileChannel inputFileChannel = inputFileInputStream.getChannel();
-
-		inputFileChannel.transferTo(
-			0, inputFileChannel.size(), outputFileChannel);
-
-		inputFileChannel.close();
+		try (FileChannel inputFileChannel = inputFileInputStream.getChannel()) {
+			inputFileChannel.transferTo(
+				0, inputFileChannel.size(), outputFileChannel);
+		}
 
 		inputFile.delete();
 	}
@@ -456,12 +449,12 @@ public class SampleSQLBuilder {
 
 	private static final int _WRITER_BUFFER_SIZE = 16 * 1024;
 
-	private String[] _csvFileNames;
-	private DataFactory _dataFactory;
-	private String _dbType;
+	private final String[] _csvFileNames;
+	private final DataFactory _dataFactory;
+	private final String _dbType;
 	private volatile Exception _freemarkerException;
-	private int _optimizeBufferSize;
-	private String _outputDir;
-	private String _script;
+	private final int _optimizeBufferSize;
+	private final String _outputDir;
+	private final String _script;
 
 }

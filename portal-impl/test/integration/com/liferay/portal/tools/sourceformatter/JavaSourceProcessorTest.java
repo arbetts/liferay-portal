@@ -27,8 +27,15 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 	}
 
 	@Test
+	public void testConstructorParameterOrder() throws Exception {
+		test(
+			"ConstructorParameterOrder.testjava",
+			"Constructor parameter order attribute:");
+	}
+
+	@Test
 	public void testExceedMaxLineLength() throws Exception {
-		test("ExceedMaxLineLength.testjava", "> 80:", 34);
+		test("ExceedMaxLineLength.testjava", "> 80:", 35);
 	}
 
 	@Test
@@ -56,7 +63,7 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 
 	@Test
 	public void testIncorrectClose() throws Exception {
-		test("IncorrectClose.testjava", "}:");
+		test("IncorrectClose.testjava");
 	}
 
 	@Test
@@ -78,19 +85,21 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 				"line break:", "line break:", "line break:", "line break:",
 				"line break:", "line break:", "line break:", "line break:",
 				"line break:", "line break:", "line break:", "line break:",
-				"line break:", "line break:"
+				"line break:", "line break:", "line break:", "line break:"
 			},
 			new Integer[] {
-				23, 27, 31, 38, 42, 45, 48, 52, 55, 60, 66, 70, 74, 77
+				23, 27, 31, 38, 42, 45, 48, 52, 55, 60, 66, 70, 76, 84, 87, 94
 			});
 	}
 
 	@Test
 	public void testIncorrectTabs() throws Exception {
+		/*
 		test(
 			"IncorrectTabs.testjava",
 			new String[] {"tab:", "tab:", "tab:", "tab:"},
 			new Integer[] {23, 27, 33, 40});
+		*/
 	}
 
 	@Test
@@ -100,19 +109,13 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 
 	@Test
 	public void testInefficientStringMethods() throws Exception {
-		String mainReleaseVersion = sourceFormatter.getMainReleaseVersion();
-
-		if (!mainReleaseVersion.equals(
-				BaseSourceProcessor.MAIN_RELEASE_VERSION_6_1_0)) {
-
-			test(
-				"InefficientStringMethods.testjava",
-				new String[] {
-					"Use StringUtil.equalsIgnoreCase:",
-					"Use StringUtil.toLowerCase:", "Use StringUtil.toUpperCase:"
-				},
-				new Integer[] {26, 30, 31});
-		}
+		test(
+			"InefficientStringMethods.testjava",
+			new String[] {
+				"Use StringUtil.equalsIgnoreCase:",
+				"Use StringUtil.toLowerCase:", "Use StringUtil.toUpperCase:"
+			},
+			new Integer[] {26, 30, 31});
 	}
 
 	@Test
@@ -170,6 +173,11 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 	}
 
 	@Test
+	public void testSortMethodsWithAnnotatedParameters() throws Exception {
+		test("SortMethodsWithAnnotatedParameters.testjava");
+	}
+
+	@Test
 	public void testStaticFinalLog() throws Exception {
 		test("StaticFinalLog.testjava");
 	}
@@ -180,8 +188,18 @@ public class JavaSourceProcessorTest extends BaseSourceProcessorTestCase {
 	}
 
 	@Test
+	public void testTruncateLongLines() throws Exception {
+		test("TruncateLongLines.testjava");
+	}
+
+	@Test
 	public void testUnusedImport() throws Exception {
 		test("UnusedImport.testjava");
+	}
+
+	@Test
+	public void testUnusedParameter() throws Exception {
+		test("UnusedParameter.testjava", "Unused parameter color:", 26);
 	}
 
 }

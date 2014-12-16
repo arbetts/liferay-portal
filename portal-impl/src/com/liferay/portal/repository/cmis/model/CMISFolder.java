@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.repository.model.RepositoryModelOperation;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.User;
@@ -105,6 +106,13 @@ public class CMISFolder extends CMISModel implements Folder {
 		else {
 			return containsPermission(_cmisFolder, actionId);
 		}
+	}
+
+	@Override
+	public void execute(RepositoryModelOperation repositoryModelOperation)
+		throws PortalException {
+
+		repositoryModelOperation.execute(this);
 	}
 
 	@Override
@@ -472,11 +480,11 @@ public class CMISFolder extends CMISModel implements Folder {
 		return _cmisRepository;
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(CMISFolder.class);
+	private static final Log _log = LogFactoryUtil.getLog(CMISFolder.class);
 
-	private org.apache.chemistry.opencmis.client.api.Folder _cmisFolder;
-	private CMISRepository _cmisRepository;
+	private final org.apache.chemistry.opencmis.client.api.Folder _cmisFolder;
+	private final CMISRepository _cmisRepository;
 	private long _folderId;
-	private String _uuid;
+	private final String _uuid;
 
 }

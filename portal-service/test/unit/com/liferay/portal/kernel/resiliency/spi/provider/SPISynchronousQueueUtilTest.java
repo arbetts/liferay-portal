@@ -32,8 +32,8 @@ import org.junit.Test;
 public class SPISynchronousQueueUtilTest {
 
 	@ClassRule
-	public static CodeCoverageAssertor codeCoverageAssertor =
-		new CodeCoverageAssertor();
+	public static final CodeCoverageAssertor codeCoverageAssertor =
+		CodeCoverageAssertor.INSTANCE;
 
 	@Test
 	public void testConstructor() {
@@ -51,9 +51,8 @@ public class SPISynchronousQueueUtilTest {
 			SPISynchronousQueueUtil.createSynchronousQueue(spiUUID);
 
 		Map<String, SynchronousQueue<SPI>> synchronizerRegistry =
-			(Map<String, SynchronousQueue<SPI>>)
-				ReflectionTestUtil.getFieldValue(
-					SPISynchronousQueueUtil.class, "_synchronousQueues");
+			ReflectionTestUtil.getFieldValue(
+				SPISynchronousQueueUtil.class, "_synchronousQueues");
 
 		Assert.assertSame(synchronousQueue, synchronizerRegistry.get(spiUUID));
 

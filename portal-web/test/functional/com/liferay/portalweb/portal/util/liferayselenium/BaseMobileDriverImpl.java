@@ -14,9 +14,15 @@
 
 package com.liferay.portalweb.portal.util.liferayselenium;
 
-import com.liferay.portalweb.portal.util.TestPropsValues;
+import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portalweb.util.TestPropsValues;
 
 import io.appium.java_client.MobileDriver;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.internal.WrapsDriver;
 
 /**
  * @author Kenji Heigel
@@ -101,7 +107,7 @@ public abstract class BaseMobileDriverImpl
 	public void assertJavaScriptErrors(String ignoreJavaScriptError)
 		throws Exception {
 
-		throw new UnsupportedOperationException();
+		WebDriverHelper.assertJavaScriptErrors(this, ignoreJavaScriptError);
 	}
 
 	@Override
@@ -116,6 +122,16 @@ public abstract class BaseMobileDriverImpl
 	@Override
 	public void assertLocation(String pattern) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void assertNoJavaScriptExceptions() throws Exception {
+		LiferaySeleniumHelper.assertNoJavaScriptExceptions();
+	}
+
+	@Override
+	public void assertNoLiferayExceptions() throws Exception {
+		LiferaySeleniumHelper.assertNoLiferayExceptions();
 	}
 
 	@Override
@@ -136,8 +152,9 @@ public abstract class BaseMobileDriverImpl
 	@Override
 	public void assertNotPartialText(String locator, String pattern)
 		throws Exception {
-			throw new UnsupportedOperationException();
-		}
+
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public void assertNotSelectedLabel(String selectLocator, String pattern)
@@ -160,7 +177,7 @@ public abstract class BaseMobileDriverImpl
 
 	@Override
 	public void assertNotVisible(String locator) throws Exception {
-		throw new UnsupportedOperationException();
+		LiferaySeleniumHelper.assertNotVisible(this, locator);
 	}
 
 	@Override
@@ -361,7 +378,7 @@ public abstract class BaseMobileDriverImpl
 
 	@Override
 	public boolean isNotText(String locator, String value) {
-		throw new UnsupportedOperationException();
+		return LiferaySeleniumHelper.isNotText(this, locator, value);
 	}
 
 	@Override
@@ -391,7 +408,7 @@ public abstract class BaseMobileDriverImpl
 
 	@Override
 	public boolean isText(String locator, String value) {
-		throw new UnsupportedOperationException();
+		return value.equals(getText(locator, "1"));
 	}
 
 	@Override
@@ -421,7 +438,7 @@ public abstract class BaseMobileDriverImpl
 
 	@Override
 	public void makeVisible(String locator) {
-		throw new UnsupportedOperationException();
+		WebDriverHelper.makeVisible(this, locator);
 	}
 
 	@Override
@@ -468,6 +485,17 @@ public abstract class BaseMobileDriverImpl
 	}
 
 	@Override
+	public void saveScreenshotBeforeAction(boolean actionFailed)
+		throws Exception {
+
+		if (!TestPropsValues.SAVE_SCREENSHOT) {
+			return;
+		}
+
+		LiferaySeleniumHelper.saveScreenshotBeforeAction(this, actionFailed);
+	}
+
+	@Override
 	public void scrollWebElementIntoView(String locator) throws Exception {
 		throw new UnsupportedOperationException();
 	}
@@ -495,7 +523,7 @@ public abstract class BaseMobileDriverImpl
 
 	@Override
 	public void sendKeys(String locator, String value) {
-		throw new UnsupportedOperationException();
+		WebDriverHelper.type(this, locator, value);
 	}
 
 	@Override
@@ -521,11 +549,6 @@ public abstract class BaseMobileDriverImpl
 
 	@Override
 	public void setDefaultTimeout() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void setDefaultTimeoutImplicit() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -627,6 +650,40 @@ public abstract class BaseMobileDriverImpl
 	}
 
 	@Override
+	public void tap(String locator) {
+		WebElement webElement = getWebElement("//body");
+
+		WrapsDriver wrapsDriver = (WrapsDriver)webElement;
+
+		WebDriver wrappedWebDriver = wrapsDriver.getWrappedDriver();
+
+		JavascriptExecutor javascriptExecutor =
+			(JavascriptExecutor)wrappedWebDriver;
+
+		StringBundler sb = new StringBundler(5);
+
+		sb.append("YUI().use('node-event-simulate', function(Y) {");
+		sb.append("var node = Y.one('");
+
+		String cssLocator = locator;
+
+		cssLocator = cssLocator.replaceAll("\\/\\/", " ");
+		cssLocator = cssLocator.replaceAll(
+			"contains\\(@([^,]*),([^)]*)\\)", "$1*=$2");
+		cssLocator = cssLocator.replaceAll("'", "\"");
+		cssLocator = cssLocator.replaceAll("\\/", " > ");
+		cssLocator = cssLocator.replaceAll("^ ", "");
+		cssLocator = cssLocator.replaceAll(" and ", "][");
+
+		sb.append(cssLocator);
+
+		sb.append("');");
+		sb.append("node.simulateGesture('tap');});");
+
+		javascriptExecutor.executeScript(sb.toString());
+	}
+
+	@Override
 	public void typeAceEditor(String locator, String value) {
 		throw new UnsupportedOperationException();
 	}
@@ -702,7 +759,7 @@ public abstract class BaseMobileDriverImpl
 
 	@Override
 	public void waitForNotVisible(String locator) throws Exception {
-		throw new UnsupportedOperationException();
+		LiferaySeleniumHelper.waitForNotVisible(this, locator);
 	}
 
 	@Override

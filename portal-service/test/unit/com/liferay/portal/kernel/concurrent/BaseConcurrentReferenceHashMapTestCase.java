@@ -49,7 +49,7 @@ public class BaseConcurrentReferenceHashMapTestCase {
 		throws InterruptedException {
 
 		Map<Reference<?>, FinalizeAction> finalizeActions =
-			(Map<Reference<?>, FinalizeAction>)ReflectionTestUtil.getFieldValue(
+			ReflectionTestUtil.getFieldValue(
 				FinalizeManager.class, "_finalizeActions");
 
 		String testKey = new String("testKey");
@@ -89,10 +89,10 @@ public class BaseConcurrentReferenceHashMapTestCase {
 		testKey = null;
 
 		if (fullGC) {
-			GCUtil.fullGC();
+			GCUtil.fullGC(true);
 		}
 		else {
-			GCUtil.gc();
+			GCUtil.gc(true);
 		}
 
 		ReflectionTestUtil.invoke(

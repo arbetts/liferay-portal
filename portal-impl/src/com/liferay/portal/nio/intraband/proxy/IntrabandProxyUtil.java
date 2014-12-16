@@ -1035,8 +1035,9 @@ public class IntrabandProxyUtil {
 	private static Set<String> _annotationDescriptors = new HashSet<String>(
 		Arrays.asList(
 			Type.getDescriptor(Id.class), Type.getDescriptor(Proxy.class)));
-
 	private static Method _defineClassMethod;
+	private static Comparator<Method> _methodComparator =
+		new MethodComparator();
 
 	static {
 		try {
@@ -1044,13 +1045,10 @@ public class IntrabandProxyUtil {
 				ClassLoader.class, "defineClass", String.class, byte[].class,
 				int.class, int.class);
 		}
-		catch (Exception e) {
-			throw new ExceptionInInitializerError(e);
+		catch (Throwable t) {
+			throw new ExceptionInInitializerError(t);
 		}
 	}
-
-	private static Comparator<Method> _methodComparator =
-		new MethodComparator();
 
 	private static class SkeletonDispatchTableSwitchGenerator
 		implements TableSwitchGenerator {

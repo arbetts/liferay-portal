@@ -57,6 +57,7 @@ import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.LayoutURLUtil;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
@@ -86,6 +87,7 @@ import com.liferay.portlet.messageboards.model.MBThreadConstants;
 import com.liferay.portlet.messageboards.model.impl.MBCategoryImpl;
 import com.liferay.portlet.messageboards.model.impl.MBMessageDisplayImpl;
 import com.liferay.portlet.messageboards.service.base.MBMessageLocalServiceBaseImpl;
+import com.liferay.portlet.messageboards.service.permission.MBPermission;
 import com.liferay.portlet.messageboards.social.MBActivityKeys;
 import com.liferay.portlet.messageboards.util.MBSubscriptionSender;
 import com.liferay.portlet.messageboards.util.MBUtil;
@@ -678,21 +680,16 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 					MessageCreateDateComparator comparator =
 						new MessageCreateDateComparator(true);
 
-					MBMessage lastMessage =
-						mbMessagePersistence.fetchByT_S_Last(
-							thread.getThreadId(),
+					MBMessage[] prevAndNextMessages =
+						mbMessagePersistence.findByT_S_PrevAndNext(
+							message.getMessageId(), thread.getThreadId(),
 							WorkflowConstants.STATUS_APPROVED, comparator);
 
-					if ((lastMessage != null) &&
-						(message.getMessageId() ==
-							lastMessage.getMessageId())) {
-
-						MBMessage parentMessage =
-							mbMessagePersistence.findByPrimaryKey(
-								message.getParentMessageId());
-
-						thread.setLastPostByUserId(parentMessage.getUserId());
-						thread.setLastPostDate(parentMessage.getModifiedDate());
+					if (prevAndNextMessages[2] == null) {
+						thread.setLastPostByUserId(
+							prevAndNextMessages[0].getUserId());
+						thread.setLastPostDate(
+							prevAndNextMessages[0].getModifiedDate());
 
 						mbThreadPersistence.update(thread);
 					}
@@ -1875,7 +1872,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 					message.getMessageId();
 		}
 
-		String layoutURL = getLayoutURL(
+		String layoutURL = LayoutURLUtil.getLayoutURL(
 			message.getGroupId(), PortletKeys.MESSAGE_BOARDS, serviceContext);
 
 		if (Validator.isNotNull(layoutURL)) {
@@ -1908,7 +1905,8 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 	}
 
 	protected void notifyDiscussionSubscribers(
-		MBMessage message, ServiceContext serviceContext) {
+			MBMessage message, ServiceContext serviceContext)
+		throws PortalException {
 
 		if (!PrefsPropsUtil.getBoolean(
 				message.getCompanyId(),
@@ -1916,6 +1914,9 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 			return;
 		}
+
+		MBDiscussion mbDiscussion =
+			mbDiscussionLocalService.getThreadDiscussion(message.getThreadId());
 
 		String contentURL = (String)serviceContext.getAttribute("contentURL");
 
@@ -1943,8 +1944,8 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 		subscriptionSender.setBody(body);
 		subscriptionSender.setCompanyId(message.getCompanyId());
-		subscriptionSender.setClassName(message.getModelClassName());
-		subscriptionSender.setClassPK(message.getMessageId());
+		subscriptionSender.setClassName(MBDiscussion.class.getName());
+		subscriptionSender.setClassPK(mbDiscussion.getDiscussionId());
 		subscriptionSender.setContextAttribute(
 			"[$COMMENTS_BODY$]", message.getBody(true), false);
 		subscriptionSender.setContextAttributes(
@@ -1954,8 +1955,12 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		subscriptionSender.setEntryURL(contentURL);
 		subscriptionSender.setFrom(fromAddress, fromName);
 		subscriptionSender.setHtmlFormat(true);
+
+		Date modifiedDate = message.getModifiedDate();
+
 		subscriptionSender.setMailId(
-			"mb_discussion", message.getCategoryId(), message.getMessageId());
+			"mb_discussion", message.getCategoryId(), message.getMessageId(),
+			modifiedDate.getTime());
 
 		int notificationType =
 			UserNotificationDefinition.NOTIFICATION_TYPE_ADD_ENTRY;
@@ -1971,6 +1976,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		subscriptionSender.setScopeGroupId(message.getGroupId());
 		subscriptionSender.setServiceContext(serviceContext);
 		subscriptionSender.setSubject(subject);
+		subscriptionSender.setUniqueMailId(false);
 		subscriptionSender.setUserId(message.getUserId());
 
 		String className = (String)serviceContext.getAttribute("className");
@@ -2107,13 +2113,19 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		if (message.getParentMessageId() !=
 				MBMessageConstants.DEFAULT_PARENT_MESSAGE_ID) {
 
+			MBMessage parentMessage = mbMessageLocalService.getMessage(
+				message.getParentMessageId());
+
+			Date modifiedDate = parentMessage.getModifiedDate();
+
 			inReplyTo = PortalUtil.getMailId(
 				company.getMx(), MBUtil.MESSAGE_POP_PORTLET_PREFIX,
-				message.getCategoryId(), message.getParentMessageId());
+				message.getCategoryId(), parentMessage.getMessageId(),
+				modifiedDate.getTime());
 		}
 
 		SubscriptionSender subscriptionSenderPrototype =
-			new MBSubscriptionSender();
+			new MBSubscriptionSender(MBPermission.RESOURCE_NAME);
 
 		subscriptionSenderPrototype.setBulk(
 			PropsValues.MESSAGE_BOARDS_EMAIL_BULK);
@@ -2136,9 +2148,12 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		subscriptionSenderPrototype.setLocalizedBodyMap(bodyLocalizedValuesMap);
 		subscriptionSenderPrototype.setLocalizedSubjectMap(
 			subjectLocalizedValuesMap);
+
+		Date modifiedDate = message.getModifiedDate();
+
 		subscriptionSenderPrototype.setMailId(
 			MBUtil.MESSAGE_POP_PORTLET_PREFIX, message.getCategoryId(),
-			message.getMessageId());
+			message.getMessageId(), modifiedDate.getTime());
 
 		int notificationType =
 			UserNotificationDefinition.NOTIFICATION_TYPE_ADD_ENTRY;
@@ -2154,6 +2169,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		subscriptionSenderPrototype.setReplyToAddress(replyToAddress);
 		subscriptionSenderPrototype.setScopeGroupId(message.getGroupId());
 		subscriptionSenderPrototype.setServiceContext(serviceContext);
+		subscriptionSenderPrototype.setUniqueMailId(false);
 		subscriptionSenderPrototype.setUserId(message.getUserId());
 
 		SubscriptionSender subscriptionSender =

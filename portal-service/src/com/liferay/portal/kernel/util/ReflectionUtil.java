@@ -33,7 +33,21 @@ import java.util.Set;
  */
 public class ReflectionUtil {
 
-	public static final Error SHOULD_NEVER_HAPPEN_ERROR = new AssertionError();
+	public static Object arrayClone(Object array) {
+		Class<?> clazz = array.getClass();
+
+		if (!clazz.isArray()) {
+			throw new IllegalArgumentException(
+				"Input object is not an array: " + array);
+		}
+
+		try {
+			return _CLONE_METHOD.invoke(array);
+		}
+		catch (Exception e) {
+			return throwException(e);
+		}
+	}
 
 	public static Class<?> getAnnotationDeclaringClass(
 		Class<? extends Annotation> annotationClass, Class<?> clazz) {
@@ -60,15 +74,7 @@ public class ReflectionUtil {
 			field.setAccessible(true);
 		}
 
-		int modifiers = field.getModifiers();
-
-		if ((modifiers & Modifier.FINAL) == Modifier.FINAL) {
-			Field modifiersField = getDeclaredField(Field.class, "modifiers");
-
-			modifiersField.setInt(field, modifiers & ~Modifier.FINAL);
-		}
-
-		return field;
+		return unfinalField(field);
 	}
 
 	public static Method getDeclaredMethod(
@@ -207,12 +213,24 @@ public class ReflectionUtil {
 		return false;
 	}
 
-	public static void throwException(Throwable throwable) {
-		ReflectionUtil.<RuntimeException>_doThrowException(throwable);
+	public static <T> T throwException(Throwable throwable) {
+		return ReflectionUtil.<T, RuntimeException>_doThrowException(throwable);
+	}
+
+	public static Field unfinalField(Field field) throws Exception {
+		int modifiers = field.getModifiers();
+
+		if ((modifiers & Modifier.FINAL) == Modifier.FINAL) {
+			Field modifiersField = getDeclaredField(Field.class, "modifiers");
+
+			modifiersField.setInt(field, modifiers & ~Modifier.FINAL);
+		}
+
+		return field;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <E extends Throwable> void _doThrowException(
+	private static <T, E extends Throwable> T _doThrowException(
 			Throwable throwable)
 		throws E {
 
@@ -235,6 +253,17 @@ public class ReflectionUtil {
 			}
 			catch (ClassNotFoundException cnfe) {
 			}
+		}
+	}
+
+	private static final Method _CLONE_METHOD;
+
+	static {
+		try {
+			_CLONE_METHOD = getDeclaredMethod(Object.class, "clone");
+		}
+		catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
 		}
 	}
 

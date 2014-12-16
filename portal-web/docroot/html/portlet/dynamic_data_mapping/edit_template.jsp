@@ -66,6 +66,8 @@ String structureAvailableFields = ParamUtil.getString(request, "structureAvailab
 if (Validator.isNotNull(structureAvailableFields)) {
 	scopeAvailableFields = structureAvailableFields;
 }
+
+boolean showCacheableInput = ParamUtil.getBoolean(request, "showCacheableInput");
 %>
 
 <portlet:actionURL var="editTemplateURL">
@@ -196,7 +198,7 @@ if (Validator.isNotNull(structureAvailableFields)) {
 						</aui:select>
 					</c:when>
 					<c:otherwise>
-						<c:if test="<%= Validator.equals(ddmDisplay.getPortletId(), PortletKeys.JOURNAL) || Validator.equals(ddmDisplay.getPortletId(), PortletKeys.JOURNAL_CONTENT) %>">
+						<c:if test="<%= showCacheableInput %>">
 							<aui:input helpMessage="journal-template-cacheable-help" name="cacheable" value="<%= cacheable %>" />
 						</c:if>
 
@@ -209,7 +211,7 @@ if (Validator.isNotNull(structureAvailableFields)) {
 								<aui:row>
 									<c:if test="<%= smallImage && (template != null) %>">
 										<aui:col width="<%= 50 %>">
-											<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="preview" />" class="lfr-ddm-small-image-preview" src='<%= Validator.isNotNull(template.getSmallImageURL()) ? HtmlUtil.escapeHREF(template.getSmallImageURL()) : themeDisplay.getPathImage() + "/template?img_id=" + template.getSmallImageId() + "&t=" + WebServerServletTokenUtil.getToken(template.getSmallImageId()) %>' />
+											<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="preview" />" class="lfr-ddm-small-image-preview" src="<%= HtmlUtil.escapeAttribute(template.getTemplateImageURL(themeDisplay)) %>" />
 										</aui:col>
 									</c:if>
 

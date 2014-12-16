@@ -60,9 +60,6 @@ import java.util.Map;
  */
 public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 
-	public DLFileEntryImpl() {
-	}
-
 	@Override
 	public String buildTreePath() throws PortalException {
 		if (getFolderId() == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
@@ -89,6 +86,12 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 	public long getDataRepositoryId() {
 		return DLFolderConstants.getDataRepositoryId(
 			getGroupId(), getFolderId());
+	}
+
+	@Override
+	public DLFileEntryType getDLFileEntryType() throws PortalException {
+		return DLFileEntryTypeLocalServiceUtil.getDLFileEntryType(
+			getFileEntryTypeId());
 	}
 
 	@Override
@@ -146,20 +149,21 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 			return fieldsMap;
 		}
 
-		DLFileEntryType dlFileEntryType =
-			DLFileEntryTypeLocalServiceUtil.getFileEntryType(fileEntryTypeId);
+		DLFileEntryType dlFileEntryType = getDLFileEntryType();
 
 		List<DDMStructure> ddmStructures = dlFileEntryType.getDDMStructures();
 
 		for (DDMStructure ddmStructure : ddmStructures) {
 			DLFileEntryMetadata dlFileEntryMetadata =
-				DLFileEntryMetadataLocalServiceUtil.getFileEntryMetadata(
+				DLFileEntryMetadataLocalServiceUtil.fetchFileEntryMetadata(
 					ddmStructure.getStructureId(), fileVersionId);
 
-			Fields fields = StorageEngineUtil.getFields(
-				dlFileEntryMetadata.getDDMStorageId());
+			if (dlFileEntryMetadata != null) {
+				Fields fields = StorageEngineUtil.getFields(
+					dlFileEntryMetadata.getDDMStorageId());
 
-			fieldsMap.put(ddmStructure.getStructureKey(), fields);
+				fieldsMap.put(ddmStructure.getStructureKey(), fields);
+			}
 		}
 
 		return fieldsMap;
@@ -400,7 +404,8 @@ public class DLFileEntryImpl extends DLFileEntryBaseImpl {
 		super.setExtraSettings(_extraSettingsProperties.toString());
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(DLFileEntryImpl.class);
+	private static final Log _log = LogFactoryUtil.getLog(
+		DLFileEntryImpl.class);
 
 	private UnicodeProperties _extraSettingsProperties;
 

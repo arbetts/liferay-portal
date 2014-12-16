@@ -146,9 +146,6 @@ public class WikiPageStagedModelDataHandler
 
 		long userId = portletDataContext.getUserId(page.getUserUuid());
 
-		StagedModelDataHandlerUtil.importReferenceStagedModel(
-			portletDataContext, page, WikiNode.class, page.getNodeId());
-
 		Element pageElement =
 			portletDataContext.getImportDataStagedModelElement(page);
 
@@ -292,7 +289,7 @@ public class WikiPageStagedModelDataHandler
 		}
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		WikiPageStagedModelDataHandler.class);
 
 }

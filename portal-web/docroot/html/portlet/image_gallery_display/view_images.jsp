@@ -42,6 +42,8 @@ DLActionsDisplayContext dlActionsDisplayContext = new DLActionsDisplayContext(re
 <div>
 
 	<%
+	boolean hasViewableFileEntries = false;
+
 	for (int i = 0; i < results.size(); i++) {
 		Object result = results.get(i);
 	%>
@@ -61,12 +63,14 @@ DLActionsDisplayContext dlActionsDisplayContext = new DLActionsDisplayContext(re
 					thumbnailId = "entry_" + fileEntry.getFileEntryId();
 				}
 
-				DLFileVersionActionsDisplayContext dlFileVersionActionsDisplayContext = DLFileVersionActionsDisplayContextUtil.getDLFileVersionActionsDisplayContext(request, response, fileEntry.getFileVersion());
+				DLViewFileVersionDisplayContext dlViewFileVersionDisplayContext = DLViewFileVersionDisplayContextUtil.getIGFileVersionActionsDisplayContext(request, response, fileEntry.getFileVersion());
 				%>
 
 				<c:if test="<%= DLFileEntryPermission.contains(permissionChecker, fileEntry, ActionKeys.VIEW) %>">
 
 					<%
+					hasViewableFileEntries = true;
+
 					FileVersion fileVersion = fileEntry.getFileVersion();
 
 					boolean hasAudio = AudioProcessorUtil.hasAudio(fileVersion);
@@ -75,7 +79,7 @@ DLActionsDisplayContext dlActionsDisplayContext = new DLActionsDisplayContext(re
 					boolean hasVideo = VideoProcessorUtil.hasVideo(fileVersion);
 
 					String href = themeDisplay.getPathThemeImages() + "/file_system/large/" + DLUtil.getGenericName(fileEntry.getExtension()) + ".png";
-					String src = DLUtil.getThumbnailSrc(fileEntry, fileVersion, null, themeDisplay);
+					String src = DLUtil.getThumbnailSrc(fileEntry, fileVersion, themeDisplay);
 
 					int playerHeight = 500;
 
@@ -258,78 +262,68 @@ embeddedPlayerURL.setParameter("struts_action", "/image_gallery_display/embedded
 embeddedPlayerURL.setWindowState(LiferayWindowState.POP_UP);
 %>
 
-<aui:script use="aui-image-viewer-gallery,aui-image-viewer-media">
-	var viewportRegion = A.getDoc().get('viewportRegion');
+<c:if test="<%= hasViewableFileEntries %>">
+	<aui:script use="aui-image-viewer,aui-image-viewer-media">
+		var viewportRegion = A.getDoc().get('viewportRegion');
 
-	var maxHeight = (viewportRegion.height / 2);
-	var maxWidth = (viewportRegion.width / 2);
+		var maxHeight = (viewportRegion.height / 2);
+		var maxWidth = (viewportRegion.width / 2);
 
-	var imageGallery = new A.ImageGallery(
-		{
-			after: {
-				render: function(event) {
-					var instance = this;
+		var imageGallery = new A.ImageViewer(
+			{
+				after: {
+					<c:if test="<%= dlActionsDisplayContext.isShowActions() %>">
+						load: function(event) {
+							var instance = this;
 
-					var footerNode = instance.footerNode;
+							var currentLink = instance.getCurrentLink();
 
-					instance._actions = A.Node.create('<div class="lfr-image-gallery-actions"></div>');
+							var thumbnailId = currentLink.attr('thumbnailId');
 
-					if (footerNode) {
-						footerNode.append(instance._actions);
-					}
-				}
+							var actions = instance._actions;
 
-				<c:if test="<%= dlActionsDisplayContext.isShowActions() %>">
-					, load: function(event) {
-						var instance = this;
+							if (actions) {
+								var defaultAction = A.one('#<portlet:namespace />buttonsContainer_' + thumbnailId);
 
-						var currentLink = instance.getCurrentLink();
+								actions.empty();
 
-						var thumbnailId = currentLink.attr('thumbnailId');
+								var action = defaultAction.clone().show();
 
-						var actions = instance._actions;
-
-						if (actions) {
-							var defaultAction = A.one('#<portlet:namespace />buttonsContainer_' + thumbnailId);
-
-							actions.empty();
-
-							var action = defaultAction.clone().show();
-
-							actions.append(action);
+								actions.append(action);
+							}
 						}
+					</c:if>
+				},
+				delay: 5000,
+				infoTemplate: '<%= LanguageUtil.format(request, "image-x-of-x", new String[] {"{current}", "{total}"}, false) %>',
+				links: '#<portlet:namespace />imageGalleryAssetInfo .image-link.preview',
+				maxHeight: maxHeight,
+				maxWidth: maxWidth,
+				playingLabel: '(<liferay-ui:message key="playing" />)',
+				plugins: [
+					{
+						cfg: {
+							'providers.liferay': {
+								container: '<iframe frameborder="0" height="{height}" scrolling="no" src="<%= embeddedPlayerURL.toString() %>&<portlet:namespace />thumbnailURL={thumbnailURL}&<portlet:namespace />mp3PreviewURL={mp3PreviewURL}&<portlet:namespace />mp4PreviewURL={mp4PreviewURL}&<portlet:namespace />oggPreviewURL={oggPreviewURL}&<portlet:namespace />ogvPreviewURL={ogvPreviewURL}" width="{width}"></iframe>',
+								matcher: /(.+)&mediaGallery=1/,
+								mediaRegex: /(.+)&mediaGallery=1/,
+								options: A.merge(
+									A.MediaViewerPlugin.DEFAULT_OPTIONS,
+									{
+										'mp3PreviewURL': '',
+										'mp4PreviewURL': '',
+										'oggPreviewURL': '',
+										'ogvPreviewURL': '',
+										'thumbnailURL': ''
+									}
+								)
+							}
+						},
+						fn: A.MediaViewerPlugin
 					}
-				</c:if>
-			},
-			delay: 5000,
-			infoTemplate: '<%= LanguageUtil.format(request, "image-x-of-x", new String[] {"{current}", "{total}"}, false) %>',
-			links: '#<portlet:namespace />imageGalleryAssetInfo .image-link.preview',
-			maxHeight: maxHeight,
-			maxWidth: maxWidth,
-			playingLabel: '(<liferay-ui:message key="playing" />)',
-			plugins: [
-				{
-					cfg: {
-						'providers.liferay': {
-							container: '<iframe frameborder="0" height="{height}" scrolling="no" src="<%= embeddedPlayerURL.toString() %>&<portlet:namespace />thumbnailURL={thumbnailURL}&<portlet:namespace />mp3PreviewURL={mp3PreviewURL}&<portlet:namespace />mp4PreviewURL={mp4PreviewURL}&<portlet:namespace />oggPreviewURL={oggPreviewURL}&<portlet:namespace />ogvPreviewURL={ogvPreviewURL}" width="{width}"></iframe>',
-							matcher: /(.+)&mediaGallery=1/,
-							options: A.merge(
-								A.MediaViewerPlugin.DEFAULT_OPTIONS,
-								{
-									'thumbnailURL': '',
-									'mp3PreviewURL': '',
-									'mp4PreviewURL': '',
-									'oggPreviewURL': '',
-									'ogvPreviewURL': ''
-								}
-							),
-							mediaRegex: /(.+)&mediaGallery=1/
-						}
-					},
-					fn: A.MediaViewerPlugin
-				}
-			],
-			zIndex: ++Liferay.zIndex.WINDOW
-		}
-	).render();
-</aui:script>
+				],
+				zIndex: ++Liferay.zIndex.WINDOW
+			}
+		).render();
+	</aui:script>
+</c:if>

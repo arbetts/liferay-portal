@@ -80,6 +80,7 @@ import com.liferay.portlet.sites.util.SitesUtil;
 
 import java.io.IOException;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -538,6 +539,11 @@ public class LayoutStagedModelDataHandler
 		}
 
 		importedLayout.setCompanyId(portletDataContext.getCompanyId());
+
+		if (layout.getLayoutPrototypeUuid() != null) {
+			importedLayout.setModifiedDate(new Date());
+		}
+
 		importedLayout.setParentLayoutId(parentLayoutId);
 		importedLayout.setName(layout.getName());
 		importedLayout.setTitle(layout.getTitle());
@@ -1084,6 +1090,11 @@ public class LayoutStagedModelDataHandler
 		}
 
 		updateTypeSettings(importedLayout, layout);
+	}
+
+	@Override
+	protected void importReferenceStagedModels(
+		PortletDataContext portletDataContext, Layout layout) {
 	}
 
 	protected void importTheme(

@@ -14,8 +14,8 @@
 
 package com.liferay.currency.converter.web.portlet;
 
-import com.liferay.currency.converter.web.upgrade.CurrencyConverterUpgrade;
-import com.liferay.util.bridges.mvc.MVCPortlet;
+import com.liferay.currency.converter.web.upgrade.CurrencyConverterWebUpgrade;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
 import javax.portlet.Portlet;
 
@@ -23,9 +23,9 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
-* @author Raymond Augé
-* @author Peter Fellwock
-*/
+ * @author Raymond Augé
+ * @author Peter Fellwock
+ */
 @Component(
 	immediate = true,
 	property = {
@@ -40,13 +40,13 @@ import org.osgi.service.component.annotations.Reference;
 		"com.liferay.portlet.render-weight=0",
 		"com.liferay.portlet.struts-path=currency_converter",
 		"com.liferay.portlet.use-default-template=true",
+		"javax.portlet.display-name=Currency Converter",
+		"javax.portlet.expiration-cache=0",
 		"javax.portlet.init-param.edit-guest-template=/edit.jsp",
 		"javax.portlet.init-param.edit-template=/edit.jsp",
 		"javax.portlet.init-param.template-path=/",
 		"javax.portlet.init-param.view-template=/view.jsp",
-		"javax.portlet.portlet.display-name=Currency Converter",
-		"javax.portlet.portlet.expiration-cache=0",
-		"javax.portlet.portlet.modes=text/html;edit,edit-guest",
+		"javax.portlet.portlet-mode=text/html;edit,edit-guest",
 		"javax.portlet.preferences=classpath:/META-INF/portlet-preferences/default-portlet-preferences.xml",
 		"javax.portlet.resource-bundle=content.Language"
 	},
@@ -55,8 +55,8 @@ import org.osgi.service.component.annotations.Reference;
 public class CurrencyConverterPortlet extends MVCPortlet {
 
 	@Reference(unbind = "-")
-	protected void setCurrencyConverterUpgrade(
-		CurrencyConverterUpgrade currencyConverterUpgrade) {
+	protected void setCurrencyConverterWebUpgrade(
+		CurrencyConverterWebUpgrade currencyConverterWebUpgrade) {
 	}
 
 }

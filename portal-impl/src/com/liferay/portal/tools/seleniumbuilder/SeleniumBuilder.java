@@ -222,6 +222,22 @@ public class SeleniumBuilder {
 		return testCaseCount;
 	}
 
+	private boolean _isCommandNameOverridden(
+		Element rootElement, String commandName) {
+
+		List<Element> commandElements =
+			_seleniumBuilderFileUtil.getAllChildElements(
+				rootElement, "command");
+
+		for (Element commandElement : commandElements) {
+			if (commandName.equals(commandElement.attributeValue("name"))) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private boolean _isIgnoreCommandName(
 		Element rootElement, String commandName) {
 
@@ -271,8 +287,6 @@ public class SeleniumBuilder {
 		Map<String, Set<String>> testCaseMethodNameMap =
 			new TreeMap<String, Set<String>>();
 
-		Set<String> testCaseMethodNames = new TreeSet<String>();
-
 		Set<String> testCaseNames = _seleniumBuilderContext.getTestCaseNames();
 
 		for (String testCaseName : testCaseNames) {
@@ -306,6 +320,10 @@ public class SeleniumBuilder {
 				for (Element commandElement : commandElements) {
 					String commandName = commandElement.attributeValue("name");
 
+					if (_isCommandNameOverridden(rootElement, commandName)) {
+						continue;
+					}
+
 					if (_isIgnoreCommandName(rootElement, commandName)) {
 						continue;
 					}
@@ -314,8 +332,6 @@ public class SeleniumBuilder {
 						testCaseName + "TestCase#test" + commandName;
 
 					compontentTestCaseMethodNames.add(testCaseMethodName);
-
-					testCaseMethodNames.add(testCaseMethodName);
 				}
 			}
 
@@ -359,8 +375,6 @@ public class SeleniumBuilder {
 				else {
 					compontentTestCaseMethodNames.add(testCaseMethodName);
 				}
-
-				testCaseMethodNames.add(testCaseMethodName);
 			}
 
 			if (!compontentTestCaseMethodNames.isEmpty()) {
@@ -399,52 +413,6 @@ public class SeleniumBuilder {
 				sb.append("PortalSmokeTestCase#testSmoke\n");
 			}
 		}
-
-		sb.append("\n");
-
-		String[] productNames = {"marketplace", "portal", "social-office"};
-
-		for (String productName : productNames) {
-			Set<String> productTestCaseMethodNames = new TreeSet<String>();
-
-			String productKey = productName;
-
-			productName = StringUtil.replace(productName, "-", "_");
-			productName = StringUtil.upperCase(productName);
-
-			sb.append(productName);
-			sb.append("_TEST_CASE_METHOD_NAMES=");
-
-			for (String componentName : componentNames) {
-				if (componentName.startsWith(productKey) &&
-					testCaseMethodNameMap.containsKey(componentName)) {
-
-					productTestCaseMethodNames.addAll(
-						testCaseMethodNameMap.get(componentName));
-				}
-			}
-
-			if (!productTestCaseMethodNames.isEmpty()) {
-				String testCaseMethodNamesString = StringUtil.merge(
-					productTestCaseMethodNames.toArray(
-						new String[productTestCaseMethodNames.size()]),
-						StringPool.SPACE);
-
-				sb.append(testCaseMethodNamesString);
-				sb.append("\n");
-			}
-			else {
-				sb.append("PortalSmokeTestCase#testSmoke\n");
-			}
-		}
-
-		sb.append("\nTEST_CASE_METHOD_NAMES=");
-
-		String testCaseMethodNamesString = StringUtil.merge(
-			testCaseMethodNames.toArray(new String[testCaseMethodNames.size()]),
-			StringPool.SPACE);
-
-		sb.append(testCaseMethodNamesString);
 
 		_seleniumBuilderFileUtil.writeFile(
 			"../../../test.case.method.names.properties", sb.toString(), false);

@@ -572,15 +572,15 @@ public class Creole10Parser]]></replacevalue>
 		<mkdir dir="${tstamp.value}/compass" />
 
 		<get
-			dest="${tstamp.value}/compass/compass-0.12.2.gem"
-			src="http://rubygems.org/downloads/compass-0.12.2.gem"
+			dest="${tstamp.value}/compass/compass-1.0.1.gem"
+			src="http://rubygems.org/downloads/compass-1.0.1.gem"
 		/>
 
 		<java
 			fork="true"
 			jar="${project.dir}/lib/portal/jruby.jar"
 		>
-			<arg line="-S gem install -i ./${tstamp.value}/output ${tstamp.value}/compass/compass-0.12.2.gem --no-rdoc --no-ri" />
+			<arg line="-S gem install -i ./${tstamp.value}/output ${tstamp.value}/compass/compass-1.0.1.gem --no-rdoc --no-ri" />
 		</java>
 
 		<if>
@@ -599,6 +599,22 @@ public class Creole10Parser]]></replacevalue>
 		/>
 
 		<delete dir="${tstamp.value}" />
+	</target>
+
+	<target name="build-selenium">
+		<ant dir="../portal-web" target="build-selenium" />
+	</target>
+
+	<target name="build-selenium-action">
+		<ant dir="../portal-web" target="build-selenium-action" />
+	</target>
+
+	<target name="build-selenium-block">
+		<ant dir="../portal-web" target="build-selenium-block" />
+	</target>
+
+	<target name="build-selenium-function">
+		<ant dir="../portal-web" target="build-selenium-function" />
 	</target>
 
 	<target name="build-selenium-java-jar">
@@ -644,36 +660,12 @@ public class Creole10Parser]]></replacevalue>
 		<delete dir="${tstamp.value}" />
 	</target>
 
-	<target name="build-selenium-old">
-		<ant dir="../portal-web" target="build-selenium-old" />
+	<target name="build-selenium-macro">
+		<ant dir="../portal-web" target="build-selenium-macro" />
 	</target>
 
-	<target name="build-selenium-new">
-		<ant dir="../portal-web" target="build-selenium-new" />
-	</target>
-
-	<target name="build-selenium-new-action">
-		<ant dir="../portal-web" target="build-selenium-new-action" />
-	</target>
-
-	<target name="build-selenium-new-block">
-		<ant dir="../portal-web" target="build-selenium-new-block" />
-	</target>
-
-	<target name="build-selenium-new-function">
-		<ant dir="../portal-web" target="build-selenium-new-function" />
-	</target>
-
-	<target name="build-selenium-new-macro">
-		<ant dir="../portal-web" target="build-selenium-new-macro" />
-	</target>
-
-	<target name="build-selenium-new-path">
-		<ant dir="../portal-web" target="build-selenium-new-path" />
-	</target>
-
-	<target name="build-selenium-new-test-case">
-		<ant dir="../portal-web" target="build-selenium-new-test-case" />
+	<target name="build-selenium-path">
+		<ant dir="../portal-web" target="build-selenium-path" />
 	</target>
 
 	<target name="build-selenium-server-jar">
@@ -836,6 +828,10 @@ public class Creole10Parser]]></replacevalue>
 		<delete dir="${tstamp.value}" />
 	</target>
 
+	<target name="build-selenium-test-case">
+		<ant dir="../portal-web" target="build-selenium-test-case" />
+	</target>
+
 	<target name="build-service">
 		<java
 			classname="com.liferay.portal.tools.servicebuilder.ServiceBuilder"
@@ -919,12 +915,6 @@ public class Creole10Parser]]></replacevalue>
 		</antcall>
 	</target>
 
-	<target name="build-service-portlet-bookmarks">
-		<antcall target="build-service">
-			<param name="service.file" value="${basedir}/src/com/liferay/portlet/bookmarks/service.xml" />
-		</antcall>
-	</target>
-
 	<target name="build-service-portlet-calendar">
 		<antcall target="build-service">
 			<param name="service.file" value="${basedir}/src/com/liferay/portlet/calendar/service.xml" />
@@ -979,12 +969,6 @@ public class Creole10Parser]]></replacevalue>
 		</antcall>
 	</target>
 
-	<target name="build-service-portlet-polls">
-		<antcall target="build-service">
-			<param name="service.file" value="${basedir}/src/com/liferay/portlet/polls/service.xml" />
-		</antcall>
-	</target>
-
 	<target name="build-service-portlet-ratings">
 		<antcall target="build-service">
 			<param name="service.file" value="${basedir}/src/com/liferay/portlet/ratings/service.xml" />
@@ -1025,7 +1009,6 @@ public class Creole10Parser]]></replacevalue>
 		<antcall target="build-service-portlet-announcements" />
 		<antcall target="build-service-portlet-asset" />
 		<antcall target="build-service-portlet-blogs" />
-		<antcall target="build-service-portlet-bookmarks" />
 		<antcall target="build-service-portlet-calendar" />
 		<antcall target="build-service-portlet-documentlibrary" />
 		<antcall target="build-service-portlet-dynamicdatalists" />
@@ -1035,7 +1018,6 @@ public class Creole10Parser]]></replacevalue>
 		<antcall target="build-service-portlet-journal" />
 		<antcall target="build-service-portlet-messageboards" />
 		<antcall target="build-service-portlet-mobiledevicerules" />
-		<antcall target="build-service-portlet-polls" />
 		<antcall target="build-service-portlet-ratings" />
 		<antcall target="build-service-portlet-shopping" />
 		<antcall target="build-service-portlet-social" />
@@ -1222,12 +1204,6 @@ public class Creole10Parser]]></replacevalue>
 		</antcall>
 	</target>
 
-	<target name="build-wsdd-portlet-bookmarks">
-		<antcall target="build-wsdd">
-			<param name="service.file" value="${basedir}/src/com/liferay/portlet/bookmarks/service.xml" />
-		</antcall>
-	</target>
-
 	<target name="build-wsdd-portlet-calendar">
 		<antcall target="build-wsdd">
 			<param name="service.file" value="${basedir}/src/com/liferay/portlet/calendar/service.xml" />
@@ -1282,12 +1258,6 @@ public class Creole10Parser]]></replacevalue>
 		</antcall>
 	</target>
 
-	<target name="build-wsdd-portlet-polls">
-		<antcall target="build-wsdd">
-			<param name="service.file" value="${basedir}/src/com/liferay/portlet/polls/service.xml" />
-		</antcall>
-	</target>
-
 	<target name="build-wsdd-portlet-ratings">
 		<antcall target="build-wsdd">
 			<param name="service.file" value="${basedir}/src/com/liferay/portlet/ratings/service.xml" />
@@ -1328,7 +1298,6 @@ public class Creole10Parser]]></replacevalue>
 		<antcall target="build-wsdd-portlet-announcements" />
 		<antcall target="build-wsdd-portlet-asset" />
 		<antcall target="build-wsdd-portlet-blogs" />
-		<antcall target="build-wsdd-portlet-bookmarks" />
 		<antcall target="build-wsdd-portlet-documentlibrary" />
 		<antcall target="build-wsdd-portlet-dynamicdatalists" />
 		<antcall target="build-wsdd-portlet-dynamicdatamapping" />
@@ -1337,7 +1306,6 @@ public class Creole10Parser]]></replacevalue>
 		<antcall target="build-wsdd-portlet-journal" />
 		<antcall target="build-wsdd-portlet-messageboards" />
 		<antcall target="build-wsdd-portlet-mobiledevicerules" />
-		<antcall target="build-wsdd-portlet-polls" />
 		<antcall target="build-wsdd-portlet-ratings" />
 		<antcall target="build-wsdd-portlet-shopping" />
 		<antcall target="build-wsdd-portlet-social" />

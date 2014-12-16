@@ -75,6 +75,19 @@ else {
 <aui:form action="<%= editTagURL %>" name="fm">
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= tag == null ? Constants.ADD : Constants.UPDATE %>" />
 
+	<liferay-ui:error exception="<%= AssetTagException.class %>">
+
+		<%
+		AssetTagException ate = (AssetTagException)errorException;
+		%>
+
+		<c:if test="<%= ate.getType() == AssetTagException.INVALID_CHARACTER %>">
+			<liferay-ui:message key="please-enter-a-valid-name" />
+		</c:if>
+	</liferay-ui:error>
+
+	<liferay-ui:error exception="<%= DuplicateTagException.class %>" message="a-tag-with-that-name-already-exists" />
+
 	<aui:model-context bean="<%= tag %>" model="<%= AssetTag.class %>" />
 
 	<aui:fieldset>

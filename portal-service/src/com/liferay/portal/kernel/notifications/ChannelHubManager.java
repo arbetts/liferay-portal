@@ -60,6 +60,9 @@ public interface ChannelHubManager {
 
 	public void destroyChannelHub(long companyId) throws ChannelException;
 
+	public void destroyClusterChannel(long companyId, long userId)
+		throws ChannelException;
+
 	public ChannelHub fetchChannelHub(long companyId) throws ChannelException;
 
 	public ChannelHub fetchChannelHub(long companyId, boolean createIfAbsent)
@@ -112,6 +115,10 @@ public interface ChannelHubManager {
 			Collection<String> notificationEventUuids)
 		throws ChannelException;
 
+	public void sendClusterNotificationEvent(
+			long companyId, long userId, NotificationEvent notificationEvent)
+		throws ChannelException;
+
 	public void sendNotificationEvent(
 			long companyId, long userId, NotificationEvent notificationEvent)
 		throws ChannelException;
@@ -119,6 +126,10 @@ public interface ChannelHubManager {
 	public void sendNotificationEvents(
 			long companyId, long userId,
 			Collection<NotificationEvent> notificationEvents)
+		throws ChannelException;
+
+	public void storeNotificationEvent(
+			long companyId, long userId, NotificationEvent notificationEvent)
 		throws ChannelException;
 
 	public void unregisterChannelListener(

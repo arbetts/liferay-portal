@@ -583,11 +583,20 @@ public class ServiceBuilder {
 		_tplSpringXml = _getTplProperty("spring_xml", _tplSpringXml);
 
 		try {
-			_badTableNames = _readLines(_tplBadTableNames);
-			_badAliasNames = _readLines(_tplBadAliasNames);
-			_badColumnNames = _readLines(_tplBadColumnNames);
+			_apiDir = apiDir;
+			_autoImportDefaultReferences = autoImportDefaultReferences;
+			_autoNamespaceTables = autoNamespaceTables;
+			_beanLocatorUtil = beanLocatorUtil;
+			_buildNumber = buildNumber;
+			_buildNumberIncrement = buildNumberIncrement;
 			_hbmFileName = hbmFileName;
+			_implDir = implDir;
 			_modelHintsFileName = modelHintsFileName;
+			_osgiModule = osgiModule;
+			_pluginName = GetterUtil.getString(pluginName);
+			_propsUtil = propsUtil;
+			_remotingFileName = remotingFileName;
+			_resourcesDir = resourcesDir;
 			_springFileName = springFileName;
 
 			_springNamespaces = springNamespaces;
@@ -599,27 +608,20 @@ public class ServiceBuilder {
 					_springNamespaces, _SPRING_NAMESPACE_BEANS);
 			}
 
-			_apiDir = apiDir;
-			_implDir = implDir;
-			_resourcesDir = resourcesDir;
-			_remotingFileName = remotingFileName;
 			_sqlDir = sqlDir;
 			_sqlFileName = sqlFileName;
 			_sqlIndexesFileName = sqlIndexesFileName;
 			_sqlSequencesFileName = sqlSequencesFileName;
-			_autoImportDefaultReferences = autoImportDefaultReferences;
-			_autoNamespaceTables = autoNamespaceTables;
-			_beanLocatorUtil = beanLocatorUtil;
-			_beanLocatorUtilShortName = _beanLocatorUtil.substring(
-				_beanLocatorUtil.lastIndexOf(".") + 1);
-			_propsUtil = propsUtil;
-			_pluginName = GetterUtil.getString(pluginName);
 			_targetEntityName = targetEntityName;
 			_testDir = testDir;
 			_build = build;
-			_buildNumber = buildNumber;
-			_buildNumberIncrement = buildNumberIncrement;
-			_osgiModule = osgiModule;
+
+			_badTableNames = _readLines(_tplBadTableNames);
+			_badAliasNames = _readLines(_tplBadAliasNames);
+			_badColumnNames = _readLines(_tplBadColumnNames);
+
+			_beanLocatorUtilShortName = _beanLocatorUtil.substring(
+				_beanLocatorUtil.lastIndexOf(".") + 1);
 
 			String content = getContent(inputFileName);
 
@@ -1971,8 +1973,15 @@ public class ServiceBuilder {
 		}
 
 		for (String exception : exceptions) {
+			String dirName = StringPool.BLANK;
+
+			if (_osgiModule) {
+				dirName = "exception/";
+			}
+
 			File exceptionFile = new File(
-				_serviceOutputPath + "/" + exception + "Exception.java");
+				_serviceOutputPath + "/" + dirName + exception +
+					"Exception.java");
 
 			if (!exceptionFile.exists()) {
 				Map<String, Object> context = _getContext();
@@ -2154,7 +2163,7 @@ public class ServiceBuilder {
 	}
 
 	private void _createFinderUtil(Entity entity) throws Exception {
-		if (!entity.hasFinderClass()) {
+		if (!entity.hasFinderClass() || _osgiModule) {
 			_removeFinderUtil(entity);
 
 			return;
@@ -2419,8 +2428,7 @@ public class ServiceBuilder {
 			int x = newContent.indexOf("</model-hints>");
 
 			newContent =
-				newContent.substring(0, x) + content +
-					newContent.substring(x);
+				newContent.substring(0, x) + content + newContent.substring(x);
 		}
 		else {
 			firstModel = newContent.lastIndexOf("<model", firstModel) - 1;
@@ -3278,30 +3286,29 @@ public class ServiceBuilder {
 		Map<String, List<IndexMetadata>> indexMetadataMap =
 			new TreeMap<String, List<IndexMetadata>>();
 
-		UnsyncBufferedReader unsyncBufferedReader = new UnsyncBufferedReader(
-			new FileReader(sqlFile));
+		try (UnsyncBufferedReader unsyncBufferedReader =
+				new UnsyncBufferedReader(new FileReader(sqlFile))) {
 
-		while (true) {
-			String indexSQL = unsyncBufferedReader.readLine();
+			while (true) {
+				String indexSQL = unsyncBufferedReader.readLine();
 
-			if (indexSQL == null) {
-				break;
+				if (indexSQL == null) {
+					break;
+				}
+
+				indexSQL = indexSQL.trim();
+
+				if (Validator.isNull(indexSQL)) {
+					continue;
+				}
+
+				IndexMetadata indexMetadata =
+					IndexMetadataFactoryUtil.createIndexMetadata(indexSQL);
+
+				_addIndexMetadata(
+					indexMetadataMap, indexMetadata.getTableName(), indexMetadata);
 			}
-
-			indexSQL = indexSQL.trim();
-
-			if (Validator.isNull(indexSQL)) {
-				continue;
-			}
-
-			IndexMetadata indexMetadata =
-				IndexMetadataFactoryUtil.createIndexMetadata(indexSQL);
-
-			_addIndexMetadata(
-				indexMetadataMap, indexMetadata.getTableName(), indexMetadata);
 		}
-
-		unsyncBufferedReader.close();
 
 		// indexes.sql appending
 
@@ -3411,41 +3418,40 @@ public class ServiceBuilder {
 			}
 		}
 		else if (addMissingTables) {
-			StringBundler sb = new StringBundler();
+			try (UnsyncBufferedReader unsyncBufferedReader =
+					new UnsyncBufferedReader(new UnsyncStringReader(content))) {
 
-			UnsyncBufferedReader unsyncBufferedReader =
-				new UnsyncBufferedReader(new UnsyncStringReader(content));
+				StringBundler sb = new StringBundler();
 
-			String line = null;
-			boolean appendNewTable = true;
+				String line = null;
+				boolean appendNewTable = true;
 
-			while ((line = unsyncBufferedReader.readLine()) != null) {
-				if (appendNewTable && line.startsWith(_SQL_CREATE_TABLE)) {
-					x = _SQL_CREATE_TABLE.length();
-					y = line.indexOf(" ", x);
+				while ((line = unsyncBufferedReader.readLine()) != null) {
+					if (appendNewTable && line.startsWith(_SQL_CREATE_TABLE)) {
+						x = _SQL_CREATE_TABLE.length();
+						y = line.indexOf(" ", x);
 
-					String tableName = line.substring(x, y);
+						String tableName = line.substring(x, y);
 
-					if (tableName.compareTo(entityMapping.getTable()) > 0) {
-						sb.append(newCreateTableString);
-						sb.append("\n\n");
+						if (tableName.compareTo(entityMapping.getTable()) > 0) {
+							sb.append(newCreateTableString);
+							sb.append("\n\n");
 
-						appendNewTable = false;
+							appendNewTable = false;
+						}
 					}
+
+					sb.append(line);
+					sb.append("\n");
 				}
 
-				sb.append(line);
-				sb.append("\n");
+				if (appendNewTable) {
+					sb.append("\n");
+					sb.append(newCreateTableString);
+				}
+
+				FileUtil.write(sqlFile, sb.toString(), true);
 			}
-
-			if (appendNewTable) {
-				sb.append("\n");
-				sb.append(newCreateTableString);
-			}
-
-			unsyncBufferedReader.close();
-
-			FileUtil.write(sqlFile, sb.toString(), true);
 		}
 	}
 
@@ -3462,22 +3468,21 @@ public class ServiceBuilder {
 
 		Set<String> sequenceSQLs = new TreeSet<String>();
 
-		UnsyncBufferedReader unsyncBufferedReader = new UnsyncBufferedReader(
-			new FileReader(sqlFile));
+		try (UnsyncBufferedReader unsyncBufferedReader =
+				new UnsyncBufferedReader(new FileReader(sqlFile))) {
 
-		while (true) {
-			String sequenceSQL = unsyncBufferedReader.readLine();
+			while (true) {
+				String sequenceSQL = unsyncBufferedReader.readLine();
 
-			if (sequenceSQL == null) {
-				break;
-			}
+				if (sequenceSQL == null) {
+					break;
+				}
 
-			if (Validator.isNotNull(sequenceSQL)) {
-				sequenceSQLs.add(sequenceSQL);
+				if (Validator.isNotNull(sequenceSQL)) {
+					sequenceSQLs.add(sequenceSQL);
+				}
 			}
 		}
-
-		unsyncBufferedReader.close();
 
 		for (int i = 0; i < _ejbList.size(); i++) {
 			Entity entity = _ejbList.get(i);
@@ -3608,41 +3613,40 @@ public class ServiceBuilder {
 			}
 		}
 		else if (addMissingTables) {
-			StringBundler sb = new StringBundler();
+			try (UnsyncBufferedReader unsyncBufferedReader =
+					new UnsyncBufferedReader(new UnsyncStringReader(content))) {
 
-			UnsyncBufferedReader unsyncBufferedReader =
-				new UnsyncBufferedReader(new UnsyncStringReader(content));
+				StringBundler sb = new StringBundler();
 
-			String line = null;
-			boolean appendNewTable = true;
+				String line = null;
+				boolean appendNewTable = true;
 
-			while ((line = unsyncBufferedReader.readLine()) != null) {
-				if (appendNewTable && line.startsWith(_SQL_CREATE_TABLE)) {
-					x = _SQL_CREATE_TABLE.length();
-					y = line.indexOf(" ", x);
+				while ((line = unsyncBufferedReader.readLine()) != null) {
+					if (appendNewTable && line.startsWith(_SQL_CREATE_TABLE)) {
+						x = _SQL_CREATE_TABLE.length();
+						y = line.indexOf(" ", x);
 
-					String tableName = line.substring(x, y);
+						String tableName = line.substring(x, y);
 
-					if (tableName.compareTo(entity.getTable()) > 0) {
-						sb.append(newCreateTableString);
-						sb.append("\n\n");
+						if (tableName.compareTo(entity.getTable()) > 0) {
+							sb.append(newCreateTableString);
+							sb.append("\n\n");
 
-						appendNewTable = false;
+							appendNewTable = false;
+						}
 					}
+
+					sb.append(line);
+					sb.append("\n");
 				}
 
-				sb.append(line);
-				sb.append("\n");
+				if (appendNewTable) {
+					sb.append("\n");
+					sb.append(newCreateTableString);
+				}
+
+				FileUtil.write(sqlFile, sb.toString(), true);
 			}
-
-			if (appendNewTable) {
-				sb.append("\n");
-				sb.append(newCreateTableString);
-			}
-
-			unsyncBufferedReader.close();
-
-			FileUtil.write(sqlFile, sb.toString(), true);
 		}
 	}
 
@@ -3673,45 +3677,44 @@ public class ServiceBuilder {
 	}
 
 	private String _fixHbmXml(String content) throws IOException {
-		StringBundler sb = new StringBundler();
+		try (UnsyncBufferedReader unsyncBufferedReader =
+				new UnsyncBufferedReader(new UnsyncStringReader(content))) {
 
-		UnsyncBufferedReader unsyncBufferedReader = new UnsyncBufferedReader(
-			new UnsyncStringReader(content));
+			StringBundler sb = new StringBundler();
 
-		String line = null;
+			String line = null;
 
-		while ((line = unsyncBufferedReader.readLine()) != null) {
-			if (line.startsWith("\t<class name=\"")) {
-				line = StringUtil.replace(
-					line,
-					new String[] {
-						".service.persistence.", "HBM\" table=\""
-					},
-					new String[] {
-						".model.", "\" table=\""
-					});
-
-				if (!line.contains(".model.impl.") &&
-					!line.contains("BlobModel")) {
-
+			while ((line = unsyncBufferedReader.readLine()) != null) {
+				if (line.startsWith("\t<class name=\"")) {
 					line = StringUtil.replace(
 						line,
 						new String[] {
-							".model.", "\" table=\""
+							".service.persistence.", "HBM\" table=\""
 						},
 						new String[] {
-							".model.impl.", "Impl\" table=\""
+							".model.", "\" table=\""
 						});
+
+					if (!line.contains(".model.impl.") &&
+						!line.contains("BlobModel")) {
+
+						line = StringUtil.replace(
+							line,
+							new String[] {
+								".model.", "\" table=\""
+							},
+							new String[] {
+								".model.impl.", "Impl\" table=\""
+							});
+					}
 				}
+
+				sb.append(line);
+				sb.append('\n');
 			}
 
-			sb.append(line);
-			sb.append('\n');
+			return sb.toString().trim();
 		}
-
-		unsyncBufferedReader.close();
-
-		return sb.toString().trim();
 	}
 
 	private String _fixSpringXml(String content) {

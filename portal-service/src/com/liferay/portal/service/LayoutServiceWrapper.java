@@ -208,12 +208,11 @@ public class LayoutServiceWrapper implements LayoutService,
 
 	@Override
 	public com.liferay.portal.kernel.repository.model.FileEntry addTempFileEntry(
-		long groupId, java.lang.String fileName,
-		java.lang.String tempFolderName, java.io.InputStream inputStream,
-		java.lang.String mimeType)
+		long groupId, java.lang.String folderName, java.lang.String fileName,
+		java.io.InputStream inputStream, java.lang.String mimeType)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _layoutService.addTempFileEntry(groupId, fileName,
-			tempFolderName, inputStream, mimeType);
+		return _layoutService.addTempFileEntry(groupId, folderName, fileName,
+			inputStream, mimeType);
 	}
 
 	/**
@@ -254,10 +253,10 @@ public class LayoutServiceWrapper implements LayoutService,
 	}
 
 	@Override
-	public void deleteTempFileEntry(long groupId, java.lang.String fileName,
-		java.lang.String tempFolderName)
+	public void deleteTempFileEntry(long groupId, java.lang.String folderName,
+		java.lang.String fileName)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		_layoutService.deleteTempFileEntry(groupId, fileName, tempFolderName);
+		_layoutService.deleteTempFileEntry(groupId, folderName, fileName);
 	}
 
 	/**
@@ -604,7 +603,8 @@ public class LayoutServiceWrapper implements LayoutService,
 	@Override
 	public java.util.List<com.liferay.portal.model.Layout> getLayouts(
 		long groupId, boolean privateLayout, long parentLayoutId,
-		boolean incomplete, int start, int end) {
+		boolean incomplete, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _layoutService.getLayouts(groupId, privateLayout,
 			parentLayoutId, incomplete, start, end);
 	}
@@ -617,10 +617,10 @@ public class LayoutServiceWrapper implements LayoutService,
 	}
 
 	@Override
-	public java.lang.String[] getTempFileEntryNames(long groupId,
-		java.lang.String tempFolderName)
+	public java.lang.String[] getTempFileNames(long groupId,
+		java.lang.String folderName)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _layoutService.getTempFileEntryNames(groupId, tempFolderName);
+		return _layoutService.getTempFileNames(groupId, folderName);
 	}
 
 	/**
@@ -1276,6 +1276,15 @@ public class LayoutServiceWrapper implements LayoutService,
 		return _layoutService.updateParentLayoutId(plid, parentPlid);
 	}
 
+	/**
+	* Updates the parent layout ID and priority of the layout.
+	*
+	* @param plid the primary key of the layout
+	* @param parentPlid the primary key of the parent layout
+	* @param priority the layout's new priority
+	* @return the layout matching the primary key
+	* @throws PortalException if a portal exception occurred
+	*/
 	@Override
 	public com.liferay.portal.model.Layout updateParentLayoutIdAndPriority(
 		long plid, long parentPlid, int priority)

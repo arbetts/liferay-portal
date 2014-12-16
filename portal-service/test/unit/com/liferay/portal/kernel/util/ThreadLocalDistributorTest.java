@@ -19,7 +19,6 @@ import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayOutputStream;
 import com.liferay.portal.kernel.test.CaptureHandler;
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
 import com.liferay.portal.kernel.test.JDKLoggerTestUtil;
-import com.liferay.portal.kernel.test.NewClassLoaderJUnitTestRunner;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 
 import java.io.ObjectInputStream;
@@ -34,17 +33,15 @@ import java.util.logging.LogRecord;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * @author Shuyang Zhou
  */
-@RunWith(NewClassLoaderJUnitTestRunner.class)
 public class ThreadLocalDistributorTest {
 
 	@ClassRule
-	public static CodeCoverageAssertor codeCoverageAssertor =
-		new CodeCoverageAssertor();
+	public static final CodeCoverageAssertor codeCoverageAssertor =
+		CodeCoverageAssertor.INSTANCE;
 
 	public ThreadLocalDistributorTest() {
 		_keyValuePairs.add(
@@ -73,14 +70,12 @@ public class ThreadLocalDistributorTest {
 		threadLocalDistributor.setClassLoader(getClassLoader());
 		threadLocalDistributor.setThreadLocalSources(_keyValuePairs);
 
-		CaptureHandler captureHandler = null;
+		CaptureHandler captureHandler = JDKLoggerTestUtil.configureJDKLogger(
+			ThreadLocalDistributor.class.getName(), Level.WARNING);
 
 		try {
 
 			// With log
-
-			captureHandler = JDKLoggerTestUtil.configureJDKLogger(
-				ThreadLocalDistributor.class.getName(), Level.WARNING);
 
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
 
@@ -105,9 +100,8 @@ public class ThreadLocalDistributorTest {
 				"_object is not of type ThreadLocal", logRecord3.getMessage());
 
 			List<ThreadLocal<Serializable>> threadLocals =
-				(List<ThreadLocal<Serializable>>)
-					ReflectionTestUtil.getFieldValue(
-						threadLocalDistributor, "_threadLocals");
+				ReflectionTestUtil.getFieldValue(
+					threadLocalDistributor, "_threadLocals");
 
 			Assert.assertEquals(1, threadLocals.size());
 			Assert.assertSame(TestClass._threadLocal, threadLocals.get(0));
@@ -125,17 +119,14 @@ public class ThreadLocalDistributorTest {
 
 			Assert.assertTrue(logRecords.isEmpty());
 
-			threadLocals = (List<ThreadLocal<Serializable>>)
-				ReflectionTestUtil.getFieldValue(
-					threadLocalDistributor, "_threadLocals");
+			threadLocals = ReflectionTestUtil.getFieldValue(
+				threadLocalDistributor, "_threadLocals");
 
 			Assert.assertEquals(1, threadLocals.size());
 			Assert.assertSame(TestClass._threadLocal, threadLocals.get(0));
 		}
 		finally {
-			if (captureHandler != null) {
-				captureHandler.close();
-			}
+			captureHandler.close();
 		}
 	}
 
@@ -168,9 +159,8 @@ public class ThreadLocalDistributorTest {
 
 		threadLocalDistributor.capture();
 
-		Serializable[] threadLocalValues =
-			(Serializable[])ReflectionTestUtil.getFieldValue(
-				threadLocalDistributor, "_threadLocalValues");
+		Serializable[] threadLocalValues = ReflectionTestUtil.getFieldValue(
+			threadLocalDistributor, "_threadLocalValues");
 
 		Assert.assertEquals(1, threadLocalValues.length);
 		Assert.assertSame(testValue, threadLocalValues[0]);
@@ -178,12 +168,11 @@ public class ThreadLocalDistributorTest {
 		UnsyncByteArrayOutputStream unsyncByteArrayOutputStream =
 			new UnsyncByteArrayOutputStream();
 
-		ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-			unsyncByteArrayOutputStream);
+		try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+				unsyncByteArrayOutputStream)) {
 
-		threadLocalDistributor.writeExternal(objectOutputStream);
-
-		objectOutputStream.close();
+			threadLocalDistributor.writeExternal(objectOutputStream);
+		}
 
 		byte[] data = unsyncByteArrayOutputStream.toByteArray();
 
@@ -219,14 +208,15 @@ public class ThreadLocalDistributorTest {
 		return clazz.getClassLoader();
 	}
 
-	private List<KeyValuePair> _keyValuePairs = new ArrayList<KeyValuePair>();
+	private final List<KeyValuePair> _keyValuePairs =
+		new ArrayList<KeyValuePair>();
 
 	private static class TestClass {
 
 		@SuppressWarnings("unused")
 		private static ThreadLocal<?> _nullValue;
 
-		private static ThreadLocal<String> _threadLocal =
+		private static final ThreadLocal<String> _threadLocal =
 			new ThreadLocal<String>();
 
 		@SuppressWarnings("unused")

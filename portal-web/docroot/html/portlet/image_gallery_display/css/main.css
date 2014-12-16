@@ -1,13 +1,12 @@
 @import "compass";
 
-.lfr-image-gallery-actions {
-	font-size: 11px;
-	text-align: right;
-}
-
 .portlet-image-gallery-display {
 	.lfr-asset-attributes {
 		clear: both;
+	}
+
+	.carousel.image-viewer-base {
+		margin: 0 auto;
 	}
 
 	.folder-search {

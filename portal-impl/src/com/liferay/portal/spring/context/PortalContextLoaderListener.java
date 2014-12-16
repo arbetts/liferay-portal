@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.dao.orm.EntityCacheUtil;
 import com.liferay.portal.kernel.dao.orm.FinderCacheUtil;
 import com.liferay.portal.kernel.deploy.DeployManagerUtil;
 import com.liferay.portal.kernel.deploy.hot.HotDeployUtil;
+import com.liferay.portal.kernel.exception.LoggedExceptionInInitializerError;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletBagPool;
@@ -63,7 +64,6 @@ import com.liferay.portal.util.InitUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebAppPool;
 import com.liferay.portlet.PortletContextBagPool;
-import com.liferay.portlet.wiki.util.WikiCacheUtil;
 
 import java.beans.PropertyDescriptor;
 
@@ -265,7 +265,6 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 			EntityCacheUtil.clearLocalCache();
 			PermissionCacheUtil.clearCache();
 			TemplateResourceLoaderUtil.clearCache();
-			WikiCacheUtil.clearCache(0);
 
 			ServletContextPool.clear();
 
@@ -321,6 +320,8 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 
 			ModuleFrameworkUtilAdapter.registerContext(applicationContext);
 
+			ModuleFrameworkUtilAdapter.registerExtraPackages();
+
 			ModuleFrameworkUtilAdapter.startRuntime();
 		}
 		catch (Exception e) {
@@ -337,7 +338,7 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 			Map<Class<?>, PropertyDescriptor[]>
 				filteredPropertyDescriptorsCache =
 					(Map<Class<?>, PropertyDescriptor[]>)
-						_filteredPropertyDescriptorsCacheField.get(
+						_FILTERED_PROPERTY_DESCRIPTORS_CACHE_FIELD.get(
 							autowireCapableBeanFactory);
 
 			filteredPropertyDescriptorsCache.clear();
@@ -354,27 +355,28 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 		}
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Field _FILTERED_PROPERTY_DESCRIPTORS_CACHE_FIELD;
+
+	private static final Log _log = LogFactoryUtil.getLog(
 		PortalContextLoaderListener.class);
 
-	private static Field _filteredPropertyDescriptorsCacheField;
 	private static String _portalServletContextName = StringPool.BLANK;
 	private static String _portalServletContextPath = StringPool.SLASH;
 
-	private IndexerPostProcessorRegistry _indexerPostProcessorRegistry;
-	private SchedulerEntryRegistry _schedulerEntryRegistry;
-	private ServiceWrapperRegistry _serviceWrapperRegistry;
-
 	static {
 		try {
-			_filteredPropertyDescriptorsCacheField =
+			_FILTERED_PROPERTY_DESCRIPTORS_CACHE_FIELD =
 				ReflectionUtil.getDeclaredField(
 					AbstractAutowireCapableBeanFactory.class,
 					"filteredPropertyDescriptorsCache");
 		}
 		catch (Exception e) {
-			_log.error(e, e);
+			throw new LoggedExceptionInInitializerError(e);
 		}
 	}
+
+	private IndexerPostProcessorRegistry _indexerPostProcessorRegistry;
+	private SchedulerEntryRegistry _schedulerEntryRegistry;
+	private ServiceWrapperRegistry _serviceWrapperRegistry;
 
 }

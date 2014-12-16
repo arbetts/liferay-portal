@@ -173,10 +173,6 @@ public class ImageProcessorImpl
 
 	@Override
 	public boolean isSupported(String mimeType) {
-		if (Validator.isNull(mimeType)) {
-			return false;
-		}
-
 		return _imageMimeTypes.contains(mimeType);
 	}
 
@@ -407,13 +403,8 @@ public class ImageProcessorImpl
 		try {
 			file = FileUtil.createTempFile(type);
 
-			FileOutputStream fos = new FileOutputStream(file);
-
-			try {
+			try (FileOutputStream fos = new FileOutputStream(file)) {
 				ImageToolUtil.write(renderedImage, type, fos);
-			}
-			finally {
-				fos.close();
 			}
 
 			addFileToStore(
@@ -463,10 +454,11 @@ public class ImageProcessorImpl
 		}
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(ImageProcessorImpl.class);
+	private static final Log _log = LogFactoryUtil.getLog(
+		ImageProcessorImpl.class);
 
-	private List<Long> _fileVersionIds = new Vector<Long>();
-	private Set<String> _imageMimeTypes = SetUtil.fromArray(
+	private final List<Long> _fileVersionIds = new Vector<Long>();
+	private final Set<String> _imageMimeTypes = SetUtil.fromArray(
 		PropsValues.DL_FILE_ENTRY_PREVIEW_IMAGE_MIME_TYPES);
 
 }

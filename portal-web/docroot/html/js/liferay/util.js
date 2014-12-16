@@ -1,4 +1,4 @@
-;(function(A, Liferay) {
+;(function(A, $, _, Liferay) {
 	A.use('aui-base-lang');
 
 	var Lang = A.Lang;
@@ -22,6 +22,8 @@
 
 	var STR_CHECKED = 'checked';
 
+	var REGEX_PORTLET_ID = /^(?:p_p_id)?_(.*)_.*$/;
+
 	var Window = {
 		_map: {}
 	};
@@ -42,71 +44,6 @@
 			);
 
 			Util.addInputCancel = function(){};
-		},
-
-		addInputFocus: function() {
-			A.use(
-				'aui-base',
-				function(A) {
-					var handleFocus = function(event) {
-						var target = event.target;
-
-						var tagName = target.get('tagName');
-
-						if (tagName) {
-							tagName = tagName.toLowerCase();
-						}
-
-						var nodeType = target.get('type');
-
-						if (((tagName == 'input') && (/text|password/).test(nodeType)) ||
-							(tagName == 'textarea')) {
-
-							var action = 'addClass';
-
-							if (/blur|focusout/.test(event.type)) {
-								action = 'removeClass';
-							}
-
-							target[action]('focus');
-						}
-					};
-
-					A.on('focus', handleFocus, document);
-					A.on('blur', handleFocus, document);
-				}
-			);
-
-			Util.addInputFocus = function(){};
-		},
-
-		addInputType: function(el) {
-			Util.addInputType = Lang.emptyFn;
-
-			if (Browser.isIe() && Browser.getMajorVersion() < 7) {
-				Util.addInputType = function(el) {
-					var item;
-
-					if (el) {
-						el = A.one(el);
-					}
-					else {
-						el = A.one(document.body);
-					}
-
-					var defaultType = 'text';
-
-					el.all('input').each(
-						function(item, index) {
-							var type = item.get('type') || defaultType;
-
-							item.addClass(type);
-						}
-					);
-				};
-			}
-
-			return Util.addInputType(el);
 		},
 
 		addParams: function(params, url) {
@@ -305,10 +242,7 @@
 		},
 
 		getPortletId: function(portletId) {
-			portletId = portletId.replace(/^p_p_id_/i, '');
-			portletId = portletId.replace(/_$/, '');
-
-			return portletId;
+			return String(portletId).replace(REGEX_PORTLET_ID, '$1');
 		},
 
 		getPortletNamespace: function(portletId) {
@@ -469,6 +403,62 @@
 			var instance = this;
 
 			return (instance.getWindowWidth() < Liferay.BREAKPOINTS.TABLET);
+		},
+
+		listCheckboxesExcept: function(form, except, name, checked) {
+			if (form._node) {
+				form = form.getDOM();
+			}
+
+			var selector = 'input[type=checkbox]';
+
+			if (name) {
+				selector += '[name=' + name + ']';
+			}
+
+			return _.reduce(
+				$(form).find(selector),
+				function(prev, item, index) {
+					item = $(item);
+
+					var val = item.val();
+
+					if (val && (item.attr('name') != except) && (item.prop('checked') == checked) && !item.prop('disabled')) {
+						prev.push(val);
+					}
+
+					return prev;
+				},
+				[]
+			).join();
+		},
+
+		listCheckedExcept: function(form, except, name) {
+			return Util.listCheckboxesExcept(form, except, name, true);
+		},
+
+		listSelect: function(select, delimeter) {
+			if (select._node) {
+				select = select.getDOM();
+			}
+
+			return _.reduce(
+				$(select).find('option'),
+				function(prev, item, index) {
+					var val = $(item).val();
+
+					if (val) {
+						prev.push(val);
+					}
+
+					return prev;
+				},
+				[]
+			).join(delimeter || ',');
+		},
+
+		listUncheckedExcept: function(form, except, name) {
+			return Util.listCheckboxesExcept(form, except, name, false);
 		},
 
 		ns: function(namespace, obj) {
@@ -1051,8 +1041,6 @@
 		Util,
 		'focusFormField',
 		function(el, caretPosition) {
-			Util.addInputFocus();
-
 			var interacting = false;
 
 			var clickHandle = A.getDoc().on(
@@ -1063,6 +1051,10 @@
 					clickHandle.detach();
 				}
 			);
+
+			if (el.jquery) {
+				el = el[0];
+			}
 
 			if (!interacting && Util.inBrowserView(el)) {
 				A.one(el).focus();
@@ -1203,7 +1195,7 @@
 
 			ddmURL.setParameter('templateId', config.templateId);
 
-			ddmURL.setPortletId(166);
+			ddmURL.setPortletId(Liferay.PortletKeys.DYNAMIC_DATA_MAPPING);
 			ddmURL.setWindowState('pop_up');
 
 			config.uri = ddmURL.toString();
@@ -1386,7 +1378,7 @@
 				}
 			}
 		},
-		['aui-base']
+		['aui-base', 'aui-selector']
 	);
 
 	Liferay.provide(
@@ -1442,13 +1434,28 @@
 				dialog.show();
 			}
 			else {
+				var destroyDialog = function(event) {
+					var dialogId = config.id;
+
+					var dialogWindow = Util.getWindow(dialogId);
+
+					if (dialogWindow && Util.getPortletId(dialogId) === event.portletId) {
+						dialogWindow.destroy();
+
+						Liferay.detach('destroyPortlet', destroyDialog);
+					}
+				}
+
 				Util.openWindow(
 					config,
 					function(dialogWindow) {
 						eventHandles.push(dialogWindow.after(['destroy', 'visibleChange'], detachSelectionOnHideFn));
+
+						Liferay.on('destroyPortlet', destroyDialog);
 					}
 				);
 			}
+
 		},
 		['aui-base', 'liferay-util-window']
 	);
@@ -1644,6 +1651,10 @@
 		Util,
 		'toggleDisabled',
 		function(button, state) {
+			if (button.jquery) {
+				button = button.get();
+			}
+
 			if (!A.instanceOf(button, A.NodeList)) {
 				button = A.all(button);
 			}
@@ -1747,7 +1758,7 @@
 				);
 			}
 		},
-		['aui-base', 'liferay-util-list-fields']
+		['aui-base']
 	);
 
 	Liferay.provide(
@@ -1755,6 +1766,10 @@
 		'submitForm',
 		function(form, action, singleSubmit, validate) {
 			if (!Util._submitLocked) {
+				if (form.jquery) {
+					form = form[0];
+				}
+
 				Liferay.fire(
 					'submitForm',
 					{
@@ -1846,7 +1861,11 @@
 		BAD_REQUEST: 400,
 		INTERNAL_SERVER_ERROR: 500,
 		OK: 200,
-		SC_DUPLICATE_FILE_EXCEPTION: 490
+		SC_DUPLICATE_FILE_EXCEPTION: 490,
+		SC_FILE_ANTIVIRUS_EXCEPTION: 494,
+		SC_FILE_EXTENSION_EXCEPTION: 491,
+		SC_FILE_NAME_EXCEPTION: 492,
+		SC_FILE_SIZE_EXCEPTION: 493
 	};
 
 	// 0-200: Theme Developer
@@ -1865,4 +1884,4 @@
 		MENU: 5000,
 		TOOLTIP: 10000
 	};
-})(AUI(), Liferay);
+})(AUI(), AUI.$, AUI._, Liferay);

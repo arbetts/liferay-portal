@@ -127,6 +127,8 @@ public class RuntimeTag extends TagSupport {
 				layout.isTypeControlPanel() ||
 				layout.isTypePanel()) {
 
+				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
+					layout, portletId);
 				PortletPreferencesFactoryUtil.getPortletSetup(
 					request, portletId, defaultPreferences);
 
@@ -217,7 +219,7 @@ public class RuntimeTag extends TagSupport {
 		return portlet;
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(RuntimeTag.class);
+	private static final Log _log = LogFactoryUtil.getLog(RuntimeTag.class);
 
 	private String _defaultPreferences;
 	private String _portletName;

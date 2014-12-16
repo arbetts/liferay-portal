@@ -608,9 +608,13 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			boolean sendEmail, ServiceContext serviceContext)
 		throws PortalException {
 
-		boolean indexingEnabled = serviceContext.isIndexingEnabled();
+		boolean indexingEnabled = true;
 
-		serviceContext.setIndexingEnabled(false);
+		if (serviceContext != null) {
+			indexingEnabled = serviceContext.isIndexingEnabled();
+
+			serviceContext.setIndexingEnabled(false);
+		}
 
 		try {
 			User user = addUserWithWorkflow(
@@ -645,7 +649,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			return user;
 		}
 		finally {
-			serviceContext.setIndexingEnabled(indexingEnabled);
+			if (serviceContext != null) {
+				serviceContext.setIndexingEnabled(indexingEnabled);
+			}
 		}
 	}
 
@@ -1092,9 +1098,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		UserGroupPermissionUtil.check(
 			getPermissionChecker(), userGroupId, ActionKeys.ASSIGN_MEMBERS);
 
-		Set<Long> unsetUserIds =
-			SetUtil.fromArray(
-				userGroupPersistence.getUserPrimaryKeys(userGroupId));
+		Set<Long> unsetUserIds = SetUtil.fromArray(
+			userGroupPersistence.getUserPrimaryKeys(userGroupId));
 
 		unsetUserIds.removeAll(SetUtil.fromArray(userIds));
 

@@ -14,8 +14,12 @@
 
 package com.liferay.portlet.blogs.util.test;
 
+import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.servlet.taglib.ui.ImageSelector;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.TempFileEntryUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 import com.liferay.portal.model.Group;
@@ -127,14 +131,34 @@ public class BlogsTestUtil {
 			boolean allowPingbacks = true;
 			boolean allowTrackbacks = true;
 			String[] trackbacks = new String[0];
-			InputStream smallImageInputStream = null;
-			String smallImageURL = StringPool.BLANK;
-			String smallImageFileName = StringPool.BLANK;
+
+			ImageSelector coverImageSelector = null;
+			ImageSelector smallImageSelector = null;
 
 			if (smallImage) {
-				smallImageFileName = "image.jpg";
-				smallImageInputStream = BlogsTestUtil.class.getResourceAsStream(
+				Class<?> clazz = BlogsTestUtil.class;
+
+				ClassLoader classLoader = clazz.getClassLoader();
+
+				InputStream inputStream = classLoader.getResourceAsStream(
 					"com/liferay/portal/util/dependencies/test.jpg");
+
+				FileEntry fileEntry = null;
+
+				try {
+					fileEntry = TempFileEntryUtil.getTempFileEntry(
+						serviceContext.getScopeGroupId(), userId,
+						BlogsEntry.class.getName(), "image.jpg");
+				}
+				catch (Exception e) {
+					fileEntry = TempFileEntryUtil.addTempFileEntry(
+						serviceContext.getScopeGroupId(), userId,
+						BlogsEntry.class.getName(), "image.jpg", inputStream,
+						MimeTypesUtil.getContentType("image.jpg"));
+				}
+
+				smallImageSelector = new ImageSelector(
+					fileEntry.getFileEntryId(), StringPool.BLANK, null);
 			}
 
 			serviceContext = (ServiceContext)serviceContext.clone();
@@ -146,8 +170,7 @@ public class BlogsTestUtil {
 				userId, title, subtitle, description, content, displayDateMonth,
 				displayDateDay, displayDateYear, displayDateHour,
 				displayDateMinute, allowPingbacks, allowTrackbacks, trackbacks,
-				smallImage, smallImageURL, smallImageFileName,
-				smallImageInputStream, serviceContext);
+				coverImageSelector, smallImageSelector, serviceContext);
 
 			if (approved) {
 				return updateStatus(entry, serviceContext);
@@ -197,13 +220,23 @@ public class BlogsTestUtil {
 			BlogsEntry entry, String title, boolean approved)
 		throws Exception {
 
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(entry.getGroupId());
+
+		return updateEntry(entry, title, approved, serviceContext);
+	}
+
+	public static BlogsEntry updateEntry(
+			BlogsEntry entry, String title, boolean approved,
+			ServiceContext serviceContext)
+		throws Exception {
+
 		boolean workflowEnabled = WorkflowThreadLocal.isEnabled();
 
 		try {
 			WorkflowThreadLocal.setEnabled(true);
 
-			ServiceContext serviceContext =
-				ServiceContextTestUtil.getServiceContext(entry.getGroupId());
+			serviceContext = (ServiceContext)serviceContext.clone();
 
 			serviceContext.setCommand(Constants.UPDATE);
 			serviceContext.setLayoutFullURL("http://localhost");
@@ -212,9 +245,8 @@ public class BlogsTestUtil {
 
 			entry = BlogsEntryLocalServiceUtil.updateEntry(
 				entry.getUserId(), entry.getEntryId(), title,
-				entry.getDescription(), entry.getContent(), 1, 1, 2012, 12, 00,
-				true, true, new String[0], entry.getSmallImage(),
-				entry.getSmallImageURL(), StringPool.BLANK, null,
+				entry.getSubtitle(), entry.getDescription(), entry.getContent(),
+				1, 1, 2012, 12, 00, true, true, new String[0], null, null,
 				serviceContext);
 
 			if (approved) {

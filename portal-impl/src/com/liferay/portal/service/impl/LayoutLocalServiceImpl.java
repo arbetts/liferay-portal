@@ -66,6 +66,7 @@ import com.liferay.portal.model.LayoutPrototype;
 import com.liferay.portal.model.LayoutReference;
 import com.liferay.portal.model.LayoutSet;
 import com.liferay.portal.model.LayoutSetPrototype;
+import com.liferay.portal.model.LayoutType;
 import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.model.ResourceConstants;
@@ -360,8 +361,10 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			LayoutTypePortlet layoutTypePortlet =
 				(LayoutTypePortlet)layout.getLayoutType();
 
-			layoutTypePortlet.setLayoutTemplateId(
-				0, PropsValues.LAYOUT_DEFAULT_TEMPLATE_ID, false);
+			if (Validator.isNull(layoutTypePortlet.getLayoutTemplateId())) {
+				layoutTypePortlet.setLayoutTemplateId(
+					0, PropsValues.LAYOUT_DEFAULT_TEMPLATE_ID, false);
+			}
 		}
 
 		layout.setExpandoBridgeAttributes(serviceContext);
@@ -2194,7 +2197,9 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			Layout layout = layoutPersistence.findByG_P_L(
 				groupId, privateLayout, layoutIds[0]);
 
-			if (!PortalUtil.isLayoutFirstPageable(layout.getType())) {
+			LayoutType layoutType = layout.getLayoutType();
+
+			if (!layoutType.isFirstPageable()) {
 				throw new RequiredLayoutException(
 					RequiredLayoutException.FIRST_LAYOUT_TYPE);
 			}

@@ -390,6 +390,19 @@ public class ChannelHubImpl implements ChannelHub {
 	}
 
 	@Override
+	public void storeNotificationEvent(
+			long userId, NotificationEvent notificationEvent)
+		throws ChannelException {
+
+		Channel channel = fetchChannel(userId);
+
+		if (channel != null) {
+			channel.storeNotificationEvent(
+				notificationEvent, System.currentTimeMillis());
+		}
+	}
+
+	@Override
 	public void unregisterChannelListener(
 			long userId, ChannelListener channelListener)
 		throws ChannelException {
@@ -400,7 +413,7 @@ public class ChannelHubImpl implements ChannelHub {
 	}
 
 	private Channel _channel;
-	private ConcurrentMap<Long, Channel> _channels =
+	private final ConcurrentMap<Long, Channel> _channels =
 		new ConcurrentHashMap<Long, Channel>();
 	private long _companyId = CompanyConstants.SYSTEM;
 

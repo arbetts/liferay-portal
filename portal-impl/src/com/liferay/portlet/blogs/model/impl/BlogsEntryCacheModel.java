@@ -41,7 +41,7 @@ public class BlogsEntryCacheModel implements CacheModel<BlogsEntry>,
 	Externalizable {
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(49);
+		StringBundler sb = new StringBundler(55);
 
 		sb.append("{uuid=");
 		sb.append(uuid);
@@ -77,8 +77,14 @@ public class BlogsEntryCacheModel implements CacheModel<BlogsEntry>,
 		sb.append(allowTrackbacks);
 		sb.append(", trackbacks=");
 		sb.append(trackbacks);
+		sb.append(", coverImageFileEntryId=");
+		sb.append(coverImageFileEntryId);
+		sb.append(", coverImageURL=");
+		sb.append(coverImageURL);
 		sb.append(", smallImage=");
 		sb.append(smallImage);
+		sb.append(", smallImageFileEntryId=");
+		sb.append(smallImageFileEntryId);
 		sb.append(", smallImageId=");
 		sb.append(smallImageId);
 		sb.append(", smallImageURL=");
@@ -185,7 +191,17 @@ public class BlogsEntryCacheModel implements CacheModel<BlogsEntry>,
 			blogsEntryImpl.setTrackbacks(trackbacks);
 		}
 
+		blogsEntryImpl.setCoverImageFileEntryId(coverImageFileEntryId);
+
+		if (coverImageURL == null) {
+			blogsEntryImpl.setCoverImageURL(StringPool.BLANK);
+		}
+		else {
+			blogsEntryImpl.setCoverImageURL(coverImageURL);
+		}
+
 		blogsEntryImpl.setSmallImage(smallImage);
+		blogsEntryImpl.setSmallImageFileEntryId(smallImageFileEntryId);
 		blogsEntryImpl.setSmallImageId(smallImageId);
 
 		if (smallImageURL == null) {
@@ -236,7 +252,10 @@ public class BlogsEntryCacheModel implements CacheModel<BlogsEntry>,
 		allowPingbacks = objectInput.readBoolean();
 		allowTrackbacks = objectInput.readBoolean();
 		trackbacks = objectInput.readUTF();
+		coverImageFileEntryId = objectInput.readLong();
+		coverImageURL = objectInput.readUTF();
 		smallImage = objectInput.readBoolean();
+		smallImageFileEntryId = objectInput.readLong();
 		smallImageId = objectInput.readLong();
 		smallImageURL = objectInput.readUTF();
 		status = objectInput.readInt();
@@ -316,7 +335,17 @@ public class BlogsEntryCacheModel implements CacheModel<BlogsEntry>,
 			objectOutput.writeUTF(trackbacks);
 		}
 
+		objectOutput.writeLong(coverImageFileEntryId);
+
+		if (coverImageURL == null) {
+			objectOutput.writeUTF(StringPool.BLANK);
+		}
+		else {
+			objectOutput.writeUTF(coverImageURL);
+		}
+
 		objectOutput.writeBoolean(smallImage);
+		objectOutput.writeLong(smallImageFileEntryId);
 		objectOutput.writeLong(smallImageId);
 
 		if (smallImageURL == null) {
@@ -356,7 +385,10 @@ public class BlogsEntryCacheModel implements CacheModel<BlogsEntry>,
 	public boolean allowPingbacks;
 	public boolean allowTrackbacks;
 	public String trackbacks;
+	public long coverImageFileEntryId;
+	public String coverImageURL;
 	public boolean smallImage;
+	public long smallImageFileEntryId;
 	public long smallImageId;
 	public String smallImageURL;
 	public int status;
