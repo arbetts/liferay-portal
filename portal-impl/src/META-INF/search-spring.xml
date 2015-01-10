@@ -23,6 +23,20 @@
 		</constructor-arg>
 	</bean>
 
+	<!-- Index Status -->
+	<bean id="com.liferay.portal.search.IndexStatusMessageSenderUtil" class="com.liferay.portal.search.IndexStatusMessageSenderUtil">
+		<property name="IndexStatusMessageSender">
+			<bean class="com.liferay.portal.search.IndexStatusMessageSenderImpl">
+				<property name="singleDestinationMessageSender">
+					<bean class="com.liferay.portal.kernel.messaging.sender.DefaultSingleDestinationMessageSender">
+						<property name="destinationName" value="liferay/background_task_status" />
+						<property name="messageSender" ref="com.liferay.portal.kernel.messaging.sender.MessageSender" />
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
 	<!-- Proxy -->
 
 	<bean id="com.liferay.portal.kernel.search.IndexSearcherProxyBean" class="com.liferay.portal.kernel.search.IndexSearcherProxyBean">
