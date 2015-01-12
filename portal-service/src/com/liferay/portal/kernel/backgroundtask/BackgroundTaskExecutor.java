@@ -31,4 +31,6 @@ public interface BackgroundTaskExecutor {
 
 	public boolean isSerial();
 
+	public boolean isSingleton();
+
 }

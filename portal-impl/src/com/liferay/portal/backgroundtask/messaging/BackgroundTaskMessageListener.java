@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusRegistryUtil
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.backgroundtask.ClassLoaderAwareBackgroundTaskExecutor;
 import com.liferay.portal.kernel.backgroundtask.SerialBackgroundTaskExecutor;
+import com.liferay.portal.kernel.backgroundtask.SingletonBackgroundTaskExecutor;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.BaseMessageListener;
@@ -173,7 +174,11 @@ public class BackgroundTaskMessageListener extends BaseMessageListener {
 				backgroundTaskExecutor, classLoader);
 		}
 
-		if (backgroundTaskExecutor.isSerial()) {
+		if (backgroundTaskExecutor.isSingleton()) {
+			backgroundTaskExecutor = new SingletonBackgroundTaskExecutor(
+				backgroundTaskExecutor);
+		}
+		else if (backgroundTaskExecutor.isSerial()) {
 			backgroundTaskExecutor = new SerialBackgroundTaskExecutor(
 				backgroundTaskExecutor);
 		}

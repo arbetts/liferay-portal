@@ -50,6 +50,11 @@ public abstract class BaseBackgroundTaskExecutor
 		return _serial;
 	}
 
+	@Override
+	public boolean isSingleton() {
+		return _singleton;
+	}
+
 	protected Locale getLocale(BackgroundTask backgroundTask) {
 		Map<String, Serializable> taskContextMap =
 			backgroundTask.getTaskContextMap();
@@ -86,11 +91,16 @@ public abstract class BaseBackgroundTaskExecutor
 		_serial = serial;
 	}
 
+	protected void setSingleton(boolean singleton) {
+		_singleton = singleton;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		BaseBackgroundTaskExecutor.class);
 
 	private BackgroundTaskStatusMessageTranslator
 		_backgroundTaskStatusMessageTranslator;
 	private boolean _serial;
+	private boolean _singleton;
 
 }

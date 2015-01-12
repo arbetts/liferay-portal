@@ -53,6 +53,11 @@ public class DelegatingBackgroundTaskExecutor
 		return _backgroundTaskExecutor.isSerial();
 	}
 
+	@Override
+	public boolean isSingleton() {
+		return _backgroundTaskExecutor.isSingleton();
+	}
+
 	protected BackgroundTaskExecutor getBackgroundTaskExecutor() {
 		return _backgroundTaskExecutor;
 	}
