@@ -108,10 +108,15 @@ public class SearchEngineInitializer implements Runnable {
 
 			portlets = ListUtil.sort(portlets, new PortletLuceneComparator());
 
-			for (Portlet portlet : portlets) {
+			for (int i = 0; i < portlets.size(); i++) {
+				Portlet portlet = portlets.get(i);
+
 				if (!portlet.isActive()) {
 					continue;
 				}
+
+				IndexStatusMessageSenderUtil.sendStatusMessage(
+					portlet.getDisplayName(), portlets.size(), i+1);
 
 				List<Indexer> indexers = portlet.getIndexerInstances();
 

@@ -6,6 +6,6 @@ package com.liferay.portal.search;
 public interface IndexStatusMessageSender {
 
 	public void sendStatusMessage(
-		String portletId, int portletCount, int currentPortlet);
+		String portletId, int totalPortlets, int currentPortlet);
 
 }

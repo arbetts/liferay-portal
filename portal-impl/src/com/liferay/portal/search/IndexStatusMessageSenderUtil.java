@@ -7,11 +7,11 @@ import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermissio
  */
 public class IndexStatusMessageSenderUtil {
 
-	public void sendStatusMessage(
-		String portletId, int portletCount, int currentPortlet) {
+	public static void sendStatusMessage(
+		String portletId, int totalPortlets, int currentPortlet) {
 
 		_indexStatusMessageSender.sendStatusMessage(
-			portletId, portletCount, currentPortlet);
+			portletId, totalPortlets, currentPortlet);
 	}
 
 	public void setIndexStatusMessageSender(

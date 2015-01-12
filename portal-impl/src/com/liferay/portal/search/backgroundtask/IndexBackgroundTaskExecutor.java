@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.model.Portlet;
+import com.liferay.portal.search.IndexStatusMessageSenderUtil;
 import com.liferay.portal.search.SearchEngineInitializer;
 import com.liferay.portal.search.lucene.LuceneHelperUtil;
 import com.liferay.portal.search.lucene.cluster.LuceneClusterUtil;
@@ -48,6 +49,34 @@ import java.util.concurrent.TimeUnit;
 public class IndexBackgroundTaskExecutor extends BaseBackgroundTaskExecutor {
 
 	public IndexBackgroundTaskExecutor() {
+		setBackgroundTaskStatusMessageTranslator(
+			new BackgroundTaskStatusMessageTranslator() {
+				@Override
+				public void translate(
+					BackgroundTaskStatus backgroundTaskStatus,
+					Message message) {
+
+					translateIndexMessage(backgroundTaskStatus, message);
+				}
+
+				protected void translateIndexMessage(
+					BackgroundTaskStatus backgroundTaskStatus, Message message) {
+
+					backgroundTaskStatus.setAttribute(
+						"portlet", message.getString("portlet"));
+					backgroundTaskStatus.setAttribute(
+						"total", message.getInteger("total"));
+					backgroundTaskStatus.setAttribute(
+						"current", message.getInteger("current"));
+
+					System.out.println("portlet: " + message.getString("portlet"));
+					System.out.println("current: " + message.getInteger("current"));
+					System.out.println("total: " + message.getInteger("total"));
+				}
+			}
+		);
+
+		setSingleton(true);
 	}
 
 	@Override
@@ -317,13 +346,7 @@ public class IndexBackgroundTaskExecutor extends BaseBackgroundTaskExecutor {
 							localClusterNodeAddress),
 						true);
 
-				try {
-					ClusterExecutorUtil.execute(clusterRequest);
-				}
-				catch (SystemException se) {
-					_log.error(
-						"Unable to notify peers to start index loading", se);
-				}
+				ClusterExecutorUtil.execute(clusterRequest);
 
 				if (_log.isInfoEnabled()) {
 					_log.info(

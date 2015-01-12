@@ -12,13 +12,13 @@ public class IndexStatusMessageSenderImpl extends BaseStatusMessageSender
 	implements IndexStatusMessageSender {
 
 	public void sendStatusMessage(
-		String portletId, int portletCount, int currentPortlet) {
+		String portletId, int totalPortlets, int currentPortlet) {
 
 		Map<String, Serializable> contextMap =
 			new HashMap<String, Serializable>();
 
 		contextMap.put("portlet", portletId);
-		contextMap.put("total", portletCount);
+		contextMap.put("total", totalPortlets);
 		contextMap.put("current", currentPortlet);
 
 		sendStatusMessage(new StatusMessageContext("reindex", contextMap));
