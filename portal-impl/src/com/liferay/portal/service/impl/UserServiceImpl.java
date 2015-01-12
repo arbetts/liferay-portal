@@ -608,9 +608,13 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			boolean sendEmail, ServiceContext serviceContext)
 		throws PortalException {
 
-		boolean indexingEnabled = serviceContext.isIndexingEnabled();
+		boolean indexingEnabled = true;
 
-		serviceContext.setIndexingEnabled(false);
+		if (serviceContext != null) {
+			indexingEnabled = serviceContext.isIndexingEnabled();
+
+			serviceContext.setIndexingEnabled(false);
+		}
 
 		try {
 			User user = addUserWithWorkflow(
@@ -645,7 +649,9 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			return user;
 		}
 		finally {
-			serviceContext.setIndexingEnabled(indexingEnabled);
+			if (serviceContext != null) {
+				serviceContext.setIndexingEnabled(indexingEnabled);
+			}
 		}
 	}
 
@@ -1092,9 +1098,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		UserGroupPermissionUtil.check(
 			getPermissionChecker(), userGroupId, ActionKeys.ASSIGN_MEMBERS);
 
-		Set<Long> unsetUserIds =
-			SetUtil.fromArray(
-				userGroupPersistence.getUserPrimaryKeys(userGroupId));
+		Set<Long> unsetUserIds = SetUtil.fromArray(
+			userGroupPersistence.getUserPrimaryKeys(userGroupId));
 
 		unsetUserIds.removeAll(SetUtil.fromArray(userIds));
 
@@ -2096,12 +2101,12 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	 *             operation was not allowed by the membership policy
 	 * @deprecated As of 7.0.0, replaced by {@link #updateUser(long, String,
 	 *             String, String, boolean, String, String, String, String,
-	 *             long, String, String, String, String, String, String, String,
-	 *             String, int, int, boolean, int, int, int, String, String,
-	 *             String, String, String, String, String, String, String,
-	 *             String, String, long[], long[], long[], java.util.List,
-	 *             long[], java.util.List, java.util.List, java.util.List,
-	 *             java.util.List, java.util.List, boolean, byte[],
+	 *             long, String, boolean, byte[], String, String, String,
+	 *             String, String, String, String, int, int, boolean, int, int,
+	 *             int, String, String, String, String, String, String, String,
+	 *             String, String, String, String, long[], long[], long[],
+	 *             java.util.List, long[], java.util.List, java.util.List,
+	 *             java.util.List, java.util.List, java.util.List,
 	 *             com.liferay.portal.service.ServiceContext)}
 	 */
 	@Deprecated

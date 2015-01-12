@@ -15,6 +15,8 @@
 package com.liferay.portlet.shopping;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.resource.manager.ClassLoaderResourceManager;
+import com.liferay.portal.kernel.resource.manager.ResourceManager;
 import com.liferay.portal.kernel.settings.FallbackKeys;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.settings.ParameterMapSettings;
@@ -57,6 +59,16 @@ public class ShoppingSettings {
 
 	public static final String[] CURRENCY_IDS;
 
+	public static final double[] INSURANCE_RANGE = {
+		0.01, 9.99, 10.00, 49.99, 50.00, 99.99, 100.00, 199.99, 200.00,
+		Double.POSITIVE_INFINITY
+	};
+
+	public static final double[] SHIPPING_RANGE = {
+		0.01, 9.99, 10.00, 49.99, 50.00, 99.99, 100.00, 199.99, 200.00,
+		Double.POSITIVE_INFINITY
+	};
+
 	static {
 		String[] ids = null;
 
@@ -86,16 +98,6 @@ public class ShoppingSettings {
 			CURRENCY_IDS = ids;
 		}
 	}
-
-	public static final double[] INSURANCE_RANGE = {
-		0.01, 9.99, 10.00, 49.99, 50.00, 99.99, 100.00, 199.99, 200.00,
-		Double.POSITIVE_INFINITY
-	};
-
-	public static final double[] SHIPPING_RANGE = {
-		0.01, 9.99, 10.00, 49.99, 50.00, 99.99, 100.00, 199.99, 200.00,
-		Double.POSITIVE_INFINITY
-	};
 
 	public static ShoppingSettings getInstance(long groupId)
 		throws PortalException {
@@ -337,13 +339,16 @@ public class ShoppingSettings {
 		"ccTypes", "insurance", "shipping"
 	};
 
+	private static final ResourceManager _resourceManager =
+		new ClassLoaderResourceManager(ShoppingSettings.class.getClassLoader());
+
 	static {
 		SettingsFactory settingsFactory =
 			SettingsFactoryUtil.getSettingsFactory();
 
 		settingsFactory.registerSettingsMetadata(
 			ShoppingConstants.SERVICE_NAME, _getFallbackKeys(),
-			_MULTI_VALUED_KEYS);
+			_MULTI_VALUED_KEYS, _resourceManager);
 	}
 
 	private TypedSettings _typedSettings;

@@ -18,6 +18,7 @@ import com.liferay.portal.RequiredLayoutException;
 import com.liferay.portal.events.EventsProcessorUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.lar.ExportImportHelperUtil;
 import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
 import com.liferay.portal.kernel.lar.UserIdStrategy;
 import com.liferay.portal.kernel.log.Log;
@@ -44,6 +45,7 @@ import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutPrototype;
 import com.liferay.portal.model.LayoutSet;
 import com.liferay.portal.model.LayoutSetPrototype;
+import com.liferay.portal.model.LayoutType;
 import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.model.Organization;
@@ -86,7 +88,6 @@ import com.liferay.portal.service.persistence.LayoutSetUtil;
 import com.liferay.portal.service.persistence.LayoutUtil;
 import com.liferay.portal.theme.PortletDisplay;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.LayoutSettings;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
@@ -134,9 +135,8 @@ public class SitesImpl implements Sites {
 		UnicodeProperties settingsProperties =
 			layoutSet.getSettingsProperties();
 
-		String mergeFailFriendlyURLLayouts =
-			settingsProperties.getProperty(
-				MERGE_FAIL_FRIENDLY_URL_LAYOUTS, StringPool.BLANK);
+		String mergeFailFriendlyURLLayouts = settingsProperties.getProperty(
+			MERGE_FAIL_FRIENDLY_URL_LAYOUTS, StringPool.BLANK);
 
 		mergeFailFriendlyURLLayouts = StringUtil.add(
 			mergeFailFriendlyURLLayouts, layout.getUuid());
@@ -504,12 +504,11 @@ public class SitesImpl implements Sites {
 		if (LayoutPermissionUtil.contains(
 				permissionChecker, layout, ActionKeys.DELETE)) {
 
-			LayoutSettings layoutSettings = LayoutSettings.getInstance(layout);
+			LayoutType layoutType = layout.getLayoutType();
 
 			EventsProcessorUtil.process(
 				PropsKeys.LAYOUT_CONFIGURATION_ACTION_DELETE,
-				layoutSettings.getConfigurationActionDelete(), request,
-				response);
+				layoutType.getConfigurationActionDelete(), request, response);
 		}
 
 		if (group.isGuest() && !layout.isPrivateLayout() &&
@@ -565,20 +564,25 @@ public class SitesImpl implements Sites {
 
 		LayoutSet layoutSet = layoutSetPrototype.getLayoutSet();
 
+		List<Layout> layoutSetPrototypeLayouts =
+			LayoutLocalServiceUtil.getLayouts(
+				layoutSet.getGroupId(), layoutSet.isPrivateLayout());
+
 		Map<String, String[]> parameterMap = getLayoutSetPrototypeParameters(
 			serviceContext);
 
 		return LayoutLocalServiceUtil.exportLayoutsAsFile(
-			layoutSet.getGroupId(), layoutSet.isPrivateLayout(), null,
+			layoutSet.getGroupId(), layoutSet.isPrivateLayout(),
+			ExportImportHelperUtil.getLayoutIds(layoutSetPrototypeLayouts),
 			parameterMap, null, null);
 	}
 
 	@Override
-	public Long[] filterGroups(List<Group> groups, String[] names) {
+	public Long[] filterGroups(List<Group> groups, String[] groupKeys) {
 		List<Long> groupIds = new ArrayList<Long>();
 
 		for (Group group : groups) {
-			if (!ArrayUtil.contains(names, group.getName())) {
+			if (!ArrayUtil.contains(groupKeys, group.getGroupKey())) {
 				groupIds.add(group.getGroupId());
 			}
 		}
@@ -1408,10 +1412,9 @@ public class SitesImpl implements Sites {
 			GroupLocalServiceUtil.addGroup(
 				userId, GroupConstants.DEFAULT_PARENT_GROUP_ID,
 				Layout.class.getName(), targetLayout.getPlid(),
-				GroupConstants.DEFAULT_LIVE_GROUP_ID,
-				targetLayout.getName(languageId), null, 0, true,
-				GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION, null, false,
-				true, null);
+				GroupConstants.DEFAULT_LIVE_GROUP_ID, targetLayout.getNameMap(),
+				null, 0, true, GroupConstants.DEFAULT_MEMBERSHIP_RESTRICTION,
+				null, false, true, null);
 		}
 
 		String portletTitle = PortalUtil.getPortletTitle(
@@ -1629,7 +1632,7 @@ public class SitesImpl implements Sites {
 	 * its linked layout set when it is first accessed.
 	 * </p>
 	 *
-	 * @param  layoutSet the site having its timestamp reset
+	 * @param layoutSet the site having its timestamp reset
 	 */
 	protected void doResetPrototype(LayoutSet layoutSet) {
 		UnicodeProperties settingsProperties =
@@ -1754,7 +1757,7 @@ public class SitesImpl implements Sites {
 
 		File cacheFile = new File(sb.toString());
 
-		if (cacheFile.exists()) {
+		if (cacheFile.exists() && !importData) {
 			Date modifiedDate = layoutSetPrototype.getModifiedDate();
 
 			if (cacheFile.lastModified() >= modifiedDate.getTime()) {
@@ -1771,9 +1774,14 @@ public class SitesImpl implements Sites {
 		boolean newFile = false;
 
 		if (file == null) {
+			List<Layout> layoutSetPrototypeLayouts =
+				LayoutLocalServiceUtil.getLayouts(
+					layoutSetPrototype.getGroupId(), true);
+
 			file = LayoutLocalServiceUtil.exportLayoutsAsFile(
-				layoutSetPrototype.getGroupId(), true, null, parameterMap, null,
-				null);
+				layoutSetPrototype.getGroupId(), true,
+				ExportImportHelperUtil.getLayoutIds(layoutSetPrototypeLayouts),
+				parameterMap, null, null);
 
 			newFile = true;
 		}

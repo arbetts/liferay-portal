@@ -28,7 +28,6 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
@@ -146,9 +145,6 @@ public class WikiPageStagedModelDataHandler
 
 		long userId = portletDataContext.getUserId(page.getUserUuid());
 
-		StagedModelDataHandlerUtil.importReferenceStagedModel(
-			portletDataContext, page, WikiNode.class, page.getNodeId());
-
 		Element pageElement =
 			portletDataContext.getImportDataStagedModelElement(page);
 
@@ -215,7 +211,6 @@ public class WikiPageStagedModelDataHandler
 					(FileEntry)portletDataContext.getZipEntryAsObject(path);
 
 				InputStream inputStream = null;
-				String mimeType = null;
 
 				try {
 					String binPath = attachmentElement.attributeValue(
@@ -247,13 +242,10 @@ public class WikiPageStagedModelDataHandler
 						continue;
 					}
 
-					mimeType = MimeTypesUtil.getContentType(
-						inputStream, fileEntry.getTitle());
-
 					WikiPageLocalServiceUtil.addPageAttachment(
 						userId, importedPage.getNodeId(),
 						importedPage.getTitle(), fileEntry.getTitle(),
-						inputStream, mimeType);
+						inputStream, null);
 				}
 				finally {
 					StreamUtil.cleanUp(inputStream);
@@ -292,7 +284,7 @@ public class WikiPageStagedModelDataHandler
 		}
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		WikiPageStagedModelDataHandler.class);
 
 }

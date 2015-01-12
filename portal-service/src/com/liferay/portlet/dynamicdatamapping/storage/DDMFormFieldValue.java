@@ -14,6 +14,8 @@
 
 package com.liferay.portlet.dynamicdatamapping.storage;
 
+import com.liferay.portal.kernel.util.HashUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.dynamicdatamapping.model.Value;
 
 import java.util.ArrayList;
@@ -35,6 +37,31 @@ public class DDMFormFieldValue {
 		_nestedDDMFormFieldValues.add(nestedDDMFormFieldValue);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof DDMFormFieldValue)) {
+			return false;
+		}
+
+		DDMFormFieldValue ddmFormFieldValue = (DDMFormFieldValue)obj;
+
+		if (Validator.equals(_instanceId, ddmFormFieldValue._instanceId) &&
+			Validator.equals(_name, ddmFormFieldValue._name) &&
+			Validator.equals(_value, ddmFormFieldValue._value) &&
+			Validator.equals(
+				_nestedDDMFormFieldValues,
+				ddmFormFieldValue._nestedDDMFormFieldValues)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 	public DDMFormValues getDDMFormValues() {
 		return _ddmFormValues;
 	}
@@ -51,24 +78,28 @@ public class DDMFormFieldValue {
 		return _nestedDDMFormFieldValues;
 	}
 
-	public Map<String, List<Value>> getNestedDDMFormFieldValuesMap() {
-		Map<String, List<Value>> nestedDDMFormFieldValuesMap =
-			new HashMap<String, List<Value>>();
+	public Map<String, List<DDMFormFieldValue>>
+		getNestedDDMFormFieldValuesMap() {
+
+		Map<String, List<DDMFormFieldValue>> nestedDDMFormFieldValuesMap =
+			new HashMap<String, List<DDMFormFieldValue>>();
 
 		for (DDMFormFieldValue nestedDDMFormFieldValue :
 				_nestedDDMFormFieldValues) {
 
-			List<Value> values = nestedDDMFormFieldValuesMap.get(
-				nestedDDMFormFieldValue.getName());
+			List<DDMFormFieldValue> nestedDDMFormFieldValues =
+				nestedDDMFormFieldValuesMap.get(
+					nestedDDMFormFieldValue.getName());
 
-			if (values == null) {
-				values = new ArrayList<Value>();
+			if (nestedDDMFormFieldValues == null) {
+				nestedDDMFormFieldValues = new ArrayList<DDMFormFieldValue>();
 
 				nestedDDMFormFieldValuesMap.put(
-					nestedDDMFormFieldValue.getName(), values);
+					nestedDDMFormFieldValue.getName(),
+					nestedDDMFormFieldValues);
 			}
 
-			values.add(nestedDDMFormFieldValue.getValue());
+			nestedDDMFormFieldValues.add(nestedDDMFormFieldValue);
 		}
 
 		return nestedDDMFormFieldValuesMap;
@@ -76,6 +107,16 @@ public class DDMFormFieldValue {
 
 	public Value getValue() {
 		return _value;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = HashUtil.hash(0, _instanceId);
+
+		hash = HashUtil.hash(hash, _name);
+		hash = HashUtil.hash(hash, _nestedDDMFormFieldValues);
+
+		return HashUtil.hash(hash, _value);
 	}
 
 	public void setDDMFormValues(DDMFormValues ddmFormValues) {

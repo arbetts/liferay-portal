@@ -53,11 +53,7 @@ public class LiferayPDFBoxConverter {
 	}
 
 	public void generateImagesPB() throws Exception {
-		PDDocument pdDocument = null;
-
-		try {
-			pdDocument = PDDocument.load(_inputFile);
-
+		try (PDDocument pdDocument = PDDocument.load(_inputFile)) {
 			PDDocumentCatalog pdDocumentCatalog =
 				pdDocument.getDocumentCatalog();
 
@@ -68,25 +64,20 @@ public class LiferayPDFBoxConverter {
 
 				if (_generateThumbnail && (i == 0)) {
 					_generateImagesPB(
-						pdPage, i, _thumbnailFile, _thumbnailExtension);
+						pdPage, _thumbnailFile, _thumbnailExtension);
 				}
 
 				if (!_generatePreview) {
 					break;
 				}
 
-				_generateImagesPB(pdPage, i + 1, _previewFiles[i], _extension);
-			}
-		}
-		finally {
-			if (pdDocument != null) {
-				pdDocument.close();
+				_generateImagesPB(pdPage, _previewFiles[i], _extension);
 			}
 		}
 	}
 
 	private void _generateImagesPB(
-			PDPage pdPage, int index, File outputFile, String extension)
+			PDPage pdPage, File outputFile, String extension)
 		throws Exception {
 
 		RenderedImage renderedImage = pdPage.convertToImage(

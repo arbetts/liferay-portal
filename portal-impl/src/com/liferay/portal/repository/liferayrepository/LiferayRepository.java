@@ -91,8 +91,8 @@ public class LiferayRepository
 
 	@Override
 	public FileEntry addFileEntry(
-			long folderId, String sourceFileName, String mimeType, String title,
-			String description, String changeLog, File file,
+			long userId, long folderId, String sourceFileName, String mimeType,
+			String title, String description, String changeLog, File file,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -121,9 +121,9 @@ public class LiferayRepository
 
 	@Override
 	public FileEntry addFileEntry(
-			long folderId, String sourceFileName, String mimeType, String title,
-			String description, String changeLog, InputStream is, long size,
-			ServiceContext serviceContext)
+			long userId, long folderId, String sourceFileName, String mimeType,
+			String title, String description, String changeLog, InputStream is,
+			long size, ServiceContext serviceContext)
 		throws PortalException {
 
 		long fileEntryTypeId = ParamUtil.getLong(
@@ -143,9 +143,48 @@ public class LiferayRepository
 		return new LiferayFileEntry(dlFileEntry);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, see {@link #addFileEntry(long, long, String,
+	 *             String, String, String, String, File, ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public FileEntry addFileEntry(
+			long folderId, String sourceFileName, String mimeType, String title,
+			String description, String changeLog, File file,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return addFileEntry(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			folderId, sourceFileName, mimeType, title, description, changeLog,
+			file, serviceContext);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, see {@link #addFileEntry(long, long, String,
+	 *             String, String, String, String, InputStream, long,
+	 *             ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public FileEntry addFileEntry(
+			long folderId, String sourceFileName, String mimeType, String title,
+			String description, String changeLog, InputStream is, long size,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return addFileEntry(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			folderId, sourceFileName, mimeType, title, description, changeLog,
+			is, size, serviceContext);
+	}
+
 	@Override
 	public Folder addFolder(
-			long parentFolderId, String title, String description,
+			long userId, long parentFolderId, String name, String description,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -153,9 +192,26 @@ public class LiferayRepository
 
 		DLFolder dlFolder = dlFolderService.addFolder(
 			getGroupId(), getRepositoryId(), mountPoint,
-			toFolderId(parentFolderId), title, description, serviceContext);
+			toFolderId(parentFolderId), name, description, serviceContext);
 
 		return new LiferayFolder(dlFolder);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #addFolder(long, long,
+	 *             String, String, ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public Folder addFolder(
+			long parentFolderId, String name, String description,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return addFolder(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			parentFolderId, name, description, serviceContext);
 	}
 
 	@Override
@@ -170,14 +226,41 @@ public class LiferayRepository
 		return null;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #checkInFileEntry(long, long,
+	 *             boolean, String, ServiceContext)}
+	 */
+	@Deprecated
 	@Override
 	public void checkInFileEntry(
 			long fileEntryId, boolean major, String changeLog,
 			ServiceContext serviceContext)
 		throws PortalException {
 
+		checkInFileEntry(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			fileEntryId, major, changeLog, serviceContext);
+	}
+
+	@Override
+	public void checkInFileEntry(
+			long userId, long fileEntryId, boolean major, String changeLog,
+			ServiceContext serviceContext)
+		throws PortalException {
+
 		dlFileEntryService.checkInFileEntry(
 			fileEntryId, major, changeLog, serviceContext);
+	}
+
+	@Override
+	public void checkInFileEntry(
+			long userId, long fileEntryId, String lockUuid,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		dlFileEntryService.checkInFileEntry(
+			fileEntryId, lockUuid, serviceContext);
 	}
 
 	/**
@@ -192,12 +275,19 @@ public class LiferayRepository
 		checkInFileEntry(fileEntryId, lockUuid, new ServiceContext());
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #checkInFileEntry(long, long,
+	 *             String, ServiceContext)}
+	 */
+	@Deprecated
 	@Override
 	public void checkInFileEntry(
 			long fileEntryId, String lockUuid, ServiceContext serviceContext)
 		throws PortalException {
 
-		dlFileEntryService.checkInFileEntry(
+		checkInFileEntry(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
 			fileEntryId, lockUuid, serviceContext);
 	}
 
@@ -226,7 +316,7 @@ public class LiferayRepository
 
 	@Override
 	public FileEntry copyFileEntry(
-			long groupId, long fileEntryId, long destFolderId,
+			long userId, long groupId, long fileEntryId, long destFolderId,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -235,6 +325,28 @@ public class LiferayRepository
 			serviceContext);
 
 		return new LiferayFileEntry(dlFileEntry);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #copyFileEntry(long, long,
+	 *             long, long, ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public FileEntry copyFileEntry(
+			long groupId, long fileEntryId, long destFolderId,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return copyFileEntry(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			groupId, fileEntryId, destFolderId, serviceContext);
+	}
+
+	@Override
+	public void deleteAll() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -263,11 +375,11 @@ public class LiferayRepository
 	}
 
 	@Override
-	public void deleteFolder(long parentFolderId, String title)
+	public void deleteFolder(long parentFolderId, String name)
 		throws PortalException {
 
 		dlFolderService.deleteFolder(
-			getGroupId(), toFolderId(parentFolderId), title);
+			getGroupId(), toFolderId(parentFolderId), name);
 	}
 
 	@Override
@@ -403,11 +515,11 @@ public class LiferayRepository
 	}
 
 	@Override
-	public Folder getFolder(long parentFolderId, String title)
+	public Folder getFolder(long parentFolderId, String name)
 		throws PortalException {
 
 		DLFolder dlFolder = dlFolderService.getFolder(
-			getGroupId(), toFolderId(parentFolderId), title);
+			getGroupId(), toFolderId(parentFolderId), name);
 
 		return new LiferayFolder(dlFolder);
 	}
@@ -643,7 +755,8 @@ public class LiferayRepository
 
 	@Override
 	public FileEntry moveFileEntry(
-			long fileEntryId, long newFolderId, ServiceContext serviceContext)
+			long userId, long fileEntryId, long newFolderId,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		DLFileEntry dlFileEntry = dlFileEntryService.moveFileEntry(
@@ -652,15 +765,49 @@ public class LiferayRepository
 		return new LiferayFileEntry(dlFileEntry);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #moveFileEntry(long, long,
+	 *             long, ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public FileEntry moveFileEntry(
+			long fileEntryId, long newFolderId, ServiceContext serviceContext)
+		throws PortalException {
+
+		return moveFileEntry(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			fileEntryId, newFolderId, serviceContext);
+	}
+
 	@Override
 	public Folder moveFolder(
-			long folderId, long parentFolderId, ServiceContext serviceContext)
+			long userId, long folderId, long parentFolderId,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		DLFolder dlFolder = dlFolderService.moveFolder(
 			toFolderId(folderId), toFolderId(parentFolderId), serviceContext);
 
 		return new LiferayFolder(dlFolder);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #moveFolder(long, long,
+	 *             ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public Folder moveFolder(
+			long folderId, long newParentFolderId,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return moveFolder(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			folderId, newParentFolderId, serviceContext);
 	}
 
 	@Override
@@ -681,6 +828,21 @@ public class LiferayRepository
 			lockUuid, companyId, expirationTime);
 	}
 
+	@Override
+	public void revertFileEntry(
+			long userId, long fileEntryId, String version,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		dlFileEntryService.revertFileEntry(
+			fileEntryId, version, serviceContext);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #revertFileEntry(long, long,
+	 *             String, ServiceContext)}
+	 */
+	@Deprecated
 	@Override
 	public void revertFileEntry(
 			long fileEntryId, String version, ServiceContext serviceContext)
@@ -705,8 +867,8 @@ public class LiferayRepository
 		throws PortalException {
 
 		return dlFileEntryService.search(
-			getGroupId(), creatorUserId, folderId, mimeTypes, status, start,
-			end);
+			getGroupId(), creatorUserId, toFolderId(folderId), mimeTypes,
+			status, start, end);
 	}
 
 	@Override
@@ -740,17 +902,17 @@ public class LiferayRepository
 	}
 
 	@Override
-	public void unlockFolder(long parentFolderId, String title, String lockUuid)
+	public void unlockFolder(long parentFolderId, String name, String lockUuid)
 		throws PortalException {
 
 		dlFolderService.unlockFolder(
-			getGroupId(), toFolderId(parentFolderId), title, lockUuid);
+			getGroupId(), toFolderId(parentFolderId), name, lockUuid);
 	}
 
 	@Override
 	public FileEntry updateFileEntry(
-			long fileEntryId, String sourceFileName, String mimeType,
-			String title, String description, String changeLog,
+			long userId, long fileEntryId, String sourceFileName,
+			String mimeType, String title, String description, String changeLog,
 			boolean majorVersion, File file, ServiceContext serviceContext)
 		throws PortalException {
 
@@ -776,8 +938,8 @@ public class LiferayRepository
 
 	@Override
 	public FileEntry updateFileEntry(
-			long fileEntryId, String sourceFileName, String mimeType,
-			String title, String description, String changeLog,
+			long userId, long fileEntryId, String sourceFileName,
+			String mimeType, String title, String description, String changeLog,
 			boolean majorVersion, InputStream is, long size,
 			ServiceContext serviceContext)
 		throws PortalException {
@@ -796,9 +958,58 @@ public class LiferayRepository
 		return new LiferayFileEntry(dlFileEntry);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #updateFileEntry(long, long,
+	 *             String, String, String, String, String, boolean, File,
+	 *             ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public FileEntry updateFileEntry(
+			long fileEntryId, String sourceFileName, String mimeType,
+			String title, String description, String changeLog,
+			boolean majorVersion, File file, ServiceContext serviceContext)
+		throws PortalException {
+
+		return updateFileEntry(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			fileEntryId, sourceFileName, mimeType, title, description,
+			changeLog, majorVersion, file, serviceContext);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #updateFileEntry(long, long,
+	 *             String, String, String, String, String, boolean, InputStream,
+	 *             long, ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public FileEntry updateFileEntry(
+			long fileEntryId, String sourceFileName, String mimeType,
+			String title, String description, String changeLog,
+			boolean majorVersion, InputStream is, long size,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return updateFileEntry(
+			com.liferay.portal.kernel.repository.util.RepositoryUserUtil.
+				getUserId(),
+			fileEntryId, sourceFileName, mimeType, title, description,
+			changeLog, majorVersion, is, size, serviceContext);
+	}
+
 	@Override
 	public Folder updateFolder(
-			long folderId, String title, String description,
+		long folderId, long parentFolderId, String name, String description,
+		ServiceContext serviceContext) {
+
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Folder updateFolder(
+			long folderId, String name, String description,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -806,12 +1017,12 @@ public class LiferayRepository
 			serviceContext, "defaultFileEntryTypeId");
 		SortedArrayList<Long> fileEntryTypeIds = getLongList(
 			serviceContext, "dlFileEntryTypesSearchContainerPrimaryKeys");
-		boolean overrideFileEntryTypes = ParamUtil.getBoolean(
-			serviceContext, "overrideFileEntryTypes");
+		int restrictionType = ParamUtil.getInteger(
+			serviceContext, "restrictionType");
 
 		DLFolder dlFolder = dlFolderService.updateFolder(
-			toFolderId(folderId), title, description, defaultFileEntryTypeId,
-			fileEntryTypeIds, overrideFileEntryTypes, serviceContext);
+			toFolderId(folderId), name, description, defaultFileEntryTypeId,
+			fileEntryTypeIds, restrictionType, serviceContext);
 
 		return new LiferayFolder(dlFolder);
 	}

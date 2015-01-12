@@ -97,6 +97,8 @@ public class DDLIndexer extends BaseIndexer {
 		if (recordSetId > 0) {
 			contextQuery.addRequiredTerm("recordSetId", recordSetId);
 		}
+
+		addSearchClassTypeIds(contextQuery, searchContext);
 	}
 
 	@Override
@@ -124,6 +126,8 @@ public class DDLIndexer extends BaseIndexer {
 
 		DDLRecordVersion recordVersion = record.getRecordVersion();
 
+		document.addKeyword(
+			Field.CLASS_TYPE_ID, recordVersion.getRecordSetId());
 		document.addKeyword(Field.STATUS, recordVersion.getStatus());
 		document.addKeyword(Field.VERSION, recordVersion.getVersion());
 
@@ -158,6 +162,7 @@ public class DDLIndexer extends BaseIndexer {
 		portletURL.setParameter(
 			"struts_action", "/dynamic_data_lists/view_record");
 		portletURL.setParameter("recordId", recordId);
+		portletURL.setParameter("version", document.get(Field.VERSION));
 
 		Summary summary = createSummary(
 			document, Field.TITLE, Field.DESCRIPTION);

@@ -116,6 +116,20 @@ public class WikiPageLocalServiceUtil {
 		getService().addPageResources(page, groupPermissions, guestPermissions);
 	}
 
+	public static void addTempFileEntry(long groupId, long userId,
+		java.lang.String folderName, java.lang.String fileName,
+		java.io.InputStream inputStream, java.lang.String mimeType)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService()
+			.addTempFileEntry(groupId, userId, folderName, fileName,
+			inputStream, mimeType);
+	}
+
+	/**
+	* @deprecated As of 7.0.0 replaced by {@link #addTempFileEntry(long, long,
+	String, String, InputStream, String)}
+	*/
+	@Deprecated
 	public static void addTempPageAttachment(long groupId, long userId,
 		java.lang.String fileName, java.lang.String tempFolderName,
 		java.io.InputStream inputStream, java.lang.String mimeType)
@@ -218,11 +232,10 @@ public class WikiPageLocalServiceUtil {
 		return getService().deletePersistedModel(persistedModel);
 	}
 
-	public static void deleteTempPageAttachment(long groupId, long userId,
-		java.lang.String fileName, java.lang.String tempFolderName)
+	public static void deleteTempFileEntry(long groupId, long userId,
+		java.lang.String folderName, java.lang.String fileName)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		getService()
-			.deleteTempPageAttachment(groupId, userId, fileName, tempFolderName);
+		getService().deleteTempFileEntry(groupId, userId, folderName, fileName);
 	}
 
 	public static void deleteTrashPageAttachments(long nodeId,
@@ -315,10 +328,10 @@ public class WikiPageLocalServiceUtil {
 	}
 
 	/**
-	* Returns the number of rows that match the dynamic query.
+	* Returns the number of rows matching the dynamic query.
 	*
 	* @param dynamicQuery the dynamic query
-	* @return the number of rows that match the dynamic query
+	* @return the number of rows matching the dynamic query
 	*/
 	public static long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery) {
@@ -326,11 +339,11 @@ public class WikiPageLocalServiceUtil {
 	}
 
 	/**
-	* Returns the number of rows that match the dynamic query.
+	* Returns the number of rows matching the dynamic query.
 	*
 	* @param dynamicQuery the dynamic query
 	* @param projection the projection to apply to the query
-	* @return the number of rows that match the dynamic query
+	* @return the number of rows matching the dynamic query
 	*/
 	public static long dynamicQueryCount(
 		com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery,
@@ -365,6 +378,11 @@ public class WikiPageLocalServiceUtil {
 	public static com.liferay.portlet.wiki.model.WikiPage fetchPage(
 		long nodeId, java.lang.String title, double version) {
 		return getService().fetchPage(nodeId, title, version);
+	}
+
+	public static com.liferay.portlet.wiki.model.WikiPage fetchPage(
+		long resourcePrimKey) {
+		return getService().fetchPage(resourcePrimKey);
 	}
 
 	public static com.liferay.portlet.wiki.model.WikiPage fetchWikiPage(
@@ -421,6 +439,11 @@ public class WikiPageLocalServiceUtil {
 	public static int getChildrenCount(long nodeId, boolean head,
 		java.lang.String parentTitle, int status) {
 		return getService().getChildrenCount(nodeId, head, parentTitle, status);
+	}
+
+	public static java.util.List<com.liferay.portlet.wiki.model.WikiPage> getDependentPages(
+		long nodeId, boolean head, java.lang.String title, int status) {
+		return getService().getDependentPages(nodeId, head, title, status);
 	}
 
 	public static com.liferay.portlet.wiki.model.WikiPage getDraftPage(
@@ -672,11 +695,15 @@ public class WikiPageLocalServiceUtil {
 		return getService().getRecentChangesCount(nodeId);
 	}
 
-	public static java.lang.String[] getTempPageAttachmentNames(long groupId,
-		long userId, java.lang.String tempFolderName)
+	public static java.util.List<com.liferay.portlet.wiki.model.WikiPage> getRedirectPages(
+		long nodeId, boolean head, java.lang.String redirectTitle, int status) {
+		return getService().getRedirectPages(nodeId, head, redirectTitle, status);
+	}
+
+	public static java.lang.String[] getTempFileNames(long groupId,
+		long userId, java.lang.String folderName)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return getService()
-				   .getTempPageAttachmentNames(groupId, userId, tempFolderName);
+		return getService().getTempFileNames(groupId, userId, folderName);
 	}
 
 	/**
@@ -721,11 +748,28 @@ public class WikiPageLocalServiceUtil {
 		return getService().getWikiPages(start, end);
 	}
 
+	/**
+	* Returns all the wiki pages matching the UUID and company.
+	*
+	* @param uuid the UUID of the wiki pages
+	* @param companyId the primary key of the company
+	* @return the matching wiki pages, or an empty list if no matches were found
+	*/
 	public static java.util.List<com.liferay.portlet.wiki.model.WikiPage> getWikiPagesByUuidAndCompanyId(
 		java.lang.String uuid, long companyId) {
 		return getService().getWikiPagesByUuidAndCompanyId(uuid, companyId);
 	}
 
+	/**
+	* Returns a range of wiki pages matching the UUID and company.
+	*
+	* @param uuid the UUID of the wiki pages
+	* @param companyId the primary key of the company
+	* @param start the lower bound of the range of wiki pages
+	* @param end the upper bound of the range of wiki pages (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the range of matching wiki pages, or an empty list if no matches were found
+	*/
 	public static java.util.List<com.liferay.portlet.wiki.model.WikiPage> getWikiPagesByUuidAndCompanyId(
 		java.lang.String uuid, long companyId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.portlet.wiki.model.WikiPage> orderByComparator) {
@@ -754,8 +798,8 @@ public class WikiPageLocalServiceUtil {
 	}
 
 	/**
-	* @deprecated As of 7.0.0, replaced by {@link #renamePage(
-	long, long, String, String, ServiceContext)}
+	* @deprecated As of 7.0.0, replaced by {@link #renamePage(long, long,
+	String, String, ServiceContext)}
 	*/
 	@Deprecated
 	public static void movePage(long userId, long nodeId,
@@ -769,6 +813,7 @@ public class WikiPageLocalServiceUtil {
 	* @deprecated As of 6.2.0, replaced by {@link #renamePage(long, long,
 	String, String, boolean, ServiceContext)}
 	*/
+	@Deprecated
 	public static void movePage(long userId, long nodeId,
 		java.lang.String title, java.lang.String newTitle, boolean strict,
 		com.liferay.portal.service.ServiceContext serviceContext)
@@ -785,6 +830,20 @@ public class WikiPageLocalServiceUtil {
 				   .movePageAttachmentToTrash(userId, nodeId, title, fileName);
 	}
 
+	public static com.liferay.portlet.wiki.model.WikiPage movePageFromTrash(
+		long userId, long nodeId, java.lang.String title, long newNodeId,
+		java.lang.String newParentTitle)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .movePageFromTrash(userId, nodeId, title, newNodeId,
+			newParentTitle);
+	}
+
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #movePageFromTrash(long,
+	long, String, long, String)} *
+	*/
+	@Deprecated
 	public static com.liferay.portlet.wiki.model.WikiPage movePageFromTrash(
 		long userId, long nodeId, java.lang.String title,
 		java.lang.String newParentTitle,
@@ -826,12 +885,6 @@ public class WikiPageLocalServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException {
 		getService()
 			.renamePage(userId, nodeId, title, newTitle, strict, serviceContext);
-	}
-
-	public static void restoreDependentFromTrash(
-		com.liferay.portlet.wiki.model.WikiPage page, long trashEntryId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		getService().restoreDependentFromTrash(page, trashEntryId);
 	}
 
 	public static void restorePageAttachmentFromTrash(long userId, long nodeId,

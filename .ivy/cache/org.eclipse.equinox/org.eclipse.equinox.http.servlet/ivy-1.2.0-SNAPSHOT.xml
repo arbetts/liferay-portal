@@ -4,7 +4,7 @@
 		module="org.eclipse.equinox.http.servlet"
 		revision="1.2.0-SNAPSHOT"
 		status="integration"
-		publication="20140808135424"
+		publication="20140922200442"
 	>
 		<description homepage="" />
 		<m:properties__releaseName>Mars</m:properties__releaseName>

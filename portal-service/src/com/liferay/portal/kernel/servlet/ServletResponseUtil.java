@@ -530,9 +530,7 @@ public class ServletResponseUtil {
 		else {
 			FileInputStream fileInputStream = new FileInputStream(file);
 
-			FileChannel fileChannel = fileInputStream.getChannel();
-
-			try {
+			try (FileChannel fileChannel = fileInputStream.getChannel()) {
 				int contentLength = (int)fileChannel.size();
 
 				response.setContentLength(contentLength);
@@ -542,9 +540,6 @@ public class ServletResponseUtil {
 				fileChannel.transferTo(
 					0, contentLength,
 					Channels.newChannel(response.getOutputStream()));
-			}
-			finally {
-				fileChannel.close();
 			}
 		}
 	}
@@ -561,24 +556,20 @@ public class ServletResponseUtil {
 			long contentLength)
 		throws IOException {
 
-		OutputStream outputStream = null;
+		if (response.isCommitted()) {
+			StreamUtil.cleanUp(inputStream);
 
-		try {
-			if (response.isCommitted()) {
-				return;
-			}
-
-			if (contentLength > 0) {
-				response.setContentLength((int)contentLength);
-			}
-
-			response.flushBuffer();
-
-			StreamUtil.transfer(inputStream, response.getOutputStream(), false);
+			return;
 		}
-		finally {
-			StreamUtil.cleanUp(inputStream, outputStream);
+
+		if (contentLength > 0) {
+			response.setHeader(
+				HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
 		}
+
+		response.flushBuffer();
+
+		StreamUtil.transfer(inputStream, response.getOutputStream());
 	}
 
 	public static void write(HttpServletResponse response, String s)

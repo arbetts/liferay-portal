@@ -18,19 +18,18 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.ServerDetector;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.struts.StrutsUtil;
 import com.liferay.portlet.RenderResponseImpl;
-import com.liferay.web.proxy.web.upgrade.WebProxyUpgrade;
+import com.liferay.web.proxy.web.upgrade.WebProxyWebUpgrade;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.util.Dictionary;
-import java.util.Hashtable;
 
 import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
@@ -118,8 +117,7 @@ public class WebProxyPortlet extends PortletBridgePortlet {
 			PortletContext portletContext = getPortletContext();
 
 			PortletRequestDispatcher portletRequestDispatcher =
-				portletContext.getRequestDispatcher(
-					StrutsUtil.TEXT_HTML_DIR + "/portal/portlet_not_setup.jsp");
+				portletContext.getRequestDispatcher("/portlet_not_setup.jsp");
 
 			portletRequestDispatcher.include(renderRequest, renderResponse);
 		}
@@ -179,7 +177,8 @@ public class WebProxyPortlet extends PortletBridgePortlet {
 		PortletConfig portletConfig = getPortletConfig();
 		PortletContext portletContext = getPortletContext();
 
-		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		Dictionary<String, Object> properties =
+			new HashMapDictionary<String, Object>();
 
 		properties.put(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
@@ -215,21 +214,21 @@ public class WebProxyPortlet extends PortletBridgePortlet {
 
 		renderResponse.setContentType(ContentTypes.TEXT_HTML_UTF8);
 
-		PrintWriter writer = renderResponse.getWriter();
-
-		writer.print(
-			"WebProxyPortlet will not be enabled unless Liferay's " +
-				"serializer.jar and xalan.jar files are copied to the " +
-					"JDK's endorsed directory");
-
-		writer.close();
+		try (PrintWriter writer = renderResponse.getWriter()) {
+			writer.print(
+				"WebProxyPortlet will not be enabled unless Liferay's " +
+					"serializer.jar and xalan.jar files are copied to the " +
+						"JDK's endorsed directory");
+		}
 	}
 
 	@Reference(unbind = "-")
-	protected void setWebProxyUpgrade(WebProxyUpgrade webProxyUpgrade) {
+	protected void setWebProxyWebUpgrade(
+		WebProxyWebUpgrade webProxyWebUpgrade) {
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(WebProxyPortlet.class);
+	private static final Log _log = LogFactoryUtil.getLog(
+		WebProxyPortlet.class);
 
 	private ComponentContext _componentContext;
 	private boolean _enabled;

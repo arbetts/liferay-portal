@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -189,16 +190,15 @@ public class ListUtil {
 
 		List<String> list = new ArrayList<String>();
 
-		UnsyncBufferedReader unsyncBufferedReader = new UnsyncBufferedReader(
-			new FileReader(file));
+		try (UnsyncBufferedReader unsyncBufferedReader =
+				new UnsyncBufferedReader(new FileReader(file))) {
 
-		String s = StringPool.BLANK;
+			String s = StringPool.BLANK;
 
-		while ((s = unsyncBufferedReader.readLine()) != null) {
-			list.add(s);
+			while ((s = unsyncBufferedReader.readLine()) != null) {
+				list.add(s);
+			}
 		}
-
-		unsyncBufferedReader.close();
 
 		return list;
 	}
@@ -291,6 +291,29 @@ public class ListUtil {
 		}
 
 		return list;
+	}
+
+	public static <E> Iterator<E> reverseIterator(List<E> list) {
+		final ListIterator<E> listIterator = list.listIterator(list.size());
+
+		return new Iterator<E>() {
+
+			@Override
+			public boolean hasNext() {
+				return listIterator.hasPrevious();
+			}
+
+			@Override
+			public E next() {
+				return listIterator.previous();
+			}
+
+			@Override
+			public void remove() {
+				listIterator.remove();
+			}
+
+		};
 	}
 
 	public static <E> List<E> sort(List<E> list) {

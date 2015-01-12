@@ -128,7 +128,7 @@ public class DynamicCSSUtil {
 				if (PortalUtil.isRightToLeft(request) &&
 					!RTLCSSUtil.isExcludedPath(resourcePath)) {
 
-					content = RTLCSSUtil.getRtlCss(content);
+					content = RTLCSSUtil.getRtlCss(resourcePath, content);
 				}
 
 				return content;
@@ -146,6 +146,21 @@ public class DynamicCSSUtil {
 
 		if (cacheResourceURL != null) {
 			cacheResourceURLConnection = cacheResourceURL.openConnection();
+
+			if (!themeCssFastLoad) {
+				URL resourceURL = servletContext.getResource(resourcePath);
+
+				if (resourceURL != null) {
+					URLConnection resourceURLConnection =
+						resourceURL.openConnection();
+
+					if (cacheResourceURLConnection.getLastModified() <
+							resourceURLConnection.getLastModified()) {
+
+						cacheResourceURLConnection = null;
+					}
+				}
+			}
 		}
 
 		if ((themeCssFastLoad || !content.contains(_CSS_IMPORT_BEGIN)) &&
@@ -181,7 +196,8 @@ public class DynamicCSSUtil {
 			if (PortalUtil.isRightToLeft(request) &&
 				!RTLCSSUtil.isExcludedPath(resourcePath)) {
 
-				parsedContent = RTLCSSUtil.getRtlCss(parsedContent);
+				parsedContent = RTLCSSUtil.getRtlCss(
+					resourcePath, parsedContent);
 
 				// Append custom CSS for RTL
 
@@ -499,6 +515,10 @@ public class DynamicCSSUtil {
 
 	private static boolean _isThemeCssFastLoad(
 		HttpServletRequest request, ThemeDisplay themeDisplay) {
+
+		if (!PropsValues.THEME_CSS_FAST_LOAD_CHECK_REQUEST_PARAMETER) {
+			return PropsValues.THEME_CSS_FAST_LOAD;
+		}
 
 		if (themeDisplay != null) {
 			return themeDisplay.isThemeCssFastLoad();

@@ -78,6 +78,20 @@ public class WikiPageServiceWrapper implements WikiPageService,
 	}
 
 	@Override
+	public void addTempFileEntry(long nodeId, java.lang.String folderName,
+		java.lang.String fileName, java.io.InputStream inputStream,
+		java.lang.String mimeType)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_wikiPageService.addTempFileEntry(nodeId, folderName, fileName,
+			inputStream, mimeType);
+	}
+
+	/**
+	* @deprecated As of 7.0.0 replaced by {@link #addTempFileEntry(long,
+	String, String, InputStream, String)}
+	*/
+	@Deprecated
+	@Override
 	public void addTempPageAttachment(long nodeId, java.lang.String fileName,
 		java.lang.String tempFolderName, java.io.InputStream inputStream,
 		java.lang.String mimeType)
@@ -141,11 +155,10 @@ public class WikiPageServiceWrapper implements WikiPageService,
 	}
 
 	@Override
-	public void deleteTempPageAttachment(long nodeId,
-		java.lang.String fileName, java.lang.String tempFolderName)
+	public void deleteTempFileEntry(long nodeId, java.lang.String folderName,
+		java.lang.String fileName)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		_wikiPageService.deleteTempPageAttachment(nodeId, fileName,
-			tempFolderName);
+		_wikiPageService.deleteTempFileEntry(nodeId, folderName, fileName);
 	}
 
 	@Override
@@ -329,17 +342,17 @@ public class WikiPageServiceWrapper implements WikiPageService,
 	}
 
 	@Override
-	public java.lang.String[] getTempPageAttachmentNames(long nodeId,
-		java.lang.String tempFolderName)
+	public java.lang.String[] getTempFileNames(long nodeId,
+		java.lang.String folderName)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _wikiPageService.getTempPageAttachmentNames(nodeId,
-			tempFolderName);
+		return _wikiPageService.getTempFileNames(nodeId, folderName);
 	}
 
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link #renamePage(long, String,
 	String, ServiceContext)}
 	*/
+	@Deprecated
 	@Override
 	public void movePage(long nodeId, java.lang.String title,
 		java.lang.String newTitle,

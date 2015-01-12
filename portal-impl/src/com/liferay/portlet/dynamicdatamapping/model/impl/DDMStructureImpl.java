@@ -16,15 +16,12 @@ package com.liferay.portlet.dynamicdatamapping.model.impl;
 
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
-import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PredicateFilter;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -59,6 +56,26 @@ import java.util.Set;
 public class DDMStructureImpl extends DDMStructureBaseImpl {
 
 	@Override
+	public DDMForm createFullHierarchyDDMForm() throws PortalException {
+		DDMForm fullHierarchyDDMForm = DDMFormXSDDeserializerUtil.deserialize(
+			getDefinition());
+
+		DDMStructure parentDDMStructure = getParentDDMStructure();
+
+		if (parentDDMStructure != null) {
+			DDMForm ancestorsDDMForm =
+				parentDDMStructure.createFullHierarchyDDMForm();
+
+			List<DDMFormField> ddmFormFields =
+				fullHierarchyDDMForm.getDDMFormFields();
+
+			ddmFormFields.addAll(ancestorsDDMForm.getDDMFormFields());
+		}
+
+		return fullHierarchyDDMForm;
+	}
+
+	@Override
 	public String[] getAvailableLanguageIds() {
 		DDMForm ddmForm = getDDMForm();
 
@@ -83,15 +100,13 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 			try {
 				_ddmForm = DDMFormXSDDeserializerUtil.deserialize(
 					getDefinition());
-
-				addDDMFormPrivateDDMFormFields();
 			}
 			catch (Exception e) {
 				_log.error(e, e);
 			}
 		}
 
-		return _ddmForm;
+		return new DDMForm(_ddmForm);
 	}
 
 	@Override
@@ -111,9 +126,7 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 	}
 
 	@Override
-	public List<DDMFormField> getDDMFormFields(boolean includeTransientFields)
-		throws PortalException {
-
+	public List<DDMFormField> getDDMFormFields(boolean includeTransientFields) {
 		Map<String, DDMFormField> ddmFormFieldsMap =
 			getFullHierarchyDDMFormFieldsMap(true);
 
@@ -160,7 +173,7 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 	}
 
 	@Override
-	public Set<String> getFieldNames() throws PortalException {
+	public Set<String> getFieldNames() {
 		List<DDMFormField> ddmFormFields = getDDMFormFields(false);
 
 		List<String> ddmFormFieldNames = getDDMFormFieldNames(ddmFormFields);
@@ -217,27 +230,22 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 	}
 
 	@Override
-	public DDMForm getFullHierarchyDDMForm() throws PortalException {
-		DDMForm ddmForm = getDDMForm();
-
-		DDMStructure parentDDMStructure = getParentDDMStructure();
-
-		if (parentDDMStructure != null) {
-			DDMForm ancestorsDDMForm =
-				parentDDMStructure.getFullHierarchyDDMForm();
-
-			List<DDMFormField> ddmFormFields = ddmForm.getDDMFormFields();
-
-			ddmFormFields.addAll(ancestorsDDMForm.getDDMFormFields());
+	public DDMForm getFullHierarchyDDMForm() {
+		if (_fullHierarchyDDMForm == null) {
+			try {
+				_fullHierarchyDDMForm = createFullHierarchyDDMForm();
+			}
+			catch (Exception e) {
+				_log.error(e, e);
+			}
 		}
 
-		return ddmForm;
+		return new DDMForm(_fullHierarchyDDMForm);
 	}
 
 	@Override
 	public Map<String, DDMFormField> getFullHierarchyDDMFormFieldsMap(
-			boolean includeNestedDDMFormFields)
-		throws PortalException {
+		boolean includeNestedDDMFormFields) {
 
 		DDMForm ddmForm = getFullHierarchyDDMForm();
 
@@ -245,7 +253,7 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 	}
 
 	@Override
-	public List<String> getRootFieldNames() throws PortalException {
+	public List<String> getRootFieldNames() {
 		DDMForm ddmForm = getFullHierarchyDDMForm();
 
 		return getDDMFormFieldNames(ddmForm.getDDMFormFields());
@@ -338,20 +346,11 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 	}
 
 	@Override
-	public boolean hasField(String fieldName) throws PortalException {
+	public boolean hasField(String fieldName) {
 		Map<String, DDMFormField> ddmFormFieldsMap =
 			getFullHierarchyDDMFormFieldsMap(true);
 
 		return ddmFormFieldsMap.containsKey(fieldName);
-	}
-
-	@Override
-	public boolean isFieldPrivate(String fieldName) {
-		if (fieldName.startsWith(StringPool.UNDERLINE)) {
-			return true;
-		}
-
-		return false;
 	}
 
 	@Override
@@ -402,44 +401,17 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 		super.setDefinition(definition);
 
 		_ddmForm = null;
+		_fullHierarchyDDMForm = null;
+	}
+
+	@Override
+	public void setFullHierarchyDDMForm(DDMForm fullHierarchyDDMForm) {
+		_fullHierarchyDDMForm = fullHierarchyDDMForm;
 	}
 
 	@Override
 	public void updateDDMForm(DDMForm ddmForm) {
 		setDefinition(DDMFormXSDSerializerUtil.serialize(ddmForm));
-	}
-
-	protected void addDDMFormPrivateDDMFormFields() {
-		List<DDMFormField> ddmFormFields = _ddmForm.getDDMFormFields();
-
-		String[] privateFieldNames =
-			PropsValues.DYNAMIC_DATA_MAPPING_STRUCTURE_PRIVATE_FIELD_NAMES;
-
-		for (String privateFieldName : privateFieldNames) {
-			DDMFormField privateDDMFormField = createPrivateDDMFormField(
-				privateFieldName);
-
-			ddmFormFields.add(privateDDMFormField);
-		}
-	}
-
-	protected DDMFormField createPrivateDDMFormField(String privateFieldName) {
-		DDMFormField privateDDMFormField = new DDMFormField(
-			privateFieldName, "text");
-
-		String dataType = PropsUtil.get(
-			PropsKeys.DYNAMIC_DATA_MAPPING_STRUCTURE_PRIVATE_FIELD_DATATYPE,
-			new Filter(privateFieldName));
-
-		privateDDMFormField.setDataType(dataType);
-
-		String repeatable = PropsUtil.get(
-			PropsKeys.DYNAMIC_DATA_MAPPING_STRUCTURE_PRIVATE_FIELD_REPEATABLE,
-			new Filter(privateFieldName));
-
-		privateDDMFormField.setRepeatable(Boolean.valueOf(repeatable));
-
-		return privateDDMFormField;
 	}
 
 	protected List<DDMFormField> filterTransientDDMFormFields(
@@ -484,9 +456,13 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 		return parentStructure;
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(DDMStructureImpl.class);
+	private static final Log _log = LogFactoryUtil.getLog(
+		DDMStructureImpl.class);
 
 	@CacheField(methodName = "DDMForm")
 	private DDMForm _ddmForm;
+
+	@CacheField(methodName = "FullHierarchyDDMForm")
+	private DDMForm _fullHierarchyDDMForm;
 
 }

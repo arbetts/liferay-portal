@@ -34,9 +34,11 @@ import com.liferay.portal.kernel.nio.intraband.proxy.annotation.Proxy;
 import com.liferay.portal.kernel.nio.intraband.rpc.RPCResponse;
 import com.liferay.portal.kernel.nio.intraband.test.MockIntraband;
 import com.liferay.portal.kernel.nio.intraband.test.MockRegistrationReference;
+import com.liferay.portal.kernel.test.AggregateTestRule;
 import com.liferay.portal.kernel.test.CaptureHandler;
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
 import com.liferay.portal.kernel.test.JDKLoggerTestUtil;
+import com.liferay.portal.kernel.test.NewEnv;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
@@ -52,7 +54,8 @@ import com.liferay.portal.nio.intraband.proxy.IntrabandProxyUtil.MethodsBag;
 import com.liferay.portal.nio.intraband.proxy.IntrabandProxyUtil.TemplateSkeleton;
 import com.liferay.portal.nio.intraband.proxy.IntrabandProxyUtil.TemplateStub;
 import com.liferay.portal.test.AdviseWith;
-import com.liferay.portal.test.runners.AspectJMockingNewClassLoaderJUnitTestRunner;
+import com.liferay.portal.test.AspectJNewEnvTestRule;
+import com.liferay.portal.test.aspects.ReflectionUtilAdvice;
 import com.liferay.portal.util.FileImpl;
 import com.liferay.portal.util.PropsValues;
 
@@ -97,8 +100,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
@@ -119,12 +122,13 @@ import org.objectweb.asm.tree.VarInsnNode;
 /**
  * @author Shuyang Zhou
  */
-@RunWith(AspectJMockingNewClassLoaderJUnitTestRunner.class)
 public class IntrabandProxyUtilTest {
 
 	@ClassRule
-	public static CodeCoverageAssertor codeCoverageAssertor =
-		new CodeCoverageAssertor();
+	@Rule
+	public static final AggregateTestRule aggregateTestRule =
+		new AggregateTestRule(
+			CodeCoverageAssertor.INSTANCE, AspectJNewEnvTestRule.INSTANCE);
 
 	@Before
 	public void setUp() {
@@ -330,12 +334,14 @@ public class IntrabandProxyUtilTest {
 		Assert.assertEquals("doStuff2-()V", proxyMethodSignatures[1]);
 	}
 
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testGenerateSkeletonClassFunction() throws Exception {
 		_doTestGenerateSkeletonClassFunction(TestGenerateInterface1.class);
 		_doTestGenerateSkeletonClassFunction(TestGenerateInterface2.class);
 	}
 
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testGenerateSkeletonClassStructure() throws Exception {
 		_doTestGenerateSkeletonClassStructure(TestGenerateInterface1.class);
@@ -344,6 +350,7 @@ public class IntrabandProxyUtilTest {
 		_doTestGenerateSkeletonClassStructure(TestGenerateClass2.class);
 	}
 
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testGenerateStubClassFunction() throws Exception {
 
@@ -365,8 +372,6 @@ public class IntrabandProxyUtilTest {
 		RegistrationReference registrationReference =
 			new MockRegistrationReference(autoReplyMockIntraband);
 
-		ExceptionHandler exceptionHandler = new WarnLogExceptionHandler();
-
 		CaptureHandler captureHandler = JDKLoggerTestUtil.configureJDKLogger(
 			stubClass.getName(), Level.INFO);
 
@@ -376,7 +381,8 @@ public class IntrabandProxyUtilTest {
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
 
 			stubObject = constructor.newInstance(
-				testId, registrationReference, exceptionHandler);
+				testId, registrationReference,
+				WarnLogExceptionHandler.INSTANCE);
 
 			Assert.assertEquals(2, logRecords.size());
 
@@ -399,7 +405,7 @@ public class IntrabandProxyUtilTest {
 			ReflectionTestUtil.getFieldValue(
 				stubObject, "_registrationReference"));
 		Assert.assertSame(
-			exceptionHandler,
+			WarnLogExceptionHandler.INSTANCE,
 			ReflectionTestUtil.getFieldValue(stubObject, "_exceptionHandler"));
 		Assert.assertSame(
 			autoReplyMockIntraband,
@@ -414,7 +420,7 @@ public class IntrabandProxyUtilTest {
 			String.class, RegistrationReference.class, ExceptionHandler.class);
 
 		stubObject = constructor.newInstance(
-			testId, registrationReference, exceptionHandler);
+			testId, registrationReference, WarnLogExceptionHandler.INSTANCE);
 
 		for (Method idMethod : _getIdMethods(TestGenerateStubFunction2.class)) {
 			Assert.assertEquals(
@@ -498,6 +504,7 @@ public class IntrabandProxyUtilTest {
 		}
 	}
 
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testGenerateStubClassStructure() throws Exception {
 		_doTestGenerateStubClassStructure(
@@ -547,18 +554,20 @@ public class IntrabandProxyUtilTest {
 	}
 
 	@AdviseWith(adviceClasses = {ReflectionUtilAdvice.class})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
-	public void testInitializationFailure() {
+	public void testInitializationFailure() throws ClassNotFoundException {
+		Throwable throwable = new Throwable();
+
+		ReflectionUtilAdvice.setDeclaredMethodThrowable(throwable);
+
 		try {
 			new IntrabandProxyUtil();
 
 			Assert.fail();
 		}
 		catch (ExceptionInInitializerError eiie) {
-			Throwable throwable = eiie.getCause();
-
-			Assert.assertSame(RuntimeException.class, throwable.getClass());
-			Assert.assertEquals("Unable to get method", throwable.getMessage());
+			Assert.assertSame(throwable, eiie.getCause());
 		}
 	}
 
@@ -578,11 +587,11 @@ public class IntrabandProxyUtilTest {
 
 		IntrabandProxyUtil.newStubInstance(
 			stubClass, "id", new MockRegistrationReference(null),
-			new WarnLogExceptionHandler());
+			WarnLogExceptionHandler.INSTANCE);
 
 		try {
 			IntrabandProxyUtil.newStubInstance(
-				stubClass, "id", null, new WarnLogExceptionHandler());
+				stubClass, "id", null, WarnLogExceptionHandler.INSTANCE);
 
 			Assert.fail();
 		}
@@ -601,7 +610,7 @@ public class IntrabandProxyUtilTest {
 
 		try {
 			IntrabandProxyUtil.newStubInstance(
-				stubClass, "id", null, new WarnLogExceptionHandler());
+				stubClass, "id", null, WarnLogExceptionHandler.INSTANCE);
 
 			Assert.fail();
 		}
@@ -617,7 +626,7 @@ public class IntrabandProxyUtilTest {
 
 		IntrabandProxyUtil.newStubInstance(
 			stubClass, "id", new MockRegistrationReference(null),
-			new WarnLogExceptionHandler());
+			WarnLogExceptionHandler.INSTANCE);
 	}
 
 	@Test
@@ -893,20 +902,17 @@ public class IntrabandProxyUtilTest {
 			mockIntraband,
 			ReflectionTestUtil.getFieldValue(templateStub, "_intraband"));
 
-		ExceptionHandler exceptionHandler = new WarnLogExceptionHandler();
-
 		templateStub = new TemplateStub(
-			"id", mockRegistrationReference, exceptionHandler);
+			"id", mockRegistrationReference, WarnLogExceptionHandler.INSTANCE);
 
 		Assert.assertEquals(
-			"id",
-			ReflectionTestUtil.getFieldValue(templateStub, "_id"));
+			"id", ReflectionTestUtil.getFieldValue(templateStub, "_id"));
 		Assert.assertSame(
 			mockRegistrationReference,
 			ReflectionTestUtil.getFieldValue(
 				templateStub, "_registrationReference"));
 		Assert.assertSame(
-			exceptionHandler,
+			WarnLogExceptionHandler.INSTANCE,
 			ReflectionTestUtil.getFieldValue(
 				templateStub, "_exceptionHandler"));
 		Assert.assertSame(
@@ -985,6 +991,7 @@ public class IntrabandProxyUtilTest {
 	}
 
 	@AdviseWith(adviceClasses = {DisableProxyClassesDump.class})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testToClassProxyClassesDumpDisabled()
 		throws FileNotFoundException {
@@ -993,6 +1000,7 @@ public class IntrabandProxyUtilTest {
 	}
 
 	@AdviseWith(adviceClasses = {EnableProxyClassesDump.class})
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testToClassProxyClassesDumpEnabled()
 		throws FileNotFoundException {
@@ -1032,19 +1040,6 @@ public class IntrabandProxyUtilTest {
 			throws Throwable {
 
 			return proceedingJoinPoint.proceed(new Object[] {Boolean.TRUE});
-		}
-
-	}
-
-	@Aspect
-	public static class ReflectionUtilAdvice {
-
-		@Around(
-			"execution(public static java.lang.reflect.Method " +
-				"com.liferay.portal.kernel.util.ReflectionUtil." +
-					"getDeclaredMethod(Class, String, Class...))")
-		public Object getDeclaredMethod() {
-			throw new RuntimeException("Unable to get method");
 		}
 
 	}
@@ -2432,6 +2427,11 @@ public class IntrabandProxyUtilTest {
 		new HashMap<Class<?>, Object>();
 	private static Map<Class<?>, Object> _sampleValueMap =
 		new HashMap<Class<?>, Object>();
+	private static Type[] _types = {
+		Type.BOOLEAN_TYPE, Type.BYTE_TYPE, Type.CHAR_TYPE, Type.DOUBLE_TYPE,
+		Type.FLOAT_TYPE, Type.INT_TYPE, Type.LONG_TYPE, Type.SHORT_TYPE,
+		Type.getType(String.class), Type.getType(Object.class)
+	};
 
 	static {
 		_autoboxingMap.put(boolean.class, Boolean.class);
@@ -2469,12 +2469,6 @@ public class IntrabandProxyUtilTest {
 		_sampleValueMap.put(Object.class, new Locale("en"));
 		_sampleValueMap.put(void.class, null);
 	}
-
-	private static Type[] _types = {
-		Type.BOOLEAN_TYPE, Type.BYTE_TYPE, Type.CHAR_TYPE, Type.DOUBLE_TYPE,
-		Type.FLOAT_TYPE, Type.INT_TYPE, Type.LONG_TYPE, Type.SHORT_TYPE,
-		Type.getType(String.class), Type.getType(Object.class)
-	};
 
 	private static class AutoReplyMockIntraband extends MockIntraband {
 
@@ -2799,6 +2793,7 @@ public class IntrabandProxyUtilTest {
 
 		@Id
 		public abstract String getId2();
+
 	}
 
 	private interface TestProxyMethodsInterface {

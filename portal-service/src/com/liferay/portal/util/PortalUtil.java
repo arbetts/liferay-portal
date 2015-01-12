@@ -607,20 +607,6 @@ public class PortalUtil {
 		return getPortal().getClassNameId(value);
 	}
 
-	/**
-	 * Returns the ID of certain portlets from the fully qualified name of one
-	 * of their classes. The portlets this method supports are: blogs,
-	 * bookmarks, calendar, document library, image gallery, journal, message
-	 * boards, and wiki.
-	 *
-	 * @param  className the fully qualified name of a class in a portlet
-	 * @return the ID of the portlet the class is a part of, or an empty string
-	 *         if the class is not supported
-	 */
-	public static String getClassNamePortletId(String className) {
-		return getPortal().getClassNamePortletId(className);
-	}
-
 	public static Company getCompany(HttpServletRequest request)
 		throws PortalException {
 
@@ -896,6 +882,13 @@ public class PortalUtil {
 	}
 
 	public static Map<String, Serializable> getExpandoBridgeAttributes(
+			ExpandoBridge expandoBridge, HttpServletRequest request)
+		throws PortalException {
+
+		return getPortal().getExpandoBridgeAttributes(expandoBridge, request);
+	}
+
+	public static Map<String, Serializable> getExpandoBridgeAttributes(
 			ExpandoBridge expandoBridge, PortletRequest portletRequest)
 		throws PortalException {
 
@@ -910,6 +903,14 @@ public class PortalUtil {
 
 		return getPortal().getExpandoBridgeAttributes(
 			expandoBridge, uploadPortletRequest);
+	}
+
+	public static Serializable getExpandoValue(
+			HttpServletRequest request, String name, int type,
+			String displayType)
+		throws PortalException {
+
+		return getPortal().getExpandoValue(request, name, type, displayType);
 	}
 
 	public static Serializable getExpandoValue(
@@ -971,20 +972,17 @@ public class PortalUtil {
 	}
 
 	public static String getGroupFriendlyURL(
-			Group group, boolean privateLayoutSet, ThemeDisplay themeDisplay)
+			LayoutSet layoutSet, ThemeDisplay themeDisplay)
 		throws PortalException {
 
-		return getPortal().getGroupFriendlyURL(
-			group, privateLayoutSet, themeDisplay);
+		return getPortal().getGroupFriendlyURL(layoutSet, themeDisplay);
 	}
 
 	public static String getGroupFriendlyURL(
-			Group group, boolean privateLayoutSet, ThemeDisplay themeDisplay,
-			Locale locale)
+			LayoutSet layoutSet, ThemeDisplay themeDisplay, Locale locale)
 		throws PortalException {
 
-		return getPortal().getGroupFriendlyURL(
-			group, privateLayoutSet, themeDisplay, locale);
+		return getPortal().getGroupFriendlyURL(layoutSet, themeDisplay, locale);
 	}
 
 	public static int[] getGroupFriendlyURLIndex(String requestURI) {
@@ -1115,14 +1113,6 @@ public class PortalUtil {
 			requestContext);
 	}
 
-	public static String getLayoutEditPage(Layout layout) {
-		return getPortal().getLayoutEditPage(layout);
-	}
-
-	public static String getLayoutEditPage(String type) {
-		return getPortal().getLayoutEditPage(type);
-	}
-
 	public static String getLayoutFriendlyURL(
 			Layout layout, ThemeDisplay themeDisplay)
 		throws PortalException {
@@ -1228,14 +1218,6 @@ public class PortalUtil {
 		throws PortalException {
 
 		return getPortal().getLayoutURL(themeDisplay);
-	}
-
-	public static String getLayoutViewPage(Layout layout) {
-		return getPortal().getLayoutViewPage(layout);
-	}
-
-	public static String getLayoutViewPage(String type) {
-		return getPortal().getLayoutViewPage(type);
 	}
 
 	public static LiferayPortletRequest getLiferayPortletRequest(
@@ -1648,6 +1630,12 @@ public class PortalUtil {
 
 	public static String getPortletTitle(String portletId, Locale locale) {
 		return getPortal().getPortletTitle(portletId, locale);
+	}
+
+	public static String getPortletTitle(
+		String portletId, ResourceBundle resourceBundle) {
+
+		return getPortal().getPortletTitle(portletId, resourceBundle);
 	}
 
 	public static String getPortletTitle(String portletId, String languageId) {
@@ -2155,30 +2143,6 @@ public class PortalUtil {
 		return getPortal().isLayoutDescendant(layout, layoutId);
 	}
 
-	public static boolean isLayoutFirstPageable(Layout layout) {
-		return getPortal().isLayoutFirstPageable(layout);
-	}
-
-	public static boolean isLayoutFirstPageable(String type) {
-		return getPortal().isLayoutFirstPageable(type);
-	}
-
-	public static boolean isLayoutFriendliable(Layout layout) {
-		return getPortal().isLayoutFriendliable(layout);
-	}
-
-	public static boolean isLayoutFriendliable(String type) {
-		return getPortal().isLayoutFriendliable(type);
-	}
-
-	public static boolean isLayoutParentable(Layout layout) {
-		return getPortal().isLayoutParentable(layout);
-	}
-
-	public static boolean isLayoutParentable(String type) {
-		return getPortal().isLayoutParentable(type);
-	}
-
 	public static boolean isLayoutSitemapable(Layout layout) {
 		return getPortal().isLayoutSitemapable(layout);
 	}
@@ -2201,6 +2165,10 @@ public class PortalUtil {
 
 	public static boolean isOmniadmin(long userId) {
 		return getPortal().isOmniadmin(userId);
+	}
+
+	public static boolean isOmniadmin(User user) {
+		return getPortal().isOmniadmin(user);
 	}
 
 	public static boolean isReservedParameter(String name) {
@@ -2430,7 +2398,7 @@ public class PortalUtil {
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
-	 *             #removePortalInetSocketAddressEventListener(
+	 *             #removePortalEventListener(
 	 *             PortalInetSocketAddressEventListener)}
 	 */
 	@Deprecated

@@ -2,12 +2,6 @@
 @import "mixins";
 
 .taglib-form-navigator {
-	ul.form-navigator.list-group {
-		@include respond-to(desktop) {
-			float: right;
-		}
-	}
-
 	.error-notice, .modified-notice {
 		display: none;
 	}
@@ -102,6 +96,10 @@
 			&.active {
 				display: block;
 			}
+
+			textarea {
+				max-width: 100%;
+			}
 		}
 
 		legend {
@@ -128,6 +126,8 @@
 
 		.tab {
 			&.active {
+				background: transparent;
+
 				@include opacity(1);
 
 				.tab-label {

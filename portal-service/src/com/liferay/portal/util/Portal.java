@@ -485,18 +485,6 @@ public interface Portal {
 	 */
 	public long getClassNameId(String value);
 
-	/**
-	 * Returns the ID of certain portlets from the fully qualified name of one
-	 * of their classes. The portlets this method supports are: blogs,
-	 * bookmarks, calendar, document library, image gallery, journal, message
-	 * boards, and wiki.
-	 *
-	 * @param  className the fully qualified name of a class in a portlet
-	 * @return the ID of the portlet the class is a part of, or an empty string
-	 *         if the class is not supported
-	 */
-	public String getClassNamePortletId(String className);
-
 	public Company getCompany(HttpServletRequest request)
 		throws PortalException;
 
@@ -671,12 +659,21 @@ public interface Portal {
 		PortletPreferences preferences, long companyId, String defaultValue);
 
 	public Map<String, Serializable> getExpandoBridgeAttributes(
+			ExpandoBridge expandoBridge, HttpServletRequest request)
+		throws PortalException;
+
+	public Map<String, Serializable> getExpandoBridgeAttributes(
 			ExpandoBridge expandoBridge, PortletRequest portletRequest)
 		throws PortalException;
 
 	public Map<String, Serializable> getExpandoBridgeAttributes(
 			ExpandoBridge expandoBridge,
 			UploadPortletRequest uploadPortletRequest)
+		throws PortalException;
+
+	public Serializable getExpandoValue(
+			HttpServletRequest request, String name, int type,
+			String displayType)
 		throws PortalException;
 
 	public Serializable getExpandoValue(
@@ -709,12 +706,11 @@ public interface Portal {
 		throws PortalException;
 
 	public String getGroupFriendlyURL(
-			Group group, boolean privateLayoutSet, ThemeDisplay themeDisplay)
+			LayoutSet layoutSet, ThemeDisplay themeDisplay)
 		throws PortalException;
 
 	public String getGroupFriendlyURL(
-			Group group, boolean privateLayoutSet, ThemeDisplay themeDisplay,
-			Locale locale)
+			LayoutSet layoutSet, ThemeDisplay themeDisplay, Locale locale)
 		throws PortalException;
 
 	public int[] getGroupFriendlyURLIndex(String requestURI);
@@ -781,10 +777,6 @@ public interface Portal {
 			Map<String, Object> requestContext)
 		throws PortalException;
 
-	public String getLayoutEditPage(Layout layout);
-
-	public String getLayoutEditPage(String type);
-
 	public String getLayoutFriendlyURL(Layout layout, ThemeDisplay themeDisplay)
 		throws PortalException;
 
@@ -840,10 +832,6 @@ public interface Portal {
 
 	public String getLayoutURL(ThemeDisplay themeDisplay)
 		throws PortalException;
-
-	public String getLayoutViewPage(Layout layout);
-
-	public String getLayoutViewPage(String type);
 
 	public LiferayPortletRequest getLiferayPortletRequest(
 		PortletRequest portletRequest);
@@ -1041,6 +1029,9 @@ public interface Portal {
 	public String getPortletTitle(PortletResponse portletResponse);
 
 	public String getPortletTitle(String portletId, Locale locale);
+
+	public String getPortletTitle(
+		String portletId, ResourceBundle resourceBundle);
 
 	public String getPortletTitle(String portletId, String languageId);
 
@@ -1304,18 +1295,6 @@ public interface Portal {
 	public boolean isLayoutDescendant(Layout layout, long layoutId)
 		throws PortalException;
 
-	public boolean isLayoutFirstPageable(Layout layout);
-
-	public boolean isLayoutFirstPageable(String type);
-
-	public boolean isLayoutFriendliable(Layout layout);
-
-	public boolean isLayoutFriendliable(String type);
-
-	public boolean isLayoutParentable(Layout layout);
-
-	public boolean isLayoutParentable(String type);
-
 	public boolean isLayoutSitemapable(Layout layout);
 
 	public boolean isLoginRedirectRequired(HttpServletRequest request);
@@ -1327,6 +1306,8 @@ public interface Portal {
 	public boolean isMultipartRequest(HttpServletRequest request);
 
 	public boolean isOmniadmin(long userId);
+
+	public boolean isOmniadmin(User user);
 
 	public boolean isReservedParameter(String name);
 

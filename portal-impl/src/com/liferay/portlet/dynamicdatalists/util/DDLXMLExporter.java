@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.dynamicdatalists.util;
 
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.xml.Document;
@@ -91,6 +92,10 @@ public class DDLXMLExporter extends BaseDDLExporter {
 				addFieldElement(
 					fieldsElement, label.getString(getLocale()), value);
 			}
+
+			addFieldElement(
+				fieldsElement, LanguageUtil.get(getLocale(), "status"),
+				getStatusMessage(recordVersion.getStatus()));
 		}
 
 		String xml = document.asXML();

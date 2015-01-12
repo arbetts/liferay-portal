@@ -18,6 +18,7 @@ import com.liferay.portal.NoSuchRepositoryEntryException;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.RepositoryException;
@@ -132,9 +133,9 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public FileEntry addFileEntry(
-			long folderId, String sourceFileName, String mimeType, String title,
-			String description, String changeLog, InputStream is, long size,
-			ServiceContext serviceContext)
+			long userId, long folderId, String sourceFileName, String mimeType,
+			String title, String description, String changeLog, InputStream is,
+			long size, ServiceContext serviceContext)
 		throws PortalException {
 
 		if (Validator.isNull(title)) {
@@ -195,21 +196,21 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public Folder addFolder(
-			long parentFolderId, String title, String description,
+			long userId, long parentFolderId, String name, String description,
 			ServiceContext serviceContext)
 		throws PortalException {
 
 		try {
 			Session session = getSession();
 
-			validateTitle(session, parentFolderId, title);
+			validateTitle(session, parentFolderId, name);
 
 			org.apache.chemistry.opencmis.client.api.Folder cmisFolder =
 				getCmisFolder(session, parentFolderId);
 
 			Map<String, Object> properties = new HashMap<String, Object>();
 
-			properties.put(PropertyIds.NAME, title);
+			properties.put(PropertyIds.NAME, name);
 			properties.put(
 				PropertyIds.OBJECT_TYPE_ID, BaseTypeId.CMIS_FOLDER.value());
 
@@ -271,7 +272,7 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public void checkInFileEntry(
-		long fileEntryId, boolean major, String changeLog,
+		long userId, long fileEntryId, boolean major, String changeLog,
 		ServiceContext serviceContext) {
 
 		try {
@@ -313,9 +314,11 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public void checkInFileEntry(
-		long fileEntryId, String lockUuid, ServiceContext serviceContext) {
+		long userId, long fileEntryId, String lockUuid,
+		ServiceContext serviceContext) {
 
-		checkInFileEntry(fileEntryId, false, StringPool.BLANK, serviceContext);
+		checkInFileEntry(
+			userId, fileEntryId, false, StringPool.BLANK, serviceContext);
 	}
 
 	@Override
@@ -360,7 +363,7 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public FileEntry copyFileEntry(
-			long groupId, long fileEntryId, long destFolderId,
+			long userId, long groupId, long fileEntryId, long destFolderId,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -650,14 +653,13 @@ public class CMISRepository extends BaseCmisRepository {
 	}
 
 	@Override
-	public Folder getFolder(long parentFolderId, String title)
+	public Folder getFolder(long parentFolderId, String name)
 		throws PortalException {
 
 		try {
 			Session session = getSession();
 
-			String objectId = getObjectId(
-				session, parentFolderId, false, title);
+			String objectId = getObjectId(session, parentFolderId, false, name);
 
 			if (objectId != null) {
 				CmisObject cmisObject = session.getObject(objectId);
@@ -670,7 +672,7 @@ public class CMISRepository extends BaseCmisRepository {
 		catch (CmisObjectNotFoundException confe) {
 			throw new NoSuchFolderException(
 				"No CMIS folder with {parentFolderId=" + parentFolderId +
-					", title=" + title + "}",
+					", name=" + name + "}",
 				confe);
 		}
 		catch (PortalException pe) {
@@ -687,7 +689,7 @@ public class CMISRepository extends BaseCmisRepository {
 
 		throw new NoSuchFolderException(
 			"No CMIS folder with {parentFolderId=" + parentFolderId +
-				", title=" + title + "}");
+				", name=" + name + "}");
 	}
 
 	@Override
@@ -1005,7 +1007,8 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public FileEntry moveFileEntry(
-			long fileEntryId, long newFolderId, ServiceContext serviceContext)
+			long userId, long fileEntryId, long newFolderId,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		try {
@@ -1062,7 +1065,8 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public Folder moveFolder(
-			long folderId, long parentFolderId, ServiceContext serviceContext)
+			long userId, long folderId, long parentFolderId,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		try {
@@ -1133,7 +1137,8 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public void revertFileEntry(
-			long fileEntryId, String version, ServiceContext serviceContext)
+			long userId, long fileEntryId, String version,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		try {
@@ -1160,14 +1165,16 @@ public class CMISRepository extends BaseCmisRepository {
 			}
 
 			String mimeType = oldVersion.getContentStreamMimeType();
-			String changeLog = "Reverted to " + version;
+			String changeLog = LanguageUtil.format(
+				serviceContext.getLocale(), "reverted-to-x", version, false);
 			String title = oldVersion.getName();
 			ContentStream contentStream = oldVersion.getContentStream();
 
 			updateFileEntry(
-				fileEntryId, contentStream.getFileName(), mimeType, title,
-				StringPool.BLANK, changeLog, true, contentStream.getStream(),
-				contentStream.getLength(), serviceContext);
+				userId, fileEntryId, contentStream.getFileName(), mimeType,
+				title, StringPool.BLANK, changeLog, true,
+				contentStream.getStream(), contentStream.getLength(),
+				serviceContext);
 		}
 		catch (PortalException pe) {
 			throw pe;
@@ -1273,8 +1280,8 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public FileEntry updateFileEntry(
-			long fileEntryId, String sourceFileName, String mimeType,
-			String title, String description, String changeLog,
+			long userId, long fileEntryId, String sourceFileName,
+			String mimeType, String title, String description, String changeLog,
 			boolean majorVersion, InputStream is, long size,
 			ServiceContext serviceContext)
 		throws PortalException {
@@ -1426,7 +1433,7 @@ public class CMISRepository extends BaseCmisRepository {
 
 	@Override
 	public Folder updateFolder(
-			long folderId, String title, String description,
+			long folderId, String name, String description,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -1443,8 +1450,8 @@ public class CMISRepository extends BaseCmisRepository {
 
 			Map<String, Object> properties = new HashMap<String, Object>();
 
-			if (Validator.isNotNull(title) && !title.equals(currentTitle)) {
-				properties.put(PropertyIds.NAME, title);
+			if (Validator.isNotNull(name) && !name.equals(currentTitle)) {
+				properties.put(PropertyIds.NAME, name);
 			}
 
 			ObjectId cmisFolderObjectId = cmisFolder.updateProperties(
@@ -1784,7 +1791,7 @@ public class CMISRepository extends BaseCmisRepository {
 		hits.setLength(total);
 		hits.setQuery(query);
 		hits.setQueryTerms(new String[0]);
-		hits.setScores(scores.toArray(new Float[scores.size()]));
+		hits.setScores(ArrayUtil.toFloatArray(scores));
 		hits.setSearchTime(searchTime);
 		hits.setSnippets(snippets.toArray(new String[snippets.size()]));
 		hits.setStart(startTime);

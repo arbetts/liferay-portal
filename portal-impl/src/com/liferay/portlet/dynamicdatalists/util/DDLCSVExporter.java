@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.dynamicdatalists.util;
 
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.CSVUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -28,6 +29,7 @@ import com.liferay.portlet.dynamicdatamapping.storage.Field;
 import com.liferay.portlet.dynamicdatamapping.storage.Fields;
 import com.liferay.portlet.dynamicdatamapping.storage.StorageEngineUtil;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -53,13 +55,17 @@ public class DDLCSVExporter extends BaseDDLExporter {
 			sb.append(CharPool.COMMA);
 		}
 
-		sb.setIndex(sb.index() - 1);
+		sb.append(LanguageUtil.get(getLocale(), "status"));
 		sb.append(StringPool.NEW_LINE);
 
 		List<DDLRecord> records = DDLRecordLocalServiceUtil.getRecords(
 			recordSetId, status, start, end, orderByComparator);
 
-		for (DDLRecord record : records) {
+		Iterator<DDLRecord> iterator = records.iterator();
+
+		while (iterator.hasNext()) {
+			DDLRecord record = iterator.next();
+
 			DDLRecordVersion recordVersion = record.getRecordVersion();
 
 			Fields fields = StorageEngineUtil.getFields(
@@ -79,8 +85,11 @@ public class DDLCSVExporter extends BaseDDLExporter {
 				sb.append(CharPool.COMMA);
 			}
 
-			sb.setIndex(sb.index() - 1);
-			sb.append(StringPool.NEW_LINE);
+			sb.append(getStatusMessage(recordVersion.getStatus()));
+
+			if (iterator.hasNext()) {
+				sb.append(StringPool.NEW_LINE);
+			}
 		}
 
 		String csv = sb.toString();

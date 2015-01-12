@@ -215,12 +215,11 @@ public class WikiPageServiceSoap {
 		}
 	}
 
-	public static void deleteTempPageAttachment(long nodeId,
-		java.lang.String fileName, java.lang.String tempFolderName)
+	public static void deleteTempFileEntry(long nodeId,
+		java.lang.String folderName, java.lang.String fileName)
 		throws RemoteException {
 		try {
-			WikiPageServiceUtil.deleteTempPageAttachment(nodeId, fileName,
-				tempFolderName);
+			WikiPageServiceUtil.deleteTempFileEntry(nodeId, folderName, fileName);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -572,11 +571,11 @@ public class WikiPageServiceSoap {
 		}
 	}
 
-	public static java.lang.String[] getTempPageAttachmentNames(long nodeId,
-		java.lang.String tempFolderName) throws RemoteException {
+	public static java.lang.String[] getTempFileNames(long nodeId,
+		java.lang.String folderName) throws RemoteException {
 		try {
-			java.lang.String[] returnValue = WikiPageServiceUtil.getTempPageAttachmentNames(nodeId,
-					tempFolderName);
+			java.lang.String[] returnValue = WikiPageServiceUtil.getTempFileNames(nodeId,
+					folderName);
 
 			return returnValue;
 		}
@@ -590,8 +589,8 @@ public class WikiPageServiceSoap {
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link #renamePage(long, String,
 	String, ServiceContext)}
-	*
 	*/
+	@Deprecated
 	public static void movePage(long nodeId, java.lang.String title,
 		java.lang.String newTitle,
 		com.liferay.portal.service.ServiceContext serviceContext)

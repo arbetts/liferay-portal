@@ -68,6 +68,12 @@ public class TrashEntryServiceImpl extends TrashEntryServiceBaseImpl {
 		PermissionChecker permissionChecker = getPermissionChecker();
 
 		for (TrashEntry entry : entries) {
+			entry = trashEntryPersistence.fetchByPrimaryKey(entry.getEntryId());
+
+			if (entry == null) {
+				continue;
+			}
+
 			try {
 				TrashHandler trashHandler =
 					TrashHandlerRegistryUtil.getTrashHandler(
@@ -304,6 +310,12 @@ public class TrashEntryServiceImpl extends TrashEntryServiceBaseImpl {
 
 		PermissionChecker permissionChecker = getPermissionChecker();
 
+		long scopeGroupId = 0;
+
+		if (serviceContext != null) {
+			scopeGroupId = serviceContext.getScopeGroupId();
+		}
+
 		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
 			className);
 
@@ -312,8 +324,8 @@ public class TrashEntryServiceImpl extends TrashEntryServiceBaseImpl {
 				classPK, destinationContainerModelId);
 
 		if (!trashHandler.hasTrashPermission(
-				permissionChecker, serviceContext.getScopeGroupId(),
-				destinationContainerModelId, TrashActionKeys.MOVE)) {
+				permissionChecker, scopeGroupId, destinationContainerModelId,
+				TrashActionKeys.MOVE)) {
 
 			throw new TrashPermissionException(TrashPermissionException.MOVE);
 		}
@@ -475,7 +487,7 @@ public class TrashEntryServiceImpl extends TrashEntryServiceBaseImpl {
 		trashHandler.deleteTrashEntry(entry.getClassPK());
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		TrashEntryServiceImpl.class);
 
 }

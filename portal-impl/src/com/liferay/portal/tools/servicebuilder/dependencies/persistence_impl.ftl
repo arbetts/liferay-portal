@@ -14,7 +14,12 @@ package ${packagePath}.service.persistence.impl;
 
 <#assign noSuchEntity = serviceBuilder.getNoSuchEntityException(entity)>
 
-import ${packagePath}.${noSuchEntity}Exception;
+<#if osgiModule>
+	import ${packagePath}.exception.${noSuchEntity}Exception;
+<#else>
+	import ${packagePath}.${noSuchEntity}Exception;
+</#if>
+
 import ${packagePath}.model.${entity.name};
 import ${packagePath}.model.impl.${entity.name}Impl;
 import ${packagePath}.model.impl.${entity.name}ModelImpl;
@@ -1764,7 +1769,7 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 
 			@Override
 			public long getMvccVersion() {
-				return 0;
+				return -1;
 			}
 
 			@Override

@@ -160,56 +160,50 @@ int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 </c:if>
 
 <aui:script>
-	Liferay.provide(
-		window,
-		'<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>clearFacet',
-		function(selection) {
-			document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>'].value = '';
-			document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>selection'].value = selection;
+	function <portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>clearFacet(selection) {
+		var form = AUI.$(document.<portlet:namespace />fm);
 
-			submitForm(document.<portlet:namespace />fm);
-		},
-		['aui-base']
-	);
+		form.fm('<%= HtmlUtil.escapeJS(facet.getFieldId()) %>').val('');
+		form.fm('<%= HtmlUtil.escapeJS(facet.getFieldId()) %>selection').val(selection);
 
-	Liferay.provide(
-		window,
-		'<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>searchCustomRange',
-		function(selection) {
-			var fromDate = document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>from'].value;
-			var toDate = document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>to'].value;
+		submitForm(form);
+	}
 
-			if (fromDate && toDate) {
-				if (fromDate > toDate) {
-					fromDate = document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>to'].value;
-					toDate = document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>from'].value;
+	function <portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>searchCustomRange(selection) {
+		var form = AUI.$(document.<portlet:namespace />fm);
 
-					document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>to'].value = toDate;
-					document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>from'].value = fromDate;
-				}
+		var fromDate = form.fm('<%= HtmlUtil.escapeJS(facet.getFieldId()) %>from');
+		var toDate = form.fm('<%= HtmlUtil.escapeJS(facet.getFieldId()) %>to');
 
-				var range = '[' + fromDate.replace(/-/g, '') + '000000 TO ' + toDate.replace(/-/g, '') + '235959]';
+		var fromDateVal = fromDate.val();
+		var toDateVal = toDate.val();
 
-				document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>'].value = range;
-				document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>selection'].value = selection;
+		if (fromDateVal && toDateVal) {
+			if (fromDateVal > toDateVal) {
+				fromDateVal = toDate.val();
+				toDateVal = fromDate.val();
 
-				submitForm(document.<portlet:namespace />fm);
+				fromDate.val(fromDateVal);
+				toDate.val(toDateVal);
 			}
-		},
-		['aui-base']
-	);
 
-	Liferay.provide(
-		window,
-		'<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>setRange',
-		function(selection, range) {
-			document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>'].value = range;
-			document.<portlet:namespace />fm['<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>selection'].value = selection;
+			var range = '[' + fromDateVal.replace(/-/g, '') + '000000 TO ' + toDateVal.replace(/-/g, '') + '235959]';
 
-			submitForm(document.<portlet:namespace />fm);
-		},
-		['aui-base']
-	);
+			form.fm('<%= HtmlUtil.escapeJS(facet.getFieldId()) %>').val(range);
+			form.fm('<%= HtmlUtil.escapeJS(facet.getFieldId()) %>selection').val(selection);
+
+			submitForm(form);
+		}
+	}
+
+	function <portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>setRange(selection, range) {
+		var form = AUI.$(document.<portlet:namespace />fm);
+
+		form.fm('<%= HtmlUtil.escapeJS(facet.getFieldId()) %>').val(range);
+		form.fm('<%= HtmlUtil.escapeJS(facet.getFieldId()) %>selection').val(selection);
+
+		submitForm(form);
+	}
 </aui:script>
 
 <aui:script use="aui-datepicker-deprecated,aui-form-validator">
@@ -221,12 +215,11 @@ int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 
 	var REGEX_DATE = /^\d{4}(-)(0[1-9]|1[012])\1(0[1-9]|[12][0-9]|3[01])$/;
 
-	var customRangeFrom = A.one('#<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>from');
-	var customRangeTo = A.one('#<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>to');
-
 	var dateFrom = null;
 	var dateTo = null;
 
+	var customRangeFrom = A.one('#<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>from');
+	var customRangeTo = A.one('#<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>to');
 	var searchButton = A.one('#<portlet:namespace />searchCustomRangeButton');
 
 	A.mix(
@@ -299,6 +292,13 @@ int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 		}
 	);
 
+	var calendarStrings = {
+		next: '<liferay-ui:message key="next" />',
+		none: '<liferay-ui:message key="none" />',
+		previous: '<liferay-ui:message key="previous" />',
+		today: '<liferay-ui:message key="today" />'
+	};
+
 	var fromDatepicker = new A.DatePicker(
 		{
 			after: {
@@ -323,18 +323,13 @@ int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 					],
 				</c:if>
 
-				selectionMode: 'single',
-
-				strings: {
-					next: '<liferay-ui:message key="next" />',
-					none: '<liferay-ui:message key="none" />',
-					previous: '<liferay-ui:message key="previous" />',
-					today: '<liferay-ui:message key="today" />'
-				}
+				selectionMode: 'single'
 			},
 			trigger: '#<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>from'
 		}
 	).render('#<%= randomNamespace %>custom-range-from');
+
+	fromDatepicker.set('strings', calendarStrings);
 
 	var toDatepicker = new A.DatePicker(
 		{
@@ -359,18 +354,13 @@ int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 					],
 				</c:if>
 
-				selectionMode: 'single',
-
-				strings: {
-					next: '<liferay-ui:message key="next" />',
-					none: '<liferay-ui:message key="none" />',
-					previous: '<liferay-ui:message key="previous" />',
-					today: '<liferay-ui:message key="today" />'
-				}
+				selectionMode: 'single'
 			},
 			trigger: '#<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>to'
 		}
 	).render('#<%= randomNamespace %>custom-range-to');
+
+	toDatepicker.set('strings', calendarStrings);
 
 	A.one('.<%= randomNamespace %>custom-range-toggle').on(
 		'click',

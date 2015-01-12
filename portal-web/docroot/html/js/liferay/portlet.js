@@ -298,8 +298,6 @@
 
 				instance.refreshLayout(portletBound);
 
-				Util.addInputType(portletBound);
-
 				if (window.location.hash) {
 					window.location.hash = 'p_p_id_' + portletId + '_';
 				}
@@ -593,7 +591,7 @@
 
 				var url = portlet.refreshURL;
 
-				var placeHolder = A.Node.create('<div class="loading-animation" id="p_load' + id + '" />');
+				var placeHolder = A.Node.create('<div class="loading-animation" id="p_p_id' + id + '" />');
 
 				if (data.portletAjaxable && url) {
 					portlet.placeBefore(placeHolder);

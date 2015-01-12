@@ -137,14 +137,6 @@ public class OrganizationStagedModelDataHandler
 
 		long userId = portletDataContext.getUserId(organization.getUserUuid());
 
-		if (organization.getParentOrganizationId() !=
-				OrganizationConstants.DEFAULT_PARENT_ORGANIZATION_ID) {
-
-			StagedModelDataHandlerUtil.importReferenceStagedModel(
-				portletDataContext, organization, Organization.class,
-				organization.getParentOrganizationId());
-		}
-
 		Map<Long, Long> organizationIds =
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
 				Organization.class);
@@ -471,6 +463,11 @@ public class OrganizationStagedModelDataHandler
 		UsersAdminUtil.updatePhones(
 			Organization.class.getName(),
 			importedOrganization.getOrganizationId(), phones);
+	}
+
+	@Override
+	protected void importReferenceStagedModels(
+		PortletDataContext portletDataContext, Organization organization) {
 	}
 
 	protected void importWebsites(

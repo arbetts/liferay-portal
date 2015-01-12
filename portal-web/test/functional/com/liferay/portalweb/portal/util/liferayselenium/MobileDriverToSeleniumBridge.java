@@ -18,6 +18,12 @@ import com.thoughtworks.selenium.Selenium;
 
 import io.appium.java_client.MobileDriver;
 
+import java.io.IOException;
+
+import java.util.List;
+
+import org.openqa.selenium.WebElement;
+
 import org.w3c.dom.Node;
 
 /**
@@ -28,6 +34,8 @@ public class MobileDriverToSeleniumBridge
 
 	public MobileDriverToSeleniumBridge(MobileDriver mobileDriver) {
 		super(mobileDriver);
+
+		WebDriverHelper.setDefaultWindowHandle(mobileDriver.getWindowHandle());
 	}
 
 	@Override
@@ -124,18 +132,29 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void click(String locator) {
-		throw new UnsupportedOperationException();
+		WebElement webElement = getWebElement(locator);
+
+		try {
+			webElement.click();
+		}
+		catch (Exception e) {
+			if (!isInViewport(locator)) {
+				swipeWebElementIntoView(locator);
+			}
+
+			webElement.click();
+		}
 	}
 
 	@Override
 	public void clickAt(String locator, String coordString) {
-		throw new UnsupportedOperationException();
+		clickAt(locator, coordString, true);
 	}
 
 	public void clickAt(
 		String locator, String coordString, boolean scrollIntoView) {
 
-		throw new UnsupportedOperationException();
+		click(locator);
 	}
 
 	@Override
@@ -258,7 +277,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public String getAttribute(String attributeLocator) {
-		throw new UnsupportedOperationException();
+		return WebDriverHelper.getAttribute(this, attributeLocator);
 	}
 
 	@Override
@@ -323,7 +342,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public String getEval(String script) {
-		throw new UnsupportedOperationException();
+		return WebDriverHelper.getEval(this, script);
 	}
 
 	@Override
@@ -429,11 +448,21 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public String getText(String locator) {
-		throw new UnsupportedOperationException();
+		return getText(locator, null);
 	}
 
 	public String getText(String locator, String timeout) {
-		throw new UnsupportedOperationException();
+		WebElement webElement = getWebElement(locator, timeout);
+
+		if (!isInViewport(locator)) {
+			swipeWebElementIntoView(locator);
+		}
+
+		String text = webElement.getText();
+
+		text = text.trim();
+
+		return text.replace("\n", " ");
 	}
 
 	@Override
@@ -511,7 +540,26 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public boolean isElementPresent(String locator) {
-		throw new UnsupportedOperationException();
+		return WebDriverHelper.isElementPresent(this, locator);
+	}
+
+	public boolean isInViewport(String locator) {
+		int elementPositionCenterY = WebDriverHelper.getElementPositionCenterY(
+			this, locator);
+
+		int viewportPositionBottom = WebDriverHelper.getViewportPositionBottom(
+			this);
+
+		int viewportPositionTop = WebDriverHelper.getScrollOffsetY(this);
+
+		if ((elementPositionCenterY >= viewportPositionBottom) ||
+			(elementPositionCenterY <= viewportPositionTop)) {
+
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 
 	@Override
@@ -536,7 +584,17 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public boolean isVisible(String locator) {
-		throw new UnsupportedOperationException();
+		WebElement webElement = getWebElement(locator, "1");
+
+		if (!webElement.isDisplayed()) {
+			return webElement.isDisplayed();
+		}
+
+		if (!isInViewport(locator)) {
+			swipeWebElementIntoView(locator);
+		}
+
+		return isInViewport(locator);
 	}
 
 	@Override
@@ -616,7 +674,6 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void mouseOver(String locator) {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -686,7 +743,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void runScript(String script) {
-		throw new UnsupportedOperationException();
+		getEval(script);
 	}
 
 	@Override
@@ -696,7 +753,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void selectFrame(String locator) {
-		throw new UnsupportedOperationException();
+		WebDriverHelper.selectFrame(this, locator);
 	}
 
 	@Override
@@ -706,7 +763,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void selectWindow(String windowID) {
-		throw new UnsupportedOperationException();
+		WebDriverHelper.selectWindow(this, windowID);
 	}
 
 	@Override
@@ -725,7 +782,7 @@ public class MobileDriverToSeleniumBridge
 	}
 
 	public void setDefaultTimeoutImplicit() {
-		throw new UnsupportedOperationException();
+		WebDriverHelper.setDefaultTimeoutImplicit(this);
 	}
 
 	@Override
@@ -749,7 +806,7 @@ public class MobileDriverToSeleniumBridge
 	}
 
 	public void setTimeoutImplicit(String timeout) {
-		throw new UnsupportedOperationException();
+		WebDriverHelper.setTimeoutImplicit(this, timeout);
 	}
 
 	@Override
@@ -804,7 +861,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void type(String locator, String value) {
-		throw new UnsupportedOperationException();
+		WebDriverHelper.type(this, locator, value);
 	}
 
 	@Override
@@ -854,6 +911,66 @@ public class MobileDriverToSeleniumBridge
 	@Override
 	public void windowMaximize() {
 		throw new UnsupportedOperationException();
+	}
+
+	protected WebElement getWebElement(String locator) {
+		return WebDriverHelper.getWebElement(this, locator);
+	}
+
+	protected WebElement getWebElement(String locator, String timeout) {
+		return WebDriverHelper.getWebElement(this, locator, timeout);
+	}
+
+	protected List<WebElement> getWebElements(String locator) {
+		return WebDriverHelper.getWebElements(this, locator);
+	}
+
+	protected List<WebElement> getWebElements(String locator, String timeout) {
+		return WebDriverHelper.getWebElements(this, locator, timeout);
+	}
+
+	protected void swipeWebElementIntoView(String locator) {
+		int elementPositionCenterY = WebDriverHelper.getElementPositionCenterY(
+			this, locator);
+
+		for (int i = 0; i < 25; i++) {
+			int viewportPositionBottom =
+				WebDriverHelper.getViewportPositionBottom(this);
+
+			int viewportPositionTop = WebDriverHelper.getScrollOffsetY(this);
+
+			if (elementPositionCenterY >= viewportPositionBottom) {
+				try {
+					Runtime runtime = Runtime.getRuntime();
+
+					runtime.exec(
+						"adb -s emulator-5554 shell /data/local/swipe_up.sh");
+				}
+				catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			}
+			else if (elementPositionCenterY <= viewportPositionTop ) {
+				try {
+					Runtime runtime = Runtime.getRuntime();
+
+					runtime.exec(
+						"adb -s emulator-5554 shell /data/local/swipe_down.sh");
+				}
+				catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			}
+			else {
+				break;
+			}
+
+			try {
+				LiferaySeleniumHelper.pause("1000");
+			}
+			catch (Exception e) {
+			}
+		}
 	}
 
 }

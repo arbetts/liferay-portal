@@ -14,8 +14,10 @@
 
 package com.liferay.portal.kernel.resiliency.spi.agent.annotation;
 
+import com.liferay.portal.kernel.test.AggregateTestRule;
 import com.liferay.portal.kernel.test.CodeCoverageAssertor;
-import com.liferay.portal.kernel.test.NewClassLoaderJUnitTestRunner;
+import com.liferay.portal.kernel.test.NewEnv;
+import com.liferay.portal.kernel.test.NewEnvTestRule;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 
 import java.util.Map;
@@ -23,32 +25,31 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * @author Shuyang Zhou
  */
-@RunWith(NewClassLoaderJUnitTestRunner.class)
 public class DistributedRegistryTest {
 
 	@ClassRule
-	public static CodeCoverageAssertor codeCoverageAssertor =
-		new CodeCoverageAssertor();
+	@Rule
+	public static final AggregateTestRule aggregateTestRule =
+		new AggregateTestRule(
+			CodeCoverageAssertor.INSTANCE, NewEnvTestRule.INSTANCE);
 
 	@Before
 	public void setUp() {
-		_exactDirections =
-			(Map<String, Direction>)ReflectionTestUtil.getFieldValue(
-				DistributedRegistry.class, "_exactDirections");
-		_postfixDirections =
-			(Map<String, Direction>)ReflectionTestUtil.getFieldValue(
-				DistributedRegistry.class, "_postfixDirections");
-		_prefixDirections =
-			(Map<String, Direction>)ReflectionTestUtil.getFieldValue(
-				DistributedRegistry.class, "_prefixDirections");
+		_exactDirections = ReflectionTestUtil.getFieldValue(
+			DistributedRegistry.class, "_exactDirections");
+		_postfixDirections = ReflectionTestUtil.getFieldValue(
+			DistributedRegistry.class, "_postfixDirections");
+		_prefixDirections = ReflectionTestUtil.getFieldValue(
+			DistributedRegistry.class, "_prefixDirections");
 	}
 
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testClassRegisterAndUnregister() {
 		DistributedRegistry.registerDistributed(ChildClass.class);
@@ -201,6 +202,7 @@ public class DistributedRegistryTest {
 				"name" + postfix, Direction.REQUEST));
 	}
 
+	@NewEnv(type = NewEnv.Type.CLASSLOADER)
 	@Test
 	public void testIndividualRegisterAndUnregister() {
 
@@ -332,6 +334,7 @@ public class DistributedRegistryTest {
 
 		@Distributed
 		public static String name9 = "name9";
+
 	}
 
 	private interface ParentInterface {

@@ -16,13 +16,10 @@ package com.liferay.portalweb.portal.util.liferayselenium;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portalweb.portal.BaseTestCase;
-import com.liferay.portalweb.portal.util.TestPropsValues;
 
 import com.thoughtworks.selenium.Selenium;
 
@@ -36,9 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,7 +46,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
@@ -63,8 +57,6 @@ import org.openqa.selenium.internal.WrapsDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import org.sikuli.script.Screen;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -82,10 +74,10 @@ public class WebDriverToSeleniumBridge
 	public WebDriverToSeleniumBridge(WebDriver webDriver) {
 		super(webDriver);
 
-		initKeys();
 		initKeysSpecialChars();
 
-		defaultWindowHandle = getWindowHandle();
+		WebDriverHelper.setDefaultWindowHandle(webDriver.getWindowHandle());
+		WebDriverHelper.setNavigationBarHeight(120);
 	}
 
 	@Override
@@ -387,13 +379,19 @@ public class WebDriverToSeleniumBridge
 
 	@Override
 	public void dragAndDrop(String locator, String coordString) {
-		WebElement webElement = getWebElement(locator);
-
 		try {
-			Point point = webElement.getLocation();
+			int x = WebDriverHelper.getElementPositionCenterX(this, locator);
 
-			int x = point.getX() + 45;
-			int y = point.getY() + 100;
+			x += WebDriverHelper.getFramePositionLeft(this);
+			x += WebDriverHelper.getWindowPositionLeft(this);
+			x -= WebDriverHelper.getScrollOffsetX(this);
+
+			int y = WebDriverHelper.getElementPositionCenterY(this, locator);
+
+			y += WebDriverHelper.getFramePositionTop(this);
+			y += WebDriverHelper.getNavigationBarHeight();
+			y += WebDriverHelper.getWindowPositionTop(this);
+			y -= WebDriverHelper.getScrollOffsetY(this);
 
 			Robot robot = new Robot();
 
@@ -503,15 +501,7 @@ public class WebDriverToSeleniumBridge
 
 	@Override
 	public String getAttribute(String attributeLocator) {
-		int pos = attributeLocator.lastIndexOf(CharPool.AT);
-
-		String locator = attributeLocator.substring(0, pos);
-
-		WebElement webElement = getWebElement(locator);
-
-		String attribute = attributeLocator.substring(pos + 1);
-
-		return webElement.getAttribute(attribute);
+		return WebDriverHelper.getAttribute(this, attributeLocator);
 	}
 
 	@Override
@@ -594,15 +584,7 @@ public class WebDriverToSeleniumBridge
 
 	@Override
 	public String getEval(String script) {
-		WebElement webElement = getWebElement("//body");
-
-		WrapsDriver wrapsDriver = (WrapsDriver)webElement;
-
-		WebDriver webDriver = wrapsDriver.getWrappedDriver();
-
-		JavascriptExecutor javascriptExecutor = (JavascriptExecutor)webDriver;
-
-		return (String)javascriptExecutor.executeScript(script);
+		return WebDriverHelper.getEval(this, script);
 	}
 
 	@Override
@@ -900,9 +882,7 @@ public class WebDriverToSeleniumBridge
 
 	@Override
 	public boolean isElementPresent(String locator) {
-		List<WebElement> webElements = getWebElements(locator, "1");
-
-		return !webElements.isEmpty();
+		return WebDriverHelper.isElementPresent(this, locator);
 	}
 
 	@Override
@@ -944,34 +924,21 @@ public class WebDriverToSeleniumBridge
 	public void keyDown(String locator, String keySequence) {
 		WebElement webElement = getWebElement(locator);
 
-		if (keySequence.startsWith("\\")) {
-			int index = GetterUtil.getInteger(keySequence.substring(1));
+		WrapsDriver wrapsDriver = (WrapsDriver)webElement;
 
-			Keys keys = _keysArray[index];
+		WebDriver webDriver = wrapsDriver.getWrappedDriver();
 
-			if ((index >= 48) && (index <= 90)) {
-				webElement.sendKeys(StringPool.ASCII_TABLE[index]);
-			}
-			else if ((index == 16) || (index == 17) || (index == 18)) {
-				WrapsDriver wrapsDriver = (WrapsDriver)webElement;
+		Actions actions = new Actions(webDriver);
 
-				WebDriver webDriver = wrapsDriver.getWrappedDriver();
+		String keycode = keySequence.substring(1);
 
-				Actions actions = new Actions(webDriver);
+		Keys keys = Keys.valueOf(keycode);
 
-				actions.keyDown(webElement, keys);
+		actions.keyDown(webElement, keys);
 
-				Action action = actions.build();
+		Action action = actions.build();
 
-				action.perform();
-			}
-			else {
-				webElement.sendKeys(keys);
-			}
-		}
-		else {
-			webElement.sendKeys(keySequence);
-		}
+		action.perform();
 	}
 
 	@Override
@@ -984,29 +951,30 @@ public class WebDriverToSeleniumBridge
 		WebElement webElement = getWebElement(locator);
 
 		if (keySequence.startsWith("\\")) {
-			int index = GetterUtil.getInteger(keySequence.substring(1));
+			String keycode = keySequence.substring(1);
 
-			Keys keys = _keysArray[index];
+			if (isValidKeycode(keycode)) {
+				Keys keys = Keys.valueOf(keycode);
 
-			if ((index >= 48) && (index <= 90)) {
-				webElement.sendKeys(StringPool.ASCII_TABLE[index]);
-			}
-			else if ((index == 16) || (index == 17) || (index == 18)) {
 				WrapsDriver wrapsDriver = (WrapsDriver)webElement;
 
 				WebDriver webDriver = wrapsDriver.getWrappedDriver();
 
 				Actions actions = new Actions(webDriver);
 
-				actions = actions.keyDown(webElement, keys);
-				actions = actions.keyUp(webElement, keys);
+				if (keycode.equals("ALT") || keycode.equals("COMMAND") ||
+					keycode.equals("CONTROL") || keycode.equals("SHIFT")) {
 
-				Action action = actions.build();
+					actions.keyDown(webElement, keys);
+					actions.keyUp(webElement, keys);
 
-				action.perform();
-			}
-			else {
-				webElement.sendKeys(keys);
+					Action action = actions.build();
+
+					action.perform();
+				}
+				else {
+					webElement.sendKeys(keys);
+				}
 			}
 		}
 		else {
@@ -1023,34 +991,21 @@ public class WebDriverToSeleniumBridge
 	public void keyUp(String locator, String keySequence) {
 		WebElement webElement = getWebElement(locator);
 
-		if (keySequence.startsWith("\\")) {
-			int index = GetterUtil.getInteger(keySequence.substring(1));
+		WrapsDriver wrapsDriver = (WrapsDriver)webElement;
 
-			Keys keys = _keysArray[index];
+		WebDriver webDriver = wrapsDriver.getWrappedDriver();
 
-			if ((index >= 48) && (index <= 90)) {
-				webElement.sendKeys(StringPool.ASCII_TABLE[index]);
-			}
-			else if ((index == 16) || (index == 17) || (index == 18)) {
-				WrapsDriver wrapsDriver = (WrapsDriver)webElement;
+		Actions actions = new Actions(webDriver);
 
-				WebDriver webDriver = wrapsDriver.getWrappedDriver();
+		String keycode = keySequence.substring(1);
 
-				Actions actions = new Actions(webDriver);
+		Keys keys = Keys.valueOf(keycode);
 
-				actions.keyUp(webElement, keys);
+		actions.keyUp(webElement, keys);
 
-				Action action = actions.build();
+		Action action = actions.build();
 
-				action.perform();
-			}
-			else {
-				webElement.sendKeys(keys);
-			}
-		}
-		else {
-			webElement.sendKeys(keySequence);
-		}
+		action.perform();
 	}
 
 	@Override
@@ -1212,10 +1167,6 @@ public class WebDriverToSeleniumBridge
 
 	@Override
 	public void mouseOver(String locator) {
-		if (TestPropsValues.MOBILE_DEVICE_ENABLED) {
-			return;
-		}
-
 		WebElement webElement = getWebElement(locator);
 
 		if (!webElement.isDisplayed()) {
@@ -1407,29 +1358,7 @@ public class WebDriverToSeleniumBridge
 
 	@Override
 	public void selectFrame(String locator) {
-		WebDriver.TargetLocator targetLocator = switchTo();
-
-		if (locator.equals("relative=parent")) {
-			targetLocator.window(defaultWindowHandle);
-
-			if (!_frameWebElements.isEmpty()) {
-				_frameWebElements.pop();
-
-				if (!_frameWebElements.isEmpty()) {
-					targetLocator.frame(_frameWebElements.peek());
-				}
-			}
-		}
-		else if (locator.equals("relative=top")) {
-			_frameWebElements = new Stack<WebElement>();
-
-			targetLocator.window(defaultWindowHandle);
-		}
-		else {
-			_frameWebElements.push(getWebElement(locator));
-
-			targetLocator.frame(_frameWebElements.peek());
-		}
+		WebDriverHelper.selectFrame(this, locator);
 	}
 
 	@Override
@@ -1456,49 +1385,7 @@ public class WebDriverToSeleniumBridge
 
 	@Override
 	public void selectWindow(String windowID) {
-		Set<String> windowHandles = getWindowHandles();
-
-		if (windowID.equals("name=undefined")) {
-			String title = getTitle();
-
-			for (String windowHandle : windowHandles) {
-				WebDriver.TargetLocator targetLocator = switchTo();
-
-				targetLocator.window(windowHandle);
-
-				if (!title.equals(getTitle())) {
-					return;
-				}
-			}
-
-			BaseTestCase.fail(
-				"Unable to find the window ID \"" + windowID + "\"");
-		}
-		else if (windowID.equals("null")) {
-			WebDriver.TargetLocator targetLocator = switchTo();
-
-			targetLocator.window(defaultWindowHandle);
-		}
-		else {
-			String targetWindowTitle = windowID;
-
-			if (targetWindowTitle.startsWith("title=")) {
-				targetWindowTitle = targetWindowTitle.substring(6);
-			}
-
-			for (String windowHandle : windowHandles) {
-				WebDriver.TargetLocator targetLocator = switchTo();
-
-				targetLocator.window(windowHandle);
-
-				if (targetWindowTitle.equals(getTitle())) {
-					return;
-				}
-			}
-
-			BaseTestCase.fail(
-				"Unable to find the window ID \"" + windowID + "\"");
-		}
+		WebDriverHelper.selectWindow(this, windowID);
 	}
 
 	@Override
@@ -1517,9 +1404,7 @@ public class WebDriverToSeleniumBridge
 	}
 
 	public void setDefaultTimeoutImplicit() {
-		int timeout = TestPropsValues.TIMEOUT_IMPLICIT_WAIT * 1000;
-
-		setTimeoutImplicit(String.valueOf(timeout));
+		WebDriverHelper.setDefaultTimeoutImplicit(this);
 	}
 
 	@Override
@@ -1542,12 +1427,7 @@ public class WebDriverToSeleniumBridge
 	}
 
 	public void setTimeoutImplicit(String timeout) {
-		WebDriver.Options options = manage();
-
-		WebDriver.Timeouts timeouts = options.timeouts();
-
-		timeouts.implicitlyWait(
-			GetterUtil.getInteger(timeout), TimeUnit.MILLISECONDS);
+		WebDriverHelper.setTimeoutImplicit(this, timeout);
 	}
 
 	@Override
@@ -1602,32 +1482,7 @@ public class WebDriverToSeleniumBridge
 
 	@Override
 	public void type(String locator, String value) {
-		WebElement webElement = getWebElement(locator);
-
-		if (!webElement.isEnabled()) {
-			return;
-		}
-
-		if (TestPropsValues.MOBILE_DEVICE_ENABLED) {
-			webElement.clear();
-
-			webElement.click();
-
-			try {
-				Thread.sleep(1000);
-			}
-			catch (Exception e) {
-			}
-
-			Screen screen = new Screen();
-
-			screen.type(value);
-		}
-		else {
-			webElement.clear();
-
-			webElement.sendKeys(value);
-		}
+		WebDriverHelper.type(this, locator, value);
 	}
 
 	@Override
@@ -1648,6 +1503,8 @@ public class WebDriverToSeleniumBridge
 
 		for (int specialCharIndex : specialCharIndexes) {
 			webElement.sendKeys(value.substring(i, specialCharIndex));
+
+			webElement.sendKeys(Keys.ESCAPE);
 
 			String specialChar = String.valueOf(value.charAt(specialCharIndex));
 
@@ -1733,7 +1590,8 @@ public class WebDriverToSeleniumBridge
 					targetLocator.window(windowHandle);
 
 					if (targetWindowTitle.equals(getTitle())) {
-						targetLocator.window(defaultWindowHandle);
+						targetLocator.window(
+							WebDriverHelper.getDefaultWindowHandle());
 
 						return;
 					}
@@ -1778,8 +1636,6 @@ public class WebDriverToSeleniumBridge
 		}
 
 		for (String specialChar : _keysSpecialChars.keySet()) {
-			specialChar = "\\" + specialChar;
-
 			while (value.contains(specialChar)) {
 				specialCharIndexes.add(value.indexOf(specialChar));
 
@@ -1791,141 +1647,19 @@ public class WebDriverToSeleniumBridge
 	}
 
 	protected WebElement getWebElement(String locator) {
-		return getWebElement(locator, null);
+		return WebDriverHelper.getWebElement(this, locator);
 	}
 
 	protected WebElement getWebElement(String locator, String timeout) {
-		List<WebElement> webElements = getWebElements(locator, timeout);
-
-		if (!webElements.isEmpty()) {
-			return webElements.get(0);
-		}
-
-		return null;
+		return WebDriverHelper.getWebElement(this, locator, timeout);
 	}
 
 	protected List<WebElement> getWebElements(String locator) {
-		return getWebElements(locator, null);
+		return WebDriverHelper.getWebElements(this, locator);
 	}
 
 	protected List<WebElement> getWebElements(String locator, String timeout) {
-		if (timeout != null) {
-			setTimeoutImplicit(timeout);
-		}
-
-		try {
-			if (locator.startsWith("//")) {
-				return findElements(By.xpath(locator));
-			}
-			else if (locator.startsWith("class=")) {
-				locator = locator.substring(6);
-
-				return findElements(By.className(locator));
-			}
-			else if (locator.startsWith("css=")) {
-				locator = locator.substring(4);
-
-				return findElements(By.cssSelector(locator));
-			}
-			else if (locator.startsWith("link=")) {
-				locator = locator.substring(5);
-
-				return findElements(By.linkText(locator));
-			}
-			else if (locator.startsWith("name=")) {
-				locator = locator.substring(5);
-
-				return findElements(By.name(locator));
-			}
-			else if (locator.startsWith("tag=")) {
-				locator = locator.substring(4);
-
-				return findElements(By.tagName(locator));
-			}
-			else if (locator.startsWith("xpath=") ||
-					 locator.startsWith("xPath=")) {
-
-				locator = locator.substring(6);
-
-				return findElements(By.xpath(locator));
-			}
-			else {
-				return findElements(By.id(locator));
-			}
-		}
-		finally {
-			if (timeout != null) {
-				setDefaultTimeoutImplicit();
-			}
-		}
-	}
-
-	protected void initKeys() {
-
-		// ASCII to WebDriver
-
-		_keysArray[107] = Keys.ADD;
-		_keysArray[18] = Keys.ALT;
-		_keysArray[40] = Keys.ARROW_DOWN;
-		_keysArray[37] = Keys.ARROW_LEFT;
-		_keysArray[39] = Keys.ARROW_RIGHT;
-		_keysArray[38] = Keys.ARROW_UP;
-		_keysArray[8] = Keys.BACK_SPACE;
-		//keyTable[] = Keys.CANCEL;
-		//keyTable[] = Keys.CLEAR;
-		//keyTable[] = Keys.COMMAND;
-		_keysArray[17] = Keys.CONTROL;
-		_keysArray[110] = Keys.DECIMAL;
-		_keysArray[46] = Keys.DELETE;
-		_keysArray[111] = Keys.DIVIDE;
-		//keyTable[] = Keys.DOWN;
-		//keyTable[] = Keys.END;
-		_keysArray[13] = Keys.RETURN;
-		//keyTable[] = Keys.EQUALS;
-		_keysArray[27] = Keys.ESCAPE;
-		_keysArray[112] = Keys.F1;
-		_keysArray[121] = Keys.F10;
-		_keysArray[122] = Keys.F11;
-		_keysArray[123] = Keys.F12;
-		_keysArray[113] = Keys.F2;
-		_keysArray[114] = Keys.F3;
-		_keysArray[115] = Keys.F4;
-		_keysArray[116] = Keys.F5;
-		_keysArray[117] = Keys.F6;
-		_keysArray[118] = Keys.F7;
-		_keysArray[119] = Keys.F8;
-		_keysArray[120] = Keys.F9;
-		//keyTable[] = Keys.HELP;
-		_keysArray[36] = Keys.HOME;
-		_keysArray[45] = Keys.INSERT;
-		//keyTable[] = Keys.LEFT;
-		//keyTable[] = Keys.LEFT_ALT;
-		//keyTable[] = Keys.LEFT_CONTROL;
-		//keyTable[] = Keys.LEFT_SHIFT;
-		//keyTable[] = Keys.META;
-		//keyTable[] = Keys.NULL;
-		_keysArray[96] = Keys.NUMPAD0;
-		_keysArray[97] = Keys.NUMPAD1;
-		_keysArray[98] = Keys.NUMPAD2;
-		_keysArray[99] = Keys.NUMPAD3;
-		_keysArray[100] = Keys.NUMPAD4;
-		_keysArray[101] = Keys.NUMPAD5;
-		_keysArray[102] = Keys.NUMPAD6;
-		_keysArray[103] = Keys.NUMPAD7;
-		_keysArray[104] = Keys.NUMPAD8;
-		_keysArray[105] = Keys.NUMPAD9;
-		_keysArray[34] = Keys.PAGE_DOWN;
-		_keysArray[33] = Keys.PAGE_UP;
-		_keysArray[19] = Keys.PAUSE;
-		//keyTable[] = Keys.RETURN;
-		//keyTable[] = Keys.RIGHT;
-		//keyTable[] = Keys.SEMICOLON;
-		//keyTable[] = Keys.SEPARATOR;
-		_keysArray[16] = Keys.SHIFT;
-		_keysArray[32] = Keys.SPACE;
-		_keysArray[109] = Keys.SUBTRACT;
-		_keysArray[9] = Keys.TAB;
-		//keyTable[] = Keys.UP;
+		return WebDriverHelper.getWebElements(this, locator, timeout);
 	}
 
 	protected void initKeysSpecialChars() {
@@ -1940,15 +1674,20 @@ public class WebDriverToSeleniumBridge
 		_keysSpecialChars.put(">", ".");
 	}
 
+	protected boolean isValidKeycode(String keycode) {
+		for (Keys keys : Keys.values()) {
+			String keysName = keys.name();
+
+			if (keysName.equals(keycode)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	protected void scrollWebElementIntoView(WebElement webElement) {
-		WrapsDriver wrapsDriver = (WrapsDriver)webElement;
-
-		WebDriver webDriver = wrapsDriver.getWrappedDriver();
-
-		JavascriptExecutor javascriptExecutor = (JavascriptExecutor)webDriver;
-
-		javascriptExecutor.executeScript(
-			"arguments[0].scrollIntoView();", webElement);
+		WebDriverHelper.scrollWebElementIntoView(this, webElement);
 	}
 
 	protected void selectByRegexpText(String selectLocator, String regexp) {
@@ -2004,13 +1743,9 @@ public class WebDriverToSeleniumBridge
 		select.selectByIndex(index);
 	}
 
-	protected String defaultWindowHandle;
-
 	private static Log _log = LogFactoryUtil.getLog(
 		WebDriverToSeleniumBridge.class);
 
-	private Stack<WebElement> _frameWebElements = new Stack<WebElement>();
-	private Keys[] _keysArray = new Keys[128];
 	private Map<String, String> _keysSpecialChars =
 		new HashMap<String, String>();
 

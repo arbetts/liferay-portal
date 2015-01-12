@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class NamespaceServletRequest extends DynamicServletRequest {
 
-	static Set<String> reservedAttrs = new HashSet<String>();
+	public static Set<String> reservedAttrs = new HashSet<String>();
 
 	static {
 		reservedAttrs.add(JavaConstants.JAVAX_PORTLET_CONFIG);
@@ -150,6 +150,14 @@ public class NamespaceServletRequest extends DynamicServletRequest {
 		}
 	}
 
+	@Override
+	protected void injectInto(DynamicServletRequest dynamicServletRequest) {
+		dynamicServletRequest.setRequest(
+			new NamespaceServletRequest(
+				(HttpServletRequest)getRequest(), _attrNamespace,
+				_paramNamespace));
+	}
+
 	private boolean _isReservedParam(String name) {
 		if (reservedAttrs.contains(name)) {
 			return true;
@@ -166,7 +174,7 @@ public class NamespaceServletRequest extends DynamicServletRequest {
 		return false;
 	}
 
-	private String _attrNamespace;
-	private String _paramNamespace;
+	private final String _attrNamespace;
+	private final String _paramNamespace;
 
 }

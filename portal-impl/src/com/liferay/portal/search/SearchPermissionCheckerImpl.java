@@ -309,8 +309,6 @@ public class SearchPermissionCheckerImpl implements SearchPermissionChecker {
 				UserGroupRoleLocalServiceUtil.getUserGroupRoles( userId));
 		}
 		else {
-			groups.addAll(permissionCheckerBag.getGroups());
-
 			for (long groupId : groupIds) {
 				if (GroupLocalServiceUtil.hasUserGroup(userId, groupId)) {
 					Group group = GroupLocalServiceUtil.getGroup(groupId);
@@ -427,6 +425,16 @@ public class SearchPermissionCheckerImpl implements SearchPermissionChecker {
 						Field.GROUP_ROLE_ID,
 						group.getGroupId() + StringPool.DASH +
 							role.getRoleId());
+				}
+			}
+
+			for (long groupId : groupIds) {
+				if (ResourcePermissionLocalServiceUtil.hasResourcePermission(
+						companyId, className, ResourceConstants.SCOPE_GROUP,
+						String.valueOf(groupId), role.getRoleId(),
+						ActionKeys.VIEW)) {
+
+					groupsQuery.addTerm(Field.GROUP_ID, groupId);
 				}
 			}
 

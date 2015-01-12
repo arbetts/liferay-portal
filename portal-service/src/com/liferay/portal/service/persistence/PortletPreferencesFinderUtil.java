@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * @author Brian Wing Shun Chan
+ * @generated
  */
 @ProviderType
 public class PortletPreferencesFinderUtil {
@@ -41,6 +42,11 @@ public class PortletPreferencesFinderUtil {
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByPortletId(
 		java.lang.String portletId) {
 		return getFinder().findByPortletId(portletId);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portal.model.PortletPreferences> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getFinder().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	public static java.util.List<com.liferay.portal.model.PortletPreferences> findByC_G_O_O_P_P(

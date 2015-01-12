@@ -16,6 +16,8 @@ package com.liferay.portal.service.impl;
 
 import com.liferay.portal.PortletIdException;
 import com.liferay.portal.kernel.cluster.Clusterable;
+import com.liferay.portal.kernel.configuration.Configuration;
+import com.liferay.portal.kernel.configuration.ConfigurationFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.image.SpriteProcessor;
@@ -28,6 +30,7 @@ import com.liferay.portal.kernel.portlet.FriendlyURLMapper;
 import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletLayoutListener;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.scheduler.SchedulerEntry;
 import com.liferay.portal.kernel.scheduler.SchedulerEntryImpl;
 import com.liferay.portal.kernel.scheduler.TimeUnit;
@@ -85,7 +88,6 @@ import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletQNameUtil;
 import com.liferay.portlet.expando.model.CustomAttributesDisplay;
 import com.liferay.util.ContentUtil;
-import com.liferay.util.bridges.mvc.MVCPortlet;
 
 import java.net.URL;
 
@@ -142,6 +144,18 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 
 	@Override
 	public void checkPortlet(Portlet portlet) throws PortalException {
+		long companyId = portlet.getCompanyId();
+		String name = portlet.getRootPortletId();
+
+		int resourcePermissionsCount =
+			resourcePermissionLocalService.getResourcePermissionsCount(
+				companyId, name, ResourceConstants.SCOPE_INDIVIDUAL, name);
+
+		if (resourcePermissionsCount == 0) {
+			resourceLocalService.addResources(
+				companyId, 0, 0, name, name, true, false, false);
+		}
+
 		if (portlet.isSystem()) {
 			return;
 		}
@@ -152,8 +166,6 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			return;
 		}
 
-		long companyId = portlet.getCompanyId();
-		String name = portlet.getPortletId();
 		int scope = ResourceConstants.SCOPE_COMPANY;
 		String primKey = String.valueOf(companyId);
 		String actionId = ActionKeys.ADD_TO_PAGE;
@@ -165,15 +177,9 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			for (String roleName : roleNames) {
 				Role role = roleLocalService.getRole(companyId, roleName);
 
-				if (resourceBlockLocalService.isSupported(name)) {
-					resourceBlockLocalService.addCompanyScopePermission(
-						companyId, name, role.getRoleId(), actionId);
-				}
-				else {
-					resourcePermissionLocalService.addResourcePermission(
-						companyId, name, scope, primKey, role.getRoleId(),
-						actionId);
-				}
+				resourcePermissionLocalService.addResourcePermission(
+					companyId, name, scope, primKey, role.getRoleId(),
+					actionId);
 			}
 		}
 
@@ -1077,6 +1083,32 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 		return portletsPool;
 	}
 
+	private String _getTriggerValue(Portlet portlet, String propertyKey) {
+		PortletApp portletApp = portlet.getPortletApp();
+
+		ServletContext servletContext = portletApp.getServletContext();
+
+		ClassLoader classLoader = servletContext.getClassLoader();
+
+		Configuration configuration = _propertiesConfigurations.get(
+			classLoader);
+
+		if (configuration == null) {
+			String propertyFileName = "portal";
+
+			if (portletApp.isWARFile()) {
+				propertyFileName = "portlet";
+			}
+
+			configuration = ConfigurationFactoryUtil.getConfiguration(
+				classLoader, propertyFileName);
+
+			_propertiesConfigurations.put(classLoader, configuration);
+		}
+
+		return configuration.get(propertyKey);
+	}
+
 	private void _readLiferayDisplay(
 		String servletContextName, Element element,
 		PortletCategory portletCategory, Set<String> portletIds) {
@@ -1298,8 +1330,9 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 					"property-key");
 
 				if (propertyKeyElement != null) {
-					schedulerEntry.setPropertyKey(
-						propertyKeyElement.getTextTrim());
+					schedulerEntry.setTriggerValue(
+						_getTriggerValue(
+							portletModel, propertyKeyElement.getTextTrim()));
 				}
 				else {
 					schedulerEntry.setTriggerValue(
@@ -1313,8 +1346,9 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 					"property-key");
 
 				if (propertyKeyElement != null) {
-					schedulerEntry.setPropertyKey(
-						propertyKeyElement.getTextTrim());
+					schedulerEntry.setTriggerValue(
+						_getTriggerValue(
+							portletModel, propertyKeyElement.getTextTrim()));
 				}
 				else {
 					Element simpleTriggerValueElement = simpleElement.element(
@@ -2403,16 +2437,19 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			PortletConstants.INSTANCE_SEPARATOR.length() +
 				PortletConstants.USER_SEPARATOR.length() + 39;
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		PortletLocalServiceImpl.class);
 
-	private static Map<Long, Map<String, Portlet>> _companyPortletsPool =
+	private static final Map<Long, Map<String, Portlet>> _companyPortletsPool =
 		new ConcurrentHashMap<Long, Map<String, Portlet>>();
-	private static Map<String, PortletApp> _portletAppsPool =
+	private static final Map<String, PortletApp> _portletAppsPool =
 		new ConcurrentHashMap<String, PortletApp>();
-	private static Map<String, String> _portletIdsByStrutsPath =
+	private static final Map<String, String> _portletIdsByStrutsPath =
 		new ConcurrentHashMap<String, String>();
-	private static Map<String, Portlet> _portletsPool =
+	private static final Map<String, Portlet> _portletsPool =
 		new ConcurrentHashMap<String, Portlet>();
+	private static final Map<ClassLoader, Configuration>
+		_propertiesConfigurations =
+			new ConcurrentHashMap<ClassLoader, Configuration>();
 
 }

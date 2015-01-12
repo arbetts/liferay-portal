@@ -146,6 +146,8 @@ public class PortalSecurityManagerImpl extends SecurityManager
 
 		initClasses();
 
+		PortalPolicy portalPolicy = null;
+
 		try {
 			Policy policy = null;
 
@@ -153,11 +155,11 @@ public class PortalSecurityManagerImpl extends SecurityManager
 				policy = Policy.getPolicy();
 			}
 
-			_portalPolicy = new PortalPolicy(policy);
+			portalPolicy = new PortalPolicy(policy);
 
-			Policy.setPolicy(_portalPolicy);
+			Policy.setPolicy(portalPolicy);
 
-			_portalPolicy.refresh();
+			portalPolicy.refresh();
 		}
 		catch (Exception e) {
 			if (_log.isInfoEnabled()) {
@@ -170,9 +172,9 @@ public class PortalSecurityManagerImpl extends SecurityManager
 			if (_log.isWarnEnabled()) {
 				_log.warn(e, e);
 			}
-
-			return;
 		}
+
+		_portalPolicy = portalPolicy;
 
 		try {
 			initInitialContextFactoryBuilder();
@@ -214,6 +216,10 @@ public class PortalSecurityManagerImpl extends SecurityManager
 		}
 	}
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	@Override
 	public void checkMemberAccess(Class<?> clazz, int accessibility) {
 		if (clazz == null) {
@@ -484,7 +490,7 @@ public class PortalSecurityManagerImpl extends SecurityManager
 	}
 
 	protected void initPACLImpl(Class<?> clazz, Object pacl) throws Exception {
-		Field field = clazz.getDeclaredField("_pacl");
+		Field field = ReflectionUtil.getDeclaredField(clazz, "_pacl");
 
 		synchronized (field) {
 			field.setAccessible(true);
@@ -535,18 +541,19 @@ public class PortalSecurityManagerImpl extends SecurityManager
 			TemplateContextHelper.class, new DoTemplateContextHelperPACL());
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		PortalSecurityManagerImpl.class.getName());
 
-	private static ThreadLocal<ClassLoader> _checkMemberAccessClassLoader =
-		new AutoResetThreadLocal<ClassLoader>(
-			PortalSecurityManagerImpl.class +
-				"._checkMembersAccessClassLoader");
-	private static RuntimePermission _checkMemberAccessPermission =
+	private static final ThreadLocal<ClassLoader>
+		_checkMemberAccessClassLoader =
+			new AutoResetThreadLocal<ClassLoader>(
+				PortalSecurityManagerImpl.class +
+					"._checkMembersAccessClassLoader");
+	private static final RuntimePermission _checkMemberAccessPermission =
 		new RuntimePermission("accessDeclaredMembers");
 
 	private SecurityManager _originalSecurityManager;
-	private PortalPolicy _portalPolicy;
+	private final PortalPolicy _portalPolicy;
 
 	private static class DoBeanLocatorImplPACL implements BeanLocatorImpl.PACL {
 
@@ -633,7 +640,7 @@ public class PortalSecurityManagerImpl extends SecurityManager
 			return newReferencedBean;
 		}
 
-		private static Map<Object, Object> _doPrivilegedBeans =
+		private static final Map<Object, Object> _doPrivilegedBeans =
 			new IdentityHashMap<Object, Object>();
 
 	}
@@ -732,7 +739,8 @@ public class PortalSecurityManagerImpl extends SecurityManager
 			);
 		}
 
-		private ClassLoaderUtil.PACL _noPacl = new ClassLoaderUtil.NoPACL();
+		private final ClassLoaderUtil.PACL _noPacl =
+			new ClassLoaderUtil.NoPACL();
 
 	}
 
@@ -1298,7 +1306,7 @@ public class PortalSecurityManagerImpl extends SecurityManager
 					PortletClassLoaderUtil.getClassLoader(), _classes));
 		}
 
-		private static Map<String, Class<?>> _classes =
+		private static final Map<String, Class<?>> _classes =
 			new HashMap<String, Class<?>>();
 
 		static {
