@@ -15,10 +15,12 @@
 package com.liferay.portal.kernel.backgroundtask;
 
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 
 import java.io.Serializable;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,7 +42,10 @@ public class BackgroundTaskStatus implements Serializable {
 	}
 
 	public String getAttributesJSON() {
-		return JSONFactoryUtil.serialize(_attributes);
+		HashMap<String, Serializable> copy = new HashMap<String, Serializable>(
+			_attributes);
+
+		return JSONFactoryUtil.serialize(copy);
 	}
 
 	public void setAttribute(String key, Serializable value) {
