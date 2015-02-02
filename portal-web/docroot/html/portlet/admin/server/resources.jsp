@@ -28,30 +28,6 @@ numberFormat = NumberFormat.getInstance(locale);
 
 long totalMemory = runtime.totalMemory();
 long usedMemory = totalMemory - runtime.freeMemory();
-long backgroundTaskId = 0;
-
-
-String	orderByCol =  "create-date";
-String 	orderByType =  "desc";
-
-OrderByComparator<BackgroundTask> orderByComparator =
-	BackgroundTaskComparatorFactoryUtil.getBackgroundTaskOrderByComparator(
-		orderByCol, orderByType);
-
-List<BackgroundTask> backgroundTasks =
-	BackgroundTaskLocalServiceUtil.getBackgroundTasks(
-		themeDisplay.getCompanyGroupId(),
-		IndexBackgroundTaskExecutor.class.getName(), QueryUtil.ALL_POS,
-		QueryUtil.ALL_POS, orderByComparator);
-
-	boolean inProgress = false;
-if (!backgroundTasks.isEmpty()) {
-	BackgroundTask backgroundTask = backgroundTasks.get(0);
-
-	inProgress = backgroundTask.isInProgress();
-	backgroundTaskId = backgroundTask.getBackgroundTaskId();
-
-}
 %>
 
 <div>
@@ -209,74 +185,3 @@ if (!backgroundTasks.isEmpty()) {
 		</table>
 	</liferay-ui:panel>
 </liferay-ui:panel-container>
-
-<aui:script use="aui-progressbar">
-
-	var myProgressBar;
-
-	var isInProgress = <%=inProgress%>;
-
-	function _createProgressBar() {
-
-		myProgressBar = new Y.ProgressBar(
-			{
-				boundingBox: '#myProgressBar',
-				max: 100,
-				min: 0,
-				on: {
-					complete: function(e) {
-						this.set('label', '<liferay-ui:message key="complete" />');
-					},
-					valueChange: function(e) {
-						this.set('label', e.newVal + '%');
-					}
-				},
-			}
-		).render();
-	}
-
-	var checkBackgroundTaskStatus = function() {
-		Liferay.Service(
-			'/backgroundtask/get-background-task-status-json',
-			{
-				backgroundTaskId: '<%= backgroundTaskId %>',
-			},
-			function(json) {
-				var total = json.total;
-				var current = json.current;
-				var portlet = json.portlet;
-
-				if (current == total) {
-					isInProgress = false;
-				}
-
-				var value = parseInt(current / total * 100);
-
-				myProgressBar.value(value);
-
-				checkBackgroundTaskStatus();
-			}
-		);
-	};
-
-	function _submitForm() {
-	// call form submit, disable button
-	}
-
-	A.one("#myButton").on('click', function(event){
-
-		_submitForm();
-
-		_createProgressBar();
-
-	});
-
-	if (isInProgress) {
-
-	_disableButton();
-
-	_createProgressBar();
-
-	}
-
-</aui:script>

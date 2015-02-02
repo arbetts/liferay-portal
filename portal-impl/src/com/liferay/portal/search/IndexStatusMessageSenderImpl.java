@@ -24,4 +24,14 @@ public class IndexStatusMessageSenderImpl extends BaseStatusMessageSender
 		sendStatusMessage(new StatusMessageContext("reindex", contextMap));
 	}
 
+	public void sendStatusMessage(String indexStatus) {
+
+		Map<String, Serializable> contextMap =
+			new HashMap<String, Serializable>();
+
+		contextMap.put("message", indexStatus);
+
+		sendStatusMessage(new StatusMessageContext("reindex", contextMap));
+	}
+
 }

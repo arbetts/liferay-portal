@@ -8,4 +8,6 @@ public interface IndexStatusMessageSender {
 	public void sendStatusMessage(
 		String portletId, int totalPortlets, int currentPortlet);
 
+	public void sendStatusMessage(String indexStatus);
+
 }

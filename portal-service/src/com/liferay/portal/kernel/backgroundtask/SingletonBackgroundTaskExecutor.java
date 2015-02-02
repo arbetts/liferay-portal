@@ -26,7 +26,7 @@ public class SingletonBackgroundTaskExecutor
 		throws DuplicateLockException{
 
 		return new BackgroundTaskResult(
-			BackgroundTaskConstants.STATUS_FAILED,
+			BackgroundTaskConstants.STATUS_CANCELLED,
 			"Singleton background task already in progress");
 	}
 

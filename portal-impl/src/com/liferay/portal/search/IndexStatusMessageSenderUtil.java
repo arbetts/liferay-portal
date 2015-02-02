@@ -14,6 +14,10 @@ public class IndexStatusMessageSenderUtil {
 			portletId, totalPortlets, currentPortlet);
 	}
 
+	public static void sendStatusMessage(String indexStatus) {
+		_indexStatusMessageSender.sendStatusMessage(indexStatus);
+	}
+
 	public void setIndexStatusMessageSender(
 		IndexStatusMessageSender indexStatusMessageSender) {
 

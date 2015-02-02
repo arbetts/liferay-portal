@@ -89,10 +89,22 @@ public class IndexBackgroundTaskExecutor extends BaseBackgroundTaskExecutor {
 		long[] companyIds = (long[]) taskContextMap.get("companyIds");
 		String portletId = (String) taskContextMap.get("portletId");
 
-		doReindex(companyIds, portletId);
+		BackgroundTaskResult backgroundTaskResult = null;
 
-		BackgroundTaskResult backgroundTaskResult = new BackgroundTaskResult(
-			BackgroundTaskConstants.STATUS_SUCCESSFUL);
+		try {
+			doReindex(companyIds, portletId);
+
+			backgroundTaskResult = new BackgroundTaskResult(
+				BackgroundTaskConstants.STATUS_SUCCESSFUL);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e.getMessage(), e);
+			}
+
+			backgroundTaskResult = new BackgroundTaskResult(
+				BackgroundTaskConstants.STATUS_FAILED);
+		}
 
 		return backgroundTaskResult;
 	}

@@ -14,6 +14,7 @@
 
 package com.liferay.portal.search;
 
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.dao.shard.ShardUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -99,9 +100,24 @@ public class SearchEngineInitializer implements Runnable {
 		stopWatch.start();
 
 		try {
+			if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
+				IndexStatusMessageSenderUtil.sendStatusMessage(
+					"Deleting old Index");
+			}
+
 			SearchEngineUtil.removeCompany(_companyId);
 
+			if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
+				IndexStatusMessageSenderUtil.sendStatusMessage(
+					"initializing Search Engine");
+			}
+
 			SearchEngineUtil.initialize(_companyId);
+
+			if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
+				IndexStatusMessageSenderUtil.sendStatusMessage(
+					"Starting Index Process");
+			}
 
 			List<Portlet> portlets = PortletLocalServiceUtil.getPortlets(
 				_companyId);
@@ -115,8 +131,10 @@ public class SearchEngineInitializer implements Runnable {
 					continue;
 				}
 
-				IndexStatusMessageSenderUtil.sendStatusMessage(
-					portlet.getDisplayName(), portlets.size(), i+1);
+				if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
+					IndexStatusMessageSenderUtil.sendStatusMessage(
+						portlet.getDisplayName(), portlets.size(), i + 1);
+				}
 
 				List<Indexer> indexers = portlet.getIndexerInstances();
 
