@@ -18,6 +18,7 @@ import aQute.bnd.annotation.ProviderType;
 
 /**
  * @author Brian Wing Shun Chan
+ * @generated
  */
 @ProviderType
 public interface ResourcePermissionFinder {
@@ -29,6 +30,9 @@ public interface ResourcePermissionFinder {
 	public java.util.List<com.liferay.portal.model.ResourcePermission> findByResource(
 		long companyId, long groupId, java.lang.String name,
 		java.lang.String primKey);
+
+	public java.util.Map<java.io.Serializable, com.liferay.portal.model.ResourcePermission> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys);
 
 	public java.util.List<com.liferay.portal.model.ResourcePermission> findByR_S(
 		long roleId, int[] scopes, int start, int end);

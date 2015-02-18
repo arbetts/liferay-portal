@@ -35,18 +35,16 @@ import net.sf.ehcache.event.CacheEventListener;
 public class EhcachePortalCacheClusterReplicator implements CacheEventListener {
 
 	public EhcachePortalCacheClusterReplicator(Properties properties) {
-		if (properties != null) {
-			_replicatePuts = GetterUtil.getBoolean(
-				properties.getProperty(_REPLICATE_PUTS), true);
-			_replicatePutsViaCopy = GetterUtil.getBoolean(
-				properties.getProperty(_REPLICATE_PUTS_VIA_COPY));
-			_replicateRemovals = GetterUtil.getBoolean(
-				properties.getProperty(_REPLICATE_REMOVALS), true);
-			_replicateUpdates = GetterUtil.getBoolean(
-				properties.getProperty(_REPLICATE_UPDATES), true);
-			_replicateUpdatesViaCopy = GetterUtil.getBoolean(
-				properties.getProperty(_REPLICATE_UPDATES_VIA_COPY));
-		}
+		_replicatePuts = GetterUtil.getBoolean(
+			properties.getProperty(_REPLICATE_PUTS), true);
+		_replicatePutsViaCopy = GetterUtil.getBoolean(
+			properties.getProperty(_REPLICATE_PUTS_VIA_COPY));
+		_replicateRemovals = GetterUtil.getBoolean(
+			properties.getProperty(_REPLICATE_REMOVALS), true);
+		_replicateUpdates = GetterUtil.getBoolean(
+			properties.getProperty(_REPLICATE_UPDATES), true);
+		_replicateUpdatesViaCopy = GetterUtil.getBoolean(
+			properties.getProperty(_REPLICATE_UPDATES_VIA_COPY));
 	}
 
 	@Override
@@ -170,10 +168,10 @@ public class EhcachePortalCacheClusterReplicator implements CacheEventListener {
 	private static final String _REPLICATE_UPDATES_VIA_COPY =
 		"replicateUpdatesViaCopy";
 
-	private boolean _replicatePuts = true;
-	private boolean _replicatePutsViaCopy;
-	private boolean _replicateRemovals = true;
-	private boolean _replicateUpdates = true;
-	private boolean _replicateUpdatesViaCopy;
+	private final boolean _replicatePuts;
+	private final boolean _replicatePutsViaCopy;
+	private final boolean _replicateRemovals;
+	private final boolean _replicateUpdates;
+	private final boolean _replicateUpdatesViaCopy;
 
 }

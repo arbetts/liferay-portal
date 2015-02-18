@@ -45,9 +45,11 @@ import com.liferay.portlet.dynamicdatamapping.TemplateSmallImageSizeException;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants;
+import com.liferay.portlet.dynamicdatamapping.model.DDMTemplateVersion;
 import com.liferay.portlet.dynamicdatamapping.service.base.DDMTemplateLocalServiceBaseImpl;
 import com.liferay.portlet.dynamicdatamapping.util.DDMXMLUtil;
 import com.liferay.portlet.journal.model.JournalArticle;
+import com.liferay.portlet.journal.model.JournalArticleConstants;
 import com.liferay.portlet.journal.service.persistence.JournalArticleUtil;
 
 import java.io.File;
@@ -94,6 +96,8 @@ public class DDMTemplateLocalServiceImpl
 	 * @param  classNameId the primary key of the class name for the template's
 	 *         related model
 	 * @param  classPK the primary key of the template's related entity
+	 * @param  sourceClassNameId the primary key of the class name for
+	 *         template's source model
 	 * @param  nameMap the template's locales and localized names
 	 * @param  descriptionMap the template's locales and localized descriptions
 	 * @param  type the template's type. For more information, see {@link
@@ -113,15 +117,15 @@ public class DDMTemplateLocalServiceImpl
 	@Override
 	public DDMTemplate addTemplate(
 			long userId, long groupId, long classNameId, long classPK,
-			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,
-			String type, String mode, String language, String script,
-			ServiceContext serviceContext)
+			long sourceClassNameId, Map<Locale, String> nameMap,
+			Map<Locale, String> descriptionMap, String type, String mode,
+			String language, String script, ServiceContext serviceContext)
 		throws PortalException {
 
 		return addTemplate(
-			userId, groupId, classNameId, classPK, null, nameMap,
-			descriptionMap, type, mode, language, script, false, false, null,
-			null, serviceContext);
+			userId, groupId, classNameId, classPK, sourceClassNameId, null,
+			nameMap, descriptionMap, type, mode, language, script, false, false,
+			null, null, serviceContext);
 	}
 
 	/**
@@ -132,6 +136,8 @@ public class DDMTemplateLocalServiceImpl
 	 * @param  classNameId the primary key of the class name for the template's
 	 *         related model
 	 * @param  classPK the primary key of the template's related entity
+	 * @param  sourceClassNameId the primary key of the class name for
+	 *         template's source model
 	 * @param  templateKey the unique string identifying the template
 	 *         (optionally <code>null</code>)
 	 * @param  nameMap the template's locales and localized names
@@ -159,11 +165,11 @@ public class DDMTemplateLocalServiceImpl
 	@Override
 	public DDMTemplate addTemplate(
 			long userId, long groupId, long classNameId, long classPK,
-			String templateKey, Map<Locale, String> nameMap,
-			Map<Locale, String> descriptionMap, String type, String mode,
-			String language, String script, boolean cacheable,
-			boolean smallImage, String smallImageURL, File smallImageFile,
-			ServiceContext serviceContext)
+			long sourceClassNameId, String templateKey,
+			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,
+			String type, String mode, String language, String script,
+			boolean cacheable, boolean smallImage, String smallImageURL,
+			File smallImageFile, ServiceContext serviceContext)
 		throws PortalException {
 
 		// Template
@@ -211,7 +217,9 @@ public class DDMTemplateLocalServiceImpl
 		template.setModifiedDate(serviceContext.getModifiedDate(now));
 		template.setClassNameId(classNameId);
 		template.setClassPK(classPK);
+		template.setSourceClassNameId(sourceClassNameId);
 		template.setTemplateKey(templateKey);
+		template.setVersion(DDMTemplateConstants.VERSION_DEFAULT);
 		template.setNameMap(nameMap);
 		template.setDescriptionMap(descriptionMap);
 		template.setType(type);
@@ -245,6 +253,10 @@ public class DDMTemplateLocalServiceImpl
 		saveImages(
 			smallImage, template.getSmallImageId(), smallImageFile,
 			smallImageBytes);
+
+		// Template version
+
+		addTemplateVersion(template, DDMTemplateConstants.VERSION_DEFAULT);
 
 		return template;
 	}
@@ -357,7 +369,7 @@ public class DDMTemplateLocalServiceImpl
 			String type, ServiceContext serviceContext)
 		throws PortalException {
 
-		List<DDMTemplate> newTemplates = new ArrayList<DDMTemplate>();
+		List<DDMTemplate> newTemplates = new ArrayList<>();
 
 		List<DDMTemplate> oldTemplates = ddmTemplatePersistence.findByC_C_T(
 			classNameId, oldClassPK, type);
@@ -401,15 +413,17 @@ public class DDMTemplateLocalServiceImpl
 					template.getCompanyId());
 
 				if (template.getGroupId() == companyGroup.getGroupId()) {
-					if (JournalArticleUtil.countByTemplateId(
+					if (JournalArticleUtil.countByC_DDMTK(
+							JournalArticleConstants.CLASSNAME_ID_DEFAULT,
 							template.getTemplateKey()) > 0) {
 
 						throw new RequiredTemplateException();
 					}
 				}
 				else {
-					if (JournalArticleUtil.countByG_T(
+					if (JournalArticleUtil.countByG_C_DDMTK(
 							template.getGroupId(),
+							JournalArticleConstants.CLASSNAME_ID_DEFAULT,
 							template.getTemplateKey()) > 0) {
 
 						throw new RequiredTemplateException();
@@ -457,6 +471,18 @@ public class DDMTemplateLocalServiceImpl
 		}
 	}
 
+	@Override
+	public void deleteTemplates(long groupId, long classNameId)
+		throws PortalException {
+
+		List<DDMTemplate> templates = ddmTemplatePersistence.findByG_C(
+			groupId, classNameId);
+
+		for (DDMTemplate template : templates) {
+			ddmTemplateLocalService.deleteTemplate(template);
+		}
+	}
+
 	/**
 	 * Returns the template matching the group and template key.
 	 *
@@ -478,21 +504,24 @@ public class DDMTemplateLocalServiceImpl
 	}
 
 	/**
-	 * Returns the template matching the group and template key, optionally in
-	 * the global scope.
+	 * Returns the template matching the group and template key, optionally
+	 * searching ancestor sites (that have sharing enabled) and global scoped
+	 * sites.
 	 *
 	 * <p>
 	 * This method first searches in the given group. If the template is still
 	 * not found and <code>includeAncestorTemplates</code> is set to
-	 * <code>true</code>, this method searches the global group.
+	 * <code>true</code>, this method searches the group's ancestor sites (that
+	 * have sharing enabled) and lastly searches global scoped sites.
 	 * </p>
 	 *
 	 * @param  groupId the primary key of the group
 	 * @param  classNameId the primary key of the class name for the template's
 	 *         related model
 	 * @param  templateKey the unique string identifying the template
-	 * @param  includeAncestorTemplates whether to include the global scope in
-	 *         the search
+	 * @param  includeAncestorTemplates whether to include ancestor sites (that
+	 *         have sharing enabled) and include global scoped sites in the
+	 *         search in the search
 	 * @return the matching template, or <code>null</code> if a matching
 	 *         template could not be found
 	 * @throws PortalException if a portal exception occurred
@@ -564,21 +593,24 @@ public class DDMTemplateLocalServiceImpl
 	}
 
 	/**
-	 * Returns the template matching the group and template key, optionally in
-	 * the parent sites.
+	 * Returns the template matching the group and template key, optionally
+	 * searching ancestor sites (that have sharing enabled) and global scoped
+	 * sites.
 	 *
 	 * <p>
 	 * This method first searches in the group. If the template is still not
 	 * found and <code>includeAncestorTemplates</code> is set to
-	 * <code>true</code>, this method searches the parent sites.
+	 * <code>true</code>, this method searches the group's ancestor sites (that
+	 * have sharing enabled) and lastly searches global scoped sites.
 	 * </p>
 	 *
 	 * @param  groupId the primary key of the group
 	 * @param  classNameId the primary key of the class name for the template's
 	 *         related model
 	 * @param  templateKey the unique string identifying the template
-	 * @param  includeAncestorTemplates whether to include the parent sites in
-	 *         the search
+	 * @param  includeAncestorTemplates whether to include ancestor sites (that
+	 *         have sharing enabled) and include global scoped sites in the
+	 *         search in the search
 	 * @return the matching template
 	 * @throws PortalException if a matching template could not be found
 	 */
@@ -673,7 +705,7 @@ public class DDMTemplateLocalServiceImpl
 			boolean includeAncestorTemplates)
 		throws PortalException {
 
-		List<DDMTemplate> ddmTemplates = new ArrayList<DDMTemplate>();
+		List<DDMTemplate> ddmTemplates = new ArrayList<>();
 
 		ddmTemplates.addAll(
 			ddmTemplatePersistence.findByG_C_C(groupId, classNameId, classPK));
@@ -1254,6 +1286,13 @@ public class DDMTemplateLocalServiceImpl
 			template.setClassPK(classPK);
 		}
 
+		DDMTemplateVersion latestTemplateVersion =
+			ddmTemplateVersionLocalService.getLatestTemplateVersion(templateId);
+
+		String version = getNextVersion(
+			latestTemplateVersion.getVersion(), false);
+
+		template.setVersion(version);
 		template.setNameMap(nameMap);
 		template.setDescriptionMap(descriptionMap);
 		template.setType(type);
@@ -1271,6 +1310,10 @@ public class DDMTemplateLocalServiceImpl
 		saveImages(
 			smallImage, template.getSmallImageId(), smallImageFile,
 			smallImageBytes);
+
+		// Template version
+
+		addTemplateVersion(template, version);
 
 		return template;
 	}
@@ -1316,6 +1359,31 @@ public class DDMTemplateLocalServiceImpl
 			template.getSmallImageURL(), smallImageFile, serviceContext);
 	}
 
+	protected DDMTemplateVersion addTemplateVersion(
+		DDMTemplate template, String version) {
+
+		long templateVersionId = counterLocalService.increment();
+
+		DDMTemplateVersion templateVersion =
+			ddmTemplateVersionPersistence.create(templateVersionId);
+
+		templateVersion.setGroupId(template.getGroupId());
+		templateVersion.setCompanyId(template.getCompanyId());
+		templateVersion.setUserId(template.getUserId());
+		templateVersion.setUserName(template.getUserName());
+		templateVersion.setCreateDate(template.getModifiedDate());
+		templateVersion.setTemplateId(template.getTemplateId());
+		templateVersion.setVersion(version);
+		templateVersion.setName(template.getName());
+		templateVersion.setDescription(template.getDescription());
+		templateVersion.setLanguage(template.getLanguage());
+		templateVersion.setScript(template.getScript());
+
+		ddmTemplateVersionPersistence.update(templateVersion);
+
+		return templateVersion;
+	}
+
 	protected DDMTemplate copyTemplate(
 			long userId, DDMTemplate template, long classPK,
 			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,
@@ -1326,10 +1394,11 @@ public class DDMTemplateLocalServiceImpl
 
 		return addTemplate(
 			userId, template.getGroupId(), template.getClassNameId(), classPK,
-			null, nameMap, descriptionMap, template.getType(),
-			template.getMode(), template.getLanguage(), template.getScript(),
-			template.isCacheable(), template.isSmallImage(),
-			template.getSmallImageURL(), smallImageFile, serviceContext);
+			template.getSourceClassNameId(), null, nameMap, descriptionMap,
+			template.getType(), template.getMode(), template.getLanguage(),
+			template.getScript(), template.isCacheable(),
+			template.isSmallImage(), template.getSmallImageURL(),
+			smallImageFile, serviceContext);
 	}
 
 	protected String formatScript(String type, String language, String script)
@@ -1348,6 +1417,20 @@ public class DDMTemplateLocalServiceImpl
 		}
 
 		return script;
+	}
+
+	protected String getNextVersion(String version, boolean majorVersion) {
+		int[] versionParts = StringUtil.split(version, StringPool.PERIOD, 0);
+
+		if (majorVersion) {
+			versionParts[0]++;
+			versionParts[1] = 0;
+		}
+		else {
+			versionParts[1]++;
+		}
+
+		return versionParts[0] + StringPool.PERIOD + versionParts[1];
 	}
 
 	protected File getSmallImageFile(DDMTemplate template) {
@@ -1477,7 +1560,7 @@ public class DDMTemplateLocalServiceImpl
 		}
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		DDMTemplateLocalServiceImpl.class);
 
 }

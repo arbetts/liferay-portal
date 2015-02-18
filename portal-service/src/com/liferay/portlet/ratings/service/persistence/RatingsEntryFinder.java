@@ -18,9 +18,13 @@ import aQute.bnd.annotation.ProviderType;
 
 /**
  * @author Brian Wing Shun Chan
+ * @generated
  */
 @ProviderType
 public interface RatingsEntryFinder {
+	public java.util.Map<java.io.Serializable, com.liferay.portlet.ratings.model.RatingsEntry> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys);
+
 	public java.util.List<com.liferay.portlet.ratings.model.RatingsEntry> findByU_C_C(
 		long userId, long classNameId, java.util.List<java.lang.Long> classPKs);
 }

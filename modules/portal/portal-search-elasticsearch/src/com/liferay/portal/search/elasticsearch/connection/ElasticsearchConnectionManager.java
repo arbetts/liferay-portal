@@ -14,6 +14,8 @@
 
 package com.liferay.portal.search.elasticsearch.connection;
 
+import com.liferay.portal.search.elasticsearch.spi.connection.ElasticsearchConnection;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
@@ -56,8 +58,11 @@ public class ElasticsearchConnectionManager {
 		return adminClient.cluster();
 	}
 
-	public ClusterHealthResponse getClusterHealthResponse() {
-		return _elasticsearchConnection.get().getClusterHealthResponse();
+	public ClusterHealthResponse getClusterHealthResponse(
+		long timeout, int nodesCount) {
+
+		return _elasticsearchConnection.get().getClusterHealthResponse(
+			timeout, nodesCount);
 	}
 
 	public ElasticsearchConnection getElasticsearchConnection() {
@@ -81,7 +86,7 @@ public class ElasticsearchConnectionManager {
 		_elasticsearchConnection.set(null);
 	}
 
-	private AtomicReference<ElasticsearchConnection> _elasticsearchConnection =
-		new AtomicReference<ElasticsearchConnection>();
+	private final AtomicReference<ElasticsearchConnection>
+		_elasticsearchConnection = new AtomicReference<>();
 
 }

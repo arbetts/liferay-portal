@@ -15,6 +15,7 @@
 package com.liferay.portlet.journal.trash;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.trash.BaseTrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
@@ -28,6 +29,7 @@ import com.liferay.portlet.journal.service.JournalFolderLocalServiceUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Eudaldo Alonso
@@ -47,7 +49,7 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 	}
 
 	@Override
-	public String getContainerModelName() {
+	public String getContainerModelName(long classPK) {
 		return "folder";
 	}
 
@@ -56,12 +58,10 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 			long classPK, long parentContainerModelId, int start, int end)
 		throws PortalException {
 
-		List<JournalFolder> folders =
-			JournalFolderLocalServiceUtil.getFolders(
-				getGroupId(classPK), parentContainerModelId, start, end);
+		List<JournalFolder> folders = JournalFolderLocalServiceUtil.getFolders(
+			getGroupId(classPK), parentContainerModelId, start, end);
 
-		List<ContainerModel> containerModels = new ArrayList<ContainerModel>(
-			folders.size());
+		List<ContainerModel> containerModels = new ArrayList<>(folders.size());
 
 		for (JournalFolder curFolder : folders) {
 			containerModels.add(curFolder);
@@ -83,7 +83,7 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 	public List<ContainerModel> getParentContainerModels(long classPK)
 		throws PortalException {
 
-		List<ContainerModel> containerModels = new ArrayList<ContainerModel>();
+		List<ContainerModel> containerModels = new ArrayList<>();
 
 		ContainerModel containerModel = getParentContainerModel(classPK);
 
@@ -109,7 +109,19 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 
 	@Override
 	public String getRootContainerModelName() {
-		return "home";
+		return "folder";
+	}
+
+	@Override
+	public String getRootContainerModelTitle(
+		long containerModelId, Locale locale) {
+
+		return LanguageUtil.get(locale, "home");
+	}
+
+	@Override
+	public String getSubcontainerModelName() {
+		return "folder";
 	}
 
 	@Override
@@ -132,7 +144,7 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 			long classPK, int start, int end)
 		throws PortalException {
 
-		List<TrashRenderer> trashRenderers = new ArrayList<TrashRenderer>();
+		List<TrashRenderer> trashRenderers = new ArrayList<>();
 
 		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
 
@@ -175,7 +187,7 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 			long classPK, int start, int end)
 		throws PortalException {
 
-		List<TrashRenderer> trashRenderers = new ArrayList<TrashRenderer>();
+		List<TrashRenderer> trashRenderers = new ArrayList<>();
 
 		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
 

@@ -26,8 +26,8 @@ import com.liferay.portal.kernel.search.SearchEngineUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortalRunMode;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.search.elasticsearch.connection.ElasticsearchConnection;
 import com.liferay.portal.search.elasticsearch.connection.ElasticsearchConnectionManager;
+import com.liferay.portal.search.elasticsearch.spi.connection.ElasticsearchConnection;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -168,7 +168,7 @@ public class ElasticsearchEngineConfigurator
 	private IndexSearcher _indexSearcher;
 	private IndexWriter _indexWriter;
 	private MessageBus _messageBus;
-	private Map<String, SearchEngine> _searchEngines =
-		new ConcurrentHashMap<String, SearchEngine>();
+	private final Map<String, SearchEngine> _searchEngines =
+		new ConcurrentHashMap<>();
 
 }

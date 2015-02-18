@@ -3,6 +3,10 @@
 		border-bottom: 1px solid #DDD;
 		padding: 0.6em 0;
 
+		&:last-child {
+			border-bottom-width: 0;
+		}
+
 		.asset-content p {
 			margin-bottom: 0;
 		}
@@ -39,24 +43,6 @@
 	.asset-edit {
 		float: right;
 		margin-left: 1em;
-	}
-
-	.asset-metadata {
-		clear: both;
-		overflow: hidden;
-		padding: 10px;
-
-		span {
-			display: inline-block;
-		}
-
-		.metadata-author {
-			display: none;
-		}
-
-		.metadata-categories span {
-			float: none;
-		}
 	}
 
 	.asset-more {
@@ -160,16 +146,6 @@
 
 	.add-asset-selector {
 		margin-right: 0;
-	}
-
-	.metadata-author {
-		font-weight: bold;
-		margin-right: 10px;
-	}
-
-	.metadata-entry {
-		color: #999;
-		margin-right: 2em;
 	}
 
 	.single-item-button {

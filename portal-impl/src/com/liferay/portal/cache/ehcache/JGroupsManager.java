@@ -52,17 +52,21 @@ public class JGroupsManager implements CacheManagerPeerProvider, CachePeer {
 		CacheManager cacheManager, String clusterName,
 		String channelProperties) {
 
+		_cacheManager = cacheManager;
+
+		JChannel jChannel = null;
+
 		try {
-			_jChannel = new JChannel(channelProperties);
+			jChannel = new JChannel(channelProperties);
 
-			_jChannel.setReceiver(new EhcacheJGroupsReceiver());
+			jChannel.setReceiver(new EhcacheJGroupsReceiver());
 
-			_jChannel.connect(clusterName);
+			jChannel.connect(clusterName);
 
 			if (_log.isInfoEnabled()) {
 				_log.info(
 					"Create a new channel with properties " +
-						_jChannel.getProperties());
+						jChannel.getProperties());
 			}
 		}
 		catch (Exception e) {
@@ -71,7 +75,11 @@ public class JGroupsManager implements CacheManagerPeerProvider, CachePeer {
 			}
 		}
 
-		_cacheManager = cacheManager;
+		_jChannel = jChannel;
+
+		BaseReceiver baseReceiver = (BaseReceiver)_jChannel.getReceiver();
+
+		baseReceiver.openLatch();
 	}
 
 	@Override
@@ -161,7 +169,7 @@ public class JGroupsManager implements CacheManagerPeerProvider, CachePeer {
 
 	@Override
 	public List<JGroupsManager> listRemoteCachePeers(Ehcache ehcache) {
-		List<JGroupsManager> cachePeers = new ArrayList<JGroupsManager>();
+		List<JGroupsManager> cachePeers = new ArrayList<>();
 
 		cachePeers.add(this);
 
@@ -189,8 +197,7 @@ public class JGroupsManager implements CacheManagerPeerProvider, CachePeer {
 	public void send(Address address, List eventMessages)
 		throws RemoteException {
 
-		ArrayList<JGroupEventMessage> jGroupEventMessages =
-			new ArrayList<JGroupEventMessage>();
+		ArrayList<JGroupEventMessage> jGroupEventMessages = new ArrayList<>();
 
 		for (Object eventMessage : eventMessages) {
 			if (eventMessage instanceof JGroupEventMessage) {
@@ -269,15 +276,15 @@ public class JGroupsManager implements CacheManagerPeerProvider, CachePeer {
 
 	private static final String _SCHEME = "JGroups";
 
-	private static Log _log = LogFactoryUtil.getLog(JGroupsManager.class);
+	private static final Log _log = LogFactoryUtil.getLog(JGroupsManager.class);
 
-	private CacheManager _cacheManager;
-	private JChannel _jChannel;
+	private final CacheManager _cacheManager;
+	private final JChannel _jChannel;
 
 	private class EhcacheJGroupsReceiver extends BaseReceiver {
 
 		@Override
-		public void receive(Message message) {
+		protected void doReceive(Message message) {
 			Object object = message.getObject();
 
 			if (object == null) {

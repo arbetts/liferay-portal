@@ -16,7 +16,8 @@ package com.liferay.portal.search.elasticsearch.connection;
 
 import com.liferay.portal.kernel.util.PortalRunMode;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.search.elasticsearch.index.IndexFactory;
+import com.liferay.portal.search.elasticsearch.spi.connection.ElasticsearchConnection;
+import com.liferay.portal.search.elasticsearch.spi.index.IndexFactory;
 
 import java.util.concurrent.Future;
 
@@ -47,7 +48,9 @@ public abstract class BaseElasticsearchConnection
 	}
 
 	@Override
-	public ClusterHealthResponse getClusterHealthResponse() {
+	public ClusterHealthResponse getClusterHealthResponse(
+		long timeout, int nodesCount) {
+
 		AdminClient adminClient = _client.admin();
 
 		ClusterAdminClient clusterAdminClient = adminClient.cluster();
@@ -55,17 +58,11 @@ public abstract class BaseElasticsearchConnection
 		ClusterHealthRequestBuilder clusterHealthRequestBuilder =
 			clusterAdminClient.prepareHealth();
 
-		if (PortalRunMode.isTestMode()) {
-			clusterHealthRequestBuilder.setTimeout(
-				TimeValue.timeValueMillis(100));
-		}
-		else {
-			clusterHealthRequestBuilder.setTimeout(
-				TimeValue.timeValueSeconds(30));
-		}
+		clusterHealthRequestBuilder.setTimeout(
+			TimeValue.timeValueMillis(timeout));
 
 		clusterHealthRequestBuilder.setWaitForGreenStatus();
-		clusterHealthRequestBuilder.setWaitForNodes(">1");
+		clusterHealthRequestBuilder.setWaitForNodes(">" + (nodesCount - 1));
 
 		Future<ClusterHealthResponse> future =
 			clusterHealthRequestBuilder.execute();

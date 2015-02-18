@@ -92,7 +92,7 @@ int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 
 		if (dates.length >= 2) {
 			var firstSelected = dates[0];
-			var lastSelected = dates[dates.length-1];
+			var lastSelected = dates[dates.length - 1];
 
 			if (A.DataType.DateMath.before(dates[0], dates[1])) {
 				minDate = firstSelected;
@@ -132,10 +132,10 @@ int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 
 						if (dates.length > 1) {
 							firstSelected = dates[0];
-							lastSelected = dates[dates.length-1];
+							lastSelected = dates[dates.length - 1];
 
 							if (firstSelected > lastSelected) {
-								firstSelected = dates[dates.length-1];
+								firstSelected = dates[dates.length - 1];
 								lastSelected = dates[0];
 							}
 						}
@@ -180,13 +180,17 @@ int firstDayOfWeek = localeCal.getFirstDayOfWeek() - 1;
 			minDate: A.DataType.DateMath.subtract(now, A.DataType.DateMath.YEAR, 2),
 			selectMultipleDates: true,
 			setValue: true,
-			showToday: true,
-			strings: {
-				next: '<liferay-ui:message key="next" />',
-				none: '<liferay-ui:message key="none" />',
-				previous: '<liferay-ui:message key="previous" />',
-				today: '<liferay-ui:message key="today" />'
-			}
+			showToday: true
 		}
 	).render('#<portlet:namespace /><%= HtmlUtil.escapeJS(facet.getFieldId()) %>PlaceHolder');
+
+	dateSelection.set(
+		'strings',
+		{
+			next: '<liferay-ui:message key="next" />',
+			none: '<liferay-ui:message key="none" />',
+			previous: '<liferay-ui:message key="previous" />',
+			today: '<liferay-ui:message key="today" />'
+		}
+	);
 </aui:script>

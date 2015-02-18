@@ -22,7 +22,8 @@ import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.util.PortalRunMode;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.search.elasticsearch.connection.ElasticsearchConnectionManager;
-import com.liferay.portal.search.elasticsearch.document.ElasticsearchDocumentFactory;
+import com.liferay.portal.search.elasticsearch.spi.ElasticsearchUpdateDocumentCommand;
+import com.liferay.portal.search.elasticsearch.spi.document.ElasticsearchDocumentFactory;
 import com.liferay.portal.search.elasticsearch.util.DocumentTypes;
 import com.liferay.portal.search.elasticsearch.util.LogUtil;
 
@@ -171,7 +172,7 @@ public class ElasticsearchUpdateDocumentCommandImpl
 		}
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		ElasticsearchUpdateDocumentCommandImpl.class);
 
 	private ElasticsearchConnectionManager _elasticsearchConnectionManager;

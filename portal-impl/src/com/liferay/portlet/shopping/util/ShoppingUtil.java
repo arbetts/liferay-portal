@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.model.Company;
+import com.liferay.portal.theme.PortletDisplay;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
@@ -183,24 +184,35 @@ public class ShoppingUtil {
 			return discount;
 		}
 
-		String[] categoryIds = StringUtil.split(coupon.getLimitCategories());
+		String[] categoryNames = StringUtil.split(coupon.getLimitCategories());
+
+		Set<Long> categoryIds = new HashSet<>();
+
+		for (String categoryName : categoryNames) {
+			ShoppingCategory category =
+				ShoppingCategoryLocalServiceUtil.getCategory(
+					coupon.getGroupId(), categoryName);
+
+			List<Long> subcategoryIds = new ArrayList<>();
+
+			ShoppingCategoryLocalServiceUtil.getSubcategoryIds(
+				subcategoryIds, category.getGroupId(),
+				category.getCategoryId());
+
+			categoryIds.add(category.getCategoryId());
+			categoryIds.addAll(subcategoryIds);
+		}
+
 		String[] skus = StringUtil.split(coupon.getLimitSkus());
 
-		if ((categoryIds.length > 0) || (skus.length > 0)) {
-			Set<String> categoryIdsSet = new HashSet<String>();
-
-			for (String categoryId : categoryIds) {
-				categoryIdsSet.add(categoryId);
-			}
-
-			Set<String> skusSet = new HashSet<String>();
+		if ((categoryIds.size() > 0) || (skus.length > 0)) {
+			Set<String> skusSet = new HashSet<>();
 
 			for (String sku : skus) {
 				skusSet.add(sku);
 			}
 
-			Map<ShoppingCartItem, Integer> newItems =
-				new HashMap<ShoppingCartItem, Integer>();
+			Map<ShoppingCartItem, Integer> newItems = new HashMap<>();
 
 			for (Map.Entry<ShoppingCartItem, Integer> entry :
 					items.entrySet()) {
@@ -210,9 +222,8 @@ public class ShoppingUtil {
 
 				ShoppingItem item = cartItem.getItem();
 
-				if ((!categoryIdsSet.isEmpty() &&
-					 categoryIdsSet.contains(
-						 String.valueOf(item.getCategoryId()))) ||
+				if ((!categoryIds.isEmpty() &&
+					 categoryIds.contains(item.getCategoryId())) ||
 					(!skusSet.isEmpty() && skusSet.contains(item.getSku()))) {
 
 					newItems.put(cartItem, count);
@@ -719,8 +730,7 @@ public class ShoppingUtil {
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		Map<String, String> definitionTerms =
-			new LinkedHashMap<String, String>();
+		Map<String, String> definitionTerms = new LinkedHashMap<>();
 
 		definitionTerms.put(
 			"[$FROM_ADDRESS$]", HtmlUtil.escape(emailFromAddress));
@@ -747,8 +757,11 @@ public class ShoppingUtil {
 
 		definitionTerms.put("[$PORTAL_URL$]", company.getVirtualHostname());
 
+		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
+
 		definitionTerms.put(
-			"[$PORTLET_NAME$]", PortalUtil.getPortletTitle(portletRequest));
+			"[$PORTLET_NAME$]", HtmlUtil.escape(portletDisplay.getTitle()));
+
 		definitionTerms.put(
 			"[$TO_ADDRESS$]",
 			LanguageUtil.get(
@@ -766,7 +779,7 @@ public class ShoppingUtil {
 		ShoppingItem item, ShoppingItemField[] itemFields,
 		String[] fieldsArray) {
 
-		Set<String> fieldsValues = new HashSet<String>();
+		Set<String> fieldsValues = new HashSet<>();
 
 		for (String fields : fieldsArray) {
 			int pos = fields.indexOf("=");
@@ -776,8 +789,8 @@ public class ShoppingUtil {
 			fieldsValues.add(fieldValue.trim());
 		}
 
-		List<String> names = new ArrayList<String>();
-		List<String[]> values = new ArrayList<String[]>();
+		List<String> names = new ArrayList<>();
+		List<String[]> values = new ArrayList<>();
 
 		for (int i = 0; i < itemFields.length; i++) {
 			names.add(itemFields[i].getName());
@@ -808,9 +821,8 @@ public class ShoppingUtil {
 
 				int arrayPos;
 
-				for (arrayPos = i / numOfRepeats;
-					arrayPos >= vArray.length;
-					arrayPos = arrayPos - vArray.length) {
+				for (arrayPos = i / numOfRepeats; arrayPos >= vArray.length;
+					 arrayPos = arrayPos - vArray.length) {
 				}
 
 				if (!fieldsValues.contains(vArray[arrayPos].trim())) {
@@ -985,7 +997,7 @@ public class ShoppingUtil {
 	}
 
 	public static boolean isInStock(ShoppingItem item) {
-		if (item.hasInfiniteStock()) {
+		if (item.isInfiniteStock()) {
 			return true;
 		}
 
@@ -1014,7 +1026,7 @@ public class ShoppingUtil {
 		ShoppingItem item, ShoppingItemField[] itemFields, String[] fieldsArray,
 		Integer orderedQuantity) {
 
-		if (item.hasInfiniteStock()) {
+		if (item.isInfiniteStock()) {
 			return true;
 		}
 

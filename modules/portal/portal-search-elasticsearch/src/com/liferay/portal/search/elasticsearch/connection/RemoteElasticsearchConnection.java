@@ -20,7 +20,8 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.search.elasticsearch.index.IndexFactory;
+import com.liferay.portal.search.elasticsearch.spi.connection.ElasticsearchConnection;
+import com.liferay.portal.search.elasticsearch.spi.index.IndexFactory;
 import com.liferay.registry.util.StringPlus;
 
 import java.net.InetAddress;
@@ -128,9 +129,9 @@ public class RemoteElasticsearchConnection extends BaseElasticsearchConnection {
 		return transportClient;
 	}
 
-	private static Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		RemoteElasticsearchConnection.class);
 
-	private Set<String> _transportAddresses = new HashSet<String>();
+	private Set<String> _transportAddresses = new HashSet<>();
 
 }

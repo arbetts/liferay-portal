@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * @author Brian Wing Shun Chan
+ * @generated
  */
 @ProviderType
 public class ResourcePermissionFinderUtil {
@@ -39,6 +40,11 @@ public class ResourcePermissionFinderUtil {
 		long companyId, long groupId, java.lang.String name,
 		java.lang.String primKey) {
 		return getFinder().findByResource(companyId, groupId, name, primKey);
+	}
+
+	public static java.util.Map<java.io.Serializable, com.liferay.portal.model.ResourcePermission> fetchByPrimaryKeys(
+		java.util.Set<java.io.Serializable> primaryKeys) {
+		return getFinder().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	public static java.util.List<com.liferay.portal.model.ResourcePermission> findByR_S(

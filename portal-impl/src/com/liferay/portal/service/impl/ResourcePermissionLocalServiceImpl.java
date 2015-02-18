@@ -42,7 +42,6 @@ import com.liferay.portal.security.permission.PermissionCacheUtil;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.service.base.ResourcePermissionLocalServiceBaseImpl;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.ResourcePermissionsThreadLocal;
 import com.liferay.util.dao.orm.CustomSQLUtil;
@@ -161,11 +160,11 @@ public class ResourcePermissionLocalServiceImpl
 	 * permissions to view all blog posts.
 	 * </p>
 	 *
-	 * @param  resourceName the resource's name, which can be either a class
-	 *         name or a portlet ID
-	 * @param  roleName the role's name
-	 * @param  scope the scope
-	 * @param  resourceActionBitwiseValue the bitwise IDs of the actions
+	 * @param resourceName the resource's name, which can be either a class name
+	 *        or a portlet ID
+	 * @param roleName the role's name
+	 * @param scope the scope
+	 * @param resourceActionBitwiseValue the bitwise IDs of the actions
 	 */
 	@Override
 	public void addResourcePermissions(
@@ -324,6 +323,14 @@ public class ResourcePermissionLocalServiceImpl
 	}
 
 	@Override
+	public ResourcePermission fetchResourcePermission(
+		long companyId, String name, int scope, String primKey, long roleId) {
+
+		return resourcePermissionPersistence.fetchByC_N_S_P_R(
+			companyId, name, scope, primKey, roleId);
+	}
+
+	@Override
 	public Map<Long, Set<String>> getAvailableResourcePermissionActionIds(
 		long companyId, String name, int scope, String primKey,
 		Collection<String> actionIds) {
@@ -335,16 +342,15 @@ public class ResourcePermissionLocalServiceImpl
 		List<ResourcePermission> resourcePermissions = getResourcePermissions(
 			companyId, name, scope, primKey);
 
-		Map<Long, Set<String>> roleIdsToActionIds =
-			new HashMap<Long, Set<String>>(resourcePermissions.size());
+		Map<Long, Set<String>> roleIdsToActionIds = new HashMap<>(
+			resourcePermissions.size());
 
 		for (ResourcePermission resourcePermission : resourcePermissions) {
 			if (resourcePermission.getActionIds() == 0) {
 				continue;
 			}
 
-			Set<String> availableActionIds = new HashSet<String>(
-				actionIds.size());
+			Set<String> availableActionIds = new HashSet<>(actionIds.size());
 
 			for (String actionId : actionIds) {
 				if (resourcePermission.hasActionId(actionId)) {
@@ -391,8 +397,7 @@ public class ResourcePermissionLocalServiceImpl
 			return Collections.emptyList();
 		}
 
-		List<String> availableActionIds = new ArrayList<String>(
-			actionIds.size());
+		List<String> availableActionIds = new ArrayList<>(actionIds.size());
 
 		for (String actionId : actionIds) {
 			ResourceAction resourceAction =
@@ -408,8 +413,8 @@ public class ResourcePermissionLocalServiceImpl
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
-	 *             #getAvailableResourcePermissionActionIds(
-	 *             long, String, int, String, Collection)}
+	 *             #getAvailableResourcePermissionActionIds(long, String, int,
+	 *             String, Collection)}
 	 */
 	@Deprecated
 	@Override
@@ -608,13 +613,47 @@ public class ResourcePermissionLocalServiceImpl
 			List<Resource> resources, long[] roleIds, String actionId)
 		throws PortalException {
 
+		if (roleIds.length == 0) {
+			return false;
+		}
+
+		int size = resources.size();
+
+		if (size < 2) {
+			throw new IllegalArgumentException(
+				"The list of resources must contain at least two values");
+		}
+
+		Resource firstResource = resources.get(0);
+
+		if (firstResource.getScope() != ResourceConstants.SCOPE_INDIVIDUAL) {
+			throw new IllegalArgumentException(
+				"The first resource must be an individual scope");
+		}
+
+		Resource lastResource = resources.get(size - 1);
+
+		if (lastResource.getScope() != ResourceConstants.SCOPE_COMPANY) {
+			throw new IllegalArgumentException(
+				"The last resource must be a company scope");
+		}
+
+		// See LPS-47464
+
+		if (resourcePermissionPersistence.countByC_N_S_P(
+				firstResource.getCompanyId(), firstResource.getName(),
+				firstResource.getScope(), firstResource.getPrimKey()) < 1) {
+
+			return false;
+		}
+
 		// Iterate the list of resources in reverse order to test permissions
 		// from company scope to individual scope because it is more likely that
 		// a permission is assigned at a higher scope. Optimizing this method to
 		// one SQL call may actually slow things down since most of the calls
 		// will pull from the cache after the first request.
 
-		for (int i = resources.size() - 1; i >= 0; i--) {
+		for (int i = size - 1; i >= 0; i--) {
 			Resource resource = resources.get(i);
 
 			if (hasResourcePermission(
@@ -704,6 +743,10 @@ public class ResourcePermissionLocalServiceImpl
 			long[] roleIds, String actionId)
 		throws PortalException {
 
+		if (roleIds.length == 0) {
+			return false;
+		}
+
 		ResourceAction resourceAction =
 			resourceActionLocalService.getResourceAction(name, actionId);
 
@@ -751,14 +794,18 @@ public class ResourcePermissionLocalServiceImpl
 			long[] roleIds, String actionId)
 		throws PortalException {
 
+		boolean[] hasResourcePermissions = new boolean[roleIds.length];
+
+		if (roleIds.length == 0) {
+			return hasResourcePermissions;
+		}
+
 		ResourceAction resourceAction =
 			resourceActionLocalService.getResourceAction(name, actionId);
 
 		List<ResourcePermission> resourcePermissions =
 			resourcePermissionPersistence.findByC_N_S_P_R(
 				companyId, name, scope, primKey, roleIds);
-
-		boolean[] hasResourcePermissions = new boolean[roleIds.length];
 
 		if (resourcePermissions.isEmpty()) {
 			return hasResourcePermissions;
@@ -841,10 +888,10 @@ public class ResourcePermissionLocalServiceImpl
 		if (fromRole.getType() != toRole.getType()) {
 			throw new PortalException("Role types are mismatched");
 		}
-		else if (PortalUtil.isSystemRole(toRole.getName())) {
+		else if (toRole.isSystem()) {
 			throw new PortalException("Cannot move permissions to system role");
 		}
-		else if (PortalUtil.isSystemRole(fromRole.getName())) {
+		else if (fromRole.isSystem()) {
 			throw new PortalException(
 				"Cannot move permissions from system role");
 		}

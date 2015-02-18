@@ -16,6 +16,7 @@ package com.liferay.portal.search.elasticsearch.facet;
 
 import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.search.elasticsearch.spi.facet.FacetProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -95,8 +96,7 @@ public class CompositeFacetProcessor
 	}
 
 	private static FacetProcessor<SearchRequestBuilder> _defaultFacetProcessor;
-	private static Map<String, FacetProcessor<SearchRequestBuilder>>
-		_facetProcessors =
-			new HashMap<String, FacetProcessor<SearchRequestBuilder>>();
+	private static final Map<String, FacetProcessor<SearchRequestBuilder>>
+		_facetProcessors = new HashMap<>();
 
 }
