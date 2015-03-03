@@ -1036,6 +1036,10 @@ public class VerifyProperties extends VerifyProcess {
 			"passwords.passwordpolicytoolkit.validator.charset.uppercase"
 		},
 		new String[] {
+			"permissions.inline.sql.resource.block.query.threshhold=100",
+			"permissions.inline.sql.resource.block.query.threshold=100"
+		},
+		new String[] {
 			"portal.instance.http.port", "portal.instance.http.socket.address"
 		},
 		new String[] {
