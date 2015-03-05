@@ -20,13 +20,13 @@ import com.liferay.portal.kernel.cluster.ClusterEventListener;
 import com.liferay.portal.kernel.cluster.ClusterException;
 import com.liferay.portal.kernel.cluster.ClusterExecutor;
 import com.liferay.portal.kernel.cluster.ClusterInvokeThreadLocal;
-import com.liferay.portal.kernel.cluster.ClusterMessageType;
 import com.liferay.portal.kernel.cluster.ClusterNode;
 import com.liferay.portal.kernel.cluster.ClusterNodeResponse;
 import com.liferay.portal.kernel.cluster.ClusterRequest;
 import com.liferay.portal.kernel.cluster.FutureClusterResponses;
 import com.liferay.portal.kernel.concurrent.ConcurrentReferenceValueHashMap;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.executor.PortalExecutorManagerUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.memory.FinalizeManager;
@@ -44,6 +44,8 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 
+import java.io.Serializable;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -58,6 +60,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
 
 import org.jgroups.JChannel;
 
@@ -90,6 +93,8 @@ public class ClusterExecutorImpl
 		_controlJChannel.setReceiver(null);
 
 		_controlJChannel.close();
+
+		_executorService.shutdownNow();
 
 		_clusterEventListeners.clear();
 		_clusterNodeAddresses.clear();
@@ -196,6 +201,9 @@ public class ClusterExecutorImpl
 			return;
 		}
 
+		_executorService = PortalExecutorManagerUtil.getPortalExecutor(
+			ClusterExecutorImpl.class.getName());
+
 		PortalUtil.addPortalInetSocketAddressEventListener(this);
 
 		if (PropsValues.CLUSTER_EXECUTOR_DEBUG_ENABLED) {
@@ -260,8 +268,8 @@ public class ClusterExecutorImpl
 
 			memberJoined(_localAddress, _localClusterNode);
 
-			ClusterRequest clusterRequest = ClusterRequest.createClusterRequest(
-				ClusterMessageType.UPDATE, _localClusterNode);
+			ClusterRequest clusterRequest =
+				ClusterRequest.createMulticastRequest(_localClusterNode, true);
 
 			_controlJChannel.send(null, clusterRequest);
 		}
@@ -299,14 +307,16 @@ public class ClusterExecutorImpl
 	protected ClusterNodeResponse executeClusterRequest(
 		ClusterRequest clusterRequest) {
 
-		MethodHandler methodHandler = clusterRequest.getMethodHandler();
+		Serializable payload = clusterRequest.getPayload();
 
-		if (methodHandler == null) {
+		if (!(payload instanceof MethodHandler)) {
 			return ClusterNodeResponse.createExceptionClusterNodeResponse(
 				_localClusterNode, clusterRequest.getUuid(),
 				new ClusterException(
 					"Payload is not of type " + MethodHandler.class.getName()));
 		}
+
+		MethodHandler methodHandler = (MethodHandler)payload;
 
 		ClusterInvokeThreadLocal.setEnabled(false);
 
@@ -346,7 +356,7 @@ public class ClusterExecutorImpl
 			PropsKeys.CLUSTER_LINK_CHANNEL_PROPERTIES_CONTROL);
 
 		ClusterRequestReceiver clusterRequestReceiver =
-			new ClusterRequestReceiver(this);
+			new ClusterRequestReceiver(this, _executorService);
 
 		_controlJChannel = createJChannel(
 			controlProperty, clusterRequestReceiver, _DEFAULT_CLUSTER_NAME);
@@ -409,19 +419,23 @@ public class ClusterExecutorImpl
 		_localClusterNode = clusterNode;
 	}
 
-	protected void memberJoined(Address joinAddress, ClusterNode clusterNode) {
+	protected boolean memberJoined(
+		Address joinAddress, ClusterNode clusterNode) {
+
 		_liveInstances.put(joinAddress, clusterNode);
 
 		Address previousAddress = _clusterNodeAddresses.put(
 			clusterNode.getClusterNodeId(), joinAddress);
 
-		if (previousAddress == null) {
-			ClusterEvent clusterEvent = ClusterEvent.join(clusterNode);
-
-			// PLACEHOLDER
-
-			fireClusterEvent(clusterEvent);
+		if (previousAddress != null) {
+			return false;
 		}
+
+		ClusterEvent clusterEvent = ClusterEvent.join(clusterNode);
+
+		fireClusterEvent(clusterEvent);
+
+		return true;
 	}
 
 	protected void memberRemoved(List<Address> departAddresses) {
@@ -480,8 +494,8 @@ public class ClusterExecutorImpl
 	}
 
 	protected void sendNotifyRequest() {
-		ClusterRequest clusterRequest = ClusterRequest.createClusterRequest(
-			ClusterMessageType.NOTIFY, _localClusterNode);
+		ClusterRequest clusterRequest = ClusterRequest.createMulticastRequest(
+			_localClusterNode, true);
 
 		try {
 			_controlJChannel.send(null, clusterRequest);
@@ -502,6 +516,7 @@ public class ClusterExecutorImpl
 	private final Map<String, Address> _clusterNodeAddresses =
 		new ConcurrentHashMap<>();
 	private JChannel _controlJChannel;
+	private ExecutorService _executorService;
 	private final Map<String, FutureClusterResponses> _futureClusterResponses =
 		new ConcurrentReferenceValueHashMap<>(
 			FinalizeManager.WEAK_REFERENCE_FACTORY);

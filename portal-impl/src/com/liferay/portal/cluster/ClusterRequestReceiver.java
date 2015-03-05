@@ -17,7 +17,6 @@ package com.liferay.portal.cluster;
 import com.liferay.portal.kernel.cache.Lifecycle;
 import com.liferay.portal.kernel.cache.ThreadLocalCacheManager;
 import com.liferay.portal.kernel.cluster.Address;
-import com.liferay.portal.kernel.cluster.ClusterMessageType;
 import com.liferay.portal.kernel.cluster.ClusterNode;
 import com.liferay.portal.kernel.cluster.ClusterNodeResponse;
 import com.liferay.portal.kernel.cluster.ClusterRequest;
@@ -26,9 +25,12 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.CentralizedThreadLocal;
 
+import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import org.jgroups.Channel;
 import org.jgroups.Message;
@@ -40,7 +42,12 @@ import org.jgroups.View;
  */
 public class ClusterRequestReceiver extends BaseReceiver {
 
-	public ClusterRequestReceiver(ClusterExecutorImpl clusterExecutorImpl) {
+	public ClusterRequestReceiver(
+		ClusterExecutorImpl clusterExecutorImpl,
+		ExecutorService executorService) {
+
+		super(executorService);
+
 		_clusterExecutorImpl = clusterExecutorImpl;
 	}
 
@@ -164,25 +171,23 @@ public class ClusterRequestReceiver extends BaseReceiver {
 
 		Object responsePayload = null;
 
-		ClusterMessageType clusterMessageType =
-			clusterRequest.getClusterMessageType();
+		Serializable requestPayload = clusterRequest.getPayload();
 
-		if (clusterMessageType == ClusterMessageType.EXECUTE) {
+		if (requestPayload instanceof ClusterNode) {
+			boolean newMember = _clusterExecutorImpl.memberJoined(
+				sourceAddress, (ClusterNode)requestPayload);
+
+			if (newMember) {
+				responsePayload = ClusterRequest.createMulticastRequest(
+					_clusterExecutorImpl.getLocalClusterNode(), true);
+			}
+		}
+		else {
 			ClusterNodeResponse clusterNodeResponse =
 				_clusterExecutorImpl.executeClusterRequest(clusterRequest);
 
 			if (!clusterRequest.isFireAndForget()) {
 				responsePayload = clusterNodeResponse;
-			}
-		}
-		else {
-			_clusterExecutorImpl.memberJoined(
-				sourceAddress, clusterRequest.getOriginatingClusterNode());
-
-			if (clusterMessageType == ClusterMessageType.NOTIFY) {
-				responsePayload = ClusterRequest.createClusterRequest(
-					ClusterMessageType.UPDATE,
-					_clusterExecutorImpl.getLocalClusterNode());
 			}
 		}
 
