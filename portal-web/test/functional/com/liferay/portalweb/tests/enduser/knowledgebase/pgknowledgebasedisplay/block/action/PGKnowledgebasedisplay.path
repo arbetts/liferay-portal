@@ -39,11 +39,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>CONFIRMATION</td>
-	<td></td>
-	<td></td>
-</tr>
-<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -131,12 +126,12 @@
 </tr>
 <tr>
 	<td>ARTICLE_PREVIOUS</td>
-	<td>//div[@class='kb-article-container']//div/span[@class='kb-article-previous']/a/i[contains(@class,'left')]</td>
+	<td>//div[@class='kb-article-container']//div/span[@class='kb-article-previous']/a/span</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ARTICLE_NEXT</td>
-	<td>//div[@class='kb-article-container']//div/span[@class='kb-article-next']/a/i[contains(@class,'right')]</td>
+	<td>//div[@class='kb-article-container']//div/span[@class='kb-article-next']/a/span</td>
 	<td></td>
 </tr>
 <tr>
@@ -162,7 +157,7 @@
 </tr>
 <tr>
 	<td>ARTICLE_NAVIGATION_GENERIC</td>
-	<td>//div[@class='kbarticle-navigation']/ul/li/a</td>
+	<td>//div[@class='kbarticle-navigation']/ul</td>
 	<td></td>
 </tr>
 <tr>
@@ -172,7 +167,7 @@
 </tr>
 <tr>
 	<td>ARTICLE_NAVIGATION_CHILD_GENERIC</td>
-	<td>//div[@class='kbarticle-navigation']/ul/li/ul/li/a</td>
+	<td>//div[@class='kbarticle-navigation']/ul/li/ul</td>
 	<td></td>
 </tr>
 <tr>
@@ -248,6 +243,17 @@
 	<td></td>
 	<td></td>
 </tr>
+<!--FOLDER_NAVIGATION-->
+<tr>
+	<td>FOLDER_NAVIGATION_MENULIST</td>
+	<td>//div[contains(@class,'form-group')]/select</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
 <!--SUGGESTION-->
 <tr>
 	<td>SUGGESTION_TITLE</td>
@@ -262,6 +268,11 @@
 <tr>
 	<td>SUGGESTION_CONTENT</td>
 	<td>//div[@class='kb-article-comment']//div[contains(.,'${kbSuggestionBody}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SUGGESTION_CONTENT_DUPLICATE</td>
+	<td>xpath=(//div[@class='kb-article-comment']//div[contains(.,'${kbSuggestionBody}')])[2]</td>
 	<td></td>
 </tr>
 <tr>

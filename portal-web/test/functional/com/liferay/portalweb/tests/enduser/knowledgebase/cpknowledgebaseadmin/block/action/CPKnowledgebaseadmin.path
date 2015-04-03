@@ -49,11 +49,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>CONFIRMATION</td>
-	<td></td>
-	<td></td>
-</tr>
-<tr>
 	<td>SCOPE_SELECTOR_BUTTON</td>
 	<td>//div[contains(@class,'lfr-title-scope-selector')]//a[contains(@class,'dropdown-toggle')]</td>
 	<td></td>
@@ -215,6 +210,11 @@
 <tr>
 	<td>ARTICLE_TABLE_CREATE_DATE_POPUP</td>
 	<td>//div[contains(@class,'tooltip-inner')]/div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ARTICLE_TABLE_STATUS</td>
+	<td>//tr[contains(.,'${key_kbArticleTitle}')]/td[7]</td>
 	<td></td>
 </tr>
 <tr>

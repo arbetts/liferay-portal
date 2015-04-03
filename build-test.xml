@@ -26,21 +26,6 @@
 	<property name="plink.executable" location="${project.dir}/tools/putty/plink.exe" />
 	<property name="pscp.executable" location="${project.dir}/tools/putty/pscp.exe" />
 
-	<if>
-		<os family="unix" />
-		<then>
-			<exec executable="/bin/bash" os="${os.unix}" outputproperty="ip.address">
-				<arg value="-c" />
-				<arg value="ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'" />
-			</exec>
-		</then>
-		<else>
-			<hostinfo host="${env.COMPUTERNAME}.local" prefix="host.info" />
-
-			<property name="ip.address" value="${host.info.ADDR4}" />
-		</else>
-	</if>
-
 	<macrodef name="check-config">
 		<sequential>
 			<if>
@@ -90,7 +75,7 @@
 					</or>
 				</not>
 				<then>
-					<fail>Please set "browser.type" to one of the following:${line.separator}firefox, googlechrome, ie</fail>
+					<fail>Please set "browser.type" to one of the following:${line.separator}firefox, googlechrome, ie.</fail>
 				</then>
 			</if>
 
@@ -116,7 +101,7 @@
 					</or>
 				</not>
 				<then>
-					<fail>Please set "database.type" to one of the following:${line.separator}db2, hsql, mysql, oracle, postgresql, sql.server, sybase</fail>
+					<fail>Please set "database.type" to one of the following:${line.separator}db2, hsql, mysql, oracle, postgresql, sql.server, sybase.</fail>
 				</then>
 			</if>
 		</sequential>
@@ -343,9 +328,32 @@
 		</sequential>
 	</macrodef>
 
+	<macrodef name="get-ip-address">
+		<sequential>
+			<if>
+				<isset property="ip.address" />
+				<then>
+					<var name="ip.address" value="${ip.address}" />
+				</then>
+				<elseif>
+					<os family="unix" />
+					<then>
+						<exec executable="/bin/bash" os="${os.unix}" outputproperty="ip.address">
+							<arg value="-c" />
+							<arg value="ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'" />
+						</exec>
+					</then>
+				</elseif>
+				<else>
+					<fail message="Please set the property ${ip.address}." />
+				</else>
+			</if>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="get-test-class-name">
 		<sequential>
-			<fail message="Please set the property ${test.class}" unless="test.class" />
+			<fail message="Please set the property ${test.class}." unless="test.class" />
 
 			<var name="test.class.name" unset="true" />
 
@@ -395,7 +403,7 @@
 
 	<macrodef name="get-test-method-name">
 		<sequential>
-			<fail message="Please set the property ${test.class}" unless="test.class" />
+			<fail message="Please set the property ${test.class}." unless="test.class" />
 
 			<var name="test.method.name" unset="true" />
 
@@ -421,7 +429,7 @@
 
 	<macrodef name="get-test-name">
 		<sequential>
-			<fail message="Please set the property ${test.class}" unless="test.class" />
+			<fail message="Please set the property ${test.class}." unless="test.class" />
 
 			<var name="test.name" unset="true" />
 
@@ -439,19 +447,78 @@
 		</sequential>
 	</macrodef>
 
+	<macrodef name="get-test-simple-class-name">
+		<sequential>
+			<fail message="Please set the property ${test.class}." unless="test.class" />
+
+			<var name="test.simple.class.name" unset="true" />
+
+			<script classpathref="project.classpath" language="beanshell">
+				<![CDATA[
+					String testClass = project.getProperty("test.class");
+
+					String testSimpleClassName = testClass;
+
+					if (testClass.contains("#")) {
+						int x = testClass.indexOf("#");
+
+						testSimpleClassName =  testClass.substring(0, x);
+					}
+
+					if (!testSimpleClassName.endsWith("TestCase")) {
+						testSimpleClassName = testSimpleClassName + "TestCase";
+					}
+
+					project.setProperty("test.simple.class.name", testSimpleClassName);
+				]]>
+			</script>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="get-test-url">
+		<sequential>
+			<get-testcase-property property.name="mobile.device.enabled" />
+
+			<get-testcase-property property.name="testcase.url" />
+
+			<if>
+				<isset property="test.url" />
+				<then>
+					<var name="test.url" value="${test.url}" />
+				</then>
+				<elseif>
+					<equals arg1="${mobile.device.enabled}" arg2="true" />
+					<then>
+						<get-ip-address />
+
+						<var name="test.url" value="http://${ip.address}:8080" />
+					</then>
+				</elseif>
+				<elseif>
+					<isset property="testcase.url" />
+					<then>
+						<var name="test.url" value="${testcase.url}" />
+					</then>
+				</elseif>
+				<else>
+					<var name="test.url" value="http://localhost:8080" />
+				</else>
+			</if>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="get-testcase-property">
 		<attribute name="property.name" />
 
 		<sequential>
+			<var name="@{property.name}" unset="true" />
+
 			<if>
 				<isset property="test.class" />
 				<then>
 					<property file="${project.dir}/test.generated.properties" />
 
-					<var name="property.name" unset="true" />
-					<var name="@{property.name}" unset="true" />
-
-					<property name="property.name" value="@{property.name}" />
+					<var name="property.name" value="@{property.name}" />
 
 					<get-test-method-name />
 					<get-test-simple-class-name />
@@ -518,23 +585,14 @@
 
 	<macrodef name="get-testray-logs">
 		<sequential>
-			<if>
-				<isset property="jenkins.testray.results.dir" />
-				<then>
-					<antelope:stringutil property="job.name" string="${env.JOB_NAME}">
-						<antelope:replace regex="," replacement="_" />
-					</antelope:stringutil>
+			<antelope:stringutil property="job.name" string="${env.JOB_NAME}">
+				<antelope:replace regex="," replacement="_" />
+			</antelope:stringutil>
 
-					<property name="testray.logs.dir" value="${jenkins.testray.results.dir}/logs/${job.name}/builds/${env.TOP_LEVEL_BUILD_NUMBER}" />
+			<property name="testray.logs.dir" value="${job.name}/builds/${env.TOP_LEVEL_BUILD_NUMBER}" />
 
-					<property name="testray.logs.console" value="${testray.logs.dir}/console.txt" />
-					<property name="testray.logs.report" value="${testray.logs.dir}/report.html" />
-				</then>
-				<else>
-					<property name="testray.logs.console" value="" />
-					<property name="testray.logs.report" value="" />
-				</else>
-			</if>
+			<property name="testray.logs.console" value="${testray.logs.dir}/console.txt" />
+			<property name="testray.logs.report" value="${testray.logs.dir}/report.html" />
 		</sequential>
 	</macrodef>
 
@@ -594,34 +652,6 @@
 							break;
 						}
 					}
-				]]>
-			</script>
-		</sequential>
-	</macrodef>
-
-	<macrodef name="get-test-simple-class-name">
-		<sequential>
-			<fail message="Please set the property ${test.class}" unless="test.class" />
-
-			<var name="test.simple.class.name" unset="true" />
-
-			<script classpathref="project.classpath" language="beanshell">
-				<![CDATA[
-					String testClass = project.getProperty("test.class");
-
-					String testSimpleClassName = testClass;
-
-					if (testClass.contains("#")) {
-						int x = testClass.indexOf("#");
-
-						testSimpleClassName =  testClass.substring(0, x);
-					}
-
-					if (!testSimpleClassName.endsWith("TestCase")) {
-						testSimpleClassName = testSimpleClassName + "TestCase";
-					}
-
-					project.setProperty("test.simple.class.name", testSimpleClassName);
 				]]>
 			</script>
 		</sequential>
@@ -1093,29 +1123,73 @@
 					</unzip>
 
 					<delete file="tomcat.zip" />
-
-					<copy
-						file="${app.server.tomcat.dir}/conf/tomcat-users.xml"
-						overwrite="true"
-						tofile="${app.server.tomcat.dir}/conf/tomcat-users.xml.orig"
-					/>
-
-					<echo file="${app.server.tomcat.dir}/conf/tomcat-users.xml"><![CDATA[<?xml version="1.0"?>
-
-<tomcat-users>
-	<role rolename="tomcat" />
-	<role rolename="manager-gui" />
-	<role rolename="manager-script" />
-	<role rolename="manager-jmx" />
-	<role rolename="manager-status" />
-	<user
-		password="${app.server.tomcat.manager.password}"
-		roles="tomcat,manager-gui,manager-script,manager-jmx,manager-status"
-		username="${app.server.tomcat.manager.user}"
-	/>
-</tomcat-users>]]></echo>
 				</then>
 			</if>
+
+			<xmltask source="${app.server.tomcat.dir}/conf/tomcat-users.xml" dest="${app.server.tomcat.dir}/conf/tomcat-users.xml">
+				<copy path="/tomcat-users/role[@rolename='manager-gui']/@rolename" property="tomcat.role.manager-gui.exists" />
+				<copy path="/tomcat-users/role[@rolename='manager-jmx']/@rolename" property="tomcat.role.manager-jmx.exists" />
+				<copy path="/tomcat-users/role[@rolename='manager-script']/@rolename" property="tomcat.role.manager-script.exists" />
+				<copy path="/tomcat-users/role[@rolename='manager-status']/@rolename" property="tomcat.role.manager-status.exists" />
+				<copy path="/tomcat-users/role[@rolename='tomcat']/@rolename" property="tomcat.role.tomcat.exists" />
+				<copy path="/tomcat-users/user[@username='${app.server.tomcat.manager.user}']/@username" property="tomcat.user.exists" />
+
+				<call path="/">
+					<actions>
+						<if>
+							<not>
+								<and>
+									<isset property="tomcat.role.manager-gui.exists" />
+									<isset property="tomcat.role.manager-script.exists" />
+									<isset property="tomcat.role.manager-jmx.exists" />
+									<isset property="tomcat.role.manager-status.exists" />
+									<isset property="tomcat.role.tomcat.exists" />
+									<isset property="tomcat.user.exists" />
+								</and>
+							</not>
+							<then>
+								<tstamp>
+									<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
+								</tstamp>
+
+								<copy
+									file="${app.server.tomcat.dir}/conf/tomcat-users.xml"
+									overwrite="true"
+									tofile="${app.server.tomcat.dir}/conf/tomcat-users.xml.${tstamp.value}"
+								/>
+							</then>
+						</if>
+					</actions>
+				</call>
+
+				<insert path="/tomcat-users" unless="tomcat.role.tomcat.exists"><![CDATA[
+					<role rolename="tomcat" />
+				]]></insert>
+
+				<insert path="/tomcat-users" unless="tomcat.role.manager-gui.exists"><![CDATA[
+					<role rolename="manager-gui" />
+				]]></insert>
+
+				<insert path="/tomcat-users" unless="tomcat.role.manager-script.exists"><![CDATA[
+					<role rolename="manager-script" />
+				]]></insert>
+
+				<insert path="/tomcat-users" unless="tomcat.role.manager-jmx.exists"><![CDATA[
+					<role rolename="manager-jmx" />
+				]]></insert>
+
+				<insert path="/tomcat-users" unless="tomcat.role.manager-status.exists"><![CDATA[
+					<role rolename="manager-status" />
+				]]></insert>
+
+				<insert path="/tomcat-users" unless="tomcat.user.exists"><![CDATA[
+					<user
+						password="${app.server.tomcat.manager.password}"
+						roles="tomcat,manager-gui,manager-script,manager-jmx,manager-status"
+						username="${app.server.tomcat.manager.user}"
+					/>
+				]]></insert>
+			</xmltask>
 		</sequential>
 	</macrodef>
 
@@ -1187,10 +1261,7 @@
 				</elseif>
 				<else>
 					<waitfor maxwait="1" maxwaitunit="second" timeoutproperty="portal.not.started">
-						<and>
-							<available file="${test.app.server.parent.dir}/logs" />
-							<socket server="localhost" port="${test.app.server.leading.port.number}080" />
-						</and>
+						<socket server="localhost" port="${test.app.server.leading.port.number}080" />
 					</waitfor>
 				</else>
 			</if>
@@ -1214,6 +1285,7 @@
 						</then>
 					</if>
 
+					<delete dir="${liferay.home}/data" />
 					<delete dir="${liferay.home}/osgi/state" />
 
 					<if>
@@ -1251,10 +1323,7 @@
 						</elseif>
 						<else>
 							<waitfor maxwait="5" maxwaitunit="minute">
-								<and>
-									<available file="${test.app.server.parent.dir}/logs" />
-									<http url="http://localhost:${test.app.server.leading.port.number}080/web/guest" />
-								</and>
+								<http url="http://localhost:${test.app.server.leading.port.number}080/web/guest" />
 							</waitfor>
 						</else>
 					</if>
@@ -1299,9 +1368,19 @@
 				app.server.bundle.index="@{app.server.bundle.index}"
 			/>
 
-			<antcall target="clean-up-logs" />
+			<if>
+				<and>
+					<equals arg1="@{app.server.bundle.index}" arg2="0" />
+					<not>
+						<equals arg1="@{app.server.bin.dir}" arg2="${app.server.tcat.admin.bin.dir}" />
+					</not>
+				</and>
+				<then>
+					<antcall target="clean-up-logs" />
 
-			<record action="start" name="log" />
+					<record action="start" name="log" />
+				</then>
+			</if>
 
 			<exec dir="${test.app.server.bin.dir}" executable="${app.server.stop.executable}" resolveexecutable="true">
 				<arg line="${app.server.stop.executable.arg.line}" />
@@ -1430,6 +1509,15 @@ create database lportal${database.index} character set utf8;</echo>
 								</not>
 							</or>
 							<then>
+								<get-testcase-property property.name="database.minimal.enabled" />
+
+								<if>
+									<equals arg1="${database.minimal.enabled}" arg2="true" />
+									<then>
+										<var name="database.create.suffix" value="-bare" />
+									</then>
+								</if>
+
 								<property name="sql.dir" value="sql\create${database.create.suffix}\" />
 								<property name="sql.file" value="create${database.create.suffix}-${database.type}.sql" />
 							</then>
@@ -1503,24 +1591,63 @@ go]]></replacevalue>
 		<get-env-liferay-portal />
 		<get-env-operating-system />
 
-		<get-testcase-property property.name="testray.component.names" />
-		<get-testcase-property property.name="testray.main.component.name" />
-		<get-testcase-property property.name="testray.testcase.description" />
-		<get-testcase-property property.name="testray.testcase.name" />
-		<get-testcase-property property.name="testray.testcase.priority" />
-		<get-testcase-property property.name="testray.testcase.product.edition" />
+		<if>
+			<isset property="test.class" />
+			<then>
+				<get-testcase-property property.name="testray.component.names" />
+				<get-testcase-property property.name="testray.main.component.name" />
+				<get-testcase-property property.name="testray.testcase.description" />
+				<get-testcase-property property.name="testray.testcase.name" />
+				<get-testcase-property property.name="testray.testcase.priority" />
+				<get-testcase-property property.name="testray.testcase.product.edition" />
+			</then>
+		</if>
 
 		<get-testray-components />
 		<get-testray-logs />
 		<get-testray-project-name />
 		<get-testray-team-name />
 
+		<if>
+			<isset property="env.TEST_BUILD_FIX_PACK_NAME" />
+			<then>
+				<propertyregex
+					input="${testray.build.name}"
+					override="true"
+					property="testray.build.name"
+					regexp="(-\s)\d+(\s-)"
+					replace="\1${env.TEST_BUILD_FIX_PACK_NAME}\2"
+				/>
+			</then>
+		</if>
+
+		<if>
+			<available file="portal-web/test-results/functional/report.html" />
+			<then>
+				<property name="test.case.attachments">
+					<![CDATA[
+						<attachments>
+							<file name="console.output" value="${testray.logs.console}" />
+							<file name="report.html" value="${testray.logs.report}" />
+						</attachments>
+					]]>
+				</property>
+			</then>
+			<else>
+				<property name="test.case.attachments">
+					<![CDATA[
+						<attachments>
+							<file name="console.output" value="${testray.logs.console}" />
+						</attachments>
+					]]>
+				</property>
+			</else>
+		</if>
+
 		<property name="test.case.properties">
 			<![CDATA[
 				<properties>
 					<property name="testray.component.names" value="${testray.component.names}" />
-					<property name="testray.logs.console" value="${testray.logs.console}" />
-					<property name="testray.logs.report" value="${testray.logs.report}" />
 					<property name="testray.main.component.name" value="${testray.main.component.name}" />
 					<property name="testray.team.name" value="${testray.team.name}" />
 					<property name="testray.testcase.description" value="${testray.testcase.description}" />
@@ -1568,10 +1695,21 @@ go]]></replacevalue>
 
 		<for param="file.name">
 			<path>
-				<fileset
-					dir="portal-web/test-results/functional"
-					includes="TEST-*.xml"
-				/>
+				<fileset dir="modules" erroronmissingdir="false">
+					<include name="**/TEST-*.xml" />
+				</fileset>
+				<fileset dir="portal-impl/test-results" erroronmissingdir="false">
+					<include name="**/TEST-*.xml" />
+				</fileset>
+				<fileset dir="portal-service/test-results" erroronmissingdir="false">
+					<include name="**/TEST-*.xml" />
+				</fileset>
+				<fileset dir="portal-web/test-results" erroronmissingdir="false">
+					<include name="**/TEST-*.xml" />
+				</fileset>
+				<fileset dir="util-java/test-results" erroronmissingdir="false">
+					<include name="**/TEST-*.xml" />
+				</fileset>
 			</path>
 			<sequential>
 				<var name="file.name" value="@{file.name}" />
@@ -1593,21 +1731,81 @@ go]]></replacevalue>
 				<replaceregexp
 					file="@{file.name}"
 					flags="g"
-					match="(\s*\&lt;testcase[^/]*)/&gt;"
+					match="&lt;testcase[^&lt;]*?&lt;skipped[\s\S]*?testcase&gt;"
+					replace=""
+				/>
+
+				<replaceregexp
+					file="@{file.name}"
+					flags="g"
+					match="(\s*\&lt;testcase[^/\n]*)/&gt;"
 					replace="\1&gt;${line.separator}&lt;/testcase&gt;"
 				/>
 
 				<replaceregexp
 					file="@{file.name}"
 					match="&lt;testcase[^&gt;]*&gt;"
-					replace="${test.suite.properties}\0${test.case.properties}"
+					replace="${test.suite.properties}\0"
 				/>
+
+				<replaceregexp
+					file="@{file.name}"
+					flags="g"
+					match="&lt;testcase[^&gt;]*&gt;"
+					replace="\0${test.case.attachments}${line.separator}${test.case.properties}"
+				/>
+
+				<replaceregexp
+					file="@{file.name}"
+					flags="g"
+					match="(.*classname=&quot;\S+\.(\w+).*name=&quot;(\w+)[\s\S]+?)(\$\{testray\.testcase\.name\})"
+					replace="\1\2#\3"
+				/>
+
+				<if>
+					<isset property="group.index" />
+					<then>
+						<replaceregexp
+							file="@{file.name}"
+							flags="g"
+							match="\$\{testray\.testcase\.name\}"
+							replace="${testray.main.component.name}#${group.index}"
+						/>
+					</then>
+					<else>
+						<replaceregexp
+							file="@{file.name}"
+							flags="g"
+							match="\$\{testray\.testcase\.name\}"
+							replace="${testray.main.component.name}"
+						/>
+					</else>
+				</if>
+
+				<if>
+					<contains string="@{file.name}" substring="EvaluateLog" />
+					<then>
+						<replaceregexp
+							file="@{file.name}"
+							flags="g"
+							match="testray\.testcase\.name.*(?=&quot;)"
+							replace="\0_EvaluateLog"
+						/>
+					</then>
+				</if>
 
 				<replaceregexp
 					file="@{file.name}"
 					flags="g"
 					match="\&gt;[\n\s]*\&lt;"
 					replace="\&gt;${line.separator}\&lt;"
+				/>
+
+				<replaceregexp
+					file="@{file.name}"
+					flags="g"
+					match="(&lt;/?)error"
+					replace="\1failure"
 				/>
 			</sequential>
 		</for>
@@ -1979,6 +2177,10 @@ ${marketplace.portlet.properties}</echo>
 			</then>
 		</if>
 
+		<get-test-method-name />
+
+		<get-test-simple-class-name />
+
 		<if>
 			<isset property="test.evaluate.logs" />
 			<then>
@@ -1987,6 +2189,39 @@ ${marketplace.portlet.properties}</echo>
 				<ant dir="portal-web" target="test-class">
 					<property name="test.class" value="EvaluateLogTestSuite" />
 				</ant>
+			</then>
+		</if>
+
+		<if>
+			<isset property="test.method.name" />
+			<then>
+				<property name="test.class" value="${test.simple.class.name}#${test.method.name}" />
+			</then>
+			<else>
+				<property name="test.class" value="${test.simple.class.name}" />
+			</else>
+		</if>
+
+		<if>
+			<isset property="env.JENKINS_HOME" />
+			<then>
+				<antcall target="build-test-results-xml" />
+
+				<if>
+					<isset property="jenkins.shared.user.content.dir" />
+					<then>
+						<var name="jenkins.shared.results.dir" value="${jenkins.shared.user.content.dir}/jobs" />
+					</then>
+					<else>
+						<var name="jenkins.shared.results.dir" value="." />
+					</else>
+				</if>
+
+				<copy
+					failonerror="false"
+					file="portal-web/test-results/functional/TEST-com.liferay.portalweb.portal.evaluatelog.EvaluateLogTestSuite.xml"
+					tofile="${jenkins.shared.results.dir}/${env.BUILD_FLOW_JOB_NAME}/builds/${env.BUILD_FLOW_BUILD_NUMBER}/test-results/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${test.class}_EvaluateLog.xml"
+				/>
 			</then>
 		</if>
 
@@ -2017,24 +2252,71 @@ ${marketplace.portlet.properties}</echo>
 					</elseif>
 				</if>
 
-				<property name="results.xml.file" value="portal-web/test-results/functional/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${test.class}.xml" />
+				<if>
+					<isset property="group.index" />
+					<then>
+						<propertyregex
+							input="${group.index}"
+							override="true"
+							property="group.index"
+							regexp="[\w\.]+\.(\w+)"
+							replace="\1"
+						/>
+
+						<property name="results.xml.file" value="portal-web/test-results/functional/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${testray.main.component.name}_${group.index}.xml" />
+					</then>
+					<elseif>
+						<isset property="test.class" />
+						<then>
+							<property name="results.xml.file" value="portal-web/test-results/functional/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${test.class}.xml" />
+						</then>
+					</elseif>
+					<else>
+						<property name="results.xml.file" value="portal-web/test-results/functional/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${testray.main.component.name}.xml" />
+					</else>
+				</if>
+
+				<if>
+					<equals arg1="${build.status}" arg2="pass" />
+					<then>
+						<property name="testcase.element"><![CDATA[<testcase classname="${test.class.name}" name="${test.method.name}" time="0.00" />]]></property>
+					</then>
+					<else>
+						<property name="testcase.element"><![CDATA[
+							<testcase classname="${test.class.name}" name="${test.method.name}" time="0.00">
+								<failure message="Jenkins failure prior to running test.">Jenkins failure prior to running test.</failure>
+							</testcase>
+						]]></property>
+					</else>
+				</if>
 
 				<echo file="${results.xml.file}"><![CDATA[<?xml version="1.0"?>
 
 <testsuite>
-	<testcase classname="${test.class.name}" name="${test.method.name}" time="0.00">
-		<failure message="Jenkins failure prior to running test.">Jenkins failure prior to running test.</failure>
-	</testcase>
+	${testcase.element}
 	<system-out></system-out>
 	<system-err></system-err>
 </testsuite>]]></echo>
 
 				<antcall target="build-test-results-xml" />
 
-				<copy
-					file="${results.xml.file}"
-					tofile="${jenkins.shared.user.content.dir}/jobs/${env.BUILD_FLOW_JOB_NAME}/builds/${env.BUILD_FLOW_BUILD_NUMBER}/test-results/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${test.class}.xml"
-				/>
+				<copy flatten="true" todir="${jenkins.shared.user.content.dir}/jobs/${env.BUILD_FLOW_JOB_NAME}/builds/${env.BUILD_FLOW_BUILD_NUMBER}/test-results">
+					<fileset dir="modules" erroronmissingdir="false">
+						<include name="**/TEST-*.xml" />
+					</fileset>
+					<fileset dir="portal-impl/test-results" erroronmissingdir="false">
+						<include name="**/TEST-*.xml" />
+					</fileset>
+					<fileset dir="portal-service/test-results" erroronmissingdir="false">
+						<include name="**/TEST-*.xml" />
+					</fileset>
+					<fileset dir="portal-web/test-results" erroronmissingdir="false">
+						<include name="**/TEST-*.xml" />
+					</fileset>
+					<fileset dir="util-java/test-results" erroronmissingdir="false">
+						<include name="**/TEST-*.xml" />
+					</fileset>
+				</copy>
 			</then>
 		</if>
 	</target>
@@ -2283,86 +2565,6 @@ ${marketplace.portlet.properties}</echo>
 		/>
 	</target>
 
-	<target name="generate-test-properties" depends="check-config">
-		<property file="${project.dir}/test.generated.properties" />
-
-		<var name="mobile.device.type" unset="true" />
-
-		<if>
-			<contains string="${test.class}" substring="#" />
-			<then>
-				<get-test-method-name />
-
-				<get-test-simple-class-name />
-			</then>
-			<elseif>
-				<isset property="test.class" />
-				<then>
-					<property name="test.method.name" value="[A-Za-z]*" />
-
-					<get-test-simple-class-name />
-				</then>
-			</elseif>
-		</if>
-
-		<xmlproperty
-			file="portal-web/test-config/database.xml"
-			keeproot="true"
-		/>
-
-		<echoproperties destfile="${basedir}/test.run.properties">
-			<propertyset>
-				<propertyref prefix="database.${database.type}" />
-				<propertyref prefix="${test.simple.class.name}." />
-			</propertyset>
-		</echoproperties>
-
-		<replaceregexp
-			file="${basedir}/test.run.properties"
-			flags="g"
-			match="database\.${database.type}"
-			replace="database"
-		/>
-
-		<if>
-			<isset property="test.class" />
-			<then>
-				<replaceregexp
-					file="${basedir}/test.run.properties"
-					flags="g"
-					match="${test.simple.class.name}\.(${test.method.name}|all)\."
-					replace=""
-				/>
-
-				<replaceregexp
-					file="${basedir}/test.run.properties"
-					flags="g"
-					match="${test.simple.class.name}.*"
-					replace=""
-				/>
-			</then>
-		</if>
-
-		<property file="${basedir}/test.run.properties" />
-
-		<loadfile property="test.properties.expanded" srcfile="${basedir}/test.run.properties">
-			<filterchain>
-				<expandproperties />
-			</filterchain>
-		</loadfile>
-
-		<echo file="${basedir}/test.run.properties">${test.properties.expanded}</echo>
-
-		<property file="${project.dir}/test.${user.name}.properties" />
-		<property file="${project.dir}/test.${env.COMPUTERNAME}.properties" />
-		<property file="${project.dir}/test.${env.HOST}.properties" />
-		<property file="${project.dir}/test.${env.HOSTNAME}.properties" />
-		<property file="${project.dir}/test.properties" />
-
-		<propertycopy from="mobile.device.resolution[${mobile.device.type}]" name="mobile.device.resolution" />
-		<propertycopy from="mobile.device.user.agent[${mobile.device.type}]" name="mobile.device.user.agent" />
-	</target>
-
 	<target name="kill-spi">
 		<if>
 			<os family="unix" />
@@ -2425,7 +2627,7 @@ ${marketplace.portlet.properties}</echo>
 					input="${jenkins.results.xml.suite.file.body}"
 					override="true"
 					property="jenkins.results.xml.suite.file.body"
-					regexp="&lt;\?xml[\s\S.]*&lt;testcase"
+					regexp="&lt;\?xml[\s\S]*?&lt;testcase"
 					replace="&lt;testcase"
 				/>
 
@@ -2433,7 +2635,7 @@ ${marketplace.portlet.properties}</echo>
 					input="${jenkins.results.xml.suite.file.body}"
 					override="true"
 					property="jenkins.results.xml.suite.file.body"
-					regexp="&lt;/testcase&gt;[\s\S.]*"
+					regexp="&lt;/testcase&gt;\s*&lt;system[\s\S]*"
 					replace="&lt;/testcase&gt;${line.separator}"
 				/>
 
@@ -2443,7 +2645,12 @@ ${marketplace.portlet.properties}</echo>
 
 		<echo append="true" file="${jenkins.results.xml.suite.file}">&lt;/testsuite&gt;</echo>
 
-		<copy file="${jenkins.results.xml.suite.file}" tofile="${env.WORKSPACE}/TEST-ConsolidatedResults.xml" />
+		<if>
+			<contains string="${env.JOB_NAME}" substring="frontend" />
+			<then>
+				<copy file="${jenkins.results.xml.suite.file}" tofile="${env.WORKSPACE}/TEST-ConsolidatedResults.xml" />
+			</then>
+		</if>
 
 		<if>
 			<isset property="jenkins.testray.results.dir" />
@@ -2518,7 +2725,7 @@ hw.keyboard=yes
 		</echo>
 	</target>
 
-	<target name="prepare-portal-ext-properties" depends="generate-test-properties">
+	<target name="prepare-portal-ext-properties">
 		<prepare-fix-pack-bundle />
 
 		<get-database-property property.name="database.driver" />
@@ -2550,6 +2757,8 @@ mail.session.jndi.name=
 axis.servlet.hosts.allowed=
 
 tunnel.servlet.hosts.allowed=</echo>
+
+		<get-testcase-property property.name="cluster.enabled" />
 
 		<if>
 			<equals arg1="${cluster.enabled}" arg2="true" />
@@ -2621,6 +2830,8 @@ ${custom.properties}</echo>
 			</then>
 		</if>
 
+		<get-testcase-property property.name="database.jndi.enabled" />
+
 		<if>
 			<equals arg1="${database.jndi.enabled}" arg2="true" />
 			<then>
@@ -2630,6 +2841,8 @@ ${custom.properties}</echo>
 				</replace>
 			</then>
 		</if>
+
+		<get-testcase-property property.name="database.sharding" />
 
 		<if>
 			<and>
@@ -2711,14 +2924,20 @@ portal.security.manager.strategy=liferay</echo>
 			</then>
 		</if>
 
+		<get-testcase-property property.name="mobile.device.enabled" />
+
 		<if>
 			<equals arg1="${mobile.device.enabled}" arg2="true" />
 			<then>
+				<get-ip-address />
+
 				<echo file="portal-impl/src/portal-ext.properties" append="true">
 
 virtual.hosts.valid.hosts=localhost,127.0.0.1,${ip.address}</echo>
 			</then>
 		</if>
+
+		<get-testcase-property property.name="portal.version" />
 
 		<propertyregex
 			input="${portal.version}"
@@ -2905,6 +3124,8 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 			</then>
 		</if>
 
+		<get-testcase-property property.name="captcha.max.challenges" />
+
 		<if>
 			<isset property="captcha.max.challenges" />
 			<then>
@@ -2928,6 +3149,8 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 			</then>
 		</if>
 
+		<get-testcase-property property.name="setup.wizard.enabled" />
+
 		<if>
 			<equals arg1="${setup.wizard.enabled}" arg2="true" />
 			<then>
@@ -2935,14 +3158,9 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 			</then>
 		</if>
 
-		<if>
-			<equals arg1="${tck.url}" arg2="true" />
-			<then>
-				<echo file="portal-impl/src/portal-ext.properties" append="true">
+		<echo file="portal-impl/src/portal-ext.properties" append="true">
 
-tck.url=true</echo>
-			</then>
-		</if>
+hot.deploy.dependency.management.enabled=false</echo>
 
 		<if>
 			<isset property="test.set.default.portal.properties" />
@@ -2956,6 +3174,12 @@ tck.url=true</echo>
 			<then>
 				<property name="test.build.liferay.portal.zip.file.name" value="${app.server.portal.dir}" />
 			</then>
+			<elseif>
+				<equals arg1="${app.server.type}" arg2="glassfish" />
+				<then>
+					<property name="test.build.liferay.portal.zip.file.name" value="${app.server.glassfish.portal.war.dir}" />
+				</then>
+			</elseif>
 			<elseif>
 				<equals arg1="${tcat.enabled}" arg2="true" />
 				<then>
@@ -3077,7 +3301,7 @@ osb.lcs.portlet.oauth.consumer.secret=${osb.lcs.portlet.oauth.consumer.secret}</
 		</replace>
 	</target>
 
-	<target name="prepare-selenium" depends="generate-test-properties">
+	<target name="prepare-selenium">
 		<delete file="portal-web/test/test-portal-web-ext.properties" />
 
 		<if>
@@ -3090,6 +3314,186 @@ osb.lcs.portlet.oauth.consumer.secret=${osb.lcs.portlet.oauth.consumer.secret}</
 			<else>
 				<property name="selenium.output.dir" value="H:\\selenium-output\\" />
 			</else>
+		</if>
+
+		<if>
+			<isset property="database.db2.driver" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.db2.driver=${database.db2.driver}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.db2.password" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.db2.password=${database.db2.password}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.db2.url" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.db2.url=${database.db2.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.db2.username" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.db2.username=${database.db2.username}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.mysql.driver" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.mysql.driver=${database.mysql.driver}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.mysql.password" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.mysql.password=${database.mysql.password}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.mysql.url" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.mysql.url=${database.mysql.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.mysql.username" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.mysql.username=${database.mysql.username}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.oracle.driver" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.oracle.driver=${database.oracle.driver}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.oracle.password" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.oracle.password=${database.oracle.password}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.oracle.url" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.oracle.url=${database.oracle.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.oracle.username" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.oracle.username=${database.oracle.username}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.postgresql.driver" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.postgresql.driver=${database.postgresql.driver}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.postgresql.password" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.postgresql.password=${database.postgresql.password}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.postgresql.url" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.postgresql.url=${database.postgresql.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.postgresql.username" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.postgresql.username=${database.postgresql.username}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.sybase.driver" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.sybase.driver=${database.sybase.driver}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.sybase.password" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.sybase.password=${database.sybase.password}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.sybase.url" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.sybase.url=${database.sybase.url}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="database.sybase.username" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					database.sybase.username=${database.sybase.username}
+				</echo>
+			</then>
 		</if>
 
 		<if>
@@ -3203,6 +3607,42 @@ osb.lcs.portlet.oauth.consumer.secret=${osb.lcs.portlet.oauth.consumer.secret}</
 		</if>
 
 		<if>
+			<isset property="lcs.email.address.1" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					lcs.email.address.1=${lcs.email.address.1}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="lcs.email.address.2" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					lcs.email.address.2=${lcs.email.address.2}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="lcs.email.password.1" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					lcs.email.password.1=${lcs.email.password.1}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="lcs.email.password.2" />
+			<then>
+				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+					lcs.email.password.2=${lcs.email.password.2}
+				</echo>
+			</then>
+		</if>
+
+		<if>
 			<isset property="liferay.portal.branch" />
 			<then>
 				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
@@ -3236,8 +3676,6 @@ osb.lcs.portlet.oauth.consumer.secret=${osb.lcs.portlet.oauth.consumer.secret}</
 			<then>
 				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
 					mobile.device.enabled=${mobile.device.enabled}
-					mobile.device.resolution=${mobile.device.resolution}
-					mobile.device.user.agent=${mobile.device.user.agent}
 				</echo>
 			</then>
 		</if>
@@ -3377,32 +3815,11 @@ osb.lcs.portlet.oauth.consumer.secret=${osb.lcs.portlet.oauth.consumer.secret}</
 			</then>
 		</if>
 
-		<get-testcase-property property.name="portal.url" />
+		<get-test-url />
 
-		<if>
-			<equals arg1="${test.selenium.unit.enabled}" arg2="true" />
-			<then>
-				<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
-					portal.url=file:///${basedir.unix}/portal-web/test/functional/com/liferay/portalweb/selenium/dependencies/Site.html
-				</echo>
-			</then>
-			<elseif>
-				<equals arg1="${mobile.device.enabled}" arg2="true" />
-				<then>
-					<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
-						portal.url=http://${ip.address}:8080
-					</echo>
-				</then>
-			</elseif>
-			<elseif>
-				<isset property="portal.url" />
-				<then>
-					<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
-						portal.url=${portal.url}
-					</echo>
-				</then>
-			</elseif>
-		</if>
+		<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
+			portal.url=${test.url}
+		</echo>
 
 		<echo file="portal-web/test/test-portal-web-ext.properties" append="true">
 			selenium.executable.dir=${basedir.unix}/tools/selenium/
@@ -3682,8 +4099,8 @@ app.server.tomcat.dir=${app.server.parent.dir}/tomcat-7.0.27</echo>
 			</and>
 			<then>
 				<antcall target="prepare-test-bundle">
-					<param name="app.server.lib.global.dir" value="${app.server.tcserver.lib.global.dir}" />
-					<param name="app.server.portal.dir" value="${app.server.tcserver.portal.dir}" />
+					<param name="app.server.lib.global.dir" value="${app.server.weblogic.lib.global.dir}" />
+					<param name="app.server.portal.dir" value="${app.server.weblogic.portal.dir}" />
 					<param name="app.server.type" value="weblogic" />
 				</antcall>
 			</then>
@@ -3926,7 +4343,7 @@ plugins.includes=marketplace-portlet</echo>
 		</if>
 	</target>
 
-	<target name="prepare-test-properties" depends="generate-test-properties">
+	<target name="prepare-test-properties">
 		<get-database-property property.name="database.driver" />
 		<get-database-property property.name="database.password" />
 		<get-database-property property.name="database.url" />
@@ -4032,7 +4449,7 @@ cluster.link.bind.addr["cluster-link-udp"]=127.0.0.1</echo>
 		<echo />
 	</target>
 
-	<target name="rebuild-database" depends="generate-test-properties,build-sql-file">
+	<target name="rebuild-database" depends="build-sql-file">
 		<if>
 			<not>
 				<isset property="skip.rebuild-database" />
@@ -4223,9 +4640,6 @@ if (ppstate.equals("normal")) {
 	<target name="record-test-class-file-names">
 		<script classpathref="project.classpath" language="beanshell">
 			<![CDATA[
-				import java.nio.file.Files;
-				import java.nio.file.Paths;
-
 				import org.apache.tools.ant.DirectoryScanner;
 
 				List getClassGroups(List classFileNames, int groupsSize) {
@@ -4254,7 +4668,6 @@ if (ppstate.equals("normal")) {
 						new String[] {
 							"modules/apps/bookmarks/bookmarks-test/test/integration/**/*Test.java",
 							"modules/apps/social/social-networking-test/test/integration/**/*Test.java",
-							"modules/apps/wiki/wiki-test/test/integration/**/*Test.java",
 							"modules/portal/portal-json-web-service-extender/test/integration/**/*Test.java",
 							"modules/portal/portal-template-freemarker/test/integration/**/*Test.java",
 							"modules/util/osgi-util/test/integration/**/*Test.java",
@@ -4345,6 +4758,14 @@ if (ppstate.equals("normal")) {
 	</target>
 
 	<target name="record-test-plugin-names">
+		<loadproperties srcFile="${lp.plugins.dir}/build.properties">
+			<filterchain>
+				<linecontains>
+					<contains value="plugins.excludes" />
+				</linecontains>
+			</filterchain>
+		</loadproperties>
+
 		<script classpathref="project.classpath" language="beanshell">
 			<![CDATA[
 				import org.apache.tools.ant.DirectoryScanner;
@@ -4390,7 +4811,11 @@ if (ppstate.equals("normal")) {
 
 						String pluginName = fileName.substring(x + 1, y);
 
-						pluginNames.add(pluginName);
+						String pluginsExcludes = project.getProperty("plugins.excludes");
+
+						if (!pluginsExcludes.contains(pluginName)) {
+							pluginNames.add(pluginName);
+						}
 					}
 
 					Collections.sort(pluginNames);
@@ -4478,7 +4903,7 @@ if (ppstate.equals("normal")) {
 					replace="http://\1-\2/\2"
 				/>
 
-				<mirrors-get dest="${testray.logs.dir}/console.txt" ignoreerrors="true" src="${jenkins.build.url}/consoleText" />
+				<get dest="${testray.logs.dir}/console.txt" ignoreerrors="true" src="${jenkins.build.url}/consoleText" />
 			</then>
 		</if>
 	</target>
@@ -4496,7 +4921,7 @@ if (ppstate.equals("normal")) {
 		<fail message="Please set the property ${token}." unless="token" />
 		<fail message="Please set the property ${value}." unless="value" />
 
-		<fail message="${token} not found in ${file}">
+		<fail message="${token} not found in ${file}.">
 			<condition>
 				<not>
 					<resourcecontains resource="${file}" substring="${token}" />
@@ -4593,6 +5018,8 @@ if (ppstate.equals("normal")) {
 			</else>
 		</if>
 
+		<property name="test.class" value="${test.simple.class.name}#${test.method.name}" />
+
 		<if>
 			<isset property="jenkins.shared.user.content.dir" />
 			<then>
@@ -4648,15 +5075,6 @@ if (ppstate.equals("normal")) {
 				<if>
 					<available file="${jenkins.results.xml.file}" />
 					<then>
-						<if>
-							<not>
-								<isset property="test.class" />
-							</not>
-							<then>
-								<property name="test.class" value="${test.simple.class.name}#${test.method.name}" />
-							</then>
-						</if>
-
 						<copy
 							file="${jenkins.results.xml.file}"
 							tofile="${jenkins.shared.results.dir}/${env.BUILD_FLOW_JOB_NAME}/builds/${env.BUILD_FLOW_BUILD_NUMBER}/test-results/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${test.class}.xml"
@@ -4851,62 +5269,9 @@ if (ppstate.equals("normal")) {
 					<available file="${liferay.home}/logs" type="dir" />
 				</waitfor>
 
-				<for param="log.file">
-					<path>
-						<fileset dir="${liferay.home}/logs">
-							<include name="*.log" />
-						</fileset>
-					</path>
-					<sequential>
-						<var name="log.file" value="@{log.file}" />
-					</sequential>
-				</for>
-
-				<script classpathref="project.classpath" language="beanshell">
-					<![CDATA[
-						import com.liferay.portal.kernel.util.StringUtil;
-
-						import org.apache.commons.io.FileUtils;
-
-						Set requiredPluginNamesSet = new HashSet();
-
-						requiredPluginNamesSet.add("marketplace-portlet");
-
-						String[] pluginTypes = {"hook", "layouttpl", "portlet", "theme", "web"};
-
-						for (String pluginType : pluginTypes) {
-							String[] pluginNames = StringUtil.split(project.getProperty(pluginType + ".plugins.includes"), ',');
-
-							for (String pluginName : pluginNames) {
-								requiredPluginNamesSet.add(pluginName);
-							}
-						}
-
-						System.out.println("Ensuring the following plugins have been deployed:");
-						System.out.println(StringUtil.merge(requiredPluginNamesSet));
-
-						int i = 0;
-
-						for (String pluginName : requiredPluginNamesSet) {
-							String content = "";
-
-							while (i < 120 && !content.contains(pluginName + " is available for use")) {
-								try {
-									Thread.sleep(1000);
-
-									File file = new File(StringUtil.replace(project.getProperty("log.file"), "\\", "/"));
-
-									content = FileUtils.readFileToString(file);
-
-									i++;
-								}
-								catch (Exception e) {
-									e.printStackTrace();
-								}
-							}
-						}
-					]]>
-				</script>
+				<antcall target="wait-for-plugins-deployment">
+					<param name="required.plugins.includes" value="marketplace-portlet" />
+				</antcall>
 			</then>
 		</if>
 
@@ -5094,7 +5459,7 @@ which can be downloaded from this website: http://code.google.com/p/chromedriver
 				<fail>
 .
 
-Please set "ie.driver.zip" in test.properties to point to "IEDriverServer_x64_2.31.0.zip" or "IEDriverServer_Win32_2.31.0.zip" which can be downloaded from this website: https://code.google.com/p/selenium/wiki/InternetExplorerDriver
+Please set "ie.driver.zip" in test.properties to point to "IEDriverServer_x64_2.31.0.zip" or "IEDriverServer_Win32_2.31.0.zip" which can be downloaded from this website: https://code.google.com/p/selenium/wiki/InternetExplorerDriver.
 				</fail>
 			</then>
 			<else>
@@ -5275,7 +5640,22 @@ Please set "ie.driver.zip" in test.properties to point to "IEDriverServer_x64_2.
 
 		<ant dir="util-java" target="test-class-group" inheritAll="false" />
 
+		<antcall target="rebuild-database" inheritAll="false" />
+
 		<ant dir="modules" target="test-class-group" inheritAll="false" />
+
+		<ant antfile="build-test-tck.xml" target="record-test-tck-package-names" />
+
+		<ant antfile="build-test-tck.xml" target="test-class-group" />
+
+		<if>
+			<available file=".testable.portal.started" />
+			<then>
+				<antcall target="stop-app-server" />
+
+				<delete file=".testable.portal.started" failonerror="false" />
+			</then>
+		</if>
 	</target>
 
 	<target name="test-integration">
@@ -5302,5 +5682,92 @@ Please set "ie.driver.zip" in test.properties to point to "IEDriverServer_x64_2.
 		<ant dir="util-java" target="test-unit" inheritAll="false" />
 
 		<ant dir="modules" target="test-unit" inheritAll="false" />
+	</target>
+
+	<target name="wait-for-plugins-deployment">
+		<fail message="Please set the property ${test.class}." unless="test.class" />
+
+		<condition property="required.plugins.includes" value="">
+			<not>
+				<isset property="required.plugins.includes" />
+			</not>
+		</condition>
+
+		<if>
+			<not>
+				<available file="${liferay.home}/logs" type="dir" />
+			</not>
+			<then>
+				<fail message="${liferay.home}/logs is not available." />
+			</then>
+		</if>
+
+		<first id="first">
+			<fileset dir="${liferay.home}/logs" includes="*.log" />
+		</first>
+
+		<var name="log.file.path" value="${toString:first}" />
+
+		<get-testcase-property property.name="hook.plugins.includes" />
+		<get-testcase-property property.name="layouttpl.plugins.includes" />
+		<get-testcase-property property.name="portlet.plugins.includes" />
+		<get-testcase-property property.name="theme.plugins.includes" />
+		<get-testcase-property property.name="web.plugins.includes" />
+
+		<script classpathref="project.classpath" language="beanshell">
+			<![CDATA[
+				import com.liferay.portal.kernel.util.StringUtil;
+
+				import org.apache.commons.io.FileUtils;
+
+				Set requiredPluginNamesSet = new HashSet();
+
+				String[] pluginTypes = {"hook", "layouttpl", "portlet", "required", "theme", "web"};
+
+				for (String pluginType : pluginTypes) {
+					String[] pluginNames = StringUtil.split(project.getProperty(pluginType + ".plugins.includes"), ',');
+
+					for (String pluginName : pluginNames) {
+						requiredPluginNamesSet.add(pluginName);
+					}
+				}
+
+				System.out.println("Ensuring the following plugins have been deployed:");
+				System.out.println(StringUtil.merge(requiredPluginNamesSet));
+
+				String logFilePath = project.getProperty("log.file.path");
+
+				logFilePath = logFilePath.replaceAll("\\\\", "/");
+
+				int second = 0;
+
+				for (String pluginName : requiredPluginNamesSet) {
+					while (true) {
+						try {
+							File file = new File(logFilePath);
+
+							String content = FileUtils.readFileToString(file);
+
+							if (content.contains(pluginName + " is available for use") ||
+								content.contains(pluginName + " are available for use")) {
+
+								break;
+							}
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+
+						if (second >= 120) {
+							break;
+						}
+
+						second++;
+
+						Thread.sleep(1000);
+					}
+				}
+			]]>
+		</script>
 	</target>
 </project>

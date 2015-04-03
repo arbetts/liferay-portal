@@ -17,15 +17,15 @@ package com.liferay.portlet.documentlibrary.subscriptions;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.Sync;
-import com.liferay.portal.kernel.test.rule.SynchronousMailTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
-import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.MainServletTestRule;
+import com.liferay.portal.test.rule.SynchronousMailTestRule;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.util.DLConstants;
@@ -51,16 +51,18 @@ public class DLSubscriptionLocalizedContentTest
 			SynchronousMailTestRule.INSTANCE);
 
 	@Override
-	protected long addBaseModel(long containerModelId) throws Exception {
+	protected long addBaseModel(long userId, long containerModelId)
+		throws Exception {
+
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
-				group.getGroupId(), TestPropsValues.getUserId());
+				group.getGroupId(), userId);
 
 		DLAppTestUtil.populateNotificationsServiceContext(
 			serviceContext, Constants.ADD);
 
-		FileEntry fileEntry =  DLAppLocalServiceUtil.addFileEntry(
-			TestPropsValues.getUserId(), group.getGroupId(), containerModelId,
+		FileEntry fileEntry = DLAppLocalServiceUtil.addFileEntry(
+			userId, group.getGroupId(), containerModelId,
 			RandomTestUtil.randomString() + ".txt", ContentTypes.TEXT_PLAIN,
 			RandomTestUtil.randomBytes(), serviceContext);
 
@@ -96,9 +98,21 @@ public class DLSubscriptionLocalizedContentTest
 	}
 
 	@Override
-	protected void updateBaseModel(long baseModelId) throws Exception {
-		DLAppTestUtil.updateFileEntryWithWorkflow(
-			group.getGroupId(), baseModelId, false, true);
+	protected void updateBaseModel(long userId, long baseModelId)
+		throws Exception {
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				group.getGroupId(), userId);
+
+		DLAppTestUtil.populateNotificationsServiceContext(
+			serviceContext, Constants.UPDATE);
+
+		DLAppLocalServiceUtil.updateFileEntry(
+			userId, baseModelId, RandomTestUtil.randomString(),
+			ContentTypes.TEXT_PLAIN, RandomTestUtil.randomString(),
+			StringPool.BLANK, StringPool.BLANK, false,
+			RandomTestUtil.randomBytes(), serviceContext);
 	}
 
 }

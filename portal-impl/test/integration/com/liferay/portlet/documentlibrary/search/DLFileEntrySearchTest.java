@@ -49,7 +49,6 @@ import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.util.test.DLAppTestUtil;
-import com.liferay.portlet.dynamicdatamapping.io.DDMFormXSDDeserializerUtil;
 import com.liferay.portlet.dynamicdatamapping.model.DDMForm;
 import com.liferay.portlet.dynamicdatamapping.model.DDMFormLayout;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
@@ -66,7 +65,6 @@ import com.liferay.portlet.dynamicdatamapping.util.test.DDMStructureTestUtil;
 import java.io.File;
 import java.io.InputStream;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -137,8 +135,10 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 		SearchContext searchContext = SearchContextTestUtil.getSearchContext(
 			group.getGroupId());
 
-		int initialBaseModelsSearchCount = searchBaseModelsCount(
-			getBaseModelClass(), group.getGroupId(), "Word", searchContext);
+		int initialBaseModelsSearchCount = 0;
+
+		assertBaseModelsCount(
+			initialBaseModelsSearchCount, "Word", searchContext);
 
 		String fileName = "OSX_Test.docx";
 
@@ -162,11 +162,8 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 			FileUtil.delete(file);
 		}
 
-		Assert.assertEquals(
-			initialBaseModelsSearchCount + 1,
-			searchBaseModelsCount(
-				getBaseModelClass(), group.getGroupId(), "Word",
-				searchContext));
+		assertBaseModelsCount(
+			initialBaseModelsSearchCount + 1, "Word", searchContext);
 	}
 
 	protected BaseModel<?> addBaseModel(
@@ -219,12 +216,11 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 			ServiceContext serviceContext)
 		throws Exception {
 
-		String definition = DDMStructureTestUtil.getSampleStructureDefinition(
-			"name");
+		DDMForm ddmForm = DDMStructureTestUtil.getSampleDDMForm("name");
 
 		DDMStructure ddmStructure = DDMStructureTestUtil.addStructure(
 			serviceContext.getScopeGroupId(), DLFileEntry.class.getName(),
-			definition);
+			ddmForm);
 
 		return addBaseModel(keywords, ddmStructure, serviceContext);
 	}
@@ -289,10 +285,11 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 			BaseModel<?> parentBaseModel, ServiceContext serviceContext)
 		throws Exception {
 
-		Folder folder = DLAppTestUtil.addFolder(
+		Folder folder = DLAppServiceUtil.addFolder(
+			serviceContext.getScopeGroupId(),
 			(Long)parentBaseModel.getPrimaryKeyObj(),
 			RandomTestUtil.randomString(_FOLDER_NAME_MAX_LENGTH),
-			serviceContext);
+			RandomTestUtil.randomString(), serviceContext);
 
 		return (DLFolder)folder.getModel();
 	}
@@ -302,10 +299,11 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 			Group group, ServiceContext serviceContext)
 		throws Exception {
 
-		Folder folder = DLAppTestUtil.addFolder(
+		Folder folder = DLAppServiceUtil.addFolder(
+			serviceContext.getScopeGroupId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 			RandomTestUtil.randomString(_FOLDER_NAME_MAX_LENGTH),
-			serviceContext);
+			RandomTestUtil.randomString(), serviceContext);
 
 		return (DLFolder)folder.getModel();
 	}
@@ -341,7 +339,7 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 	protected long searchGroupEntriesCount(long groupId, long creatorUserId)
 		throws Exception {
 
-		Hits hits =  DLAppServiceUtil.search(
+		Hits hits = DLAppServiceUtil.search(
 			groupId, creatorUserId, WorkflowConstants.STATUS_APPROVED,
 			QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 
@@ -356,9 +354,10 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 
 		DLFileEntry dlFileEntry = (DLFileEntry)baseModel;
 
-		FileEntry fileEntry = DLAppTestUtil.updateFileEntry(
-			serviceContext.getScopeGroupId(), dlFileEntry.getFileEntryId(),
-			null, dlFileEntry.getMimeType(), keywords, true, serviceContext);
+		FileEntry fileEntry = DLAppServiceUtil.updateFileEntry(
+			dlFileEntry.getFileEntryId(), null, dlFileEntry.getMimeType(),
+			keywords, StringPool.BLANK, StringPool.BLANK, true, (byte[])null,
+			serviceContext);
 
 		return (DLFileEntry)fileEntry.getModel();
 	}
@@ -367,10 +366,7 @@ public class DLFileEntrySearchTest extends BaseSearchTestCase {
 	protected void updateDDMStructure(ServiceContext serviceContext)
 		throws Exception {
 
-		String definition = DDMStructureTestUtil.getSampleStructureDefinition(
-			"title");
-
-		DDMForm ddmForm = DDMFormXSDDeserializerUtil.deserialize(definition);
+		DDMForm ddmForm = DDMStructureTestUtil.getSampleDDMForm("title");
 
 		DDMFormLayout ddmFormLayout = DDMUtil.getDefaultDDMFormLayout(ddmForm);
 
