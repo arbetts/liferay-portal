@@ -14,16 +14,16 @@
 
 package com.liferay.portal.lar;
 
-import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageSenderImpl;
 import com.liferay.portal.kernel.lar.ManifestSummary;
 import com.liferay.portal.kernel.lar.PortletDataHandlerStatusMessageSender;
-import com.liferay.portal.kernel.messaging.sender.SingleDestinationMessageSender;
 import com.liferay.portal.model.StagedModel;
 
 /**
  * @author Michael C. Han
  */
 public class PortletDataHandlerStatusMessageSenderImpl
+	extends BackgroundTaskStatusMessageSenderImpl
 	implements PortletDataHandlerStatusMessageSender {
 
 	/**
@@ -42,16 +42,11 @@ public class PortletDataHandlerStatusMessageSenderImpl
 	public void sendStatusMessage(
 		String messageType, String portletId, ManifestSummary manifestSummary) {
 
-		if (!BackgroundTaskThreadLocal.hasBackgroundTask()) {
-			return;
-		}
-
 		PortletDataHandlerStatusMessage portletDataHandlerStatusMessage =
 			new PortletDataHandlerStatusMessage(
 				messageType, portletId, manifestSummary);
 
-		_singleDestinationMessageSender.send(
-			portletDataHandlerStatusMessage.getStatusMessage());
+		sendStatusMessage(portletDataHandlerStatusMessage);
 	}
 
 	@Override
@@ -59,40 +54,22 @@ public class PortletDataHandlerStatusMessageSenderImpl
 		String messageType, String[] portletIds,
 		ManifestSummary manifestSummary) {
 
-		if (!BackgroundTaskThreadLocal.hasBackgroundTask()) {
-			return;
-		}
-
 		PortletDataHandlerStatusMessage portletDataHandlerStatusMessage =
 			new PortletDataHandlerStatusMessage(
 				messageType, portletIds, manifestSummary);
 
-		_singleDestinationMessageSender.send(
-			portletDataHandlerStatusMessage.getStatusMessage());
+		sendStatusMessage(portletDataHandlerStatusMessage);
 	}
 
 	@Override
 	public <T extends StagedModel> void sendStatusMessage(
 		String messageType, T stagedModel, ManifestSummary manifestSummary) {
 
-		if (!BackgroundTaskThreadLocal.hasBackgroundTask()) {
-			return;
-		}
-
 		PortletDataHandlerStatusMessage portletDataHandlerStatusMessage =
 			new PortletDataHandlerStatusMessage(
 				messageType, stagedModel, manifestSummary);
 
-		_singleDestinationMessageSender.send(
-			portletDataHandlerStatusMessage.getStatusMessage());
+		sendStatusMessage(portletDataHandlerStatusMessage);
 	}
-
-	public void setSingleDestinationMessageSender(
-		SingleDestinationMessageSender singleDestinationMessageSender) {
-
-		_singleDestinationMessageSender = singleDestinationMessageSender;
-	}
-
-	private SingleDestinationMessageSender _singleDestinationMessageSender;
 
 }
