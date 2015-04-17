@@ -44,6 +44,7 @@ import com.liferay.portal.security.lang.DoPrivilegedUtil;
 import com.liferay.portal.service.BackgroundTaskLocalServiceUtil;
 import com.liferay.portal.service.LockLocalServiceUtil;
 import com.liferay.portal.tools.DBUpgrader;
+import com.liferay.portal.tools.DBUpgraderUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.messageboards.util.MBMessageIndexer;
@@ -139,7 +140,7 @@ public class StartupAction extends SimpleAction {
 			_log.debug("Upgrade database");
 		}
 
-		DBUpgrader.upgrade();
+		DBUpgraderUtil.upgrade();
 
 		// Clear locks
 
@@ -189,7 +190,7 @@ public class StartupAction extends SimpleAction {
 			_log.debug("Verify database");
 		}
 
-		DBUpgrader.verify();
+		DBUpgraderUtil.verify();
 
 		// Background tasks
 

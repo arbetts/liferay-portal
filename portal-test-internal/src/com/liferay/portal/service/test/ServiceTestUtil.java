@@ -47,6 +47,7 @@ import com.liferay.portal.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextThreadLocal;
 import com.liferay.portal.tools.DBUpgrader;
+import com.liferay.portal.tools.DBUpgraderUtil;
 import com.liferay.portal.util.PortalInstances;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
@@ -137,7 +138,7 @@ public class ServiceTestUtil {
 		// Upgrade
 
 		try {
-			DBUpgrader.upgrade();
+			DBUpgraderUtil.upgrade();
 		}
 		catch (Throwable t) {
 			_log.error(t, t);
@@ -167,7 +168,7 @@ public class ServiceTestUtil {
 		// Verify
 
 		try {
-			DBUpgrader.verify();
+			DBUpgraderUtil.verify();
 		}
 		catch (Exception e) {
 			_log.error(e, e);

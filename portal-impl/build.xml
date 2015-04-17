@@ -1561,7 +1561,7 @@ security-manager-sockets-accept=\</replacevalue>
 
 	<target name="upgrade-db">
 		<java
-			classname="com.liferay.portal.tools.DBUpgrader"
+			classname="com.liferay.portal.tools.DBUpgraderUtil"
 			classpathref="project.classpath"
 			fork="true"
 			maxmemory="1024m"
