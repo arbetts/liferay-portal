@@ -31,13 +31,7 @@ public class BackgroundTaskStatusMessageSenderImpl
 			return;
 		}
 
-		Message message = backgroundTaskStatusMessage.getStatusMessage();
-
-		message.put(
-			"backgroundTaskId",
-			BackgroundTaskThreadLocal.getBackgroundTaskId());
-
-		_singleDestinationMessageSender.send(message);
+		_singleDestinationMessageSender.send(backgroundTaskStatusMessage);
 	}
 
 	public void setSingleDestinationMessageSender(

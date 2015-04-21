@@ -19,8 +19,12 @@ import com.liferay.portal.kernel.messaging.Message;
 /**
  * @author Andrew Betts
  */
-public interface BackgroundTaskStatusMessage {
+public class BackgroundTaskStatusMessage extends Message {
 
-	public Message getStatusMessage();
+	public BackgroundTaskStatusMessage() {
+		put(
+			"backgroundTaskId",
+			BackgroundTaskThreadLocal.getBackgroundTaskId());
+	}
 
 }
