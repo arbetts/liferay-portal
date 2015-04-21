@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.util.Validator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.portlet.PortletRequest;
 
@@ -183,11 +184,11 @@ public class LanguageUtil {
 		return getLanguage().get(resourceBundle, key, defaultValue);
 	}
 
-	public static Locale[] getAvailableLocales() {
+	public static Set<Locale> getAvailableLocales() {
 		return getLanguage().getAvailableLocales();
 	}
 
-	public static Locale[] getAvailableLocales(long groupId) {
+	public static Set<Locale> getAvailableLocales(long groupId) {
 		return getLanguage().getAvailableLocales(groupId);
 	}
 
@@ -225,11 +226,15 @@ public class LanguageUtil {
 		return getLanguage().getLanguageId(portletRequest);
 	}
 
+	public static Locale getLocale(long groupId, String languageCode) {
+		return getLanguage().getLocale(groupId, languageCode);
+	}
+
 	public static Locale getLocale(String languageCode) {
 		return getLanguage().getLocale(languageCode);
 	}
 
-	public static Locale[] getSupportedLocales() {
+	public static Set<Locale> getSupportedLocales() {
 		return getLanguage().getSupportedLocales();
 	}
 

@@ -9,11 +9,6 @@
 </thead>
 <tbody>
 <tr>
-	<td>PAGE_NAME</td>
-	<td></td>
-	<td>PGWikiWikipageRename</td>
-</tr>
-<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -102,7 +97,7 @@
 </tr>
 <tr>
 	<td>CHANGE_PARENT_NEW_PARENT_SELECT</td>
-	<td>//select[@name='_36_newParentTitle']</td>
+	<td>//select[@name='_36_WAR_wikiweb_newParentTitle']</td>
 	<td></td>
 </tr>
 <tr>
