@@ -500,7 +500,7 @@
 		<execute function="AssertTextNotPresent" locator1="Permissions#CONTENT_PERMISSIONS_ROLE_NAME" value1="Guest" />
 	</command>
 
-	<command known-issues="LPS-48551" name="RolesOrganizationSearch" priority="4">
+	<command name="RolesOrganizationSearch" priority="4">
 		<var name="searchAssetTitle" value="Test Document" />
 
 		<execute macro="Page#gotoCP">
@@ -682,7 +682,7 @@
 			<var name="searchTerm" value="Test Document" />
 		</execute>
 
-		<execute macro="Search#viewSearchPG">
+		<execute macro="Search#viewSearchResultPG">
 			<var name="searchAssetTitle" value="Test Document" />
 			<var name="searchAssetType" value="Document" />
 		</execute>
@@ -740,7 +740,7 @@
 			<var name="searchTerm" value="Test Document" />
 		</execute>
 
-		<execute macro="Search#viewSearchPG">
+		<execute macro="Search#viewSearchResultPG">
 			<var name="searchAssetTitle" value="Test Document" />
 			<var name="searchAssetType" value="Document" />
 		</execute>
@@ -1125,7 +1125,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="LPS-48551" name="RolesSiteSearch" priority="4">
+	<command name="RolesSiteSearch" priority="4">
 		<var name="searchAssetTitle" value="Test Document" />
 
 		<execute macro="Page#gotoCP">
@@ -1276,7 +1276,7 @@
 			<var name="searchTerm" value="Test Document" />
 		</execute>
 
-		<execute macro="Search#viewSearchPG">
+		<execute macro="Search#viewSearchResultPG">
 			<var name="searchAssetTitle" value="Test Document" />
 			<var name="searchAssetType" value="Document" />
 		</execute>
@@ -1330,7 +1330,7 @@
 			<var name="searchTerm" value="Test Document" />
 		</execute>
 
-		<execute macro="Search#viewSearchPG">
+		<execute macro="Search#viewSearchResultPG">
 			<var name="searchAssetTitle" value="Test Document" />
 			<var name="searchAssetType" value="Document" />
 		</execute>

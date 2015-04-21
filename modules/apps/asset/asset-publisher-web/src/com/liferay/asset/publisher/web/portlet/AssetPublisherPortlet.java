@@ -21,9 +21,9 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -67,8 +67,6 @@ import org.osgi.service.component.annotations.Reference;
 		"com.liferay.portlet.add-default-resource=true",
 		"com.liferay.portlet.css-class-wrapper=portlet-asset-publisher",
 		"com.liferay.portlet.display-category=category.cms",
-		"com.liferay.portlet.friendly-url-mapping=asset_publisher",
-		"com.liferay.portlet.friendly-url-routes=com/liferay/asset/publisher/web/portlet/route/asset-publisher-friendly-url-routes.xml",
 		"com.liferay.portlet.header-portlet-css=/css/main.css",
 		"com.liferay.portlet.icon=/icons/asset_publisher.png",
 		"com.liferay.portlet.instanceable=true",
@@ -82,6 +80,7 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.display-name=Asset Publisher",
 		"javax.portlet.expiration-cache=0",
 		"javax.portlet.init-param.config-template=/configuration.jsp",
+		"javax.portlet.init-param.copy-request-parameters=true",
 		"javax.portlet.init-param.template-path=/",
 		"javax.portlet.init-param.view-template=/view.jsp",
 		"javax.portlet.resource-bundle=content.Language",
@@ -92,7 +91,7 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.supported-public-render-parameter=tags",
 		"javax.portlet.supports.mime-type=text/html"
 	},
-	service = Portlet.class
+	service = {AssetPublisherPortlet.class, Portlet.class}
 )
 public class AssetPublisherPortlet extends MVCPortlet {
 
@@ -102,12 +101,6 @@ public class AssetPublisherPortlet extends MVCPortlet {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
-
-		String cmd = ParamUtil.getString(resourceRequest, Constants.CMD);
-
-		if (!cmd.equals("getFieldValue")) {
-			return;
-		}
 
 		try {
 			ServiceContext serviceContext = ServiceContextFactory.getInstance(
@@ -157,7 +150,7 @@ public class AssetPublisherPortlet extends MVCPortlet {
 			jsonObject.put("displayValue", String.valueOf(displayValue));
 
 			if (fieldValue instanceof Boolean) {
-				jsonObject.put("value", (Boolean) fieldValue);
+				jsonObject.put("value", (Boolean)fieldValue);
 			}
 			else if (fieldValue instanceof Date) {
 				DateFormat dateFormat =
@@ -223,16 +216,18 @@ public class AssetPublisherPortlet extends MVCPortlet {
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws IOException, PortletException {
 
-		String cmd = ParamUtil.getString(resourceRequest, Constants.CMD);
+		String resourceID = GetterUtil.getString(
+			resourceRequest.getResourceID());
 
-		if (cmd.equals("getFieldValue")) {
+		if (resourceID.equals("getFieldValue")) {
 			getFieldValue(resourceRequest, resourceResponse);
 		}
-		else if (cmd.equals("rss")) {
+		else if (resourceID.equals("getRSS")) {
 			getRSS(resourceRequest, resourceResponse);
 		}
-
-		super.serveResource(resourceRequest, resourceResponse);
+		else {
+			super.serveResource(resourceRequest, resourceResponse);
+		}
 	}
 
 	public void subscribe(

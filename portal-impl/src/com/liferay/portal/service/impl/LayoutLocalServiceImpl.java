@@ -83,7 +83,6 @@ import com.liferay.portal.util.comparator.LayoutPriorityComparator;
 import com.liferay.portlet.documentlibrary.util.DLValidatorUtil;
 import com.liferay.portlet.dynamicdatalists.RecordSetDuplicateRecordSetKeyException;
 import com.liferay.portlet.dynamicdatamapping.StructureDuplicateStructureKeyException;
-import com.liferay.portlet.mobiledevicerules.model.MDRRuleGroupInstance;
 import com.liferay.portlet.sites.util.Sites;
 import com.liferay.portlet.sites.util.SitesUtil;
 
@@ -413,8 +412,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		boolean addGuestPermissions = false;
 
-		if (!privateLayout ||
-			type.equals(LayoutConstants.TYPE_CONTROL_PANEL) ||
+		if (!privateLayout || type.equals(LayoutConstants.TYPE_CONTROL_PANEL) ||
 			type.equals(LayoutConstants.TYPE_USER_PERSONAL_PANEL) ||
 			group.isLayoutSetPrototype()) {
 
@@ -444,14 +442,6 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		updateAsset(
 			userId, layout, serviceContext.getAssetCategoryIds(),
 			serviceContext.getAssetTagNames());
-
-		// Message boards
-
-		if (PropsValues.LAYOUT_COMMENTS_ENABLED) {
-			mbMessageLocalService.addDiscussionMessage(
-				userId, user.getFullName(), groupId, Layout.class.getName(),
-				plid, WorkflowConstants.ACTION_PUBLISH);
-		}
 
 		return layout;
 	}
@@ -618,38 +608,6 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		ratingsStatsLocalService.deleteStats(
 			Layout.class.getName(), layout.getPlid());
-
-		// Mobile device rules
-
-		long layoutClassNameId = classNameLocalService.getClassNameId(
-			Layout.class);
-
-		List<MDRRuleGroupInstance> mdrRuleGroupInstances =
-			mdrRuleGroupInstancePersistence.findByC_C(
-				layoutClassNameId, layout.getPlid());
-
-		for (MDRRuleGroupInstance mdrRuleGroupInstance :
-				mdrRuleGroupInstances) {
-
-			mdrRuleGroupInstanceLocalService.deleteMDRRuleGroupInstance(
-				mdrRuleGroupInstance);
-		}
-
-		// Message boards
-
-		mbMessageLocalService.deleteDiscussionMessages(
-			Layout.class.getName(), layout.getPlid());
-
-		// Journal articles
-
-		journalArticleLocalService.deleteLayoutArticleReferences(
-			layout.getGroupId(), layout.getUuid());
-
-		// Journal content searches
-
-		journalContentSearchLocalService.deleteLayoutContentSearches(
-			layout.getGroupId(), layout.isPrivateLayout(),
-			layout.getLayoutId());
 
 		// Expando
 
@@ -952,7 +910,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		Map<String, Serializable> settingsMap =
 			ExportImportConfigurationSettingsMapFactory.buildSettingsMap(
 				userId, groupId, privateLayout, layoutIds, parameterMap,
-				startDate, endDate, user.getLocale(), user.getTimeZone());
+				user.getLocale(), user.getTimeZone());
 
 		ServiceContext serviceContext = new ServiceContext();
 
@@ -1151,8 +1109,8 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		Map<String, Serializable> settingsMap =
 			ExportImportConfigurationSettingsMapFactory.buildExportSettingsMap(
 				userId, plid, groupId, portletId, parameterMap,
-				Constants.EXPORT, startDate, endDate, user.getLocale(),
-				user.getTimeZone(), fileName);
+				Constants.EXPORT, user.getLocale(), user.getTimeZone(),
+				fileName);
 
 		ServiceContext serviceContext = new ServiceContext();
 
@@ -1339,8 +1297,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 				layoutFriendlyURL.getPlid());
 		}
 
-		if ((layout == null) &&
-			friendlyURL.startsWith(StringPool.SLASH) &&
+		if ((layout == null) && friendlyURL.startsWith(StringPool.SLASH) &&
 			Validator.isNumber(friendlyURL.substring(1))) {
 
 			long layoutId = GetterUtil.getLong(friendlyURL.substring(1));
@@ -1921,6 +1878,35 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	}
 
 	@Override
+	public void importLayoutsDataDeletions(
+			long userId, long groupId, boolean privateLayout,
+			Map<String, String[]> parameterMap, File file)
+		throws PortalException {
+
+		try {
+			LayoutImporter layoutImporter = LayoutImporter.getInstance();
+
+			layoutImporter.importLayoutsDataDeletions(
+				userId, groupId, privateLayout, parameterMap, file);
+		}
+		catch (PortalException pe) {
+			Throwable cause = pe.getCause();
+
+			if (cause instanceof LocaleException) {
+				throw (PortalException)cause;
+			}
+
+			throw pe;
+		}
+		catch (SystemException se) {
+			throw se;
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
+		}
+	}
+
+	@Override
 	public long importLayoutsInBackground(
 			long userId, ExportImportConfiguration exportImportConfiguration,
 			File file)
@@ -1970,8 +1956,8 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		Map<String, Serializable> settingsMap =
 			ExportImportConfigurationSettingsMapFactory.buildImportSettingsMap(
 				userId, groupId, privateLayout, null, parameterMap,
-				Constants.IMPORT, null, null, user.getLocale(),
-				user.getTimeZone(), file.getName());
+				Constants.IMPORT, user.getLocale(), user.getTimeZone(),
+				file.getName());
 
 		ServiceContext serviceContext = new ServiceContext();
 
@@ -2006,6 +1992,35 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		}
 		finally {
 			FileUtil.delete(file);
+		}
+	}
+
+	@Override
+	public void importPortletDataDeletions(
+			long userId, long plid, long groupId, String portletId,
+			Map<String, String[]> parameterMap, File file)
+		throws PortalException {
+
+		try {
+			PortletImporter portletImporter = PortletImporter.getInstance();
+
+			portletImporter.importPortletDataDeletions(
+				userId, plid, groupId, portletId, parameterMap, file);
+		}
+		catch (PortalException pe) {
+			Throwable cause = pe.getCause();
+
+			if (cause instanceof LocaleException) {
+				throw (PortalException)cause;
+			}
+
+			throw pe;
+		}
+		catch (SystemException se) {
+			throw se;
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
 		}
 	}
 
@@ -2208,8 +2223,8 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		Map<String, Serializable> settingsMap =
 			ExportImportConfigurationSettingsMapFactory.buildImportSettingsMap(
 				userId, plid, groupId, portletId, parameterMap,
-				Constants.IMPORT, null, null, user.getLocale(),
-				user.getTimeZone(), file.getName());
+				Constants.IMPORT, user.getLocale(), user.getTimeZone(),
+				file.getName());
 
 		ServiceContext serviceContext = new ServiceContext();
 
@@ -2382,7 +2397,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			layout.getUuid(), 0, assetCategoryIds, assetTagNames, false, null,
 			null, null, ContentTypes.TEXT_HTML,
 			layout.getName(LocaleUtil.getDefault()), null, null, null, null, 0,
-			0, null, false);
+			0, null);
 	}
 
 	/**

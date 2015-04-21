@@ -23,6 +23,15 @@
 				('onpopstate' in WIN || A.UA.gecko >= 2));
 	};
 
+	var filterConfig = null;
+
+	if (!COMBINE) {
+		filterConfig = {
+			replaceStr: '.js' + LiferayAUI.getStaticResourceURLParams(),
+			searchExp: '\\.js$'
+		};
+	}
+
 	window.YUI_config = {
 		base: PATH_JAVASCRIPT + '/aui/',
 		combine: COMBINE,
@@ -43,7 +52,22 @@
 			liferay: {
 				base: PATH_JAVASCRIPT + '/liferay/',
 				combine: COMBINE,
+				filter: filterConfig,
 				modules: {
+					'liferay-alloy-editor': {
+						path: 'alloyeditor.js',
+						requires: [
+							'alloy-editor',
+							'liferay-portlet-base'
+						]
+					},
+					'liferay-alloy-editor-source': {
+						path: 'alloyeditor_source.js',
+						requires: [
+							'liferay-fullscreen-source-editor',
+							'liferay-source-editor'
+						]
+					},
 					'liferay-app-view-move': {
 						path: 'app_view_move.js',
 						plugins: {
@@ -963,10 +987,6 @@
 		root: PATH_JAVASCRIPT + '/aui/',
 		useBrowserConsole: false
 	};
-
-	if (Browser.isIe() && Browser.getMajorVersion() < 9) {
-		CORE_MODULES.push('aui-base-html5-shiv');
-	}
 
 	CORE_MODULES.push('liferay-browser-selectors');
 })();

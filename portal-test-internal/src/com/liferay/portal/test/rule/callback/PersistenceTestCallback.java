@@ -19,7 +19,7 @@ import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.callback.BaseTestCallback;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.model.ModelListenerRegistrationUtil;
-import com.liferay.portal.tools.DBUpgrader;
+import com.liferay.portal.tools.DBUpgraderUtil;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,7 +72,7 @@ public class PersistenceTestCallback extends BaseTestCallback<Object, Object> {
 		}
 
 		try {
-			DBUpgrader.upgrade();
+			DBUpgraderUtil.upgrade();
 		}
 		catch (Throwable t) {
 			throw new ExceptionInInitializerError(t);

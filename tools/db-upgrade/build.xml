@@ -7,7 +7,7 @@
 		</path>
 
 		<java
-			classname="com.liferay.portal.tools.DBUpgrader"
+			classname="com.liferay.portal.tools.DBUpgraderUtil"
 			classpathref="lib.classpath"
 			fork="true"
 			maxmemory="1024m"

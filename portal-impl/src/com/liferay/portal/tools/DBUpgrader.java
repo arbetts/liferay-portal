@@ -29,7 +29,6 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.model.Release;
 import com.liferay.portal.model.ReleaseConstants;
 import com.liferay.portal.service.ClassNameLocalServiceUtil;
@@ -37,7 +36,6 @@ import com.liferay.portal.service.ReleaseLocalServiceUtil;
 import com.liferay.portal.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.spring.aop.ServiceBeanAopCacheManager;
 import com.liferay.portal.spring.aop.ServiceBeanAopCacheManagerUtil;
-import com.liferay.portal.util.InitUtil;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.util.dao.orm.CustomSQLUtil;
@@ -55,39 +53,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.apache.commons.lang.time.StopWatch;
-
 /**
  * @author Michael C. Han
  * @author Brian Wing Shun Chan
  */
 public class DBUpgrader {
 
-	public static void main(String[] args) {
-		try {
-			StopWatch stopWatch = new StopWatch();
-
-			stopWatch.start();
-
-			InitUtil.initWithSpring(true);
-
-			upgrade();
-			verify();
-
-			System.out.println(
-				"\nCompleted upgrade and verify processes in " +
-					(stopWatch.getTime() / Time.SECOND) + " seconds");
-
-			System.exit(0);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-
-			System.exit(1);
-		}
-	}
-
-	public static void upgrade() throws Exception {
+	public void upgrade() throws Exception {
 
 		// Disable database caching before upgrade
 
@@ -198,7 +170,7 @@ public class DBUpgrader {
 		}
 	}
 
-	public static void verify() throws Exception {
+	public void verify() throws Exception {
 
 		// Check release
 
@@ -276,7 +248,7 @@ public class DBUpgrader {
 		CacheRegistryUtil.setActive(true);
 	}
 
-	private static void _checkPermissionAlgorithm() throws Exception {
+	private void _checkPermissionAlgorithm() throws Exception {
 		long count = _getResourceCodesCount();
 
 		if (count == 0) {
@@ -297,7 +269,7 @@ public class DBUpgrader {
 		throw new IllegalStateException(sb.toString());
 	}
 
-	private static void _checkReleaseState(int state) throws Exception {
+	private void _checkReleaseState(int state) throws Exception {
 		if (state == ReleaseConstants.STATE_GOOD) {
 			return;
 		}
@@ -314,14 +286,14 @@ public class DBUpgrader {
 		throw new IllegalStateException(sb.toString());
 	}
 
-	private static void _deleteTempImages() throws Exception {
+	private void _deleteTempImages() throws Exception {
 		DB db = DBFactoryUtil.getDB();
 
 		db.runSQL(_DELETE_TEMP_IMAGES_1);
 		db.runSQL(_DELETE_TEMP_IMAGES_2);
 	}
 
-	private static void _disableTransactions() throws Exception {
+	private void _disableTransactions() throws Exception {
 		if (_log.isDebugEnabled()) {
 			_log.debug("Disable transactions");
 		}
@@ -355,7 +327,7 @@ public class DBUpgrader {
 		);
 	}
 
-	private static void _enableTransactions() throws Exception {
+	private void _enableTransactions() throws Exception {
 		if (_log.isDebugEnabled()) {
 			_log.debug("Enable transactions");
 		}
@@ -372,7 +344,7 @@ public class DBUpgrader {
 		ServiceBeanAopCacheManagerUtil.reset();
 	}
 
-	private static int _getReleaseState() throws Exception {
+	private int _getReleaseState() throws Exception {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -400,7 +372,7 @@ public class DBUpgrader {
 		}
 	}
 
-	private static long _getResourceCodesCount() throws Exception {
+	private long _getResourceCodesCount() throws Exception {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -428,13 +400,13 @@ public class DBUpgrader {
 		}
 	}
 
-	private static void _updateCompanyKey() throws Exception {
+	private void _updateCompanyKey() throws Exception {
 		DB db = DBFactoryUtil.getDB();
 
 		db.runSQL("update Company set key_ = null");
 	}
 
-	private static void _updateReleaseState(int state) throws Exception {
+	private void _updateReleaseState(int state) throws Exception {
 		Connection con = null;
 		PreparedStatement ps = null;
 

@@ -18,8 +18,6 @@
 
 <%
 PortletURL portletURL = renderResponse.createRenderURL();
-
-portletURL.setParameter("struts_action", "/layout_set_prototypes/view");
 %>
 
 <liferay-ui:error exception="<%= RequiredLayoutSetPrototypeException.class %>" message="you-cannot-delete-site-templates-that-are-used-by-a-site" />
@@ -66,7 +64,6 @@ portletURL.setParameter("struts_action", "/layout_set_prototypes/view");
 
 			<liferay-ui:search-container-column-text
 				name="name"
-				orderable="<%= true %>"
 			>
 
 				<aui:a href="<%= rowURL %>"><%= layoutSetPrototype.getName(locale) %></aui:a>
@@ -104,24 +101,3 @@ portletURL.setParameter("struts_action", "/layout_set_prototypes/view");
 		<liferay-ui:search-iterator />
 	</liferay-ui:search-container>
 </aui:form>
-
-<aui:script use="aui-base,liferay-util-window">
-	A.getBody().delegate(
-		'click',
-		function(event) {
-			event.preventDefault();
-
-			var link = event.currentTarget;
-			var title = link.get('text');
-
-			Liferay.Util.openWindow(
-				{
-					id: '<portlet:namespace />' + title,
-					title: title,
-					uri: link.attr('href')
-				}
-			);
-		},
-		'.layoutset-prototype-action a'
-	);
-</aui:script>
