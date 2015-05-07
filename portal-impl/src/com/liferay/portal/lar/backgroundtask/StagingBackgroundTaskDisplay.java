@@ -133,7 +133,7 @@ public class StagingBackgroundTaskDisplay extends BaseBackgroundTaskDisplay {
 			if (phase.equals(Constants.EXPORT) &&
 				!Validator.equals(_cmd, Constants.PUBLISH_TO_REMOTE)) {
 
-				base = _EXPORT_PHASE_BASE;
+				base = _EXPORT_PHASE_MAX_PERCENTAGE;
 			}
 
 			percentage = Math.round(
@@ -283,7 +283,7 @@ public class StagingBackgroundTaskDisplay extends BaseBackgroundTaskDisplay {
 		return message;
 	}
 
-	private static final int _EXPORT_PHASE_BASE = 50;
+	private static final int _EXPORT_PHASE_MAX_PERCENTAGE = 50;
 
 	private static final int _MAX_PERCENTAGE = 100;
 
