@@ -17,9 +17,6 @@ package com.liferay.portal.kernel.staging;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.lar.MissingReference;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.workflow.WorkflowTask;
@@ -32,11 +29,8 @@ import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 
-import java.io.Serializable;
-
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.portlet.PortletPreferences;
@@ -75,6 +69,11 @@ public interface Staging {
 	public void copyFromLive(PortletRequest PortletRequest, Portlet portlet)
 		throws PortalException;
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #publishPortlet(long, long,
+	 *             long, long, long, String, Map)}
+	 */
+	@Deprecated
 	public void copyPortlet(
 			PortletRequest PortletRequest, long sourceGroupId,
 			long targetGroupId, long sourcePlid, long targetPlid,
@@ -88,6 +87,20 @@ public interface Staging {
 	public void copyRemoteLayouts(long exportImportConfigurationId)
 		throws PortalException;
 
+	public void copyRemoteLayouts(
+			long sourceGroupId, boolean privateLayout,
+			Map<Long, Boolean> layoutIdMap, Map<String, String[]> parameterMap,
+			String remoteAddress, int remotePort, String remotePathContext,
+			boolean secureConnection, long remoteGroupId,
+			boolean remotePrivateLayout)
+		throws PortalException;
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #copyRemoteLayouts(long,
+	 *             boolean, Map, Map, String, int, String, boolean, long,
+	 *             boolean)}
+	 */
+	@Deprecated
 	public void copyRemoteLayouts(
 			long sourceGroupId, boolean privateLayout,
 			Map<Long, Boolean> layoutIdMap, Map<String, String[]> parameterMap,
@@ -173,13 +186,6 @@ public interface Staging {
 			ServiceContext serviceContext)
 		throws Exception;
 
-	public JSONArray getErrorMessagesJSONArray(
-		Locale locale, Map<String, MissingReference> missingReferences,
-		Map<String, Serializable> contextMap);
-
-	public JSONObject getExceptionMessagesJSONObject(
-		Locale locale, Exception e, Map<String, Serializable> contextMap);
-
 	public Group getLiveGroup(long groupId);
 
 	public long getLiveGroupId(long groupId);
@@ -212,14 +218,22 @@ public interface Staging {
 
 	public Group getStagingGroup(long groupId);
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.portal.kernel.lar.exportimportconfiguration.ExportImportConfigurationParameterMapFactory#buildParameterMap(
+	 *             )}
+	 */
+	@Deprecated
 	public Map<String, String[]> getStagingParameters();
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.portal.kernel.lar.exportimportconfiguration.ExportImportConfigurationParameterMapFactory#buildParameterMap(
+	 *             PortletRequest)}
+	 */
+	@Deprecated
 	public Map<String, String[]> getStagingParameters(
 		PortletRequest PortletRequest);
-
-	public JSONArray getWarningMessagesJSONArray(
-		Locale locale, Map<String, MissingReference> missingReferences,
-		Map<String, Serializable> contextMap);
 
 	public WorkflowTask getWorkflowTask(
 			long userId, LayoutRevision layoutRevision)
@@ -230,6 +244,12 @@ public interface Staging {
 
 	public boolean isIncomplete(Layout layout, long layoutSetBranchId);
 
+	/**
+	 * @deprecated As of 7.0.0, see {@link
+	 *             com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor#getIsolationLevel(
+	 *             )}
+	 */
+	@Deprecated
 	public void lockGroup(long userId, long groupId) throws PortalException;
 
 	public void publishLayout(
@@ -246,12 +266,23 @@ public interface Staging {
 	public void publishLayouts(
 			long userId, long sourceGroupId, long targetGroupId,
 			boolean privateLayout, long[] layoutIds,
+			Map<String, String[]> parameterMap)
+		throws PortalException;
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #publishLayouts(long, long,
+	 *             long, boolean, long[], Map)}
+	 */
+	@Deprecated
+	public void publishLayouts(
+			long userId, long sourceGroupId, long targetGroupId,
+			boolean privateLayout, long[] layoutIds,
 			Map<String, String[]> parameterMap, Date startDate, Date endDate)
 		throws PortalException;
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link #publishLayouts(long, long,
-	 *             long, boolean, long[], Map, Date, Date)}
+	 *             long, boolean, long[], Map)}
 	 */
 	@Deprecated
 	public void publishLayouts(
@@ -262,8 +293,31 @@ public interface Staging {
 
 	public void publishLayouts(
 			long userId, long sourceGroupId, long targetGroupId,
+			boolean privateLayout, Map<String, String[]> parameterMap)
+		throws PortalException;
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #publishLayouts(long, long,
+	 *             long, boolean, Map)}
+	 */
+	@Deprecated
+	public void publishLayouts(
+			long userId, long sourceGroupId, long targetGroupId,
 			boolean privateLayout, Map<String, String[]> parameterMap,
 			Date startDate, Date endDate)
+		throws PortalException;
+
+	public void publishPortlet(
+			long userId, ExportImportConfiguration exportImportConfiguration)
+		throws PortalException;
+
+	public void publishPortlet(long userId, long exportImportConfigurationId)
+		throws PortalException;
+
+	public void publishPortlet(
+			long userId, long sourceGroupId, long targetGroupId,
+			long sourcePlid, long targetPlid, String portletId,
+			Map<String, String[]> parameterMap)
 		throws PortalException;
 
 	public void publishToLive(PortletRequest PortletRequest)
@@ -306,6 +360,12 @@ public interface Staging {
 
 	public String stripProtocolFromRemoteAddress(String remoteAddress);
 
+	/**
+	 * @deprecated As of 7.0.0, see {@link
+	 *             com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor#getIsolationLevel(
+	 *             )}
+	 */
+	@Deprecated
 	public void unlockGroup(long groupId);
 
 	public void unscheduleCopyFromLive(PortletRequest PortletRequest)

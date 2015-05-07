@@ -169,6 +169,10 @@
 			<var name="siteScopeName" value="${globalSiteName}" />
 		</execute>
 
+		<execute macro="WebContent#gotoEditCP">
+			<var name="webContentTitle" value="${webContentTitle}" />
+		</execute>
+
 		<execute macro="WebContent#editCP">
 			<var name="webContentContentEdit" value="${webContentContentEdit}" />
 			<var name="webContentTitle" value="${webContentTitle}" />
@@ -207,7 +211,7 @@
 		<execute function="AssertTextNotPresent" locator1="PGAssetpublisher#ASSET_ABSTRACT_READ_MORE" value1="Read More" />
 	</command>
 
-	<command name="AddWebContentWithGlobalScopeViaCPToSiteAP" priority="4">
+	<command known-issues="LPS-51687" name="AddWebContentWithGlobalScopeViaCPToSiteAP" priority="4">
 		<var name="globalSiteType" value="Global" />
 		<var name="portletName" value="Asset Publisher" />
 		<var name="removeSiteScopeName" value="Site Name" />
@@ -299,6 +303,10 @@
 			<var name="siteScopeName" value="${globalSiteName}" />
 		</execute>
 
+		<execute macro="WebContent#gotoEditCP">
+			<var name="webContentTitle" value="${webContentTitle}" />
+		</execute>
+
 		<execute macro="WebContent#editCP">
 			<var name="webContentContentEdit" value="${webContentContentEdit}" />
 			<var name="webContentTitle" value="${webContentTitle}" />
@@ -361,9 +369,20 @@
 			<var name="siteScopeName" value="${globalSiteName}" />
 		</execute>
 
+		<execute macro="WebContentNavigator#gotoManageStructures" />
+
 		<execute macro="WebContentStructures#addCP">
 			<var name="structureDescription" value="${structureDescription}" />
-			<var name="structureFieldNames" value="${structureFieldNames}" />
+			<var name="structureName" value="${structureName}" />
+		</execute>
+
+		<execute macro="DynamicDataMapping#addField">
+			<var name="field" value="Text" />
+			<var name="fieldFieldLabel" value="Text" />
+			<var name="fieldName" value="Text" />
+		</execute>
+
+		<execute macro="WebContentStructures#saveCP">
 			<var name="structureName" value="${structureName}" />
 		</execute>
 
@@ -458,9 +477,20 @@
 			<var name="siteScopeName" value="${globalSiteName}" />
 		</execute>
 
+		<execute macro="WebContentNavigator#gotoManageStructures" />
+
 		<execute macro="WebContentStructures#addCP">
 			<var name="structureDescription" value="${structureDescription}" />
-			<var name="structureFieldNames" value="${structureFieldNames}" />
+			<var name="structureName" value="${structureName}" />
+		</execute>
+
+		<execute macro="DynamicDataMapping#addField">
+			<var name="field" value="Text" />
+			<var name="fieldFieldLabel" value="Text" />
+			<var name="fieldName" value="Text" />
+		</execute>
+
+		<execute macro="WebContentStructures#saveCP">
 			<var name="structureName" value="${structureName}" />
 		</execute>
 
@@ -578,7 +608,7 @@
 		</execute>
 	</command>
 
-	<command name="WebContentAdministrationSitesTemplatePermissionPersistence" priority="5">
+	<command known-issues="LPS-51156" name="WebContentAdministrationSitesTemplatePermissionPersistence" priority="5">
 		<var name="password" value="test" />
 		<var name="pollsQuestion" value="What is the most important issue for this election?" />
 		<var name="pollsQuestionChoiceA" value="The Economy" />

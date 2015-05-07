@@ -1,5 +1,5 @@
 <definition component-name="portal-web-forms-and-data-lists">
-	<property name="testray.main.component.name" value="Web Forms and Data Lists" />
+	<property name="testray.main.component.name" value="Dynamic Data Lists" />
 
 	<set-up>
 		<execute macro="User#firstLoginPG" />
@@ -198,7 +198,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="LIFERAYQA-12730" name="AddListAndRecordWithContactsPredefinedDataDefinition" priority="4">
+	<command name="AddListAndRecordWithContactsPredefinedDataDefinition" priority="4">
 		<var name="ddlDataDefinitionName" value="Contacts" />
 
 		<execute macro="Page#gotoContentCP">
@@ -296,7 +296,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="LIFERAYQA-12730" name="AddListAndRecordWithEventsPredefinedDataDefinition" priority="4">
+	<command name="AddListAndRecordWithEventsPredefinedDataDefinition" priority="4">
 		<var name="ddlDataDefinitionName" value="Events" />
 
 		<execute macro="Page#gotoContentCP">
@@ -451,7 +451,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="LIFERAYQA-12730" name="AddListAndRecordWithIssuesTrackingPredefinedDataDefinition" priority="4">
+	<command name="AddListAndRecordWithIssuesTrackingPredefinedDataDefinition" priority="4">
 		<var name="ddlDataDefinitionName" value="Issues Tracking" />
 
 		<execute macro="Page#gotoContentCP">
@@ -544,7 +544,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="LIFERAYQA-12730" name="AddListAndRecordWithMeetingMinutesPredefinedDataDefinition" priority="4">
+	<command name="AddListAndRecordWithMeetingMinutesPredefinedDataDefinition" priority="4">
 		<var name="ddlDataDefinitionName" value="Meeting Minutes" />
 
 		<execute macro="Page#gotoContentCP">
@@ -973,7 +973,7 @@
 		</execute>
 	</command>
 
-	<command known-issues="LIFERAYQA-12730" name="AddListRecordWithDocumentsAndMediaFieldChooseFromDocumentLibrary" priority="5">
+	<command name="AddListRecordWithDocumentsAndMediaFieldChooseFromDocumentLibrary" priority="5">
 		<var name="ddlDataDefinitionName" value="Data Definition" />
 		<var name="ddlListName" value="List Name" />
 		<var name="ddlRecordFieldData" value="Document Title" />
@@ -1141,7 +1141,7 @@
 		</execute>
 	</command>
 
-	<command name="AddListRecordWithGeolocationField" priority="5">
+	<command known-issues="LRQA-13522" name="AddListRecordWithGeolocationField" priority="5">
 		<property name="test.assert.javascript.errors" value="false" />
 
 		<var name="ddlDataDefinitionName" value="Data Definition" />
@@ -2548,6 +2548,7 @@
 		<var name="fieldFieldLabel" value="Boolean" />
 		<var name="fieldFieldLabelEdit" value="Boolean Edit" />
 		<var name="fieldName" value="Boolean" />
+		<var name="fieldNameEdit" value="Boolean_Edit" />
 
 		<execute macro="Page#gotoContentCP">
 			<var name="portletName" value="Dynamic Data Lists" />
@@ -2578,6 +2579,7 @@
 			<var name="field" value="${field}" />
 			<var name="fieldFieldLabel" value="${fieldFieldLabel}" />
 			<var name="fieldFieldLabelEdit" value="${fieldFieldLabelEdit}" />
+			<var name="fieldNameEdit" value="${fieldNameEdit}" />
 		</execute>
 
 		<execute macro="DDLDataDefinition#saveCP" />
@@ -2593,7 +2595,7 @@
 
 		<execute macro="DynamicDataMapping#viewField">
 			<var name="fieldFieldLabel" value="${fieldFieldLabelEdit}" />
-			<var name="fieldName" value="${fieldName}" />
+			<var name="fieldName" value="${fieldNameEdit}" />
 		</execute>
 
 		<execute macro="Page#gotoContentCP">
@@ -2622,7 +2624,7 @@
 		<execute macro="DDLRecord#populateFieldBoolean">
 			<var name="ddlRecordFieldData" value="${ddlRecordFieldData}" />
 			<var name="fieldFieldLabel" value="${fieldFieldLabelEdit}" />
-			<var name="fieldName" value="${fieldName}" />
+			<var name="fieldName" value="${fieldNameEdit}" />
 		</execute>
 
 		<execute macro="DDLRecord#publishCP" />

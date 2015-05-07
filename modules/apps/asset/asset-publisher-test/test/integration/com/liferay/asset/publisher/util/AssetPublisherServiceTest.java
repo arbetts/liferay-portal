@@ -14,7 +14,7 @@
 
 package com.liferay.asset.publisher.util;
 
-import com.liferay.arquillian.bridge.junit.Arquillian;
+import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.asset.publisher.web.util.AssetPublisherUtil;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -117,9 +117,10 @@ public class AssetPublisherServiceTest {
 
 		addAssetVocabulary();
 
-		long[] allCategoyIds =
-			{_assetCategoryIds[0], _assetCategoryIds[1], _assetCategoryIds[2],
-				_assetCategoryIds[3]};
+		long[] allCategoyIds = {
+			_assetCategoryIds[0], _assetCategoryIds[1], _assetCategoryIds[2],
+			_assetCategoryIds[3]
+		};
 
 		String[] allAssetTagNames = {_ASSET_TAG_NAMES[0], _ASSET_TAG_NAMES[1]};
 
@@ -178,11 +179,15 @@ public class AssetPublisherServiceTest {
 		new LiferayIntegrationTestRule();
 
 	protected void addAssetCategories(long vocabularyId) throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext();
+
 		for (String assetCategoryName : _ASSET_CATEGORY_NAMES) {
 			AssetCategory assetCategory =
 				AssetCategoryLocalServiceUtil.addCategory(
-					TestPropsValues.getUserId(), assetCategoryName,
-					vocabularyId, ServiceContextTestUtil.getServiceContext());
+					TestPropsValues.getUserId(),
+					serviceContext.getScopeGroupId(), assetCategoryName,
+					vocabularyId, serviceContext);
 
 			_assetCategoryIds = ArrayUtil.append(
 				_assetCategoryIds, assetCategory.getCategoryId());
@@ -237,8 +242,8 @@ public class AssetPublisherServiceTest {
 
 		AssetVocabulary assetVocabulary =
 			AssetVocabularyLocalServiceUtil.addVocabulary(
-				TestPropsValues.getUserId(), RandomTestUtil.randomString(),
-				ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
+				TestPropsValues.getUserId(), _group.getGroupId(),
+				RandomTestUtil.randomString(), serviceContext);
 
 		addAssetCategories(assetVocabulary.getVocabularyId());
 	}

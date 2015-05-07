@@ -122,8 +122,6 @@ public class DLFileEntryMetadataPersistenceTest {
 
 		newDLFileEntryMetadata.setDDMStructureId(RandomTestUtil.nextLong());
 
-		newDLFileEntryMetadata.setFileEntryTypeId(RandomTestUtil.nextLong());
-
 		newDLFileEntryMetadata.setFileEntryId(RandomTestUtil.nextLong());
 
 		newDLFileEntryMetadata.setFileVersionId(RandomTestUtil.nextLong());
@@ -140,8 +138,6 @@ public class DLFileEntryMetadataPersistenceTest {
 			newDLFileEntryMetadata.getDDMStorageId());
 		Assert.assertEquals(existingDLFileEntryMetadata.getDDMStructureId(),
 			newDLFileEntryMetadata.getDDMStructureId());
-		Assert.assertEquals(existingDLFileEntryMetadata.getFileEntryTypeId(),
-			newDLFileEntryMetadata.getFileEntryTypeId());
 		Assert.assertEquals(existingDLFileEntryMetadata.getFileEntryId(),
 			newDLFileEntryMetadata.getFileEntryId());
 		Assert.assertEquals(existingDLFileEntryMetadata.getFileVersionId(),
@@ -149,66 +145,34 @@ public class DLFileEntryMetadataPersistenceTest {
 	}
 
 	@Test
-	public void testCountByUuid() {
-		try {
-			_persistence.countByUuid(StringPool.BLANK);
+	public void testCountByUuid() throws Exception {
+		_persistence.countByUuid(StringPool.BLANK);
 
-			_persistence.countByUuid(StringPool.NULL);
+		_persistence.countByUuid(StringPool.NULL);
 
-			_persistence.countByUuid((String)null);
-		}
-		catch (Exception e) {
-			Assert.fail(e.getMessage());
-		}
+		_persistence.countByUuid((String)null);
 	}
 
 	@Test
-	public void testCountByFileEntryTypeId() {
-		try {
-			_persistence.countByFileEntryTypeId(RandomTestUtil.nextLong());
+	public void testCountByFileEntryId() throws Exception {
+		_persistence.countByFileEntryId(RandomTestUtil.nextLong());
 
-			_persistence.countByFileEntryTypeId(0L);
-		}
-		catch (Exception e) {
-			Assert.fail(e.getMessage());
-		}
+		_persistence.countByFileEntryId(0L);
 	}
 
 	@Test
-	public void testCountByFileEntryId() {
-		try {
-			_persistence.countByFileEntryId(RandomTestUtil.nextLong());
+	public void testCountByFileVersionId() throws Exception {
+		_persistence.countByFileVersionId(RandomTestUtil.nextLong());
 
-			_persistence.countByFileEntryId(0L);
-		}
-		catch (Exception e) {
-			Assert.fail(e.getMessage());
-		}
+		_persistence.countByFileVersionId(0L);
 	}
 
 	@Test
-	public void testCountByFileVersionId() {
-		try {
-			_persistence.countByFileVersionId(RandomTestUtil.nextLong());
+	public void testCountByD_F() throws Exception {
+		_persistence.countByD_F(RandomTestUtil.nextLong(),
+			RandomTestUtil.nextLong());
 
-			_persistence.countByFileVersionId(0L);
-		}
-		catch (Exception e) {
-			Assert.fail(e.getMessage());
-		}
-	}
-
-	@Test
-	public void testCountByD_F() {
-		try {
-			_persistence.countByD_F(RandomTestUtil.nextLong(),
-				RandomTestUtil.nextLong());
-
-			_persistence.countByD_F(0L, 0L);
-		}
-		catch (Exception e) {
-			Assert.fail(e.getMessage());
-		}
+		_persistence.countByD_F(0L, 0L);
 	}
 
 	@Test
@@ -236,20 +200,14 @@ public class DLFileEntryMetadataPersistenceTest {
 
 	@Test
 	public void testFindAll() throws Exception {
-		try {
-			_persistence.findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS,
-				getOrderByComparator());
-		}
-		catch (Exception e) {
-			Assert.fail(e.getMessage());
-		}
+		_persistence.findAll(QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			getOrderByComparator());
 	}
 
 	protected OrderByComparator<DLFileEntryMetadata> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("DLFileEntryMetadata",
 			"uuid", true, "fileEntryMetadataId", true, "DDMStorageId", true,
-			"DDMStructureId", true, "fileEntryTypeId", true, "fileEntryId",
-			true, "fileVersionId", true);
+			"DDMStructureId", true, "fileEntryId", true, "fileVersionId", true);
 	}
 
 	@Test
@@ -479,8 +437,6 @@ public class DLFileEntryMetadataPersistenceTest {
 		dlFileEntryMetadata.setDDMStorageId(RandomTestUtil.nextLong());
 
 		dlFileEntryMetadata.setDDMStructureId(RandomTestUtil.nextLong());
-
-		dlFileEntryMetadata.setFileEntryTypeId(RandomTestUtil.nextLong());
 
 		dlFileEntryMetadata.setFileEntryId(RandomTestUtil.nextLong());
 

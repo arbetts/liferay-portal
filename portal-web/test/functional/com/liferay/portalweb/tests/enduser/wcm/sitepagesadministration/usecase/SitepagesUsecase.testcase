@@ -431,7 +431,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewSecureContentAndPageAsGuest" priority="4">
+	<command known-issues="LPS-51696" name="ViewSecureContentAndPageAsGuest" priority="4">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Server Administration" />
 		</execute>
@@ -631,7 +631,7 @@
 		<execute function="AssertTextEquals" locator1="Home#ERROR_MESSAGE" value1="You do not have the required permissions." />
 	</command>
 
-	<command name="ViewSecureContentAndPageAsSiteMember" priority="4">
+	<command known-issues="LPS-51696" name="ViewSecureContentAndPageAsSiteMember" priority="4">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Server Administration" />
 		</execute>
@@ -882,7 +882,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewSecureContentAndPageAsUser" priority="4">
+	<command known-issues="LPS-51696" name="ViewSecureContentAndPageAsUser" priority="4">
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Server Administration" />
 		</execute>
@@ -1103,7 +1103,7 @@
 		<execute function="AssertTextEquals" locator1="Home#ERROR_MESSAGE" value1="You do not have the required permissions." />
 	</command>
 
-	<command name="WebContentAdministrationSitesPagesPanel" priority="3">
+	<command known-issues="LPS-51696" name="WebContentAdministrationSitesPagesPanel" priority="3">
 		<execute macro="Page#addPG">
 			<var name="componentName" value="Collaboration" />
 			<var name="pageName" value="Panel Test Page" />
@@ -1200,14 +1200,14 @@
 
 		<execute function="AssertClick" locator1="CPSitepages#PAGE_TREE_PAGE_LINK_1" value1="Blank Page" />
 		<execute function="AssertClickNoError" locator1="CPSitepages#TOOLBAR_DELETE" value1="Delete" />
-		<execute function="Confirm" locator1="CPSitepages#CONFIRMATION" value1="Are you sure you want to delete the selected page?" />
+		<execute function="Confirm" value1="Are you sure you want to delete the selected page?" />
 		<execute function="AssertTextEquals" locator1="CPSitepages#INFO_MESSAGE_1" value1="Your request failed to complete." />
 		<execute function="AssertTextEquals" locator1="CPSitepages#INFO_MESSAGE_2" value1="The first page cannot be of type Link to URL." />
 		<execute function="AssertTextEquals" locator1="CPSitepages#PAGE_TREE_PAGE_LINK_1" value1="Blank Page" />
 
 		<execute macro="SitePage#addCP">
-			<var name="pageTypeDescription" value="Liferay" />
-			<var name="pageTypeURL" value="http://www.liferay.com/" />
+			<var name="pageTypeDescription" value="Is California on Fire?" />
+			<var name="pageTypeURL" value="http://iscaliforniaonfire.com/" />
 			<var name="siteName" value="Page Type Test Site Name" />
 			<var name="sitePageName" value="Embedded Page" />
 			<var name="sitePagePrivacy" value="Public" />
@@ -1247,8 +1247,9 @@
 		<execute function="AssertLocation" value1="http://localhost:8080/web/page-type-test-site-name/embedded-page" />
 
 		<execute function="SelectFrame" locator1="PGEmbedded#EMBEDDED_IFRAME" />
-		<execute function="AssertTextEquals" locator1="PGEmbedded#EMBEDDED_LIFERAY_COPYRIGHT_TEXT" value1="© 2015 LIFERAY INC. ALL RIGHTS RESERVED" />
-		<execute function="SelectFrame" value1="relative=top" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="PGEmbedded#EMBEDDED_SITE_TEXT" value1="Yes" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="PGEmbedded#EMBEDDED_SITE_TEXT" value1="updated" />
+		<execute function="SelectFrameTop" value1="relative=top" />
 
 		<execute macro="Page#gotoPG">
 			<var name="pageName" value="Panel Page" />

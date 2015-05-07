@@ -18,12 +18,14 @@
 
 <%
 long groupId = ParamUtil.getLong(request, "groupId");
+boolean showHeader = ParamUtil.getBoolean(request, "showHeader", true);
 
 PortletURL portletURL = liferayPortletResponse.createRenderURL();
 
 portletURL.setParameter("struts_action", "/layouts_admin/export_layouts");
 portletURL.setParameter("tabs2", "current-and-previous");
 portletURL.setParameter("groupId", String.valueOf(groupId));
+portletURL.setParameter("showHeader", String.valueOf(showHeader));
 
 String orderByCol = ParamUtil.getString(request, "orderByCol");
 String orderByType = ParamUtil.getString(request, "orderByType");
@@ -72,7 +74,7 @@ OrderByComparator<BackgroundTask> orderByComparator = BackgroundTaskComparatorFa
 		<liferay-ui:search-container-column-jsp
 			cssClass="background-task-status-column"
 			name="status"
-			path="/html/portlet/layouts_admin/publish_process_message.jsp"
+			path="/html/portlet/background_task/background_task_status.jsp"
 		/>
 
 		<liferay-ui:search-container-column-date

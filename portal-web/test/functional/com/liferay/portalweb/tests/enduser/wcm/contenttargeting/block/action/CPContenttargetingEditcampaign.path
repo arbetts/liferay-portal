@@ -9,16 +9,6 @@
 </thead>
 <tbody>
 <tr>
-	<td>PAGE_NAME</td>
-	<td></td>
-	<td>CPContenttargetingEditcampaign</td>
-</tr>
-<tr>
-	<td></td>
-	<td></td>
-	<td></td>
-</tr>
-<tr>
 	<td>EXTEND_ACTION_PATH</td>
 	<td>CPContenttargetingAddcampaign</td>
 	<td></td>
@@ -36,6 +26,11 @@
 <tr>
 	<td>TRACKING_ACTIONS_APPLIED</td>
 	<td>//div[contains(@class,'field-header') and contains(.,'${key_trackingAction}')]//div[@class='field-title']</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
 	<td></td>
 </tr>
 <tr>

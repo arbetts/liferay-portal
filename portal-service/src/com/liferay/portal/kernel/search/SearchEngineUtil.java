@@ -374,10 +374,6 @@ public class SearchEngineUtil {
 	public static String getQueryString(
 		SearchContext searchContext, Query query) {
 
-		if (_log.isDebugEnabled()) {
-			_log.debug("Search query " + query.toString());
-		}
-
 		SearchEngine searchEngine = getSearchEngine(
 			searchContext.getSearchEngineId());
 
@@ -387,6 +383,9 @@ public class SearchEngineUtil {
 			return indexSearcher.getQueryString(searchContext, query);
 		}
 		catch (ParseException pe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Unable to parse query " + query, pe);
+			}
 		}
 
 		return StringPool.BLANK;
@@ -807,7 +806,7 @@ public class SearchEngineUtil {
 		throws SearchException {
 
 		if (_log.isDebugEnabled()) {
-			_log.debug("Search query " + query.toString());
+			_log.debug("Search query " + getQueryString(searchContext, query));
 		}
 
 		SearchEngine searchEngine = getSearchEngine(
@@ -1050,11 +1049,15 @@ public class SearchEngineUtil {
 	}
 
 	public static void updatePermissionFields(String name, String primKey) {
-		if (isIndexReadOnly() || !PermissionThreadLocal.isFlushEnabled()) {
+		if (isIndexReadOnly()) {
 			return;
 		}
 
-		_searchPermissionChecker.updatePermissionFields(name, primKey);
+		if (PermissionThreadLocal.isFlushResourcePermissionEnabled(
+				name, primKey)) {
+
+			_searchPermissionChecker.updatePermissionFields(name, primKey);
+		}
 	}
 
 	public void setExcludedEntryClassNames(

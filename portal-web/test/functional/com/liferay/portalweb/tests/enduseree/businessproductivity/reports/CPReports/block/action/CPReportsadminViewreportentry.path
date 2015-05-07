@@ -9,21 +9,6 @@
 </thead>
 <tbody>
 <tr>
-	<td>PAGE_NAME</td>
-	<td></td>
-	<td>CPReportsadminViewreportentry</td>
-</tr>
-<tr>
-	<td></td>
-	<td></td>
-	<td></td>
-</tr>
-<tr>
-	<td>CONFIRMATION</td>
-	<td></td>
-	<td></td>
-</tr>
-<tr>
 	<td>SUCCESS_MESSAGE</td>
 	<td>//div[@class='alert alert-success']</td>
 	<td></td>
@@ -81,7 +66,7 @@
 </tr>
 <tr>
 	<td>ENTRY_FILE_TABLE_ACTIONS</td>
-	<td>//tr[contains(.,'${key_reportsFileName}')]/td[2]/div/a[@title='Actions']</td>
+	<td>//tr[contains(.,'${key_reportsFileName}')]/td[2]/div/a</td>
 	<td></td>
 </tr>
 <tr>

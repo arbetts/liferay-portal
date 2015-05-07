@@ -63,7 +63,7 @@ public class AssetPublisherPortletDisplayTemplateHandler
 
 	@Override
 	public Map<String, Object> getCustomContextObjects() {
-		Map<String, Object> contextObjects = new HashMap<String, Object>(1);
+		Map<String, Object> contextObjects = new HashMap<>(1);
 
 		contextObjects.put("assetPublisherHelper", new AssetPublisherHelper());
 
@@ -73,7 +73,7 @@ public class AssetPublisherPortletDisplayTemplateHandler
 	@Override
 	public String getName(Locale locale) {
 		ResourceBundle resourceBundle = ResourceBundle.getBundle(
-			"content.Language");
+			"content.Language", locale);
 
 		String portletTitle = PortalUtil.getPortletTitle(
 			AssetPublisherPortletKeys.ASSET_PUBLISHER, resourceBundle);

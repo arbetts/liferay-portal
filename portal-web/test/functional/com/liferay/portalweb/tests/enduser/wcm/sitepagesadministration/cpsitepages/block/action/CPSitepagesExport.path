@@ -9,21 +9,6 @@
 </thead>
 <tbody>
 <tr>
-	<td>PAGE_NAME</td>
-	<td></td>
-	<td>CPSitepagesExport</td>
-</tr>
-<tr>
-	<td></td>
-	<td></td>
-	<td></td>
-</tr>
-<tr>
-	<td>EXPORT_IFRAME</td>
-	<td>//iframe[@id='_156_exportDialog_iframe_']</td>
-	<td></td>
-</tr>
-<tr>
 	<td>NEW_EXPORT_PROCESS_NAVIGATION</td>
 	<td>//ul[contains(@class,'nav-tabs')]/li/a[contains(.,'New Export Process')]</td>
 	<td></td>
@@ -45,7 +30,7 @@
 </tr>
 <tr>
 	<td>CANCEL_BUTTON</td>
-	<td>//a[contains(@class,'btn-cancel')]</td>
+	<td>//button[contains(.,'Cancel')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -163,7 +148,7 @@
 </tr>
 <tr>
 	<td>CONTENT_CHOOSE_CONTENT_CONTENT_CHECKBOX</td>
-	<td>//ul[@class='portlet-list']/li/label[contains(.,'${key_contentName}')]/input</td>
+	<td>//ul[@class='portlet-list']//label[contains(.,'${key_contentName}')]/input</td>
 	<td></td>
 </tr>
 <tr>

@@ -9,21 +9,6 @@
 </thead>
 <tbody>
 <tr>
-	<td>PAGE_NAME</td>
-	<td></td>
-	<td>CPReportsadmin</td>
-</tr>
-<tr>
-	<td></td>
-	<td></td>
-	<td></td>
-</tr>
-<tr>
-	<td>CONFIRMATION</td>
-	<td></td>
-	<td></td>
-</tr>
-<tr>
 	<td>REPORT_PDF_CLASS_NAME_PNG</td>
 	<td>portal/screenshots/reports/report_pdf_class_name.png</td>
 	<td></td>
@@ -40,17 +25,17 @@
 </tr>
 <tr>
 	<td>ERROR_MESSAGE_1</td>
-	<td>xpath=(//div[@class='alert alert-error'])[1]</td>
+	<td>xpath=(//div[@class='alert alert-danger'])[1]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ERROR_MESSAGE_2</td>
-	<td>xpath=(//div[@class='alert alert-error'])[2]</td>
+	<td>xpath=(//div[@class='alert alert-danger'])[2]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>OPTIONS_WRENCH_ICON</td>
-	<td>//a[@title='Options']</td>
+	<td>//div[@id='main-content']//a[@title='Options']</td>
 	<td></td>
 </tr>
 <tr>
@@ -109,12 +94,12 @@
 </tr>
 <tr>
 	<td>REPORTS_ENTRY_TABLE_ACTIONS</td>
-	<td>//tr[contains(.,'${key_reportsDefinitionName}')]/td[4]/div/a[@title='Actions']</td>
+	<td>//tr[contains(.,'${key_reportsDefinitionName}')]/td[4]/div/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>REPORTS_ENTRY_TABLE_ACTIONS_1</td>
-	<td>xpath=(//tr/td[4]/div/a[@title='Actions'])[1]</td>
+	<td>xpath=(//tr/td[4]/div/a)[1]</td>
 	<td></td>
 </tr>
 <tr>
@@ -136,7 +121,7 @@
 <!--DEFINITIONS-->
 <tr>
 	<td>DEFINITIONS_ADD_REPORT_DEFINITION_BUTTON</td>
-	<td>//button[contains(.,'Add Report Definition')]</td>
+	<td>//a[contains(.,'Add Report Definition')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -152,12 +137,12 @@
 </tr>
 <tr>
 	<td>DEFINITIONS_DEFINITION_TABLE_ACTIONS</td>
-	<td>//tr[contains(.,'${key_reportsDefinitionName}')]/td[4]/div/a[@title='Actions']</td>
+	<td>//tr[contains(.,'${key_reportsDefinitionName}')]/td[4]/div/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DEFINITIONS_DEFINITION_TABLE_ACTIONS_1</td>
-	<td>xpath=(//tr/td[4]/div/a[@title='Actions'])[1]</td>
+	<td>xpath=(//tr/td[4]/div/a)[1]</td>
 	<td></td>
 </tr>
 <tr>
@@ -225,7 +210,7 @@
 <!--SOURCES-->
 <tr>
 	<td>SOURCES_ADD_SOURCE_BUTTON</td>
-	<td>//button[contains(.,'Add Source')]</td>
+	<td>//a[contains(.,'Add Source')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -236,7 +221,7 @@
 <!--SOURCES_SOURCE-->
 <tr>
 	<td>SOURCES_SOURCE_TABLE_ACTIONS_1</td>
-	<td>xpath=(//tr/td[4]/div/a[@title='Actions'])[1]</td>
+	<td>xpath=(//tr/td[4]/div/a)[1]</td>
 	<td></td>
 </tr>
 <tr>

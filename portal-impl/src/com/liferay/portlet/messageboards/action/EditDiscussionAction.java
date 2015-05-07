@@ -30,6 +30,7 @@ import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
+import com.liferay.portlet.messageboards.DiscussionMaxCommentsException;
 import com.liferay.portlet.messageboards.MessageBodyException;
 import com.liferay.portlet.messageboards.NoSuchMessageException;
 import com.liferay.portlet.messageboards.RequiredMessageException;
@@ -107,7 +108,8 @@ public class EditDiscussionAction extends PortletAction {
 			sendRedirect(actionRequest, actionResponse, redirect);
 		}
 		catch (Exception e) {
-			if (e instanceof MessageBodyException ||
+			if (e instanceof DiscussionMaxCommentsException ||
+				e instanceof MessageBodyException ||
 				e instanceof NoSuchMessageException ||
 				e instanceof PrincipalException ||
 				e instanceof RequiredMessageException) {
@@ -283,6 +285,14 @@ public class EditDiscussionAction extends PortletAction {
 		long threadId = ParamUtil.getLong(actionRequest, "threadId");
 		long parentMessageId = ParamUtil.getLong(
 			actionRequest, "parentMessageId");
+
+		if ((threadId == 0) && (parentMessageId != 0)) {
+			MBMessage parentMessage = MBMessageServiceUtil.getMessage(
+				parentMessageId);
+
+			threadId = parentMessage.getThreadId();
+		}
+
 		String subject = ParamUtil.getString(actionRequest, "subject");
 		String body = ParamUtil.getString(actionRequest, "body");
 

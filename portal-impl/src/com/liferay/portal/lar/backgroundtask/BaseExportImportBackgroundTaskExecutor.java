@@ -14,17 +14,22 @@
 
 package com.liferay.portal.lar.backgroundtask;
 
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskDisplay;
 import com.liferay.portal.kernel.backgroundtask.BaseBackgroundTaskExecutor;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.staging.StagingUtil;
+import com.liferay.portal.kernel.lar.StagingBackgroundTaskDisplayHelperUtil;
+import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.model.ExportImportConfiguration;
 import com.liferay.portal.service.ExportImportConfigurationLocalServiceUtil;
+import com.liferay.portal.spring.transaction.TransactionAttributeBuilder;
 
 import java.io.Serializable;
 
 import java.util.Map;
+
+import org.springframework.transaction.interceptor.TransactionAttribute;
 
 /**
  * @author Akos Thurzo
@@ -38,13 +43,20 @@ public abstract class BaseExportImportBackgroundTaskExecutor
 	}
 
 	@Override
+	public Class<? extends BackgroundTaskDisplay> getBackgroundTaskDisplay() {
+		return StagingBackgroundTaskDisplay.class;
+	}
+
+	@Override
 	public String handleException(BackgroundTask backgroundTask, Exception e) {
 		ExportImportConfiguration exportImportConfiguration =
 			getExportImportConfiguration(backgroundTask);
 
-		JSONObject jsonObject = StagingUtil.getExceptionMessagesJSONObject(
-			getLocale(backgroundTask), e,
-			exportImportConfiguration.getSettingsMap());
+		JSONObject jsonObject =
+			StagingBackgroundTaskDisplayHelperUtil.
+				getExceptionMessagesJSONObject(
+					getLocale(backgroundTask), e,
+					exportImportConfiguration.getSettingsMap());
 
 		return jsonObject.toString();
 	}
@@ -61,5 +73,9 @@ public abstract class BaseExportImportBackgroundTaskExecutor
 		return ExportImportConfigurationLocalServiceUtil.
 			fetchExportImportConfiguration(exportImportConfigurationId);
 	}
+
+	protected TransactionAttribute transactionAttribute =
+		TransactionAttributeBuilder.build(
+			Propagation.REQUIRED, new Class<?>[] {Exception.class});
 
 }

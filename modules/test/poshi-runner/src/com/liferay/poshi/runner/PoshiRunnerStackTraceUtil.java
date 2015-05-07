@@ -14,7 +14,11 @@
 
 package com.liferay.poshi.runner;
 
+import com.liferay.poshi.runner.util.Validator;
+
 import java.util.Stack;
+
+import org.dom4j.Element;
 
 /**
  * @author Karen Dang
@@ -22,40 +26,121 @@ import java.util.Stack;
  */
 public final class PoshiRunnerStackTraceUtil {
 
+	public static void emptyStackTrace() {
+		while (!_stackTrace.isEmpty()) {
+			_stackTrace.pop();
+		}
+	}
+
 	public static String getStackTrace() {
+		return getStackTrace(null);
+	}
+
+	public static String getStackTrace(String msg) {
 		StringBuilder sb = new StringBuilder();
 
-		while (!_stackTrace.isEmpty()) {
-			sb.append(_stackTrace.pop());
+		sb.append("\nBUILD FAILED:");
+
+		if (Validator.isNotNull(msg)) {
+			sb.append(" ");
+			sb.append(msg);
 		}
+
+		Stack<String> stackTrace = (Stack<String>)_stackTrace.clone();
+
+		sb.append("\n");
+		sb.append(_filePaths.peek());
+		sb.append(":");
+		sb.append(_currentElement.attributeValue("line-number"));
+
+		while (!stackTrace.isEmpty()) {
+			sb.append("\n");
+			sb.append(stackTrace.pop());
+		}
+
+		sb.append("\n");
 
 		return sb.toString();
 	}
 
-	public static String popFilePath() {
-		return _filePaths.pop();
+	public static void popStackTrace() {
+		_filePaths.pop();
+		_stackTrace.pop();
 	}
 
-	public static String popStackTrace() {
-		return _stackTrace.pop();
+	public static void printStackTrace() {
+		printStackTrace(null);
 	}
 
-	public static void pushFilePath(
-		String className, String classType, String lineNumber) {
+	public static void printStackTrace(String msg) {
+		System.out.println(getStackTrace(msg));
+	}
 
-		if (className.contains("#")) {
-			className = PoshiRunnerGetterUtil.getClassNameFromClassCommandName(
-				className);
+	public static void pushStackTrace(Element element) throws Exception {
+		_stackTrace.push(
+			_filePaths.peek() + ":" + element.attributeValue("line-number"));
+
+		String classCommandName = null;
+		String classType = null;
+
+		if (element.attributeValue("function") != null) {
+			classCommandName = element.attributeValue("function");
+			classType = "function";
+		}
+		else if (element.attributeValue("macro") != null) {
+			classCommandName = element.attributeValue("macro");
+			classType = "macro";
+		}
+		else if (element.attributeValue("macro-desktop") != null) {
+			classCommandName = element.attributeValue("macro-desktop");
+			classType = "macro";
+		}
+		else if (element.attributeValue("macro-mobile") != null) {
+			classCommandName = element.attributeValue("macro-mobile");
+			classType = "macro";
+		}
+		else {
+			printStackTrace();
+
+			throw new Exception(
+				"Missing (function|macro|macro-desktop|macro-mobile) " +
+					"attribute");
 		}
 
-		_filePaths.push(
-			PoshiRunnerContext.getFilePath(className + "." + classType));
+		_pushFilePath(classCommandName, classType);
 	}
 
-	public static void pushStackTrace(String lineNumber) {
-		_stackTrace.push(_filePaths.peek() + ":" + lineNumber + "\n");
+	public static void setCurrentElement(Element currentElement) {
+		_currentElement = currentElement;
 	}
 
+	public static void startStackTrace(
+		String classCommandName, String classType) {
+
+		_pushFilePath(classCommandName, classType);
+	}
+
+	private static void _pushFilePath(
+		String classCommandName, String classType) {
+
+		String className =
+			PoshiRunnerGetterUtil.getClassNameFromClassCommandName(
+				classCommandName);
+
+		String fileExtension =
+			PoshiRunnerGetterUtil.getFileExtensionFromClassType(classType);
+
+		String filePath = PoshiRunnerContext.getFilePathFromFileName(
+			className + "." + fileExtension);
+
+		String commandName =
+			PoshiRunnerGetterUtil.getCommandNameFromClassCommandName(
+				classCommandName);
+
+		_filePaths.push(filePath + "[" + commandName + "]");
+	}
+
+	private static Element _currentElement;
 	private static final Stack<String> _filePaths = new Stack<>();
 	private static final Stack<String> _stackTrace = new Stack<>();
 

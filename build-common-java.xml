@@ -16,18 +16,6 @@
 		</else>
 	</if>
 
-	<target name="clean">
-		<delete dir="classes" />
-		<delete dir="test-classes" />
-		<delete dir="test-coverage" />
-		<delete dir="test-results" />
-		<delete dir="woven-classes" />
-		<delete dir="${doc.dir}/${ant.project.name}/javadocs" />
-		<delete file="${jar.file}.jar" failonerror="false" />
-		<delete file="${jar.file}-javadoc.jar" failonerror="false" />
-		<delete file="${jar.file}-sources.jar" failonerror="false" />
-	</target>
-
 	<target name="check-compile-uptodate">
 		<uptodate property="compile.uptodate" targetfile="classes/.touch">
 			<srcfiles dir="${basedir}" includes="bnd.bnd,build.xml,ivy.xml,src/**/*.*" />
@@ -57,6 +45,18 @@
 				<equals arg1="${jar.uptodate}" arg2="true" />
 			</not>
 		</condition>
+	</target>
+
+	<target name="clean">
+		<delete dir="classes" />
+		<delete dir="test-classes" />
+		<delete dir="test-coverage" />
+		<delete dir="test-results" />
+		<delete dir="woven-classes" />
+		<delete dir="${doc.dir}/${ant.project.name}/javadocs" />
+		<delete file="${jar.file}.jar" failonerror="false" />
+		<delete file="${jar.file}-javadoc.jar" failonerror="false" />
+		<delete file="${jar.file}-sources.jar" failonerror="false" />
 	</target>
 
 	<target name="compile" depends="check-compile-uptodate" unless="${compile.uptodate}">
@@ -154,6 +154,12 @@
 					</classpath>
 					<property name="-sourcepath" value="." />
 				</bnd>
+
+				<baseline-jar
+					bndFile="bnd.bnd"
+					bndRootFile="${project.dir}/common.bnd"
+					newJarFile="${jar.file}.jar"
+				/>
 			</then>
 			<else>
 				<antcall target="manifest" />
@@ -267,7 +273,9 @@
 		<if>
 			<available file="bnd.bnd" />
 			<then>
-				<release-to-repo-macro
+				<bndexpand propertyfile="${project.dir}/common.bnd" />
+
+				<release-to-repo
 					bndRootFile="${project.dir}/common.bnd"
 					file="${jar.file}.jar"
 				/>

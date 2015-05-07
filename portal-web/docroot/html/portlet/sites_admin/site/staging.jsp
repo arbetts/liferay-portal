@@ -66,7 +66,13 @@ BackgroundTask lastCompletedInitialPublicationBackgroundTask = BackgroundTaskLoc
 		/>
 	</div>
 
-	<liferay-util:include page="/html/portlet/layouts_admin/publish_process_message_task_details.jsp">
+	<%
+	BackgroundTaskDisplay backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(lastCompletedInitialPublicationBackgroundTask.getBackgroundTaskId(), locale);
+
+	request.setAttribute("backgroundTaskDisplay", backgroundTaskDisplay);
+	%>
+
+	<liferay-util:include page="/html/portlet/background_task/background_task_details.jsp">
 		<liferay-util:param name="backgroundTaskId" value="<%= String.valueOf(lastCompletedInitialPublicationBackgroundTask.getBackgroundTaskId()) %>" />
 	</liferay-util:include>
 </c:if>
@@ -168,12 +174,12 @@ BackgroundTask lastCompletedInitialPublicationBackgroundTask = BackgroundTaskLoc
 		<div class="<%= showRemoteOptions ? StringPool.BLANK : "hide" %> staging-section" id="<portlet:namespace />remoteStagingOptions">
 			<br />
 
-			<%@ include file="/html/portlet/layouts_admin/error_auth_exception.jspf" %>
+			<%@ include file="/html/portlet/sites_admin/error_auth_exception.jspf" %>
 
-			<%@ include file="/html/portlet/layouts_admin/error_remote_export_exception.jspf" %>
+			<%@ include file="/html/portlet/sites_admin/error_remote_export_exception.jspf" %>
 
 			<aui:fieldset label="remote-live-connection-settings">
-				<%@ include file="/html/portlet/layouts_admin/error_remote_options_exception.jspf" %>
+				<%@ include file="/html/portlet/sites_admin/error_remote_options_exception.jspf" %>
 
 				<div class="alert alert-info">
 					<liferay-ui:message key="remote-publish-help" />

@@ -22,7 +22,9 @@ import com.liferay.portal.kernel.lar.StagedModelDataHandler;
 import com.liferay.portal.kernel.lar.StagedModelDataHandlerRegistryUtil;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.sender.SingleDestinationMessageSender;
+import com.liferay.portal.kernel.messaging.sender.SingleDestinationMessageSenderFactoryUtil;
 import com.liferay.portal.kernel.util.LongWrapper;
+import com.liferay.portal.lar.backgroundtask.StagingBackgroundTaskConstants;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.StagedModel;
 import com.liferay.portal.service.PortletLocalServiceUtil;
@@ -35,6 +37,14 @@ import java.util.Map;
  */
 public class PortletDataHandlerStatusMessageSenderImpl
 	implements PortletDataHandlerStatusMessageSender {
+
+	public void afterPropertiesSet() {
+		if (_singleDestinationMessageSender == null) {
+			_singleDestinationMessageSender =
+				SingleDestinationMessageSenderFactoryUtil.
+					createSingleDestinationMessageSender(_destinationName);
+		}
+	}
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link #sendStatusMessage(String,
@@ -74,7 +84,8 @@ public class PortletDataHandlerStatusMessageSenderImpl
 			}
 
 			message.put(
-				"portletModelAdditionCountersTotal",
+				StagingBackgroundTaskConstants.
+					PORTLET_MODEL_ADDITION_COUNTERS_TOTAL,
 				portletModelAdditionCountersTotal);
 		}
 
@@ -113,17 +124,25 @@ public class PortletDataHandlerStatusMessageSenderImpl
 					stagedModel.getModelClassName());
 
 		message.put(
-			"stagedModelName",
+			StagingBackgroundTaskConstants.STAGED_MODEL_NAME,
 			stagedModelDataHandler.getDisplayName(stagedModel));
 
 		message.put(
-			"stagedModelType",
+			StagingBackgroundTaskConstants.STAGED_MODEL_TYPE,
 			String.valueOf(stagedModel.getStagedModelType()));
 		message.put("uuid", stagedModel.getUuid());
 
 		_singleDestinationMessageSender.send(message);
 	}
 
+	public void setDestinationName(String destinationName) {
+		_destinationName = destinationName;
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #setDestinationName(String)})
+	 */
+	@Deprecated
 	public void setSingleDestinationMessageSender(
 		SingleDestinationMessageSender singleDestinationMessageSender) {
 
@@ -144,7 +163,7 @@ public class PortletDataHandlerStatusMessageSenderImpl
 			manifestSummary.getModelAdditionCounters();
 
 		message.put(
-			"modelAdditionCounters",
+			StagingBackgroundTaskConstants.MODEL_ADDITION_COUNTERS,
 			new HashMap<String, LongWrapper>(modelAdditionCounters));
 
 		Map<String, LongWrapper> modelDeletionCounters =
@@ -157,6 +176,7 @@ public class PortletDataHandlerStatusMessageSenderImpl
 		return message;
 	}
 
+	private String _destinationName;
 	private SingleDestinationMessageSender _singleDestinationMessageSender;
 
 }
