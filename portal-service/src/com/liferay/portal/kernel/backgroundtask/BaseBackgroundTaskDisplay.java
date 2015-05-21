@@ -17,6 +17,7 @@ package com.liferay.portal.kernel.backgroundtask;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.BackgroundTask;
 
@@ -27,19 +28,23 @@ import java.util.Locale;
  */
 public class BaseBackgroundTaskDisplay implements BackgroundTaskDisplay {
 
-	public BaseBackgroundTaskDisplay(
-		BackgroundTask backgroundTask, Locale locale) {
-
+	public BaseBackgroundTaskDisplay(BackgroundTask backgroundTask) {
+		_backgroundTask = backgroundTask;
 		_backgroundTaskStatus =
 			BackgroundTaskStatusRegistryUtil.getBackgroundTaskStatus(
 				backgroundTask.getBackgroundTaskId());
-
-		_locale = locale;
-		_percentage = -1;
 	}
 
 	@Override
 	public JSONObject getDetails() {
+		return getDetails(LocaleUtil.getDefault());
+	}
+
+	@Override
+	public JSONObject getDetails(Locale locale) {
+
+		// process background task status here to return details
+
 		return _details;
 	}
 
@@ -112,12 +117,12 @@ public class BaseBackgroundTaskDisplay implements BackgroundTaskDisplay {
 		return detailsJSON;
 	}
 
-	protected BackgroundTaskStatus getBackgroundTaskStatus() {
-		return _backgroundTaskStatus;
+	protected BackgroundTask getBackgroundTask() {
+		return _backgroundTask;
 	}
 
-	protected Locale getLocale() {
-		return _locale;
+	protected BackgroundTaskStatus getBackgroundTaskStatus() {
+		return _backgroundTaskStatus;
 	}
 
 	protected void setDetails(JSONObject details) {
@@ -128,14 +133,9 @@ public class BaseBackgroundTaskDisplay implements BackgroundTaskDisplay {
 		_message = message;
 	}
 
-	protected void setPercentage(int percentage) {
-		_percentage = percentage;
-	}
-
+	private final BackgroundTask _backgroundTask;
 	private final BackgroundTaskStatus _backgroundTaskStatus;
 	private JSONObject _details = null;
-	private final Locale _locale;
 	private String _message = null;
-	private int _percentage = -1;
 
 }

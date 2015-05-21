@@ -38,17 +38,16 @@ import java.util.Map;
 /**
  * @author Andrew Betts
  */
-public class ExportImportBackgroundTaskDisplay extends BaseBackgroundTaskDisplay {
+public class ExportImportBackgroundTaskDisplay
+	extends BaseBackgroundTaskDisplay {
 
-	public ExportImportBackgroundTaskDisplay(
-		BackgroundTask backgroundTask, Locale locale) {
-
-		super(backgroundTask, locale);
+	public ExportImportBackgroundTaskDisplay(BackgroundTask backgroundTask) {
+		super(backgroundTask);
 
 		Map<String, Serializable> taskContextMap =
 			backgroundTask.getTaskContextMap();
 
-		_cmd = (String)taskContextMap.get(Constants.CMD);
+		_cmd = MapUtil.getString(taskContextMap, Constants.CMD);
 
 		JSONObject details = createDetailsJSON(locale, backgroundTask);
 
@@ -105,6 +104,11 @@ public class ExportImportBackgroundTaskDisplay extends BaseBackgroundTaskDisplay
 	}
 
 	@Override
+	public JSONObject getDetails(Locale locale) {
+		return createDetailsJSON(locale, getBackgroundTask());
+	}
+
+	@Override
 	public boolean hasMessage() {
 		if (hasRemoteMessage() || hasStagedModelMessage()) {
 			return true;
@@ -154,7 +158,7 @@ public class ExportImportBackgroundTaskDisplay extends BaseBackgroundTaskDisplay
 	protected JSONObject createDetailsJSON(
 		Locale locale, BackgroundTask backgroundTask) {
 
-		JSONObject backgroundTaskJSON;
+		JSONObject backgroundTaskJSON = null;
 
 		try {
 			backgroundTaskJSON = JSONFactoryUtil.createJSONObject(

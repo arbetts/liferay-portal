@@ -21,7 +21,7 @@ ResultRow row = (ResultRow)request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_
 
 BackgroundTask backgroundTask = (BackgroundTask)row.getObject();
 
-BackgroundTaskDisplay backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(backgroundTask.getBackgroundTaskId(), locale);
+BackgroundTaskDisplay backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(backgroundTask.getBackgroundTaskId());
 %>
 
 <strong class="background-task-status-<%= BackgroundTaskConstants.getStatusLabel(backgroundTask.getStatus()) %> <%= BackgroundTaskConstants.getStatusCssClass(backgroundTask.getStatus()) %> label">
@@ -50,7 +50,7 @@ BackgroundTaskDisplay backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.g
 
 		<c:if test="<%= backgroundTaskDisplay.hasMessage() %>">
 			<div class="progress-current-item">
-				<liferay-ui:message key="<%= backgroundTaskDisplay.getMessage() %>" localizeKey="<%= false %>" />
+				<liferay-ui:message key="<%= backgroundTaskDisplay.getMessage(locale) %>" localizeKey="<%= false %>" />
 			</div>
 		</c:if>
 	</c:if>
