@@ -67,7 +67,7 @@ BackgroundTask lastCompletedInitialPublicationBackgroundTask = BackgroundTaskLoc
 	</div>
 
 	<%
-	BackgroundTaskDisplay backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(lastCompletedInitialPublicationBackgroundTask.getBackgroundTaskId(), locale);
+	BackgroundTaskDisplay backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(lastCompletedInitialPublicationBackgroundTask);
 
 	request.setAttribute("backgroundTaskDisplay", backgroundTaskDisplay);
 	%>
