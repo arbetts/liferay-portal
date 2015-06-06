@@ -284,8 +284,7 @@ public class SearchPermissionCheckerImpl implements SearchPermissionChecker {
 			advancedPermissionChecker =
 				(AdvancedPermissionChecker)permissionChecker;
 		}
-
-		if (advancedPermissionChecker == null) {
+		else {
 			return booleanFilter;
 		}
 
