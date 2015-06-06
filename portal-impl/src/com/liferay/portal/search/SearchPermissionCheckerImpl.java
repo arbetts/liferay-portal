@@ -289,8 +289,15 @@ public class SearchPermissionCheckerImpl implements SearchPermissionChecker {
 			return booleanFilter;
 		}
 
-		PermissionCheckerBag permissionCheckerBag = getPermissionCheckerBag(
-			advancedPermissionChecker, userId);
+		PermissionCheckerBag permissionCheckerBag = null;
+
+		if (advancedPermissionChecker.isSignedIn()) {
+			permissionCheckerBag = advancedPermissionChecker.getUserBag(
+				userId, 0);
+		}
+		else {
+			permissionCheckerBag = advancedPermissionChecker.getGuestUserBag();
+		}
 
 		Set<Group> groups = new LinkedHashSet<>();
 		Set<Role> roles = new LinkedHashSet<>();
@@ -444,18 +451,6 @@ public class SearchPermissionCheckerImpl implements SearchPermissionChecker {
 
 		if (indexer != null) {
 			indexer.reindex(resourceName, GetterUtil.getLong(resourceClassPK));
-		}
-	}
-
-	protected PermissionCheckerBag getPermissionCheckerBag(
-			AdvancedPermissionChecker advancedPermissionChecker, long userId)
-		throws Exception {
-
-		if (!advancedPermissionChecker.isSignedIn()) {
-			return advancedPermissionChecker.getGuestUserBag();
-		}
-		else {
-			return advancedPermissionChecker.getUserBag(userId, 0);
 		}
 	}
 
