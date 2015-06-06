@@ -267,7 +267,7 @@ public class SearchPermissionCheckerImpl implements SearchPermissionChecker {
 			BooleanFilter booleanFilter, SearchContext searchContext)
 		throws Exception {
 
-		Indexer indexer = IndexerRegistryUtil.getIndexer(className);
+		Indexer indexer = IndexerRegistryUtil.nullSafeGetIndexer(className);
 
 		if (!indexer.isPermissionAware()) {
 			return booleanFilter;
