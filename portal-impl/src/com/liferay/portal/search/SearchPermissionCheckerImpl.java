@@ -52,6 +52,7 @@ import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -475,13 +476,15 @@ public class SearchPermissionCheckerImpl implements SearchPermissionChecker {
 				UserGroupRoleLocalServiceUtil.getUserGroupRoles(userId));
 		}
 		else {
-			for (long groupId : groupIds) {
-				if (GroupLocalServiceUtil.hasUserGroup(userId, groupId)) {
-					Group group = GroupLocalServiceUtil.getGroup(groupId);
+			Arrays.sort(groupIds);
 
+			for (Group group : permissionCheckerBag.getGroups()) {
+				if (Arrays.binarySearch(groupIds, group.getGroupId()) != -1) {
 					groups.add(group);
 				}
+			}
 
+			for (long groupId : groupIds) {
 				userGroupRoles.addAll(
 					UserGroupRoleLocalServiceUtil.getUserGroupRoles(
 						userId, groupId));
