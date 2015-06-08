@@ -79,7 +79,7 @@ BackgroundTask lastCompletedInitialPublicationBackgroundTask = BackgroundTaskMan
 		<%
 		BackgroundTaskDisplay backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(lastCompletedInitialPublicationBackgroundTask);
 
-		request.setAttribute("backgroundTaskDisplay", backgroundTaskDisplay);
+		request.setAttribute(WebKeys.BACKGROUND_TASK_DISPLAY, backgroundTaskDisplay);
 		%>
 
 		<liferay-util:include page="/html/portlet/background_task/background_task_details.jsp" servletContext="<%= application %>">
