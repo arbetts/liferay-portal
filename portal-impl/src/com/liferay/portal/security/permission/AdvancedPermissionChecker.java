@@ -252,11 +252,10 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 		Set<Group> groups = new LinkedHashSet<>();
 		Set<Role> roles = new LinkedHashSet<>();
 		Set<UserGroupRole> userGroupRoles = new LinkedHashSet<>();
-		Map<Long, List<Role>> groupIdsToRoles = new HashMap<>();
 
 		populate(
 			companyId, groupIds, userPermissionCheckerBag, groups, roles,
-			userGroupRoles, groupIdsToRoles);
+			userGroupRoles);
 
 		return doGetPermissionFilter(
 			companyId, className, booleanFilter, groups, roles, userGroupRoles);
@@ -1536,8 +1535,7 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 			long companyId, long[] groupIds,
 			UserPermissionCheckerBag userPermissionCheckerBag,
 			Set<Group> groups, Set<Role> roles,
-			Set<UserGroupRole> userGroupRoles,
-			Map<Long, List<Role>> groupIdsToRoles)
+			Set<UserGroupRole> userGroupRoles)
 		throws Exception {
 
 		roles.addAll(userPermissionCheckerBag.getRoles());
@@ -1579,8 +1577,6 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 				user.getUserId(), group.getGroupId());
 
 			List<Role> groupRoles = ListUtil.fromCollection(userBag.getRoles());
-
-			groupIdsToRoles.put(group.getGroupId(), groupRoles);
 
 			roles.addAll(groupRoles);
 		}
