@@ -35,11 +35,13 @@ import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.AdvancedPermissionChecker;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerBag;
+import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.security.permission.ResourceBlockIdsBag;
@@ -49,6 +51,7 @@ import com.liferay.portal.service.ResourceBlockPermissionLocalServiceUtil;
 import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 
 import java.util.ArrayList;
@@ -281,6 +284,12 @@ public class SearchPermissionCheckerImpl implements SearchPermissionChecker {
 
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
+
+		if (permissionChecker.getUserId() != userId) {
+			User user = UserLocalServiceUtil.getUser(userId);
+
+			permissionChecker = PermissionCheckerFactoryUtil.create(user);
+		}
 
 		AdvancedPermissionChecker advancedPermissionChecker = null;
 
