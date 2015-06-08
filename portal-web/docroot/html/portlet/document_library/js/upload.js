@@ -172,7 +172,7 @@ AUI.add(
 
 							return val;
 						},
-						validator: Lang.isArray,
+						validator: Array.isArray,
 						value: []
 					},
 
@@ -977,7 +977,7 @@ AUI.add(
 							instance._uploadURL = Liferay.Util.addParams(
 								{
 									redirect: redirect,
-									ts: Lang.now()
+									ts: Date.now()
 								},
 								uploadURL
 							);
@@ -998,7 +998,7 @@ AUI.add(
 
 						var queue = uploader && uploader.queue;
 
-						return !!(queue && (queue.queuedFiles.length > 0 || queue.numberOfUploads > 0 || !A.Object.isEmpty(queue.currentFiles)) && queue._currentState == UploaderQueue.UPLOADING);
+						return !!queue && (queue.queuedFiles.length > 0 || queue.numberOfUploads > 0 || !A.Object.isEmpty(queue.currentFiles)) && queue._currentState == UploaderQueue.UPLOADING;
 					},
 
 					_onDataRequest: function(event) {

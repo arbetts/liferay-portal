@@ -162,7 +162,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void close() {
-		throw new UnsupportedOperationException();
+		super.close();
 	}
 
 	@Override
@@ -470,16 +470,22 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public String getTitle() {
-		throw new UnsupportedOperationException();
+		return super.getTitle();
 	}
 
 	@Override
 	public String getValue(String locator) {
-		throw new UnsupportedOperationException();
+		return getValue(locator, null);
 	}
 
 	public String getValue(String locator, String timeout) {
-		throw new UnsupportedOperationException();
+		WebElement webElement = getWebElement(locator, timeout);
+
+		if (!isInViewport(locator)) {
+			swipeWebElementIntoView(locator);
+		}
+
+		return webElement.getAttribute("value");
 	}
 
 	@Override
@@ -711,7 +717,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void openWindow(String url, String windowID) {
-		throw new UnsupportedOperationException();
+		open(url);
 	}
 
 	@Override
@@ -854,7 +860,7 @@ public class MobileDriverToSeleniumBridge
 
 	@Override
 	public void stop() {
-		throw new UnsupportedOperationException();
+		quit();
 	}
 
 	@Override

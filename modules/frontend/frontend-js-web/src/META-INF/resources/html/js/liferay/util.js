@@ -1,9 +1,9 @@
 ;(function(A, $, _, Liferay) {
 	A.use('aui-base-lang');
 
-	var Lang = A.Lang;
-
 	var AArray = A.Array;
+
+	var Lang = A.Lang;
 
 	var EVENT_CLICK = 'click';
 
@@ -680,7 +680,7 @@
 		},
 
 		randomInt: function() {
-			return Math.ceil(Math.random() * new Date().getTime());
+			return Math.ceil(Math.random() * (new Date()).getTime());
 		},
 
 		removeEntitySelection: function(entityIdString, entityNameString, removeEntityButton, namespace) {
@@ -751,21 +751,12 @@
 					plid: 0,
 					portletId: 0,
 					title: '',
-					url: themeDisplay.getPathMain() + '/portlet_configuration/update_title'
+					url: params.editTitleURL
 				}
 			);
 
 			$.ajax(
-				params.url,
-				{
-					data: {
-						doAsUserId: params.doAsUserId,
-						p_auth: Liferay.authToken,
-						p_l_id: params.plid,
-						portletId: params.portletId,
-						title: params.title
-					}
-				}
+				params.url
 			);
 		},
 
@@ -857,7 +848,7 @@
 
 			var display = 'none';
 
-			if ((keyCode >= 65 && keyCode <= 90 && !shiftKey) || (keyCode >= 97 && keyCode <= 122 && shiftKey)) {
+			if (keyCode >= 65 && keyCode <= 90 && !shiftKey || keyCode >= 97 && keyCode <= 122 && shiftKey) {
 				display = '';
 			}
 
@@ -1079,12 +1070,16 @@
 
 									var portletTitleEditOptions = title.getData('portletTitleEditOptions');
 
+									var portletURL = Liferay.PortletURL.createURL(portletTitleEditOptions.editTitleURL);
+
+									portletURL.setDoAsUserId(portletTitleEditOptions.doAsUserId);
+									portletURL.setParameter('plid', portletTitleEditOptions.plid);
+									portletURL.setParameter('portletId', portletTitleEditOptions.portletId);
+									portletURL.setParameter('title', event.newVal);
+
 									Util.savePortletTitle(
 										{
-											doAsUserId: portletTitleEditOptions.doAsUserId,
-											plid: portletTitleEditOptions.plid,
-											portletId: portletTitleEditOptions.portletId,
-											title: event.newVal
+											editTitleURL: portletURL.toString()
 										}
 									);
 								}
@@ -1416,7 +1411,7 @@
 						function(item, index) {
 							var assetEntryId = item.attr('data-assetentryid');
 
-							var assetEntryIndex = A.Array.indexOf(selectedData, assetEntryId);
+							var assetEntryIndex = selectedData.indexOf(assetEntryId);
 
 							if (assetEntryIndex > -1) {
 								item.attr('disabled', true);

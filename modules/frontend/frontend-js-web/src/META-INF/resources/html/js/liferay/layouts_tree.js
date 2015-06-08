@@ -392,7 +392,7 @@ AUI.add(
 						}
 					},
 					formatter: A.bind(instance._formatJSONResults, instance),
-					url: themeDisplay.getPathMain() + '/layouts_admin/get_layouts'
+					url: themeDisplay.getPathMain() + '/portal/get_layouts'
 				};
 
 				return ioCfg;
@@ -513,7 +513,7 @@ AUI.add(
 				var instance = this;
 
 				A.io.request(
-					themeDisplay.getPathMain() + '/layouts_admin/update_page',
+					themeDisplay.getPathMain() + '/portal/edit_layout',
 					{
 						data: A.mix(
 							data,

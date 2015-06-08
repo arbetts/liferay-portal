@@ -16,6 +16,8 @@ package com.liferay.portal.security.permission;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.User;
@@ -59,6 +61,15 @@ public abstract class BasePermissionChecker implements PermissionChecker {
 	@Override
 	public long getOwnerRoleId() {
 		return ownerRole.getRoleId();
+	}
+
+	@Override
+	public BooleanFilter getPermissionBooleanFilter(
+			long companyId, long[] groupIds, String className,
+			BooleanFilter booleanFilter, SearchContext searchContext)
+		throws Exception {
+
+		return booleanFilter;
 	}
 
 	@Override

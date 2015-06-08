@@ -151,6 +151,14 @@ public class WebDriverHelper {
 		}
 	}
 
+	public static void check(WebDriver webDriver, String locator) {
+		WebElement webElement = getWebElement(webDriver, locator);
+
+		if (!webElement.isSelected()) {
+			webElement.click();
+		}
+	}
+
 	public static String getAttribute(
 		WebDriver webDriver, String attributeLocator) {
 
@@ -368,6 +376,12 @@ public class WebDriverHelper {
 		return point.getY();
 	}
 
+	public static void goBack(WebDriver webDriver) {
+		WebDriver.Navigation navigation = webDriver.navigate();
+
+		navigation.back();
+	}
+
 	public static boolean isElementPresent(
 		WebDriver webDriver, String locator) {
 
@@ -579,6 +593,14 @@ public class WebDriverHelper {
 		sb.append("\");");
 
 		javascriptExecutor.executeScript(sb.toString());
+	}
+
+	public static void uncheck(WebDriver webdDriver, String locator) {
+		WebElement webElement = getWebElement(webdDriver, locator);
+
+		if (webElement.isSelected()) {
+			webElement.click();
+		}
 	}
 
 	protected static WebElement getWebElement(
