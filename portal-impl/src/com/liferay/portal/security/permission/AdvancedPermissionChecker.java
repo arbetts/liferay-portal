@@ -240,13 +240,13 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 			BooleanFilter booleanFilter, SearchContext searchContext)
 		throws Exception {
 
-		PermissionCheckerBag permissionCheckerBag = null;
+		UserPermissionCheckerBag userPermissionCheckerBag = null;
 
 		if (isSignedIn()) {
-			permissionCheckerBag = getUserBag(user.getUserId(), 0);
+			userPermissionCheckerBag = getUserBag();
 		}
 		else {
-			permissionCheckerBag = getGuestUserBag();
+			userPermissionCheckerBag = getGuestUserBag();
 		}
 
 		Set<Group> groups = new LinkedHashSet<>();
@@ -255,7 +255,7 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 		Map<Long, List<Role>> groupIdsToRoles = new HashMap<>();
 
 		populate(
-			companyId, groupIds, permissionCheckerBag, groups, roles,
+			companyId, groupIds, userPermissionCheckerBag, groups, roles,
 			userGroupRoles, groupIdsToRoles);
 
 		return doGetPermissionFilter(
@@ -1534,15 +1534,16 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 
 	protected void populate(
 			long companyId, long[] groupIds,
-			PermissionCheckerBag permissionCheckerBag, Set<Group> groups,
-			Set<Role> roles, Set<UserGroupRole> userGroupRoles,
+			UserPermissionCheckerBag userPermissionCheckerBag,
+			Set<Group> groups, Set<Role> roles,
+			Set<UserGroupRole> userGroupRoles,
 			Map<Long, List<Role>> groupIdsToRoles)
 		throws Exception {
 
-		roles.addAll(permissionCheckerBag.getRoles());
+		roles.addAll(userPermissionCheckerBag.getRoles());
 
 		if (ArrayUtil.isEmpty(groupIds)) {
-			groups.addAll(permissionCheckerBag.getGroups());
+			groups.addAll(userPermissionCheckerBag.getGroups());
 
 			userGroupRoles.addAll(
 				UserGroupRoleLocalServiceUtil.getUserGroupRoles(
@@ -1551,7 +1552,7 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 		else {
 			Arrays.sort(groupIds);
 
-			for (Group group : permissionCheckerBag.getGroups()) {
+			for (Group group : userPermissionCheckerBag.getGroups()) {
 				if (Arrays.binarySearch(groupIds, group.getGroupId()) != -1) {
 					groups.add(group);
 				}
