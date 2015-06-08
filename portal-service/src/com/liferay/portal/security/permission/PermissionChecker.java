@@ -16,6 +16,8 @@ package com.liferay.portal.security.permission;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.model.User;
 
 import java.util.List;
@@ -52,6 +54,11 @@ public interface PermissionChecker extends Cloneable {
 	 * @return the primary key of the owner role
 	 */
 	public long getOwnerRoleId();
+
+	public BooleanFilter getPermissionBooleanFilter(
+			long companyId, long[] groupIds, String className,
+			BooleanFilter booleanFilter, SearchContext searchContext)
+		throws Exception;
 
 	public List<Long> getResourceBlockIds(
 		long companyId, long groupId, long userId, String name,

@@ -17,10 +17,16 @@ package com.liferay.portal.security.permission;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.search.BooleanClauseOccur;
+import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.SetUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
@@ -37,6 +43,7 @@ import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.Team;
 import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserGroup;
+import com.liferay.portal.model.UserGroupRole;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
@@ -46,10 +53,12 @@ import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.TeamLocalServiceUtil;
 import com.liferay.portal.service.UserGroupLocalServiceUtil;
+import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -223,6 +232,34 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 				companyId, ResourceBlockConstants.OWNER_USER_ID, groupId, name,
 				resourceBlockIdsBag);
 		}
+	}
+
+	@Override
+	public BooleanFilter getPermissionBooleanFilter(
+			long companyId, long[] groupIds, String className,
+			BooleanFilter booleanFilter, SearchContext searchContext)
+		throws Exception {
+
+		PermissionCheckerBag permissionCheckerBag = null;
+
+		if (isSignedIn()) {
+			permissionCheckerBag = getUserBag(user.getUserId(), 0);
+		}
+		else {
+			permissionCheckerBag = getGuestUserBag();
+		}
+
+		Set<Group> groups = new LinkedHashSet<>();
+		Set<Role> roles = new LinkedHashSet<>();
+		Set<UserGroupRole> userGroupRoles = new LinkedHashSet<>();
+		Map<Long, List<Role>> groupIdsToRoles = new HashMap<>();
+
+		populate(
+			companyId, groupIds, permissionCheckerBag, groups, roles,
+			userGroupRoles, groupIdsToRoles);
+
+		return doGetPermissionFilter(
+			companyId, className, booleanFilter, groups, roles, userGroupRoles);
 	}
 
 	@Override
@@ -728,6 +765,31 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 		}
 	}
 
+	protected void addRequiredMemberRole(
+			Group group, BooleanFilter permissionBooleanFilter)
+		throws Exception {
+
+		if (group.isOrganization()) {
+			Role organizationUserRole = RoleLocalServiceUtil.getRole(
+				group.getCompanyId(), RoleConstants.ORGANIZATION_USER);
+
+			permissionBooleanFilter.addTerm(
+				Field.GROUP_ROLE_ID,
+				group.getGroupId() + StringPool.DASH +
+					organizationUserRole.getRoleId());
+		}
+
+		if (group.isSite()) {
+			Role siteMemberRole = RoleLocalServiceUtil.getRole(
+				group.getCompanyId(), RoleConstants.SITE_MEMBER);
+
+			permissionBooleanFilter.addTerm(
+				Field.GROUP_ROLE_ID,
+				group.getGroupId() + StringPool.DASH +
+					siteMemberRole.getRoleId());
+		}
+	}
+
 	protected void addTeamRoles(long userId, Group group, Set<Role> roles)
 		throws Exception {
 
@@ -796,6 +858,126 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 		logHasUserPermission(groupId, name, primKey, actionId, stopWatch, 4);
 
 		return value;
+	}
+
+	protected BooleanFilter doGetPermissionFilter(
+			long companyId, String className, BooleanFilter booleanFilter,
+			Set<Group> groups, Set<Role> roles,
+			Set<UserGroupRole> userGroupRoles)
+		throws Exception {
+
+		BooleanFilter permissionBooleanFilter = new BooleanFilter();
+
+		if (user.getUserId() > 0) {
+			permissionBooleanFilter.addTerm(Field.USER_ID, user.getUserId());
+		}
+
+		BooleanFilter groupsBooleanFilter = new BooleanFilter();
+		BooleanFilter rolesBooleanFilter = new BooleanFilter();
+
+		List<Role> regularRoles = new ArrayList<>();
+		List<Role> irregularRoles = new ArrayList<>();
+
+		for (Role role : roles) {
+			String roleName = role.getName();
+
+			if (roleName.equals(RoleConstants.ADMINISTRATOR)) {
+				return booleanFilter;
+			}
+
+			if (role.getType() == RoleConstants.TYPE_REGULAR) {
+				regularRoles.add(role);
+			}
+			else {
+				irregularRoles.add(role);
+			}
+
+			rolesBooleanFilter.addTerm(Field.ROLE_ID, role.getRoleId());
+		}
+
+		long[] regularRoleIds = ListUtil.toLongArray(
+			regularRoles, Role.ROLE_ID_ACCESSOR);
+		long[] irregularRoleIds = ListUtil.toLongArray(
+			irregularRoles, Role.ROLE_ID_ACCESSOR);
+		long[] roleIds = ArrayUtil.append(regularRoleIds, irregularRoleIds);
+
+		if (ResourcePermissionLocalServiceUtil.hasResourcePermission(
+				companyId, className, ResourceConstants.SCOPE_COMPANY,
+				String.valueOf(companyId), roleIds, ActionKeys.VIEW)) {
+
+			return booleanFilter;
+		}
+
+		if (ResourcePermissionLocalServiceUtil.hasResourcePermission(
+				companyId, className, ResourceConstants.SCOPE_GROUP_TEMPLATE,
+				String.valueOf(GroupConstants.DEFAULT_PARENT_GROUP_ID),
+				regularRoleIds, ActionKeys.VIEW)) {
+
+			return booleanFilter;
+		}
+
+		for (Group group : groups) {
+			if (ResourcePermissionLocalServiceUtil.hasResourcePermission(
+					companyId, className, ResourceConstants.SCOPE_GROUP,
+					String.valueOf(group.getGroupId()), roleIds,
+					ActionKeys.VIEW)) {
+
+				groupsBooleanFilter.addTerm(Field.GROUP_ID, group.getGroupId());
+			}
+			else if (ResourcePermissionLocalServiceUtil.hasResourcePermission(
+						companyId, className,
+						ResourceConstants.SCOPE_GROUP_TEMPLATE,
+						String.valueOf(GroupConstants.DEFAULT_PARENT_GROUP_ID),
+						irregularRoleIds, ActionKeys.VIEW)) {
+
+				groupsBooleanFilter.addTerm(Field.GROUP_ID, group.getGroupId());
+			}
+
+			for (Role role : irregularRoles) {
+				if (group.isSite() &&
+					!RoleConstants.SITE_MEMBER.equals(role.getName()) &&
+					(role.getType() == RoleConstants.TYPE_SITE)) {
+
+					rolesBooleanFilter.addTerm(
+						Field.GROUP_ROLE_ID,
+						group.getGroupId() + StringPool.DASH +
+							role.getRoleId());
+				}
+			}
+		}
+
+		for (Group group : groups) {
+			addRequiredMemberRole(group, rolesBooleanFilter);
+		}
+
+		for (UserGroupRole userGroupRole : userGroupRoles) {
+			rolesBooleanFilter.addTerm(
+				Field.GROUP_ROLE_ID,
+				userGroupRole.getGroupId() + StringPool.DASH +
+					userGroupRole.getRoleId());
+		}
+
+		if (groupsBooleanFilter.hasClauses()) {
+			permissionBooleanFilter.add(groupsBooleanFilter);
+		}
+
+		if (rolesBooleanFilter.hasClauses()) {
+			permissionBooleanFilter.add(rolesBooleanFilter);
+		}
+
+		if (!permissionBooleanFilter.hasClauses()) {
+			return booleanFilter;
+		}
+
+		BooleanFilter fullBooleanFilter = new BooleanFilter();
+
+		if ((booleanFilter != null) && booleanFilter.hasClauses()) {
+			fullBooleanFilter.add(booleanFilter, BooleanClauseOccur.MUST);
+		}
+
+		fullBooleanFilter.add(permissionBooleanFilter, BooleanClauseOccur.MUST);
+
+		return fullBooleanFilter;
 	}
 
 	/**
@@ -1348,6 +1530,59 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 			"Checking user permission block " + block + " for " + groupId +
 				" " + name + " " + primKey + " " + actionId + " takes " +
 					stopWatch.getTime() + " ms");
+	}
+
+	protected void populate(
+			long companyId, long[] groupIds,
+			PermissionCheckerBag permissionCheckerBag, Set<Group> groups,
+			Set<Role> roles, Set<UserGroupRole> userGroupRoles,
+			Map<Long, List<Role>> groupIdsToRoles)
+		throws Exception {
+
+		roles.addAll(permissionCheckerBag.getRoles());
+
+		if (ArrayUtil.isEmpty(groupIds)) {
+			groups.addAll(permissionCheckerBag.getGroups());
+
+			userGroupRoles.addAll(
+				UserGroupRoleLocalServiceUtil.getUserGroupRoles(
+					user.getUserId()));
+		}
+		else {
+			Arrays.sort(groupIds);
+
+			for (Group group : permissionCheckerBag.getGroups()) {
+				if (Arrays.binarySearch(groupIds, group.getGroupId()) != -1) {
+					groups.add(group);
+				}
+			}
+
+			for (long groupId : groupIds) {
+				userGroupRoles.addAll(
+					UserGroupRoleLocalServiceUtil.getUserGroupRoles(
+						user.getUserId(), groupId));
+				userGroupRoles.addAll(
+					UserGroupRoleLocalServiceUtil.
+						getUserGroupRolesByUserUserGroupAndGroup(
+							user.getUserId(), groupId));
+			}
+		}
+
+		if (isSignedIn()) {
+			roles.add(
+				RoleLocalServiceUtil.getRole(companyId, RoleConstants.GUEST));
+		}
+
+		for (Group group : groups) {
+			PermissionCheckerBag userBag = getUserBag(
+				user.getUserId(), group.getGroupId());
+
+			List<Role> groupRoles = ListUtil.fromCollection(userBag.getRoles());
+
+			groupIdsToRoles.put(group.getGroupId(), groupRoles);
+
+			roles.addAll(groupRoles);
+		}
 	}
 
 	/**
