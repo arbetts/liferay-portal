@@ -403,16 +403,95 @@ public class VerifyProperties extends VerifyProcess {
 			"display.templates.config", "com.liferay.asset.tags.navigation.web"
 		},
 
-		// Auth Verifiers
+		// Authentication Verifier
 
+		new String[] {
+			"auth.verifier.BasicAuthHeaderAutoLogin.basic_auth",
+			"auth.verifier.BasicAuthHeaderAuthVerifier.basic_auth",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.BasicAuthHeaderAutoLogin.hosts.allowed",
+			"auth.verifier.BasicAuthHeaderAuthVerifier.hosts.allowed",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.BasicAuthHeaderAutoLogin.urls.excludes",
+			"auth.verifier.BasicAuthHeaderAuthVerifier.urls.excludes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.BasicAuthHeaderAutoLogin.urls.includes",
+			"auth.verifier.BasicAuthHeaderAuthVerifier.urls.includes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+
+		new String[] {
+			"auth.verifier.DigestAuthenticationAuthVerifier.digest_auth",
+			"auth.verifier.DigestAuthenticationAuthVerifier.digest_auth",
+			"com.liferay.portal.security.auth.verifier"
+		},
 		new String[] {
 			"auth.verifier.DigestAuthenticationAuthVerifier.hosts.allowed",
 			"auth.verifier.DigestAuthenticationAuthVerifier.hosts.allowed",
 			"com.liferay.portal.security.auth.verifier"
 		},
 		new String[] {
+			"auth.verifier.DigestAuthenticationAuthVerifier.urls.excludes",
+			"auth.verifier.DigestAuthenticationAuthVerifier.urls.excludes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
 			"auth.verifier.DigestAuthenticationAuthVerifier.urls.includes",
 			"auth.verifier.DigestAuthenticationAuthVerifier.urls.includes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+
+		new String[] {
+			"auth.verifier.ParameterAutoLogin.hosts.allowed",
+			"auth.verifier.RequestParameterAuthVerifier.hosts.allowed",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.ParameterAutoLogin.urls.excludes",
+			"auth.verifier.RequestParameterAuthVerifier.urls.excludes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.ParameterAutoLogin.urls.includes",
+			"auth.verifier.RequestParameterAuthVerifier.urls.includes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+
+		new String[] {
+			"auth.verifier.PortalSessionAuthVerifier.hosts.allowed",
+			"auth.verifier.PortalSessionAuthVerifier.hosts.allowed",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.PortalSessionAuthVerifier.urls.excludes",
+			"auth.verifier.PortalSessionAuthVerifier.urls.excludes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.PortalSessionAuthVerifier.urls.includes",
+			"auth.verifier.PortalSessionAuthVerifier.urls.includes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+
+		new String[] {
+			"auth.verifier.TunnelingServletAuthVerifier.hosts.allowed",
+			"auth.verifier.TunnelingServletAuthVerifier.hosts.allowed",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.TunnelingServletAuthVerifier.urls.excludes",
+			"auth.verifier.TunnelingServletAuthVerifier.urls.excludes",
+			"com.liferay.portal.security.auth.verifier"
+		},
+		new String[] {
+			"auth.verifier.TunnelingServletAuthVerifier.urls.includes",
+			"auth.verifier.TunnelingServletAuthVerifier.urls.includes",
 			"com.liferay.portal.security.auth.verifier"
 		},
 
@@ -1005,6 +1084,18 @@ public class VerifyProperties extends VerifyProcess {
 		new String[] {
 			"polls.publish.to.live.by.default", "publish.to.live.by.default",
 			"com.liferay.polls.service"
+		},
+
+		// Request Header
+
+		new String[] {
+			"request.header.auth.hosts.allowed", "authHostsAllowed",
+			"com.liferay.portal.security.auto.login.request.header"
+		},
+
+		new String[] {
+			"request.header.auth.import.from.ldap", "importFromLDAP",
+			"com.liferay.portal.security.auto.login.request.header"
 		},
 
 		// RSS

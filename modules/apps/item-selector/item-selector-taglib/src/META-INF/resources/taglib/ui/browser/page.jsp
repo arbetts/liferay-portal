@@ -17,20 +17,35 @@
 <%@ include file="/taglib/ui/browser/init.jsp" %>
 
 <%
-String displayStyle = GetterUtil.getString(request.getAttribute("liferay-ui:item-selector-browser:displayStyle"), "descriptive");
-String idPrefix = GetterUtil.getString(request.getAttribute("liferay-ui:item-selector-browser:idPrefix"));
+String randomNamespace = PortalUtil.generateRandomKey(request, "taglib_ui_browser_page") + StringPool.UNDERLINE;
+
+String displayStyle = GetterUtil.getString(request.getAttribute("liferay-ui:item-selector-browser:displayStyle"));
+PortletURL displayStyleURL = (PortletURL)request.getAttribute("liferay-ui:item-selector-browser:displayStyleURL");
+String itemSelectedEventName = GetterUtil.getString(request.getAttribute("liferay-ui:item-selector-browser:itemSelectedEventName"));
 ReturnType returnType = (ReturnType)request.getAttribute("liferay-ui:item-selector-browser:returnType");
 SearchContainer searchContainer = (SearchContainer)request.getAttribute("liferay-ui:item-selector-browser:searchContainer");
 String tabName = GetterUtil.getString(request.getAttribute("liferay-ui:item-selector-browser:tabName"));
 String uploadMessage = GetterUtil.getString(request.getAttribute("liferay-ui:item-selector-browser:uploadMessage"));
 %>
 
-<div class="lfr-item-viewer" id="<%= idPrefix %>ItemSelectorContainer">
+<div class="lfr-item-viewer" id="<%= randomNamespace %>ItemSelectorContainer">
+	<c:if test="<%= displayStyleURL != null %>">
+		<aui:nav-bar>
+			<aui:nav collapsible="<%= true %>" cssClass="nav-display-style-buttons navbar-nav" icon="th-list" id="displayStyleButtons">
+				<liferay-ui:app-view-display-style
+					displayStyle="<%= displayStyle %>"
+					displayStyleURL="<%= displayStyleURL %>"
+					displayStyles='<%= new String[] {"descriptive", "list"} %>'
+				/>
+			</aui:nav>
+		</aui:nav-bar>
+	</c:if>
+
 	<c:if test="<%= ReturnType.BASE_64.equals(returnType) %>">
 		<div class="drop-zone">
-			<label class="btn btn-primary" for="<%= idPrefix %>InputFile"><liferay-ui:message key="select-file" /></label>
+			<label class="btn btn-primary" for="<%= randomNamespace %>InputFile"><liferay-ui:message key="select-file" /></label>
 
-			<input class="hide" id="<%= idPrefix %>InputFile" type="file" />
+			<input class="hide" id="<%= randomNamespace %>InputFile" type="file" />
 
 			<p>
 				<%= uploadMessage %>
@@ -63,7 +78,8 @@ String uploadMessage = GetterUtil.getString(request.getAttribute("liferay-ui:ite
 						%>
 
 						<liferay-ui:search-container-column-text name="title">
-							<a class="item-preview" data-url="<%= HtmlUtil.escapeAttribute(DLUtil.getPreviewURL(fileEntry, latestFileVersion, themeDisplay, StringPool.BLANK)) %>" href="<%= HtmlUtil.escapeHREF(DLUtil.getImagePreviewURL(fileEntry, themeDisplay)) %>" title="<%= HtmlUtil.escapeAttribute(title) %>">
+
+							<a class="item-preview" data-returnType="<%= HtmlUtil.escapeAttribute(returnType.getName()) %>" data-url="<%= HtmlUtil.escapeAttribute(DLUtil.getPreviewURL(fileEntry, latestFileVersion, themeDisplay, StringPool.BLANK)) %>" data-value="<%= HtmlUtil.escapeAttribute(returnType.getValue(fileEntry, themeDisplay)) %>" href="<%= HtmlUtil.escapeHREF(DLUtil.getImagePreviewURL(fileEntry, themeDisplay)) %>" title="<%= HtmlUtil.escapeAttribute(title) %>">
 
 								<%
 								String iconCssClass = DLUtil.getFileIconCssClass(fileEntry.getExtension());
@@ -119,7 +135,7 @@ String uploadMessage = GetterUtil.getString(request.getAttribute("liferay-ui:ite
 						</div>
 
 						<div class="text-primary">
-							<a class="item-preview" data-url="<%= HtmlUtil.escapeAttribute(DLUtil.getPreviewURL(fileEntry, latestFileVersion, themeDisplay, StringPool.BLANK)) %>" href="<%= HtmlUtil.escapeHREF(DLUtil.getImagePreviewURL(fileEntry, themeDisplay)) %>" title="<%= HtmlUtil.escapeAttribute(title) %>">
+							<a class="item-preview" data-returnType="<%= HtmlUtil.escapeAttribute(returnType.getName()) %>" data-url="<%= HtmlUtil.escapeAttribute(DLUtil.getPreviewURL(fileEntry, latestFileVersion, themeDisplay, StringPool.BLANK)) %>" data-value="<%= HtmlUtil.escapeAttribute(returnType.getValue(fileEntry, themeDisplay)) %>" href="<%= HtmlUtil.escapeHREF(DLUtil.getImagePreviewURL(fileEntry, themeDisplay)) %>" title="<%= HtmlUtil.escapeAttribute(title) %>">
 								<%= HtmlUtil.escape(title) %>
 							</a>
 
@@ -149,7 +165,12 @@ String uploadMessage = GetterUtil.getString(request.getAttribute("liferay-ui:ite
 	new Liferay.ItemSelectorBrowser(
 		{
 			closeCaption: '<%= UnicodeLanguageUtil.get(request, tabName) %>',
-			rootNode: '#<%= idPrefix %>ItemSelectorContainer'
+			on: {
+				selectedItem: function(event) {
+					Liferay.Util.getOpener().Liferay.fire('<%= itemSelectedEventName %>', event);
+				}
+			},
+			rootNode: '#<%= randomNamespace %>ItemSelectorContainer'
 		}
 	);
 </aui:script>

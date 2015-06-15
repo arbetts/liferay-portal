@@ -15,6 +15,7 @@
 		<dirset dir="document-library" includes="*" />
 		<dirset dir="dynamic-data-lists" includes="*" />
 		<dirset dir="dynamic-data-mapping" includes="*" />
+		<dirset dir="export-import" includes="*" />
 		<dirset dir="hello-velocity" includes="*" />
 		<dirset dir="iframe" includes="*" />
 		<dirset dir="invitation" includes="*" />
@@ -42,6 +43,7 @@
 		<dirset dir="site" includes="*" />
 		<dirset dir="site-navigation" includes="*" />
 		<dirset dir="social" includes="*" />
+		<dirset dir="social-office" includes="*" />
 		<dirset dir="translator" includes="*" />
 		<dirset dir="trash" includes="*" />
 		<dirset dir="unit-converter" includes="*" />

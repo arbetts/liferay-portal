@@ -15,11 +15,16 @@
 package com.liferay.layout.item.selector.web;
 
 import com.liferay.item.selector.ItemSelectorView;
+import com.liferay.item.selector.criteria.DefaultItemSelectorReturnType;
+import com.liferay.item.selector.criteria.layout.criterion.LayoutItemSelectorCriterion;
+import com.liferay.portal.kernel.util.SetUtil;
 
 import java.io.IOException;
 
+import java.util.Collections;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.portlet.PortletURL;
 
@@ -28,14 +33,18 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.osgi.service.component.annotations.Component;
+
 /**
  * @author Roberto Díaz
  */
+@Component(service = ItemSelectorView.class)
 public class LayoutItemSelectorView
-	implements ItemSelectorView<LayoutItemSelectorCriterion> {
+	implements ItemSelectorView
+		<LayoutItemSelectorCriterion, DefaultItemSelectorReturnType> {
 
-	public static final String ITEM_SELECTED_CALLBACK =
-		LayoutItemSelectorView.class.getName() + "#ITEM_SELECTED_CALLBACK";
+	public static final String ITEM_SELECTED_EVENT_NAME =
+		LayoutItemSelectorView.class.getName() + "#ITEM_SELECTED_EVENT_NAME";
 
 	public static final String LAYOUT_ITEM_SELECTOR_CRITERION =
 		LayoutItemSelectorView.class.getName() +
@@ -50,6 +59,13 @@ public class LayoutItemSelectorView
 	}
 
 	@Override
+	public Set<DefaultItemSelectorReturnType>
+		getSupportedItemSelectorReturnTypes() {
+
+		return _supportedItemSelectorReturnTypes;
+	}
+
+	@Override
 	public String getTitle(Locale locale) {
 		ResourceBundle resourceBundle = ResourceBundle.getBundle(
 			"content/Language", locale);
@@ -61,10 +77,10 @@ public class LayoutItemSelectorView
 	public void renderHTML(
 			ServletRequest request, ServletResponse response,
 			LayoutItemSelectorCriterion layoutItemSelectorCriterion,
-			PortletURL portletURL, String itemSelectedCallback)
+			PortletURL portletURL, String itemSelectedEventName)
 		throws IOException, ServletException {
 
-		request.setAttribute(ITEM_SELECTED_CALLBACK, itemSelectedCallback);
+		request.setAttribute(ITEM_SELECTED_EVENT_NAME, itemSelectedEventName);
 		request.setAttribute(
 			LAYOUT_ITEM_SELECTOR_CRITERION, layoutItemSelectorCriterion);
 		request.setAttribute(PORTLET_URL, portletURL);
@@ -74,5 +90,13 @@ public class LayoutItemSelectorView
 
 		requestDispatcher.include(request, response);
 	}
+
+	private static final Set<DefaultItemSelectorReturnType>
+		_supportedItemSelectorReturnTypes = Collections.unmodifiableSet(
+			SetUtil.fromArray(
+				new DefaultItemSelectorReturnType[] {
+					DefaultItemSelectorReturnType.URL,
+					DefaultItemSelectorReturnType.UUID
+				}));
 
 }

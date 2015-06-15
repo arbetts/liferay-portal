@@ -47,7 +47,8 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	configurationPid = "com.liferay.portal.search.elasticsearch.configuration.ElasticsearchConfiguration",
-	immediate = true, service = ElasticsearchConnection.class
+	immediate = true, property = {"operation.mode=EMBEDDED"},
+	service = ElasticsearchConnection.class
 )
 public class EmbeddedElasticsearchConnection
 	extends BaseElasticsearchConnection {
@@ -121,6 +122,9 @@ public class EmbeddedElasticsearchConnection
 	protected void loadRequiredDefaultConfigurations(
 		ImmutableSettings.Builder builder) {
 
+		builder.put(
+			"bootstrap.mlockall",
+			elasticsearchConfiguration.bootstrapMlockAll());
 		builder.put("cluster.name", elasticsearchConfiguration.clusterName());
 		builder.put(
 			"http.cors.enabled", elasticsearchConfiguration.httpCORSEnabled());
@@ -132,8 +136,14 @@ public class EmbeddedElasticsearchConnection
 		builder.put("node.local", true);
 		builder.put(
 			"path.data",
-			_props.get(PropsKeys.LIFERAY_HOME) + "/data/elasticsearch");
+			_props.get(PropsKeys.LIFERAY_HOME) + "/data/elasticsearch/indices");
 		builder.put("path.logs", _props.get(PropsKeys.LIFERAY_HOME) + "/logs");
+		builder.put(
+			"path.plugins",
+			_props.get(PropsKeys.LIFERAY_HOME) + "/data/elasticsearch/plugins");
+		builder.put(
+			"path.repo",
+			_props.get(PropsKeys.LIFERAY_HOME) + "/data/elasticsearch/repo");
 		builder.put(
 			"path.work", SystemProperties.get(SystemProperties.TMP_DIR));
 

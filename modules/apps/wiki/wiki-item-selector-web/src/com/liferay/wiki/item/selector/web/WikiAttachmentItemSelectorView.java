@@ -15,11 +15,15 @@
 package com.liferay.wiki.item.selector.web;
 
 import com.liferay.item.selector.ItemSelectorView;
+import com.liferay.item.selector.criteria.DefaultItemSelectorReturnType;
+import com.liferay.portal.kernel.util.SetUtil;
 
 import java.io.IOException;
 
+import java.util.Collections;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.portlet.PortletURL;
 
@@ -32,11 +36,12 @@ import javax.servlet.ServletResponse;
  * @author Iván Zaera
  */
 public class WikiAttachmentItemSelectorView
-	implements ItemSelectorView<WikiAttachmentItemSelectorCriterion> {
+	implements ItemSelectorView
+		<WikiAttachmentItemSelectorCriterion, DefaultItemSelectorReturnType> {
 
-	public static final String ITEM_SELECTED_CALLBACK =
+	public static final String ITEM_SELECTED_EVENT_NAME =
 		WikiAttachmentItemSelectorView.class.getName() +
-			"#ITEM_SELECTED_CALLBACK";
+			"#ITEM_SELECTED_EVENT_NAME";
 
 	public static final String PORTLET_URL =
 		WikiAttachmentItemSelectorView.class.getName() + "#PORTLET_URL";
@@ -53,6 +58,13 @@ public class WikiAttachmentItemSelectorView
 	}
 
 	@Override
+	public Set<DefaultItemSelectorReturnType>
+		getSupportedItemSelectorReturnTypes() {
+
+		return _supportedItemSelectorReturnTypes;
+	}
+
+	@Override
 	public String getTitle(Locale locale) {
 		ResourceBundle resourceBundle = ResourceBundle.getBundle(
 			"content/Language", locale);
@@ -65,10 +77,10 @@ public class WikiAttachmentItemSelectorView
 			ServletRequest request, ServletResponse response,
 			WikiAttachmentItemSelectorCriterion
 				wikiAttachmentItemSelectorCriterion,
-			PortletURL portletURL, String itemSelectedCallback)
+			PortletURL portletURL, String itemSelectedEventName)
 		throws IOException, ServletException {
 
-		request.setAttribute(ITEM_SELECTED_CALLBACK, itemSelectedCallback);
+		request.setAttribute(ITEM_SELECTED_EVENT_NAME, itemSelectedEventName);
 		request.setAttribute(PORTLET_URL, portletURL);
 		request.setAttribute(
 			WIKI_ATTACHMENT_ITEM_SELECTOR_CRITERION,
@@ -79,5 +91,12 @@ public class WikiAttachmentItemSelectorView
 
 		requestDispatcher.include(request, response);
 	}
+
+	private static final Set<DefaultItemSelectorReturnType>
+		_supportedItemSelectorReturnTypes = Collections.unmodifiableSet(
+			SetUtil.fromArray(
+				new DefaultItemSelectorReturnType[] {
+					DefaultItemSelectorReturnType.URL
+				}));
 
 }
