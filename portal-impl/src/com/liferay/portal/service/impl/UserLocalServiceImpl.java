@@ -3366,9 +3366,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 				status, params, andOperator, QueryUtil.ALL_POS,
 				QueryUtil.ALL_POS, null);
 
-			Hits hits = indexer.search(searchContext);
-
-			return hits.getLength();
+			return (int)indexer.searchCount(searchContext);
 		}
 		catch (Exception e) {
 			throw new SystemException(e);
@@ -3425,9 +3423,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 				screenName, emailAddress, null, null, null, null, null, status,
 				params, true, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
-			Hits hits = indexer.search(searchContext);
-
-			return hits.getLength();
+			return (int)indexer.searchCount(searchContext);
 		}
 		catch (Exception e) {
 			throw new SystemException(e);
@@ -4677,7 +4673,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		user.setLastLoginDate(lastLoginDate);
 		user.setLastLoginIP(lastLoginIP);
 
-		resetFailedLoginAttempts(user);
+		resetFailedLoginAttempts(user, true);
 
 		return user;
 	}
@@ -6205,9 +6201,15 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	protected void resetFailedLoginAttempts(User user) {
-		user.setFailedLoginAttempts(0);
+		resetFailedLoginAttempts(user, false);
+	}
 
-		userPersistence.update(user);
+	protected void resetFailedLoginAttempts(User user, boolean forceUpdate) {
+		if (forceUpdate || (user.getFailedLoginAttempts() > 0)) {
+			user.setFailedLoginAttempts(0);
+
+			userPersistence.update(user);
+		}
 	}
 
 	protected BaseModelSearchResult<User> searchUsers(

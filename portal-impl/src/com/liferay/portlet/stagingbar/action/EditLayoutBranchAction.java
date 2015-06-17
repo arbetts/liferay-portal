@@ -19,18 +19,19 @@ import com.liferay.portal.NoSuchGroupException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
-import com.liferay.portal.kernel.staging.StagingUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.LayoutBranchServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
+import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.layoutsadmin.action.EditLayoutsAction;
+import com.liferay.portlet.exportimport.staging.StagingUtil;
+import com.liferay.portlet.sites.action.ActionUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +52,7 @@ import org.apache.struts.action.ActionMapping;
  * @author Brian Wing Shun Chan
  * @author Julio Camarero
  */
-public class EditLayoutBranchAction extends EditLayoutsAction {
+public class EditLayoutBranchAction extends PortletAction {
 
 	@Override
 	public void processAction(
@@ -59,13 +60,6 @@ public class EditLayoutBranchAction extends EditLayoutsAction {
 			PortletConfig portletConfig, ActionRequest actionRequest,
 			ActionResponse actionResponse)
 		throws Exception {
-
-		try {
-			checkPermissions(actionRequest);
-		}
-		catch (PrincipalException pe) {
-			return;
-		}
 
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
@@ -127,17 +121,7 @@ public class EditLayoutBranchAction extends EditLayoutsAction {
 		throws Exception {
 
 		try {
-			checkPermissions(renderRequest);
-		}
-		catch (PrincipalException pe) {
-			SessionErrors.add(
-				renderRequest, PrincipalException.class.getName());
-
-			return actionMapping.findForward("portlet.staging_bar.error");
-		}
-
-		try {
-			getGroup(renderRequest);
+			ActionUtil.getGroup(renderRequest);
 		}
 		catch (Exception e) {
 			if (e instanceof NoSuchGroupException ||

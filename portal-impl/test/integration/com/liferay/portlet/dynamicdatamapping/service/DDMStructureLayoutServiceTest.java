@@ -23,6 +23,7 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMFormLayoutColumn;
 import com.liferay.portlet.dynamicdatamapping.model.DDMFormLayoutPage;
 import com.liferay.portlet.dynamicdatamapping.model.DDMFormLayoutRow;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
+import com.liferay.portlet.dynamicdatamapping.service.test.BaseDDMServiceTestCase;
 import com.liferay.portlet.dynamicdatamapping.util.test.DDMFormTestUtil;
 
 import java.util.List;
@@ -73,10 +74,10 @@ public class DDMStructureLayoutServiceTest extends BaseDDMServiceTestCase {
 
 		Assert.assertEquals(
 			"Text1",
-			getDDMFormLayoutColumnFieldName(ddmFormLayoutColumns.get(0)));
+			getDDMFormLayoutColumnFieldName(ddmFormLayoutColumns.get(0), 0));
 		Assert.assertEquals(
 			"Text2",
-			getDDMFormLayoutColumnFieldName(ddmFormLayoutColumns.get(1)));
+			getDDMFormLayoutColumnFieldName(ddmFormLayoutColumns.get(1), 0));
 	}
 
 	protected List<DDMFormLayoutColumn> createDDMFormLayoutColumns(
@@ -93,16 +94,13 @@ public class DDMStructureLayoutServiceTest extends BaseDDMServiceTestCase {
 			ddmFormLayoutColumns);
 	}
 
-	protected String getDDMFormFieldName(
-		DDMFormLayoutColumn ddmFormLayoutColumn) {
-
-		return ddmFormLayoutColumn.getDDMFormFieldName();
-	}
-
 	protected String getDDMFormLayoutColumnFieldName(
-		DDMFormLayoutColumn ddmFormLayoutColumn) {
+		DDMFormLayoutColumn ddmFormLayoutColumn, int index) {
 
-		return ddmFormLayoutColumn.getDDMFormFieldName();
+		List<String> ddmFormFieldNames =
+			ddmFormLayoutColumn.getDDMFormFieldNames();
+
+		return ddmFormFieldNames.get(index);
 	}
 
 	protected void setUpDDMForm() {

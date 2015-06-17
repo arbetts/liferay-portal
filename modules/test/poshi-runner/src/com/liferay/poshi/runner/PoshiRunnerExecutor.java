@@ -168,6 +168,9 @@ public class PoshiRunnerExecutor {
 				else if (childElement.attributeValue("selenium") != null) {
 					runSeleniumElement(childElement);
 				}
+				else if (childElement.attributeValue("test-case") != null) {
+					runTestCaseExecuteElement(childElement);
+				}
 			}
 			else if (childElementName.equals("if")) {
 				runIfElement(childElement);
@@ -213,6 +216,8 @@ public class PoshiRunnerExecutor {
 		XMLLoggerHandler.updateStatus(element, "pending");
 
 		String message = element.attributeValue("message");
+
+		XMLLoggerHandler.updateStatus(element, "fail");
 
 		if (Validator.isNotNull(message)) {
 			throw new Exception(
@@ -267,6 +272,8 @@ public class PoshiRunnerExecutor {
 		for (Element executeVarElement : executeVarElements) {
 			runVarElement(executeVarElement, false, false);
 		}
+
+		PoshiRunnerStackTraceUtil.setCurrentElement(executeElement);
 
 		String classCommandName = executeElement.attributeValue("function");
 
@@ -561,6 +568,10 @@ public class PoshiRunnerExecutor {
 						"locator2");
 				}
 			}
+			else if (argument.matches("\\$\\{([^}]*)\\}")) {
+				argument = PoshiRunnerVariablesUtil.replaceCommandVars(
+					argument);
+			}
 
 			arguments.add(argument);
 
@@ -608,6 +619,59 @@ public class PoshiRunnerExecutor {
 		SummaryLoggerHandler.passSummary(element);
 
 		XMLLoggerHandler.updateStatus(element, "pass");
+	}
+
+	public static void runTestCaseCommandElement(Element commandElement)
+		throws Exception {
+
+		PoshiRunnerStackTraceUtil.setCurrentElement(commandElement);
+
+		PoshiRunnerVariablesUtil.pushCommandMap();
+
+		parseElement(commandElement);
+
+		PoshiRunnerVariablesUtil.popCommandMap();
+	}
+
+	public static void runTestCaseExecuteElement(Element executeElement)
+		throws Exception {
+
+		PoshiRunnerStackTraceUtil.setCurrentElement(executeElement);
+
+		XMLLoggerHandler.updateStatus(executeElement, "pending");
+
+		String classCommandName = executeElement.attributeValue("test-case");
+
+		String className =
+			PoshiRunnerGetterUtil.getClassNameFromClassCommandName(
+				classCommandName);
+
+		if (className.equals("super")) {
+			className = PoshiRunnerGetterUtil.getExtendedTestCaseName();
+
+			classCommandName = classCommandName.replaceFirst(
+				"super", className);
+		}
+
+		PoshiRunnerStackTraceUtil.pushStackTrace(executeElement);
+
+		Element rootElement = PoshiRunnerContext.getTestCaseRootElement(
+			className);
+
+		List<Element> rootVarElements = rootElement.elements("var");
+
+		for (Element rootVarElement : rootVarElements) {
+			runVarElement(rootVarElement, false, true);
+		}
+
+		Element commandElement = PoshiRunnerContext.getTestCaseCommandElement(
+			classCommandName);
+
+		runTestCaseCommandElement(commandElement);
+
+		PoshiRunnerStackTraceUtil.popStackTrace();
+
+		XMLLoggerHandler.updateStatus(executeElement, "pass");
 	}
 
 	public static void runVarElement(

@@ -24,6 +24,9 @@ public interface BackgroundTaskExecutor {
 	public BackgroundTaskResult execute(BackgroundTask backgroundTask)
 		throws Exception;
 
+	public BackgroundTaskDisplay getBackgroundTaskDisplay(
+		BackgroundTask backgroundTask);
+
 	public BackgroundTaskStatusMessageTranslator
 		getBackgroundTaskStatusMessageTranslator();
 

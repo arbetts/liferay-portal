@@ -3,8 +3,6 @@ AUI.add(
 	function(A) {
 		var AObject = A.Object;
 
-		var owns = AObject.owns;
-
 		var _browserKey = Liferay.Util.randomInt();
 		var _enabled = false;
 		var _encryptedUserId = null;
@@ -87,7 +85,7 @@ AUI.add(
 			var response = JSON.parse(obj.responseText);
 			var send = false;
 
-			if (A.Lang.isArray(response)) {
+			if (Array.isArray(response)) {
 				var meta = response.shift();
 
 				for (var i = 0; i < response.length; i++) {
@@ -100,7 +98,9 @@ AUI.add(
 					var portlet = _portlets[portletId];
 
 					if (portlet) {
-						if (chunkData) {
+						var currentPortletId = _portletIdsMap[portletId];
+
+						if (chunkData && currentPortletId) {
 							chunkData.initialRequest = portlet.initialRequest;
 						}
 
@@ -111,7 +111,7 @@ AUI.add(
 							_delayIndex = 0;
 						}
 
-						if (portlet.initialRequest) {
+						if (portlet.initialRequest && currentPortletId) {
 							send = true;
 
 							portlet.initialRequest = false;
@@ -307,7 +307,7 @@ AUI.add(
 			submitRequest: function(key, data, chunkId) {
 				if (!_frozen && key in _portlets) {
 					for (var i in data) {
-						if (owns(data, i)) {
+						if (data.hasOwnProperty(i)) {
 							var content = data[i];
 
 							if (content.replace) {

@@ -16,13 +16,13 @@ package com.liferay.portal.security.auth.verifier;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.security.auth.verifier.AuthVerifier;
+import com.liferay.portal.kernel.security.auth.verifier.AuthVerifierResult;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.security.auth.AccessControlContext;
 import com.liferay.portal.security.auth.AuthException;
-import com.liferay.portal.security.auth.AuthVerifier;
-import com.liferay.portal.security.auth.AuthVerifierResult;
 import com.liferay.portal.servlet.filters.secure.NonceUtil;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalInstances;
@@ -41,8 +41,10 @@ import org.osgi.service.component.annotations.Component;
 @Component(
 	immediate = true,
 	property = {
+		"auth.verifier.DigestAuthenticationAuthVerifier.digest_auth=false",
 		"auth.verifier.DigestAuthenticationAuthVerifier.hosts.allowed=",
-		"auth.verifier.DigestAuthenticationAuthVerifier.urls.includes=N/A"
+		"auth.verifier.DigestAuthenticationAuthVerifier.urls.excludes=*",
+		"auth.verifier.DigestAuthenticationAuthVerifier.urls.includes="
 	}
 )
 public class DigestAuthenticationAuthVerifier implements AuthVerifier {
