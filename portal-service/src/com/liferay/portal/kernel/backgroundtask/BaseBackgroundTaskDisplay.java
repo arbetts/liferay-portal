@@ -31,6 +31,7 @@ public abstract class BaseBackgroundTaskDisplay
 
 	public BaseBackgroundTaskDisplay(BackgroundTask backgroundTask) {
 		_backgroundTask = backgroundTask;
+
 		_backgroundTaskStatus =
 			BackgroundTaskStatusRegistryUtil.getBackgroundTaskStatus(
 				backgroundTask.getBackgroundTaskId());
@@ -43,10 +44,10 @@ public abstract class BaseBackgroundTaskDisplay
 
 	@Override
 	public JSONObject getDetailsJSONObject(Locale locale) {
-		JSONObject detailsJSON = createMessageDetails(_backgroundTask);
+		JSONObject detailsJSONObject = createMessageDetails(_backgroundTask);
 
 		return BackgroundTaskDisplayJSONTransformer.translateDetailsJSON(
-			locale, detailsJSON);
+			locale, detailsJSONObject);
 	}
 
 	@Override

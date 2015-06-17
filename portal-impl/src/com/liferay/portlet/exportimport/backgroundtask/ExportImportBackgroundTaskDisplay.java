@@ -150,6 +150,7 @@ public class ExportImportBackgroundTaskDisplay
 		return false;
 	}
 
+	@Override
 	protected JSONObject createMessageDetails(BackgroundTask backgroundTask) {
 		if (_details != null) {
 			return _details;
