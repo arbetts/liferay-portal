@@ -48,10 +48,10 @@ String backgroundTaskStatusMessage = backgroundTask.getStatusMessage();
 			</h4>
 
 			<%
-			JSONArray detailsItems = detailsJSONObject.getJSONArray("detailsItems");
+			JSONArray detailsItemsJSONObject = detailsJSONObject.getJSONArray("detailsItems");
 
-			for (int i = 0; i < detailsItems.length(); i++) {
-				JSONObject detailsItemJSONObject = detailsItems.getJSONObject(i);
+			for (int i = 0; i < detailsItemsJSONObject.length(); i++) {
+				JSONObject detailsItemJSONObject = detailsItemsJSONObject.getJSONObject(i);
 			%>
 
 			<span class="error-message">
