@@ -152,14 +152,14 @@ public class ExportImportBackgroundTaskDisplay
 
 	@Override
 	protected JSONObject createMessageDetails(BackgroundTask backgroundTask) {
-		if (_details != null) {
-			return _details;
+		if (_detailsJSONObject != null) {
+			return _detailsJSONObject;
 		}
 
-		JSONObject backgroundTaskJSON = null;
+		JSONObject backgroundTaskJSONObject = null;
 
 		try {
-			backgroundTaskJSON = JSONFactoryUtil.createJSONObject(
+			backgroundTaskJSONObject = JSONFactoryUtil.createJSONObject(
 				backgroundTask.getStatusMessage());
 		}
 		catch (Exception e) {
@@ -175,31 +175,31 @@ public class ExportImportBackgroundTaskDisplay
 		boolean validated = MapUtil.getBoolean(
 			backgroundTask.getTaskContextMap(), "validated");
 
-		String detailHeader =
+		String detailsHeader =
 			"an-unexpected-error-occurred-with-the-publication-process." +
 				"-please-check-your-portal-and-publishing-configuration";
 
 		if (exported && !validated) {
-			detailHeader =
+			detailsHeader =
 				"an-unexpected-error-occurred-with-the-publication-" +
 					"process.-please-check-your-portal-and-publishing-" +
 						"configuration";
 		}
 
-		JSONArray detailItems = JSONFactoryUtil.createJSONArray();
+		JSONArray detailsItemsJSONArray = JSONFactoryUtil.createJSONArray();
 
-		JSONArray errorMessagesJSONArray = backgroundTaskJSON.getJSONArray(
-			"messageListItems");
+		JSONArray errorMessagesJSONArray =
+			backgroundTaskJSONObject.getJSONArray("messageListItems");
 
 		if (errorMessagesJSONArray != null) {
-			String message = backgroundTaskJSON.getString("message");
+			String message = backgroundTaskJSONObject.getString("message");
 
 			BackgroundTaskDisplayJSONTransformer.addDetailsItem(
-				detailItems, message, errorMessagesJSONArray);
+				detailsItemsJSONArray, message, errorMessagesJSONArray);
 		}
 
-		JSONArray warningMessagesJSONArray = backgroundTaskJSON.getJSONArray(
-			"warningMessages");
+		JSONArray warningMessagesJSONArray =
+			backgroundTaskJSONObject.getJSONArray("warningMessages");
 
 		if (warningMessagesJSONArray != null) {
 			String message = "the-following-data-has-not-been-published";
@@ -213,15 +213,16 @@ public class ExportImportBackgroundTaskDisplay
 			}
 
 			BackgroundTaskDisplayJSONTransformer.addDetailsItem(
-				detailItems, message, warningMessagesJSONArray);
+				detailsItemsJSONArray, message, warningMessagesJSONArray);
 		}
 
-		int status = backgroundTaskJSON.getInt("status");
+		int status = backgroundTaskJSONObject.getInt("status");
 
-		_details = BackgroundTaskDisplayJSONTransformer.createDetailsJSONObject(
-			detailHeader, detailItems, status);
+		_detailsJSONObject =
+			BackgroundTaskDisplayJSONTransformer.createDetailsJSONObject(
+				detailsHeader, detailsItemsJSONArray, status);
 
-		return _details;
+		return _detailsJSONObject;
 	}
 
 	protected String createMessageKey() {
@@ -295,7 +296,7 @@ public class ExportImportBackgroundTaskDisplay
 	private final long _allProgressBarCountersTotal;
 	private final String _cmd;
 	private final long _currentProgressBarCountersTotal;
-	private JSONObject _details;
+	private JSONObject _detailsJSONObject;
 	private String _messageKey;
 	private int _percentage;
 	private final String _phase;

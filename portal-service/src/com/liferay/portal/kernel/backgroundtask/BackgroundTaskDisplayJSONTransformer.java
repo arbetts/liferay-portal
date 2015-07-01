@@ -27,18 +27,19 @@ import java.util.Locale;
 public class BackgroundTaskDisplayJSONTransformer {
 
 	public static void addDetailsItem(
-		JSONArray detailsItems, String message, JSONArray detailsItemsList) {
+		JSONArray detailsItemsJSONArray, String message,
+		JSONArray detailsItemsListJSONArray) {
 
-		JSONObject detailItem = JSONFactoryUtil.createJSONObject();
+		JSONObject detailsItemJSONObject = JSONFactoryUtil.createJSONObject();
 
-		detailItem.put("message", message);
-		detailItem.put("itemsList", detailsItemsList);
+		detailsItemJSONObject.put("message", message);
+		detailsItemJSONObject.put("itemsList", detailsItemsListJSONArray);
 
-		detailsItems.put(detailItem);
+		detailsItemsJSONArray.put(detailsItemJSONObject);
 	}
 
 	public static void addListItem(
-		JSONArray itemsList, String info, String errorMessage,
+		JSONArray itemsListJSONArray, String info, String errorMessage,
 		String errorStrongMessage) {
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
@@ -47,19 +48,19 @@ public class BackgroundTaskDisplayJSONTransformer {
 		jsonObject.put("errorMessage", errorMessage);
 		jsonObject.put("errorStrongMessage", errorStrongMessage);
 
-		itemsList.put(jsonObject);
+		itemsListJSONArray.put(jsonObject);
 	}
 
 	public static JSONObject createDetailsJSONObject(
-		String detailsHeader, JSONArray detailsItems, int status) {
+		String detailsHeader, JSONArray detailsItemsJSONArray, int status) {
 
-		JSONObject detailsJSON = JSONFactoryUtil.createJSONObject();
+		JSONObject detailsJSONObject = JSONFactoryUtil.createJSONObject();
 
-		detailsJSON.put("detailsHeader", detailsHeader);
-		detailsJSON.put("detailsItems", detailsItems);
-		detailsJSON.put("status", status);
+		detailsJSONObject.put("detailsHeader", detailsHeader);
+		detailsJSONObject.put("detailsItems", detailsItemsJSONArray);
+		detailsJSONObject.put("status", status);
 
-		return detailsJSON;
+		return detailsJSONObject;
 	}
 
 	public static JSONObject translateDetailsJSON(
@@ -69,20 +70,23 @@ public class BackgroundTaskDisplayJSONTransformer {
 			return null;
 		}
 
-		JSONArray detailsItems = detailsJSONObject.getJSONArray("detailsItems");
+		JSONArray detailsItemsJSONArray = detailsJSONObject.getJSONArray(
+			"detailsItems");
 
-		if (detailsItems == null) {
+		if (detailsItemsJSONArray == null) {
 			return detailsJSONObject;
 		}
 
-		for (int i = 0; i < detailsItems.length(); i++) {
-			JSONObject detailsItem = detailsItems.getJSONObject(i);
+		for (int i = 0; i < detailsItemsJSONArray.length(); i++) {
+			JSONObject detailsItemJSONObject =
+				detailsItemsJSONArray.getJSONObject(i);
 
-			String message = detailsItem.getString("message");
+			String message = detailsItemJSONObject.getString("message");
 
-			detailsItem.put("message", LanguageUtil.get(locale, message));
+			detailsItemJSONObject.put(
+				"message", LanguageUtil.get(locale, message));
 
-			JSONArray itemsListJSONArray = detailsItem.getJSONArray(
+			JSONArray itemsListJSONArray = detailsItemJSONObject.getJSONArray(
 				"itemsList");
 
 			if (itemsListJSONArray == null) {
@@ -108,14 +112,14 @@ public class BackgroundTaskDisplayJSONTransformer {
 				listItemJSONObject.put("info", LanguageUtil.get(locale, info));
 			}
 
-			detailsItem.put("itemsList", itemsListJSONArray);
+			detailsItemJSONObject.put("itemsList", itemsListJSONArray);
 		}
 
 		String detailsHeader = detailsJSONObject.getString("detailsHeader");
 
 		detailsJSONObject.put(
 			"detailsHeader", LanguageUtil.get(locale, detailsHeader));
-		detailsJSONObject.put("detailsItems", detailsItems);
+		detailsJSONObject.put("detailsItems", detailsItemsJSONArray);
 
 		return detailsJSONObject;
 	}
