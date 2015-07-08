@@ -151,7 +151,9 @@ public class ExportImportBackgroundTaskDisplay
 	}
 
 	@Override
-	protected JSONObject createDetailsJSONObject(BackgroundTask backgroundTask) {
+	protected JSONObject createDetailsJSONObject(
+		BackgroundTask backgroundTask) {
+
 		if (_detailsJSONObject != null) {
 			return _detailsJSONObject;
 		}
