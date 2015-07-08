@@ -24,7 +24,6 @@ long backgroundTaskId = ParamUtil.getLong(request, "backgroundTaskId");
 BackgroundTask backgroundTask = BackgroundTaskLocalServiceUtil.fetchBackgroundTask(backgroundTaskId);
 
 int backgroundTaskStatus = backgroundTask.getStatus();
-
 String backgroundTaskStatusMessage = backgroundTask.getStatusMessage();
 %>
 
