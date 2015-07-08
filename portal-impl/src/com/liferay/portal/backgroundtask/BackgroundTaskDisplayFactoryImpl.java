@@ -17,8 +17,6 @@ package com.liferay.portal.backgroundtask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskDisplay;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskDisplayFactory;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.service.BackgroundTaskLocalServiceUtil;
 
@@ -52,8 +50,5 @@ public class BackgroundTaskDisplayFactoryImpl
 
 		return getBackgroundTaskDisplay(backgroundTask);
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		BackgroundTaskDisplayFactoryImpl.class);
 
 }
