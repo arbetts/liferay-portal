@@ -26,19 +26,19 @@ import java.util.Locale;
  */
 public class BackgroundTaskDisplayJSONTransformer {
 
-	public static void addDetailsItem(
+	public static void appendJSONObjectToDetailsItems(
 		JSONArray detailsItemsJSONArray, String message,
-		JSONArray detailsItemsListJSONArray) {
+		JSONArray itemsListJSONArray) {
 
-		JSONObject detailsItemJSONObject = JSONFactoryUtil.createJSONObject();
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-		detailsItemJSONObject.put("message", message);
-		detailsItemJSONObject.put("itemsList", detailsItemsListJSONArray);
+		jsonObject.put("message", message);
+		jsonObject.put("itemsList", itemsListJSONArray);
 
-		detailsItemsJSONArray.put(detailsItemJSONObject);
+		detailsItemsJSONArray.put(jsonObject);
 	}
 
-	public static void addListItem(
+	public static void appendJSONObjectToItemsList(
 		JSONArray itemsListJSONArray, String info, String errorMessage,
 		String errorStrongMessage) {
 
@@ -54,13 +54,13 @@ public class BackgroundTaskDisplayJSONTransformer {
 	public static JSONObject createDetailsJSONObject(
 		String detailsHeader, JSONArray detailsItemsJSONArray, int status) {
 
-		JSONObject detailsJSONObject = JSONFactoryUtil.createJSONObject();
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-		detailsJSONObject.put("detailsHeader", detailsHeader);
-		detailsJSONObject.put("detailsItems", detailsItemsJSONArray);
-		detailsJSONObject.put("status", status);
+		jsonObject.put("detailsHeader", detailsHeader);
+		jsonObject.put("detailsItems", detailsItemsJSONArray);
+		jsonObject.put("status", status);
 
-		return detailsJSONObject;
+		return jsonObject;
 	}
 
 	public static JSONObject translateDetailsJSON(
@@ -92,30 +92,26 @@ public class BackgroundTaskDisplayJSONTransformer {
 			return null;
 		}
 
-		JSONArray translatedDetailsItemsJSONArray =
-			JSONFactoryUtil.createJSONArray();
+		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
 		for (int i = 0; i < detailsItemsJSONArray.length(); i++) {
-			JSONObject detailsItemJSONObject =
-				detailsItemsJSONArray.getJSONObject(i);
+			JSONObject jsonObject = detailsItemsJSONArray.getJSONObject(i);
 
-			String message = detailsItemJSONObject.getString("message");
+			String message = jsonObject.getString("message");
 
-			detailsItemJSONObject.put(
-				"message", LanguageUtil.get(locale, message));
+			jsonObject.put("message", LanguageUtil.get(locale, message));
 
-			JSONArray itemsListJSONArray = detailsItemJSONObject.getJSONArray(
-				"itemsList");
+			JSONArray itemsListJSONArray = jsonObject.getJSONArray("itemsList");
 
 			itemsListJSONArray = translateItemsListJSONArray(
 				locale, itemsListJSONArray);
 
-			detailsItemJSONObject.put("itemsList", itemsListJSONArray);
+			jsonObject.put("itemsList", itemsListJSONArray);
 
-			translatedDetailsItemsJSONArray.put(detailsItemJSONObject);
+			jsonArray.put(jsonObject);
 		}
 
-		return translatedDetailsItemsJSONArray;
+		return jsonArray;
 	}
 
 	protected static JSONArray translateItemsListJSONArray(
@@ -125,29 +121,29 @@ public class BackgroundTaskDisplayJSONTransformer {
 			return null;
 		}
 
-		JSONArray translatedItemsListJSONArray =
+		JSONArray jsonArray =
 			JSONFactoryUtil.createJSONArray();
 
 		for (int j = 0; j < itemsListJSONArray.length(); j++) {
-			JSONObject listItemJSONObject = itemsListJSONArray.getJSONObject(j);
+			JSONObject jsonObject = itemsListJSONArray.getJSONObject(j);
 
-			String info = listItemJSONObject.getString("info");
-			String errorMessage = listItemJSONObject.getString("errorMessage");
-			String errorStrongMessage = listItemJSONObject.getString(
+			String info = jsonObject.getString("info");
+			String errorMessage = jsonObject.getString("errorMessage");
+			String errorStrongMessage = jsonObject.getString(
 				"errorStrongMessage");
 
-			listItemJSONObject.put("info", LanguageUtil.get(locale, info));
-			listItemJSONObject.put(
+			jsonObject.put("info", LanguageUtil.get(locale, info));
+			jsonObject.put(
 				"errorMessage",
 				LanguageUtil.get(locale, errorMessage));
-			listItemJSONObject.put(
+			jsonObject.put(
 				"errorStrongMessage",
 				LanguageUtil.get(locale, errorStrongMessage));
 
-			translatedItemsListJSONArray.put(listItemJSONObject);
+			jsonArray.put(jsonObject);
 		}
 
-		return translatedItemsListJSONArray;
+		return jsonArray;
 	}
 
 }

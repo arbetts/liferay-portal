@@ -196,7 +196,7 @@ public class ExportImportBackgroundTaskDisplay
 		if (errorMessagesJSONArray != null) {
 			String message = backgroundTaskJSONObject.getString("message");
 
-			BackgroundTaskDisplayJSONTransformer.addDetailsItem(
+			BackgroundTaskDisplayJSONTransformer.appendJSONObjectToDetailsItems(
 				detailsItemsJSONArray, message, errorMessagesJSONArray);
 		}
 
@@ -214,7 +214,7 @@ public class ExportImportBackgroundTaskDisplay
 						"published-either";
 			}
 
-			BackgroundTaskDisplayJSONTransformer.addDetailsItem(
+			BackgroundTaskDisplayJSONTransformer.appendJSONObjectToDetailsItems(
 				detailsItemsJSONArray, message, warningMessagesJSONArray);
 		}
 
