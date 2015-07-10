@@ -14,20 +14,12 @@
 
 package com.liferay.portal.lar.test;
 
-import com.liferay.portal.kernel.lar.ExportImportClassedModelUtil;
-import com.liferay.portal.kernel.lar.ExportImportPathUtil;
-import com.liferay.portal.kernel.lar.PortletDataContext;
-import com.liferay.portal.kernel.lar.PortletDataContextFactoryUtil;
-import com.liferay.portal.kernel.lar.PortletDataHandlerKeys;
-import com.liferay.portal.kernel.lar.StagedModelDataHandler;
-import com.liferay.portal.kernel.lar.StagedModelDataHandlerRegistryUtil;
-import com.liferay.portal.kernel.lar.StagedModelDataHandlerUtil;
-import com.liferay.portal.kernel.lar.UserIdStrategy;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -38,7 +30,6 @@ import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipReaderFactoryUtil;
 import com.liferay.portal.kernel.zip.ZipWriter;
 import com.liferay.portal.kernel.zip.ZipWriterFactoryUtil;
-import com.liferay.portal.lar.CurrentUserIdStrategy;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.StagedModel;
@@ -56,6 +47,16 @@ import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
 import com.liferay.portlet.asset.util.test.AssetTestUtil;
+import com.liferay.portlet.exportimport.lar.CurrentUserIdStrategy;
+import com.liferay.portlet.exportimport.lar.ExportImportClassedModelUtil;
+import com.liferay.portlet.exportimport.lar.ExportImportPathUtil;
+import com.liferay.portlet.exportimport.lar.PortletDataContext;
+import com.liferay.portlet.exportimport.lar.PortletDataContextFactoryUtil;
+import com.liferay.portlet.exportimport.lar.PortletDataHandlerKeys;
+import com.liferay.portlet.exportimport.lar.StagedModelDataHandler;
+import com.liferay.portlet.exportimport.lar.StagedModelDataHandlerRegistryUtil;
+import com.liferay.portlet.exportimport.lar.StagedModelDataHandlerUtil;
+import com.liferay.portlet.exportimport.lar.UserIdStrategy;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.model.MBMessageDisplay;
 import com.liferay.portlet.messageboards.model.MBThread;
@@ -196,6 +197,94 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 			liveGroup);
 	}
 
+	@Test
+	public void testVersioning() throws Exception {
+		if (!isVersionableStagedModel()) {
+			return;
+		}
+
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			addDependentStagedModelsMap(stagingGroup);
+
+		StagedModel stagedModel = addStagedModel(
+			stagingGroup, dependentStagedModelsMap);
+
+		stagedModel = addVersion(stagedModel);
+
+		exportImportStagedModel(stagedModel);
+
+		StagedModel importedStagedModel = getStagedModel(
+			stagedModel.getUuid(), liveGroup);
+
+		Assert.assertNotNull(importedStagedModel);
+
+		validateImportedStagedModel(stagedModel, importedStagedModel);
+	}
+
+	@Test
+	public void testVersioning2() throws Exception {
+		if (!isVersionableStagedModel()) {
+			return;
+		}
+
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			addDependentStagedModelsMap(stagingGroup);
+
+		StagedModel stagedModel = addStagedModel(
+			stagingGroup, dependentStagedModelsMap);
+
+		// Make sure the dates are different
+
+		Thread.sleep(4000);
+
+		exportImportStagedModel(stagedModel);
+
+		StagedModel importedStagedModel = getStagedModel(
+			stagedModel.getUuid(), liveGroup);
+
+		validateImportedStagedModel(stagedModel, importedStagedModel);
+
+		stagedModel = addVersion(stagedModel);
+
+		exportImportStagedModel(stagedModel);
+
+		importedStagedModel = getStagedModel(stagedModel.getUuid(), liveGroup);
+
+		validateImportedStagedModel(stagedModel, importedStagedModel);
+	}
+
+	@Test
+	public void testVersioningExportImportTwice() throws Exception {
+		if (!isVersionableStagedModel()) {
+			return;
+		}
+
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			addDependentStagedModelsMap(stagingGroup);
+
+		StagedModel stagedModel = addStagedModel(
+			stagingGroup, dependentStagedModelsMap);
+
+		stagedModel = addVersion(stagedModel);
+
+		exportImportStagedModel(stagedModel);
+
+		StagedModel importedStagedModel = getStagedModel(
+			stagedModel.getUuid(), liveGroup);
+
+		Assert.assertNotNull(importedStagedModel);
+
+		validateImportedStagedModel(stagedModel, importedStagedModel);
+
+		exportImportStagedModel(stagedModel);
+
+		importedStagedModel = getStagedModel(stagedModel.getUuid(), liveGroup);
+
+		Assert.assertNotNull(importedStagedModel);
+
+		validateImportedStagedModel(stagedModel, importedStagedModel);
+	}
+
 	protected void addComments(StagedModel stagedModel) throws Exception {
 		if (!isCommentableStagedModel()) {
 			return;
@@ -261,6 +350,10 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 			Map<String, List<StagedModel>> dependentStagedModelsMap)
 		throws Exception;
 
+	protected StagedModel addVersion(StagedModel stagedModel) throws Exception {
+		return null;
+	}
+
 	protected void deleteStagedModel(
 			StagedModel stagedModel,
 			Map<String, List<StagedModel>> dependentStagedModelsMap,
@@ -287,6 +380,24 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 				stagedModelDataHandler.deleteStagedModel(dependentStagedModel);
 			}
 		}
+	}
+
+	protected void exportImportStagedModel(StagedModel stagedModel)
+		throws Exception {
+
+		initExport();
+
+		StagedModelDataHandlerUtil.exportStagedModel(
+			portletDataContext, stagedModel);
+
+		initImport();
+
+		StagedModel exportedStagedModel = readExportedStagedModel(stagedModel);
+
+		Assert.assertNotNull(exportedStagedModel);
+
+		StagedModelDataHandlerUtil.importStagedModel(
+			portletDataContext, exportedStagedModel);
 	}
 
 	protected AssetEntry fetchAssetEntry(StagedModel stagedModel, Group group)
@@ -393,6 +504,10 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 	}
 
 	protected boolean isCommentableStagedModel() {
+		return false;
+	}
+
+	protected boolean isVersionableStagedModel() {
 		return false;
 	}
 
@@ -643,6 +758,26 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 		validateImport(dependentStagedModelsMap, group);
 
 		validateRatings(stagedModel, importedStagedModel);
+	}
+
+	protected void validateImportedStagedModel(
+			StagedModel stagedModel, StagedModel importedStagedModel)
+		throws Exception {
+
+		Assert.assertTrue(
+			stagedModel.getCreateDate() + " " +
+				importedStagedModel.getCreateDate(),
+			DateUtil.equals(
+				stagedModel.getCreateDate(),
+				importedStagedModel.getCreateDate(), true));
+		Assert.assertTrue(
+			stagedModel.getModifiedDate() + " " +
+				importedStagedModel.getModifiedDate(),
+			DateUtil.equals(
+				stagedModel.getModifiedDate(),
+				importedStagedModel.getModifiedDate(), true));
+		Assert.assertEquals(
+			stagedModel.getUuid(), importedStagedModel.getUuid());
 	}
 
 	protected void validateRatings(

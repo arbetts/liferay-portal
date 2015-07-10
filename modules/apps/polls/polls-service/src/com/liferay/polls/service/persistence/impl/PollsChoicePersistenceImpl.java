@@ -2600,6 +2600,7 @@ public class PollsChoicePersistenceImpl extends BasePersistenceImpl<PollsChoice>
 		pollsChoiceImpl.setQuestionId(pollsChoice.getQuestionId());
 		pollsChoiceImpl.setName(pollsChoice.getName());
 		pollsChoiceImpl.setDescription(pollsChoice.getDescription());
+		pollsChoiceImpl.setLastPublishDate(pollsChoice.getLastPublishDate());
 
 		return pollsChoiceImpl;
 	}
@@ -2960,6 +2961,11 @@ public class PollsChoicePersistenceImpl extends BasePersistenceImpl<PollsChoice>
 	@Override
 	protected Set<String> getBadColumnNames() {
 		return _badColumnNames;
+	}
+
+	@Override
+	protected Map<String, Integer> getTableColumnsMap() {
+		return PollsChoiceModelImpl.TABLE_COLUMNS_MAP;
 	}
 
 	/**

@@ -94,15 +94,6 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 	</c:if>
 </liferay-ui:error>
 
-<liferay-ui:error exception="<%= RecordSetDuplicateRecordSetKeyException.class %>">
-
-	<%
-	RecordSetDuplicateRecordSetKeyException rsdrske = (RecordSetDuplicateRecordSetKeyException)errorException;
-	%>
-
-	<liferay-ui:message arguments="<%= rsdrske.getRecordSetKey() %>" key="dynamic-data-list-record-set-with-record-set-key-x-already-exists" translateArguments="<%= false %>" />
-</liferay-ui:error>
-
 <liferay-ui:error exception="<%= StructureDuplicateStructureKeyException.class %>">
 
 	<%
@@ -312,7 +303,7 @@ ManifestSummary manifestSummary = ExportImportHelperUtil.getManifestSummary(user
 																<span class="selected-labels" id="<portlet:namespace />selectedContent_<%= portlet.getRootPortletId() %>"></span>
 
 																<%
-																Map<String,Object> data = new HashMap<String,Object>();
+																Map<String, Object> data = new HashMap<String, Object>();
 
 																data.put("portletid", portlet.getRootPortletId());
 																data.put("portlettitle", portletTitle);

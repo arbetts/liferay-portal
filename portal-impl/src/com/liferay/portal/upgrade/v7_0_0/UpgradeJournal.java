@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
@@ -41,9 +42,8 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMStructureConstants;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplateConstants;
 import com.liferay.portlet.dynamicdatamapping.storage.StorageType;
-import com.liferay.portlet.dynamicdatamapping.util.DDMXMLUtil;
-import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.util.ContentUtil;
+import com.liferay.util.xml.XMLUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -167,7 +167,10 @@ public class UpgradeJournal extends UpgradeBaseJournal {
 			ps.setTimestamp(7, now);
 			ps.setTimestamp(8, now);
 			ps.setLong(9, DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID);
-			ps.setLong(10, PortalUtil.getClassNameId(JournalArticle.class));
+			ps.setLong(
+				10,
+				PortalUtil.getClassNameId(
+					"com.liferay.portlet.journal.model.JournalArticle"));
 			ps.setString(11, ddmStructureKey);
 			ps.setString(12, DDMStructureConstants.VERSION_DEFAULT);
 			ps.setString(13, localizedName);
@@ -183,8 +186,12 @@ public class UpgradeJournal extends UpgradeBaseJournal {
 			addStructureVersion(
 				ddmStructureVersionId, groupId, companyId,
 				getDefaultUserId(companyId), StringPool.BLANK, now,
-				ddmStructureId, localizedName, localizedDescription, definition,
-				storageType, DDMStructureConstants.TYPE_DEFAULT);
+				ddmStructureId,
+				DDMStructureConstants.DEFAULT_PARENT_STRUCTURE_ID,
+				localizedName, localizedDescription, definition, storageType,
+				DDMStructureConstants.TYPE_DEFAULT,
+				WorkflowConstants.STATUS_APPROVED, getDefaultUserId(companyId),
+				StringPool.BLANK, now);
 
 			String ddmStructureLayoutDefinition =
 				getDefaultDDMFormLayoutDefinition(definition);
@@ -280,7 +287,9 @@ public class UpgradeJournal extends UpgradeBaseJournal {
 				StringPool.BLANK, now,
 				PortalUtil.getClassNameId(DDMStructure.class), ddmStructureId,
 				ddmTemplateId, localizedName, localizedDescription,
-				TemplateConstants.LANG_TYPE_FTL, script);
+				TemplateConstants.LANG_TYPE_FTL, script,
+				WorkflowConstants.STATUS_APPROVED, getDefaultUserId(companyId),
+				StringPool.BLANK, now);
 
 			Map<String, Long> bitwiseValues = getBitwiseValues(
 				DDMTemplate.class.getName());
@@ -425,7 +434,7 @@ public class UpgradeJournal extends UpgradeBaseJournal {
 			dynamicElementElement.add(dynamicContentElement);
 		}
 
-		return DDMXMLUtil.formatXML(newDocument);
+		return XMLUtil.formatXML(newDocument);
 	}
 
 	@Override
@@ -468,7 +477,7 @@ public class UpgradeJournal extends UpgradeBaseJournal {
 
 	protected String getContent(String fileName) {
 		return ContentUtil.get(
-			"com/liferay/portal/events/dependencies/" + fileName);
+			"com/liferay/portal/upgrade/v7_0_0/dependencies/" + fileName);
 	}
 
 	protected List<Element> getDDMStructures(Locale locale)
@@ -535,7 +544,9 @@ public class UpgradeJournal extends UpgradeBaseJournal {
 
 			ps.setLong(1, groupId);
 			ps.setLong(
-				2, PortalUtil.getClassNameId(JournalArticle.class.getName()));
+				2,
+				PortalUtil.getClassNameId(
+					"com.liferay.portlet.journal.model.JournalArticle"));
 			ps.setString(3, ddmStructureKey);
 
 			rs = ps.executeQuery();

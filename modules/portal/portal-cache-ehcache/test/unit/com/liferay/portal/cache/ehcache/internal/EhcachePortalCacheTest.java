@@ -14,11 +14,13 @@
 
 package com.liferay.portal.cache.ehcache.internal;
 
-import com.liferay.portal.cache.test.MockPortalCacheManager;
 import com.liferay.portal.cache.test.TestCacheListener;
 import com.liferay.portal.cache.test.TestCacheReplicator;
+import com.liferay.portal.cache.test.TestPortalCacheManager;
 import com.liferay.portal.kernel.cache.CacheListenerScope;
 import com.liferay.portal.kernel.cache.PortalCacheHelperUtil;
+import com.liferay.portal.kernel.cache.PortalCacheManager;
+import com.liferay.portal.kernel.test.rule.CodeCoverageAssertor;
 
 import java.util.List;
 
@@ -34,12 +36,17 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 /**
  * @author Shuyang Zhou
  */
 public class EhcachePortalCacheTest {
+
+	@ClassRule
+	public static final CodeCoverageAssertor codeCoverageAssertor =
+		CodeCoverageAssertor.INSTANCE;
 
 	@BeforeClass
 	public static void setUpClass() {
@@ -65,10 +72,12 @@ public class EhcachePortalCacheTest {
 
 		Cache cache = _cacheManager.getCache(_PORTAL_CACHE_NAME);
 
-		_ehcachePortalCache = new EhcachePortalCache<String, String>(
-			new MockPortalCacheManager<String, String>(
-				_PORTAL_CACHE_MANAGER_NAME),
-			cache);
+		PortalCacheManager<String, String> portalCacheManager =
+			TestPortalCacheManager.createTestPortalCacheManager(
+				_PORTAL_CACHE_NAME);
+
+		_ehcachePortalCache = new EhcachePortalCache<>(
+			portalCacheManager, cache);
 
 		_ehcachePortalCache.put(_KEY_1, _VALUE_1);
 

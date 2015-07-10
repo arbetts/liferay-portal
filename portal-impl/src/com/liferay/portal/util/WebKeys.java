@@ -65,9 +65,13 @@ public class WebKeys implements com.liferay.portal.kernel.util.WebKeys {
 
 	public static final String COMIC_ENTRY = "COMIC_ENTRY";
 
+	public static final String COMMENT = "COMMENT";
+
 	public static final String COMPANY = "COMPANY";
 
 	public static final String COMPANY_ID = "COMPANY_ID";
+
+	public static final String CONFIGURATION_ACTION = "CONFIGURATION_ACTION";
 
 	public static final String CONFIGURATION_ACTION_PATH = "CONFIGURATION_ACTION_PATH";
 
@@ -94,12 +98,6 @@ public class WebKeys implements com.liferay.portal.kernel.util.WebKeys {
 	public static final String DOCUMENT_LIBRARY_FOLDERS = "DOCUMENT_LIBRARY_FOLDERS";
 
 	public static final String DOCUMENT_LIBRARY_REPOSITORY = "DOCUMENT_LIBRARY_REPOSITORY";
-
-	public static final String DYNAMIC_DATA_LISTS_RECORD = "DYNAMIC_DATA_LISTS_RECORD";
-
-	public static final String DYNAMIC_DATA_LISTS_RECORD_SET = "DYNAMIC_DATA_LISTS_RECORD_SET";
-
-	public static final String DYNAMIC_DATA_LISTS_RECORD_VERSION = "DYNAMIC_DATA_LISTS_RECORD_VERSION";
 
 	public static final String DYNAMIC_DATA_MAPPING_FORM_HTML = "DYNAMIC_DATA_MAPPING_FORM_HTML";
 
@@ -196,8 +194,6 @@ public class WebKeys implements com.liferay.portal.kernel.util.WebKeys {
 	public static final String JOURNAL_TEMPLATE_ID = "JOURNAL_TEMPLATE_ID";
 
 	public static final String LANGUAGE_ID = "LANGUAGE_ID";
-
-	public static final String LAYOUT_CONTENT = "LAYOUT_CONTENT";
 
 	public static final String LAYOUT_DEFAULT = "LAYOUT_DEFAULT";
 
@@ -308,8 +304,6 @@ public class WebKeys implements com.liferay.portal.kernel.util.WebKeys {
 	public static final String PORTLET_CONTENT_JSP = "PORTLET_CONTENT_JSP";
 
 	public static final String PORTLET_PARALLEL_RENDER = "PORTLET_PARALLEL_RENDER";
-
-	public static final String PORTLET_RENDER_PARAMETERS = "PORTLET_RENDER_PARAMETERS_";
 
 	public static final String PORTLET_STRUTS_ACTION = "PORTLET_STRUTS_ACTION";
 

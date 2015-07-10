@@ -57,7 +57,7 @@ else {
 
 long fileVersionId = fileVersion.getFileVersionId();
 
-Lock lock = fileEntry.getLock();
+com.liferay.portal.kernel.lock.Lock lock = fileEntry.getLock();
 
 String[] conversions = new String[0];
 
@@ -178,7 +178,7 @@ DLViewFileVersionDisplayContext dlViewFileVersionDisplayContext = DLDisplayConte
 						}
 						%>
 
-						<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="thumbnail" />" class="thumbnail" src="<%= thumbnailSrc %>" style="<%= DLUtil.getThumbnailStyle(true, 0) %>" />
+						<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="thumbnail" />" class="thumbnail" src="<%= thumbnailSrc %>" style="<%= DLUtil.getThumbnailStyle(true, 0, 128, 128) %>" />
 					</span>
 
 					<span class="user-date">
@@ -376,10 +376,10 @@ DLViewFileVersionDisplayContext dlViewFileVersionDisplayContext = DLDisplayConte
 							List<DDMStructure> ddmStructures = dlViewFileVersionDisplayContext.getDDMStructures();
 
 							for (DDMStructure ddmStructure : ddmStructures) {
-								Fields fields = null;
+								DDMFormValues ddmFormValues = null;
 
 								try {
-									fields = DDMFormValuesToFieldsConverterUtil.convert(ddmStructure, dlViewFileVersionDisplayContext.getDDMFormValues(ddmStructure));
+									ddmFormValues = dlViewFileVersionDisplayContext.getDDMFormValues(ddmStructure);
 								}
 								catch (Exception e) {
 								}
@@ -390,7 +390,7 @@ DLViewFileVersionDisplayContext dlViewFileVersionDisplayContext = DLDisplayConte
 									<liferay-ddm:html
 										classNameId="<%= PortalUtil.getClassNameId(DDMStructure.class) %>"
 										classPK="<%= ddmStructure.getPrimaryKey() %>"
-										fields="<%= fields %>"
+										ddmFormValues="<%= ddmFormValues %>"
 										fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
 										readOnly="<%= true %>"
 										requestedLocale="<%= locale %>"
@@ -422,19 +422,18 @@ DLViewFileVersionDisplayContext dlViewFileVersionDisplayContext = DLDisplayConte
 							List<DDMStructure> ddmStructures = DDMStructureLocalServiceUtil.getClassStructures(company.getCompanyId(), PortalUtil.getClassNameId(RawMetadataProcessor.class), new StructureStructureKeyComparator(true));
 
 							for (DDMStructure ddmStructure : ddmStructures) {
-								Fields fields = null;
+								DDMFormValues ddmFormValues = null;
 
 								try {
 									DLFileEntryMetadata fileEntryMetadata = DLFileEntryMetadataLocalServiceUtil.getFileEntryMetadata(ddmStructure.getStructureId(), fileVersionId);
 
-									DDMFormValues ddmFormValues = StorageEngineUtil.getDDMFormValues(fileEntryMetadata.getDDMStorageId());
+									ddmFormValues = StorageEngineUtil.getDDMFormValues(fileEntryMetadata.getDDMStorageId());
 
-									fields = DDMFormValuesToFieldsConverterUtil.convert(ddmStructure, ddmFormValues);
 								}
 								catch (Exception e) {
 								}
 
-								if (fields != null) {
+								if (ddmFormValues != null) {
 									String name = "metadata." + ddmStructure.getName(locale, true);
 						%>
 
@@ -443,7 +442,7 @@ DLViewFileVersionDisplayContext dlViewFileVersionDisplayContext = DLDisplayConte
 										<liferay-ddm:html
 											classNameId="<%= PortalUtil.getClassNameId(DDMStructure.class) %>"
 											classPK="<%= ddmStructure.getPrimaryKey() %>"
-											fields="<%= fields %>"
+											ddmFormValues="<%= ddmFormValues %>"
 											fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
 											readOnly="<%= true %>"
 											requestedLocale="<%= locale %>"
@@ -672,5 +671,9 @@ DLViewFileVersionDisplayContext dlViewFileVersionDisplayContext = DLDisplayConte
 </aui:script>
 
 <%
-DLUtil.addPortletBreadcrumbEntries(fileEntry, request, renderResponse);
+boolean addPortletBreadcrumbEntries = ParamUtil.getBoolean(request, "addPortletBreadcrumbEntries", true);
+
+if (addPortletBreadcrumbEntries) {
+	DLUtil.addPortletBreadcrumbEntries(fileEntry, request, renderResponse);
+}
 %>

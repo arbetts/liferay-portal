@@ -77,6 +77,7 @@ public class DDMStructureServiceSoap {
 		java.lang.String[] descriptionMapValues,
 		com.liferay.portlet.dynamicdatamapping.model.DDMForm ddmForm,
 		com.liferay.portlet.dynamicdatamapping.model.DDMFormLayout ddmFormLayout,
+		java.lang.String storageType,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws RemoteException {
 		try {
@@ -88,7 +89,7 @@ public class DDMStructureServiceSoap {
 			com.liferay.portlet.dynamicdatamapping.model.DDMStructure returnValue =
 				DDMStructureServiceUtil.addStructure(userId, groupId,
 					classNameId, nameMap, descriptionMap, ddmForm,
-					ddmFormLayout, serviceContext);
+					ddmFormLayout, storageType, serviceContext);
 
 			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModel(returnValue);
 		}
@@ -644,6 +645,21 @@ public class DDMStructureServiceSoap {
 					start, end);
 
 			return com.liferay.portlet.dynamicdatamapping.model.DDMStructureSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void revertStructure(long structureId,
+		java.lang.String version,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws RemoteException {
+		try {
+			DDMStructureServiceUtil.revertStructure(structureId, version,
+				serviceContext);
 		}
 		catch (Exception e) {
 			_log.error(e, e);

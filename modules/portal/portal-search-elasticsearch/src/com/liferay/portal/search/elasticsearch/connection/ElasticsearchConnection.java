@@ -22,7 +22,9 @@ import org.elasticsearch.client.Client;
  */
 public interface ElasticsearchConnection {
 
-	public void close();
+	public boolean close();
+
+	public void connect();
 
 	public Client getClient();
 
@@ -30,7 +32,5 @@ public interface ElasticsearchConnection {
 		long timeout, int nodesCount);
 
 	public OperationMode getOperationMode();
-
-	public void initialize();
 
 }

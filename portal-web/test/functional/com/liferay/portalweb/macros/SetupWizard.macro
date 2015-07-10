@@ -18,9 +18,9 @@
 		</if>
 
 		<if>
-			<equals arg1="${databaseNameDefault}" arg2="false" />
+			<isset var="databaseName" />
 			<then>
-				<var method="StringUtil#replace('${jdbcURL}', 'lportal', 'lportal1')" name="jdbcURL" />
+				<var method="StringUtil#replace('${jdbcURL}', 'lportal', '${databaseName}')" name="jdbcURL" />
 			</then>
 		</if>
 
@@ -49,6 +49,7 @@
 		<execute macro="Portlet#shutdownServer" />
 
 		<execute macro="Portlet#startServer">
+			<var name="base_branch" value="${base_branch}" />
 			<var name="deleteLiferayHome" value="false" />
 		</execute>
 
@@ -69,6 +70,7 @@
 		</execute>
 
 		<execute macro="SetupWizard#configureDatabasePG">
+			<var name="databaseName" value="${databaseName}" />
 			<var name="databasePassword" value="${databasePassword}" />
 			<var name="databaseType" value="${databaseType}" />
 			<var name="databaseUserName" value="${databaseUserName}" />
@@ -83,6 +85,7 @@
 		<execute macro="Portlet#shutdownServer" />
 
 		<execute macro="Portlet#startServer">
+			<var name="base_branch" value="${base_branch}" />
 			<var name="deleteLiferayHome" value="false" />
 		</execute>
 

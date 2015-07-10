@@ -12327,6 +12327,7 @@ public class BookmarksEntryPersistenceImpl extends BasePersistenceImpl<Bookmarks
 		bookmarksEntryImpl.setDescription(bookmarksEntry.getDescription());
 		bookmarksEntryImpl.setVisits(bookmarksEntry.getVisits());
 		bookmarksEntryImpl.setPriority(bookmarksEntry.getPriority());
+		bookmarksEntryImpl.setLastPublishDate(bookmarksEntry.getLastPublishDate());
 		bookmarksEntryImpl.setStatus(bookmarksEntry.getStatus());
 		bookmarksEntryImpl.setStatusByUserId(bookmarksEntry.getStatusByUserId());
 		bookmarksEntryImpl.setStatusByUserName(bookmarksEntry.getStatusByUserName());
@@ -12692,6 +12693,11 @@ public class BookmarksEntryPersistenceImpl extends BasePersistenceImpl<Bookmarks
 	@Override
 	protected Set<String> getBadColumnNames() {
 		return _badColumnNames;
+	}
+
+	@Override
+	protected Map<String, Integer> getTableColumnsMap() {
+		return BookmarksEntryModelImpl.TABLE_COLUMNS_MAP;
 	}
 
 	/**

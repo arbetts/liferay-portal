@@ -108,11 +108,12 @@ public class DDMStructureServiceUtil {
 		java.util.Map<java.util.Locale, java.lang.String> descriptionMap,
 		com.liferay.portlet.dynamicdatamapping.model.DDMForm ddmForm,
 		com.liferay.portlet.dynamicdatamapping.model.DDMFormLayout ddmFormLayout,
+		java.lang.String storageType,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addStructure(userId, groupId, classNameId, nameMap,
-			descriptionMap, ddmForm, ddmFormLayout, serviceContext);
+			descriptionMap, ddmForm, ddmFormLayout, storageType, serviceContext);
 	}
 
 	/**
@@ -412,6 +413,13 @@ public class DDMStructureServiceUtil {
 	public static java.util.List<com.liferay.portlet.dynamicdatamapping.model.DDMStructure> getStructures(
 		long[] groupIds, long classNameId, int start, int end) {
 		return getService().getStructures(groupIds, classNameId, start, end);
+	}
+
+	public static void revertStructure(long structureId,
+		java.lang.String version,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService().revertStructure(structureId, version, serviceContext);
 	}
 
 	/**

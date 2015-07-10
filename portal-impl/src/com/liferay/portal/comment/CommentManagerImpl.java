@@ -14,9 +14,11 @@
 
 package com.liferay.portal.comment;
 
+import com.liferay.portal.kernel.comment.Comment;
 import com.liferay.portal.kernel.comment.CommentManager;
 import com.liferay.portal.kernel.comment.Discussion;
 import com.liferay.portal.kernel.comment.DiscussionPermission;
+import com.liferay.portal.kernel.comment.DiscussionStagingHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
 import com.liferay.portal.kernel.util.Function;
@@ -125,6 +127,13 @@ public class CommentManagerImpl implements CommentManager {
 	}
 
 	@Override
+	public Comment fetchComment(long commentId) {
+		CommentManager commentManager = getCommentManager();
+
+		return commentManager.fetchComment(commentId);
+	}
+
+	@Override
 	public int getCommentsCount(String className, long classPK) {
 		CommentManager commentManager = getCommentManager();
 
@@ -150,6 +159,13 @@ public class CommentManagerImpl implements CommentManager {
 		CommentManager commentManager = getCommentManager();
 
 		return commentManager.getDiscussionPermission(permissionChecker);
+	}
+
+	@Override
+	public DiscussionStagingHandler getDiscussionStagingHandler() {
+		CommentManager commentManager = getCommentManager();
+
+		return commentManager.getDiscussionStagingHandler();
 	}
 
 	@Override

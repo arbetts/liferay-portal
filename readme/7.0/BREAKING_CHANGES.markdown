@@ -20,7 +20,7 @@ feature or API will be dropped in an upcoming version.
 replaces an old API, in spite of the old API being kept in Liferay Portal for
 backwards compatibility.
 
-*This document has been reviewed through commit `59f8239`.*
+*This document has been reviewed through commit `a432a58`.*
 
 ## Breaking Changes Contribution Guidelines
 
@@ -101,35 +101,34 @@ parameters `currentLogoURL`, `hasUpdateLogoPermission`, `maxFileSize`, and/or
 
 **Example**
 
-Replace:
-```
-<portlet:renderURL var="editUserPortraitURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
-    <portlet:param name="struts_action" value="/users_admin/edit_user_portrait" />
-    <portlet:param name="redirect" value="<%= currentURL %>" />
-    <portlet:param name="p_u_i_d" value="<%= String.valueOf(selUser.getUserId()) %>" />
-    <portlet:param name="portrait_id" value="<%= String.valueOf(selUser.getPortraitId()) %>" />
-</portlet:renderURL>
+Old way:
 
-<liferay-ui:logo-selector
-    defaultLogoURL="<%= UserConstants.getPortraitURL(themeDisplay.getPathImage(), selUser.isMale(), 0) %>"
-    editLogoURL="<%= editUserPortraitURL %>"
-    imageId="<%= selUser.getPortraitId() %>"
-    logoDisplaySelector=".user-logo"
-/>
-```
+    <portlet:renderURL var="editUserPortraitURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+        <portlet:param name="struts_action" value="/users_admin/edit_user_portrait" />
+        <portlet:param name="redirect" value="<%= currentURL %>" />
+        <portlet:param name="p_u_i_d" value="<%= String.valueOf(selUser.getUserId()) %>" />
+        <portlet:param name="portrait_id" value="<%= String.valueOf(selUser.getPortraitId()) %>" />
+    </portlet:renderURL>
 
-With:
-```
-<liferay-ui:logo-selector
-    currentLogoURL="<%= selUser.getPortraitURL(themeDisplay) %>"
-    defaultLogoURL="<%= UserConstants.getPortraitURL(themeDisplay.getPathImage(), selUser.isMale(), 0) %>"
-    hasUpdateLogoPermission='<%= UsersAdminUtil.hasUpdateFieldPermission(selUser, "portrait") %>'
-    imageId="<%= selUser.getPortraitId() %>"
-    logoDisplaySelector=".user-logo"
-    maxFileSize="<%= PrefsPropsUtil.getLong(PropsKeys.USERS_IMAGE_MAX_SIZE) / 1024 %>"
-    tempImageFileName="<%= String.valueOf(selUser.getUserId()) %>"
-/>
-```
+    <liferay-ui:logo-selector
+        defaultLogoURL="<%= UserConstants.getPortraitURL(themeDisplay.getPathImage(), selUser.isMale(), 0) %>"
+        editLogoURL="<%= editUserPortraitURL %>"
+        imageId="<%= selUser.getPortraitId() %>"
+        logoDisplaySelector=".user-logo"
+    />
+
+
+New way:
+
+    <liferay-ui:logo-selector
+        currentLogoURL="<%= selUser.getPortraitURL(themeDisplay) %>"
+        defaultLogoURL="<%= UserConstants.getPortraitURL(themeDisplay.getPathImage(), selUser.isMale(), 0) %>"
+        hasUpdateLogoPermission='<%= UsersAdminUtil.hasUpdateFieldPermission(selUser, "portrait") %>'
+        imageId="<%= selUser.getPortraitId() %>"
+        logoDisplaySelector=".user-logo"
+        maxFileSize="<%= PrefsPropsUtil.getLong(PropsKeys.USERS_IMAGE_MAX_SIZE) / 1024 %>"
+        tempImageFileName="<%= String.valueOf(selUser.getUserId()) %>"
+    />
 
 #### Why was this change made?
 This change helps keep a unified UI and consistent experience for uploading
@@ -167,16 +166,14 @@ previously configured in your `portal-ext.properties` file.
 
 **Example**
 
-Replace:
-```
-wiki.email.page.updated.body=A wiki page was updated.
-wiki.email.page.updated.signature=For any doubts email the system administrator
-```
+Old way:
 
-With:
-```
-wiki.email.page.updated.body=A wiki page was updated.\n--\nFor any doubts email the system administrator
-```
+    wiki.email.page.updated.body=A wiki page was updated.
+    wiki.email.page.updated.signature=For any doubts email the system administrator
+
+New way:
+
+    wiki.email.page.updated.body=A wiki page was updated.\n--\nFor any doubts email the system administrator
 
 #### Why was this change made?
 This change helps simplify the user interface. The signatures can still be set
@@ -204,15 +201,13 @@ name that take a `ResourceBundle` parameter, instead of taking a
 
 **Example**
 
-Replace:
-```
-LanguageUtil.get(portletConfig, locale, key);
-```
+Old call:
 
-With:
-```
-LanguageUtil.get(portletConfig.getResourceBundle(locale), key);
-```
+    LanguageUtil.get(portletConfig, locale, key);
+
+New call:
+
+    LanguageUtil.get(portletConfig.getResourceBundle(locale), key);
 
 #### Why was this change made?
 The removed methods didn't work properly and would never work properly, since
@@ -263,27 +258,25 @@ These methods must be updated in all AssetRenderer and Indexer implementations.
 Add a `PortletRequest` and `PortletResponse` parameter to the signatures of
 these methods.
 
-**Example**
+**Example 1**
 
-Replace:
-```
-protected Summary doGetSummary(Document document, Locale locale, String snippet, PortletURL portletURL)
-```
+Old signature:
 
-With:
-```
-protected Summary doGetSummary(Document document, Locale locale, String snippet, PortletRequest portletRequest, PortletResponse portletResponse)
-```
+    protected Summary doGetSummary(Document document, Locale locale, String snippet, PortletURL portletURL)
 
-and replace:
-```
-public String getSummary(Locale locale)
-```
+New signature:
 
-With:
-```
-public String getSummary(PortletRequest portletRequest, PortletResponse portletResponse)
-```
+    protected Summary doGetSummary(Document document, Locale locale, String snippet, PortletRequest portletRequest, PortletResponse portletResponse)
+
+**Example 2**
+
+Old signature:
+
+    public String getSummary(Locale locale)
+
+New signature:
+
+    public String getSummary(PortletRequest portletRequest, PortletResponse portletResponse)
 
 #### Why was this change made?
 Some content (such as web content) needs the `PortletRequest` and
@@ -571,19 +564,15 @@ The classes from package `com.liferay.util.bridges.mvc` in `util-bridges.jar`
 were moved to a new package `com.liferay.portal.kernel.portlet.bridges.mvc`
 in `portal-service.jar`.
 
-The classes affected are:
+Old classes:
 
-```
-com.liferay.util.bridges.mvc.ActionCommand
-com.liferay.util.bridges.mvc.BaseActionCommand
-```
+    com.liferay.util.bridges.mvc.ActionCommand
+    com.liferay.util.bridges.mvc.BaseActionCommand
 
-They are now:
+New classes:
 
-```
-com.liferay.portal.kernel.portlet.bridges.mvc.ActionCommand
-com.liferay.portal.kernel.portlet.bridges.mvc.BaseActionCommand
-```
+    com.liferay.portal.kernel.portlet.bridges.mvc.ActionCommand
+    com.liferay.portal.kernel.portlet.bridges.mvc.BaseActionCommand
 
 In addition, `com.liferay.util.bridges.mvc.MVCPortlet` is deprecated, but was
 made to extend `com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet`.
@@ -1529,7 +1518,7 @@ change is used for the blog abstract field.
 
 ---------------------------------------
 
-### Moved the Contact Name Exception Classes to Inner classes of ContactNameException
+### Moved the Contact Name Exception Classes to Inner Classes of ContactNameException
 - **Date:** 2015-May-05
 - **JIRA Ticket:** LPS-55364
 
@@ -1611,11 +1600,15 @@ This affects anyone who uses those methods.
 
 The removed methods were generic and had long signatures with optional
 parameters. They now have one specialized version per parameter and are
-in the `RepositoryProvider` service. For instance, if you called ...
+in the `RepositoryProvider` service. 
+
+**Example**
+
+Old call:
 
     RepositoryLocalServiceUtil.getRepositoryImpl(0, fileEntryId, 0)
 
-... you must now call ...
+New call:
 
     RepositoryProviderUtil.getLocalRepositoryByFileEntryId(fileEntryId)
 
@@ -1626,7 +1619,7 @@ API from the Document Library, as a part of the portal modularization effort.
 
 ---------------------------------------
 
-### Removed addFileEntry method from DLAppHelperLocalService
+### Removed addFileEntry Method from DLAppHelperLocalService
 - **Date:** 2015-May-20
 - **JIRA Ticket:** LPS-47645
 
@@ -1654,3 +1647,545 @@ The logic inside the `addFileEntry` method was moved, out from
 core repository implementations from additional (optional) functionality.
 
 ---------------------------------------
+
+### Indexers Called from Document Library Now Receive FileEntry Instead of DLFileEntry
+- **Date:** 2015-May-20
+- **JIRA Ticket:** LPS-55613
+
+#### What changed?
+
+Indexers that previously received a `DLFileEntry` object (e.g., in the
+`addRelatedEntryFields` method) no longer receive a `DLFileEntry`, but a
+`FileEntry`.
+
+#### Who is affected?
+
+This affects anyone who implements an Indexer handling `DLFileEntry` objects.
+
+#### How should I update my code?
+
+You should try to use methods in `FileEntry` or exported repository capabilities
+to obtain the value you were using. If no capability exists for your use case,
+you can resort to calling `fileEntry.getModel()` and casting the result to a
+`DLFileEntry`. However, this breaks all encapsulation and may result in future
+failures or compatibility problems.
+
+Old code:
+
+    @Override
+    public void addRelatedEntryFields(Document document, Object obj)
+        throws Exception {
+
+        DLFileEntry dlFileEntry = (DLFileEntry)obj;
+
+        long fileEntryId = dlFileEntry.getFileEntryId();
+
+New Code:
+
+    @Override
+    public void addRelatedEntryFields(Document document, Object obj)
+        throws Exception {
+
+        FileEntry fileEntry = (FileEntry)obj;
+
+        long fileEntryId = fileEntry.getFileEntryId();
+
+#### Why was this change made?
+
+This change was made to enhance the Repository API and make decoupling from
+Document Library easier when modularizing the portal.
+
+---------------------------------------
+
+### Removed permissionClassName, permissionClassPK, and permissionOwner Parameters from MBMessage API
+- **Date:** 2015-May-27
+- **JIRA Ticket:** LPS-55877
+
+#### What changed?
+
+The parameters `permissionClassName`, `permissionClassPK`, and `permissionOwner`
+have been removed from the Message Boards API and Discussion tag.
+
+#### Who is affected?
+
+This affects anyone who invokes the affected methods (locally or remotely) and
+any view that uses the Discussion tag.
+
+#### How should I update my code?
+
+It suffices to remove the parameters from the method calls (for consumers of the
+API) or the attributes in tag invocations.
+
+#### Why was this change made?
+
+Those API methods were exposed in the remote services, allowing any consumer to
+bypass the permission system by providing customized `className`, `classPK`, or
+`ownerId` parameters.
+
+---------------------------------------
+
+### Moved Indexer.addRelatedEntryFields and Indexer.reindexDDMStructures, and Removed Indexer.getQueryString 
+- **Date:** 2015-May-27
+- **JIRA Ticket:** LPS-55928
+
+#### What changed?
+
+Method `Indexer.addRelatedEntryFields(Document, Object)` has been moved into 
+`RelatedEntryIndexer`.
+
+`Indexer.reindexDDMStructures(List<Long>)` has been moved into
+`DDMStructureIndexer`.
+
+`Indexer.getQueryString(SearchContext, Query)` has been removed, in favor of 
+calling `SearchEngineUtil.getQueryString(SearchContext, Query)`
+
+#### Who is affected?
+
+This affects any code that invokes the affected methods, as well as any code
+that implements the interface methods.
+
+#### How should I update my code?
+
+Any code implementing `Indexer.addRelatedEntryFields(...)` should implement the 
+`RelatedEntryIndexer` interface.
+
+Any code calling `Indexer.addRelatedEntryFields(...)` should determine first if
+the `Indexer` is an instance of `RelatedEntryIndexer`.
+
+Old code:
+
+    mbMessageIndexer.addRelatedEntryFields(...);
+
+New code:
+
+    if (mbMessageIndexer instanceof RelatedEntryIndexer) {
+        RelatedEntryIndexer relatedEntryIndexer =
+            (RelatedEntryIndexer)mbMessageIndexer;
+
+        relatedEntryIndexer.addRelatedEntryFields(...);
+    }
+
+Any code implementing `Indexer.reindexDDMStructures(...)` should implement the 
+`DDMStructureIndexer` interface.
+
+Any code calling `Indexer.reindexDDMStructures(...)` should determine first if
+the `Indexer` is an instance of `DDMStructureIndexer`. 
+
+Old code:
+
+    mbMessageIndexer.reindexDDMStructures(...);
+
+New code:
+
+    if (journalIndexer instanceof DDMStructureIndexer) {
+        DDMStructureIndexer ddmStructureIndexer =
+            (DDMStructureIndexer)journalIndexer;
+
+        ddmStructureIndexer.reindexDDMStructures(...);
+    }
+
+Any code calling Indexer.getQueryString(...) should call 
+SearchEngineUtil.getQueryString(...)
+
+Old code:
+
+    mbMessageIndexer.getQueryString(...);
+
+New code:
+
+    SearchEngineUtil.getQueryString(...);
+
+#### Why was this change made?
+
+The `addRelatedEntryFields` and `reindexDDMStructures` methods were not related
+to core indexing functions. They were functions of specialized indexers.
+
+The `getQueryString` method was an unnecessary convenience method.
+
+---------------------------------------
+
+### Removed mbMessages and fileEntryTuples Attributes from app-view-search-entry Tag
+- **Date:** 2015-May-27
+- **JIRA Ticket:** LPS-55886
+
+#### What changed?
+
+The `mbMessages` and `fileEntryTuples` attributes from the
+`app-view-search-entry` tag have been removed. Related methods `getMbMessages`,
+`getFileEntryTuples`, and `addMbMessage` have also been removed from the
+`SearchResult` class.
+
+#### Who is affected?
+
+This affects developers that use the `app-view-search-entry` tag in their views,
+have developed hooks to customize the tag JSP, or have developed a portlet that
+uses that tag. Also, any custom code that uses the `SearchResult` class may be
+affected.
+
+#### How should I update my code?
+
+The new attributes `commentRelatedSearchResults` and
+`fileEntryRelatedSearchResults` should be used instead. The expected value is
+the one returned by the `getCommentRelatedSearchResults` and
+`getFileEntryRelatedSearchResults` methods in `SearchResult`.
+
+When adding comments to the `SearchResult`, the new `addComment` method should
+be used instead of the `addMbMessage` method.
+
+#### Why was this change made?
+
+As part of the modularization efforts, references to `MBMessage` needed to be
+removed for the Message Boards portlet to be placed into its own OSGi bundle.
+
+---------------------------------------
+
+### Replaced Method getPermissionQuery with getPermissionFilter in SearchPermissionChecker, and getFacetQuery with getFacetBooleanFilter in Indexer
+- **Date:** 2015-Jun-02
+- **JIRA Ticket:** LPS-56064
+
+#### What changed?
+
+Method `SearchPermissionChecker.getPermissionQuery(
+long, long[], long, String, Query, SearchContext)`
+has been replaced by `SearchPermissionChecker.getPermissionBooleanFilter(
+long, long[], long, String, BooleanFilter, SearchContext)`.
+
+Method `Indexer.getFacetQuery(String, SearchContext)` has been replaced by
+`Indexer.getFacetBooleanFilter(String, SearchContext)`.
+
+#### Who is affected?
+
+This affects any code that invokes the affected methods, as well as any code
+that implements the interface methods.
+
+#### How should I update my code?
+
+Any code calling/implementing `SearchPermissionChecker.getPermissionQuery(...)`
+should instead call/implement
+`SearchPermissionChecker.getPermissionBooleanFilter(...)`.
+
+Any code calling/implementing `Indexer.getFacetQuery(...)` should instead
+call/implement `Indexer.getFacetBooleanFilter(...)`.
+
+#### Why was this change made?
+
+Permission constraints placed on search should not affect the score for returned
+search results.  Thus, these constraints should be applied as search filters.
+`SearchPermissionChecker` is also a very deep internal interface within the
+permission system.  Thus, to limit confusion in the logic for maintainability,
+the `SearchPermissionChecker.getPermissionQuery(...)` method was removed as
+opposed to deprecated.
+
+Similarly, constraints applied to facets should not affect the scoring or facet
+counts. Since `Indexer.getFacetQuery(...)` was only utilized by the
+`AssetEntriesFacet`, and used to reduce the impact of changes for
+`SearchPermissionChecker.getPermissionBooleanFilter(...)`, the method was
+removed as opposed to deprecated.
+
+---------------------------------------
+
+### Added userId Parameter to Update Operations of DDMStructureLocalService and DDMTemplateLocalService
+- **Date:** 2015-Jun-05
+- **JIRA Ticket:** LPS-50939
+
+#### What changed?
+
+A new parameter `userId` has been added to the `updateStructure` and
+`updateTemplate` methods of the `DDMStructureLocalService` and
+`DDMTemplateLocalService` classes, respectively.
+
+#### Who is affected?
+
+This affects any code that invokes the affected methods, as well as any code
+that implements the interface methods.
+
+#### How should I update my code?
+
+Any code calling/implementing
+`DDMStructureLocalServiceUtil.updateStructure(...)` or
+`DDMTemplateLocalServiceUtil.updateTemplate(...)` should pass the new `userId`
+parameter.
+
+#### Why was this change made?
+
+For the service to keep track of which user is modifying the structure or
+template, the `userId` parameter was required. In order to add support to
+structure and template versions, audit columns were also added to such models.
+
+---------------------------------------
+
+### Removed Method getEntries from DL, DLImpl, and DLUtil Classes
+- **Date:** 2015-Jun-10
+- **JIRA Ticket:** LPS-56247
+
+#### What changed?
+
+The method `getEntries` has been removed from the `DL`, `DLImpl`, and `DLUtil`
+classes.
+
+#### Who is affected?
+
+This affects any caller of the `getEntries` method.
+
+#### How should I update my code?
+
+You may use the `SearchResultUtil` class to process the search results. Note
+that this class is not completely equivalent; if you need exactly the same
+behavior as the removed method, you will need to add custom code.
+
+#### Why was this change made?
+
+The `getEntries` method was no longer used, and contained hardcoded references
+to classes that will be moved into OSGi bundles.
+
+---------------------------------------
+
+### Removed WikiUtil.getEntries Method
+- **Date:** 2015-Jun-10
+- **JIRA Ticket:** LPS-56242
+
+#### What changed?
+
+The method `getEntries()` has been removed from class `WikiUtil`.
+
+#### Who is affected?
+
+Any JSP hook or ext plugin that uses this method is affected. As the class was
+located in portal-impl, regular portlets and other safe extension points won't
+be affected.
+
+#### How should I update my code?
+
+You should review the JSP or ext plugin, updating it to remove any reference to
+the new class and mimicking the original JSP code. In case you need equivalent
+functionality to the one provided by `WikiUtil.getEntries()` you may use the
+`SearchResultUtil` class. While not totally equivalent, it offers similar
+functionality.
+
+#### Why was this change made?
+
+The `WikiUtil.getEntries()` method was no longer used, and it contained
+hardcoded references to classes that will be moved into OSGi modules.
+
+---------------------------------------
+
+### Removed render Method from ConfigurationAction API
+- **Date:** 2015-Jun-14
+- **JIRA Ticket:** LPS-56300
+
+#### What changed?
+
+The method `render` has been removed from the interface `ConfigurationAction`.
+
+#### Who is affected?
+
+This affects any Java code calling the method `render` on a
+`ConfigurationAction` class, or Java classes overriding the `render` method of a
+`ConfigurationAction` class.
+
+#### How should I update my code?
+
+The method `render` was used to return the path of a JSP, including the
+configuration of a portlet. That method is now available for configurations
+extending the `BaseJSPSettingsConfigurationAction` class, and is called
+`getJspPath`.
+
+If any logic was added to override the `render` method, it can now be added in
+the `include` method.
+
+#### Why was this change made?
+
+This change was part of needed modifications to support adding configuration for
+portlets based on other technology different than JSP (e.g., FreeMarker). The
+method `include` can now be used to create configuration UIs written in
+FreeMarker or any other framework.
+
+---------------------------------------
+
+### Removed ckconfig Files Used for CKEditor Configuration
+- **Date:** 2015-Jun-16
+- **JIRA Ticket:** LPS-55518
+
+#### What changed?
+
+The files `ckconfig.jsp`, `ckconfig-ext.jsp`, `ckconfig_bbcode.jsp`,
+`ckconfig_bbcode-ext.jsp`, `ckconfig_creole.jsp`, and `ckconfig_creole-ext.jsp`
+have been removed and are no longer used to configure the CKEditor instances
+created using the `liferay-ui:input-editor` tag.
+
+#### Who is affected?
+
+This affects any hook or plugin-ext overriding these files to modify the editor
+configuration.
+
+#### How should I update my code?
+
+Depending on the changes, different extension methods are available:
+
+- For CKEditor configuration options, an implementation of
+`EditorConfigContributor` can be created to pass or modify the expected
+parameters.
+- For CKEditor instance manipulation (setting attributes, adding listeners,
+etc.), the `DynamicInclude` extension point
+`js#ckeditor[_creole|_bbcode]#onEditorCreated` has been added to provide the
+possibility of injecting JavaScript, when needed.
+
+#### Why was this change made?
+
+This change is part of a greater effort to provide mechanisms to extend and
+configure any editor in Liferay Portal in a coherent and extensible way.
+
+---------------------------------------
+
+### Removed the liferay-ui:journal-article Tag
+- **Date:** 2015-Jun-29
+- **JIRA Ticket:** LPS-56383
+
+#### What changed?
+
+The `liferay-ui:journal-article` tag has been removed.
+
+#### Who is affected?
+
+This affects developers using the `liferay-ui:journal-article` tag.
+
+#### How should I update my code?
+
+You should use the `liferay-ui:asset-display` tag instead.
+
+**Example**
+
+Old code:
+
+    <liferay-ui:journal-article
+        articleId="<%= article.getArticleId() %>"
+    />
+
+New code:
+
+    <liferay-ui:asset-display
+        className="<%= JournalArticleResource.class.getName() %>"
+        template="<%= article.getResourcePrimKey() %>"
+    />
+
+#### Why was this change made?
+
+The `liferay-ui:asset-display` is a generic way to display any type of asset.
+Therefore, the `liferay-ui:journal-article` tag is no longer necessary.
+
+---------------------------------------
+
+### Changed Java Package Names for Portlets Extracted as Modules
+- **Date:** 2015-Jun-29
+- **JIRA Ticket:** LPS-56383 and others
+
+#### What changed?
+
+The Java package names changed for portlets that were extracted as OSGi modules
+in 7.0. Here is the complete list:
+
+- `com.liferay.portlet.bookmarks` &rarr; `com.liferay.bookmarks`
+- `com.liferay.portlet.dynamicdatalists` &rarr; `com.liferay.dynamicdatalists`
+- `com.liferay.portlet.journal` &rarr; `com.liferay.journal`
+- `com.liferay.portlet.polls` &rarr; `com.liferay.polls`
+- `com.liferay.portlet.wiki` &rarr; `com.liferay.wiki`
+
+#### Who is affected?
+
+This affects developers using the portlets API from their own plugins.
+
+#### How should I update my code?
+
+Update the package imports to use the new package names. Any literal usage of
+the portlet `className` should also be updated.
+
+#### Why was this change made?
+
+Package names have been adapted to the new condition of Liferay portlets as
+OSGi services.
+
+---------------------------------------
+
+### Removed the DLFileEntryTypes_DDMStructures Mapping Table
+- **Date:** 2015-Jul-01
+- **JIRA Ticket:** LPS-56660
+
+#### What changed?
+
+The `DLFileEntryTypes_DDMStructures` mapping table is no longer available.
+
+#### Who is affected?
+
+This affects developers using the Document Library File Entry Type Local Service
+API.
+
+#### How should I update my code?
+
+Update the calls to `addDDMStructureLinks`, `deleteDDMStructureLinks`, and
+`updateDDMStructureLinks` if you want to add, delete, or update references
+between `DLFileEntryType` and `DDMStructures`.
+
+#### Why was this change made?
+
+This change was made to reduce the coupling between the two applications.
+
+---------------------------------------
+
+### Removed render Method from AssetRenderer API and WorkflowHandler API
+- **Date:** 2015-Jul-03
+- **JIRA Ticket:** LPS-56705
+
+#### What changed?
+
+The method `render` has been removed from the interfaces `AssetRenderer` and
+`WorkflowHandler`.
+
+#### Who is affected?
+
+This affects any Java code calling the method `render` on an `AssetRenderer` or
+`WorkflowHandler` class, or Java classes overriding the `render` method of these
+classes.
+
+#### How should I update my code?
+
+The method `render` was used to return the path of a JSP, including the
+configuration of a portlet. That method is now available for the same
+AssetRender API extending the `BaseJSPAssetRenderer` class, and is called
+`getJspPath`.
+
+If any logic was added to override the `render` method, it can now be added in
+the `include` method.
+
+#### Why was this change made?
+
+This change was part of needed modifications to support adding asset renderers
+and workflow handlers for portlets based on other technology different than JSP
+(e.g., FreeMarker). The method `include` can now be used to create asset
+renderers or workflow handlers with UIs written in FreeMarker or any other
+framework.
+
+---------------------------------------
+### ADMIN_INSTANCES in PortletKeys renamed as PORTAL_INSTANCES
+
+- **Date:** July 8th, 2015
+- **JIRA Ticket:** LPS-56867
+
+#### What changed?
+
+Constant PortletKeys.ADMIN_INSTANCES renamed as  PortletKeys.PORTAL_INSTANCES.
+
+#### Who is affected?
+
+This affects developers using the old constant in their code, for example to 
+create a direct link to it. This is not common and most probably not a good 
+practice so it should probably not affect many people.
+
+#### How should I update my code?
+
+Rename the constant to PORTAL_INSTANCES whenever is used.
+
+#### Why was this change made?
+
+The old name was not accurate since it comes from the heritage of the portlet as
+part of the old "admin" portlet. Since Portal Instances is now extracted to its
+own module, the old name was clearly not fitting.

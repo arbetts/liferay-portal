@@ -16,9 +16,10 @@ package com.liferay.service.access.control.profile.model;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
+
+import com.liferay.portlet.exportimport.lar.StagedModelType;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -60,7 +61,8 @@ public class SACPEntryWrapper implements SACPEntry, ModelWrapper<SACPEntry> {
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
-		attributes.put("allowedServices", getAllowedServices());
+		attributes.put("allowedServiceSignatures", getAllowedServiceSignatures());
+		attributes.put("defaultSACPEntry", getDefaultSACPEntry());
 		attributes.put("name", getName());
 		attributes.put("title", getTitle());
 
@@ -111,10 +113,17 @@ public class SACPEntryWrapper implements SACPEntry, ModelWrapper<SACPEntry> {
 			setModifiedDate(modifiedDate);
 		}
 
-		String allowedServices = (String)attributes.get("allowedServices");
+		String allowedServiceSignatures = (String)attributes.get(
+				"allowedServiceSignatures");
 
-		if (allowedServices != null) {
-			setAllowedServices(allowedServices);
+		if (allowedServiceSignatures != null) {
+			setAllowedServiceSignatures(allowedServiceSignatures);
+		}
+
+		Boolean defaultSACPEntry = (Boolean)attributes.get("defaultSACPEntry");
+
+		if (defaultSACPEntry != null) {
+			setDefaultSACPEntry(defaultSACPEntry);
 		}
 
 		String name = (String)attributes.get("name");
@@ -142,13 +151,18 @@ public class SACPEntryWrapper implements SACPEntry, ModelWrapper<SACPEntry> {
 	}
 
 	/**
-	* Returns the allowed services of this s a c p entry.
+	* Returns the allowed service signatures of this s a c p entry.
 	*
-	* @return the allowed services of this s a c p entry
+	* @return the allowed service signatures of this s a c p entry
 	*/
 	@Override
-	public java.lang.String getAllowedServices() {
-		return _sacpEntry.getAllowedServices();
+	public java.lang.String getAllowedServiceSignatures() {
+		return _sacpEntry.getAllowedServiceSignatures();
+	}
+
+	@Override
+	public java.util.List<java.lang.String> getAllowedServiceSignaturesList() {
+		return _sacpEntry.getAllowedServiceSignaturesList();
 	}
 
 	@Override
@@ -179,6 +193,16 @@ public class SACPEntryWrapper implements SACPEntry, ModelWrapper<SACPEntry> {
 	@Override
 	public java.lang.String getDefaultLanguageId() {
 		return _sacpEntry.getDefaultLanguageId();
+	}
+
+	/**
+	* Returns the default s a c p entry of this s a c p entry.
+	*
+	* @return the default s a c p entry of this s a c p entry
+	*/
+	@Override
+	public boolean getDefaultSACPEntry() {
+		return _sacpEntry.getDefaultSACPEntry();
 	}
 
 	@Override
@@ -358,6 +382,16 @@ public class SACPEntryWrapper implements SACPEntry, ModelWrapper<SACPEntry> {
 		return _sacpEntry.isCachedModel();
 	}
 
+	/**
+	* Returns <code>true</code> if this s a c p entry is default s a c p entry.
+	*
+	* @return <code>true</code> if this s a c p entry is default s a c p entry; <code>false</code> otherwise
+	*/
+	@Override
+	public boolean isDefaultSACPEntry() {
+		return _sacpEntry.isDefaultSACPEntry();
+	}
+
 	@Override
 	public boolean isEscapedModel() {
 		return _sacpEntry.isEscapedModel();
@@ -387,13 +421,14 @@ public class SACPEntryWrapper implements SACPEntry, ModelWrapper<SACPEntry> {
 	}
 
 	/**
-	* Sets the allowed services of this s a c p entry.
+	* Sets the allowed service signatures of this s a c p entry.
 	*
-	* @param allowedServices the allowed services of this s a c p entry
+	* @param allowedServiceSignatures the allowed service signatures of this s a c p entry
 	*/
 	@Override
-	public void setAllowedServices(java.lang.String allowedServices) {
-		_sacpEntry.setAllowedServices(allowedServices);
+	public void setAllowedServiceSignatures(
+		java.lang.String allowedServiceSignatures) {
+		_sacpEntry.setAllowedServiceSignatures(allowedServiceSignatures);
 	}
 
 	@Override
@@ -419,6 +454,16 @@ public class SACPEntryWrapper implements SACPEntry, ModelWrapper<SACPEntry> {
 	@Override
 	public void setCreateDate(Date createDate) {
 		_sacpEntry.setCreateDate(createDate);
+	}
+
+	/**
+	* Sets whether this s a c p entry is default s a c p entry.
+	*
+	* @param defaultSACPEntry the default s a c p entry of this s a c p entry
+	*/
+	@Override
+	public void setDefaultSACPEntry(boolean defaultSACPEntry) {
+		_sacpEntry.setDefaultSACPEntry(defaultSACPEntry);
 	}
 
 	@Override

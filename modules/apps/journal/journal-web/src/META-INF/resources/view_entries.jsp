@@ -62,7 +62,7 @@ entriesChecker.setCssClass("entry-selector");
 
 articleSearchContainer.setRowChecker(entriesChecker);
 
-ArticleDisplayTerms displayTerms = (ArticleDisplayTerms) articleSearchContainer.getDisplayTerms();
+ArticleDisplayTerms displayTerms = (ArticleDisplayTerms)articleSearchContainer.getDisplayTerms();
 %>
 
 <c:if test="<%= Validator.isNotNull(displayTerms.getDDMStructureKey()) %>">
@@ -89,7 +89,7 @@ ArticleDisplayTerms displayTerms = (ArticleDisplayTerms) articleSearchContainer.
 </c:if>
 
 <%
-ArticleSearchTerms searchTerms = (ArticleSearchTerms) articleSearchContainer.getSearchTerms();
+ArticleSearchTerms searchTerms = (ArticleSearchTerms)articleSearchContainer.getSearchTerms();
 
 if (folderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 	List<Long> folderIds = new ArrayList<Long>(1);
@@ -188,7 +188,14 @@ request.setAttribute("view_entries.jsp-entryEnd", String.valueOf(articleSearchCo
 %>
 
 <div class="subscribe-action">
-	<c:if test="<%= JournalPermission.contains(permissionChecker, scopeGroupId, ActionKeys.SUBSCRIBE) && JournalUtil.getEmailArticleAnyEventEnabled(portletPreferences) %>">
+
+	<%
+	JournalWebRequestHelper journalWebRequestHelper = new JournalWebRequestHelper(request);
+
+	JournalGroupServiceConfiguration journalGroupServiceConfiguration = journalWebRequestHelper.getJournalGroupServiceConfiguration();
+	%>
+
+	<c:if test="<%= JournalPermission.contains(permissionChecker, scopeGroupId, ActionKeys.SUBSCRIBE) && JournalUtil.getEmailArticleAnyEventEnabled(journalGroupServiceConfiguration) %>">
 
 		<%
 		boolean subscribed = false;
@@ -309,7 +316,7 @@ String displayStyle = journalDisplayContext.getDisplayStyle();
 					tempRowURL.setParameter("folderId", String.valueOf(curArticle.getFolderId()));
 					tempRowURL.setParameter("articleId", curArticle.getArticleId());
 
-					tempRowURL.setParameter("status", String.valueOf(status));
+					tempRowURL.setParameter("status", String.valueOf(curArticle.getStatus()));
 
 					request.setAttribute("view_entries.jsp-article", curArticle);
 
@@ -330,7 +337,7 @@ String displayStyle = journalDisplayContext.getDisplayStyle();
 					<%
 					String folderImage = "folder_empty_article";
 
-					if (PropsValues.JOURNAL_FOLDER_ICON_CHECK_COUNT && (JournalFolderServiceUtil.getFoldersAndArticlesCount(scopeGroupId, curFolder.getFolderId()) > 0)) {
+					if (JournalServiceConfigurationValues.JOURNAL_FOLDER_ICON_CHECK_COUNT && (JournalFolderServiceUtil.getFoldersAndArticlesCount(scopeGroupId, curFolder.getFolderId()) > 0)) {
 						folderImage = "folder_full_article";
 					}
 
@@ -397,7 +404,7 @@ String displayStyle = journalDisplayContext.getDisplayStyle();
 					<c:when test="<%= curArticle != null %>">
 
 						<%
-						row.setClassName("entry-display-style");
+						row.setClassName("entry-display-style selectable");
 
 						Map<String, Object> rowData = new HashMap<String, Object>();
 
@@ -414,7 +421,7 @@ String displayStyle = journalDisplayContext.getDisplayStyle();
 					<c:when test="<%= curFolder != null %>">
 
 						<%
-						row.setClassName("entry-display-style");
+						row.setClassName("entry-display-style selectable");
 
 						Map<String, Object> rowData = new HashMap<String, Object>();
 

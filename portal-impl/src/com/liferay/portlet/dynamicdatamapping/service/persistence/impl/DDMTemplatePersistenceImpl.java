@@ -12126,6 +12126,8 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 		ddmTemplateImpl.setCompanyId(ddmTemplate.getCompanyId());
 		ddmTemplateImpl.setUserId(ddmTemplate.getUserId());
 		ddmTemplateImpl.setUserName(ddmTemplate.getUserName());
+		ddmTemplateImpl.setVersionUserId(ddmTemplate.getVersionUserId());
+		ddmTemplateImpl.setVersionUserName(ddmTemplate.getVersionUserName());
 		ddmTemplateImpl.setCreateDate(ddmTemplate.getCreateDate());
 		ddmTemplateImpl.setModifiedDate(ddmTemplate.getModifiedDate());
 		ddmTemplateImpl.setClassNameId(ddmTemplate.getClassNameId());
@@ -12503,6 +12505,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	@Override
 	protected Set<String> getBadColumnNames() {
 		return _badColumnNames;
+	}
+
+	@Override
+	protected Map<String, Integer> getTableColumnsMap() {
+		return DDMTemplateModelImpl.TABLE_COLUMNS_MAP;
 	}
 
 	/**

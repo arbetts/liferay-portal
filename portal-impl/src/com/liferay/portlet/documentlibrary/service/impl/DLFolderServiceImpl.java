@@ -14,13 +14,14 @@
 
 package com.liferay.portlet.documentlibrary.service.impl;
 
-import com.liferay.portal.ExpiredLockException;
-import com.liferay.portal.NoSuchLockException;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.lock.ExpiredLockException;
+import com.liferay.portal.kernel.lock.Lock;
+import com.liferay.portal.kernel.lock.LockManagerUtil;
+import com.liferay.portal.kernel.lock.NoSuchLockException;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.Lock;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
@@ -253,6 +254,22 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 	}
 
 	@Override
+	public List<Object> getFoldersAndFileEntriesAndFileShortcuts(
+			long groupId, long folderId, String[] mimeTypes,
+			boolean includeMountFolders, QueryDefinition<?> queryDefinition)
+		throws PortalException {
+
+		if (!DLFolderPermission.contains(
+				getPermissionChecker(), groupId, folderId, ActionKeys.VIEW)) {
+
+			return Collections.emptyList();
+		}
+
+		return dlFolderFinder.filterFindF_FE_FS_ByG_F_M_M(
+			groupId, folderId, mimeTypes, includeMountFolders, queryDefinition);
+	}
+
+	@Override
 	public int getFoldersAndFileEntriesAndFileShortcutsCount(
 			long groupId, long folderId, int status,
 			boolean includeMountFolders)
@@ -416,7 +433,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 
 	@Override
 	public boolean hasFolderLock(long folderId) throws PortalException {
-		return lockLocalService.hasLock(
+		return LockManagerUtil.hasLock(
 			getUserId(), DLFolder.class.getName(), folderId);
 	}
 
@@ -425,7 +442,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 		boolean inheritable = false;
 
 		try {
-			Lock lock = lockLocalService.getLock(
+			Lock lock = LockManagerUtil.getLock(
 				DLFolder.class.getName(), folderId);
 
 			inheritable = lock.isInheritable();
@@ -440,7 +457,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 
 	@Override
 	public boolean isFolderLocked(long folderId) {
-		return lockLocalService.isLocked(DLFolder.class.getName(), folderId);
+		return LockManagerUtil.isLocked(DLFolder.class.getName(), folderId);
 	}
 
 	@Override
@@ -489,7 +506,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 			String lockUuid, long companyId, long expirationTime)
 		throws PortalException {
 
-		return lockLocalService.refresh(lockUuid, companyId, expirationTime);
+		return LockManagerUtil.refresh(lockUuid, companyId, expirationTime);
 	}
 
 	@Override
@@ -587,7 +604,7 @@ public class DLFolderServiceImpl extends DLFolderServiceBaseImpl {
 		boolean verified = false;
 
 		try {
-			Lock lock = lockLocalService.getLock(
+			Lock lock = LockManagerUtil.getLock(
 				DLFolder.class.getName(), folderId);
 
 			if (!lock.isInheritable()) {

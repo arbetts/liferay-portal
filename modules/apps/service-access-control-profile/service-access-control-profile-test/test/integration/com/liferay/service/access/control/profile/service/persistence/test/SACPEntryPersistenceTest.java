@@ -134,7 +134,9 @@ public class SACPEntryPersistenceTest {
 
 		newSACPEntry.setModifiedDate(RandomTestUtil.nextDate());
 
-		newSACPEntry.setAllowedServices(RandomTestUtil.randomString());
+		newSACPEntry.setAllowedServiceSignatures(RandomTestUtil.randomString());
+
+		newSACPEntry.setDefaultSACPEntry(RandomTestUtil.randomBoolean());
 
 		newSACPEntry.setName(RandomTestUtil.randomString());
 
@@ -159,8 +161,10 @@ public class SACPEntryPersistenceTest {
 		Assert.assertEquals(Time.getShortTimestamp(
 				existingSACPEntry.getModifiedDate()),
 			Time.getShortTimestamp(newSACPEntry.getModifiedDate()));
-		Assert.assertEquals(existingSACPEntry.getAllowedServices(),
-			newSACPEntry.getAllowedServices());
+		Assert.assertEquals(existingSACPEntry.getAllowedServiceSignatures(),
+			newSACPEntry.getAllowedServiceSignatures());
+		Assert.assertEquals(existingSACPEntry.getDefaultSACPEntry(),
+			newSACPEntry.getDefaultSACPEntry());
 		Assert.assertEquals(existingSACPEntry.getName(), newSACPEntry.getName());
 		Assert.assertEquals(existingSACPEntry.getTitle(),
 			newSACPEntry.getTitle());
@@ -225,8 +229,9 @@ public class SACPEntryPersistenceTest {
 	protected OrderByComparator<SACPEntry> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create("SACPEntry", "uuid", true,
 			"sacpEntryId", true, "companyId", true, "userId", true, "userName",
-			true, "createDate", true, "modifiedDate", true, "allowedServices",
-			true, "name", true, "title", true);
+			true, "createDate", true, "modifiedDate", true,
+			"allowedServiceSignatures", true, "defaultSACPEntry", true, "name",
+			true, "title", true);
 	}
 
 	@Test
@@ -456,7 +461,9 @@ public class SACPEntryPersistenceTest {
 
 		sacpEntry.setModifiedDate(RandomTestUtil.nextDate());
 
-		sacpEntry.setAllowedServices(RandomTestUtil.randomString());
+		sacpEntry.setAllowedServiceSignatures(RandomTestUtil.randomString());
+
+		sacpEntry.setDefaultSACPEntry(RandomTestUtil.randomBoolean());
 
 		sacpEntry.setName(RandomTestUtil.randomString());
 

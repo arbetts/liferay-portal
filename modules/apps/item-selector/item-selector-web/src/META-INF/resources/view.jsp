@@ -17,20 +17,46 @@
 <%@ include file="/init.jsp" %>
 
 <%
-String[] tabs1Names = ItemSelectorUtil.getTabs1Names(request);
+LocalizedItemSelectorRendering localizedItemSelectorRendering = LocalizedItemSelectorRendering.get(liferayPortletRequest);
+
+List<String> titles = localizedItemSelectorRendering.getTitles();
 %>
 
 <c:choose>
-	<c:when test="<%= !ArrayUtil.isEmpty(tabs1Names) && (tabs1Names.length > 1) %>">
-		<liferay-ui:tabs names="<%= StringUtil.merge(tabs1Names) %>" param="tabs1" refresh="<%= false %>" type="pills">
+	<c:when test="<%= titles.isEmpty() %>">
+
+		<%
+		if (_log.isWarnEnabled()) {
+			String[] criteria = ParamUtil.getParameterValues(renderRequest, "criteria");
+
+			_log.warn("No item selector views found for " + StringUtil.merge(criteria, StringPool.COMMA_AND_SPACE));
+		}
+		%>
+
+		<div class="alert alert-info">
 
 			<%
-			for (String tabs1Name : tabs1Names) {
+			ResourceBundle resourceBundle = ResourceBundle.getBundle("content/Language", locale);
+			%>
+
+			<%= LanguageUtil.get(resourceBundle, "selection-is-not-available") %>
+		</div>
+	</c:when>
+	<c:otherwise>
+		<liferay-ui:tabs names="<%= StringUtil.merge(titles) %>" refresh="<%= false %>" type="pills" value="<%= localizedItemSelectorRendering.getSelectedTab() %>">
+
+			<%
+			for (String title : titles) {
+				ItemSelectorViewRenderer itemSelectorViewRenderer = localizedItemSelectorRendering.getItemSelectorViewRenderer(title);
 			%>
 
 				<liferay-ui:section>
 					<div>
-						<liferay-util:include page='<%= "/" + tabs1Name + ".jsp" %>' servletContext="<%= application %>" />
+
+						<%
+						itemSelectorViewRenderer.renderHTML(pageContext);
+						%>
+
 					</div>
 				</liferay-ui:section>
 
@@ -39,8 +65,9 @@ String[] tabs1Names = ItemSelectorUtil.getTabs1Names(request);
 			%>
 
 		</liferay-ui:tabs>
-	</c:when>
-	<c:otherwise>
-		<liferay-util:include page='<%= "/" + tabs1Names[0] + ".jsp" %>' servletContext="<%= application %>" />
 	</c:otherwise>
 </c:choose>
+
+<%!
+private static Log _log = LogFactoryUtil.getLog("com_liferay_item_selector_web.view_jsp");
+%>

@@ -16,6 +16,7 @@ package com.liferay.portal.search.elasticsearch.connection;
 
 import aQute.bnd.annotation.metatype.Configurable;
 
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.elasticsearch.configuration.ElasticsearchConfiguration;
 
 import java.util.HashMap;
@@ -40,6 +41,13 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 	immediate = true, service = ElasticsearchConnectionManager.class
 )
 public class ElasticsearchConnectionManager {
+
+	public void connect() {
+		ElasticsearchConnection elasticsearchConnection =
+			getElasticsearchConnection();
+
+		elasticsearchConnection.connect();
+	}
 
 	public AdminClient getAdminClient() {
 		Client client = getClient();
@@ -79,8 +87,23 @@ public class ElasticsearchConnectionManager {
 		return _elasticsearchConnections.get(_operationMode);
 	}
 
-	@Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE)
-	public void setElasticsearchConnection(
+	@Reference(
+		cardinality = ReferenceCardinality.MANDATORY,
+		target = "(operation.mode=EMBEDDED)"
+	)
+	public void setEmbeddedElasticsearchConnection(
+		ElasticsearchConnection elasticsearchConnection) {
+
+		_elasticsearchConnections.put(
+			elasticsearchConnection.getOperationMode(),
+			elasticsearchConnection);
+	}
+
+	@Reference(
+		cardinality = ReferenceCardinality.MANDATORY,
+		target = "(operation.mode=REMOTE)"
+	)
+	public void setRemoteElasticsearchConnection(
 		ElasticsearchConnection elasticsearchConnection) {
 
 		_elasticsearchConnections.put(
@@ -98,33 +121,55 @@ public class ElasticsearchConnectionManager {
 	}
 
 	@Activate
-	@Modified
 	protected void activate(Map<String, Object> properties) {
 		_elasticsearchConfiguration = Configurable.createConfigurable(
 			ElasticsearchConfiguration.class, properties);
 
-		OperationMode newOperationMode = OperationMode.valueOf(
-			_elasticsearchConfiguration.operationMode());
+		_clusterName = _elasticsearchConfiguration.clusterName();
 
-		if (newOperationMode.equals(_operationMode)) {
+		_operationMode = _elasticsearchConfiguration.operationMode();
+
+		if (!_elasticsearchConnections.containsKey(_operationMode)) {
+			throw new IllegalArgumentException(
+				"No connection available for: " + _operationMode);
+		}
+	}
+
+	@Modified
+	protected synchronized void modified(Map<String, Object> properties) {
+		_elasticsearchConfiguration = Configurable.createConfigurable(
+			ElasticsearchConfiguration.class, properties);
+
+		OperationMode newOperationMode =
+			_elasticsearchConfiguration.operationMode();
+
+		if (Validator.equals(
+				_elasticsearchConfiguration.clusterName(), _clusterName) &&
+			Validator.equals(
+				_elasticsearchConfiguration.operationMode(), _operationMode)) {
+
 			return;
 		}
 
-		if (_operationMode != null) {
-			ElasticsearchConnection elasticsearchConnection =
-				_elasticsearchConnections.get(_operationMode);
-
-			elasticsearchConnection.close();
+		if (!_elasticsearchConnections.containsKey(newOperationMode)) {
+			throw new IllegalArgumentException(
+				"No connection available for: " + newOperationMode);
 		}
 
-		_operationMode = newOperationMode;
-
-		ElasticsearchConnection newElasticsearchConnection =
+		ElasticsearchConnection elasticsearchConnection =
 			_elasticsearchConnections.get(_operationMode);
 
-		newElasticsearchConnection.initialize();
+		boolean closed = elasticsearchConnection.close();
+
+		_clusterName = _elasticsearchConfiguration.clusterName();
+		_operationMode = newOperationMode;
+
+		if (closed) {
+			getClient();
+		}
 	}
 
+	private String _clusterName;
 	private volatile ElasticsearchConfiguration _elasticsearchConfiguration;
 	private final Map<OperationMode, ElasticsearchConnection>
 		_elasticsearchConnections = new HashMap<>();

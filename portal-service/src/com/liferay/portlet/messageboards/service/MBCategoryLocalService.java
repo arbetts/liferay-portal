@@ -316,7 +316,7 @@ public interface MBCategoryLocalService extends BaseLocalService,
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
-		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext);
+		com.liferay.portlet.exportimport.lar.PortletDataContext portletDataContext);
 
 	/**
 	* Returns a range of all the message boards categories.
@@ -461,6 +461,15 @@ public interface MBCategoryLocalService extends BaseLocalService,
 	public com.liferay.portlet.messageboards.model.MBCategory updateMBCategory(
 		com.liferay.portlet.messageboards.model.MBCategory mbCategory);
 
+	public com.liferay.portlet.messageboards.model.MBCategory updateMessageCount(
+		long categoryId);
+
+	public com.liferay.portlet.messageboards.model.MBCategory updateStatistics(
+		long categoryId);
+
 	public com.liferay.portlet.messageboards.model.MBCategory updateStatus(
 		long userId, long categoryId, int status) throws PortalException;
+
+	public com.liferay.portlet.messageboards.model.MBCategory updateThreadCount(
+		long categoryId);
 }

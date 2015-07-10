@@ -40,7 +40,7 @@
 </tr>
 <tr>
 	<td>ADD_FOLDER</td>
-	<td>//a[@role='menuitem' and contains(.,'Folder')]</td>
+	<td>//a[@role='menuitem' and contains(.,'Add Folder')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -171,6 +171,11 @@
 <tr>
 	<td>DELETE</td>
 	<td>//a[@role='menuitem' and contains(.,'Delete')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DELETE_VERSION</td>
+	<td>//a[@role='menuitem' and contains(.,'Delete Version')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -419,6 +424,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>REVERT</td>
+	<td>//a[@role='menuitem' and contains(.,'Revert')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>RSS</td>
 	<td>//a[@role='menuitem' and contains(.,'RSS')]</td>
 	<td></td>
@@ -431,6 +441,21 @@
 <tr>
 	<td>SAVE</td>
 	<td>//a[@role='menuitem' and contains(.,'Save')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCOPE</td>
+	<td>//div[contains(.,'Scope')]//a[contains(@id,'_menu')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCOPE_DEFAULT</td>
+	<td>//div[contains(.,'Scope')]//a[contains(@id,'_menu')]/span[contains(.,'${key_scopeDefault}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SCOPE_SELECTION</td>
+	<td>//ul[contains(@class,'lfr-menu-list')]/li/a[contains(.,'${key_scopeSelection}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -506,6 +531,11 @@
 <tr>
 	<td>UNLOCK_THREAD</td>
 	<td>//a[@role='menuitem' and contains(.,'Unlock Thread')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>UNINSTALL</td>
+	<td>//a[@role='menuitem' and contains(.,'Uninstall')]</td>
 	<td></td>
 </tr>
 <tr>

@@ -16,10 +16,7 @@ package com.liferay.portlet.dynamicdatamapping.util.test;
 
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -30,6 +27,7 @@ import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.Node;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
+import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
 import com.liferay.portal.kernel.xml.XPath;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -40,6 +38,7 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructureConstants;
 import com.liferay.portlet.dynamicdatamapping.model.LocalizedValue;
 import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
+import com.liferay.portlet.dynamicdatamapping.storage.StorageType;
 import com.liferay.portlet.dynamicdatamapping.util.DDMUtil;
 
 import java.util.Collections;
@@ -111,8 +110,6 @@ public class DDMStructureTestUtil {
 		nameMap.put(defaultLocale, "Test Structure");
 
 		DDMFormLayout ddmFormLayout = DDMUtil.getDefaultDDMFormLayout(ddmForm);
-		String ddlStorageType = GetterUtil.getString(
-			PropsUtil.get(PropsKeys.DYNAMIC_DATA_LISTS_STORAGE_TYPE));
 
 		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
@@ -120,8 +117,8 @@ public class DDMStructureTestUtil {
 		return DDMStructureLocalServiceUtil.addStructure(
 			TestPropsValues.getUserId(), groupId, parentStructureId,
 			PortalUtil.getClassNameId(className), null, nameMap, null, ddmForm,
-			ddmFormLayout, ddlStorageType, DDMStructureConstants.TYPE_DEFAULT,
-			serviceContext);
+			ddmFormLayout, StorageType.JSON.toString(),
+			DDMStructureConstants.TYPE_DEFAULT, serviceContext);
 	}
 
 	public static DDMStructure addStructure(String className) throws Exception {
@@ -295,7 +292,7 @@ public class DDMStructureTestUtil {
 
 		Map<String, Map<String, String>> map = new HashMap<>();
 
-		Document document = SAXReaderUtil.read(xsd);
+		Document document = UnsecureSAXReaderUtil.read(xsd);
 
 		XPath xPathSelector = SAXReaderUtil.createXPath("//dynamic-element");
 

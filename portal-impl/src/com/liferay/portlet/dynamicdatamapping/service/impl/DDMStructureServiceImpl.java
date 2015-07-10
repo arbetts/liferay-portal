@@ -46,7 +46,7 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 	public DDMStructure addStructure(
 			long userId, long groupId, long classNameId,
 			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,
-			DDMForm ddmForm, DDMFormLayout ddmFormLayout,
+			DDMForm ddmForm, DDMFormLayout ddmFormLayout, String storageType,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -60,7 +60,7 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 
 		return ddmStructureLocalService.addStructure(
 			getUserId(), groupId, classNameId, nameMap, descriptionMap, ddmForm,
-			ddmFormLayout, serviceContext);
+			ddmFormLayout, storageType, serviceContext);
 	}
 
 	/**
@@ -512,6 +512,18 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			groupIds, classNameId, start, end);
 	}
 
+	@Override
+	public void revertStructure(
+			long structureId, String version, ServiceContext serviceContext)
+		throws PortalException {
+
+		DDMStructurePermission.check(
+			getPermissionChecker(), structureId, ActionKeys.UPDATE);
+
+		ddmStructureLocalService.revertStructure(
+			getUserId(), structureId, version, serviceContext);
+	}
+
 	/**
 	 * Returns an ordered range of all the structures matching the groups and
 	 * class name IDs, and matching the keywords in the structure names and
@@ -657,8 +669,8 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			ActionKeys.UPDATE);
 
 		return ddmStructureLocalService.updateStructure(
-			groupId, parentStructureId, classNameId, structureKey, nameMap,
-			descriptionMap, ddmForm, ddmFormLayout, serviceContext);
+			getUserId(), groupId, parentStructureId, classNameId, structureKey,
+			nameMap, descriptionMap, ddmForm, ddmFormLayout, serviceContext);
 	}
 
 	/**
@@ -714,8 +726,8 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			getPermissionChecker(), structureId, ActionKeys.UPDATE);
 
 		return ddmStructureLocalService.updateStructure(
-			structureId, parentStructureId, nameMap, descriptionMap, ddmForm,
-			ddmFormLayout, serviceContext);
+			getUserId(), structureId, parentStructureId, nameMap,
+			descriptionMap, ddmForm, ddmFormLayout, serviceContext);
 	}
 
 	/**

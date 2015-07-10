@@ -58,6 +58,7 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMFormLayoutColumn;
 import com.liferay.portlet.dynamicdatamapping.model.DDMFormLayoutPage;
 import com.liferay.portlet.dynamicdatamapping.model.DDMFormLayoutRow;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
+import com.liferay.portlet.dynamicdatamapping.model.DDMStructureVersion;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.model.LocalizedValue;
 import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
@@ -191,46 +192,38 @@ public class DDMImpl implements DDM {
 	public JSONArray getDDMFormFieldsJSONArray(
 		DDMStructure ddmStructure, String script) {
 
-		if (Validator.isNull(script)) {
-			return null;
+		DDMForm ddmForm = null;
+
+		if (ddmStructure != null) {
+			ddmForm = ddmStructure.getDDMForm();
 		}
 
-		if (ddmStructure == null) {
-			try {
-				DDMForm ddmForm = DDMFormJSONDeserializerUtil.deserialize(
-					script);
+		return getDDMFormFieldsJSONArray(ddmForm, script);
+	}
 
-				return getDDMFormFieldsJSONArray(
-					ddmForm.getDDMFormFields(), ddmForm.getAvailableLocales(),
-					ddmForm.getDefaultLocale());
-			}
-			catch (PortalException pe) {
-				if (_log.isWarnEnabled()) {
-					_log.warn("Unable to deserialize script", pe);
-				}
+	@Override
+	public JSONArray getDDMFormFieldsJSONArray(
+		DDMStructureVersion ddmStructureVersion, String script) {
 
-				return null;
-			}
+		DDMForm ddmForm = null;
+
+		if (ddmStructureVersion != null) {
+			ddmForm = ddmStructureVersion.getDDMForm();
 		}
 
-		try {
-			DDMForm ddmForm = DDMFormJSONDeserializerUtil.deserialize(script);
+		return getDDMFormFieldsJSONArray(ddmForm, script);
+	}
 
-			return getDDMFormFieldsJSONArray(
-				ddmForm.getDDMFormFields(), ddmForm.getAvailableLocales(),
-				ddmForm.getDefaultLocale());
-		}
-		catch (PortalException pe) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to deserialize script", pe);
-			}
+	@Override
+	public DDMFormValues getDDMFormValues(
+			DDMStructure ddmStructure, String fieldNamespace,
+			ServiceContext serviceContext)
+		throws PortalException {
 
-			DDMForm ddmForm = ddmStructure.getDDMForm();
+		Fields fields = getFields(
+			ddmStructure.getStructureId(), fieldNamespace, serviceContext);
 
-			return getDDMFormFieldsJSONArray(
-				ddmForm.getDDMFormFields(), ddmForm.getAvailableLocales(),
-				ddmForm.getDefaultLocale());
-		}
+		return FieldsToDDMFormValuesConverterUtil.convert(ddmStructure, fields);
 	}
 
 	@Override
@@ -716,6 +709,39 @@ public class DDMImpl implements DDM {
 	}
 
 	protected JSONArray getDDMFormFieldsJSONArray(
+		DDMForm ddmForm, String script) {
+
+		if (Validator.isNull(script)) {
+			return null;
+		}
+
+		JSONArray defaultDDMFormFieldsJSONArray = null;
+
+		if (ddmForm != null) {
+			defaultDDMFormFieldsJSONArray = getDDMFormFieldsJSONArray(
+				ddmForm.getDDMFormFields(), ddmForm.getAvailableLocales(),
+				ddmForm.getDefaultLocale());
+		}
+
+		try {
+			DDMForm scriptDDMForm = DDMFormJSONDeserializerUtil.deserialize(
+				script);
+
+			return getDDMFormFieldsJSONArray(
+				scriptDDMForm.getDDMFormFields(),
+				scriptDDMForm.getAvailableLocales(),
+				scriptDDMForm.getDefaultLocale());
+		}
+		catch (PortalException pe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to deserialize script", pe);
+			}
+
+			return defaultDDMFormFieldsJSONArray;
+		}
+	}
+
+	protected JSONArray getDDMFormFieldsJSONArray(
 		List<DDMFormField> ddmFormFields, Set<Locale> availableLocales,
 		Locale defaultLocale) {
 
@@ -797,7 +823,7 @@ public class DDMImpl implements DDM {
 
 		ddmFormLayoutRow.addDDMFormLayoutColumn(
 			new DDMFormLayoutColumn(
-				ddmFormField.getName(), DDMFormLayoutColumn.FULL));
+				DDMFormLayoutColumn.FULL, ddmFormField.getName()));
 
 		return ddmFormLayoutRow;
 	}
@@ -891,7 +917,7 @@ public class DDMImpl implements DDM {
 	protected int getFieldValueIndex(
 		String[] fieldsDisplayValues, String fieldName, String instanceId) {
 
-		if (instanceId == null) {
+		if (Validator.isNull(instanceId)) {
 			return -1;
 		}
 
@@ -936,7 +962,7 @@ public class DDMImpl implements DDM {
 			Serializable fieldValue = serviceContext.getAttribute(
 				fieldNameValue);
 
-			if (fieldValue == null) {
+			if (Validator.isNull(fieldValue)) {
 				fieldValue = predefinedValue.getString(
 					serviceContext.getLocale());
 			}
@@ -949,7 +975,7 @@ public class DDMImpl implements DDM {
 			else if (fieldDataType.equals(FieldConstants.DATE)) {
 				Date fieldValueDate = null;
 
-				if (fieldValue == null) {
+				if (Validator.isNull(fieldValue)) {
 					int fieldValueMonth = GetterUtil.getInteger(
 						serviceContext.getAttribute(fieldNameValue + "Month"));
 					int fieldValueDay = GetterUtil.getInteger(
@@ -992,7 +1018,7 @@ public class DDMImpl implements DDM {
 				}
 			}
 
-			if (fieldValue == null) {
+			if (Validator.isNull(fieldValue)) {
 				return null;
 			}
 

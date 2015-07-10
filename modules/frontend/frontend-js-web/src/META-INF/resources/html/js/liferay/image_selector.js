@@ -23,9 +23,11 @@ AUI.add(
 
 		var STR_IMAGE_DATA = 'imageData';
 
-		var STR_IMAGE_DELETED = 'imageDeleted';
+		var STR_IMAGE_DELETED = 'coverImageDeleted';
 
-		var STR_IMAGE_UPLOADED = 'imageUploaded';
+		var STR_IMAGE_SELECTED = 'coverImageSelected';
+
+		var STR_IMAGE_UPLOADED = 'coverImageUploaded';
 
 		var STR_SPACE = ' ';
 
@@ -208,20 +210,27 @@ AUI.add(
 					_onBrowseClick: function() {
 						var instance = this;
 
-						Liferay.Util.selectEntity(
+						var itemSelectorDialog = new A.LiferayItemSelectorDialog(
 							{
-								dialog: {
-									constrain: true,
-									destroyOnHide: true,
-									modal: true
-								},
 								eventName: instance.ns('selectImage'),
-								id: instance.ns('selectImage'),
-								title: Liferay.Language.get('select-image'),
-								uri: instance.get('itemSelectorURL')
-							},
-							instance._updateImageDataFn
+								on: {
+									selectedItemChange: function(event) {
+										var selectedItem = event.newVal;
+
+										if (selectedItem) {
+											instance._updateImageData(JSON.parse(selectedItem.value));
+
+											Liferay.fire(STR_IMAGE_SELECTED);
+										}
+									}
+								},
+								url: instance.get('itemSelectorURL')
+							}
 						);
+
+						itemSelectorDialog.open();
+
+						instance._cancelTimer();
 					},
 
 					_onDeleteClick: function(event) {
@@ -475,7 +484,7 @@ AUI.add(
 									if (!instance._uploadCompleted) {
 										instance._updateImageData(
 											{
-												fileentryid: '-1',
+												fileEntryId: '-1',
 												url: reader.result
 											}
 										);
@@ -499,7 +508,7 @@ AUI.add(
 						}
 					},
 
-					_updateImageData: function(event) {
+					_updateImageData: function(imageData) {
 						var instance = this;
 
 						instance._errorNodeAlert.hide();
@@ -508,8 +517,8 @@ AUI.add(
 							STR_IMAGE_DATA,
 							{
 								imageData: {
-									fileEntryId: event.fileentryid || 0,
-									url: event.url || ''
+									fileEntryId: imageData.fileEntryId || 0,
+									url: imageData.url || ''
 								}
 							}
 						);
@@ -522,6 +531,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-base', 'aui-progressbar', 'liferay-portlet-base', 'liferay-storage-formatter', 'uploader']
+		requires: ['aui-base', 'aui-progressbar', 'liferay-item-selector-dialog', 'liferay-portlet-base', 'liferay-storage-formatter', 'uploader']
 	}
 );

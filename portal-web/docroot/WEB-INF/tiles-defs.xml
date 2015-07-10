@@ -112,10 +112,6 @@
 		<put name="portlet_content" value="/portlet/admin/edit_document_library_extra_settings.jsp" />
 	</definition>
 
-	<definition name="portlet.admin.edit_instance" extends="portlet.admin">
-		<put name="portlet_content" value="/portlet/admin/edit_instance.jsp" />
-	</definition>
-
 	<definition name="portlet.admin.error" extends="portlet.admin">
 		<put name="portlet_content" value="/portlet/admin/error.jsp" />
 	</definition>
@@ -150,48 +146,6 @@
 
 	<definition name="portlet.background_task.error" extends="portlet.background_task">
 		<put name="portlet_content" value="/portlet/background_task/error.jsp" />
-	</definition>
-
-	<!-- Blogs -->
-
-	<definition name="portlet.blogs" extends="portlet" />
-
-	<definition name="portlet.blogs.edit_entry" extends="portlet.blogs">
-		<put name="portlet_content" value="/portlet/blogs/edit_entry.jsp" />
-	</definition>
-
-	<definition name="portlet.blogs.error" extends="portlet.blogs">
-		<put name="portlet_content" value="/portlet/blogs/error.jsp" />
-	</definition>
-
-	<definition name="portlet.blogs.search" extends="portlet.blogs">
-		<put name="portlet_content" value="/portlet/blogs/search.jsp" />
-	</definition>
-
-	<definition name="portlet.blogs.view" extends="portlet.blogs">
-		<put name="portlet_content" value="/portlet/blogs/view.jsp" />
-	</definition>
-
-	<definition name="portlet.blogs.view_entry" extends="portlet.blogs">
-		<put name="portlet_content" value="/portlet/blogs/view_entry.jsp" />
-	</definition>
-
-	<!-- Blogs Admin -->
-
-	<definition name="portlet.blogs_admin.view" extends="portlet">
-			<put name="portlet_content" value="/portlet/blogs_admin/view.jsp" />
-	</definition>
-
-	<!-- Blogs Aggregator -->
-
-	<definition name="portlet.blogs_aggregator" extends="portlet" />
-
-	<definition name="portlet.blogs_aggregator.error" extends="portlet.blogs_aggregator">
-		<put name="portlet_content" value="/portlet/blogs_aggregator/error.jsp" />
-	</definition>
-
-	<definition name="portlet.blogs_aggregator.view" extends="portlet.blogs_aggregator">
-		<put name="portlet_content" value="/portlet/blogs_aggregator/view.jsp" />
 	</definition>
 
 	<!-- Calendar -->
@@ -358,22 +312,6 @@
 		<put name="portlet_content" value="/portlet/document_library_display/view.jsp" />
 	</definition>
 
-	<!-- Expando -->
-
-	<definition name="portlet.expando" extends="portlet" />
-
-	<definition name="portlet.expando.edit_expando" extends="portlet.expando">
-		<put name="portlet_content" value="/portlet/expando/edit_expando.jsp" />
-	</definition>
-
-	<definition name="portlet.expando.view" extends="portlet.expando">
-		<put name="portlet_content" value="/portlet/expando/view.jsp" />
-	</definition>
-
-	<definition name="portlet.expando.view_attributes" extends="portlet.expando">
-		<put name="portlet_content" value="/portlet/expando/view_attributes.jsp" />
-	</definition>
-
 	<!-- Export Import -->
 
 	<definition name="portlet.export_import" extends="portlet" />
@@ -384,6 +322,10 @@
 
 	<definition name="portlet.export_import.error" extends="portlet.export_import">
 		<put name="portlet_content" value="/portlet/export_import/error.jsp" />
+	</definition>
+
+	<definition name="portlet.export_import.export_import" extends="portlet.export_import">
+		<put name="portlet_content" value="/portlet/export_import/export_import.jsp" />
 	</definition>
 
 	<definition name="portlet.export_import.export_layouts" extends="portlet.export_import">
@@ -400,6 +342,10 @@
 
 	<definition name="portlet.export_import.publish_layouts_simple" extends="portlet.export_import">
 		<put name="portlet_content" value="/portlet/export_import/publish_layouts_simple.jsp" />
+	</definition>
+
+	<definition name="portlet.export_import.staging" extends="portlet.export_import">
+		<put name="portlet_content" value="/portlet/export_import/publish_portlet.jsp" />
 	</definition>
 
 	<definition name="portlet.export_import.view" extends="portlet.export_import">
@@ -456,22 +402,6 @@
 
 	<definition name="portlet.invitation.view" extends="portlet.invitation">
 		<put name="portlet_content" value="/portlet/invitation/view.jsp" />
-	</definition>
-
-	<!-- Layouts Admin -->
-
-	<definition name="portlet.layouts_admin" extends="portlet" />
-
-	<definition name="portlet.layouts_admin.add_layout" extends="portlet.layouts_admin">
-		<put name="portlet_content" value="/portlet/layouts_admin/add_layout.jsp" />
-	</definition>
-
-	<definition name="portlet.layouts_admin.edit_layouts" extends="portlet.layouts_admin">
-		<put name="portlet_content" value="/portlet/layouts_admin/view.jsp" />
-	</definition>
-
-	<definition name="portlet.layouts_admin.error" extends="portlet.layouts_admin">
-		<put name="portlet_content" value="/portlet/layouts_admin/error.jsp" />
 	</definition>
 
 	<!-- Login -->
@@ -736,50 +666,6 @@
 		<put name="portlet_content" value="/portlet/portal_settings/test_opensso_configuration.jsp" />
 	</definition>
 
-	<!-- Portlet Configuration -->
-
-	<definition name="portlet.portlet_configuration" extends="portlet" />
-
-	<definition name="portlet.portlet_configuration.edit_archived_setups" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/edit_archived_setups.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.edit_configuration" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/edit_configuration.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.edit_permissions" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/edit_permissions.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.edit_public_render_parameters" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/edit_public_render_parameters.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.edit_scope" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/edit_scope.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.edit_sharing" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/edit_sharing.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.edit_supported_clients" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/edit_supported_clients.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.error" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/error.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.export_import" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/export_import.jsp" />
-	</definition>
-
-	<definition name="portlet.portlet_configuration.staging" extends="portlet.portlet_configuration">
-		<put name="portlet_content" value="/portlet/portlet_configuration/publish_portlet.jsp" />
-	</definition>
-
 	<!-- Portlet Sharing -->
 
 	<definition name="portlet.portlet_sharing" extends="portlet">
@@ -808,42 +694,6 @@
 
 	<definition name="portlet.requests.view" extends="portlet.requests">
 		<put name="portlet_content" value="/portlet/requests/view.jsp" />
-	</definition>
-
-	<!-- Roles Admin -->
-
-	<definition name="portlet.roles_admin" extends="portlet" />
-
-	<definition name="portlet.roles_admin.edit_role" extends="portlet.roles_admin">
-		<put name="portlet_content" value="/portlet/roles_admin/edit_role.jsp" />
-	</definition>
-
-	<definition name="portlet.roles_admin.edit_role_assignments" extends="portlet.roles_admin">
-		<put name="portlet_content" value="/portlet/roles_admin/edit_role_assignments.jsp" />
-	</definition>
-
-	<definition name="portlet.roles_admin.edit_role_permissions" extends="portlet.roles_admin">
-		<put name="portlet_content" value="/portlet/roles_admin/edit_role_permissions.jsp" />
-	</definition>
-
-	<definition name="portlet.roles_admin.error" extends="portlet.roles_admin">
-		<put name="portlet_content" value="/portlet/roles_admin/error.jsp" />
-	</definition>
-
-	<definition name="portlet.roles_admin.select_organization_role" extends="portlet.roles_admin">
-		<put name="portlet_content" value="/portlet/roles_admin/select_organization_role.jsp" />
-	</definition>
-
-	<definition name="portlet.roles_admin.select_regular_role" extends="portlet.roles_admin">
-		<put name="portlet_content" value="/portlet/roles_admin/select_regular_role.jsp" />
-	</definition>
-
-	<definition name="portlet.roles_admin.select_site_role" extends="portlet.roles_admin">
-		<put name="portlet_content" value="/portlet/roles_admin/select_site_role.jsp" />
-	</definition>
-
-	<definition name="portlet.roles_admin.view" extends="portlet.roles_admin">
-		<put name="portlet_content" value="/portlet/roles_admin/view.jsp" />
 	</definition>
 
 	<!-- Shopping -->
@@ -965,26 +815,6 @@
 	<definition name="portlet.software_catalog.view_product_entry" extends="portlet.software_catalog">
 		<put name="portlet_content" value="/portlet/software_catalog/view_product_entry.jsp" />
 	</definition>
-
-	<!-- Staging Bar -->
-
-	<definition name="portlet.staging_bar.edit_layout_branch" path="/portlet/staging_bar/edit_layout_branch.jsp" />
-
-	<definition name="portlet.staging_bar.edit_layout_set_branch" path="/portlet/staging_bar/edit_layout_set_branch.jsp" />
-
-	<definition name="portlet.staging_bar.error" path="/portlet/staging_bar/error.jsp" />
-
-	<definition name="portlet.staging_bar.merge_layout_set_branch" path="/portlet/staging_bar/merge_layout_set_branch.jsp" />
-
-	<definition name="portlet.staging_bar.view" path="/portlet/staging_bar/view.jsp" />
-
-	<definition name="portlet.staging_bar.view_layout_branches" path="/portlet/staging_bar/view_layout_branches.jsp" />
-
-	<definition name="portlet.staging_bar.view_layout_revision_details" path="/portlet/staging_bar/view_layout_revision_details.jsp" />
-
-	<definition name="portlet.staging_bar.view_layout_revisions" path="/portlet/staging_bar/view_layout_revisions.jsp" />
-
-	<definition name="portlet.staging_bar.view_layout_set_branches" path="/portlet/staging_bar/view_layout_set_branches.jsp" />
 
 	<!-- User Statistics -->
 

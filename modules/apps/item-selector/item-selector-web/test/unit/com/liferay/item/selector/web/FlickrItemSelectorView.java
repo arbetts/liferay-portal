@@ -14,12 +14,16 @@
 
 package com.liferay.item.selector.web;
 
+import com.liferay.item.selector.ItemSelectorReturnType;
 import com.liferay.item.selector.ItemSelectorView;
+import com.liferay.portal.kernel.util.SetUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.portlet.PortletURL;
 
@@ -38,6 +42,13 @@ public class FlickrItemSelectorView
 	}
 
 	@Override
+	public Set<ItemSelectorReturnType>
+		getSupportedItemSelectorReturnTypes() {
+
+		return _supportedItemSelectorReturnTypes;
+	}
+
+	@Override
 	public String getTitle(Locale locale) {
 		return FlickrItemSelectorView.class.getName();
 	}
@@ -46,7 +57,7 @@ public class FlickrItemSelectorView
 	public void renderHTML(
 			ServletRequest request, ServletResponse response,
 			FlickrItemSelectorCriterion flickrItemSelectorCriterion,
-			PortletURL portletURL, String itemSelectedCallback)
+			PortletURL portletURL, String itemSelectedEventName)
 		throws IOException {
 
 		PrintWriter printWriter = response.getWriter();
@@ -54,5 +65,12 @@ public class FlickrItemSelectorView
 		printWriter.print(
 			"<html>" + FlickrItemSelectorView.class.getName() + "</html>");
 	}
+
+	private static final Set<ItemSelectorReturnType>
+		_supportedItemSelectorReturnTypes = Collections.unmodifiableSet(
+			SetUtil.fromArray(
+				new ItemSelectorReturnType[] {
+					new TestURLItemSelectorReturnType()
+				}));
 
 }

@@ -17,7 +17,7 @@ AUI.add(
 
 		var STR_EMPTY = '';
 
-		var isArray = Lang.isArray;
+		var isArray = Array.isArray;
 		var isNumber = Lang.isNumber;
 
 		var SpreadSheet = A.Component.create(
@@ -101,7 +101,7 @@ AUI.add(
 						var recordsetId = instance.get('recordsetId');
 
 						Liferay.Service(
-							'/ddlrecordset/update-min-display-rows',
+							'/ddl.ddlrecordset/update-min-display-rows',
 							{
 								minDisplayRows: minDisplayRows,
 								recordSetId: recordsetId,
@@ -234,7 +234,7 @@ AUI.add(
 					_onRecordUpdate: function(event) {
 						var instance = this;
 
-						if (!A.Object.owns(event.changed, 'recordId')) {
+						if (!event.changed.hasOwnProperty('recordId')) {
 							var data = instance.get('data');
 							var recordsetId = instance.get('recordsetId');
 
@@ -316,7 +316,7 @@ AUI.add(
 					callback = callback && A.bind(callback, instance) || EMPTY_FN;
 
 					Liferay.Service(
-						'/ddlrecord/add-record',
+						'/ddl.ddlrecord/add-record',
 						{
 							displayIndex: displayIndex,
 							fieldsMap: JSON.stringify(fieldsMap),
@@ -599,7 +599,7 @@ AUI.add(
 					callback = callback && A.bind(callback, instance) || EMPTY_FN;
 
 					Liferay.Service(
-						'/ddlrecord/update-record',
+						'/ddl.ddlrecord/update-record',
 						{
 							displayIndex: displayIndex,
 							fieldsMap: JSON.stringify(fieldsMap),

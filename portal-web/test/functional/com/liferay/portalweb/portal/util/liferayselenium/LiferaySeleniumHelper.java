@@ -25,7 +25,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
-import com.liferay.portal.kernel.xml.SAXReaderUtil;
+import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portalweb.portal.BaseTestCase;
 import com.liferay.portalweb.portal.util.AntCommands;
@@ -58,11 +58,19 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
+import org.sikuli.api.DesktopScreenRegion;
+import org.sikuli.api.ImageTarget;
+import org.sikuli.api.Location;
+import org.sikuli.api.ScreenRegion;
 import org.sikuli.api.robot.Key;
-import org.sikuli.script.Button;
-import org.sikuli.script.Location;
-import org.sikuli.script.Match;
-import org.sikuli.script.Screen;
+import org.sikuli.api.robot.Keyboard;
+import org.sikuli.api.robot.Mouse;
+import org.sikuli.api.robot.desktop.DesktopKeyboard;
+import org.sikuli.api.robot.desktop.DesktopMouse;
+import org.sikuli.api.visual.Canvas;
+import org.sikuli.api.visual.CanvasBuilder.ElementAdder;
+import org.sikuli.api.visual.CanvasBuilder.ElementAreaSetter;
+import org.sikuli.api.visual.DesktopCanvas;
 
 /**
  * @author Brian Wing Shun Chan
@@ -226,7 +234,7 @@ public class LiferaySeleniumHelper {
 		content = "<log4j>" + content + "</log4j>";
 		content = content.replaceAll("log4j:", "");
 
-		Document document = SAXReaderUtil.read(content, true);
+		Document document = UnsecureSAXReaderUtil.read(content, true);
 
 		Element rootElement = document.getRootElement();
 
@@ -253,7 +261,7 @@ public class LiferaySeleniumHelper {
 
 				Element throwableElement = eventElement.element("throwable");
 
-				Exception exception;
+				Exception exception = null;
 
 				if (throwableElement != null) {
 					exception = new Exception(
@@ -595,12 +603,31 @@ public class LiferaySeleniumHelper {
 		return EmailCommands.getEmailSubject(GetterUtil.getInteger(index));
 	}
 
+	public static ImageTarget getImageTarget(
+			LiferaySelenium liferaySelenium, String image)
+		throws Exception {
+
+		File file = new File(
+			getPortalRootDirName() + liferaySelenium.getSikuliImagesDirName() +
+				image);
+
+		return new ImageTarget(file);
+	}
+
 	public static String getNumberDecrement(String value) {
 		return StringUtil.valueOf(GetterUtil.getInteger(value) - 1);
 	}
 
 	public static String getNumberIncrement(String value) {
 		return StringUtil.valueOf(GetterUtil.getInteger(value) + 1);
+	}
+
+	public static String getPortalRootDirName() throws Exception {
+		File file = new File(".");
+
+		String absolutePath = file.getAbsolutePath();
+
+		return absolutePath.substring(0, absolutePath.length() - 1);
 	}
 
 	public static boolean isConfirmation(
@@ -1054,18 +1081,6 @@ public class LiferaySeleniumHelper {
 			return true;
 		}
 
-		// LPS-55491, temporary workaround until Michael Han fixes it
-
-		if (line.contains("failure in bulk execution")) {
-			return true;
-		}
-
-		// LPS-55835, temporary workaround while Brian Wulbern investigates it
-
-		if (line.matches("Current URL.*add_panel generates exception:.*")) {
-			return true;
-		}
-
 		// LRQA-14442, temporary workaround until Kiyoshi Lee fixes it
 
 		if (line.contains("Framework Event Dispatcher: Equinox Container:")) {
@@ -1227,13 +1242,11 @@ public class LiferaySeleniumHelper {
 			LiferaySelenium liferaySelenium, String image)
 		throws Exception {
 
-		Match match = _screen.exists(
-			liferaySelenium.getProjectDirName() +
-				liferaySelenium.getSikuliImagesDirName() + image);
+		ScreenRegion screenRegion = new DesktopScreenRegion();
 
-		liferaySelenium.pause("1000");
+		ImageTarget imageTarget = getImageTarget(liferaySelenium, image);
 
-		if (match != null) {
+		if (screenRegion.wait(imageTarget, 5000) != null) {
 			throw new Exception("Element is present");
 		}
 	}
@@ -1242,74 +1255,76 @@ public class LiferaySeleniumHelper {
 			LiferaySelenium liferaySelenium, String image)
 		throws Exception {
 
-		Match match = _screen.exists(
-			liferaySelenium.getProjectDirName() +
-				liferaySelenium.getSikuliImagesDirName() + image);
+		ScreenRegion screenRegion = new DesktopScreenRegion();
 
-		liferaySelenium.pause("1000");
+		ImageTarget imageTarget = getImageTarget(liferaySelenium, image);
 
-		if (match == null) {
+		screenRegion = screenRegion.wait(imageTarget, 5000);
+
+		if (screenRegion == null) {
 			throw new Exception("Element is not present");
 		}
+
+		Canvas canvas = new DesktopCanvas();
+
+		ElementAdder elementAdder = canvas.add();
+
+		ElementAreaSetter elementAreaSetter = elementAdder.box();
+
+		elementAreaSetter.around(screenRegion);
+
+		canvas.display(2);
 	}
 
 	public static void sikuliClick(
 			LiferaySelenium liferaySelenium, String image)
 		throws Exception {
 
-		Match match = _screen.exists(
-			liferaySelenium.getProjectDirName() +
-				liferaySelenium.getSikuliImagesDirName() + image);
+		Mouse mouse = new DesktopMouse();
 
-		liferaySelenium.pause("1000");
+		ScreenRegion screenRegion = new DesktopScreenRegion();
 
-		if (match == null) {
-			return;
-		}
+		ImageTarget imageTarget = getImageTarget(liferaySelenium, image);
 
-		_screen.click(
-			liferaySelenium.getProjectDirName() +
-			liferaySelenium.getSikuliImagesDirName() + image);
+		screenRegion = screenRegion.find(imageTarget);
+
+		mouse.click(screenRegion.getCenter());
 	}
 
 	public static void sikuliDragAndDrop(
 			LiferaySelenium liferaySelenium, String image, String coordString)
 		throws Exception {
 
-		Match match = _screen.exists(
-			liferaySelenium.getProjectDirName() +
-				liferaySelenium.getSikuliImagesDirName() + image);
+		ScreenRegion screenRegion = new DesktopScreenRegion();
 
-		liferaySelenium.pause("1000");
+		ImageTarget imageTarget = getImageTarget(liferaySelenium, image);
 
-		if (match == null) {
-			throw new Exception("Image is not present");
-		}
+		screenRegion = screenRegion.find(imageTarget);
 
-		_screen.mouseMove(
-			liferaySelenium.getProjectDirName() +
-			liferaySelenium.getSikuliImagesDirName() + image);
+		Mouse mouse = new DesktopMouse();
+
+		mouse.move(screenRegion.getCenter());
 
 		Robot robot = new Robot();
 
 		robot.delay(1000);
 
-		_screen.mouseDown(Button.LEFT);
+		mouse.press();
 
-		liferaySelenium.pause("2000");
+		robot.delay(2000);
 
 		String[] coords = coordString.split(",");
 
-		Location location = match.getCenter();
+		Location location = screenRegion.getCenter();
 
 		int x = location.getX() + GetterUtil.getInteger(coords[0]);
 		int y = location.getY() + GetterUtil.getInteger(coords[1]);
 
 		robot.mouseMove(x, y);
 
-		robot.delay(1500);
+		robot.delay(1000);
 
-		_screen.mouseUp(Button.LEFT);
+		mouse.release();
 	}
 
 	public static void sikuliLeftMouseDown(LiferaySelenium liferaySelenium)
@@ -1317,7 +1332,9 @@ public class LiferaySeleniumHelper {
 
 		liferaySelenium.pause("1000");
 
-		_screen.mouseDown(Button.LEFT);
+		Mouse mouse = new DesktopMouse();
+
+		mouse.press();
 	}
 
 	public static void sikuliLeftMouseUp(LiferaySelenium liferaySelenium)
@@ -1325,26 +1342,24 @@ public class LiferaySeleniumHelper {
 
 		liferaySelenium.pause("1000");
 
-		_screen.mouseUp(Button.LEFT);
+		Mouse mouse = new DesktopMouse();
+
+		mouse.release();
 	}
 
 	public static void sikuliMouseMove(
 			LiferaySelenium liferaySelenium, String image)
 		throws Exception {
 
-		Match match = _screen.exists(
-			liferaySelenium.getProjectDirName() +
-			liferaySelenium.getSikuliImagesDirName() + image);
+		ScreenRegion screenRegion = new DesktopScreenRegion();
 
-		liferaySelenium.pause("1000");
+		ImageTarget imageTarget = getImageTarget(liferaySelenium, image);
 
-		if (match == null) {
-			return;
-		}
+		screenRegion = screenRegion.find(imageTarget);
 
-		_screen.mouseMove(
-			liferaySelenium.getProjectDirName() +
-			liferaySelenium.getSikuliImagesDirName() + image);
+		Mouse mouse = new DesktopMouse();
+
+		mouse.move(screenRegion.getCenter());
 	}
 
 	public static void sikuliRightMouseDown(LiferaySelenium liferaySelenium)
@@ -1352,7 +1367,9 @@ public class LiferaySeleniumHelper {
 
 		liferaySelenium.pause("1000");
 
-		_screen.mouseDown(Button.RIGHT);
+		Mouse mouse = new DesktopMouse();
+
+		mouse.rightPress();
 	}
 
 	public static void sikuliRightMouseUp(LiferaySelenium liferaySelenium)
@@ -1360,46 +1377,38 @@ public class LiferaySeleniumHelper {
 
 		liferaySelenium.pause("1000");
 
-		_screen.mouseUp(Button.RIGHT);
+		Mouse mouse = new DesktopMouse();
+
+		mouse.rightRelease();
 	}
 
 	public static void sikuliType(
 			LiferaySelenium liferaySelenium, String image, String value)
 		throws Exception {
 
-		Match match = _screen.exists(
-			liferaySelenium.getProjectDirName() +
-				liferaySelenium.getSikuliImagesDirName() + image);
+		sikuliClick(liferaySelenium, image);
 
 		liferaySelenium.pause("1000");
 
-		if (match == null) {
-			return;
-		}
-
-		_screen.click(
-			liferaySelenium.getProjectDirName() +
-			liferaySelenium.getSikuliImagesDirName() + image);
-
-		liferaySelenium.pause("1000");
+		Keyboard keyboard = new DesktopKeyboard();
 
 		if (value.contains("${line.separator}")) {
 			String[] tokens = StringUtil.split(value, "${line.separator}");
 
 			for (int i = 0; i < tokens.length; i++) {
-				_screen.type(tokens[i]);
+				keyboard.type(tokens[i]);
 
 				if ((i + 1) < tokens.length) {
-					_screen.type(Key.ENTER);
+					keyboard.type(Key.ENTER);
 				}
 			}
 
 			if (value.endsWith("${line.separator}")) {
-				_screen.type(Key.ENTER);
+				keyboard.type(Key.ENTER);
 			}
 		}
 		else {
-			_screen.type(value);
+			keyboard.type(value);
 		}
 	}
 
@@ -1407,18 +1416,22 @@ public class LiferaySeleniumHelper {
 			LiferaySelenium liferaySelenium, String image, String value)
 		throws Exception {
 
-		_screen.click(
-			liferaySelenium.getProjectDirName() +
-			liferaySelenium.getSikuliImagesDirName() + image);
+		sikuliClick(liferaySelenium, image);
 
-		_screen.type("a", Key.CTRL);
+		Keyboard keyboard = new DesktopKeyboard();
+
+		keyboard.keyDown(Key.CTRL);
+
+		keyboard.type("a");
+
+		keyboard.keyUp(Key.CTRL);
 
 		sikuliType(
 			liferaySelenium, image,
-			liferaySelenium.getProjectDirName() +
-				liferaySelenium.getDependenciesDirName() + value);
+			getPortalRootDirName() + liferaySelenium.getDependenciesDirName() +
+				value);
 
-		_screen.type(Key.ENTER);
+		keyboard.type(Key.ENTER);
 	}
 
 	public static void sikuliUploadTCatFile(
@@ -1434,18 +1447,24 @@ public class LiferaySeleniumHelper {
 
 		sikuliType(liferaySelenium, image, tCatAdminFileName);
 
-		_screen.type(Key.ENTER);
+		Keyboard keyboard = new DesktopKeyboard();
+
+		keyboard.type(Key.ENTER);
 	}
 
 	public static void sikuliUploadTempFile(
 			LiferaySelenium liferaySelenium, String image, String value)
 		throws Exception {
 
-		_screen.click(
-			liferaySelenium.getProjectDirName() +
-			liferaySelenium.getSikuliImagesDirName() + image);
+		sikuliClick(liferaySelenium, image);
 
-		_screen.type("a", Key.CTRL);
+		Keyboard keyboard = new DesktopKeyboard();
+
+		keyboard.keyDown(Key.CTRL);
+
+		keyboard.type("a");
+
+		keyboard.keyUp(Key.CTRL);
 
 		String slash = "/";
 
@@ -1457,13 +1476,15 @@ public class LiferaySeleniumHelper {
 			liferaySelenium, image,
 			liferaySelenium.getOutputDirName() + slash + value);
 
-		_screen.type(Key.ENTER);
+		keyboard.type(Key.ENTER);
 	}
 
 	public static void typeAceEditor(
 		LiferaySelenium liferaySelenium, String locator, String value) {
 
 		liferaySelenium.typeKeys(locator, "");
+
+		Keyboard keyboard = new DesktopKeyboard();
 
 		Matcher matcher = _aceEditorPattern.matcher(value);
 
@@ -1474,12 +1495,12 @@ public class LiferaySeleniumHelper {
 
 			String line = value.substring(x, y);
 
-			_screen.type(line.trim());
+			keyboard.type(line.trim());
 
 			String specialCharacter = matcher.group();
 
 			if (specialCharacter.equals("(")) {
-				_screen.type("9", Key.SHIFT);
+				keyboard.type("(");
 			}
 			else if (specialCharacter.equals("${line.separator}")) {
 				liferaySelenium.keyPress(locator, "\\SPACE");
@@ -1491,7 +1512,7 @@ public class LiferaySeleniumHelper {
 
 		String line = value.substring(x);
 
-		_screen.type(line.trim());
+		keyboard.type(line.trim());
 	}
 
 	public static void typeFrame(
@@ -1519,7 +1540,9 @@ public class LiferaySeleniumHelper {
 	}
 
 	public static void typeScreen(String value) {
-		_screen.type(value);
+		Keyboard keyboard = new DesktopKeyboard();
+
+		keyboard.type(value);
 	}
 
 	public static void waitForElementNotPresent(
@@ -1841,7 +1864,6 @@ public class LiferaySeleniumHelper {
 	private static final List<Exception> _javaScriptExceptions =
 		new ArrayList<>();
 	private static final List<Exception> _liferayExceptions = new ArrayList<>();
-	private static final Screen _screen = new Screen();
 	private static int _screenshotCount = 0;
 	private static int _screenshotErrorCount = 0;
 

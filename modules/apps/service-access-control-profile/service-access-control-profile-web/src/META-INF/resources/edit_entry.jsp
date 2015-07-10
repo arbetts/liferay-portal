@@ -26,6 +26,12 @@ SACPEntry sacpEntry = null;
 if (sacpEntryId > 0) {
 	sacpEntry = SACPEntryServiceUtil.getSACPEntry(sacpEntryId);
 }
+
+boolean defaultSACPEntry = false;
+
+if (sacpEntry != null) {
+	defaultSACPEntry = sacpEntry.isDefaultSACPEntry();
+}
 %>
 
 <liferay-ui:header
@@ -47,7 +53,7 @@ if (sacpEntryId > 0) {
 
 	<aui:model-context bean="<%= sacpEntry %>" model="<%= SACPEntry.class %>" />
 
-	<aui:input name="name" required="<%= true %>">
+	<aui:input disabled="<%= defaultSACPEntry %>" name="name" required="<%= true %>">
 		<aui:validator errorMessage="this-field-is-required-and-must-contain-only-following-characters" name="custom">
 			function(val, fieldNode, ruleValue) {
 				var allowedCharacters = '<%= HtmlUtil.escapeJS(SACPEntryConstants.NAME_ALLOWED_CHARACTERS) %>';
@@ -63,7 +69,7 @@ if (sacpEntryId > 0) {
 
 	<aui:input name="title" required="<%= true %>" />
 
-	<aui:input helpMessage="allowed-services-help" name="allowedServices" />
+	<aui:input helpMessage="allowed-service-signatures-help" name="allowedServiceSignatures" />
 
 	<aui:button-row>
 		<aui:button type="submit" value="save" />

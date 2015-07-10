@@ -41,7 +41,7 @@ import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.tools.ArgumentsUtil;
 import com.liferay.portal.tools.sourceformatter.JavaImportsFormatter;
 import com.liferay.portal.xml.SAXReaderFactory;
-import com.liferay.util.xml.XMLFormatter;
+import com.liferay.util.xml.Dom4jUtil;
 import com.liferay.util.xml.XMLSafeReader;
 
 import com.thoughtworks.qdox.JavaDocBuilder;
@@ -80,6 +80,10 @@ import java.io.InputStream;
 
 import java.net.URL;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -98,8 +102,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.io.FileUtils;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -523,7 +525,7 @@ public class ServiceBuilder {
 
 		File tempFile = new File(_TMP_DIR, "ServiceBuilder.temp");
 
-		FileUtils.write(tempFile, content);
+		_write(tempFile, content);
 
 		// Beautify
 
@@ -637,10 +639,8 @@ public class ServiceBuilder {
 
 		// Write file if and only if the file has changed
 
-		if (!file.exists() ||
-			!content.equals(FileUtils.readFileToString(file))) {
-
-			FileUtils.write(file, content);
+		if (!file.exists() || !content.equals(_read(file))) {
+			_write(file, content);
 
 			modifiedFileNames.add(file.getAbsolutePath());
 
@@ -887,30 +887,36 @@ public class ServiceBuilder {
 							_createHbm(entity);
 							_createHbmUtil(entity);
 
-							_createPersistenceImpl(entity);
+							JavaClass modelImplJavaClass = _getJavaClass(
+								_outputPath + "/model/impl/" +
+									entity.getName() + "Impl.java");
+
+							_createPersistenceImpl(entity, modelImplJavaClass);
 							_createPersistence(entity);
 							_createPersistenceUtil(entity);
 
 							if (Validator.isNotNull(_testDirName)) {
-								_createPersistenceTest(entity);
+								_createPersistenceTest(
+									entity, modelImplJavaClass);
 							}
 
-							_createModelImpl(entity);
-							_createExtendedModelBaseImpl(entity);
+							_createModelImpl(entity, modelImplJavaClass);
+							_createExtendedModelBaseImpl(
+								entity, modelImplJavaClass);
 							_createExtendedModelImpl(entity);
 
 							entity.setTransients(_getTransients(entity, false));
 							entity.setParentTransients(
 								_getTransients(entity, true));
 
-							_createModel(entity);
-							_createExtendedModel(entity);
+							_createModel(entity, modelImplJavaClass);
+							_createExtendedModel(entity, modelImplJavaClass);
 
-							_createModelCache(entity);
-							_createModelClp(entity);
+							_createModelCache(entity, modelImplJavaClass);
+							_createModelClp(entity, modelImplJavaClass);
 							_createModelWrapper(entity);
 
-							_createModelSoap(entity);
+							_createModelSoap(entity, modelImplJavaClass);
 
 							_createBlobModels(entity);
 
@@ -1293,7 +1299,7 @@ public class ServiceBuilder {
 						ListUtil.toString(_ejbList, Entity.NAME_ACCESSOR));
 			}
 
-			FileUtils.write(refFile, refContent);
+			_write(refFile, refContent);
 
 			useTempFile = true;
 		}
@@ -1616,7 +1622,10 @@ public class ServiceBuilder {
 		else if (type.equals("Date")) {
 			return "TIMESTAMP";
 		}
-		else if (type.equals("Map") || type.equals("String")) {
+		else if (type.equals("Map")) {
+			return "CLOB";
+		}
+		else if (type.equals("String")) {
 			Map<String, String> hints = ModelHintsUtil.getHints(model, field);
 
 			if (hints != null) {
@@ -1988,6 +1997,20 @@ public class ServiceBuilder {
 		return SAXReaderFactory.getSAXReader(null, false, false);
 	}
 
+	private static void _move(File source, File destination)
+		throws IOException {
+
+		Files.move(source.toPath(), destination.toPath());
+	}
+
+	private static String _read(File file) throws IOException {
+		String s = new String(
+			Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+
+		return StringUtil.replace(
+			s, StringPool.RETURN_NEW_LINE, StringPool.NEW_LINE);
+	}
+
 	private static URL _readJalopyXmlFromClassLoader() {
 		ClassLoader classLoader = ServiceBuilder.class.getClassLoader();
 
@@ -2083,6 +2106,18 @@ public class ServiceBuilder {
 		}
 
 		return content;
+	}
+
+	private static void _touch(File file) throws IOException {
+		Files.createFile(file.toPath());
+	}
+
+	private static void _write(File file, String s) throws IOException {
+		Path path = file.toPath();
+
+		Files.createDirectories(path.getParent());
+
+		Files.write(path, s.getBytes(StandardCharsets.UTF_8));
 	}
 
 	private void _addIndexMetadata(
@@ -2246,7 +2281,7 @@ public class ServiceBuilder {
 			}
 
 			if (exception.startsWith("NoSuch")) {
-				String content = FileUtils.readFileToString(exceptionFile);
+				String content = _read(exceptionFile);
 
 				if (!content.contains("NoSuchModelException")) {
 					content = StringUtil.replace(
@@ -2286,9 +2321,9 @@ public class ServiceBuilder {
 		writeFile(ejbFile, content, _author, _modifiedFileNames);
 	}
 
-	private void _createExtendedModel(Entity entity) throws Exception {
-		JavaClass modelImplJavaClass = _getJavaClass(
-			_outputPath + "/model/impl/" + entity.getName() + "Impl.java");
+	private void _createExtendedModel(
+			Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
 
 		List<JavaMethod> methods = ListUtil.fromArray(
 			_getMethods(modelImplJavaClass));
@@ -2317,6 +2352,8 @@ public class ServiceBuilder {
 		context.put("entity", entity);
 		context.put("methods", methods.toArray(new Object[methods.size()]));
 
+		context = _putDeprecatedKeys(context, modelJavaClass);
+
 		// Content
 
 		String content = _processTemplate(_tplExtendedModel, context);
@@ -2329,10 +2366,15 @@ public class ServiceBuilder {
 		writeFile(modelFile, content, _author, _modifiedFileNames);
 	}
 
-	private void _createExtendedModelBaseImpl(Entity entity) throws Exception {
+	private void _createExtendedModelBaseImpl(
+			Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
+
 		Map<String, Object> context = _getContext();
 
 		context.put("entity", entity);
+
+		context = _putDeprecatedKeys(context, modelImplJavaClass);
 
 		// Content
 
@@ -2361,7 +2403,7 @@ public class ServiceBuilder {
 			_outputPath + "/model/impl/" + entity.getName() + "Impl.java");
 
 		if (modelFile.exists()) {
-			content = FileUtils.readFileToString(modelFile);
+			content = _read(modelFile);
 
 			content = content.replaceAll(
 				"extends\\s+" + entity.getName() +
@@ -2391,6 +2433,8 @@ public class ServiceBuilder {
 		context.put("entity", entity);
 		context.put("methods", _getMethods(javaClass));
 
+		context = _putDeprecatedKeys(context, javaClass);
+
 		// Content
 
 		String content = _processTemplate(_tplFinder, context);
@@ -2419,6 +2463,8 @@ public class ServiceBuilder {
 
 		context.put("entity", entity);
 		context.put("methods", _getMethods(javaClass));
+
+		context = _putDeprecatedKeys(context, javaClass);
 
 		// Content
 
@@ -2483,10 +2529,10 @@ public class ServiceBuilder {
 				"<hibernate-mapping default-lazy=\"false\" auto-import=\"false\">\n" +
 				"</hibernate-mapping>";
 
-			FileUtils.write(xmlFile, xml);
+			_write(xmlFile, xml);
 		}
 
-		String oldContent = FileUtils.readFileToString(xmlFile);
+		String oldContent = _read(xmlFile);
 		String newContent = _fixHbmXml(oldContent);
 
 		int firstImport = newContent.indexOf(
@@ -2541,10 +2587,14 @@ public class ServiceBuilder {
 		writeFileRaw(xmlFile, _formatXml(newContent), _modifiedFileNames);
 	}
 
-	private void _createModel(Entity entity) throws Exception {
+	private void _createModel(Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
+
 		Map<String, Object> context = _getContext();
 
 		context.put("entity", entity);
+
+		context = _putDeprecatedKeys(context, modelImplJavaClass);
 
 		// Content
 
@@ -2558,14 +2608,15 @@ public class ServiceBuilder {
 		writeFile(modelFile, content, _author, _modifiedFileNames);
 	}
 
-	private void _createModelCache(Entity entity) throws Exception {
-		JavaClass javaClass = _getJavaClass(
-			_outputPath + "/model/impl/" + entity.getName() + "Impl.java");
+	private void _createModelCache(Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
 
 		Map<String, Object> context = _getContext();
 
 		context.put("entity", entity);
-		context.put("cacheFields", _getCacheFields(javaClass));
+		context.put("cacheFields", _getCacheFields(modelImplJavaClass));
+
+		context = _putDeprecatedKeys(context, modelImplJavaClass);
 
 		// Content
 
@@ -2580,21 +2631,20 @@ public class ServiceBuilder {
 		writeFile(modelFile, content, _author, _modifiedFileNames);
 	}
 
-	private void _createModelClp(Entity entity) throws Exception {
+	private void _createModelClp(Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
+
 		if (Validator.isNull(_pluginName)) {
 			return;
 		}
 
-		JavaClass javaClass = _getJavaClass(
-			_outputPath + "/model/impl/" + entity.getName() + "Impl.java");
-
 		Map<String, JavaMethod> methods = new HashMap<>();
 
-		for (JavaMethod method : javaClass.getMethods()) {
+		for (JavaMethod method : modelImplJavaClass.getMethods()) {
 			methods.put(method.getDeclarationSignature(false), method);
 		}
 
-		Type superClass = javaClass.getSuperClass();
+		Type superClass = modelImplJavaClass.getSuperClass();
 
 		String superClassValue = superClass.getValue();
 
@@ -2605,7 +2655,7 @@ public class ServiceBuilder {
 				superClassValue = superClassValue.substring(pos + 1);
 			}
 
-			javaClass = _getJavaClass(
+			JavaClass javaClass = _getJavaClass(
 				_outputPath + "/model/impl/" + superClassValue + ".java");
 
 			for (JavaMethod method : _getMethods(javaClass)) {
@@ -2651,10 +2701,10 @@ public class ServiceBuilder {
 				"<model-hints>\n" +
 				"</model-hints>";
 
-			FileUtils.write(xmlFile, xml);
+			_write(xmlFile, xml);
 		}
 
-		String oldContent = FileUtils.readFileToString(xmlFile);
+		String oldContent = _read(xmlFile);
 		String newContent = oldContent;
 
 		int firstModel = newContent.indexOf(
@@ -2680,14 +2730,15 @@ public class ServiceBuilder {
 		writeFileRaw(xmlFile, _formatXml(newContent), _modifiedFileNames);
 	}
 
-	private void _createModelImpl(Entity entity) throws Exception {
-		JavaClass javaClass = _getJavaClass(
-			_outputPath + "/model/impl/" + entity.getName() + "Impl.java");
+	private void _createModelImpl(Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
 
 		Map<String, Object> context = _getContext();
 
 		context.put("entity", entity);
-		context.put("cacheFields", _getCacheFields(javaClass));
+		context.put("cacheFields", _getCacheFields(modelImplJavaClass));
+
+		context = _putDeprecatedKeys(context, modelImplJavaClass);
 
 		// Content
 
@@ -2701,13 +2752,17 @@ public class ServiceBuilder {
 		writeFile(modelFile, content, _author, _modifiedFileNames);
 	}
 
-	private void _createModelSoap(Entity entity) throws Exception {
+	private void _createModelSoap(Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
+
 		File modelFile = new File(
 			_serviceOutputPath + "/model/" + entity.getName() + "Soap.java");
 
 		Map<String, Object> context = _getContext();
 
 		context.put("entity", entity);
+
+		context = _putDeprecatedKeys(context, modelImplJavaClass);
 
 		// Content
 
@@ -2741,6 +2796,8 @@ public class ServiceBuilder {
 		context.put("entity", entity);
 		context.put("methods", methods);
 
+		context = _putDeprecatedKeys(context, modelJavaClass);
+
 		// Content
 
 		String content = _processTemplate(_tplModelWrapper, context);
@@ -2763,6 +2820,8 @@ public class ServiceBuilder {
 		context.put("entity", entity);
 		context.put("methods", _getMethods(javaClass));
 
+		context = _putDeprecatedKeys(context, javaClass);
+
 		// Content
 
 		String content = _processTemplate(_tplPersistence, context);
@@ -2776,11 +2835,16 @@ public class ServiceBuilder {
 		writeFile(ejbFile, content, _author, _modifiedFileNames);
 	}
 
-	private void _createPersistenceImpl(Entity entity) throws Exception {
+	private void _createPersistenceImpl(
+			Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
+
 		Map<String, Object> context = _getContext();
 
 		context.put("entity", entity);
 		context.put("referenceList", _mergeReferenceList(entity));
+
+		context = _putDeprecatedKeys(context, modelImplJavaClass);
 
 		// Content
 
@@ -2809,10 +2873,15 @@ public class ServiceBuilder {
 		}
 	}
 
-	private void _createPersistenceTest(Entity entity) throws Exception {
+	private void _createPersistenceTest(
+			Entity entity, JavaClass modelImplJavaClass)
+		throws Exception {
+
 		Map<String, Object> context = _getContext();
 
 		context.put("entity", entity);
+
+		context = _putDeprecatedKeys(context, modelImplJavaClass);
 
 		// Content
 
@@ -2846,6 +2915,8 @@ public class ServiceBuilder {
 
 		context.put("entity", entity);
 		context.put("methods", _getMethods(javaClass));
+
+		context = _putDeprecatedKeys(context, javaClass);
 
 		// Content
 
@@ -2895,8 +2966,7 @@ public class ServiceBuilder {
 		long buildDate = System.currentTimeMillis();
 
 		if (propsFile.exists()) {
-			Properties properties = PropertiesUtil.load(
-				FileUtils.readFileToString(propsFile));
+			Properties properties = PropertiesUtil.load(_read(propsFile));
 
 			if (!_buildNumberIncrement) {
 				buildDate = GetterUtil.getLong(
@@ -2980,7 +3050,7 @@ public class ServiceBuilder {
 			return;
 		}
 
-		String content = FileUtils.readFileToString(outputFile);
+		String content = _read(outputFile);
 		String newContent = content;
 
 		int x = content.indexOf("<bean ");
@@ -3332,10 +3402,6 @@ public class ServiceBuilder {
 			_implDirName + "/" + StringUtil.replace(_propsUtil, ".", "/") +
 				".java");
 
-		if (file.exists()) {
-			return;
-		}
-
 		Map<String, Object> context = _getContext();
 
 		int index = _propsUtil.lastIndexOf(".");
@@ -3458,10 +3524,10 @@ public class ServiceBuilder {
 			"</beans>";
 
 		if (!xmlFile.exists()) {
-			FileUtils.write(xmlFile, xml);
+			_write(xmlFile, xml);
 		}
 
-		String oldContent = FileUtils.readFileToString(xmlFile);
+		String oldContent = _read(xmlFile);
 
 		if (Validator.isNotNull(_pluginName) &&
 			oldContent.contains("DOCTYPE beans PUBLIC")) {
@@ -3518,7 +3584,7 @@ public class ServiceBuilder {
 		File sqlFile = new File(_sqlDirName + "/" + _sqlIndexesFileName);
 
 		if (!sqlFile.exists()) {
-			FileUtils.touch(sqlFile);
+			_touch(sqlFile);
 		}
 
 		Map<String, List<IndexMetadata>> indexMetadataMap = new TreeMap<>();
@@ -3637,10 +3703,10 @@ public class ServiceBuilder {
 		throws IOException {
 
 		if (!sqlFile.exists()) {
-			FileUtils.touch(sqlFile);
+			_touch(sqlFile);
 		}
 
-		String content = FileUtils.readFileToString(sqlFile);
+		String content = _read(sqlFile);
 
 		int x = content.indexOf(
 			_SQL_CREATE_TABLE + entityMapping.getTable() + " (");
@@ -3705,7 +3771,7 @@ public class ServiceBuilder {
 		File sqlFile = new File(_sqlDirName + "/" + _sqlSequencesFileName);
 
 		if (!sqlFile.exists()) {
-			FileUtils.touch(sqlFile);
+			_touch(sqlFile);
 		}
 
 		Set<String> sequenceSQLs = new TreeSet<>();
@@ -3788,7 +3854,7 @@ public class ServiceBuilder {
 		File sqlFile = new File(_sqlDirName + "/" + _sqlFileName);
 
 		if (!sqlFile.exists()) {
-			FileUtils.touch(sqlFile);
+			_touch(sqlFile);
 		}
 
 		for (int i = 0; i < _ejbList.size(); i++) {
@@ -3826,7 +3892,7 @@ public class ServiceBuilder {
 			}
 		}
 
-		String content = FileUtils.readFileToString(sqlFile);
+		String content = _read(sqlFile);
 
 		writeFileRaw(sqlFile, content.trim(), _modifiedFileNames);
 	}
@@ -3837,10 +3903,10 @@ public class ServiceBuilder {
 		throws IOException {
 
 		if (!sqlFile.exists()) {
-			FileUtils.touch(sqlFile);
+			_touch(sqlFile);
 		}
 
-		String content = FileUtils.readFileToString(sqlFile);
+		String content = _read(sqlFile);
 
 		int x = content.indexOf(_SQL_CREATE_TABLE + entity.getTable() + " (");
 		int y = content.indexOf(");", x);
@@ -3853,7 +3919,7 @@ public class ServiceBuilder {
 					content.substring(0, x) + newCreateTableString +
 						content.substring(y + 2);
 
-				FileUtils.write(sqlFile, content);
+				_write(sqlFile, content);
 			}
 		}
 		else if (addMissingTables) {
@@ -3921,8 +3987,6 @@ public class ServiceBuilder {
 		_deleteFile("docroot/WEB-INF/src/META-INF/hibernate-spring.xml");
 		_deleteFile("docroot/WEB-INF/src/META-INF/infrastructure-spring.xml");
 		_deleteFile("docroot/WEB-INF/src/META-INF/misc-spring.xml");
-		_deleteFile(
-			"docroot/WEB-INF/src/META-INF/shard-data-source-spring.xml");
 	}
 
 	private String _fixHbmXml(String content) throws IOException {
@@ -4035,7 +4099,7 @@ public class ServiceBuilder {
 		}
 
 		xml = StringUtil.replace(xml, '\r', "");
-		xml = XMLFormatter.toString(xml);
+		xml = Dom4jUtil.toString(xml);
 		xml = StringUtil.replace(xml, "\"/>", "\" />");
 
 		if (Validator.isNotNull(doctype)) {
@@ -4576,7 +4640,7 @@ public class ServiceBuilder {
 				_outputPath + "/model/impl/" + entity.getName() + "Impl.java");
 		}
 
-		String content = FileUtils.readFileToString(modelFile);
+		String content = _read(modelFile);
 
 		Matcher matcher = _getterPattern.matcher(content);
 
@@ -4819,9 +4883,9 @@ public class ServiceBuilder {
 				"FinderImpl.java");
 
 		if (originalFinderImpl.exists()) {
-			FileUtils.moveFile(originalFinderImpl, newFinderImpl);
+			_move(originalFinderImpl, newFinderImpl);
 
-			String content = FileUtils.readFileToString(newFinderImpl);
+			String content = _read(newFinderImpl);
 
 			StringBundler sb = new StringBundler();
 

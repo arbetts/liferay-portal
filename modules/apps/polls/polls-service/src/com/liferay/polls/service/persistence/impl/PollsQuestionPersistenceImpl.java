@@ -2665,6 +2665,7 @@ public class PollsQuestionPersistenceImpl extends BasePersistenceImpl<PollsQuest
 		pollsQuestionImpl.setTitle(pollsQuestion.getTitle());
 		pollsQuestionImpl.setDescription(pollsQuestion.getDescription());
 		pollsQuestionImpl.setExpirationDate(pollsQuestion.getExpirationDate());
+		pollsQuestionImpl.setLastPublishDate(pollsQuestion.getLastPublishDate());
 		pollsQuestionImpl.setLastVoteDate(pollsQuestion.getLastVoteDate());
 
 		return pollsQuestionImpl;
@@ -3026,6 +3027,11 @@ public class PollsQuestionPersistenceImpl extends BasePersistenceImpl<PollsQuest
 	@Override
 	protected Set<String> getBadColumnNames() {
 		return _badColumnNames;
+	}
+
+	@Override
+	protected Map<String, Integer> getTableColumnsMap() {
+		return PollsQuestionModelImpl.TABLE_COLUMNS_MAP;
 	}
 
 	/**

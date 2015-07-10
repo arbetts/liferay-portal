@@ -184,18 +184,14 @@
 	<portlet>
 		<portlet-name>33</portlet-name>
 		<display-name>Blogs</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<portlet-class>com.liferay.portlet.blogs.portlet.BlogsPortlet</portlet-class>
 		<init-param>
 			<name>config-template</name>
 			<value>/html/portlet/blogs/configuration.jsp</value>
 		</init-param>
 		<init-param>
 			<name>template-path</name>
-			<value>/html/portlet/blogs/</value>
-		</init-param>
-		<init-param>
-			<name>view-action</name>
-			<value>/blogs/view</value>
+			<value>/</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
@@ -399,27 +395,6 @@
 		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
 	</portlet>
 	<portlet>
-		<portlet-name>88</portlet-name>
-		<display-name>Layouts Admin</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
-		<init-param>
-			<name>template-path</name>
-			<value>/html/portlet/layouts_admin/</value>
-		</init-param>
-		<init-param>
-			<name>view-action</name>
-			<value>/layouts_admin/edit_layouts</value>
-		</init-param>
-		<expiration-cache>0</expiration-cache>
-		<supports>
-			<mime-type>text/html</mime-type>
-		</supports>
-		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
-		<security-role-ref>
-			<role-name>administrator</role-name>
-		</security-role-ref>
-	</portlet>
-	<portlet>
 		<portlet-name>90</portlet-name>
 		<display-name>Portal</display-name>
 		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
@@ -539,14 +514,14 @@
 	<portlet>
 		<portlet-name>114</portlet-name>
 		<display-name>Recent Bloggers</display-name>
-		<portlet-class>com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet</portlet-class>
+		<portlet-class>com.liferay.portlet.recentbloggers.portlet.RecentBloggersPortlet</portlet-class>
 		<init-param>
 			<name>config-template</name>
 			<value>/html/portlet/recent_bloggers/configuration.jsp</value>
 		</init-param>
 		<init-param>
 			<name>template-path</name>
-			<value>/html/portlet/recent_bloggers/</value>
+			<value>/</value>
 		</init-param>
 		<init-param>
 			<name>view-template</name>
@@ -570,18 +545,14 @@
 	<portlet>
 		<portlet-name>115</portlet-name>
 		<display-name>Blogs Aggregator</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<portlet-class>com.liferay.portlet.blogsaggregator.portlet.BlogsAggregatorPortlet</portlet-class>
 		<init-param>
 			<name>config-template</name>
 			<value>/html/portlet/blogs_aggregator/configuration.jsp</value>
 		</init-param>
 		<init-param>
 			<name>template-path</name>
-			<value>/html/portlet/blogs_aggregator/</value>
-		</init-param>
-		<init-param>
-			<name>view-action</name>
-			<value>/blogs_aggregator/view</value>
+			<value>/</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
@@ -714,14 +685,18 @@
 	<portlet>
 		<portlet-name>128</portlet-name>
 		<display-name>Roles Admin</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<portlet-class>com.liferay.portlet.rolesadmin.RolesAdminPortlet</portlet-class>
+		<init-param>
+			<name>mvc-action-command-package-prefix</name>
+			<value>com.liferay.portlet.rolesadmin.action</value>
+		</init-param>
 		<init-param>
 			<name>template-path</name>
 			<value>/html/portlet/roles_admin/</value>
 		</init-param>
 		<init-param>
-			<name>view-action</name>
-			<value>/roles_admin/view</value>
+			<name>view-template</name>
+			<value>/html/portlet/roles_admin/view.jsp</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
@@ -815,15 +790,11 @@
 	</portlet>
 	<portlet>
 		<portlet-name>135</portlet-name>
-		<display-name>Admin Instances</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<display-name>Portal Instances</display-name>
+		<portlet-class>com.liferay.portlet.portalinstances.PortalInstancesPortlet</portlet-class>
 		<init-param>
 			<name>template-path</name>
-			<value>/html/portlet/admin/</value>
-		</init-param>
-		<init-param>
-			<name>view-action</name>
-			<value>/admin_instances/view</value>
+			<value>/html/portlet/portal_instances/</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
@@ -858,32 +829,14 @@
 	<portlet>
 		<portlet-name>139</portlet-name>
 		<display-name>Expando</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<portlet-class>com.liferay.portlet.expando.ExpandoPortlet</portlet-class>
 		<init-param>
 			<name>template-path</name>
 			<value>/html/portlet/expando/</value>
 		</init-param>
 		<init-param>
-			<name>view-action</name>
-			<value>/expando/view</value>
-		</init-param>
-		<expiration-cache>0</expiration-cache>
-		<supports>
-			<mime-type>text/html</mime-type>
-		</supports>
-		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
-	</portlet>
-	<portlet>
-		<portlet-name>140</portlet-name>
-		<display-name>My Pages</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
-		<init-param>
-			<name>template-path</name>
-			<value>/html/portlet/layouts_admin/</value>
-		</init-param>
-		<init-param>
-			<name>view-action</name>
-			<value>/my_pages/view</value>
+			<name>view-template</name>
+			<value>/html/portlet/expando/view.jsp</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
@@ -970,38 +923,16 @@
 		</security-role-ref>
 	</portlet>
 	<portlet>
-		<portlet-name>156</portlet-name>
-		<display-name>Group Pages</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
-		<init-param>
-			<name>template-path</name>
-			<value>/html/portlet/layouts_admin/</value>
-		</init-param>
-		<init-param>
-			<name>view-action</name>
-			<value>/group_pages/edit_layouts</value>
-		</init-param>
-		<expiration-cache>0</expiration-cache>
-		<supports>
-			<mime-type>text/html</mime-type>
-		</supports>
-		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
-	</portlet>
-	<portlet>
 		<portlet-name>161</portlet-name>
 		<display-name>Blogs</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
+		<portlet-class>com.liferay.portlet.blogsadmin.portlet.BlogsAdminPortlet</portlet-class>
 		<init-param>
 			<name>config-template</name>
 			<value>/html/portlet/blogs_admin/configuration.jsp</value>
 		</init-param>
 		<init-param>
 			<name>template-path</name>
-			<value>/html/portlet/blogs_admin/</value>
-		</init-param>
-		<init-param>
-			<name>view-action</name>
-			<value>/blogs_admin/view</value>
+			<value>/</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
@@ -1061,30 +992,6 @@
 		<security-role-ref>
 			<role-name>guest</role-name>
 		</security-role-ref>
-		<security-role-ref>
-			<role-name>power-user</role-name>
-		</security-role-ref>
-		<security-role-ref>
-			<role-name>user</role-name>
-		</security-role-ref>
-	</portlet>
-	<portlet>
-		<portlet-name>170</portlet-name>
-		<display-name>Staging Bar</display-name>
-		<portlet-class>com.liferay.portlet.StrutsPortlet</portlet-class>
-		<init-param>
-			<name>template-path</name>
-			<value>/html/portlet/staging_bar/</value>
-		</init-param>
-		<init-param>
-			<name>view-action</name>
-			<value>/staging_bar/view</value>
-		</init-param>
-		<expiration-cache>0</expiration-cache>
-		<supports>
-			<mime-type>text/html</mime-type>
-		</supports>
-		<resource-bundle>com.liferay.portlet.StrutsResourceBundle</resource-bundle>
 		<security-role-ref>
 			<role-name>power-user</role-name>
 		</security-role-ref>

@@ -19,6 +19,7 @@ import com.liferay.portal.ContactNameException;
 import com.liferay.portal.EmailAddressException;
 import com.liferay.portal.GroupFriendlyURLException;
 import com.liferay.portal.UserEmailAddressException;
+import com.liferay.portal.kernel.captcha.CaptchaConfigurationException;
 import com.liferay.portal.kernel.captcha.CaptchaTextException;
 import com.liferay.portal.kernel.captcha.CaptchaUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -79,13 +80,14 @@ public class CreateAnonymousAccountAction extends PortletAction {
 		Company company = themeDisplay.getCompany();
 
 		if (!company.isStrangers()) {
-			throw new PrincipalException();
+			throw new PrincipalException(
+				"Strangers are not allowed to access the portal");
 		}
 
 		String portletName = portletConfig.getPortletName();
 
 		if (!portletName.equals(PortletKeys.FAST_LOGIN)) {
-			throw new PrincipalException();
+			throw new PrincipalException("Unable to create anonymous account");
 		}
 
 		if (actionRequest.getRemoteUser() != null) {
@@ -130,7 +132,8 @@ public class CreateAnonymousAccountAction extends PortletAction {
 
 				writeJSON(actionRequest, actionResponse, jsonObject);
 			}
-			else if (e instanceof CaptchaTextException ||
+			else if (e instanceof CaptchaConfigurationException ||
+					 e instanceof CaptchaTextException ||
 					 e instanceof CompanyMaxUsersException ||
 					 e instanceof ContactNameException ||
 					 e instanceof EmailAddressException ||

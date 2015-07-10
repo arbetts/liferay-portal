@@ -47,12 +47,20 @@ public class SACPEntryLocalServiceWrapper implements SACPEntryLocalService,
 
 	@Override
 	public com.liferay.service.access.control.profile.model.SACPEntry addSACPEntry(
-		long userId, java.lang.String allowedServices, java.lang.String name,
+		long userId, java.lang.String allowedServiceSignatures,
+		boolean defaultSACPEntry, java.lang.String name,
 		java.util.Map<java.util.Locale, java.lang.String> titleMap,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _sacpEntryLocalService.addSACPEntry(userId, allowedServices,
-			name, titleMap, serviceContext);
+		return _sacpEntryLocalService.addSACPEntry(userId,
+			allowedServiceSignatures, defaultSACPEntry, name, titleMap,
+			serviceContext);
+	}
+
+	@Override
+	public void checkDefaultSACPEntry(long companyId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_sacpEntryLocalService.checkDefaultSACPEntry(companyId);
 	}
 
 	/**
@@ -246,7 +254,7 @@ public class SACPEntryLocalServiceWrapper implements SACPEntryLocalService,
 
 	@Override
 	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery getExportActionableDynamicQuery(
-		com.liferay.portal.kernel.lar.PortletDataContext portletDataContext) {
+		com.liferay.portlet.exportimport.lar.PortletDataContext portletDataContext) {
 		return _sacpEntryLocalService.getExportActionableDynamicQuery(portletDataContext);
 	}
 
@@ -345,13 +353,13 @@ public class SACPEntryLocalServiceWrapper implements SACPEntryLocalService,
 
 	@Override
 	public com.liferay.service.access.control.profile.model.SACPEntry updateSACPEntry(
-		long sacpEntryId, java.lang.String allowedServices,
+		long sacpEntryId, java.lang.String allowedServiceSignatures,
 		java.lang.String name,
 		java.util.Map<java.util.Locale, java.lang.String> titleMap,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _sacpEntryLocalService.updateSACPEntry(sacpEntryId,
-			allowedServices, name, titleMap, serviceContext);
+			allowedServiceSignatures, name, titleMap, serviceContext);
 	}
 
 	/**

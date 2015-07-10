@@ -110,8 +110,16 @@ import java.util.Set;
  * @author ${author}
  * @see ${entity.name}Persistence
  * @see ${packagePath}.service.persistence.${entity.name}Util
+<#if classDeprecated>
+ * @deprecated ${classDeprecatedComment}
+</#if>
  * @generated
  */
+
+<#if classDeprecated>
+	@Deprecated
+</#if>
+
 @ProviderType
 public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.name}> implements ${entity.name}Persistence {
 
@@ -950,9 +958,9 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 
 			for (Serializable primaryKey : uncachedPrimaryKeys) {
 				<#if entity.PKClassName == "String">
-					query.append(StringPool.QUOTE);
+					query.append(StringPool.APOSTROPHE);
 					query.append((String)primaryKey);
-					query.append(StringPool.QUOTE);
+					query.append(StringPool.APOSTROPHE);
 				<#else>
 					query.append(String.valueOf(primaryKey));
 				</#if>
@@ -1425,6 +1433,11 @@ public class ${entity.name}PersistenceImpl extends BasePersistenceImpl<${entity.
 			return _badColumnNames;
 		}
 	</#if>
+
+	@Override
+	protected Map<String, Integer> getTableColumnsMap() {
+		return ${entity.name}ModelImpl.TABLE_COLUMNS_MAP;
+	}
 
 	<#if entity.isHierarchicalTree()>
 		@Override

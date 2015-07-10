@@ -46,6 +46,8 @@ import com.liferay.portal.kernel.log.SanitizerLogWrapper;
 import com.liferay.portal.kernel.plugin.PluginPackage;
 import com.liferay.portal.kernel.sanitizer.Sanitizer;
 import com.liferay.portal.kernel.search.IndexerPostProcessor;
+import com.liferay.portal.kernel.security.auth.verifier.AuthVerifier;
+import com.liferay.portal.kernel.security.auto.login.AutoLogin;
 import com.liferay.portal.kernel.security.pacl.PACLConstants;
 import com.liferay.portal.kernel.security.pacl.permission.PortalHookPermission;
 import com.liferay.portal.kernel.servlet.DirectServletRegistryUtil;
@@ -81,7 +83,7 @@ import com.liferay.portal.kernel.util.Tuple;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
-import com.liferay.portal.kernel.xml.SAXReaderUtil;
+import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
 import com.liferay.portal.language.LiferayResourceBundle;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.repository.registry.RepositoryClassDefinitionCatalogUtil;
@@ -90,10 +92,8 @@ import com.liferay.portal.repository.util.ExternalRepositoryFactoryImpl;
 import com.liferay.portal.security.auth.AuthFailure;
 import com.liferay.portal.security.auth.AuthToken;
 import com.liferay.portal.security.auth.AuthTokenWhitelistUtil;
-import com.liferay.portal.security.auth.AuthVerifier;
 import com.liferay.portal.security.auth.AuthVerifierPipeline;
 import com.liferay.portal.security.auth.Authenticator;
-import com.liferay.portal.security.auth.AutoLogin;
 import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.security.auth.EmailAddressGenerator;
 import com.liferay.portal.security.auth.EmailAddressValidator;
@@ -130,11 +130,10 @@ import com.liferay.portlet.documentlibrary.store.Store;
 import com.liferay.portlet.documentlibrary.store.StoreFactory;
 import com.liferay.portlet.documentlibrary.util.DLProcessor;
 import com.liferay.portlet.documentlibrary.util.DLProcessorRegistryUtil;
-import com.liferay.portlet.dynamicdatamapping.render.DDMFormFieldRenderer;
-import com.liferay.portlet.dynamicdatamapping.render.DDMFormFieldValueRenderer;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistration;
+import com.liferay.taglib.FileAvailabilityUtil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -525,7 +524,7 @@ public class HookHotDeployListener
 
 		_servletContextNames.add(servletContextName);
 
-		Document document = SAXReaderUtil.read(xml, true);
+		Document document = UnsecureSAXReaderUtil.read(xml, true);
 
 		Element rootElement = document.getRootElement();
 
@@ -554,12 +553,6 @@ public class HookHotDeployListener
 
 			return;
 		}
-
-		initDynamicDataMappingFormFieldRenderers(
-			servletContextName, portletClassLoader, rootElement);
-
-		initDynamicDataMappingFormFieldValueRenderers(
-			servletContextName, portletClassLoader, rootElement);
 
 		initIndexerPostProcessors(
 			servletContextName, portletClassLoader, rootElement);
@@ -601,6 +594,7 @@ public class HookHotDeployListener
 		registerClpMessageListeners(servletContext, portletClassLoader);
 
 		DirectServletRegistryUtil.clearServlets();
+		FileAvailabilityUtil.clearAvailabilities();
 
 		if (_log.isInfoEnabled()) {
 			_log.info(
@@ -1029,65 +1023,6 @@ public class HookHotDeployListener
 
 		initCustomJspBag(
 			servletContextName, pluginPackage.getName(), customJspBag);
-	}
-
-	protected void initDynamicDataMappingFormFieldRenderers(
-			String servletContextName, ClassLoader portletClassLoader,
-			Element parentElement)
-		throws Exception {
-
-		List<Element> ddmFormFieldRenderersElements = parentElement.elements(
-			"dynamic-data-mapping-form-field-renderer");
-
-		if (ddmFormFieldRenderersElements.isEmpty()) {
-			return;
-		}
-
-		for (Element ddmFormFieldRendererElement :
-				ddmFormFieldRenderersElements) {
-
-			String ddmFormFieldRendererClassName =
-				ddmFormFieldRendererElement.getText();
-
-			DDMFormFieldRenderer ddmFormFieldRenderer =
-				(DDMFormFieldRenderer)newInstance(
-					portletClassLoader, DDMFormFieldRenderer.class,
-					ddmFormFieldRendererClassName);
-
-			registerService(
-				servletContextName, ddmFormFieldRendererClassName,
-				DDMFormFieldRenderer.class, ddmFormFieldRenderer);
-		}
-	}
-
-	protected void initDynamicDataMappingFormFieldValueRenderers(
-			String servletContextName, ClassLoader portletClassLoader,
-			Element parentElement)
-		throws Exception {
-
-		List<Element> ddmFormFieldValueRenderersElements =
-			parentElement.elements(
-				"dynamic-data-mapping-form-field-value-renderer");
-
-		if (ddmFormFieldValueRenderersElements.isEmpty()) {
-			return;
-		}
-
-		for (Element ddmFormFieldValueRendererElement :
-				ddmFormFieldValueRenderersElements) {
-
-			String ddmFormFieldValueRendererClassName =
-				ddmFormFieldValueRendererElement.getText();
-
-			DDMFormFieldValueRenderer ddmFormFieldValueRenderer =
-				(DDMFormFieldValueRenderer)newInstance(
-					portletClassLoader, DDMFormFieldValueRenderer.class,
-					ddmFormFieldValueRendererClassName);
-
-			registerService(
-				servletContextName, ddmFormFieldValueRendererClassName,
-				DDMFormFieldValueRenderer.class, ddmFormFieldValueRenderer);
-		}
 	}
 
 	protected void initEvent(

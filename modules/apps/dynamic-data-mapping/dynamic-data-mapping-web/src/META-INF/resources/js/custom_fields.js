@@ -266,7 +266,7 @@ AUI.add(
 						LinkToPageCellEditor.superclass.renderUI.apply(instance, arguments);
 
 						A.io.request(
-							themeDisplay.getPathMain() + '/layouts_admin/get_layouts',
+							themeDisplay.getPathMain() + '/portal/get_layouts',
 							{
 								after: {
 									success: function() {
@@ -531,16 +531,9 @@ AUI.add(
 			var defaultLocale = translationManager.get('defaultLocale');
 			var editingLocale = translationManager.get('editingLocale');
 
-			UNLOCALIZABLE_FIELD_ATTRS.forEach(
-				function(item, index) {
-					if (defaultLocale === editingLocale) {
-						AArray.removeItem(val, item);
-					}
-					else {
-						val.push(item);
-					}
-				}
-			);
+			if (defaultLocale !== editingLocale) {
+				val = UNLOCALIZABLE_FIELD_ATTRS.concat(val);
+			}
 
 			return AArray.dedupe(val);
 		};

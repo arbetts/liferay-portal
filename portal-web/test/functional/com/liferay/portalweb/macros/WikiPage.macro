@@ -1,6 +1,12 @@
 <definition>
 	<var name="assetType" value="Wiki Page" />
 
+	<command name="_editEmptyFrontPage">
+		<execute function="AssertClick" locator1="PGWiki#ADD_FRONTPAGE" value1="This page is empty. Edit it to add some text." />
+
+		<execute function="Type#typeFrameWaitForCKEditor" locator1="CKEditor#BODY_FIELD" value1="${wikiPageContent}" />
+	</command>
+
 	<command name="addAttachmentViaPageDetailsPG">
 		<var name="key_attachmentFileName" value="${attachmentFileName}" />
 		<var name="key_wikiPageTitle" value="${wikiPageTitle}" />
@@ -132,7 +138,7 @@
 		<execute function="Type#typeFrameWaitForCKEditor" locator1="CKEditor#BODY_FIELD" value1="${wikiChildPageContent}" />
 		<execute function="AssertClick" locator1="PGWikiAddpage#PUBLISH_BUTTON" value1="Publish" />
 		<execute function="AssertTextEquals" locator1="PGWikiAddpage#PORTLET_ERROR_MESSAGE" value1="Your request failed to complete." />
-		<execute function="AssertTextEquals" locator1="PGWikiAddpage#TITLE_ERROR_MESSAGE" value1="Please enter a valid title." />\
+		<execute function="AssertTextEquals" locator1="PGWikiAddpage#TITLE_ERROR_MESSAGE" value1="Please enter a valid title." />
 	</command>
 
 	<command name="addFrontPageChildPageInvalidTitleViaWD">
@@ -211,6 +217,7 @@
 			<then>
 				<execute macro="WikiPage#addTagPGCmd">
 					<var name="tagName" value="${tagName}" />
+					<var name="tagNameList" value="${tagNameList}" />
 					<var name="wikiPageTitle" value="${wikiPageTitle}" />
 				</execute>
 
@@ -244,6 +251,14 @@
 		<execute function="AssertClick#assertTextClickAtAndWaitCKEditor" locator1="PGWikidisplayAddpage#PUBLISH_BUTTON" value1="Publish" />
 
 		<execute function="AssertTextEquals" locator1="PGWikidisplay#SUCCESS_MESSAGE" value1="Your request completed successfully." />
+	</command>
+
+	<command name="addFrontPageWithWorkflowPG">
+		<execute macro="WikiPage#_editEmptyFrontPage">
+			<var name="wikiPageContent" value="${wikiPageContent}" />
+		</execute>
+
+		<execute macro="WikiPage#submitForPublication" />
 	</command>
 
 	<command name="addLocalizedFrontPagePG">
@@ -396,6 +411,7 @@
 			<then>
 				<execute macro="WikiPage#addTagPGCmd">
 					<var name="tagName" value="${tagName}" />
+					<var name="tagNameList" value="${tagNameList}" />
 					<var name="wikiPageTitle" value="${wikiPageTitle}" />
 				</execute>
 
@@ -1079,6 +1095,12 @@
 
 		<execute function="Type" locator1="PGWiki#SEARCH_FIELD" value1="${searchTerm}" />
 		<execute function="AssertClick" locator1="PGWiki#SEARCH_BUTTON" value1="Search" />
+	</command>
+
+	<command name="submitForPublication">
+		<execute function="AssertClick" locator1="PGWikiAddpage#SUBMIT_FOR_PUBLICATION_BUTTON" value1="Submit for Publication" />
+
+		<execute function="AssertTextEquals" locator1="PGWiki#SUCCESS_MESSAGE" value1="Your request completed successfully." />
 	</command>
 
 	<command name="subscribeToPagePG">

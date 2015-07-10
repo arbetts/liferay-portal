@@ -25,7 +25,7 @@
 </tr>
 <tr>
 	<td>SCRIPT_FIELD</td>
-	<td>//input[contains(@id,'script')]</td>
+	<td>//div[contains(.,'Script File')]/input[@type='file']</td>
 	<td></td>
 </tr>
 <tr>
@@ -41,6 +41,11 @@
 <tr>
 	<td>CANCEL_BUTTON</td>
 	<td>//div[@class='button-holder ']/button[contains(.,' Cancel ')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>RSS_FEEDS</td>
+	<td>//ul[@class='palette-item-content']//li/span[contains(.,'RSS Feeds')]</td>
 	<td></td>
 </tr>
 </tbody>

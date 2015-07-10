@@ -94,7 +94,7 @@ boolean checkedOut = false;
 boolean hasLock = false;
 boolean pending = false;
 
-Lock lock = null;
+com.liferay.portal.kernel.lock.Lock lock = null;
 
 if (fileEntry != null) {
 	approved = fileVersion.isApproved();
@@ -159,7 +159,7 @@ else {
 
 	if (fileVersion != null) {
 		headerTitle = fileVersion.getTitle();
-		localizeTitle= false;
+		localizeTitle = false;
 	}
 	else if ((dlFileEntryType != null) && (fileEntryTypeId != 0)) {
 		headerTitle = LanguageUtil.format(request, "new-x", dlFileEntryType.getName(locale), false);
@@ -380,14 +380,12 @@ else {
 						List<DDMStructure> ddmStructures = dlFileEntryType.getDDMStructures();
 
 						for (DDMStructure ddmStructure : ddmStructures) {
-								Fields fields = null;
+								DDMFormValues ddmFormValues = null;
 
 								try {
 									DLFileEntryMetadata fileEntryMetadata = DLFileEntryMetadataLocalServiceUtil.getFileEntryMetadata(ddmStructure.getStructureId(), fileVersionId);
 
-									DDMFormValues ddmFormValues = StorageEngineUtil.getDDMFormValues(fileEntryMetadata.getDDMStorageId());
-
-									fields = DDMFormValuesToFieldsConverterUtil.convert(ddmStructure, ddmFormValues);
+									ddmFormValues = StorageEngineUtil.getDDMFormValues(fileEntryMetadata.getDDMStorageId());
 								}
 								catch (Exception e) {
 								}
@@ -400,7 +398,7 @@ else {
 								<liferay-ddm:html
 									classNameId="<%= PortalUtil.getClassNameId(DDMStructure.class) %>"
 									classPK="<%= ddmStructure.getPrimaryKey() %>"
-									fields="<%= fields %>"
+									ddmFormValues="<%= ddmFormValues %>"
 									fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
 									requestedLocale="<%= locale %>"
 								/>
@@ -498,7 +496,6 @@ else {
 <liferay-ui:upload-progress
 	id="<%= uploadProgressId %>"
 	message="uploading"
-	redirect="<%= redirect %>"
 />
 
 <aui:script>

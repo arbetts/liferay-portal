@@ -76,6 +76,10 @@ public class CommentManagerUtil {
 		getCommentManager().deleteDiscussion(className, classPK);
 	}
 
+	public static Comment fetchComment(long commentId) {
+		return getCommentManager().fetchComment(commentId);
+	}
+
 	public static CommentManager getCommentManager() {
 		PortalRuntimePermission.checkGetBeanProperty(CommentManagerUtil.class);
 
@@ -99,6 +103,10 @@ public class CommentManagerUtil {
 		PermissionChecker permissionChecker) {
 
 		return getCommentManager().getDiscussionPermission(permissionChecker);
+	}
+
+	public static DiscussionStagingHandler getDiscussionStagingHandler() {
+		return getCommentManager().getDiscussionStagingHandler();
 	}
 
 	public static boolean hasDiscussion(String className, long classPK)
