@@ -17,6 +17,7 @@ package com.liferay.portlet.exportimport.backgroundtask;
 import com.liferay.portal.LayoutPrototypeException;
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.PortletIdException;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskDisplayDetailsItem;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskDisplayJSONTransformer;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -56,6 +57,7 @@ import com.liferay.portlet.exportimport.lar.StagedModelType;
 
 import java.io.Serializable;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -73,7 +75,8 @@ public class StagingBackgroundTaskDisplayHelperImpl
 		Locale locale, Map<String, MissingReference> missingReferences,
 		Map<String, Serializable> contextMap) {
 
-		JSONArray errorMessagesJSONArray = JSONFactoryUtil.createJSONArray();
+		List<BackgroundTaskDisplayDetailsItem>
+			backgroundTaskDisplayDetailsItems = new ArrayList<>();
 
 		for (String missingReferenceDisplayName : missingReferences.keySet()) {
 			MissingReference missingReference = missingReferences.get(
@@ -134,12 +137,16 @@ public class StagingBackgroundTaskDisplayHelperImpl
 						false);
 			}
 
-			BackgroundTaskDisplayJSONTransformer.appendJSONObjectToItemsList(
-				errorMessagesJSONArray, info, errorMessage,
-				missingReferenceDisplayName);
+			BackgroundTaskDisplayDetailsItem backgroundTaskDisplayDetailsItem =
+				new BackgroundTaskDisplayDetailsItem(
+					info, errorMessage, missingReferenceDisplayName);
+
+			backgroundTaskDisplayDetailsItems.add(
+				backgroundTaskDisplayDetailsItem);
 		}
 
-		return errorMessagesJSONArray;
+		return BackgroundTaskDisplayJSONTransformer.toJSONArray(
+			backgroundTaskDisplayDetailsItems);
 	}
 
 	@Override
@@ -151,9 +158,6 @@ public class StagingBackgroundTaskDisplayHelperImpl
 		if (contextMap != null) {
 			cmd = (String)contextMap.get(Constants.CMD);
 		}
-
-		JSONObject exceptionMessagesJSONObject =
-			JSONFactoryUtil.createJSONObject();
 
 		String errorMessage = StringPool.BLANK;
 		JSONArray errorMessagesJSONArray = null;
@@ -258,9 +262,14 @@ public class StagingBackgroundTaskDisplayHelperImpl
 				String modelResource = ResourceActionsUtil.getModelResource(
 					locale, layoutPrototypeClassName);
 
-				BackgroundTaskDisplayJSONTransformer.appendJSONObjectToItemsList(
-					errorMessagesJSONArray, layoutPrototypeUuid, modelResource,
-					layoutPrototypeName);
+				BackgroundTaskDisplayDetailsItem
+					backgroundTaskDisplayDetailsItem =
+						new BackgroundTaskDisplayDetailsItem(
+							layoutPrototypeUuid, modelResource,
+							layoutPrototypeName);
+
+				errorMessagesJSONArray.put(
+					backgroundTaskDisplayDetailsItem.toJSONObject());
 			}
 
 			errorType = ServletResponseConstants.SC_FILE_CUSTOM_EXCEPTION;
@@ -306,6 +315,7 @@ public class StagingBackgroundTaskDisplayHelperImpl
 			errorMessagesJSONArray = getErrorMessagesJSONArray(
 				locale, missingReferences.getDependencyMissingReferences(),
 				contextMap);
+
 			errorType = ServletResponseConstants.SC_FILE_CUSTOM_EXCEPTION;
 			warningMessagesJSONArray = getWarningMessagesJSONArray(
 				locale, missingReferences.getWeakMissingReferences(),
@@ -388,6 +398,9 @@ public class StagingBackgroundTaskDisplayHelperImpl
 			errorType = ServletResponseConstants.SC_FILE_CUSTOM_EXCEPTION;
 		}
 
+		JSONObject exceptionMessagesJSONObject =
+			JSONFactoryUtil.createJSONObject();
+
 		exceptionMessagesJSONObject.put("message", errorMessage);
 
 		if ((errorMessagesJSONArray != null) &&
@@ -414,7 +427,8 @@ public class StagingBackgroundTaskDisplayHelperImpl
 		Locale locale, Map<String, MissingReference> missingReferences,
 		Map<String, Serializable> contextMap) {
 
-		JSONArray warningMessagesJSONArray = JSONFactoryUtil.createJSONArray();
+		List<BackgroundTaskDisplayDetailsItem>
+			backgroundTaskDisplayDetailsItems = new ArrayList<>();
 
 		for (String missingReferenceReferrerClassName :
 				missingReferences.keySet()) {
@@ -439,12 +453,16 @@ public class StagingBackgroundTaskDisplayHelperImpl
 			String errorMessage = ResourceActionsUtil.getModelResource(
 				locale, missingReferenceReferrerClassName);
 
-			BackgroundTaskDisplayJSONTransformer.appendJSONObjectToItemsList(
-				warningMessagesJSONArray, info, errorMessage,
-				String.valueOf(referrers.size()));
+			BackgroundTaskDisplayDetailsItem backgroundTaskDisplayDetailsItem =
+				new BackgroundTaskDisplayDetailsItem(
+					info, errorMessage, String.valueOf(referrers.size()));
+
+			backgroundTaskDisplayDetailsItems.add(
+				backgroundTaskDisplayDetailsItem);
 		}
 
-		return warningMessagesJSONArray;
+		return BackgroundTaskDisplayJSONTransformer.toJSONArray(
+			backgroundTaskDisplayDetailsItems);
 	}
 
 }
