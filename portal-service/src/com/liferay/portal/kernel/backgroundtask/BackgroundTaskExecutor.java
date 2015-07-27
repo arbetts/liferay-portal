@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.backgroundtask;
 
+import java.util.Locale;
+
 /**
  * @author Michael C. Han
  */
@@ -21,6 +23,9 @@ public interface BackgroundTaskExecutor {
 
 	public BackgroundTaskResult execute(BackgroundTask backgroundTask)
 		throws Exception;
+
+	public BackgroundTaskDisplay getBackgroundTaskDisplay(
+		BackgroundTask backgroundTask, Locale locale);
 
 	public BackgroundTaskStatusMessageTranslator
 		getBackgroundTaskStatusMessageTranslator();
