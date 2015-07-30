@@ -16,6 +16,7 @@ package com.liferay.portlet.exportimport.backgroundtask;
 
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.exportimport.backgroundtask.StagingBackgroundTaskDisplay;
+import com.liferay.exportimport.backgroundtask.ExportImportBackgroundTaskDisplay;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskDisplay;
 import com.liferay.portal.kernel.backgroundtask.BaseBackgroundTaskExecutor;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -43,7 +44,7 @@ public abstract class BaseExportImportBackgroundTaskExecutor
 
 	@Override
 	public Class<? extends BackgroundTaskDisplay> getBackgroundTaskDisplay() {
-		return StagingBackgroundTaskDisplay.class;
+		return ExportImportBackgroundTaskDisplay.class;
 	}
 
 	@Override
