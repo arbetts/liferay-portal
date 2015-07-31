@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.transaction.TransactionAttribute;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portlet.exportimport.model.ExportImportConfiguration;
 import com.liferay.portlet.exportimport.service.ExportImportConfigurationLocalServiceUtil;
+import com.liferay.portlet.exportimport.staging.ExportImportBackgroundTaskDisplay;
 import com.liferay.portlet.exportimport.staging.StagingBackgroundTaskDisplayHelperUtil;
 
 import java.io.Serializable;
