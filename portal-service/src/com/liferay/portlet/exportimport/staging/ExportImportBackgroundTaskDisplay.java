@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.exportimport.staging;
 
+import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskDisplayDetails;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskDisplayDetailsSection;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatus;
@@ -30,7 +31,6 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.BackgroundTask;
 import com.liferay.portal.security.permission.ResourceActionsUtil;
 
 import java.io.Serializable;
