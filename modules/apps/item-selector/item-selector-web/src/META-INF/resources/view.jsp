@@ -36,35 +36,63 @@ List<String> titles = localizedItemSelectorRendering.getTitles();
 		<div class="alert alert-info">
 
 			<%
-			ResourceBundle resourceBundle = ResourceBundle.getBundle("content/Language", locale);
+			ResourceBundle resourceBundle = ResourceBundleUtil.getBundle("content/Language", locale, getClass());
 			%>
 
 			<%= LanguageUtil.get(resourceBundle, "selection-is-not-available") %>
 		</div>
 	</c:when>
 	<c:otherwise>
-		<liferay-ui:tabs names="<%= StringUtil.merge(titles) %>" refresh="<%= false %>" type="pills" value="<%= localizedItemSelectorRendering.getSelectedTab() %>">
+
+		<%
+		String selectedTab = localizedItemSelectorRendering.getSelectedTab();
+
+		if (Validator.isNull(selectedTab)) {
+			selectedTab = titles.get(0);
+		}
+
+		ItemSelectorViewRenderer itemSelectorViewRenderer = localizedItemSelectorRendering.getItemSelectorViewRenderer(selectedTab);
+		%>
+
+		<aui:nav-bar cssClass="collapse-basic-search" markupView="lexicon">
+			<aui:nav cssClass="navbar-nav">
+
+				<%
+				for (String title : titles) {
+					ItemSelectorViewRenderer curItemSelectorViewRenderer = localizedItemSelectorRendering.getItemSelectorViewRenderer(title);
+
+					PortletURL portletURL = curItemSelectorViewRenderer.getPortletURL();
+				%>
+
+					<aui:nav-item
+						href="<%= portletURL.toString() %>"
+						label="<%= title %>"
+						selected="<%= selectedTab.equals(title) %>"
+					/>
+
+				<%
+				}
+				%>
+
+			</aui:nav>
 
 			<%
-			for (String title : titles) {
-				ItemSelectorViewRenderer itemSelectorViewRenderer = localizedItemSelectorRendering.getItemSelectorViewRenderer(title);
+			ItemSelectorView<ItemSelectorCriterion> itemSelectorView = itemSelectorViewRenderer.getItemSelectorView();
 			%>
 
-				<liferay-ui:section>
-					<div>
+			<c:if test="<%= itemSelectorView.isShowSearch() %>">
+				<aui:nav-bar-search>
+					<aui:form action="<%= currentURL %>" name="searchFm">
+						<liferay-ui:input-search markupView="lexicon" />
+					</aui:form>
+				</aui:nav-bar-search>
+			</c:if>
+		</aui:nav-bar>
 
-						<%
-						itemSelectorViewRenderer.renderHTML(pageContext);
-						%>
+		<%
+		itemSelectorViewRenderer.renderHTML(pageContext);
+		%>
 
-					</div>
-				</liferay-ui:section>
-
-			<%
-			}
-			%>
-
-		</liferay-ui:tabs>
 	</c:otherwise>
 </c:choose>
 
