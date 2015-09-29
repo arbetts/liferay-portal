@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.search.backgroundTask;
 
+import com.liferay.portal.kernel.search.SearchContext;
+
 /**
  * @author Andrew Betts
  */
@@ -21,4 +23,5 @@ public interface ReindexStatusMessageSender {
 
 	public void sendStatusMessage(String message);
 
+	public void sendStatusMessage(String methodName, SearchContext searchContext);
 }

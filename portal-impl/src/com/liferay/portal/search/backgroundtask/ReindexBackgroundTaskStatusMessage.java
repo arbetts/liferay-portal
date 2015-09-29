@@ -15,6 +15,7 @@
 package com.liferay.portal.search.backgroundtask;
 
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessage;
+import com.liferay.portal.kernel.search.SearchContext;
 
 /**
  * @author Andrew Betts
@@ -22,8 +23,18 @@ import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessage;
 public class ReindexBackgroundTaskStatusMessage
 	extends BackgroundTaskStatusMessage {
 
-	public ReindexBackgroundTaskStatusMessage() {
+	public ReindexBackgroundTaskStatusMessage(String message) {
 		super();
+
+		put("message", message);
 	}
 
+	public ReindexBackgroundTaskStatusMessage(
+		String methodName, SearchContext searchContext) {
+		String[] entryClassNames = searchContext.getEntryClassNames();
+		String entryClassName = entryClassNames[0];
+
+		put("message", methodName + entryClassName);
+
+	}
 }

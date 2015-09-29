@@ -15,6 +15,7 @@
 package com.liferay.portal.search.backgroundtask;
 
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageSender;
+import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.backgroundTask.ReindexStatusMessageSender;
 
 /**
@@ -26,7 +27,16 @@ public class ReindexStatusMessageSenderImpl
 	@Override
 	public void sendStatusMessage(String message) {
 		ReindexBackgroundTaskStatusMessage reindexBackgroundTaskStatusMessage =
-			new ReindexBackgroundTaskStatusMessage();
+			new ReindexBackgroundTaskStatusMessage(message);
+
+		_backgroundTaskStatusMessageSender.setBackgroundTaskStatusMessage(
+			reindexBackgroundTaskStatusMessage);
+	}
+
+	@Override
+	public void sendStatusMessage(String methodName, SearchContext searchContext) {
+		ReindexBackgroundTaskStatusMessage reindexBackgroundTaskStatusMessage =
+			new ReindexBackgroundTaskStatusMessage(methodName, searchContext);
 
 		_backgroundTaskStatusMessageSender.setBackgroundTaskStatusMessage(
 			reindexBackgroundTaskStatusMessage);

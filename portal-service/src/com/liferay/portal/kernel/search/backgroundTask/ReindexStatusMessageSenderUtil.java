@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.search.backgroundTask;
 
+import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermission;
 
 /**
@@ -34,6 +35,12 @@ public class ReindexStatusMessageSenderUtil {
 		getReindexStatusMessageSender().sendStatusMessage(message);
 	}
 
+	public static void sendStatusMessage(
+		String methodName, SearchContext searchContext) {
+
+		getReindexStatusMessageSender().sendStatusMessage(
+			methodName, searchContext);
+	}
 
 	public void setReindexStatusMessageSender(
 		ReindexStatusMessageSender reindexStatusMessageSender) {
