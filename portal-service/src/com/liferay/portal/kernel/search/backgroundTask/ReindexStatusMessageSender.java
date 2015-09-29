@@ -23,5 +23,7 @@ public interface ReindexStatusMessageSender {
 
 	public void sendStatusMessage(String message);
 
-	public void sendStatusMessage(String methodName, SearchContext searchContext);
+	public void sendStatusMessage(
+		String methodName, SearchContext searchContext);
+
 }

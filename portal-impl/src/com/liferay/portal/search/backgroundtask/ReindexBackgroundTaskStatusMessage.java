@@ -24,17 +24,16 @@ public class ReindexBackgroundTaskStatusMessage
 	extends BackgroundTaskStatusMessage {
 
 	public ReindexBackgroundTaskStatusMessage(String message) {
-		super();
-
 		put("message", message);
 	}
 
 	public ReindexBackgroundTaskStatusMessage(
 		String methodName, SearchContext searchContext) {
+
 		String[] entryClassNames = searchContext.getEntryClassNames();
 		String entryClassName = entryClassNames[0];
 
 		put("message", methodName + entryClassName);
-
 	}
+
 }

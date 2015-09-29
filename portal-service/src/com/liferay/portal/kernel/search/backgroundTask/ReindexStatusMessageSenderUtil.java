@@ -50,7 +50,6 @@ public class ReindexStatusMessageSenderUtil {
 		_reindexStatusMessageSender = reindexStatusMessageSender;
 	}
 
-	private static ReindexStatusMessageSender
-		_reindexStatusMessageSender;
+	private static ReindexStatusMessageSender _reindexStatusMessageSender;
 
 }

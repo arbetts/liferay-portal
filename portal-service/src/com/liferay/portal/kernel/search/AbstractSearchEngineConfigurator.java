@@ -336,7 +336,7 @@ public abstract class AbstractSearchEngineConfigurator
 
 		IndexWriter reindexWriter = (IndexWriter)ProxyUtil.newProxyInstance(
 			this.getClass().getClassLoader(),
-			new Class<?>[]{IndexWriter.class},
+			new Class<?>[] {IndexWriter.class},
 			new ReindexStatusMessageIndexWriterWrapper(getIndexWriter()));
 
 		SearchEngineProxyWrapper searchEngineProxyWrapper =

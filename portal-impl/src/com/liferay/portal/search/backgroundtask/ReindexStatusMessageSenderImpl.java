@@ -34,7 +34,9 @@ public class ReindexStatusMessageSenderImpl
 	}
 
 	@Override
-	public void sendStatusMessage(String methodName, SearchContext searchContext) {
+	public void sendStatusMessage(
+		String methodName, SearchContext searchContext) {
+
 		ReindexBackgroundTaskStatusMessage reindexBackgroundTaskStatusMessage =
 			new ReindexBackgroundTaskStatusMessage(methodName, searchContext);
 
