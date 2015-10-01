@@ -12,14 +12,16 @@
  * details.
  */
 
-package com.liferay.portal.kernel.search.backgroundTask;
+package com.liferay.portal.kernel.search.background.task;
 
+import aQute.bnd.annotation.ProviderType;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermission;
 
 /**
  * @author Andrew Betts
  */
+@ProviderType
 public class ReindexStatusMessageSenderUtil {
 
 	public static ReindexStatusMessageSender

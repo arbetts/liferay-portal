@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.SearchEngineUtil;
+import com.liferay.portal.kernel.search.background.task.ReindexStatusMessageSenderUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.util.PropsValues;
 
@@ -88,6 +89,8 @@ public class SearchEngineInitializer implements Runnable {
 		stopWatch.start();
 
 		try {
+			ReindexStatusMessageSenderUtil.sendStatusMessage(
+				"INITIALIZATION PHASE");
 			SearchEngineUtil.removeCompany(_companyId);
 
 			SearchEngineUtil.initialize(_companyId);
@@ -95,6 +98,7 @@ public class SearchEngineInitializer implements Runnable {
 			List<Indexer<?>> indexers = IndexerRegistryUtil.getIndexers();
 
 			Set<String> searchEngineIds = new HashSet<>();
+			ReindexStatusMessageSenderUtil.sendStatusMessage("REINDEX PHASE");
 
 			for (Indexer<?> indexer : indexers) {
 				String searchEngineId = indexer.getSearchEngineId();
@@ -134,7 +138,15 @@ public class SearchEngineInitializer implements Runnable {
 			_log.info("Reindexing with " + indexer.getClass() + " started");
 		}
 
+		ReindexStatusMessageSenderUtil.sendStatusMessage(
+			"Reindexing with " + indexer.getClass() + " started");
+
 		indexer.reindex(new String[] {String.valueOf(_companyId)});
+
+		ReindexStatusMessageSenderUtil.sendStatusMessage(
+			"Reindexing with " + indexer.getClass() +
+			" completed in " + (stopWatch.getTime() / Time.SECOND) +
+			" seconds");
 
 		_usedSearchEngineIds.add(indexer.getSearchEngineId());
 

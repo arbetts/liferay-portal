@@ -12,12 +12,14 @@
  * details.
  */
 
-package com.liferay.portal.kernel.search.backgroundTask;
+package com.liferay.portal.kernel.search.background.task;
 
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.search.IndexWriter;
 import com.liferay.portal.kernel.search.SearchContext;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 
 /**
  * @author Andrew Betts
@@ -84,5 +86,14 @@ public class ReindexStatusMessageIndexWriterWrapper
 	}
 
 	private final IndexWriter _indexWriter;
+
+	@Override
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
+			sendStatusMessage(method.getName(), args);
+		}
+
+		return method.invoke(_indexWriter, args);
+	}
 
 }

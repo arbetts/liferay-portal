@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.portal.kernel.search.backgroundTask;
+package com.liferay.portal.kernel.search.background.task;
 
 import com.liferay.portal.kernel.search.SearchContext;
 

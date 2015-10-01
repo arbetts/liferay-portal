@@ -16,7 +16,7 @@ package com.liferay.portal.search.backgroundtask;
 
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskStatusMessageSender;
 import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.kernel.search.backgroundTask.ReindexStatusMessageSender;
+import com.liferay.portal.kernel.search.background.task.ReindexStatusMessageSender;
 
 /**
  * @author Andrew Betts
