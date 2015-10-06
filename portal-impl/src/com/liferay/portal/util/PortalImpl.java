@@ -3414,7 +3414,9 @@ public class PortalImpl implements Portal {
 
 		String localizedFriendlyURL = contextPath;
 
-		if (appendI18nPath) {
+		if (LanguageUtil.isAvailableLocale(layout.getGroupId(), locale) &&
+			appendI18nPath) {
+
 			localizedFriendlyURL += StringPool.SLASH + i18nPath;
 		}
 
@@ -7531,6 +7533,8 @@ public class PortalImpl implements Portal {
 					PortletCategoryKeys.CONTROL_PANEL_CONFIGURATION) ||
 				portletCategory.equals(
 					PortletCategoryKeys.CONTROL_PANEL_SITES) ||
+				portletCategory.equals(
+					PortletCategoryKeys.CONTROL_PANEL_SYSTEM) ||
 				portletCategory.equals(
 					PortletCategoryKeys.CONTROL_PANEL_USERS)) {
 

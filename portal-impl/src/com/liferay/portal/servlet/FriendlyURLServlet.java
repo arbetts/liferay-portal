@@ -330,6 +330,26 @@ public class FriendlyURLServlet extends HttpServlet {
 
 					Locale locale = PortalUtil.getLocale(request);
 
+					String i18nLanguageId = (String)request.getAttribute(
+								WebKeys.I18N_LANGUAGE_ID);
+
+					if (Validator.isNotNull(i18nLanguageId)) {
+						locale = LocaleUtil.fromLanguageId(i18nLanguageId);
+
+						if(!LanguageUtil.isAvailableLocale(
+							group.getGroupId(), locale)) {
+
+							Locale originalLocale = setAlternativeLayoutFriendlyURL(
+								request, layout,
+								layoutFriendlyURLCompositeFriendlyURL);
+
+							String redirect = PortalUtil.getLocalizedFriendlyURL(
+								request, layout, locale, originalLocale);
+
+							return new Object[] {redirect, Boolean.TRUE};
+						}
+					}
+
 					if (LanguageUtil.isAvailableLocale(
 							group.getGroupId(), locale) &&
 						!StringUtil.equalsIgnoreCase(
