@@ -15,6 +15,7 @@
 package com.liferay.portal.kernel.search;
 
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.security.permission.PermissionChecker;
 
 import java.util.Collection;
@@ -31,6 +32,8 @@ import javax.portlet.PortletResponse;
 public interface Indexer<T> {
 
 	public static final int DEFAULT_INTERVAL = 10000;
+
+	public void delete(Group group) throws SearchException;
 
 	public void delete(long companyId, String uid) throws SearchException;
 
@@ -135,6 +138,8 @@ public interface Indexer<T> {
 
 	@Bufferable
 	public void reindex(Collection<T> objects) throws SearchException;
+
+	public void reindex(Group group) throws SearchException;
 
 	@Bufferable
 	public void reindex(String className, long classPK) throws SearchException;
