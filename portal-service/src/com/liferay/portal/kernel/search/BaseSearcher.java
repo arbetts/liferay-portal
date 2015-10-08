@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.search;
 
+import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -30,8 +31,18 @@ import javax.portlet.PortletResponse;
 public abstract class BaseSearcher extends BaseIndexer<Object> {
 
 	@Override
+	public ActionableDynamicQuery getActionableDynamicQuery() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public String getClassName() {
 		return StringPool.BLANK;
+	}
+
+	@Override
+	public Class<Object> getIndexClass() {
+		return Object.class;
 	}
 
 	@Override
