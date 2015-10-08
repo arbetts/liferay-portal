@@ -1659,6 +1659,8 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 		return fieldName;
 	}
 
+	protected abstract Class<T> getIndexClass();
+
 	protected Locale getLocale(PortletRequest portletRequest) {
 		if (portletRequest != null) {
 			return portletRequest.getLocale();
@@ -1744,6 +1746,10 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 
 	protected void indexByGroup(Group group, final boolean reindex)
 		throws SearchException {
+
+		if (!GroupedModel.class.isAssignableFrom(getIndexClass())) {
+			return;
+		}
 
 		ActionableDynamicQuery actionableDynamicQuery =
 			getActionableDynamicQuery();
