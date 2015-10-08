@@ -17,6 +17,7 @@ package com.liferay.portal.kernel.search;
 import com.liferay.portal.NoSuchCountryException;
 import com.liferay.portal.NoSuchModelException;
 import com.liferay.portal.NoSuchRegionException;
+import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -110,6 +111,11 @@ import javax.portlet.PortletResponse;
  * @author Raymond Augé
  */
 public abstract class BaseIndexer<T> implements Indexer<T> {
+
+	@Override
+	public void delete(Group group) throws SearchException {
+		indexByGroup(group, false);
+	}
 
 	@Override
 	public void delete(long companyId, String uid) throws SearchException {
@@ -528,6 +534,11 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void reindex(Group group) throws SearchException {
+		indexByGroup(group, true);
 	}
 
 	@Override
@@ -1493,6 +1504,8 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 		return SearchEngineUtil.search(searchContext, fullQuery);
 	}
 
+	protected abstract ActionableDynamicQuery getActionableDynamicQuery();
+
 	protected Document getBaseModelDocument(
 		String portletId, BaseModel<?> baseModel) {
 
@@ -1727,6 +1740,39 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 		}
 
 		return null;
+	}
+
+	protected void indexByGroup(Group group, final boolean reindex)
+		throws SearchException {
+
+		ActionableDynamicQuery actionableDynamicQuery =
+			getActionableDynamicQuery();
+
+		actionableDynamicQuery.setCompanyId(group.getCompanyId());
+		actionableDynamicQuery.setGroupId(group.getGroupId());
+
+		actionableDynamicQuery.setPerformActionMethod(
+			new ActionableDynamicQuery.PerformActionMethod() {
+
+			@Override
+			public void performAction(Object object) throws PortalException {
+				T t = (T)object;
+
+				if (reindex) {
+					reindex(t);
+				}
+				else {
+					delete(t);
+				}
+			}
+		});
+
+		try {
+			actionableDynamicQuery.performActions();
+		}
+		catch (PortalException pe) {
+			throw new SearchException(pe);
+		}
 	}
 
 	protected boolean isStagingGroup(long groupId) {
