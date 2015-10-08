@@ -3,3 +3,7 @@ Bundle-SymbolicName: com.liferay.portal.search
 Bundle-Version: 1.0.0
 Export-Package: com.liferay.portal.search.*;version=${plugin.full.version}
 Include-Resource: classes
+Require-Capability:\
+	liferay.extender;
+Spring-Context: META-INF/spring
+-spring-dependency: com.liferay.portal.spring.extender.service.ServiceReference
