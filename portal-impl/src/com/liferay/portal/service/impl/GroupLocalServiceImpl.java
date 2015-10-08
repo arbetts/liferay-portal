@@ -37,8 +37,10 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.scheduler.SchedulerEngineHelperUtil;
 import com.liferay.portal.kernel.scheduler.StorageType;
+import com.liferay.portal.kernel.search.GroupIndexerUtil;
 import com.liferay.portal.kernel.spring.aop.Skip;
 import com.liferay.portal.kernel.transaction.Propagation;
+import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
@@ -128,6 +130,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * Provides the local service for accessing, adding, deleting, and updating
@@ -3307,6 +3310,10 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 				group.getGroupId());
 		}
 
+		if (group.isActive() != active) {
+			reindexActiveStatusChange(group, active);
+		}
+
 		validateFriendlyURL(
 			group.getCompanyId(), group.getGroupId(), group.getClassNameId(),
 			group.getClassPK(), friendlyURL);
@@ -4283,6 +4290,24 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 		}
 
 		return false;
+	}
+
+	protected void reindexActiveStatusChange(
+		final Group group, final boolean reindex) {
+
+		TransactionCommitCallbackUtil.registerCallback(new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				if (reindex) {
+					GroupIndexerUtil.reindex(group);
+				}
+				else {
+					GroupIndexerUtil.delete(group);
+				}
+
+				return null;
+			}
+		});
 	}
 
 	protected void setCompanyPermissions(
