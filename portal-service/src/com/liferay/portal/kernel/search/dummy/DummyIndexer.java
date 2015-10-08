@@ -20,9 +20,11 @@ import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerPostProcessor;
 import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.security.permission.PermissionChecker;
 
 import java.util.Collection;
@@ -35,6 +37,10 @@ import javax.portlet.PortletResponse;
  * @author Brian Wing Shun Chan
  */
 public class DummyIndexer implements Indexer<Object> {
+
+	@Override
+	public void delete(Group group) throws SearchException {
+	}
 
 	@Override
 	public void delete(long companyId, String uid) {
@@ -212,6 +218,10 @@ public class DummyIndexer implements Indexer<Object> {
 
 	@Override
 	public void reindex(Collection<Object> objects) {
+	}
+
+	@Override
+	public void reindex(Group group) throws SearchException {
 	}
 
 	@Override

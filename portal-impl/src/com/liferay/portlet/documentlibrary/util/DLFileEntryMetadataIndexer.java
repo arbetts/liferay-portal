@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.documentlibrary.util;
 
+import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.DDMStructureIndexer;
 import com.liferay.portal.kernel.search.Document;
@@ -101,6 +102,16 @@ public class DLFileEntryMetadataIndexer
 
 	@Override
 	protected void doReindex(String[] ids) throws Exception {
+	}
+
+	@Override
+	protected ActionableDynamicQuery getActionableDynamicQuery() {
+		return null;
+	}
+
+	@Override
+	protected Class<DLFileEntryMetadata> getIndexClass() {
+		return null;
 	}
 
 }
