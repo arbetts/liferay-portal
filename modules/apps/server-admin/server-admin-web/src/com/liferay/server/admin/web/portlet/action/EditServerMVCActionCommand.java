@@ -20,7 +20,6 @@ import com.liferay.portal.captcha.recaptcha.ReCaptchaImpl;
 import com.liferay.portal.captcha.simplecaptcha.SimpleCaptchaImpl;
 import com.liferay.portal.convert.ConvertException;
 import com.liferay.portal.convert.ConvertProcess;
-import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManagerUtil;
 import com.liferay.portal.kernel.cache.CacheRegistryUtil;
@@ -391,7 +390,8 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 
 		Map<String, Serializable> taskContextMap = new HashMap<>();
 
-		String className = ParamUtil.getString(actionRequest, "className");
+		final String className = ParamUtil.getString(
+			actionRequest, "className");
 
 		taskContextMap.put("className", className);
 
@@ -407,11 +407,6 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 				_CLASS_NAME_REINDEX_SINGLE_INDEXER_BACKGROUND_TASK_EXECUTOR;
 		}
 
-		final BackgroundTask backgroundTask =
-			BackgroundTaskManagerUtil.addBackgroundTask(
-				themeDisplay.getUserId(), CompanyConstants.SYSTEM, "reindex",
-				taskExecutorClassName, taskContextMap, new ServiceContext());
-
 		boolean blocking = ParamUtil.getBoolean(
 			actionRequest, "blocking", false);
 
@@ -424,11 +419,18 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 				public void receive(Message message)
 					throws MessageListenerException {
 
-					long backgroundTaskId = message.getLong("backgroundTaskId");
+					String taskExecutorClassName = message.getString(
+						"taskExecutorClassName");
 
-					if (backgroundTask.getBackgroundTaskId() ==
-							backgroundTaskId) {
+					String expectedExecutorName =
+						_CLASS_NAME_REINDEX_PORTAL_BACKGROUND_TASK_EXECUTOR;
 
+					if (Validator.isNotNull(className)) {
+						expectedExecutorName =
+							_CLASS_NAME_REINDEX_SINGLE_INDEXER_BACKGROUND_TASK_EXECUTOR;
+					}
+
+					if (taskExecutorClassName.equals(expectedExecutorName)) {
 						int status = message.getInteger("status");
 
 						if ((status ==
@@ -449,12 +451,22 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 				actionRequest, "timeout", Time.HOUR);
 
 			try {
+				BackgroundTaskManagerUtil.addBackgroundTask(
+					themeDisplay.getUserId(), CompanyConstants.SYSTEM,
+					"reindex", taskExecutorClassName, taskContextMap,
+					new ServiceContext());
+
 				countDownLatch.await(timeout, TimeUnit.MILLISECONDS);
 			}
 			finally {
 				MessageBusUtil.unregisterMessageListener(
 					DestinationNames.BACKGROUND_TASK_STATUS, messageListener);
 			}
+		}
+		else {
+			BackgroundTaskManagerUtil.addBackgroundTask(
+				themeDisplay.getUserId(), CompanyConstants.SYSTEM, "reindex",
+				taskExecutorClassName, taskContextMap, new ServiceContext());
 		}
 	}
 
