@@ -399,12 +399,11 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 
 		taskContextMap.put("companyIds", companyIds);
 
-		String taskExecutorClassName =
-			_CLASS_NAME_REINDEX_PORTAL_BACKGROUND_TASK_EXECUTOR;
+		String taskExecutorClassName = _REINDEX_PORTAL_BACKGROUND_TASK_EXECUTOR;
 
 		if (Validator.isNotNull(className)) {
 			taskExecutorClassName =
-				_CLASS_NAME_REINDEX_SINGLE_INDEXER_BACKGROUND_TASK_EXECUTOR;
+				_REINDEX_SINGLE_INDEXER_BACKGROUND_TASK_EXECUTOR;
 		}
 
 		boolean blocking = ParamUtil.getBoolean(
@@ -423,11 +422,11 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 						"taskExecutorClassName");
 
 					String expectedExecutorName =
-						_CLASS_NAME_REINDEX_PORTAL_BACKGROUND_TASK_EXECUTOR;
+						_REINDEX_PORTAL_BACKGROUND_TASK_EXECUTOR;
 
 					if (Validator.isNotNull(className)) {
 						expectedExecutorName =
-							_CLASS_NAME_REINDEX_SINGLE_INDEXER_BACKGROUND_TASK_EXECUTOR;
+							_REINDEX_SINGLE_INDEXER_BACKGROUND_TASK_EXECUTOR;
 					}
 
 					if (taskExecutorClassName.equals(expectedExecutorName)) {
@@ -913,12 +912,12 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	private static final String
-		_CLASS_NAME_REINDEX_PORTAL_BACKGROUND_TASK_EXECUTOR =
+		_REINDEX_PORTAL_BACKGROUND_TASK_EXECUTOR =
 			"com.liferay.portal.search.internal.background.task." +
 				"ReindexPortalBackgroundTaskExecutor";
 
 	private static final String
-		_CLASS_NAME_REINDEX_SINGLE_INDEXER_BACKGROUND_TASK_EXECUTOR =
+		_REINDEX_SINGLE_INDEXER_BACKGROUND_TASK_EXECUTOR =
 			"com.liferay.portal.search.internal.background.task." +
 				"ReindexSingleIndexerBackgroundTaskExecutor";
 
