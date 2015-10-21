@@ -82,6 +82,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			}
 		}
 
+		postFormat();
+
 		_sourceFormatterHelper.close();
 	}
 
@@ -763,10 +765,10 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			return;
 		}
 
-		File file = new File(fileName);
-
 		fileName = StringUtil.replace(
 			fileName, StringPool.BACK_SLASH, StringPool.SLASH);
+
+		File file = new File(fileName);
 
 		String absolutePath = getAbsolutePath(file);
 
@@ -1291,13 +1293,22 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			sb.append("WEB-INF/src/");
 		}
 		else {
-			pos = fileName.indexOf("src/");
+			pos = fileName.indexOf("src/main/resources/");
+
+			if (pos != -1) {
+				sb.append(fileName.substring(0, pos + 19));
+			}
+			else {
+				pos = fileName.indexOf("src/");
+
+				if (pos != -1) {
+					sb.append(fileName.substring(0, pos + 4));
+				}
+			}
 
 			if (pos == -1) {
 				return null;
 			}
-
-			sb.append(fileName.substring(0, pos + 4));
 		}
 
 		sb.append("content/Language.properties");
@@ -1453,6 +1464,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 	protected boolean isModulesFile(String absolutePath) {
 		return absolutePath.contains("/modules/");
+	}
+
+	protected void postFormat() throws Exception {
 	}
 
 	protected void processErrorMessage(String fileName, String message) {

@@ -27,6 +27,7 @@ import com.liferay.sync.engine.session.SessionManager;
 import com.liferay.sync.engine.util.FileKeyUtil;
 import com.liferay.sync.engine.util.FileUtil;
 import com.liferay.sync.engine.util.IODeltaUtil;
+import com.liferay.sync.engine.util.MSOfficeFileUtil;
 import com.liferay.sync.engine.util.StreamUtil;
 
 import java.io.InputStream;
@@ -70,6 +71,8 @@ public class DownloadFileHandler extends BaseHandler {
 			if (message.startsWith("Premature end of Content-Length")) {
 				_logger.error(message, e);
 
+				removeEvent();
+
 				FileEventUtil.downloadFile(
 					getSyncAccountId(), getLocalSyncFile(), false);
 
@@ -100,7 +103,9 @@ public class DownloadFileHandler extends BaseHandler {
 
 			SyncFile syncFile = getLocalSyncFile();
 
-			if ((Boolean)getParameterValue("patch")) {
+			if ((boolean)getParameterValue("patch")) {
+				removeEvent();
+
 				FileEventUtil.downloadFile(getSyncAccountId(), syncFile, false);
 			}
 			else {
@@ -136,7 +141,9 @@ public class DownloadFileHandler extends BaseHandler {
 		else if (exception.equals(
 					"com.liferay.portlet.documentlibrary." +
 						"NoSuchFileVersionException") &&
-				 (Boolean)getParameterValue("patch")) {
+				 (boolean)getParameterValue("patch")) {
+
+			removeEvent();
 
 			FileEventUtil.downloadFile(getSyncAccountId(), syncFile, false);
 
@@ -162,6 +169,8 @@ public class DownloadFileHandler extends BaseHandler {
 			boolean append)
 		throws Exception {
 
+		OutputStream outputStream = null;
+
 		Watcher watcher = WatcherRegistry.getWatcher(getSyncAccountId());
 
 		List<String> downloadedFilePathNames =
@@ -173,7 +182,7 @@ public class DownloadFileHandler extends BaseHandler {
 			boolean exists = Files.exists(filePath);
 
 			if (append) {
-				OutputStream outputStream = Files.newOutputStream(
+				outputStream = Files.newOutputStream(
 					tempFilePath, StandardOpenOption.APPEND);
 
 				IOUtils.copyLarge(inputStream, outputStream);
@@ -207,6 +216,12 @@ public class DownloadFileHandler extends BaseHandler {
 
 			FileUtil.setModifiedTime(tempFilePath, syncFile.getModifiedTime());
 
+			if (MSOfficeFileUtil.isLegacyExcelFile(filePath)) {
+				syncFile.setLocalExtraSettingsValue(
+					"lastSavedDate",
+					MSOfficeFileUtil.getLastSavedDate(tempFilePath));
+			}
+
 			Files.move(
 				tempFilePath, filePath, StandardCopyOption.ATOMIC_MOVE,
 				StandardCopyOption.REPLACE_EXISTING);
@@ -230,6 +245,9 @@ public class DownloadFileHandler extends BaseHandler {
 
 				SyncFileService.update(syncFile);
 			}
+		}
+		finally {
+			StreamUtil.cleanUp(outputStream);
 		}
 	}
 
@@ -288,11 +306,19 @@ public class DownloadFileHandler extends BaseHandler {
 	}
 
 	protected boolean isUnsynced(SyncFile syncFile) {
-		syncFile = SyncFileService.fetchSyncFile(syncFile.getSyncFileId());
+		if (syncFile != null) {
+			syncFile = SyncFileService.fetchSyncFile(syncFile.getSyncFileId());
+		}
+
+		if (syncFile == null) {
+			return true;
+		}
 
 		if (syncFile.getState() == SyncFile.STATE_UNSYNCED) {
-			_logger.debug(
-				"Skipping file {}. File is unsynced.", syncFile.getName());
+			if (_logger.isDebugEnabled()) {
+				_logger.debug(
+					"Skipping file {}. File is unsynced.", syncFile.getName());
+			}
 
 			return true;
 		}
@@ -300,9 +326,11 @@ public class DownloadFileHandler extends BaseHandler {
 		Path filePath = Paths.get(syncFile.getFilePathName());
 
 		if (Files.notExists(filePath.getParent())) {
-			_logger.debug(
-				"Skipping file {}. Missing parent file path {}.",
-				syncFile.getName(), filePath.getParent());
+			if (_logger.isDebugEnabled()) {
+				_logger.debug(
+					"Skipping file {}. Missing parent file path {}.",
+					syncFile.getName(), filePath.getParent());
+			}
 
 			syncFile.setState(SyncFile.STATE_ERROR);
 			syncFile.setUiEvent(SyncFile.UI_EVENT_PARENT_MISSING);

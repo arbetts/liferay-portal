@@ -62,7 +62,7 @@ AssetRendererFactory<JournalArticle> assetRendererFactory = AssetRendererFactory
 					<c:when test="<%= !article.isApproved() %>">
 
 						<%
-							AssetRenderer<JournalArticle> assetRenderer = assetRendererFactory.getAssetRenderer(article.getResourcePrimKey());
+						AssetRenderer<JournalArticle> assetRenderer = assetRendererFactory.getAssetRenderer(article.getResourcePrimKey());
 						%>
 
 						<c:choose>
@@ -81,7 +81,7 @@ AssetRendererFactory<JournalArticle> assetRendererFactory = AssetRendererFactory
 						</c:choose>
 					</c:when>
 					<c:when test="<%= (articleDisplay != null) %>">
-						<div class="user-tool-asset-addon-entries">
+						<div class="text-right user-tool-asset-addon-entries">
 							<liferay-ui:asset-addon-entry-display assetAddonEntries="<%= journalContentDisplayContext.getSelectedUserToolAssetAddonEntries() %>" />
 						</div>
 

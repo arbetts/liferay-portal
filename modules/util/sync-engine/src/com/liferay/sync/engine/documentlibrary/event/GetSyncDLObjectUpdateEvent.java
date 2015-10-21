@@ -16,13 +16,9 @@ package com.liferay.sync.engine.documentlibrary.event;
 
 import com.liferay.sync.engine.documentlibrary.handler.GetSyncDLObjectUpdateHandler;
 import com.liferay.sync.engine.documentlibrary.handler.Handler;
-import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.model.SyncSite;
-import com.liferay.sync.engine.service.SyncFileService;
 import com.liferay.sync.engine.service.SyncSiteService;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import com.liferay.sync.engine.util.ReleaseInfo;
 
 import java.util.Map;
 
@@ -61,32 +57,26 @@ public class GetSyncDLObjectUpdateEvent extends BaseEvent {
 		syncSite = SyncSiteService.fetchSyncSite(
 			syncSite.getGroupId(), syncSite.getSyncAccountId());
 
+		if (!syncSite.getActive()) {
+			return;
+		}
+
 		syncSite.setState(SyncSite.STATE_IN_PROGRESS);
 
 		SyncSiteService.update(syncSite);
 
-		if (syncSite.getRemoteSyncTime() == -1) {
-			String filePathName = syncSite.getFilePathName();
-
-			SyncFile syncFile = SyncFileService.fetchSyncFile(filePathName);
-
-			if (syncFile == null) {
-				Files.createDirectories(Paths.get(filePathName));
-
-				SyncFileService.addSyncFile(
-					null, null, null, filePathName, null, syncSite.getName(), 0,
-					syncSite.getGroupId(), SyncFile.STATE_SYNCED,
-					syncSite.getSyncAccountId(), SyncFile.TYPE_SYSTEM, false);
-			}
-		}
-
 		Map<String, Object> parameters = getParameters();
-
-		parameters.clear();
 
 		parameters.put("lastAccessTime", syncSite.getRemoteSyncTime());
 		parameters.put("max", 0);
 		parameters.put("repositoryId", syncSite.getGroupId());
+
+		if ((syncSite.getRemoteSyncTime() == -1) &&
+			ReleaseInfo.isServerCompatible(getSyncAccountId(), 5)) {
+
+			parameters.put("retrieveFromCache", false);
+		}
+
 		parameters.put("syncSite", syncSite);
 
 		executePost(_URL_PATH, parameters);

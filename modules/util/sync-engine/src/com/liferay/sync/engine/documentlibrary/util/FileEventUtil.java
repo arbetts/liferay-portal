@@ -21,6 +21,7 @@ import com.liferay.sync.engine.documentlibrary.event.CheckInFileEntryEvent;
 import com.liferay.sync.engine.documentlibrary.event.CheckOutFileEntryEvent;
 import com.liferay.sync.engine.documentlibrary.event.CopyFileEntryEvent;
 import com.liferay.sync.engine.documentlibrary.event.DownloadFileEvent;
+import com.liferay.sync.engine.documentlibrary.event.Event;
 import com.liferay.sync.engine.documentlibrary.event.GetAllFolderSyncDLObjectsEvent;
 import com.liferay.sync.engine.documentlibrary.event.GetSyncDLObjectUpdateEvent;
 import com.liferay.sync.engine.documentlibrary.event.MoveFileEntryEvent;
@@ -36,6 +37,7 @@ import com.liferay.sync.engine.model.SyncSite;
 import com.liferay.sync.engine.service.SyncFileService;
 import com.liferay.sync.engine.util.FileUtil;
 import com.liferay.sync.engine.util.PropsValues;
+import com.liferay.sync.engine.util.ReleaseInfo;
 
 import java.io.IOException;
 
@@ -46,6 +48,10 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shinn Lok
@@ -203,6 +209,21 @@ public class FileEventUtil {
 	public static void downloadFile(
 		long syncAccountId, SyncFile syncFile, boolean batch) {
 
+		Set<Event> events = FileEventManager.getEvents(
+			syncFile.getSyncFileId());
+
+		for (Event event : events) {
+			if (event instanceof DownloadFileEvent) {
+				if (_logger.isDebugEnabled()) {
+					_logger.debug(
+						"Download already in progress {}",
+						syncFile.getFilePathName());
+				}
+
+				return;
+			}
+		}
+
 		Map<String, Object> parameters = new HashMap<>();
 
 		parameters.put("batch", batch);
@@ -219,6 +240,21 @@ public class FileEventUtil {
 		long sourceVersionId, long syncAccountId, SyncFile syncFile,
 		long targetVersionId) {
 
+		Set<Event> events = FileEventManager.getEvents(
+			syncFile.getSyncFileId());
+
+		for (Event event : events) {
+			if (event instanceof DownloadFileEvent) {
+				if (_logger.isDebugEnabled()) {
+					_logger.debug(
+						"Download already in progress {}",
+						syncFile.getFilePathName());
+				}
+
+				return;
+			}
+		}
+
 		Map<String, Object> parameters = new HashMap<>();
 
 		parameters.put("batch", true);
@@ -234,11 +270,10 @@ public class FileEventUtil {
 	}
 
 	public static List<SyncFile> getAllFolders(
-		long companyId, long repositoryId, long syncAccountId) {
+		long repositoryId, long syncAccountId) {
 
 		Map<String, Object> parameters = new HashMap<>();
 
-		parameters.put("companyId", companyId);
 		parameters.put("repositoryId", repositoryId);
 
 		GetAllFolderSyncDLObjectsEvent getAllFolderSyncDLObjectsEvent =
@@ -254,13 +289,17 @@ public class FileEventUtil {
 	}
 
 	public static void getUpdates(
-		long companyId, long repositoryId, long syncAccountId,
-		SyncSite syncSite) {
+		long repositoryId, long syncAccountId, SyncSite syncSite,
+		boolean retrieveFromCache) {
 
 		Map<String, Object> parameters = new HashMap<>();
 
-		parameters.put("companyId", companyId);
 		parameters.put("repositoryId", repositoryId);
+
+		if (ReleaseInfo.isServerCompatible(syncAccountId, 5)) {
+			parameters.put("retrieveFromCache", retrieveFromCache);
+		}
+
 		parameters.put("syncSite", syncSite);
 
 		GetSyncDLObjectUpdateEvent getSyncDLObjectUpdateEvent =
@@ -306,8 +345,7 @@ public class FileEventUtil {
 	public static void resyncFolder(long syncAccountId, SyncFile syncFile) {
 		Map<String, Object> parameters = new HashMap<>();
 
-		parameters.put("companyId", syncFile.getCompanyId());
-		parameters.put("lastAccessTime", 0);
+		parameters.put("lastAccessTime", -1);
 		parameters.put("parentFolderId", syncFile.getTypePK());
 		parameters.put("repositoryId", syncFile.getRepositoryId());
 		parameters.put("syncFile", syncFile);
@@ -466,5 +504,8 @@ public class FileEventUtil {
 
 		updateFolderEvent.run();
 	}
+
+	private static final Logger _logger = LoggerFactory.getLogger(
+		FileEventUtil.class);
 
 }

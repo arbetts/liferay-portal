@@ -55,7 +55,6 @@ import com.liferay.journal.service.JournalFolderService;
 import com.liferay.journal.util.impl.JournalUtil;
 import com.liferay.journal.web.asset.JournalArticleAssetRenderer;
 import com.liferay.journal.web.portlet.action.ActionUtil;
-import com.liferay.journal.web.upgrade.JournalWebUpgrade;
 import com.liferay.journal.web.util.JournalRSSUtil;
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.diff.CompareVersionsException;
@@ -97,7 +96,7 @@ import com.liferay.portlet.PortletURLFactoryUtil;
 import com.liferay.portlet.PortletURLImpl;
 import com.liferay.portlet.asset.AssetCategoryException;
 import com.liferay.portlet.asset.AssetTagException;
-import com.liferay.portlet.documentlibrary.DuplicateFileException;
+import com.liferay.portlet.documentlibrary.DuplicateFileEntryException;
 import com.liferay.portlet.documentlibrary.FileSizeException;
 import com.liferay.portlet.trash.service.TrashEntryService;
 import com.liferay.portlet.trash.util.TrashUtil;
@@ -158,7 +157,6 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.display-name=Web Content",
 		"javax.portlet.expiration-cache=0",
 		"javax.portlet.init-param.mvc-action-command-package-prefix=com.liferay.journal.web.portlet.action",
-		"javax.portlet.init-param.single-page-application-cacheable=false",
 		"javax.portlet.init-param.template-path=/",
 		"javax.portlet.init-param.view-template=/view.jsp",
 		"javax.portlet.name=" + JournalPortletKeys.JOURNAL,
@@ -454,7 +452,7 @@ public class JournalPortlet extends MVCPortlet {
 
 			PortletRequestDispatcher portletRequestDispatcher =
 				portletContext.getRequestDispatcher(
-					"/html/taglib/ui/diff_version_comparator/diff_html.jsp");
+					"/compare_versions_diff_html.jsp");
 
 			portletRequestDispatcher.include(resourceRequest, resourceResponse);
 		}
@@ -1115,7 +1113,7 @@ public class JournalPortlet extends MVCPortlet {
 			cause instanceof AssetCategoryException ||
 			cause instanceof AssetTagException ||
 			cause instanceof DuplicateArticleIdException ||
-			cause instanceof DuplicateFileException ||
+			cause instanceof DuplicateFileEntryException ||
 			cause instanceof DuplicateFolderNameException ||
 			cause instanceof DuplicateFeedIdException ||
 			cause instanceof FeedContentFieldException ||
@@ -1281,10 +1279,6 @@ public class JournalPortlet extends MVCPortlet {
 		JournalFolderService journalFolderService) {
 
 		_journalFolderService = journalFolderService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setJournalWebUpgrade(JournalWebUpgrade journalWebUpgrade) {
 	}
 
 	@Reference

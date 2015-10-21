@@ -38,8 +38,8 @@ import java.util.concurrent.Callable;
  * @author Brian Wing Shun Chan
  * @author Shuyang Zhou
  */
-public abstract class BaseActionableDynamicQuery
-	implements ActionableDynamicQuery {
+public abstract class BaseActionableDynamicQuery<T>
+	implements ActionableDynamicQuery<T> {
 
 	public static final TransactionAttribute REQUIRES_NEW_TRANSACTION_ATTRIBUTE;
 
@@ -78,7 +78,7 @@ public abstract class BaseActionableDynamicQuery
 	}
 
 	@Override
-	public PerformActionMethod getPerformActionMethod() {
+	public PerformActionMethod<T> getPerformActionMethod() {
 		return _performActionMethod;
 	}
 
@@ -117,8 +117,7 @@ public abstract class BaseActionableDynamicQuery
 
 		addCriteria(dynamicQuery);
 
-		return (Long)executeDynamicQuery(
-			_dynamicQueryCountMethod, dynamicQuery, getCountProjection());
+		return executeDynamicQueryCount(dynamicQuery, getCountProjection());
 	}
 
 	@Override
@@ -151,7 +150,7 @@ public abstract class BaseActionableDynamicQuery
 	}
 
 	@Override
-	public void setClass(Class<?> clazz) {
+	public void setClass(Class<T> clazz) {
 		_clazz = clazz;
 	}
 
@@ -187,7 +186,7 @@ public abstract class BaseActionableDynamicQuery
 
 	@Override
 	public void setPerformActionMethod(
-		PerformActionMethod performActionMethod) {
+		PerformActionMethod<T> performActionMethod) {
 
 		_performActionMethod = performActionMethod;
 	}
@@ -282,23 +281,22 @@ public abstract class BaseActionableDynamicQuery
 
 			@Override
 			public Long call() throws Exception {
-				List<Object> objects = (List<Object>)executeDynamicQuery(
-					_dynamicQueryMethod, dynamicQuery);
+				List<T> list = executeDynamicQuery(dynamicQuery);
 
-				if (objects.isEmpty()) {
+				if (list.isEmpty()) {
 					return -1L;
 				}
 
-				for (Object object : objects) {
-					performAction(object);
+				for (T t : list) {
+					performAction(t);
 				}
 
-				if (objects.size() < _interval) {
+				if (list.size() < _interval) {
 					return -1L;
 				}
 
-				BaseModel<?> baseModel = (BaseModel<?>)objects.get(
-					objects.size() - 1);
+				BaseModel<?> baseModel = (BaseModel<?>)list.get(
+					list.size() - 1);
 
 				return (Long)baseModel.getPrimaryKeyObj();
 			}
@@ -332,12 +330,65 @@ public abstract class BaseActionableDynamicQuery
 		}
 	}
 
+	/**
+	 * Deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	protected Object executeDynamicQuery(
 			Method dynamicQueryMethod, Object... arguments)
 		throws PortalException {
 
 		try {
 			return dynamicQueryMethod.invoke(_baseLocalService, arguments);
+		}
+		catch (InvocationTargetException ite) {
+			Throwable throwable = ite.getCause();
+
+			if (throwable instanceof PortalException) {
+				throw (PortalException)throwable;
+			}
+			else if (throwable instanceof SystemException) {
+				throw (SystemException)throwable;
+			}
+
+			throw new SystemException(ite);
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected List<T> executeDynamicQuery(Object... arguments)
+		throws PortalException {
+
+		try {
+			return (List<T>)_dynamicQueryMethod.invoke(
+				_baseLocalService, arguments);
+		}
+		catch (InvocationTargetException ite) {
+			Throwable throwable = ite.getCause();
+
+			if (throwable instanceof PortalException) {
+				throw (PortalException)throwable;
+			}
+			else if (throwable instanceof SystemException) {
+				throw (SystemException)throwable;
+			}
+
+			throw new SystemException(ite);
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
+		}
+	}
+
+	protected long executeDynamicQueryCount(Object... arguments)
+		throws PortalException {
+
+		try {
+			return (long)_dynamicQueryCountMethod.invoke(
+				_baseLocalService, arguments);
 		}
 		catch (InvocationTargetException ite) {
 			Throwable throwable = ite.getCause();
@@ -389,9 +440,9 @@ public abstract class BaseActionableDynamicQuery
 		throws PortalException {
 	}
 
-	protected void performAction(Object object) throws PortalException {
+	protected void performAction(T t) throws PortalException {
 		if (_performActionMethod != null) {
-			_performActionMethod.performAction(object);
+			_performActionMethod.performAction(t);
 		}
 	}
 
@@ -399,7 +450,7 @@ public abstract class BaseActionableDynamicQuery
 	private AddOrderCriteriaMethod _addOrderCriteriaMethod;
 	private BaseLocalService _baseLocalService;
 	private ClassLoader _classLoader;
-	private Class<?> _clazz;
+	private Class<T> _clazz;
 	private boolean _commitImmediately;
 	private long _companyId;
 	private Collection<Document> _documents;
@@ -408,7 +459,7 @@ public abstract class BaseActionableDynamicQuery
 	private long _groupId;
 	private String _groupIdPropertyName = "groupId";
 	private int _interval = Indexer.DEFAULT_INTERVAL;
-	private PerformActionMethod _performActionMethod;
+	private PerformActionMethod<T> _performActionMethod;
 	private PerformCountMethod _performCountMethod;
 	private String _primaryKeyPropertyName;
 	private String _searchEngineId;
