@@ -17,12 +17,13 @@ package com.liferay.portal.kernel.dao.orm;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.transaction.TransactionAttribute;
+import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.service.BaseLocalService;
 
 /**
  * @author Brian Wing Shun Chan
  */
-public interface ActionableDynamicQuery {
+public interface ActionableDynamicQuery<T extends BaseModel<T>> {
 
 	public void addDocument(Document document) throws PortalException;
 
@@ -30,7 +31,7 @@ public interface ActionableDynamicQuery {
 
 	public AddOrderCriteriaMethod getAddOrderCriteriaMethod();
 
-	public PerformActionMethod getPerformActionMethod();
+	public PerformActionMethod<T> getPerformActionMethod();
 
 	public PerformCountMethod getPerformCountMethod();
 
@@ -45,7 +46,7 @@ public interface ActionableDynamicQuery {
 
 	public void setBaseLocalService(BaseLocalService baseLocalService);
 
-	public void setClass(Class<?> clazz);
+	public void setClass(Class<T> clazz);
 
 	public void setClassLoader(ClassLoader classLoader);
 
@@ -59,7 +60,8 @@ public interface ActionableDynamicQuery {
 
 	public void setInterval(int interval);
 
-	public void setPerformActionMethod(PerformActionMethod performActionMethod);
+	public void setPerformActionMethod(
+		PerformActionMethod<T> performActionMethod);
 
 	public void setPerformCountMethod(PerformCountMethod performCountMethod);
 
