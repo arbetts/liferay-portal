@@ -7,7 +7,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
 >
 	<tlib-version>1.0</tlib-version>
-	<short-name>frontend</short-name>
+	<short-name>liferay-frontend</short-name>
 	<uri>http://liferay.com/tld/frontend</uri>
 	<tag>
 		<description>Creates an add menu component that contains a list of menu items.</description>
@@ -188,6 +188,36 @@
 		<name>management-bar-action-buttons</name>
 		<tag-class>com.liferay.frontend.taglib.servlet.taglib.ManagementBarActionButtonsTag</tag-class>
 		<body-content>JSP</body-content>
+	</tag>
+	<tag>
+		<name>management-bar-button</name>
+		<tag-class>com.liferay.frontend.taglib.servlet.taglib.ManagementBarButtonTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>active</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>cssClass</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>href</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>iconCssClass</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 	</tag>
 	<tag>
 		<name>management-bar-buttons</name>
@@ -378,18 +408,6 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>A CSS class for styling the small image</description>
-			<name>smallImageCSSClass</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>A URL for the card's small image, if the card is vertical</description>
-			<name>smallImageUrl</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
 			<description>Text to add as a subtitle in the text zone, if the card is vertical</description>
 			<name>subtitle</name>
 			<required>false</required>
@@ -416,6 +434,28 @@
 	<tag>
 		<name>vertical-card-header</name>
 		<tag-class>com.liferay.frontend.taglib.servlet.taglib.VerticalCardHeaderTag</tag-class>
+		<body-content>JSP</body-content>
+	</tag>
+	<tag>
+		<name>vertical-card-small-image</name>
+		<tag-class>com.liferay.frontend.taglib.servlet.taglib.VerticalCardSmallImageTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<description>A CSS class for styling the small image</description>
+			<name>cssClass</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>A URL for the card's small image, if the card is vertical</description>
+			<name>src</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	<tag>
+		<name>vertical-card-sticker-bottom</name>
+		<tag-class>com.liferay.frontend.taglib.servlet.taglib.VerticalCardStickerBottomTag</tag-class>
 		<body-content>JSP</body-content>
 	</tag>
 </taglib>

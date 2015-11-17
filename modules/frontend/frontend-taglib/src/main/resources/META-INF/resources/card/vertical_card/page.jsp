@@ -17,7 +17,7 @@
 <%@ include file="/card/vertical_card/init.jsp" %>
 
 <div class="<%= Validator.isNotNull(cssClass) ? cssClass : StringPool.BLANK %> <%= showCheckbox ? "selectable" : StringPool.BLANK %>" <%= AUIUtil.buildData(data) %>>
-	<div class="<%= showCheckbox ? "checkbox checkbox-default toggle-card-dm" : StringPool.BLANK %>">
+	<div class="<%= showCheckbox ? "checkbox toggle-card-dm" : StringPool.BLANK %>">
 		<c:choose>
 			<c:when test="<%= (rowChecker != null) && (resultRow != null) %>">
 				<%= rowChecker.getRowCheckBox(request, rowChecker.isChecked(resultRow.getObject()), rowChecker.isDisabled(resultRow.getObject()), resultRow.getPrimaryKey()) %>
@@ -33,10 +33,8 @@
 					<img alt="" class="<%= imageCSSClass %><%= backgroundImage ? " sr-only" : "" %>" src="<%= imageUrl %>" />
 				</aui:a>
 
-				<c:if test="<%= Validator.isNotNull(smallImageUrl) %>">
-					<div class="sticker sticker-bottom <%= smallImageCSSClass %>">
-						<img alt="thumbnail" class="img-responsive" src="<%= smallImageUrl %>">
-					</div>
+				<c:if test="<%= Validator.isNotNull(stickerBottom) %>">
+					<%= stickerBottom %>
 				</c:if>
 			</div>
 

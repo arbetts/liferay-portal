@@ -42,7 +42,6 @@ import com.liferay.portal.model.LayoutTypePortletConstants;
 import com.liferay.portal.model.Plugin;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.PortletConstants;
-import com.liferay.portal.model.PortletPreferences;
 import com.liferay.portal.model.PortletPreferencesIds;
 import com.liferay.portal.model.Theme;
 import com.liferay.portal.security.permission.ActionKeys;
@@ -256,8 +255,7 @@ public class LayoutTypePortletImpl
 		List<Portlet> staticPortlets = getStaticPortlets(
 			PropsKeys.LAYOUT_STATIC_PORTLETS_ALL);
 
-		List<Portlet> embeddedPortlets = getEmbeddedPortlets(
-			explicitlyAddedPortlets, staticPortlets);
+		List<Portlet> embeddedPortlets = getEmbeddedPortlets();
 
 		return addStaticPortlets(
 			explicitlyAddedPortlets, staticPortlets, embeddedPortlets);
@@ -308,12 +306,11 @@ public class LayoutTypePortletImpl
 
 	@Override
 	public List<Portlet> getEmbeddedPortlets() {
-		List<Portlet> explicitlyAddedPortlets = getExplicitlyAddedPortlets();
+		Layout layout = getLayout();
 
-		List<Portlet> staticPortlets = getStaticPortlets(
-			PropsKeys.LAYOUT_STATIC_PORTLETS_ALL);
+		_embeddedPortlets = layout.getEmbeddedPortlets();
 
-		return getEmbeddedPortlets(explicitlyAddedPortlets, staticPortlets);
+		return _embeddedPortlets;
 	}
 
 	@Override
@@ -686,8 +683,7 @@ public class LayoutTypePortletImpl
 			}
 		}
 
-		List<Portlet> embeddedPortlets = getEmbeddedPortlets(
-			portlets, staticPortlets);
+		List<Portlet> embeddedPortlets = getEmbeddedPortlets();
 
 		for (Portlet portlet : embeddedPortlets) {
 			Portlet rootPortlet = portlet.getRootPortlet();
@@ -792,15 +788,21 @@ public class LayoutTypePortletImpl
 
 	@Override
 	public boolean isPortletEmbedded(String portletId) {
-		List<Portlet> embeddedPortlets = getEmbeddedPortlets();
+		Layout layout = getLayout();
 
-		for (Portlet embeddedPortlet : embeddedPortlets) {
-			if (portletId.equals(embeddedPortlet.getPortletId())) {
-				return true;
-			}
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(
+			layout.getCompanyId(), portletId);
+
+		long scopeGroupId = PortalUtil.getScopeGroupId(layout, portletId);
+
+		if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
+				scopeGroupId, PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
+				PortletKeys.PREFS_PLID_SHARED, portlet, false) < 1) {
+
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	@Override
@@ -1342,7 +1344,9 @@ public class LayoutTypePortletImpl
 		}
 
 		try {
-			if (_enablePortletLayoutListener) {
+			if (_enablePortletLayoutListener &&
+				!portlet.isUndeployedPortlet()) {
+
 				PortletLayoutListener portletLayoutListener =
 					portlet.getPortletLayoutListenerInstance();
 
@@ -1465,67 +1469,6 @@ public class LayoutTypePortletImpl
 		defaultLayoutTypePortletImpl._updatePermission = _updatePermission;
 
 		return defaultLayoutTypePortletImpl;
-	}
-
-	protected List<Portlet> getEmbeddedPortlets(
-		List<Portlet> columnPortlets, List<Portlet> staticPortlets) {
-
-		List<Portlet> portlets = new ArrayList<>();
-
-		Layout layout = getLayout();
-
-		List<PortletPreferences> portletPreferences =
-			PortletPreferencesLocalServiceUtil.getPortletPreferences(
-				PortletKeys.PREFS_OWNER_ID_DEFAULT,
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid());
-
-		if (isCustomizable() && hasUserPreferences()) {
-			portletPreferences = ListUtil.copy(portletPreferences);
-
-			portletPreferences.addAll(
-				PortletPreferencesLocalServiceUtil.getPortletPreferences(
-					_portalPreferences.getUserId(),
-					PortletKeys.PREFS_OWNER_TYPE_USER, layout.getPlid()));
-		}
-
-		for (PortletPreferences portletPreference : portletPreferences) {
-			String portletId = portletPreference.getPortletId();
-
-			Portlet portlet = PortletLocalServiceUtil.getPortletById(
-				getCompanyId(), portletId);
-
-			if ((portlet == null) || columnPortlets.contains(portlet) ||
-				staticPortlets.contains(portlet) || !portlet.isReady() ||
-				portlet.isUndeployedPortlet() || !portlet.isActive()) {
-
-				continue;
-			}
-
-			Portlet embeddedPortlet = portlet;
-
-			if (portlet.isInstanceable()) {
-
-				// Instanceable portlets do not need to be cloned because they
-				// are already cloned. See the method getPortletById in the
-				// class PortletLocalServiceImpl and how it references the
-				// method getClonedInstance in the class PortletImpl.
-
-			}
-			else {
-				embeddedPortlet = (Portlet)embeddedPortlet.clone();
-			}
-
-			// We set embedded portlets as static on order to avoid adding the
-			// close and/or move icons.
-
-			embeddedPortlet.setStatic(true);
-
-			portlets.add(embeddedPortlet);
-		}
-
-		_embeddedPortlets = portlets;
-
-		return _embeddedPortlets;
 	}
 
 	protected List<Portlet> getExplicitlyAddedPortlets() {

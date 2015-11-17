@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.xml.QName;
 import com.liferay.portal.kernel.xml.SAXReader;
 import com.liferay.portal.model.Company;
@@ -55,17 +56,16 @@ import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.service.CompanyLocalService;
 import com.liferay.portal.service.PortletLocalService;
 import com.liferay.portal.service.ResourceActionLocalService;
+import com.liferay.portal.servlet.jsp.compiler.JspServlet;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.WebAppPool;
-import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.InvokerPortlet;
 import com.liferay.portlet.PortletBagFactory;
 import com.liferay.portlet.PortletContextBag;
 import com.liferay.portlet.PortletContextBagPool;
 import com.liferay.portlet.PortletInstanceFactory;
 import com.liferay.registry.util.StringPlus;
-import com.liferay.util.log4j.Log4JUtil;
 
 import java.io.IOException;
 
@@ -95,6 +95,7 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -692,10 +693,6 @@ public class PortletTracker
 			GetterUtil.getBoolean(
 				get(serviceReference, "show-portlet-inactive"),
 				portletModel.isShowPortletInactive()));
-		portletModel.setSocialInteractionsConfiguration(
-			GetterUtil.getBoolean(
-				get(serviceReference, "social-interactions-configuration"),
-				portletModel.isSocialInteractionsConfiguration()));
 		portletModel.setStrutsPath(
 			GetterUtil.getString(
 				get(serviceReference, "struts-path"),
@@ -1033,8 +1030,6 @@ public class PortletTracker
 
 		createContext(bundle, bundlePortletApp, serviceRegistrations);
 
-		initLogger(classLoader);
-
 		serviceRegistrations.setBundlePortletApp(bundlePortletApp);
 
 		serviceRegistrations.doConfiguration(classLoader);
@@ -1103,24 +1098,6 @@ public class PortletTracker
 		BundleContext bundleContext, String contextName,
 		ClassLoader classLoader) {
 
-		Servlet servlet = null;
-
-		try {
-			Class<?> clazz = Class.forName(
-				"com.liferay.portal.servlet.jsp.compiler.JspServlet");
-
-			servlet = (Servlet)clazz.newInstance();
-		}
-		catch (Exception e) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"No JSP Servlet was deployed for WAB " + contextName +
-						" due to: " + e.getMessage());
-			}
-
-			return null;
-		}
-
 		Dictionary<String, Object> properties = new HashMapDictionary<>();
 
 		Dictionary<String, Object> componentProperties =
@@ -1151,7 +1128,7 @@ public class PortletTracker
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "*.jsp");
 
 		return bundleContext.registerService(
-			Servlet.class, servlet, properties);
+			Servlet.class, new JspServletWrapper(), properties);
 	}
 
 	protected ServiceRegistration<Servlet> createPortletServlet(
@@ -1270,11 +1247,6 @@ public class PortletTracker
 		}
 
 		return serviceRegistrations;
-	}
-
-	protected void initLogger(ClassLoader classLoader) {
-		Log4JUtil.configureLog4J(
-			classLoader.getResource("META-INF/portal-log4j.xml"));
 	}
 
 	protected void readResourceActions(
@@ -1413,6 +1385,35 @@ public class PortletTracker
 		_serviceRegistrations = new ConcurrentHashMap<>();
 	private ServiceTracker<Portlet, com.liferay.portal.model.Portlet>
 		_serviceTracker;
+
+	private class JspServletWrapper extends HttpServlet {
+
+		@Override
+		public void destroy() {
+			_servlet.destroy();
+		}
+
+		@Override
+		public ServletConfig getServletConfig() {
+			return _servlet.getServletConfig();
+		}
+
+		@Override
+		public void init(ServletConfig servletConfig) throws ServletException {
+			_servlet.init(servletConfig);
+		}
+
+		@Override
+		public void service(
+				ServletRequest servletRequest, ServletResponse servletResponse)
+			throws IOException, ServletException {
+
+			_servlet.service(servletRequest, servletResponse);
+		}
+
+		private final Servlet _servlet = new JspServlet();
+
+	}
 
 	private class PortletServletWrapper extends HttpServlet {
 
