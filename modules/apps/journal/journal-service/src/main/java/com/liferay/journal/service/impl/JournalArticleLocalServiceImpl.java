@@ -5081,7 +5081,14 @@ public class JournalArticleLocalServiceImpl
 		}
 		else {
 			if ((version > 0) && (version != latestVersion)) {
-				throw new ArticleVersionException();
+				StringBundler sb = new StringBundler(4);
+
+				sb.append("Version ");
+				sb.append(version);
+				sb.append(" is not the same as ");
+				sb.append(latestVersion);
+
+				throw new ArticleVersionException(sb.toString());
 			}
 
 			serviceContext.validateModifiedDate(
@@ -5362,7 +5369,14 @@ public class JournalArticleLocalServiceImpl
 		double oldVersion = oldArticle.getVersion();
 
 		if ((version > 0) && (version != oldVersion)) {
-			throw new ArticleVersionException();
+			StringBundler sb = new StringBundler(4);
+
+			sb.append("Version ");
+			sb.append(version);
+			sb.append(" is not the same as ");
+			sb.append(oldVersion);
+
+			throw new ArticleVersionException(sb.toString());
 		}
 
 		boolean incrementVersion = false;
@@ -7590,7 +7604,9 @@ public class JournalArticleLocalServiceImpl
 			}
 
 			if ((expirationDate != null) && expirationDate.before(new Date())) {
-				throw new ArticleExpirationDateException();
+				throw new ArticleExpirationDateException(
+					"Expiration date is in the past {expirationDate=" +
+						expirationDate + "}");
 			}
 		}
 
@@ -7598,7 +7614,7 @@ public class JournalArticleLocalServiceImpl
 			(titleMap.isEmpty() ||
 			 Validator.isNull(titleMap.get(articleDefaultLocale)))) {
 
-			throw new ArticleTitleException();
+			throw new ArticleTitleException("Title is null");
 		}
 
 		validateContent(content);
@@ -7623,7 +7639,7 @@ public class JournalArticleLocalServiceImpl
 			}
 		}
 		else if (classNameId == JournalArticleConstants.CLASSNAME_ID_DEFAULT) {
-			throw new NoSuchTemplateException();
+			throw new NoSuchTemplateException("DDMTemplateKey is null");
 		}
 
 		String[] imageExtensions = PrefsPropsUtil.getStringArray(
@@ -7659,7 +7675,8 @@ public class JournalArticleLocalServiceImpl
 		if ((smallImageMaxSize > 0) &&
 			(smallImageBytes.length > smallImageMaxSize)) {
 
-			throw new ArticleSmallImageSizeException();
+			throw new ArticleSmallImageSizeException(
+				smallImageBytes.length + " exceeds " + smallImageMaxSize);
 		}
 	}
 
@@ -7704,7 +7721,7 @@ public class JournalArticleLocalServiceImpl
 			(articleId.indexOf(CharPool.COMMA) != -1) ||
 			(articleId.indexOf(CharPool.SPACE) != -1)) {
 
-			throw new ArticleIdException();
+			throw new ArticleIdException("Invalid articleId: " + articleId);
 		}
 	}
 
@@ -7733,7 +7750,8 @@ public class JournalArticleLocalServiceImpl
 
 		for (com.liferay.dynamic.data.mapping.storage.Field field : fields) {
 			if (!ddmStructure.hasField(field.getName())) {
-				throw new StorageFieldNameException();
+				throw new StorageFieldNameException(
+					"No field exists for {name=" + field.getName() + "}");
 			}
 
 			if (ddmStructure.getFieldRequired(field.getName()) &&
