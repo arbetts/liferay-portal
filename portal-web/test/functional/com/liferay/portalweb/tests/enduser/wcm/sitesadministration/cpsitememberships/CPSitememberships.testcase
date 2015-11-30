@@ -14,6 +14,8 @@
 	</tear-down>
 
 	<command name="AddMember" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Users and Organizations" />
 		</execute>
@@ -48,6 +50,8 @@
 	</command>
 
 	<command name="AddMembersSiteUser" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Users and Organizations" />
 		</execute>
@@ -95,6 +99,8 @@
 	</command>
 
 	<command name="AddSiteTeam" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -120,6 +126,8 @@
 	</command>
 
 	<command name="AddSiteTeams" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -133,9 +141,9 @@
 		</execute>
 
 		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteName" value="Site Name" />
 			<var name="sitePageName" value="Site Page" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoUsersCP">
@@ -175,6 +183,8 @@
 	</command>
 
 	<command name="AssignMembersSiteTeamUser" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Users and Organizations" />
 		</execute>
@@ -240,6 +250,8 @@
 	</command>
 
 	<command name="DeleteSiteTeam" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -269,6 +281,8 @@
 	</command>
 
 	<command name="EditSiteTeam" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Sites" />
 		</execute>
@@ -419,6 +433,8 @@
 	</command>
 
 	<command name="OrganizationsView" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Users and Organizations" />
 		</execute>
@@ -441,9 +457,9 @@
 		</execute>
 
 		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteName" value="Organization Name 1" />
 			<var name="sitePageName" value="Site Page" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="Page#gotoCP">
@@ -570,6 +586,8 @@
 	</command>
 
 	<command name="RemoveMember" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#gotoCP">
 			<var name="portletName" value="Users and Organizations" />
 		</execute>
@@ -941,10 +959,9 @@
 		<execute macro="Page#openURL" />
 
 		<execute macro="Page#changeSiteScope">
-			<var name="portletCategoryName" value="My Sites" />
 			<var name="siteName" value="Liferay" />
 		</execute>
 
-		<execute function="AssertElementNotPresent" locator1="ControlMenu#ADMIN_SITE_ADMINISTRATION_USERS" value1="Users" />
+		<execute function="AssertNotVisible" locator1="ControlMenu#ADMIN_SITE_ADMINISTRATION_USERS" value1="Users" />
 	</command>
 </definition>

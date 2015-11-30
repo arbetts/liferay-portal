@@ -42,8 +42,8 @@
 		</execute>
 
 		<execute macro="SitePage#addCP">
+			<var name="page" value="Public Pages" />
 			<var name="sitePageName" value="Home" />
-			<var name="sitePagePrivacy" value="Public" />
 			<var name="siteScopeSelected" value="true" />
 		</execute>
 
@@ -60,6 +60,7 @@
 		</execute>
 
 		<execute macro="Page#viewTranslationsPG">
+			<var name="pageConfirmationMessage" value="en English (United States)." />
 			<var name="pageLocalizationMessage" value="This page is displayed in Spanish (Spain). Display the page in English (United States). Set Spanish (Spain) as your preferred language." />
 			<var name="pageLocalizationPreferredLanguage" value="Set Spanish (Spain) as your preferred language." />
 			<var name="pageName" value="Casa" />
@@ -71,9 +72,9 @@
 		</execute>
 
 		<execute macro="SitePage#addChildCP">
+			<var name="page" value="Public Pages" />
 			<var name="siteChildPageName" value="Blog Page" />
 			<var name="siteName" value="Site Name" />
-			<var name="sitePagePrivacy" value="Public" />
 		</execute>
 
 		<execute macro="SitePage#openPageTree" />
@@ -92,6 +93,7 @@
 
 		<execute macro="Page#viewTranslationsPG">
 			<var name="childPageName" value="Blog Página" />
+			<var name="pageConfirmationMessage" value="en English (United States)." />
 			<var name="pageLocalizationMessage" value="This page is displayed in Spanish (Spain). Display the page in English (United States). Set Spanish (Spain) as your preferred language." />
 			<var name="pageLocalizationPreferredLanguage" value="Set Spanish (Spain) as your preferred language." />
 			<var name="sitePageURL" value="http://localhost:8080/es/web/site-name/blog-page" />

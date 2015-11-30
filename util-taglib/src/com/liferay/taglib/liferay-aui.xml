@@ -524,6 +524,16 @@
 		<description>Creates a <![CDATA[<code>&lt;div&gt;</code>]]> tag to group related form elements and offer additional styling.</description>
 		<attributes>
 			<attribute>
+				<name>collapsed</name>
+				<inputType>boolean</inputType>
+				<outputType>boolean</outputType>
+			</attribute>
+			<attribute>
+				<name>collapsible</name>
+				<inputType>boolean</inputType>
+				<outputType>boolean</outputType>
+			</attribute>
+			<attribute>
 				<description>Whether to display the field set as a column instead of a row</description>
 				<name>column</name>
 				<inputType>boolean</inputType>
@@ -561,6 +571,9 @@
 				<defaultValue>true</defaultValue>
 			</attribute>
 		</attributes>
+	</component>
+	<component name="FieldsetGroup" bodyContent="true">
+		<description>Creates a <![CDATA[<code>&lt;div&gt;</code>]]> tag to group fieldset elements and offer additional styling.</description>
 	</component>
 	<component name="Form" bodyContent="true">
 		<description>Creates a form that offers additional styling and custom namespacing.</description>

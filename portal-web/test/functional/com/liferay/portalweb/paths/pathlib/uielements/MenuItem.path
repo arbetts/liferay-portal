@@ -79,6 +79,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ADD_SITE_ROLES_TO_USERS</td>
+	<td>//a[@role='menuitem' and contains(.,'Add Site Roles to Users')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADD_SITE_ROLES_TO_USER_GROUPS</td>
+	<td>//a[@role='menuitem' and contains(.,'Add Site Roles to User Groups')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ADD_SUBCATEGORY</td>
 	<td>//div[contains(@class,'open')]//a[contains(.,'Add Subcategory')]</td>
 	<td></td>
@@ -445,7 +455,12 @@
 </tr>
 <tr>
 	<td>PERMISSIONS</td>
-	<td>//div[contains(@class,'open') and contains(@class,'dropdown')]//a[contains(.,'Permissions')] | //li[contains(@class,'open')]//a[contains(.,'Permissions')]</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'Permissions')] | //li[contains(@class,'open')]//a[contains(.,'Permissions')] | //ul[contains(@class,'dropdown')]//a[contains(.,'Permissions')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PERMISSIONS_LEXICON</td>
+	<td>//div[contains(@class,'dropdown') and contains(@class,'open')]//a[contains(.,'Permissions')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -666,6 +681,11 @@
 <tr>
 	<td>VIEW_PAGES</td>
 	<td>//div[contains(@class,'open') and contains(@class,'dropdown')]//a[@role='menuitem' and contains(.,'View Pages')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VIEW_HISTORY</td>
+	<td>//div[contains(@class,'open')]//a[contains(.,'View History')]</td>
 	<td></td>
 </tr>
 <tr>
