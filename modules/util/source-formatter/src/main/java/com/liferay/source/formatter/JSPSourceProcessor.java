@@ -378,6 +378,15 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 		newContent = formatLogFileName(absolutePath, newContent);
 
+		// LPS-59076
+
+		if (portalSource && isModulesFile(absolutePath) &&
+			newContent.contains("import=\"com.liferay.registry.Registry")) {
+
+			processErrorMessage(
+				fileName, "Do not use Registry in modules: " + fileName);
+		}
+
 		Matcher matcher = _javaClassPattern.matcher(newContent);
 
 		if (matcher.find()) {
@@ -668,7 +677,8 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 					}
 				}
 
-				if ((trimmedLine.startsWith("if (") ||
+				if (javaSource &&
+					(trimmedLine.startsWith("if (") ||
 					 trimmedLine.startsWith("else if (") ||
 					 trimmedLine.startsWith("while (")) &&
 					trimmedLine.endsWith(") {")) {
@@ -750,11 +760,24 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 							}
 							else if (trimmedLine.endsWith(
 										StringPool.APOSTROPHE) &&
-									 !trimmedLine.contains(StringPool.QUOTE)) {
+									 (!trimmedLine.contains(StringPool.QUOTE) ||
+									  !tag.contains(StringPool.COLON))) {
 
 								line = StringUtil.replace(
 									line, StringPool.APOSTROPHE,
 										StringPool.QUOTE);
+
+								readAttributes = false;
+							}
+							else if (trimmedLine.endsWith(StringPool.QUOTE) &&
+									 tag.contains(StringPool.COLON) &&
+									 (StringUtil.count(
+										trimmedLine, StringPool.QUOTE) > 2)) {
+
+								processErrorMessage(
+									fileName,
+									"attribute delimeter: " + fileName + " " +
+										lineCount);
 
 								readAttributes = false;
 							}
@@ -1028,9 +1051,18 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			logFileName = logFileName.substring(x + 1);
 		}
 		else {
-			x = Math.max(
-				logFileName.lastIndexOf(".docroot."),
-				logFileName.lastIndexOf(".src.META_INF.resources."));
+			x = logFileName.lastIndexOf(".docroot.");
+
+			if (x == -1) {
+				x = Math.max(
+					logFileName.lastIndexOf(
+						".src.main.resources.META_INF.resources."),
+					logFileName.lastIndexOf(".src.META_INF.resources."));
+			}
+
+			if (x == -1) {
+				return content;
+			}
 
 			x = logFileName.lastIndexOf(StringPool.PERIOD, x - 1);
 
@@ -1038,8 +1070,13 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 			logFileName = StringUtil.replace(
 				logFileName,
-				new String[] {".docroot.", ".src.META_INF.resources."},
-				new String[] {StringPool.PERIOD, StringPool.PERIOD});
+				new String[] {
+					".docroot.", ".src.main.resources.META_INF.resources.",
+					".src.META_INF.resources."
+				},
+				new String[] {
+					StringPool.PERIOD, StringPool.PERIOD, StringPool.PERIOD
+				});
 		}
 
 		return StringUtil.replace(
@@ -1666,7 +1703,7 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 	private final Pattern _jspIncludeFilePattern = Pattern.compile(
 		"/.*[.]jsp[f]?");
 	private final Pattern _jspTagAttributes = Pattern.compile(
-		"<\\w+:\\w+ (.*?[^%])>");
+		"<[-\\w]+:[-\\w]+ (.*?[^%])>");
 	private final Pattern _jspTagAttributeValue = Pattern.compile(
 		"('|\")<%= (.+?) %>('|\")");
 	private final Pattern _jspTaglibPattern = Pattern.compile(

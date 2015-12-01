@@ -3,9 +3,13 @@
 (function() {
 	'use strict';
 
+	var STR_FILE_ENTRY_RETURN_TYPE = 'com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType';
+
 	var STR_UPLOADABLE_FILE_RETURN_TYPE = 'com.liferay.item.selector.criteria.UploadableFileReturnType';
 
 	var Util = Liferay.Util;
+
+	var React = AlloyEditor.React;
 
 	var ButtonImage = React.createClass(
 		{
@@ -100,13 +104,16 @@
 
 				if (selectedItem) {
 					Util.getWindow(eventName).onceAfter(
-						'visibleChange',
+						'destroy',
 						function() {
 							var imageSrc = selectedItem.value;
 
-							if (selectedItem.returnType === STR_UPLOADABLE_FILE_RETURN_TYPE) {
+							if (selectedItem.returnType === STR_FILE_ENTRY_RETURN_TYPE ||
+								selectedItem.returnType === STR_UPLOADABLE_FILE_RETURN_TYPE) {
 								try {
-									imageSrc = JSON.parse(selectedItem.value).url;
+									var itemValue = JSON.parse(selectedItem.value);
+
+									imageSrc = editor.config.attachmentURLPrefix ? editor.config.attachmentURLPrefix + itemValue.title : itemValue.url;
 								}
 								catch (e) {
 								}

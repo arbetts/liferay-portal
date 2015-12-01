@@ -110,6 +110,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="userId" type="long" />
 
 		<!-- Other fields -->
@@ -430,6 +431,10 @@
 			<finder-column name="companyId" />
 			<finder-column name="site" />
 		</finder>
+		<finder name="C_A" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="active" />
+		</finder>
 		<finder name="T_A" return-type="Collection">
 			<finder-column name="type" />
 			<finder-column name="active" />
@@ -523,6 +528,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="modifiedDate" type="Date" />
 
 		<!-- Other fields -->
@@ -1279,6 +1285,10 @@
 		<column name="groupId" type="long" primary="true" />
 		<column name="roleId" type="long" primary="true" />
 
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
 		<!-- Finder methods -->
 
 		<finder name="GroupId" return-type="Collection">
@@ -1293,6 +1303,10 @@
 		<!-- PK fields -->
 
 		<column name="orgLaborId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
@@ -1401,6 +1415,10 @@
 
 		<column name="passwordPolicyRelId" type="long" primary="true" />
 
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
 		<!-- Other fields -->
 
 		<column name="passwordPolicyId" type="long" />
@@ -1429,6 +1447,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="userId" type="long" />
 		<column name="createDate" type="Date" />
 
@@ -1670,6 +1689,10 @@
 		<!-- PK fields -->
 
 		<column name="portletPreferencesId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
@@ -1975,6 +1998,10 @@
 		<!-- PK fields -->
 
 		<column name="resourceBlockPermissionId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
@@ -2654,6 +2681,10 @@
 		<column name="groupId" type="long" primary="true" />
 		<column name="roleId" type="long" primary="true" />
 
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
 		<!-- Finder methods -->
 
 		<finder name="UserGroupId" return-type="Collection">
@@ -2686,6 +2717,10 @@
 		<column name="userId" type="long" primary="true" />
 		<column name="groupId" type="long" primary="true" accessor="true" />
 		<column name="roleId" type="long" primary="true" accessor="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Finder methods -->
 
@@ -2721,6 +2756,7 @@
 
 		<!-- Audit fields -->
 
+		<column name="companyId" type="long" />
 		<column name="userId" type="long" />
 
 		<!-- Other fields -->
@@ -2844,6 +2880,12 @@
 			<finder-column name="actionRequired" />
 			<finder-column name="archived" />
 		</finder>
+		<finder name="U_T_DT_D" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="type" />
+			<finder-column name="deliveryType" />
+			<finder-column name="delivered" />
+		</finder>
 		<finder name="U_DT_D_A" return-type="Collection">
 			<finder-column name="userId" />
 			<finder-column name="deliveryType" />
@@ -2901,6 +2943,10 @@
 		<!-- PK fields -->
 
 		<column name="userTrackerPathId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
 
 		<!-- Other fields -->
 
