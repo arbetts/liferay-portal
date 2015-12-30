@@ -176,7 +176,7 @@ public class GroupServiceWrapper implements GroupService,
 	* The group is unstaged and its assets and resources including layouts,
 	* membership requests, subscriptions, teams, blogs, bookmarks, calendar
 	* events, image gallery, journals, message boards, polls, shopping related
-	* entities, software catalog, and wikis are also deleted.
+	* entities, and wikis are also deleted.
 	* </p>
 	*
 	* @param groupId the primary key of the group
@@ -806,22 +806,6 @@ public class GroupServiceWrapper implements GroupService,
 		java.util.Map<java.lang.String, java.lang.String> stagedPortletIds)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_groupService.updateStagedPortlets(groupId, stagedPortletIds);
-	}
-
-	/**
-	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
-	 */
-	@Deprecated
-	public GroupService getWrappedGroupService() {
-		return _groupService;
-	}
-
-	/**
-	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
-	 */
-	@Deprecated
-	public void setWrappedGroupService(GroupService groupService) {
-		_groupService = groupService;
 	}
 
 	@Override

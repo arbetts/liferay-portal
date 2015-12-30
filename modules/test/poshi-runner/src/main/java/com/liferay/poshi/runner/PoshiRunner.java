@@ -89,6 +89,8 @@ public class PoshiRunner {
 		PoshiRunnerContext.setTestCaseCommandName(_testClassCommandName);
 		PoshiRunnerContext.setTestCaseName(_testClassName);
 
+		PoshiRunnerVariablesUtil.clear();
+
 		XMLLoggerHandler.generateXMLLog(classCommandName);
 
 		CommandLoggerHandler.startRunning();
@@ -114,6 +116,8 @@ public class PoshiRunner {
 
 			PoshiRunnerStackTraceUtil.emptyStackTrace();
 
+			e.printStackTrace();
+
 			throw new Exception(e.getMessage(), e);
 		}
 		finally {
@@ -132,9 +136,9 @@ public class PoshiRunner {
 				PoshiRunnerStackTraceUtil.emptyStackTrace();
 			}
 			finally {
-				LoggerUtil.stopLogger();
-
 				CommandLoggerHandler.stopRunning();
+
+				LoggerUtil.stopLogger();
 
 				SeleniumUtil.stopSelenium();
 			}
@@ -150,13 +154,10 @@ public class PoshiRunner {
 		List<Element> varElements = rootElement.elements("var");
 
 		for (Element varElement : varElements) {
-			String name = varElement.attributeValue("name");
-			String value = varElement.attributeValue("value");
-
-			PoshiRunnerVariablesUtil.putIntoExecuteMap(name, value);
+			PoshiRunnerExecutor.runVarElement(varElement, false, false);
 		}
 
-		PoshiRunnerVariablesUtil.pushCommandMap();
+		PoshiRunnerVariablesUtil.pushCommandMap(true);
 
 		Element commandElement = PoshiRunnerContext.getTestCaseCommandElement(
 			classCommandName);

@@ -80,7 +80,7 @@
 				<execute function="KeyPress" locator1="Search#SEARCH_FIELD" value1="\RETURN" />
 			</then>
 			<else>
-				<execute function="Click" locator1="Search#SEARCH_BUTTON" />
+				<execute function="Click" locator1="Search#SEARCH_PORTLET_SEARCH_BUTTON" />
 			</else>
 		</if>
 	</command>
@@ -149,7 +149,7 @@
 		<if>
 			<isset var="searchAssetSummary" />
 			<then>
-				<execute function="AssertTextEquals" locator1="SearchResults#ASSET_ENTRY_TABLE_SUMMARY" value1="${searchAssetSummary}" />
+				<execute function="AssertTextEquals#assertPartialText" locator1="SearchResults#ASSET_ENTRY_TABLE_SUMMARY" value1="${searchAssetSummary}" />
 			</then>
 		</if>
 	</command>

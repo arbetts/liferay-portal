@@ -27,6 +27,7 @@ taglib uri="http://liferay.com/tld/util" prefix="liferay-util" %>
 
 <%@ page import="com.liferay.layout.admin.web.constants.LayoutAdminPortletKeys" %><%@
 page import="com.liferay.layout.admin.web.display.context.LayoutsAdminDisplayContext" %><%@
+page import="com.liferay.layout.admin.web.display.context.LayoutsTreeDisplayContext" %><%@
 page import="com.liferay.mobile.device.rules.model.MDRAction" %><%@
 page import="com.liferay.mobile.device.rules.model.MDRRuleGroup" %><%@
 page import="com.liferay.mobile.device.rules.model.MDRRuleGroupInstance" %><%@
@@ -43,7 +44,6 @@ page import="com.liferay.portal.LayoutNameException" %><%@
 page import="com.liferay.portal.LayoutTypeException" %><%@
 page import="com.liferay.portal.NoSuchGroupException" %><%@
 page import="com.liferay.portal.NoSuchLayoutException" %><%@
-page import="com.liferay.portal.NoSuchLayoutSetBranchException" %><%@
 page import="com.liferay.portal.NoSuchRoleException" %><%@
 page import="com.liferay.portal.RequiredLayoutException" %><%@
 page import="com.liferay.portal.SitemapChangeFrequencyException" %><%@
@@ -124,8 +124,7 @@ page import="com.liferay.portlet.documentlibrary.FileSizeException" %><%@
 page import="com.liferay.portlet.exportimport.lar.PortletDataHandlerKeys" %><%@
 page import="com.liferay.portlet.exportimport.staging.LayoutStagingUtil" %><%@
 page import="com.liferay.portlet.exportimport.staging.StagingUtil" %><%@
-page import="com.liferay.portlet.sites.util.SitesUtil" %><%@
-page import="com.liferay.product.navigation.site.administration.util.LatentGroupManagerUtil" %>
+page import="com.liferay.portlet.sites.util.SitesUtil" %>
 
 <%@ page import="java.util.Collections" %><%@
 page import="java.util.HashMap" %><%@
@@ -151,7 +150,7 @@ PortletURL currentURLObj = PortletURLUtil.getCurrent(liferayPortletRequest, life
 
 String currentURL = currentURLObj.toString();
 
-LayoutsAdminDisplayContext layoutsAdminDisplayContext = new LayoutsAdminDisplayContext(request, liferayPortletResponse);
+LayoutsAdminDisplayContext layoutsAdminDisplayContext = new LayoutsAdminDisplayContext(liferayPortletRequest, liferayPortletResponse);
 %>
 
 <%@ include file="/init-ext.jsp" %>

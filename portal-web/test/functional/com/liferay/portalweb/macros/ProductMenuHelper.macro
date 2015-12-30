@@ -33,6 +33,20 @@
 		</if>
 	</command>
 
+	<command name="gotoEditPage">
+		<execute macro="ProductMenuHelper#openProductMenu" />
+
+		<var name="key_page" value="${page}" />
+
+		<execute function="Click" locator1="ProductMenu#EDIT_PAGE" value1="${page}" />
+	</command>
+
+	<command name="gotoEditPublicPages">
+		<execute macro="ProductMenuHelper#openProductMenu" />
+
+		<execute function="Click" locator1="ProductMenu#PUBLIC_PAGES" />
+	</command>
+
 	<command name="gotoPortlet">
 		<var name="key_portlet" value="${portlet}" />
 
@@ -82,11 +96,11 @@
 	<command name="openProductMenu">
 		<if>
 			<and>
-				<condition function="IsElementPresent" locator1="DockbarAddpanelcontent#CONTENT_TAB" />
-				<condition function="IsVisible" locator1="DockbarAddpanelcontent#CONTENT_TAB" />
+				<condition function="IsElementPresent" locator1="Button#CLOSE_PANEL" />
+				<condition function="IsVisible" locator1="Button#CLOSE_PANEL" />
 			</and>
 			<then>
-				<execute function="Click#clickAt" locator1="Dockbar#ADD_ICON" />
+				<execute function="Click#clickAt" locator1="ControlMenu#ADD" />
 			</then>
 		</if>
 

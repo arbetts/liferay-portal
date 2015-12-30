@@ -10,7 +10,7 @@
 <tbody>
 <tr>
 	<td>ADD_PAGE</td>
-	<td>//button[contains(.,'Add Page')]</td>
+	<td>//div[contains(@id,'wiki_web')]//button[contains(.,'Add Page')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -248,6 +248,17 @@
 	<td></td>
 	<td></td>
 </tr>
+<!--DESCRIPTIVE_VIEW-->
+<tr>
+	<td>DESCRIPTIVE_VIEW_ENTRY_TITLE</td>
+	<td>//li[@data-qa-id='row']/div[contains(@class,'content')]/h4[contains(.,'${key_wikiPageTitle}')]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
 <!--DRAFT_PAGES_TABLE-->
 <tr>
 	<td>DRAFT_PAGES_TABLE_PAGE_NAME</td>
@@ -339,6 +350,27 @@
 <tr>
 	<td></td>
 	<td></td>
+	<td></td>
+</tr>
+<!--SELECT_VERSION_TABLE-->
+<tr>
+	<td>SELECT_VERSION_VERSION_NEW_CHECKBOX</td>
+	<td>//tr[contains(.,'${key_wikiPageVersionNew}')]/td[1]//input[@type='checkbox']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SELECT_VERSION_DATE_NEW</td>
+	<td>//tr[contains(.,'${key_wikiPageVersionNew}')]/td[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SELECT_VERSION_VERSION_OLD_CHECKBOX</td>
+	<td>//tr[contains(.,'${key_wikiPageVersionOld}')]/td[1]//input[@type='checkbox']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SELECT_VERSION_DATE_OLD</td>
+	<td>//tr[contains(.,'${key_wikiPageVersionOld}')]/td[2]</td>
 	<td></td>
 </tr>
 <!--COMPARE_VERSIONS-->
@@ -518,37 +550,37 @@
 </tr>
 <tr>
 	<td>NODE_TABLE_WIKI_NAME</td>
-	<td>//tr[contains(.,'${key_wikiNodeName}')]/td[1]/a</td>
-	<td></td>
-</tr>
-<tr>
-	<td>NODE_TABLE_WIKI_GENERIC</td>
-	<td>//tr[1]/td[1]/a</td>
-	<td></td>
-</tr>
-<tr>
-	<td>NODE_TABLE_WIKI_GENERIC_2</td>
-	<td>//tr[2]/td[1]/a</td>
-	<td></td>
-</tr>
-<tr>
-	<td>NODE_TABLE_NUMBER_OF_PAGES</td>
 	<td>//tr[contains(.,'${key_wikiNodeName}')]/td[2]/a</td>
 	<td></td>
 </tr>
 <tr>
+	<td>NODE_TABLE_WIKI_GENERIC</td>
+	<td>//tr[1]/td[2]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NODE_TABLE_WIKI_GENERIC_2</td>
+	<td>//tr[2]/td[2]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NODE_TABLE_NUMBER_OF_PAGES</td>
+	<td>//tr[contains(.,'${key_wikiNodeName}')]/td[3]/a</td>
+	<td></td>
+</tr>
+<tr>
 	<td>NODE_TABLE_ACTIONS_DROPDOWN</td>
-	<td>//tr[contains(.,'${key_wikiNodeName}')]/td[4]/div/a</td>
+	<td>//tr[contains(.,'${key_wikiNodeName}')]/td[5]/div/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NODE_TABLE_ACTIONS_GENERIC_DROPDOWN</td>
-	<td>//tr[1]/td[4]/div/a</td>
+	<td>//tr[1]/td[5]/div/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>NODE_TABLE_ACTIONS_GENERIC_DROPDOWN_2</td>
-	<td>//tr[2]/td[4]/div/a</td>
+	<td>//tr[2]/td[5]/div/a</td>
 	<td></td>
 </tr>
 <tr>

@@ -115,6 +115,14 @@ public interface Staging {
 			boolean remotePrivateLayout, Date startDate, Date endDate)
 		throws PortalException;
 
+	public void copyRemoteLayouts(
+			long sourceGroupId, boolean privateLayout,
+			Map<Long, Boolean> layoutIdMap, String name,
+			Map<String, String[]> parameterMap, String remoteAddress,
+			int remotePort, String remotePathContext, boolean secureConnection,
+			long remoteGroupId, boolean remotePrivateLayout)
+		throws PortalException;
+
 	public void deleteLastImportSettings(Group liveGroup, boolean privateLayout)
 		throws PortalException;
 
@@ -256,6 +264,9 @@ public interface Staging {
 
 	public String getStagedPortletId(String portletId);
 
+	public long[] getStagingAndLiveGroupIds(long groupId)
+		throws PortalException;
+
 	public Group getStagingGroup(long groupId);
 
 	/**
@@ -333,6 +344,12 @@ public interface Staging {
 			Map<String, String[]> parameterMap, Date startDate, Date endDate)
 		throws PortalException;
 
+	public void publishLayouts(
+			long userId, long sourceGroupId, long targetGroupId,
+			boolean privateLayout, long[] layoutIds, String name,
+			Map<String, String[]> parameterMap)
+		throws PortalException;
+
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link #publishLayouts(long, long,
 	 *             long, boolean, long[], Map)}
@@ -392,24 +409,31 @@ public interface Staging {
 		throws PortalException;
 
 	public void setRecentLayoutBranchId(
-		HttpServletRequest request, long layoutSetBranchId, long plid,
-		long layoutBranchId);
+			HttpServletRequest request, long layoutSetBranchId, long plid,
+			long layoutBranchId)
+		throws PortalException;
 
 	public void setRecentLayoutBranchId(
-		User user, long layoutSetBranchId, long plid, long layoutBranchId);
+			User user, long layoutSetBranchId, long plid, long layoutBranchId)
+		throws PortalException;
 
 	public void setRecentLayoutRevisionId(
-		HttpServletRequest request, long layoutSetBranchId, long plid,
-		long layoutRevisionId);
+			HttpServletRequest request, long layoutSetBranchId, long plid,
+			long layoutRevisionId)
+		throws PortalException;
 
 	public void setRecentLayoutRevisionId(
-		User user, long layoutSetBranchId, long plid, long layoutRevisionId);
+			User user, long layoutSetBranchId, long plid, long layoutRevisionId)
+		throws PortalException;
 
 	public void setRecentLayoutSetBranchId(
-		HttpServletRequest request, long layoutSetId, long layoutSetBranchId);
+			HttpServletRequest request, long layoutSetId,
+			long layoutSetBranchId)
+		throws PortalException;
 
 	public void setRecentLayoutSetBranchId(
-		User user, long layoutSetId, long layoutSetBranchId);
+			User user, long layoutSetId, long layoutSetBranchId)
+		throws PortalException;
 
 	public String stripProtocolFromRemoteAddress(String remoteAddress);
 

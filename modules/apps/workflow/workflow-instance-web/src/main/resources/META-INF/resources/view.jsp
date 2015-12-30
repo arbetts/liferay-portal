@@ -29,7 +29,7 @@ else {
 }
 %>
 
-<aui:nav-bar cssClass="collapse-basic-search" markupView="lexicon">
+<aui:nav-bar markupView="lexicon">
 	<aui:nav cssClass="navbar-nav">
 		<portlet:renderURL var="viewPendingURL">
 			<portlet:param name="mvcPath" value="/view.jsp" />
@@ -52,7 +52,6 @@ else {
 			label="completed"
 			selected='<%= tabs2.equals("completed") %>'
 		/>
-
 	</aui:nav>
 </aui:nav-bar>
 
@@ -74,7 +73,6 @@ else {
 
 			<portlet:renderURL var="rowURL">
 				<portlet:param name="mvcPath" value="/edit_workflow_instance.jsp" />
-				<portlet:param name="tabs2" value="<%= tabs2 %>" />
 				<portlet:param name="redirect" value="<%= currentURL %>" />
 				<portlet:param name="workflowInstanceId" value="<%= String.valueOf(workflowInstance.getWorkflowInstanceId()) %>" />
 			</portlet:renderURL>

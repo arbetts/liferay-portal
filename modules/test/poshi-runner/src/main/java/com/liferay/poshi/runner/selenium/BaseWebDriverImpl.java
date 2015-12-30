@@ -23,6 +23,7 @@ import com.liferay.poshi.runner.util.StringUtil;
 import com.liferay.poshi.runner.util.Validator;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
@@ -334,6 +335,15 @@ public abstract class BaseWebDriverImpl
 	}
 
 	@Override
+	public String getCurrentDayName() {
+		Calendar calendar = Calendar.getInstance();
+
+		return StringUtil.valueOf(
+			calendar.getDisplayName(
+				Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.US));
+	}
+
+	@Override
 	public String getCurrentMonth() {
 		Calendar calendar = Calendar.getInstance();
 
@@ -577,12 +587,14 @@ public abstract class BaseWebDriverImpl
 
 	@Override
 	public void javaScriptMouseDown(String locator) {
-		WebDriverHelper.executeJavaScriptMouseEvent(this, locator, "mousedown");
+		WebDriverHelper.executeJavaScriptEvent(
+			this, locator, "MouseEvent", "mousedown");
 	}
 
 	@Override
 	public void javaScriptMouseUp(String locator) {
-		WebDriverHelper.executeJavaScriptMouseEvent(this, locator, "mouseup");
+		WebDriverHelper.executeJavaScriptEvent(
+			this, locator, "MouseEvent", "mouseup");
 	}
 
 	@Override

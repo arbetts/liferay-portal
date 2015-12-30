@@ -16,8 +16,7 @@ package com.liferay.mobile.device.rules.service;
 
 import aQute.bnd.annotation.ProviderType;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
+import com.liferay.osgi.util.ServiceTrackerFactory;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -415,6 +414,16 @@ public class MDRRuleGroupLocalServiceUtil {
 			start, end);
 	}
 
+	public static java.util.List<com.liferay.mobile.device.rules.model.MDRRuleGroup> searchByKeywords(
+		long groupId, java.lang.String keywords,
+		java.util.LinkedHashMap<java.lang.String, java.lang.Object> params,
+		boolean andOperator, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.mobile.device.rules.model.MDRRuleGroup> obc) {
+		return getService()
+				   .searchByKeywords(groupId, keywords, params, andOperator,
+			start, end, obc);
+	}
+
 	/**
 	* @deprecated As of 6.2.0, replaced by {@link #searchByKeywordsCount(long,
 	String, LinkedHashMap, boolean)}
@@ -475,21 +484,6 @@ public class MDRRuleGroupLocalServiceUtil {
 		return _serviceTracker.getService();
 	}
 
-	/**
-	 * @deprecated As of 6.2.0
-	 */
-	@Deprecated
-	public void setService(MDRRuleGroupLocalService service) {
-	}
-
-	private static ServiceTracker<MDRRuleGroupLocalService, MDRRuleGroupLocalService> _serviceTracker;
-
-	static {
-		Bundle bundle = FrameworkUtil.getBundle(MDRRuleGroupLocalServiceUtil.class);
-
-		_serviceTracker = new ServiceTracker<MDRRuleGroupLocalService, MDRRuleGroupLocalService>(bundle.getBundleContext(),
-				MDRRuleGroupLocalService.class, null);
-
-		_serviceTracker.open();
-	}
+	private static ServiceTracker<MDRRuleGroupLocalService, MDRRuleGroupLocalService> _serviceTracker =
+		ServiceTrackerFactory.open(MDRRuleGroupLocalService.class);
 }

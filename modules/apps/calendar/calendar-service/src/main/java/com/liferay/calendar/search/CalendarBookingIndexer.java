@@ -28,8 +28,8 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.Indexer;
-import com.liferay.portal.kernel.search.SearchEngineUtil;
 import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -162,7 +162,7 @@ public class CalendarBookingIndexer extends BaseIndexer<CalendarBooking> {
 
 			Document document = getDocument(calendarBooking);
 
-			SearchEngineUtil.updateDocument(
+			IndexWriterHelperUtil.updateDocument(
 				getSearchEngineId(), calendarBooking.getCompanyId(), document,
 				isCommitImmediately());
 		}
@@ -233,7 +233,7 @@ public class CalendarBookingIndexer extends BaseIndexer<CalendarBooking> {
 					try {
 						Document document = getDocument(calendarBooking);
 
-						indexableActionableDynamicQuery.addDocument(document);
+						indexableActionableDynamicQuery.addDocuments(document);
 					}
 					catch (PortalException pe) {
 						if (_log.isWarnEnabled()) {

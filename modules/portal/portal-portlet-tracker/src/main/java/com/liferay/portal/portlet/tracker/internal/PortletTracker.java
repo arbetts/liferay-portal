@@ -14,6 +14,7 @@
 
 package com.liferay.portal.portlet.tracker.internal;
 
+import com.liferay.osgi.util.ServiceTrackerFactory;
 import com.liferay.portal.kernel.application.type.ApplicationType;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.configuration.ConfigurationFactoryUtil;
@@ -256,10 +257,8 @@ public class PortletTracker
 
 		BundleContext bundleContext = _componentContext.getBundleContext();
 
-		_serviceTracker = new ServiceTracker<>(
+		_serviceTracker = ServiceTrackerFactory.open(
 			bundleContext, Portlet.class, this);
-
-		_serviceTracker.open();
 
 		if (_log.isInfoEnabled()) {
 			_log.info("Activated");
@@ -1070,6 +1069,7 @@ public class PortletTracker
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH,
 			"/" + portletApp.getServletContextName());
 		properties.put(Constants.SERVICE_RANKING, 1000);
+		properties.put("rtl.required", Boolean.TRUE.toString());
 
 		serviceRegistrations.addServiceRegistration(
 			bundleContext.registerService(

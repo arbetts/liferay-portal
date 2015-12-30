@@ -16,6 +16,7 @@ package com.liferay.poshi.runner;
 
 import com.liferay.poshi.runner.exception.PoshiRunnerWarningException;
 import com.liferay.poshi.runner.logger.CommandLoggerHandler;
+import com.liferay.poshi.runner.logger.LoggerUtil;
 import com.liferay.poshi.runner.logger.SummaryLoggerHandler;
 import com.liferay.poshi.runner.logger.XMLLoggerHandler;
 import com.liferay.poshi.runner.selenium.LiferaySelenium;
@@ -142,6 +143,8 @@ public class PoshiRunnerExecutor {
 	}
 
 	public static void parseElement(Element element) throws Exception {
+		LoggerUtil.pauseLoggerCheck();
+
 		List<Element> childElements = element.elements();
 
 		for (Element childElement : childElements) {
@@ -656,6 +659,7 @@ public class PoshiRunnerExecutor {
 						selenium.equals("assertLocation") ||
 						selenium.equals("assertHTMLSourceTextNotPresent") ||
 						selenium.equals("assertHTMLSourceTextPresent") ||
+						selenium.equals("assertNotLocation") ||
 						selenium.equals("assertTextNotPresent") ||
 						selenium.equals("assertTextPresent") ||
 						selenium.equals("waitForConfirmation") ||
@@ -936,13 +940,30 @@ public class PoshiRunnerExecutor {
 			return;
 		}
 
+		String staticValue = element.attributeValue("static");
+
 		if (commandVar) {
 			PoshiRunnerVariablesUtil.putIntoCommandMap(
 				varName, replacedVarValue);
 		}
+		else if ((staticValue != null) && staticValue.equals("true")) {
+			if (!PoshiRunnerVariablesUtil.containsKeyInStaticMap(varName)) {
+				PoshiRunnerVariablesUtil.putIntoStaticMap(
+					varName, replacedVarValue);
+			}
+		}
 		else {
 			PoshiRunnerVariablesUtil.putIntoExecuteMap(
 				varName, replacedVarValue);
+		}
+
+		String currentFilePath = PoshiRunnerStackTraceUtil.getCurrentFilePath();
+
+		if (commandVar && currentFilePath.contains(".testcase")) {
+			if (PoshiRunnerVariablesUtil.containsKeyInStaticMap(varName)) {
+				PoshiRunnerVariablesUtil.putIntoStaticMap(
+					varName, replacedVarValue);
+			}
 		}
 
 		if (updateLoggerStatus) {

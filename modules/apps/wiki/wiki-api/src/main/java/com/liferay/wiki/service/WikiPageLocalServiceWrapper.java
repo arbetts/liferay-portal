@@ -1026,10 +1026,10 @@ public class WikiPageLocalServiceWrapper implements WikiPageLocalService,
 	@Override
 	public void updateAsset(long userId, com.liferay.wiki.model.WikiPage page,
 		long[] assetCategoryIds, java.lang.String[] assetTagNames,
-		long[] assetLinkEntryIds)
+		long[] assetLinkEntryIds, java.lang.Double priority)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_wikiPageLocalService.updateAsset(userId, page, assetCategoryIds,
-			assetTagNames, assetLinkEntryIds);
+			assetTagNames, assetLinkEntryIds, priority);
 	}
 
 	@Override
@@ -1093,23 +1093,6 @@ public class WikiPageLocalServiceWrapper implements WikiPageLocalService,
 	public void validateTitle(java.lang.String title)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_wikiPageLocalService.validateTitle(title);
-	}
-
-	/**
-	 * @deprecated As of 6.1.0, replaced by {@link #getWrappedService}
-	 */
-	@Deprecated
-	public WikiPageLocalService getWrappedWikiPageLocalService() {
-		return _wikiPageLocalService;
-	}
-
-	/**
-	 * @deprecated As of 6.1.0, replaced by {@link #setWrappedService}
-	 */
-	@Deprecated
-	public void setWrappedWikiPageLocalService(
-		WikiPageLocalService wikiPageLocalService) {
-		_wikiPageLocalService = wikiPageLocalService;
 	}
 
 	@Override
