@@ -338,6 +338,18 @@ public class ServicePreAction extends Action {
 			}
 		}
 
+		if (layout != null && layout.getGroup().isUser() &&
+			((layout.isPrivateLayout() &&
+				 !PropsValues.LAYOUT_USER_PRIVATE_LAYOUTS_ENABLED) ||
+			 (layout.isPublicLayout() &&
+				 !PropsValues.LAYOUT_USER_PRIVATE_LAYOUTS_ENABLED))) {
+
+			User layoutUser = UserLocalServiceUtil.getUserById(
+				companyId, layout.getGroup().getClassPK());
+
+			updateUserLayouts(layoutUser);
+		}
+
 		if (layout != null) {
 			long sourceGroupId = ParamUtil.getLong(request, "p_v_l_s_g_id");
 
