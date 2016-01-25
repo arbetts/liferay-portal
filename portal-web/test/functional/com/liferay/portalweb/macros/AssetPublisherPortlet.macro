@@ -150,6 +150,7 @@
 		<execute function="Select" locator1="APConfiguration#ORDERING_AND_GROUPING_ORDER_DIRECTION_SELECT" value1="${sortOrder}" />
 
 		<execute function="AssertClick" locator1="Button#SAVE" value1="Save" />
+
 		<execute macro="Alert#viewSetupUpdatedSuccessMessage" />
 	</command>
 
@@ -247,7 +248,7 @@
 
 		<execute function="Select" locator1="APConfiguration#SOURCE_SCOPE_ASSET_TYPE_SELECT" value1="${selectedAsset}" />
 		<execute function="Select" locator1="APConfiguration#SOURCE_SCOPE_ASSET_SUBTYPE_SELECT" value1="${assetSubtype}" />
-		<execute function="Check" locator1="APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_CHECKBOX" />
+		<execute function="Check#checkToggleSwitch" locator1="APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_CHECKBOX" />
 		<execute function="AssertClick" locator1="APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_SELECT_BUTTON" value1="Select" />
 		<execute function="SelectFrame" />
 
@@ -282,7 +283,13 @@
 		</if>
 
 		<execute function="AssertClick" locator1="Button#SAVE" value1="Save" />
+
 		<execute macro="Alert#viewSetupUpdatedSuccessMessage" />
+
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Source" />
+		</execute>
+
 		<execute function="AssertSelectedLabel" locator1="APConfiguration#SOURCE_SCOPE_ASSET_TYPE_SELECT" value1="${selectedAsset}" />
 		<execute function="AssertSelectedLabel" locator1="APConfiguration#SOURCE_SCOPE_ASSET_SUBTYPE_SELECT" value1="${assetSubtype}" />
 	</command>
@@ -700,19 +707,21 @@
 	<command name="viewConfigureFlaggableDisplaySettingsPG">
 		<execute macro="AssetPublisherPortlet#gotoConfigurationPG" />
 
-		<execute function="AssertClick" locator1="NavTab#DISPLAY_SETTINGS" value1="Display Settings" />
+		<execute macro="Navigator#gotoTab">
+			<var name="tab" value="Display Settings" />
+		</execute>
 
 		<if>
 			<equals arg1="${enableRatings}" arg2="true" />
 			<then>
-				<execute function="AssertChecked" locator1="Checkbox#ENABLE_RATINGS" value1="Enable Ratings" />
+				<execute function="AssertChecked#assertCheckedToggleSwitch" locator1="Checkbox#ENABLE_RATINGS" value1="Enable Ratings" />
 			</then>
 		</if>
 
 		<if>
 			<equals arg1="${setAsDefaultPage}" arg2="true" />
 			<then>
-				<execute function="AssertChecked" locator1="Checkbox#SET_AS_THE_DEFAULT_ASSET_PUBLISHER_FOR_THIS_PAGE" value1="Set as the Default Asset Publisher for This Page" />
+				<execute function="AssertChecked#assertCheckedToggleSwitch" locator1="Checkbox#SET_AS_THE_DEFAULT_ASSET_PUBLISHER_FOR_THIS_PAGE" value1="Set as the Default Asset Publisher for This Page" />
 			</then>
 		</if>
 
@@ -878,7 +887,7 @@
 				<execute function="AssertElementNotPresent" locator1="APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_SELECT_BUTTON" value1="Select" />
 			</then>
 			<else>
-				<execute function="Check" locator1="APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_CHECKBOX" />
+				<execute function="Check#checkToggleSwitch" locator1="APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_CHECKBOX" />
 				<execute function="AssertClick" locator1="APConfiguration#SOURCE_SCOPE_FILTER_BY_FIELD_SELECT_BUTTON" value1="Select" />
 				<execute function="SelectFrame" />
 
@@ -1020,6 +1029,10 @@
 		<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_3" />
 		<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_4" />
 		<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_EMPTY_1" />
+	</command>
+
+	<command name="viewReadMoreLinkNotPresentPG">
+		<execute function="AssertTextNotPresent" locator1="Link#READ_MORE" value1="Read More" />
 	</command>
 
 	<command name="viewRestoredSetupPG">

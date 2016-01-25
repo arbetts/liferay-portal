@@ -17,6 +17,8 @@
 <%@ include file="/init.jsp" %>
 
 <%
+String toolbarItem = ParamUtil.getString(request, "toolbarItem", "view-all-organizations");
+
 String displayStyle = ParamUtil.getString(request, "displayStyle", "list");
 
 String usersListView = (String)request.getAttribute("view.jsp-usersListView");
@@ -45,7 +47,7 @@ if (filterManageableOrganizations) {
 		<%
 		SearchContainer searchContainer = new OrganizationSearch(renderRequest, portletURL);
 
-		RowChecker rowChecker = new EmptyOnClickRowChecker(renderResponse);
+		RowChecker rowChecker = new OrganizationChecker(renderResponse);
 
 		rowChecker.setRowIds("rowIdsOrganization");
 
