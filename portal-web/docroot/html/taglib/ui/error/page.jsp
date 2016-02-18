@@ -39,7 +39,7 @@ if (bodyContent != null) {
 				<liferay-ui:alert
 					icon="exclamation-full"
 					message="<%= bodyContentString %>"
-					targetContainer="<%= targetContainer  %>"
+					targetContainer="<%= targetContainer %>"
 					timeout="0"
 					type="danger"
 				/>
@@ -63,7 +63,7 @@ if (bodyContent != null) {
 		<liferay-ui:alert
 			icon="exclamation-full"
 			message="<%= alertMessage %>"
-			targetContainer="<%= targetContainer  %>"
+			targetContainer="<%= targetContainer %>"
 			timeout="0"
 			type="warning"
 		/>
@@ -75,7 +75,7 @@ if (bodyContent != null) {
 			<liferay-ui:alert
 				icon="exclamation-full"
 				message='<%= LanguageUtil.get(request, "your-request-failed-to-complete") %>'
-				targetContainer="<%= targetContainer  %>"
+				targetContainer="<%= targetContainer %>"
 				timeout="0"
 				type="danger"
 			/>
@@ -88,7 +88,7 @@ if (bodyContent != null) {
 			<liferay-ui:alert
 				icon="exclamation-full"
 				message="<%= translateMessage ? LanguageUtil.get(request, message) : message %>"
-				targetContainer="<%= targetContainer  %>"
+				targetContainer="<%= targetContainer %>"
 				timeout="0"
 				type="danger"
 			/>
