@@ -1,4 +1,4 @@
-package ${packagePath}.service;
+package ${apiPackagePath}.service;
 
 import aQute.bnd.annotation.ProviderType;
 
@@ -10,10 +10,10 @@ import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.security.access.control.AccessControlled;
-import com.liferay.portal.service.Base${sessionTypeName}Service;
-import com.liferay.portal.service.Invokable${sessionTypeName}Service;
-import com.liferay.portal.service.PermissionedModelLocalService;
-import com.liferay.portal.service.PersistedModelLocalService;
+import com.liferay.portal.kernel.service.Base${sessionTypeName}Service;
+import com.liferay.portal.kernel.service.Invokable${sessionTypeName}Service;
+import com.liferay.portal.kernel.service.PermissionedModelLocalService;
+import com.liferay.portal.kernel.service.PersistedModelLocalService;
 
 <#list imports as import>
 import ${import};

@@ -14,11 +14,20 @@
 
 package com.liferay.frontend.taglib.servlet.taglib;
 
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
+import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.portlet.PortletURLUtil;
+import com.liferay.portal.kernel.util.JavaConstants;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.taglib.util.TagResourceBundleUtil;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
+import javax.portlet.PortletURL;
+import javax.portlet.WindowState;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
@@ -31,7 +40,15 @@ public class DefineObjectsTag extends TagSupport {
 
 	@Override
 	public int doStartTag() throws JspException {
+		PortletURL currentURLObj = getCurrentURLObj();
+
+		if (currentURLObj != null) {
+			pageContext.setAttribute("currentURL", currentURLObj.toString());
+			pageContext.setAttribute("currentURLObj", currentURLObj);
+		}
+
 		pageContext.setAttribute("resourceBundle", getResourceBundle());
+		pageContext.setAttribute("windowState", getWindowState());
 
 		return SKIP_BODY;
 	}
@@ -42,8 +59,21 @@ public class DefineObjectsTag extends TagSupport {
 		_overrideResourceBundle = overrideResourceBundle;
 	}
 
-	public void setResourceBundleBaseName(String resourceBundleBaseName) {
-		_resourceBundleBaseName = resourceBundleBaseName;
+	protected PortletURL getCurrentURLObj() {
+		LiferayPortletRequest liferayPortletRequest =
+			getLiferayPortletRequest();
+
+		LiferayPortletResponse liferayPortletResponse =
+			getLiferayPortletResponse();
+
+		if ((liferayPortletRequest == null) ||
+			(liferayPortletResponse == null)) {
+
+			return null;
+		}
+
+		return PortletURLUtil.getCurrent(
+			liferayPortletRequest, liferayPortletResponse);
 	}
 
 	protected ResourceBundle getResourceBundle() {
@@ -56,14 +86,64 @@ public class DefineObjectsTag extends TagSupport {
 
 		Locale locale = PortalUtil.getLocale(request);
 
-		return TagResourceBundleUtil.getResourceBundle(
-			pageContext, _resourceBundleBaseName, locale);
+		return TagResourceBundleUtil.getResourceBundle(request, locale);
 	}
 
-	private static final String _DEFAULT_RESOURCE_BUNDLE_BASE_NAME =
-		"content.Language";
+	protected WindowState getWindowState() {
+		LiferayPortletRequest liferayPortletRequest =
+			getLiferayPortletRequest();
+
+		if (liferayPortletRequest == null) {
+			return null;
+		}
+
+		return liferayPortletRequest.getWindowState();
+	}
+
+	private LiferayPortletRequest getLiferayPortletRequest() {
+		LiferayPortletRequest liferayPortletRequest =
+			(LiferayPortletRequest)pageContext.getAttribute(
+				"liferayPortletRequest");
+
+		if (liferayPortletRequest != null) {
+			return liferayPortletRequest;
+		}
+
+		HttpServletRequest request =
+			(HttpServletRequest)pageContext.getRequest();
+
+		PortletRequest portletRequest = (PortletRequest)request.getAttribute(
+			JavaConstants.JAVAX_PORTLET_REQUEST);
+
+		if (portletRequest == null) {
+			return null;
+		}
+
+		return PortalUtil.getLiferayPortletRequest(portletRequest);
+	}
+
+	private LiferayPortletResponse getLiferayPortletResponse() {
+		LiferayPortletResponse liferayPortletResponse =
+			(LiferayPortletResponse)pageContext.getAttribute(
+				"liferayPortletResponse");
+
+		if (liferayPortletResponse != null) {
+			return liferayPortletResponse;
+		}
+
+		HttpServletRequest request =
+			(HttpServletRequest)pageContext.getRequest();
+
+		PortletResponse portletResponse = (PortletResponse)request.getAttribute(
+			JavaConstants.JAVAX_PORTLET_RESPONSE);
+
+		if (portletResponse == null) {
+			return null;
+		}
+
+		return PortalUtil.getLiferayPortletResponse(portletResponse);
+	}
 
 	private ResourceBundle _overrideResourceBundle;
-	private String _resourceBundleBaseName = _DEFAULT_RESOURCE_BUNDLE_BASE_NAME;
 
 }

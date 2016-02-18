@@ -16,10 +16,15 @@ package com.liferay.dynamic.data.mapping.model;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.ModelWrapper;
+import com.liferay.expando.kernel.model.ExpandoBridge;
 
-import com.liferay.portlet.exportimport.lar.StagedModelType;
+import com.liferay.exportimport.kernel.lar.StagedModelType;
+
+import com.liferay.portal.kernel.model.ModelWrapper;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.Validator;
+
+import java.io.Serializable;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -184,12 +189,6 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 		return _ddmDataProviderInstance.getCreateDate();
 	}
 
-	@Override
-	public java.util.List<com.liferay.portal.kernel.util.KeyValuePair> getData()
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _ddmDataProviderInstance.getData();
-	}
-
 	/**
 	* Returns the data provider instance ID of this d d m data provider instance.
 	*
@@ -294,7 +293,7 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	@Override
-	public com.liferay.portlet.expando.model.ExpandoBridge getExpandoBridge() {
+	public ExpandoBridge getExpandoBridge() {
 		return _ddmDataProviderInstance.getExpandoBridge();
 	}
 
@@ -406,7 +405,7 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	@Override
-	public java.io.Serializable getPrimaryKeyObj() {
+	public Serializable getPrimaryKeyObj() {
 		return _ddmDataProviderInstance.getPrimaryKeyObj();
 	}
 
@@ -487,14 +486,14 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 
 	@Override
 	public void prepareLocalizedFieldsForImport()
-		throws com.liferay.portal.LocaleException {
+		throws com.liferay.portal.kernel.exception.LocaleException {
 		_ddmDataProviderInstance.prepareLocalizedFieldsForImport();
 	}
 
 	@Override
 	public void prepareLocalizedFieldsForImport(
 		java.util.Locale defaultImportLocale)
-		throws com.liferay.portal.LocaleException {
+		throws com.liferay.portal.kernel.exception.LocaleException {
 		_ddmDataProviderInstance.prepareLocalizedFieldsForImport(defaultImportLocale);
 	}
 
@@ -610,19 +609,17 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 
 	@Override
 	public void setExpandoBridgeAttributes(
-		com.liferay.portal.model.BaseModel<?> baseModel) {
+		com.liferay.portal.kernel.model.BaseModel<?> baseModel) {
 		_ddmDataProviderInstance.setExpandoBridgeAttributes(baseModel);
 	}
 
 	@Override
-	public void setExpandoBridgeAttributes(
-		com.liferay.portlet.expando.model.ExpandoBridge expandoBridge) {
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
 		_ddmDataProviderInstance.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
-	public void setExpandoBridgeAttributes(
-		com.liferay.portal.service.ServiceContext serviceContext) {
+	public void setExpandoBridgeAttributes(ServiceContext serviceContext) {
 		_ddmDataProviderInstance.setExpandoBridgeAttributes(serviceContext);
 	}
 
@@ -723,7 +720,7 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	@Override
-	public void setPrimaryKeyObj(java.io.Serializable primaryKeyObj) {
+	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		_ddmDataProviderInstance.setPrimaryKeyObj(primaryKeyObj);
 	}
 
@@ -778,7 +775,7 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	@Override
-	public com.liferay.portal.model.CacheModel<com.liferay.dynamic.data.mapping.model.DDMDataProviderInstance> toCacheModel() {
+	public com.liferay.portal.kernel.model.CacheModel<com.liferay.dynamic.data.mapping.model.DDMDataProviderInstance> toCacheModel() {
 		return _ddmDataProviderInstance.toCacheModel();
 	}
 

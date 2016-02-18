@@ -60,7 +60,7 @@ iteratorURL.setParameter("title", wikiPage.getTitle());
 		/>
 
 		<liferay-ui:search-container-row
-			className="com.liferay.portlet.social.model.SocialActivity"
+			className="com.liferay.social.kernel.model.SocialActivity"
 			escapedModel="<%= true %>"
 			keyProperty="activityId"
 			modelVar="socialActivity"
@@ -153,46 +153,6 @@ iteratorURL.setParameter("title", wikiPage.getTitle());
 			checkEntryURL: '<%= checkEntryURL.toString() %>',
 			duplicateEntryURL: '<%= duplicateEntryURL.toString() %>',
 			namespace: '<portlet:namespace />'
-		}
-	);
-</aui:script>
-
-<aui:script sandbox="<%= true %>">
-	$('body').on(
-		'click',
-		'.compare-to-link a',
-		function(event) {
-			var currentTarget = $(event.currentTarget);
-
-			Liferay.Util.selectEntity(
-				{
-					dialog: {
-						constrain: true,
-						destroyOnHide: true,
-						modal: true
-					},
-					eventName: '<portlet:namespace />selectVersionFm',
-					id: '<portlet:namespace />compareVersions' + currentTarget.attr('id'),
-					title: '<liferay-ui:message key="compare-versions" />',
-					uri: currentTarget.data('uri')
-				},
-				function(event) {
-					<portlet:renderURL var="compareVersionURL">
-						<portlet:param name="mvcRenderCommandName" value="/wiki/compare_versions" />
-						<portlet:param name="backURL" value="<%= currentURL %>" />
-						<portlet:param name="nodeId" value="<%= String.valueOf(wikiPage.getNodeId()) %>" />
-						<portlet:param name="title" value="<%= wikiPage.getTitle() %>" />
-						<portlet:param name="type" value="html" />
-					</portlet:renderURL>
-
-					var uri = '<%= compareVersionURL %>';
-
-					uri = Liferay.Util.addParams('<portlet:namespace />sourceVersion=' + event.sourceversion, uri);
-					uri = Liferay.Util.addParams('<portlet:namespace />targetVersion=' + event.targetversion, uri);
-
-					location.href = uri;
-				}
-			);
 		}
 	);
 </aui:script>

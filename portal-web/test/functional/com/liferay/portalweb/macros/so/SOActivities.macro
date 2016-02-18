@@ -334,17 +334,8 @@
 			<var name="wikiPageTitle" value="FrontPage" />
 		</execute>
 
-		<execute macro="Page#openURL">
-			<var name="friendlyURL" value="${friendlyURL}" />
-			<var name="pageAccess" value="${pageAccess}" />
-			<var name="pageAccessURL" value="${pageAccessURL}" />
-			<var name="pageStaging" value="${pageStaging}" />
-			<var name="pageStagingURL" value="${pageStagingURL}" />
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteNameURL" value="${siteNameURL}" />
-			<var name="siteURL" value="true" />
-			<var name="specificURL" value="${specificURL}" />
-			<var name="virtualHostsURL" value="${virtualHostsURL}" />
 		</execute>
 
 		<execute macro="SOBookmarks#deleteBookmarksEntry">
@@ -516,12 +507,11 @@
 			<var name="soPage" value="${soPage}" />
 		</execute>
 
-		<execute macro="BlogsEntry#editPG">
+		<execute macro="Blogs#editDraftPG">
 			<var name="entryContent" value="${entryContent}" />
 			<var name="entryContentEdit" value="${entryContentEdit}" />
 			<var name="entryTitle" value="${entryTitle}" />
 			<var name="entryTitleEdit" value="${entryTitleEdit}" />
-			<var name="saveAsDraft" value="${saveAsDraft}" />
 		</execute>
 
 		<execute macro="Page#gotoPG">
@@ -538,17 +528,8 @@
 			<var name="wikiPageContentEdit" value="${wikiPageContentEdit}" />
 		</execute>
 
-		<execute macro="Page#openURL">
-			<var name="friendlyURL" value="${friendlyURL}" />
-			<var name="pageAccess" value="${pageAccess}" />
-			<var name="pageAccessURL" value="${pageAccessURL}" />
-			<var name="pageStaging" value="${pageStaging}" />
-			<var name="pageStagingURL" value="${pageStagingURL}" />
+		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="${siteName}" />
-			<var name="siteNameURL" value="${siteNameURL}" />
-			<var name="siteURL" value="true" />
-			<var name="specificURL" value="${specificURL}" />
-			<var name="virtualHostsURL" value="${virtualHostsURL}" />
 		</execute>
 
 		<execute macro="SOBookmarks#editBookmarksEntry">

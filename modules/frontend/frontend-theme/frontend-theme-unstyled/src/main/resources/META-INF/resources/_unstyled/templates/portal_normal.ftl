@@ -9,20 +9,16 @@
 
 	<meta content="initial-scale=1.0, width=device-width" name="viewport" />
 
-	${theme.include(top_head_include)}
+	<@liferay_util["include"] page=top_head_include />
 </head>
 
 <body class="${css_class}">
 
 <@liferay_ui["quick-access"] contentId="#main-content" />
 
-${theme.include(body_top_include)}
+<@liferay_util["include"] page=body_top_include />
 
-<@liferay.product_menu_sidebar state="${liferay_product_menu_state!}" />
-
-<#if themeDisplay.isImpersonated() || (is_setup_complete && is_signed_in)>
-	<@liferay_control_menu["control-menu"] />
-</#if>
+<@liferay.control_menu />
 
 <div class="container-fluid" id="wrapper">
 	<header id="banner" role="banner">
@@ -57,14 +53,14 @@ ${theme.include(body_top_include)}
 		</nav>
 
 		<#if selectable>
-			${theme.include(content_include)}
+			<@liferay_util["include"] page=content_include />
 		<#else>
 			${portletDisplay.recycle()}
 
 			${portletDisplay.setTitle(the_title)}
 
 			<@liferay_theme["wrap-portlet"] page="portlet.ftl">
-				${theme.include(content_include)}
+				<@liferay_util["include"] page=content_include />
 			</@>
 		</#if>
 	</section>
@@ -76,9 +72,9 @@ ${theme.include(body_top_include)}
 	</footer>
 </div>
 
-${theme.include(body_bottom_include)}
+<@liferay_util["include"] page=body_bottom_include />
 
-${theme.include(bottom_include)}
+<@liferay_util["include"] page=bottom_include />
 
 </body>
 

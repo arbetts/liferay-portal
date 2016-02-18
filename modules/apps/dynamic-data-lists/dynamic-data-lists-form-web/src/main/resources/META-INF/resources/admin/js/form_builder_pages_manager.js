@@ -19,6 +19,14 @@ AUI.add(
 
 		var CSS_PAGE_HEADER = A.getClassName('form', 'builder', 'page', 'header');
 
+		var CSS_PAGE_HEADER_DESCRIPTION = A.getClassName('form', 'builder', 'page', 'header', 'description');
+
+		var CSS_PAGE_HEADER_DESCRIPTION_HIDE_BORDER = A.getClassName('form', 'builder', 'page', 'header', 'description', 'hide', 'border');
+
+		var CSS_PAGE_HEADER_TITLE = A.getClassName('form', 'builder', 'page', 'header', 'title');
+
+		var CSS_PAGE_HEADER_TITLE_HIDE_BORDER = A.getClassName('form', 'builder', 'page', 'header', 'title', 'hide', 'border');
+
 		var FormBuilderPagesManager = A.Component.create(
 			{
 				ATTRS: {
@@ -28,6 +36,18 @@ AUI.add(
 					mode: {
 						validator: '_validateMode',
 						value: 'pagination'
+					},
+
+					strings: {
+						value: {
+							addPageLastPosition: Liferay.Language.get('add-new-page'),
+							aditionalInfo: Liferay.Language.get('add-a-short-description-for-this-page'),
+							deleteCurrentPage: Liferay.Language.get('delete-current-page'),
+							resetPage: Liferay.Language.get('reset-page'),
+							switchMode: Liferay.Language.get('switch-pagination-mode'),
+							untitledPage: Liferay.Language.get('untitled-page-x-of-x')
+						},
+						writeOnce: true
 					}
 				},
 
@@ -47,10 +67,26 @@ AUI.add(
 							'<span class="icon-ellipsis-vertical icon-monospaced"></span>' +
 						'</a>',
 
+					TPL_PAGE_HEADER: '<div class="' + CSS_PAGE_HEADER + ' form-inline">' +
+						'<textarea rows="1" placeholder="{untitledPage}" tabindex="1" class="' + CSS_PAGE_HEADER_TITLE + ' ' +
+						CSS_PAGE_HEADER_TITLE_HIDE_BORDER + ' form-control"></textarea>' +
+						'<textarea rows="1" placeholder="{aditionalInfo}" tabindex="2" class="' + CSS_PAGE_HEADER_DESCRIPTION + ' ' +
+						CSS_PAGE_HEADER_DESCRIPTION_HIDE_BORDER + ' form-control"></textarea>' +
+					'</div>',
+
 					initializer: function() {
 						var instance = this;
 
-						instance.after('titlesChange', A.bind('_afterTitlesChange', instance));
+						instance._eventHandlers = [
+							A.on('windowresize', A.bind('_syncPageInformationHeight', instance)),
+							instance.after('titlesChange', A.bind('_afterTitlesChange', instance))
+						];
+					},
+
+					destructor: function() {
+						var instance = this;
+
+						(new A.EventHandle(instance._eventHandlers)).detach();
 					},
 
 					_addWizardPage: function() {
@@ -113,7 +149,7 @@ AUI.add(
 									{
 										addPageLastPosition: strings.addPageLastPosition,
 										addPageNextPosition: strings.addPageNextPosition,
-										deleteCurrentPage: strings.deleteCurrentPage,
+										deleteCurrentPage: this._getDeleteButtonString(),
 										switchMode: strings.switchMode
 									}
 								),
@@ -138,6 +174,23 @@ AUI.add(
 						instance._syncControlTriggersUI();
 
 						return popover;
+					},
+
+					_createUntitledPageLabel: function(activePageNumber, pagesQuantity) {
+						var instance = this;
+						var title;
+
+						var strings = instance.get('strings');
+
+						title = A.Lang.sub(
+							strings.untitledPage,
+							[
+								activePageNumber,
+								pagesQuantity
+							]
+						);
+
+						return title;
 					},
 
 					_createWizardItems: function() {
@@ -296,6 +349,19 @@ AUI.add(
 						instance.set('titles', titles);
 					},
 
+					_plugAutoSize: function(node) {
+						var instance = this;
+
+						if (!node.autosize) {
+							var height = node.get('scrollHeight');
+
+							node.plug(A.Plugin.Autosize);
+							node.height(height);
+						}
+
+						node.autosize._uiAutoSize();
+					},
+
 					_removeWizardPage: function(index) {
 						var instance = this;
 
@@ -360,6 +426,18 @@ AUI.add(
 						pageHeader.one('.' + CSS_FORM_BUILDER_CONTROLS_TRIGGER).toggle(pagesQuantity <= 1);
 					},
 
+					_syncPageInformationHeight: function() {
+						var instance = this;
+
+						var pageHeader = instance.get('pageHeader');
+
+						var pageDescription = pageHeader.one('.' + CSS_PAGE_HEADER_DESCRIPTION);
+						var pageTitle = pageHeader.one('.' + CSS_PAGE_HEADER_TITLE);
+
+						instance._plugAutoSize(pageDescription);
+						instance._plugAutoSize(pageTitle);
+					},
+
 					_syncWizardItems: function() {
 						var instance = this;
 
@@ -367,6 +445,14 @@ AUI.add(
 
 						wizard.set('selected', instance.get('activePageNumber') - 1);
 						wizard.set('items', instance._createWizardItems());
+					},
+
+					_uiSetActivePageNumber: function(event) {
+						var instance = this;
+
+						FormBuilderPagesManager.superclass._uiSetActivePageNumber.apply(instance, arguments);
+
+						instance._syncPageInformationHeight();
 					},
 
 					_uiSetMode: function(type) {
@@ -409,6 +495,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-form-builder-page-manager', 'liferay-ddm-form-renderer-wizard']
+		requires: ['aui-autosize-deprecated', 'aui-form-builder-page-manager', 'liferay-ddm-form-renderer-wizard']
 	}
 );

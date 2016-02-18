@@ -32,7 +32,7 @@ String eventName = "_" + HtmlUtil.escapeJS(assetPublisherDisplayContext.getPortl
 >
 	<liferay-ui:section>
 		<aui:fieldset-group markupView="lexicon">
-			<liferay-ui:error-marker key="errorSection" value="asset-selection" />
+			<liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="asset-selection" />
 
 			<aui:fieldset>
 				<%= selectStyle %>
@@ -42,14 +42,19 @@ String eventName = "_" + HtmlUtil.escapeJS(assetPublisherDisplayContext.getPortl
 				<%= selectScope %>
 			</aui:fieldset>
 
-			<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="model.resource.com.liferay.portlet.asset">
+			<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="model.resource.com.liferay.asset.kernel">
 
 				<%
 				List<AssetEntry> assetEntries = AssetPublisherUtil.getAssetEntries(renderRequest, portletPreferences, permissionChecker, assetPublisherDisplayContext.getGroupIds(), true, assetPublisherDisplayContext.isEnablePermissions(), true);
 				%>
 
+				<c:if test="<%= assetEntries.isEmpty() %>">
+					<p class="text-muted">
+						<%= StringUtil.toLowerCase(LanguageUtil.get(request, "none")) %>
+					</p>
+				</c:if>
+
 				<liferay-ui:search-container
-					emptyResultsMessage="no-assets-selected"
 					iteratorURL="<%= configurationRenderURL %>"
 					total="<%= assetEntries.size() %>"
 				>
@@ -58,7 +63,7 @@ String eventName = "_" + HtmlUtil.escapeJS(assetPublisherDisplayContext.getPortl
 					/>
 
 					<liferay-ui:search-container-row
-						className="com.liferay.portlet.asset.model.AssetEntry"
+						className="com.liferay.asset.kernel.model.AssetEntry"
 						escapedModel="<%= true %>"
 						keyProperty="entryId"
 						modelVar="assetEntry"
@@ -208,13 +213,15 @@ String eventName = "_" + HtmlUtil.escapeJS(assetPublisherDisplayContext.getPortl
 			</aui:fieldset>
 		</aui:fieldset-group>
 	</liferay-ui:section>
+
 	<liferay-ui:section>
-		<liferay-ui:error-marker key="errorSection" value="display-settings" />
+		<liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="display-settings" />
 
 		<%@ include file="/display_settings.jspf" %>
 	</liferay-ui:section>
+
 	<liferay-ui:section>
-		<liferay-ui:error-marker key="errorSection" value="subscriptions" />
+		<liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="subscriptions" />
 
 		<aui:fieldset-group markupView="lexicon">
 			<aui:fieldset>

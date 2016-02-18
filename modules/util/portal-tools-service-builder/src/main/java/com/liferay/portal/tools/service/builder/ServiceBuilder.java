@@ -21,6 +21,8 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.io.unsync.UnsyncBufferedReader;
 import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
+import com.liferay.portal.kernel.model.CacheField;
+import com.liferay.portal.kernel.model.ModelHintsUtil;
 import com.liferay.portal.kernel.plugin.Version;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -37,8 +39,6 @@ import com.liferay.portal.kernel.util.StringUtil_IW;
 import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.Validator_IW;
-import com.liferay.portal.model.CacheField;
-import com.liferay.portal.model.ModelHintsUtil;
 import com.liferay.portal.tools.ArgumentsUtil;
 import com.liferay.portal.tools.ToolsUtil;
 import com.liferay.portal.xml.SAXReaderFactory;
@@ -58,8 +58,6 @@ import com.thoughtworks.qdox.model.JavaSource;
 import com.thoughtworks.qdox.model.Type;
 
 import freemarker.ext.beans.BeansWrapper;
-
-import freemarker.log.Logger;
 
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModelException;
@@ -271,7 +269,6 @@ public class ServiceBuilder {
 				"\t-Dservice.tpl.copyright.txt=copyright.txt\n"+
 				"\t-Dservice.tpl.ejb_pk=" + _TPL_ROOT + "ejb_pk.ftl\n"+
 				"\t-Dservice.tpl.exception=" + _TPL_ROOT + "exception.ftl\n"+
-				"\t-Dservice.tpl.export_actionable_dynamic_query=" + _TPL_ROOT + "export_actionable_dynamic_query.ftl\n"+
 				"\t-Dservice.tpl.extended_model=" + _TPL_ROOT + "extended_model.ftl\n"+
 				"\t-Dservice.tpl.extended_model_base_impl=" + _TPL_ROOT + "extended_model_base_impl.ftl\n"+
 				"\t-Dservice.tpl.extended_model_impl=" + _TPL_ROOT + "extended_model_impl.ftl\n"+
@@ -555,17 +552,22 @@ public class ServiceBuilder {
 					"The package-path attribute is required");
 			}
 
+			_apiPackagePath = GetterUtil.getString(
+				rootElement.attributeValue("api-package-path"), packagePath);
+			_oldServiceOutputPath =
+				_apiDirName + "/" + StringUtil.replace(packagePath, ".", "/");
 			_outputPath =
 				_implDirName + "/" + StringUtil.replace(packagePath, ".", "/");
-
-			_serviceOutputPath =
-				_apiDirName + "/" + StringUtil.replace(packagePath, ".", "/");
 
 			if (Validator.isNotNull(_testDirName)) {
 				_testOutputPath =
 					_testDirName + "/" +
 						StringUtil.replace(packagePath, ".", "/");
 			}
+
+			_serviceOutputPath =
+				_apiDirName + "/" +
+					StringUtil.replace(_apiPackagePath, ".", "/");
 
 			_packagePath = packagePath;
 
@@ -598,13 +600,11 @@ public class ServiceBuilder {
 				_portletPackageName = TextFormatter.format(
 					_portletName, TextFormatter.B);
 
+				_apiPackagePath += "." + _portletPackageName;
 				_outputPath += "/" + _portletPackageName;
-
-				_serviceOutputPath += "/" + _portletPackageName;
-
-				_testOutputPath += "/" + _portletPackageName;
-
 				_packagePath += "." + _portletPackageName;
+				_serviceOutputPath += "/" + _portletPackageName;
+				_testOutputPath += "/" + _portletPackageName;
 			}
 			else {
 				_portletShortName = namespaceElement.getText();
@@ -650,20 +650,10 @@ public class ServiceBuilder {
 
 						_resolveEntity(entity);
 
-						if (entity.hasActionableDynamicQuery()) {
-							_createActionableDynamicQuery(entity);
+						_removeOldServices(entity);
 
-							if (entity.isStagedModel()) {
-								_createExportActionableDynamicQuery(entity);
-							}
-							else {
-								_removeExportActionableDynamicQuery(entity);
-							}
-						}
-						else {
-							_removeActionableDynamicQuery(entity);
-							_removeExportActionableDynamicQuery(entity);
-						}
+						_removeActionableDynamicQuery(entity);
+						_removeExportActionableDynamicQuery(entity);
 
 						if (entity.hasColumns()) {
 							_createHbm(entity);
@@ -698,9 +688,7 @@ public class ServiceBuilder {
 
 							_createPool(entity);
 
-							if (entity.getPKList().size() > 1) {
-								_createEJBPK(entity);
-							}
+							_createEJBPK(entity);
 						}
 
 						_createFinder(entity);
@@ -722,13 +710,20 @@ public class ServiceBuilder {
 						else {
 							_removeServiceImpl(entity, _SESSION_TYPE_LOCAL);
 							_removeServiceBaseImpl(entity, _SESSION_TYPE_LOCAL);
-							_removeService(entity, _SESSION_TYPE_LOCAL);
-							_removeServiceUtil(entity, _SESSION_TYPE_LOCAL);
-
-							_removeServiceClp(entity, _SESSION_TYPE_LOCAL);
+							_removeService(
+								entity, _SESSION_TYPE_LOCAL,
+								_serviceOutputPath);
+							_removeServiceUtil(
+								entity, _SESSION_TYPE_LOCAL,
+								_serviceOutputPath);
+							_removeServiceClp(
+								entity, _SESSION_TYPE_LOCAL,
+								_serviceOutputPath);
 							_removeServiceClpInvoker(
 								entity, _SESSION_TYPE_LOCAL);
-							_removeServiceWrapper(entity, _SESSION_TYPE_LOCAL);
+							_removeServiceWrapper(
+								entity, _SESSION_TYPE_LOCAL,
+								_serviceOutputPath);
 						}
 
 						if (entity.hasRemoteService()) {
@@ -746,10 +741,10 @@ public class ServiceBuilder {
 
 							_createServiceHttp(entity);
 
-							_createServiceJson(entity);
+							_removeServiceJson(entity);
 
 							if (entity.hasColumns()) {
-								_createServiceJsonSerializer(entity);
+								_removeServiceJsonSerializer(entity);
 							}
 
 							_createServiceSoap(entity);
@@ -758,13 +753,20 @@ public class ServiceBuilder {
 							_removeServiceImpl(entity, _SESSION_TYPE_REMOTE);
 							_removeServiceBaseImpl(
 								entity, _SESSION_TYPE_REMOTE);
-							_removeService(entity, _SESSION_TYPE_REMOTE);
-							_removeServiceUtil(entity, _SESSION_TYPE_REMOTE);
-
-							_removeServiceClp(entity, _SESSION_TYPE_REMOTE);
+							_removeService(
+								entity, _SESSION_TYPE_REMOTE,
+								_serviceOutputPath);
+							_removeServiceUtil(
+								entity, _SESSION_TYPE_REMOTE,
+								_serviceOutputPath);
+							_removeServiceClp(
+								entity, _SESSION_TYPE_REMOTE,
+								_serviceOutputPath);
 							_removeServiceClpInvoker(
 								entity, _SESSION_TYPE_REMOTE);
-							_removeServiceWrapper(entity, _SESSION_TYPE_REMOTE);
+							_removeServiceWrapper(
+								entity, _SESSION_TYPE_REMOTE,
+								_serviceOutputPath);
 
 							_removeServiceHttp(entity);
 
@@ -1046,6 +1048,18 @@ public class ServiceBuilder {
 			return entity;
 		}
 
+		Set<Entity> entities = new HashSet<>(_ejbList);
+
+		entities.addAll(_entityPool.values());
+
+		for (Entity curEntity : entities) {
+			if (refPackage.equals(curEntity.getApiPackagePath())) {
+				refPackage = curEntity.getPackagePath();
+
+				break;
+			}
+		}
+
 		String refPackageDirName = StringUtil.replace(refPackage, ".", "/");
 
 		String refFileName =
@@ -1201,7 +1215,8 @@ public class ServiceBuilder {
 	}
 
 	public int getMaxLength(String model, String field) {
-		Map<String, String> hints = ModelHintsUtil.getHints(model, field);
+		Map<String, String> hints = ModelHintsUtil.getHints(
+			_apiPackagePath + ".model." + model, field);
 
 		if (hints == null) {
 			return _DEFAULT_COLUMN_MAX_LENGTH;
@@ -1282,6 +1297,30 @@ public class ServiceBuilder {
 		}
 
 		return StringPool.BLANK;
+	}
+
+	public String getPrimitiveType(String type) {
+		if (type.equals("Boolean")) {
+			return "boolean";
+		}
+		else if (type.equals("Double")) {
+			return "double";
+		}
+		else if (type.equals("Float")) {
+			return "float";
+		}
+		else if (type.equals("Integer")) {
+			return "int";
+		}
+		else if (type.equals("Long")) {
+			return "long";
+		}
+		else if (type.equals("Short")) {
+			return "short";
+		}
+		else {
+			return type;
+		}
 	}
 
 	public String getReturnType(JavaMethod method) {
@@ -1630,13 +1669,13 @@ public class ServiceBuilder {
 
 		if (returnTypeGenericsName.contains(
 				"com.liferay.portal.kernel.search.") ||
-			returnTypeGenericsName.contains("com.liferay.portal.model.Theme") ||
+			returnTypeGenericsName.contains("com.liferay.portal.kernel.model.Theme") ||
 			returnTypeGenericsName.contains(
-				"com.liferay.portlet.social.model.SocialActivityDefinition") ||
+				"com.liferay.social.kernel.model.SocialActivityDefinition") ||
 			returnTypeGenericsName.equals("java.util.List<java.lang.Object>") ||
 			returnValueName.equals("com.liferay.portal.model.Lock") ||
 			returnValueName.equals(
-				"com.liferay.portlet.messageboards.model.MBMessageDisplay") ||
+				"com.liferay.message.boards.kernel.model.MBMessageDisplay") ||
 			returnValueName.startsWith("java.io") ||
 			returnValueName.equals("java.util.Map") ||
 			returnValueName.equals("java.util.Properties") ||
@@ -1666,7 +1705,7 @@ public class ServiceBuilder {
 			if (parameterTypeName.equals(
 					"com.liferay.portal.kernel.util.UnicodeProperties") ||
 				parameterTypeName.equals(
-					"com.liferay.portal.theme.ThemeDisplay") ||
+					"com.liferay.portal.kernel.theme.ThemeDisplay") ||
 				parameterTypeName.equals(
 					"com.liferay.portlet.PortletPreferencesImpl") ||
 				parameterTypeName.equals(
@@ -1815,42 +1854,8 @@ public class ServiceBuilder {
 		}
 	}
 
-	private void _createActionableDynamicQuery(Entity entity) throws Exception {
-		File ejbFile = new File(
-			_serviceOutputPath + "/service/persistence/" +
-				entity.getName() + "ActionableDynamicQuery.java");
-
-		if (_osgiModule) {
-			ejbFile.delete();
-
-			return;
-		}
-
-		Map<String, Object> context = _getContext();
-
-		context.put("entity", entity);
-
-		// Content
-
-		String content = _processTemplate(_tplActionableDynamicQuery, context);
-
-		// Write file
-
-		ToolsUtil.writeFile(ejbFile, content, _author, _modifiedFileNames);
-	}
-
 	private void _createBlobModels(Entity entity) throws Exception {
-		List<EntityColumn> blobList = new ArrayList<>(entity.getBlobList());
-
-		Iterator<EntityColumn> itr = blobList.iterator();
-
-		while (itr.hasNext()) {
-			EntityColumn col = itr.next();
-
-			if (!col.isLazy()) {
-				itr.remove();
-			}
-		}
+		List<EntityColumn> blobList = _getBlobList(entity);
 
 		if (blobList.isEmpty()) {
 			return;
@@ -1879,6 +1884,12 @@ public class ServiceBuilder {
 	}
 
 	private void _createEJBPK(Entity entity) throws Exception {
+		List<EntityColumn> pkList = entity.getPKList();
+
+		if (pkList.size() <= 1) {
+			return;
+		}
+
 		Map<String, Object> context = _getContext();
 
 		context.put("entity", entity);
@@ -1897,9 +1908,7 @@ public class ServiceBuilder {
 	}
 
 	private void _createExceptions(List<String> exceptions) throws Exception {
-		for (int i = 0; i < _ejbList.size(); i++) {
-			Entity entity = _ejbList.get(i);
-
+		for (Entity entity : _ejbList) {
 			if (!_isTargetEntity(entity)) {
 				continue;
 			}
@@ -1911,13 +1920,26 @@ public class ServiceBuilder {
 
 		for (String exception : exceptions) {
 			File oldExceptionFile = new File(
-				_serviceOutputPath + "/" + exception + "Exception.java");
+				_oldServiceOutputPath + "/" + exception + "Exception.java");
+
+			if (!oldExceptionFile.exists()) {
+				oldExceptionFile = new File(
+					_oldServiceOutputPath + "/exception/" + exception +
+						"Exception.java");
+			}
+
+			if (!oldExceptionFile.exists()) {
+				oldExceptionFile = new File(
+					_serviceOutputPath + "/" + exception + "Exception.java");
+			}
 
 			File exceptionFile = new File(
 				_serviceOutputPath + "/exception/" + exception +
 					"Exception.java");
 
-			if (oldExceptionFile.exists()) {
+			if (oldExceptionFile.exists() &&
+				!oldExceptionFile.equals(exceptionFile)) {
+
 				exceptionFile.delete();
 
 				Files.createDirectories(
@@ -1930,12 +1952,16 @@ public class ServiceBuilder {
 				content = StringUtil.replace(
 					content,
 					new String[] {
-						"package " + _packagePath,
+						"package " + _packagePath + ";",
+						"package " + _packagePath + ".exception;",
+						"package " + _apiPackagePath + ";",
 						"com.liferay.portal.NoSuchModelException"
 					},
 					new String[] {
-						"package " + _packagePath + ".exception",
-						"com.liferay.portal.exception.NoSuchModelException"
+						"package " + _apiPackagePath + ".exception;",
+						"package " + _apiPackagePath + ".exception;",
+						"package " + _apiPackagePath + ".exception;",
+						"com.liferay.portal.kernel.exception.NoSuchModelException"
 					});
 
 				_write(exceptionFile, content);
@@ -1951,9 +1977,6 @@ public class ServiceBuilder {
 				if (exception.startsWith("NoSuch")) {
 					content = StringUtil.replace(
 						content, "PortalException", "NoSuchModelException");
-					content = StringUtil.replace(
-						content, "kernel.exception.NoSuchModelException",
-						"NoSuchModelException");
 				}
 
 				content = StringUtil.replace(content, "\r\n", "\n");
@@ -1969,41 +1992,24 @@ public class ServiceBuilder {
 					content = StringUtil.replace(
 						content, "PortalException", "NoSuchModelException");
 					content = StringUtil.replace(
-						content, "kernel.exception.NoSuchModelException",
-						"NoSuchModelException");
+						content, "portal.exception.NoSuchModelException",
+						"portal.kernel.exception.NoSuchModelException");
+
+					ToolsUtil.writeFileRaw(
+						exceptionFile, content, _modifiedFileNames);
+				}
+				else if (content.contains(
+							"portal.exception.NoSuchModelException")) {
+
+					content = StringUtil.replace(
+						content, "portal.exception.NoSuchModelException",
+						"portal.kernel.exception.NoSuchModelException");
 
 					ToolsUtil.writeFileRaw(
 						exceptionFile, content, _modifiedFileNames);
 				}
 			}
 		}
-	}
-
-	private void _createExportActionableDynamicQuery(Entity entity)
-		throws Exception {
-
-		File ejbFile = new File(
-			_serviceOutputPath + "/service/persistence/" +
-				entity.getName() + "ExportActionableDynamicQuery.java");
-
-		if (_osgiModule) {
-			ejbFile.delete();
-
-			return;
-		}
-
-		Map<String, Object> context = _getContext();
-
-		context.put("entity", entity);
-
-		// Content
-
-		String content = _processTemplate(
-			_tplExportActionableDynamicQuery, context);
-
-		// Write file
-
-		ToolsUtil.writeFile(ejbFile, content, _author, _modifiedFileNames);
 	}
 
 	private void _createExtendedModel(Entity entity) throws Exception {
@@ -2105,7 +2111,7 @@ public class ServiceBuilder {
 
 	private void _createFinder(Entity entity) throws Exception {
 		if (!entity.hasFinderClass()) {
-			_removeFinder(entity);
+			_removeFinder(entity, _serviceOutputPath);
 
 			return;
 		}
@@ -2186,7 +2192,7 @@ public class ServiceBuilder {
 
 	private void _createFinderUtil(Entity entity) throws Exception {
 		if (!entity.hasFinderClass() || _osgiModule) {
-			_removeFinderUtil(entity);
+			_removeFinderUtil(entity, _serviceOutputPath);
 
 			return;
 		}
@@ -2275,6 +2281,13 @@ public class ServiceBuilder {
 			"<import class=\"" + _packagePath + ".model.");
 		int lastImport = newContent.lastIndexOf(
 			"<import class=\"" + _packagePath + ".model.");
+
+		if (firstImport == -1) {
+			firstImport = newContent.indexOf(
+				"<import class=\"" + _apiPackagePath + ".model.");
+			lastImport = newContent.lastIndexOf(
+				"<import class=\"" + _apiPackagePath + ".model.");
+		}
 
 		if (firstImport == -1) {
 			int x = newContent.indexOf("<class");
@@ -2399,6 +2412,12 @@ public class ServiceBuilder {
 				_outputPath + "/model/impl/" + superClassValue + ".java");
 
 			for (JavaMethod method : _getMethods(javaClass)) {
+				String methodName = method.getName();
+
+				if (methodName.equals("hasSetModifiedDate")) {
+					continue;
+				}
+
 				methods.remove(method.getDeclarationSignature(false));
 			}
 
@@ -2451,6 +2470,13 @@ public class ServiceBuilder {
 			"<model name=\"" + _packagePath + ".model.");
 		int lastModel = newContent.lastIndexOf(
 			"<model name=\"" + _packagePath + ".model.");
+
+		if (firstModel == -1) {
+			firstModel = newContent.indexOf(
+				"<model name=\"" + _apiPackagePath + ".model.");
+			lastModel = newContent.lastIndexOf(
+				"<model name=\"" + _apiPackagePath + ".model.");
+		}
 
 		if (firstModel == -1) {
 			int x = newContent.indexOf("</model-hints>");
@@ -2591,11 +2617,7 @@ public class ServiceBuilder {
 
 		// Content
 
-		Logger.selectLoggerLibrary(Logger.LIBRARY_NONE);
-
 		String content = _processTemplate(_tplPersistenceImpl, context);
-
-		Logger.selectLoggerLibrary(Logger.LIBRARY_AUTO);
 
 		// Write file
 
@@ -2958,7 +2980,7 @@ public class ServiceBuilder {
 
 	private void _createServiceFactory(Entity entity, int sessionType) {
 		File ejbFile = new File(
-			_serviceOutputPath + "/service/" + entity.getName() +
+			_oldServiceOutputPath + "/service/" + entity.getName() +
 				_getSessionTypeName(sessionType) + "ServiceFactory.java");
 
 		if (ejbFile.exists()) {
@@ -3024,30 +3046,6 @@ public class ServiceBuilder {
 
 		if (!ejbFile.exists()) {
 			ToolsUtil.writeFile(ejbFile, content, _author, _modifiedFileNames);
-		}
-	}
-
-	private void _createServiceJson(Entity entity) {
-		File ejbFile = new File(
-			_outputPath + "/service/http/" + entity.getName() +
-				"ServiceJSON.java");
-
-		if (ejbFile.exists()) {
-			System.out.println("Removing deprecated " + ejbFile);
-
-			ejbFile.delete();
-		}
-	}
-
-	private void _createServiceJsonSerializer(Entity entity) {
-		File ejbFile = new File(
-			_serviceOutputPath + "/service/http/" + entity.getName() +
-				"JSONSerializer.java");
-
-		if (ejbFile.exists()) {
-			System.out.println("Removing deprecated " + ejbFile);
-
-			ejbFile.delete();
 		}
 	}
 
@@ -3203,6 +3201,14 @@ public class ServiceBuilder {
 
 		int lastSession = newContent.lastIndexOf(
 			"<bean id=\"" + _packagePath + ".service.", y);
+
+		if (firstSession == -1) {
+			firstSession = newContent.indexOf(
+				"<bean id=\"" + _apiPackagePath + ".service.", x);
+
+			lastSession = newContent.lastIndexOf(
+				"<bean id=\"" + _apiPackagePath + ".service.", y);
+		}
 
 		if ((firstSession == -1) || (firstSession > y)) {
 			x = newContent.indexOf("</beans>");
@@ -3791,6 +3797,22 @@ public class ServiceBuilder {
 		return xml;
 	}
 
+	private List<EntityColumn> _getBlobList(Entity entity) {
+		List<EntityColumn> blobList = new ArrayList<>(entity.getBlobList());
+
+		Iterator<EntityColumn> itr = blobList.iterator();
+
+		while (itr.hasNext()) {
+			EntityColumn col = itr.next();
+
+			if (!col.isLazy()) {
+				itr.remove();
+			}
+		}
+
+		return blobList;
+	}
+
 	private JavaField[] _getCacheFields(JavaClass javaClass) {
 		if (javaClass == null) {
 			return new JavaField[0];
@@ -3836,8 +3858,7 @@ public class ServiceBuilder {
 
 			if (colType.equals("String")) {
 				columnLengths[i] = getMaxLength(
-					_packagePath + ".model." + entity.getName(),
-					entityColumn.getName());
+					entity.getName(), entityColumn.getName());
 			}
 		}
 
@@ -3852,6 +3873,7 @@ public class ServiceBuilder {
 		Map<String, Object> context = new HashMap<>();
 
 		context.put("apiDir", _apiDirName);
+		context.put("apiPackagePath", _apiPackagePath);
 		context.put("arrayUtil", ArrayUtil_IW.getInstance());
 		context.put("author", _author);
 		context.put("beanLocatorUtil", _beanLocatorUtil);
@@ -3997,8 +4019,7 @@ public class ServiceBuilder {
 					sb.append("TEXT");
 				}
 				else if (colType.equals("String")) {
-					int maxLength = getMaxLength(
-						_packagePath + ".model." + entity.getName(), colName);
+					int maxLength = getMaxLength(entity.getName(), colName);
 
 					if (col.isLocalized()) {
 						maxLength = 4000;
@@ -4113,8 +4134,7 @@ public class ServiceBuilder {
 				sb.append("TEXT");
 			}
 			else if (colType.equals("String")) {
-				int maxLength = getMaxLength(
-					_packagePath + ".model." + entity.getName(), colName);
+				int maxLength = getMaxLength(entity.getName(), colName);
 
 				if (col.isLocalized() && (maxLength < 4000)) {
 					maxLength = 4000;
@@ -4156,7 +4176,7 @@ public class ServiceBuilder {
 			}
 
 			if (colName.equals("mvccVersion")) {
-				sb.append(" default 0");
+				sb.append(" default 0 not null");
 			}
 
 			if (((i + 1) != regularColList.size()) || entity.hasCompoundPK()) {
@@ -4683,10 +4703,10 @@ public class ServiceBuilder {
 			sb.append(
 				"package " + _packagePath + ".service.persistence.impl;\n\n");
 			sb.append(
-				"import " + _packagePath + ".service.persistence." + ejbName +
-					"Finder;\n");
+				"import " + _apiPackagePath + ".service.persistence." +
+					ejbName + "Finder;\n");
 			sb.append(
-				"import " + _packagePath + ".service.persistence." + ejbName +
+				"import " + _apiPackagePath + ".service.persistence." + ejbName +
 					"Util;");
 
 			content = StringUtil.replace(
@@ -5086,18 +5106,18 @@ public class ServiceBuilder {
 		}
 
 		boolean resourceActionModel = _resourceActionModels.contains(
-			_packagePath + ".model." + ejbName);
+			_apiPackagePath + ".model." + ejbName);
 
 		_ejbList.add(
 			new Entity(
-				_packagePath, _portletName, _portletShortName, ejbName,
-				humanName, table, alias, uuid, uuidAccessor, localService,
-				remoteService, persistenceClass, finderClass, dataSource,
-				sessionFactory, txManager, cacheEnabled, dynamicUpdateEnabled,
-				jsonEnabled, mvccEnabled, trashEnabled, deprecated, pkList,
-				regularColList, blobList, collectionList, columnList, order,
-				finderList, referenceList, unresolvedReferenceList,
-				txRequiredList, resourceActionModel));
+				_packagePath, _apiPackagePath, _portletName, _portletShortName,
+				ejbName, humanName, table, alias, uuid, uuidAccessor,
+				localService, remoteService, persistenceClass, finderClass,
+				dataSource, sessionFactory, txManager, cacheEnabled,
+				dynamicUpdateEnabled, jsonEnabled, mvccEnabled, trashEnabled,
+				deprecated, pkList, regularColList, blobList, collectionList,
+				columnList, order, finderList, referenceList,
+				unresolvedReferenceList, txRequiredList, resourceActionModel));
 	}
 
 	private String _processTemplate(String name, Map<String, Object> context)
@@ -5136,20 +5156,60 @@ public class ServiceBuilder {
 	}
 
 	private void _removeActionableDynamicQuery(Entity entity) {
-		_deleteFile(
+		File ejbFile = new File(
+			_oldServiceOutputPath + "/service/persistence/" +
+				entity.getName() + "ActionableDynamicQuery.java");
+
+		ejbFile.delete();
+
+		ejbFile = new File(
 			_serviceOutputPath + "/service/persistence/" +
 				entity.getName() + "ActionableDynamicQuery.java");
+
+		ejbFile.delete();
+	}
+
+	private void _removeBlobModels(Entity entity, String outputPath) {
+		for (EntityColumn col : _getBlobList(entity)) {
+			_deleteFile(
+				outputPath + "/model/" + entity.getName() +
+					col.getMethodName() + "BlobModel.java");
+		}
+	}
+
+	private void _removeEJBPK(Entity entity, String outputPath) {
+		List<EntityColumn> pkList = entity.getPKList();
+
+		if (pkList.size() <= 1) {
+			return;
+		}
+
+		_deleteFile(
+			outputPath + "/service/persistence/" + entity.getPKClassName() +
+				".java");
 	}
 
 	private void _removeExportActionableDynamicQuery(Entity entity) {
-		_deleteFile(
+		File ejbFile = new File(
+			_oldServiceOutputPath + "/service/persistence/" +
+				entity.getName() + "ExportActionableDynamicQuery.java");
+
+		ejbFile.delete();
+
+		ejbFile = new File(
 			_serviceOutputPath + "/service/persistence/" +
 				entity.getName() + "ExportActionableDynamicQuery.java");
+
+		ejbFile.delete();
 	}
 
-	private void _removeFinder(Entity entity) {
+	private void _removeExtendedModel(Entity entity, String outputPath) {
+		_deleteFile(outputPath + "/model/" + entity.getName() + ".java");
+	}
+
+	private void _removeFinder(Entity entity, String outputPath) {
 		_deleteFile(
-			_serviceOutputPath + "/service/persistence/" + entity.getName() +
+			outputPath + "/service/persistence/" + entity.getName() +
 				"Finder.java");
 	}
 
@@ -5159,15 +5219,75 @@ public class ServiceBuilder {
 				"FinderBaseImpl.java");
 	}
 
-	private void _removeFinderUtil(Entity entity) {
+	private void _removeFinderUtil(Entity entity, String outputPath) {
 		_deleteFile(
-			_serviceOutputPath + "/service/persistence/" + entity.getName() +
+			outputPath + "/service/persistence/" + entity.getName() +
 				"FinderUtil.java");
 	}
 
-	private void _removeService(Entity entity, int sessionType) {
+	private void _removeModel(Entity entity, String outputPath) {
+		_deleteFile(outputPath + "/model/" + entity.getName() + "Model.java");
+	}
+
+	private void _removeModelClp(Entity entity, String outputPath) {
+		_deleteFile(outputPath + "/model/" + entity.getName() + "Clp.java");
+	}
+
+	private void _removeModelSoap(Entity entity, String outputPath) {
+		_deleteFile(outputPath + "/model/" + entity.getName() + "Soap.java");
+	}
+
+	private void _removeModelWrapper(Entity entity, String outputPath) {
+		_deleteFile(outputPath + "/model/" + entity.getName() + "Wrapper.java");
+	}
+
+	private void _removeOldServices(Entity entity) {
+		if (_oldServiceOutputPath.equals(_serviceOutputPath)) {
+			return;
+		}
+
+		_removeBlobModels(entity, _oldServiceOutputPath);
+		_removeEJBPK(entity, _oldServiceOutputPath);
+		_removeExtendedModel(entity, _oldServiceOutputPath);
+		_removeFinder(entity, _oldServiceOutputPath);
+		_removeFinderUtil(entity, _oldServiceOutputPath);
+		_removeModel(entity, _oldServiceOutputPath);
+		_removeModelClp(entity, _oldServiceOutputPath);
+		_removeModelSoap(entity, _oldServiceOutputPath);
+		_removeModelWrapper(entity, _oldServiceOutputPath);
+		_removePersistence(entity, _oldServiceOutputPath);
+		_removePersistenceUtil(entity, _oldServiceOutputPath);
+		_removeServiceClpMessageListener(_oldServiceOutputPath);
+		_removeServiceClpSerializer(_oldServiceOutputPath);
+		_removeService(entity, _SESSION_TYPE_LOCAL, _oldServiceOutputPath);
+		_removeService(entity, _SESSION_TYPE_REMOTE, _oldServiceOutputPath);
+		_removeServiceClp(entity, _SESSION_TYPE_LOCAL, _oldServiceOutputPath);
+		_removeServiceClp(entity, _SESSION_TYPE_REMOTE, _oldServiceOutputPath);
+		_removeServiceUtil(entity, _SESSION_TYPE_LOCAL, _oldServiceOutputPath);
+		_removeServiceUtil(entity, _SESSION_TYPE_REMOTE, _oldServiceOutputPath);
+		_removeServiceWrapper(
+			entity, _SESSION_TYPE_LOCAL, _oldServiceOutputPath);
+		_removeServiceWrapper(
+			entity, _SESSION_TYPE_REMOTE, _oldServiceOutputPath);
+	}
+
+	private void _removePersistence(Entity entity, String outputPath) {
 		_deleteFile(
-			_serviceOutputPath + "/service/" + entity.getName() +
+			outputPath + "/service/persistence/" + entity.getName() +
+				"Persistence.java");
+	}
+
+	private void _removePersistenceUtil(Entity entity, String outputPath) {
+		_deleteFile(
+			outputPath + "/service/persistence/" + entity.getName() +
+				"Util.java");
+	}
+
+	private void _removeService(
+		Entity entity, int sessionType, String outputPath) {
+
+		_deleteFile(
+			outputPath + "/service/" + entity.getName() +
 				_getSessionTypeName(sessionType) + "Service.java");
 	}
 
@@ -5177,9 +5297,11 @@ public class ServiceBuilder {
 				_getSessionTypeName(sessionType) + "ServiceBaseImpl.java");
 	}
 
-	private void _removeServiceClp(Entity entity, int sessionType) {
+	private void _removeServiceClp(
+		Entity entity, int sessionType, String outputPath) {
+
 		_deleteFile(
-			_serviceOutputPath + "/service/" + entity.getName() +
+			outputPath + "/service/" + entity.getName() +
 				_getSessionTypeName(sessionType) + "ServiceClp.java");
 	}
 
@@ -5187,6 +5309,14 @@ public class ServiceBuilder {
 		_deleteFile(
 			_outputPath + "/service/base/" + entity.getName() +
 				_getSessionTypeName(sessionType) + "ServiceClpInvoker.java");
+	}
+
+	private void _removeServiceClpMessageListener(String outputPath) {
+		_deleteFile(outputPath + "/service/messaging/ClpMessageListener.java");
+	}
+
+	private void _removeServiceClpSerializer(String outputPath) {
+		_deleteFile(outputPath + "/service/ClpSerializer.java");
 	}
 
 	private void _removeServiceHttp(Entity entity) {
@@ -5201,21 +5331,49 @@ public class ServiceBuilder {
 				_getSessionTypeName(sessionType) + "ServiceImpl.java");
 	}
 
+	private void _removeServiceJson(Entity entity) {
+		File ejbFile = new File(
+			_outputPath + "/service/http/" + entity.getName() +
+				"ServiceJSON.java");
+
+		if (ejbFile.exists()) {
+			System.out.println("Removing deprecated " + ejbFile);
+
+			ejbFile.delete();
+		}
+	}
+
+	private void _removeServiceJsonSerializer(Entity entity) {
+		File ejbFile = new File(
+			_serviceOutputPath + "/service/http/" + entity.getName() +
+				"JSONSerializer.java");
+
+		if (ejbFile.exists()) {
+			System.out.println("Removing deprecated " + ejbFile);
+
+			ejbFile.delete();
+		}
+	}
+
 	private void _removeServiceSoap(Entity entity) {
 		_deleteFile(
 			_outputPath + "/service/http/" + entity.getName() +
 				"ServiceSoap.java");
 	}
 
-	private void _removeServiceUtil(Entity entity, int sessionType) {
+	private void _removeServiceUtil(
+		Entity entity, int sessionType, String outputPath) {
+
 		_deleteFile(
-			_serviceOutputPath + "/service/" + entity.getName() +
+			outputPath + "/service/" + entity.getName() +
 				_getSessionTypeName(sessionType) + "ServiceUtil.java");
 	}
 
-	private void _removeServiceWrapper(Entity entity, int sessionType) {
+	private void _removeServiceWrapper(
+		Entity entity, int sessionType, String outputPath) {
+
 		_deleteFile(
-			_serviceOutputPath + "/service/" + entity.getName() +
+			outputPath + "/service/" + entity.getName() +
 				_getSessionTypeName(sessionType) + "ServiceWrapper.java");
 	}
 
@@ -5261,6 +5419,7 @@ public class ServiceBuilder {
 		"public void set.*" + Pattern.quote("("));
 
 	private String _apiDirName;
+	private String _apiPackagePath;
 	private String _author;
 	private boolean _autoImportDefaultReferences;
 	private boolean _autoNamespaceTables;
@@ -5282,6 +5441,7 @@ public class ServiceBuilder {
 	private String _modelHintsFileName;
 	private Set<String> _modifiedFileNames = new HashSet<>();
 	private boolean _mvccEnabled;
+	private String _oldServiceOutputPath;
 	private boolean _osgiModule;
 	private String _outputPath;
 	private String _packagePath;
@@ -5303,16 +5463,12 @@ public class ServiceBuilder {
 	private String _targetEntityName;
 	private String _testDirName;
 	private String _testOutputPath;
-	private String _tplActionableDynamicQuery =
-		_TPL_ROOT + "actionable_dynamic_query.ftl";
 	private String _tplBadAliasNames = _TPL_ROOT + "bad_alias_names.txt";
 	private String _tplBadColumnNames = _TPL_ROOT + "bad_column_names.txt";
 	private String _tplBadTableNames = _TPL_ROOT + "bad_table_names.txt";
 	private String _tplBlobModel = _TPL_ROOT + "blob_model.ftl";
 	private String _tplEjbPk = _TPL_ROOT + "ejb_pk.ftl";
 	private String _tplException = _TPL_ROOT + "exception.ftl";
-	private String _tplExportActionableDynamicQuery =
-		_TPL_ROOT + "export_actionable_dynamic_query.ftl";
 	private String _tplExtendedModel = _TPL_ROOT + "extended_model.ftl";
 	private String _tplExtendedModelBaseImpl =
 		_TPL_ROOT + "extended_model_base_impl.ftl";

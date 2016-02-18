@@ -3,6 +3,14 @@
 
 $horizontal-spacing: 35px;
 
+.ddl-form-builder-buttons .icon-spinner,
+.ddl-form-settings-modal .btn-toolbar-button .icon-spinner,
+.lfr-ddl-field-settings-modal .btn-toolbar-button .icon-spinner {
+	line-height: 21px;
+	margin-left: 10px;
+	position: absolute;
+}
+
 .ddl-publish-modal {
 	.alert-info {
 		text-align: center;
@@ -199,16 +207,6 @@ $horizontal-spacing: 35px;
 			.lfr-ddm-form-field-container {
 				position: relative;
 
-				@include keyframes(spin) {
-					100% {
-						transform: rotate(359deg);
-					}
-				}
-
-				.icon-spinner {
-					@include animation(spin 1000ms infinite linear);
-				}
-
 				.lfr-form-row {
 					border-width: 0;
 					padding-bottom: 5px;
@@ -279,7 +277,7 @@ $horizontal-spacing: 35px;
 	}
 
 	.modal-title {
-		 text-transform: capitalize;
+		text-transform: capitalize;
 	}
 
 	@include lg {
@@ -335,17 +333,6 @@ $horizontal-spacing: 35px;
 
 .lfr-ddl-field-settings-modal,
 .portlet-forms {
-	@include keyframes(spin) {
-		100% {
-			transform: rotate(359deg);
-		}
-	}
-
-	.form-builder-field-settings-save .icon-spinner {
-		display: inline-block;
-		margin: -2px 0 0 4px;
-	}
-
 	.form-control {
 		font-size: 14px;
 		height: 40px;
@@ -359,15 +346,10 @@ $horizontal-spacing: 35px;
 
 	.help-block {
 		font-size: 14px;
-		position: absolute;
 	}
 
 	.icon-asterisk {
 		margin-left: 4px;
-	}
-
-	.icon-spinner {
-		@include animation(spin 1000ms infinite linear);
 	}
 
 	label.radio-inline {
@@ -436,6 +418,15 @@ $horizontal-spacing: 35px;
 .portlet-forms-admin {
 	.alert {
 		margin: 0;
+	}
+
+	.asset-icon .lexicon-icon {
+		height: 32px;
+		width: 32px;
+	}
+
+	.record-set-id, .record-set-modified-date {
+		margin-right: 20px;
 	}
 
 	.ddl-form-basic-info {
@@ -547,6 +538,16 @@ $horizontal-spacing: 35px;
 	}
 }
 
+.portal-popup {
+	.portlet-layout {
+		margin: 0 0 75px;
+	}
+
+	.portlet-column {
+		padding: 0;
+	}
+}
+
 .portlet-forms {
 	.aspect-ratio img {
 		top: 0;
@@ -557,7 +558,7 @@ $horizontal-spacing: 35px;
 	}
 
 	.ddl-form-description {
-		font-size: 14px;
+		font-size: 16px;
 		line-height: 24px;
 		word-break: break-all;
 	}
@@ -578,6 +579,8 @@ $horizontal-spacing: 35px;
 	.lfr-ddm-form-page-title {
 		color: #728694;
 		font-weight: 400;
+		resize: none;
+		word-break: break-all;
 	}
 
 	.form-builder-page-header-description,
@@ -605,6 +608,10 @@ $horizontal-spacing: 35px;
 		font-size: 19px;
 		margin-top: 0;
 	}
+
+	.multi-step-progress-bar .progress-bar-title {
+		word-break: break-all;
+	}
 }
 
 .portlet-forms-admin {
@@ -621,16 +628,14 @@ $horizontal-spacing: 35px;
 	}
 
 	.form-builder-controls-trigger  {
-		$height: 48px;
-
 		display: block;
 		font-size: 20px;
-		height: $height;
-		margin-top: - $height / 2;
+		height: 48px;
 		padding: 12px;
 		position: absolute;
 		right: 0;
-		top: 50%;
+		text-decoration: none;
+		top: 13px;
 
 		&:hover .icon-monospaced {
 			color: inherit;
@@ -740,6 +745,7 @@ $horizontal-spacing: 35px;
 	}
 
 	.form-builder-page-header {
+		padding-right: 34px;
 		position: relative;
 	}
 
@@ -747,29 +753,29 @@ $horizontal-spacing: 35px;
 		margin-bottom: 0;
 		margin-top: 0;
 		padding-left: 34px;
-		padding-right: 34px;
 		width: auto;
 
-		input {
+		.form-builder-page-header-description,
+		.form-builder-page-header-title {
+			display: block;
+			overflow: hidden;
+			width: 100%;
+		}
+
+		.form-builder-page-header-description {
+			padding-top: 0;
+		}
+
+		.form-builder-page-header-title {
+			margin-bottom: 0;
+			padding-bottom: 0;
+			padding-top: 0;
+		}
+
+		textarea {
 			border-width: 0;
 			padding-left: 0;
 			padding-right: 0;
-
-			&.form-builder-page-header-description,
-			&.form-builder-page-header-title {
-				display: block;
-				width: 100%;
-			}
-
-			&.form-builder-page-header-description {
-				padding-top: 0;
-			}
-
-			&.form-builder-page-header-title {
-				height: auto;
-				padding-bottom: 0;
-				padding-top: 0;
-			}
 
 			&:focus {
 				box-shadow: none;
@@ -792,6 +798,10 @@ $horizontal-spacing: 35px;
 
 	.form-builder-tabview {
 		padding-right: 70px;
+
+		.form-builder-controls-trigger {
+			top: 34px;
+		}
 	}
 
 	.lfr-ddm-repeatable-add-button {

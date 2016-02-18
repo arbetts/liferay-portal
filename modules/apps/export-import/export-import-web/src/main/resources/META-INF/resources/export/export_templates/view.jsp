@@ -20,7 +20,12 @@
 String redirect = ParamUtil.getString(request, "redirect");
 
 portletDisplay.setShowBackIcon(true);
-portletDisplay.setURLBack(redirect);
+
+PortletURL exportProcessesURL = PortalUtil.getControlPanelPortletURL(request, ExportImportPortletKeys.EXPORT, PortletRequest.RENDER_PHASE);
+
+exportProcessesURL.setParameter("mvcPath", "/export/view.jsp");
+
+portletDisplay.setURLBack(exportProcessesURL.toString());
 
 renderResponse.setTitle(LanguageUtil.get(request, "export-templates"));
 %>
@@ -82,7 +87,7 @@ if (liveGroup == null) {
 			</liferay-ui:search-container-results>
 
 			<liferay-ui:search-container-row
-				className="com.liferay.portlet.exportimport.model.ExportImportConfiguration"
+				className="com.liferay.exportimport.kernel.model.ExportImportConfiguration"
 				keyProperty="exportImportConfigurationId"
 				modelVar="exportImportConfiguration"
 			>
@@ -128,7 +133,6 @@ if (liveGroup == null) {
 				request.setAttribute("view.jsp-groupId", groupId);
 				request.setAttribute("view.jsp-liveGroupId", liveGroupId);
 				request.setAttribute("view.jsp-privateLayout", privateLayout);
-				request.setAttribute("view.jsp-exportImportConfigurationId", exportImportConfiguration.getExportImportConfigurationId());
 				%>
 
 				<liferay-ui:search-container-column-jsp
@@ -146,7 +150,7 @@ if (liveGroup == null) {
 		<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD %>" />
 		<portlet:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 		<portlet:param name="liveGroupId" value="<%= String.valueOf(liveGroupId) %>" />
-		<portlet:param name="privateLayout" value="<%= String.valueOf(privateLayout) %>" />
+		<portlet:param name="privateLayout" value="<%= Boolean.FALSE.toString() %>" />
 	</portlet:renderURL>
 
 	<liferay-frontend:add-menu>

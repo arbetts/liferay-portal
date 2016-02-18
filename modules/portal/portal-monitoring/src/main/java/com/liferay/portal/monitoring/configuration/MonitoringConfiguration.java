@@ -16,7 +16,7 @@ package com.liferay.portal.monitoring.configuration;
 
 import aQute.bnd.annotation.metatype.Meta;
 
-import com.liferay.portal.metatype.annotations.ExtendedObjectClassDefinition;
+import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
 
 /**
  * @author Michael C. Han
@@ -28,25 +28,28 @@ import com.liferay.portal.metatype.annotations.ExtendedObjectClassDefinition;
 )
 public interface MonitoringConfiguration {
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "200", required = false)
+	public int monitoringMessageMaxQueueSize();
+
+	@Meta.AD(deflt = "true", required = false)
 	public boolean monitorPortalRequest();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "true", required = false)
 	public boolean monitorPortletActionRequest();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "true", required = false)
 	public boolean monitorPortletEventRequest();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "true", required = false)
 	public boolean monitorPortletRenderRequest();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "true", required = false)
 	public boolean monitorPortletResourceRequest();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "true", required = false)
 	public boolean monitorServiceRequest();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "true", required = false)
 	public boolean showPerRequestDataSample();
 
 }

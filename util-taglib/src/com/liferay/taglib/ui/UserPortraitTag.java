@@ -18,15 +18,15 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.taglib.util.IncludeTag;
 import com.liferay.taglib.util.LexiconUtil;
 import com.liferay.taglib.util.TagResourceBundleUtil;
@@ -89,7 +89,9 @@ public class UserPortraitTag extends IncludeTag {
 
 		String[] userNames = StringUtil.split(userName, StringPool.SPACE);
 
-		userNames = ArrayUtil.subset(userNames, 0, 2);
+		if (userNames.length > 1) {
+			userNames = ArrayUtil.subset(userNames, 0, 2);
+		}
 
 		StringBundler sb = new StringBundler(userNames.length);
 

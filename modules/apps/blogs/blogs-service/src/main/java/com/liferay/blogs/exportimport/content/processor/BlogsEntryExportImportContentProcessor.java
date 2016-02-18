@@ -15,7 +15,7 @@
 package com.liferay.blogs.exportimport.content.processor;
 
 import com.liferay.exportimport.content.processor.ExportImportContentProcessor;
-import com.liferay.exportimport.content.processor.base.BaseExportImportContentProcessor;
+import com.liferay.exportimport.content.processor.base.BaseTextExportImportContentProcessor;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -25,14 +25,14 @@ import org.osgi.service.component.annotations.Component;
  * @author Gergely Mathe
  */
 @Component(
-	property = {"model.class.name=com.liferay.portlet.blogs.model.BlogsEntry"},
+	property = {"model.class.name=com.liferay.blogs.kernel.model.BlogsEntry"},
 	service = {
 		BlogsEntryExportImportContentProcessor.class,
 		ExportImportContentProcessor.class
 	}
 )
 public class BlogsEntryExportImportContentProcessor
-	extends BaseExportImportContentProcessor {
+	extends BaseTextExportImportContentProcessor {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		BlogsEntryExportImportContentProcessor.class);

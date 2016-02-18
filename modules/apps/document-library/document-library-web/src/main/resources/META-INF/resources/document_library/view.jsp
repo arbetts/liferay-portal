@@ -114,10 +114,10 @@ request.setAttribute("view.jsp-orderByType", orderByType);
 	%>
 
 	<div class="closed <%= portletTitleBasedNavigation ? "container-fluid-1280" : StringPool.BLANK %> sidenav-container sidenav-right" id="<portlet:namespace />infoPanelId">
-		<portlet:resourceURL id="/document_library/info_panel" var="sidebarPanelURL">
+		<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/document_library/info_panel" var="sidebarPanelURL">
 			<portlet:param name="folderId" value="<%= String.valueOf(folderId) %>" />
 			<portlet:param name="repositoryId" value="<%= String.valueOf(repositoryId) %>" />
-		</portlet:resourceURL>
+		</liferay-portlet:resourceURL>
 
 		<liferay-frontend:sidebar-panel
 			resourceURL="<%= sidebarPanelURL %>"
@@ -180,23 +180,12 @@ if (!defaultFolderView && (folder != null) && (portletName.equals(DLPortletKeys.
 %>
 
 <aui:script>
-	$('#<portlet:namespace />infoPanelId').sideNavigation(
-		{
-			gutter: 15,
-			position: 'right',
-			toggler: '.infoPanelToggler',
-			type: 'relative',
-			typeMobile: 'fixed',
-			width: 320
-		}
-	);
-
 	function <portlet:namespace />toggleActionsButton() {
 		var form = AUI.$(document.<portlet:namespace />fm2);
 
 		var hide = Liferay.Util.listCheckedExcept(form, '<portlet:namespace /><%= RowChecker.ALL_ROW_IDS %>').length == 0;
 
-		$('#<portlet:namespace />actionsButtonContainer').toggleClass('hide', hide);
+		AUI.$('#<portlet:namespace />actionsButtonContainer').toggleClass('hide', hide);
 	}
 
 	<portlet:namespace />toggleActionsButton();

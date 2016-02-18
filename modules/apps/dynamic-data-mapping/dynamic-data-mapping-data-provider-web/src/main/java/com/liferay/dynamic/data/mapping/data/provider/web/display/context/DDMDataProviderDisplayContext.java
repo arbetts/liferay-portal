@@ -27,19 +27,19 @@ import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormLayout;
 import com.liferay.dynamic.data.mapping.service.DDMDataProviderInstanceService;
 import com.liferay.dynamic.data.mapping.service.permission.DDMDataProviderInstancePermission;
-import com.liferay.dynamic.data.mapping.service.permission.DDMPermission;
+import com.liferay.dynamic.data.mapping.service.permission.DDMDataProviderPermission;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.util.DDMFormFactory;
 import com.liferay.dynamic.data.mapping.util.DDMFormLayoutFactory;
 import com.liferay.portal.kernel.bean.BeanParamUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.model.User;
-import com.liferay.portal.service.UserLocalService;
-import com.liferay.portal.util.PortalUtil;
 
 import java.util.List;
 import java.util.Set;
@@ -150,6 +150,20 @@ public class DDMDataProviderDisplayContext {
 		return _ddmDataProviderTracker.getDDMDataProviderTypes();
 	}
 
+	public String getOrderByCol() {
+		String orderByCol = ParamUtil.getString(
+			_renderRequest, "orderByCol", "modified-date");
+
+		return orderByCol;
+	}
+
+	public String getOrderByType() {
+		String orderByType = ParamUtil.getString(
+			_renderRequest, "orderByType", "asc");
+
+		return orderByType;
+	}
+
 	public PortletURL getPortletURL() {
 		PortletURL portletURL = _renderResponse.createRenderURL();
 
@@ -211,16 +225,16 @@ public class DDMDataProviderDisplayContext {
 
 	public String getUserPortraitURL(long userId) throws PortalException {
 		User user = _userLocalService.getUser(userId);
+
 		return user.getPortraitURL(
 			_ddmDataProviderRequestHelper.getThemeDisplay());
 	}
 
 	public boolean isShowAddDataProviderButton() {
-		return DDMPermission.contains(
+		return DDMDataProviderPermission.contains(
 			_ddmDataProviderRequestHelper.getPermissionChecker(),
 			_ddmDataProviderRequestHelper.getScopeGroupId(),
-			DDMActionKeys.ADD_DATA_PROVIDER_INSTANCE,
-			DDMDataProviderInstance.class.getName());
+			DDMActionKeys.ADD_DATA_PROVIDER_INSTANCE);
 	}
 
 	public boolean isShowDeleteDataProviderIcon(
@@ -261,6 +275,7 @@ public class DDMDataProviderDisplayContext {
 			_ddmDataProviderRequestHelper.getLocale());
 		ddmFormRenderingContext.setPortletNamespace(
 			_renderResponse.getNamespace());
+		ddmFormRenderingContext.setShowRequiredFieldsWarning(false);
 
 		return ddmFormRenderingContext;
 	}

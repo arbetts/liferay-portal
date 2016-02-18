@@ -19,12 +19,13 @@ import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.service.JournalArticleLocalServiceUtil;
 import com.liferay.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.ContainerModel;
 import com.liferay.portal.kernel.trash.BaseTrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.trash.TrashRenderer;
+import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.ContainerModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -192,6 +193,58 @@ public abstract class JournalBaseTrashHandler extends BaseTrashHandler {
 
 			TrashRenderer trashRenderer = trashHandler.getTrashRenderer(
 				curFolder.getPrimaryKey());
+
+			trashRenderers.add(trashRenderer);
+		}
+
+		return trashRenderers;
+	}
+
+	@Override
+	public int getTrashModelsCount(long classPK) throws PortalException {
+		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
+
+		return JournalFolderLocalServiceUtil.getFoldersAndArticlesCount(
+			folder.getGroupId(), classPK, WorkflowConstants.STATUS_IN_TRASH);
+	}
+
+	@Override
+	public List<TrashRenderer> getTrashModelTrashRenderers(
+			long classPK, int start, int end, OrderByComparator obc)
+		throws PortalException {
+
+		List<TrashRenderer> trashRenderers = new ArrayList<>();
+
+		JournalFolder folder = JournalFolderLocalServiceUtil.getFolder(classPK);
+
+		List<Object> foldersAndArticles =
+			JournalFolderLocalServiceUtil.getFoldersAndArticles(
+				folder.getGroupId(), classPK, WorkflowConstants.STATUS_IN_TRASH,
+				start, end, obc);
+
+		for (Object folderOrArticle : foldersAndArticles) {
+			TrashRenderer trashRenderer = null;
+
+			if (folderOrArticle instanceof JournalFolder) {
+				JournalFolder curFolder = (JournalFolder)folderOrArticle;
+
+				TrashHandler trashHandler =
+					TrashHandlerRegistryUtil.getTrashHandler(
+						JournalFolder.class.getName());
+
+				trashRenderer = trashHandler.getTrashRenderer(
+					curFolder.getPrimaryKey());
+			}
+			else {
+				JournalArticle article = (JournalArticle)folderOrArticle;
+
+				TrashHandler trashHandler =
+					TrashHandlerRegistryUtil.getTrashHandler(
+						JournalArticle.class.getName());
+
+				trashRenderer = trashHandler.getTrashRenderer(
+					article.getResourcePrimKey());
+			}
 
 			trashRenderers.add(trashRenderer);
 		}

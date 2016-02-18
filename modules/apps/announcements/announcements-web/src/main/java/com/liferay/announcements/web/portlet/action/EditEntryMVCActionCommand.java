@@ -14,24 +14,24 @@
 
 package com.liferay.announcements.web.portlet.action;
 
+import com.liferay.announcements.kernel.exception.EntryContentException;
+import com.liferay.announcements.kernel.exception.EntryDisplayDateException;
+import com.liferay.announcements.kernel.exception.EntryExpirationDateException;
+import com.liferay.announcements.kernel.exception.EntryTitleException;
+import com.liferay.announcements.kernel.exception.EntryURLException;
+import com.liferay.announcements.kernel.exception.NoSuchEntryException;
+import com.liferay.announcements.kernel.service.AnnouncementsEntryService;
 import com.liferay.announcements.web.constants.AnnouncementsPortletKeys;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portlet.announcements.exception.EntryContentException;
-import com.liferay.portlet.announcements.exception.EntryDisplayDateException;
-import com.liferay.portlet.announcements.exception.EntryExpirationDateException;
-import com.liferay.portlet.announcements.exception.EntryTitleException;
-import com.liferay.portlet.announcements.exception.EntryURLException;
-import com.liferay.portlet.announcements.exception.NoSuchEntryException;
-import com.liferay.portlet.announcements.service.AnnouncementsEntryService;
 
 import java.util.Calendar;
 

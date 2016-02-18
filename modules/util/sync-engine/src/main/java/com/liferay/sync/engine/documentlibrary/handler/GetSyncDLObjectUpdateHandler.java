@@ -20,7 +20,7 @@ import com.liferay.sync.engine.documentlibrary.model.SyncDLObjectUpdate;
 import com.liferay.sync.engine.documentlibrary.util.FileEventUtil;
 import com.liferay.sync.engine.documentlibrary.util.comparator.SyncFileComparator;
 import com.liferay.sync.engine.filesystem.Watcher;
-import com.liferay.sync.engine.filesystem.util.WatcherRegistry;
+import com.liferay.sync.engine.filesystem.util.WatcherManager;
 import com.liferay.sync.engine.model.SyncAccount;
 import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.model.SyncSite;
@@ -62,7 +62,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 
 import org.slf4j.Logger;
@@ -77,22 +76,20 @@ public class GetSyncDLObjectUpdateHandler extends BaseSyncDLObjectHandler {
 		super(event);
 
 		GetSyncContextEvent getSyncContextEvent = new GetSyncContextEvent(
-			event.getSyncAccountId(), Collections.<String, Object>emptyMap()) {
+			getSyncAccountId(), Collections.<String, Object>emptyMap()) {
 
 			@Override
 			public void executePost(
 					String urlPath, Map<String, Object> parameters)
 				throws Exception {
 
-				Session session = SessionManager.getSession(getSyncAccountId());
-
-				HttpClient anonymousHttpClient =
-					session.getAnonymousHttpClient();
-
 				SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
 					getSyncAccountId());
 
-				HttpResponse httpResponse = anonymousHttpClient.execute(
+				Session session = SessionManager.getSession(
+					getSyncAccountId(), true);
+
+				HttpResponse httpResponse = session.execute(
 					new HttpPost(
 						syncAccount.getUrl() + "/api/jsonws" + urlPath));
 
@@ -291,7 +288,7 @@ public class GetSyncDLObjectUpdateHandler extends BaseSyncDLObjectHandler {
 			tempFilePath, String.valueOf(targetSyncFile.getSyncFileId()),
 			false);
 
-		Watcher watcher = WatcherRegistry.getWatcher(getSyncAccountId());
+		Watcher watcher = WatcherManager.getWatcher(getSyncAccountId());
 
 		List<String> downloadedFilePathNames =
 			watcher.getDownloadedFilePathNames();
@@ -347,7 +344,7 @@ public class GetSyncDLObjectUpdateHandler extends BaseSyncDLObjectHandler {
 			return;
 		}
 
-		final Watcher watcher = WatcherRegistry.getWatcher(getSyncAccountId());
+		final Watcher watcher = WatcherManager.getWatcher(getSyncAccountId());
 
 		final List<String> deletedFilePathNames =
 			watcher.getDeletedFilePathNames();

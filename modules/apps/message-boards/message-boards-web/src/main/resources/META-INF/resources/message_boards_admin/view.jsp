@@ -31,6 +31,12 @@ else {
 	portletURL.setParameter("mbCategoryId", String.valueOf(categoryId));
 }
 
+String keywords = ParamUtil.getString(request, "keywords");
+
+if (Validator.isNotNull(keywords)) {
+	portletURL.setParameter("keywords", keywords);
+}
+
 request.setAttribute("view.jsp-categoryId", categoryId);
 request.setAttribute("view.jsp-viewCategory", Boolean.TRUE.toString());
 request.setAttribute("view.jsp-portletURL", portletURL);
@@ -50,7 +56,7 @@ request.setAttribute("view.jsp-portletURL", portletURL);
 	</liferay-util:include>
 
 	<liferay-portlet:renderURL varImpl="searchURL">
-		<portlet:param name="mvcRenderCommandName" value="/message_boards/search" />
+		<portlet:param name="mvcRenderCommandName" value="/message_boards_admin/search" />
 	</liferay-portlet:renderURL>
 
 	<aui:nav-bar-search>
@@ -65,4 +71,116 @@ request.setAttribute("view.jsp-portletURL", portletURL);
 	</aui:nav-bar-search>
 </aui:nav-bar>
 
+<%
+SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, "cur1", 0, SearchContainer.DEFAULT_DELTA, portletURL, null, "there-are-no-threads-nor-categories");
+
+searchContainer.setId("mbEntries");
+searchContainer.setRowChecker(new EntriesChecker(liferayPortletRequest, liferayPortletResponse));
+
+MBListDisplayContext mbListDisplayContext = mbDisplayContextProvider.getMbListDisplayContext(request, response, categoryId);
+
+mbListDisplayContext.populateResultsAndTotal(searchContainer);
+%>
+
+<liferay-frontend:management-bar
+	disabled="<%= searchContainer.getTotal() == 0 %>"
+	includeCheckBox="<%= true %>"
+	searchContainerId="mbEntries"
+>
+	<liferay-frontend:management-bar-buttons>
+		<liferay-frontend:management-bar-display-buttons
+			displayViews='<%= new String[] {"descriptive"} %>'
+			portletURL="<%= searchContainer.getIteratorURL() %>"
+			selectedDisplayStyle="descriptive"
+		/>
+	</liferay-frontend:management-bar-buttons>
+
+	<portlet:renderURL var="viewEntriesHomeURL">
+		<portlet:param name="categoryId" value="<%= String.valueOf(MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) %>" />
+	</portlet:renderURL>
+
+	<liferay-frontend:management-bar-filters>
+
+		<%
+		PortletURL navigationPortletURL = renderResponse.createRenderURL();
+
+		navigationPortletURL.setParameter("categoryId", String.valueOf(MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID));
+		%>
+
+		<liferay-frontend:management-bar-navigation
+			navigationKeys='<%= new String[] {"all", "recent"} %>'
+			navigationParam="entriesNavigation"
+			portletURL="<%= navigationPortletURL %>"
+		/>
+	</liferay-frontend:management-bar-filters>
+
+	<liferay-frontend:management-bar-action-buttons>
+
+		<%
+		String taglibURL = "javascript:" + renderResponse.getNamespace() + "deleteEntries();";
+		%>
+
+		<liferay-frontend:management-bar-button href="<%= taglibURL %>" icon='<%= TrashUtil.isTrashEnabled(scopeGroupId) ? "trash" : "times" %>' label='<%= TrashUtil.isTrashEnabled(scopeGroupId) ? "recycle-bin" : "delete" %>' />
+
+		<%
+		taglibURL = "javascript:" + renderResponse.getNamespace() + "lockEntries();";
+		%>
+
+		<liferay-frontend:management-bar-button href="<%= taglibURL %>" icon="lock" label="lock" />
+
+		<%
+		taglibURL = "javascript:" + renderResponse.getNamespace() + "unlockEntries();";
+		%>
+
+		<liferay-frontend:management-bar-button href="<%= taglibURL %>" icon="unlock" label="unlock" />
+	</liferay-frontend:management-bar-action-buttons>
+</liferay-frontend:management-bar>
+
+<%
+request.setAttribute("view.jsp-displayStyle", "descriptive");
+request.setAttribute("view.jsp-entriesSearchContainer", searchContainer);
+%>
+
 <liferay-util:include page="/message_boards_admin/view_entries.jsp" servletContext="<%= application %>" />
+
+<%
+if (category != null) {
+	PortalUtil.setPageSubtitle(category.getName(), request);
+	PortalUtil.setPageDescription(category.getDescription(), request);
+}
+%>
+
+<c:if test="<%= !mbListDisplayContext.isShowSearch() %>">
+	<liferay-util:include page="/message_boards_admin/add_button.jsp" servletContext="<%= application %>" />
+</c:if>
+
+<aui:script>
+	function <portlet:namespace />deleteEntries() {
+		if (<%= TrashUtil.isTrashEnabled(scopeGroupId) %> || confirm('<%= UnicodeLanguageUtil.get(request, TrashUtil.isTrashEnabled(scopeGroupId) ? "are-you-sure-you-want-to-move-the-selected-entries-to-the-recycle-bin" : "are-you-sure-you-want-to-delete-the-selected-entries") %>')) {
+			var form = AUI.$(document.<portlet:namespace />fm);
+
+			form.attr('method', 'post');
+			form.fm('<%= Constants.CMD %>').val('<%= TrashUtil.isTrashEnabled(scopeGroupId) ? Constants.MOVE_TO_TRASH : Constants.DELETE %>');
+
+			submitForm(form, '<portlet:actionURL name="/message_boards/edit_entry" />');
+		}
+	}
+
+	function <portlet:namespace />lockEntries() {
+		var form = AUI.$(document.<portlet:namespace />fm);
+
+		form.attr('method', 'post');
+		form.fm('<%= Constants.CMD %>').val('<%= Constants.LOCK %>');
+
+		submitForm(form, '<portlet:actionURL name="/message_boards/edit_entry" />');
+	}
+
+	function <portlet:namespace />unlockEntries() {
+		var form = AUI.$(document.<portlet:namespace />fm);
+
+		form.attr('method', 'post');
+		form.fm('<%= Constants.CMD %>').val('<%= Constants.UNLOCK %>');
+
+		submitForm(form, '<portlet:actionURL name="/message_boards/edit_entry" />');
+	}
+</aui:script>

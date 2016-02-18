@@ -18,12 +18,12 @@ import com.liferay.dynamic.data.mapping.constants.DDMActionKeys;
 import com.liferay.dynamic.data.mapping.model.DDMDataProviderInstance;
 import com.liferay.dynamic.data.mapping.service.base.DDMDataProviderInstanceServiceBaseImpl;
 import com.liferay.dynamic.data.mapping.service.permission.DDMDataProviderInstancePermission;
-import com.liferay.dynamic.data.mapping.service.permission.DDMPermission;
+import com.liferay.dynamic.data.mapping.service.permission.DDMDataProviderPermission;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.service.ServiceContext;
 
 import java.util.List;
 import java.util.Locale;
@@ -42,10 +42,9 @@ public class DDMDataProviderInstanceServiceImpl
 			String type, ServiceContext serviceContext)
 		throws PortalException {
 
-		DDMPermission.check(
+		DDMDataProviderPermission.check(
 			getPermissionChecker(), groupId,
-			DDMActionKeys.ADD_DATA_PROVIDER_INSTANCE,
-			DDMDataProviderInstance.class.getName());
+			DDMActionKeys.ADD_DATA_PROVIDER_INSTANCE);
 
 		return ddmDataProviderInstanceLocalService.addDataProviderInstance(
 			getUserId(), groupId, nameMap, descriptionMap, ddmFormValues, type,

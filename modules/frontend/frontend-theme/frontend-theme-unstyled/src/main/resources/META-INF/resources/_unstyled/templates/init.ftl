@@ -1,11 +1,5 @@
 <#-- ---------- Common variables ---------- -->
 
-<#assign liferay_control_menu=PortalJspTagLibs["/META-INF/resources/liferay-control-menu.tld"]>
-<#assign liferay_portlet=PortalJspTagLibs["/WEB-INF/tld/liferay-portlet-ext.tld"]>
-<#assign liferay_theme=PortalJspTagLibs["/WEB-INF/tld/liferay-theme.tld"]>
-<#assign liferay_ui=PortalJspTagLibs["/WEB-INF/tld/liferay-ui.tld"]>
-<#assign liferay_util=PortalJspTagLibs["/WEB-INF/tld/liferay-util.tld"]>
-
 <#assign theme_display = themeDisplay />
 <#assign portlet_display = portletDisplay />
 
@@ -166,19 +160,6 @@
 
 	<#if page.getType() = "portlet">
 		<#assign is_portlet_page = true />
-	</#if>
-
-	<#if is_portlet_page && theme_display.isWapTheme()>
-		<#assign all_portlets = layoutTypePortlet.getPortlets() />
-		<#assign column_1_portlets = layoutTypePortlet.getAllPortlets("column-1") />
-		<#assign column_2_portlets = layoutTypePortlet.getAllPortlets("column-2") />
-		<#assign column_3_portlets = layoutTypePortlet.getAllPortlets("column-3") />
-		<#assign column_4_portlets = layoutTypePortlet.getAllPortlets("column-4") />
-		<#assign column_5_portlets = layoutTypePortlet.getAllPortlets("column-5") />
-
-		<#if layoutTypePortlet.hasStateMax()>
-			<#assign maximized_portlet_id = layoutTypePortlet.getStateMaxPortletId() />
-		</#if>
 	</#if>
 
 	<#assign typeSettingsProperties = layout.getTypeSettingsProperties() />
@@ -346,12 +327,7 @@
 
 <#-- ---------- Includes ---------- -->
 
-<#if is_portlet_page && theme_display.isWapTheme()>
-	<#assign dir_include = "/wap" />
-<#else>
-	<#assign dir_include = "/html" />
-</#if>
-
+<#assign dir_include = "/html" />
 <#assign body_bottom_include = "${dir_include}/common/themes/body_bottom.jsp" />
 <#assign body_top_include = "${dir_include}/common/themes/body_top.jsp" />
 <#assign bottom_include = "${dir_include}/common/themes/bottom.jsp" />

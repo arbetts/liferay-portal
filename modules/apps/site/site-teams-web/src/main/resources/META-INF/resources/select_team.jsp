@@ -41,31 +41,40 @@ teamSearch.setTotal(teamsCount);
 		<aui:nav-item label="teams" selected="<%= true %>" />
 	</aui:nav>
 
-	<aui:nav-bar-search>
-		<aui:form action="<%= portletURL %>" name="searchFm">
-			<liferay-ui:input-search markupView="lexicon" />
-		</aui:form>
-	</aui:nav-bar-search>
+	<c:if test="<%= (teamsCount > 0) || searchTerms.isSearch() %>">
+		<aui:nav-bar-search>
+			<aui:form action="<%= portletURL %>" name="searchFm">
+				<liferay-ui:input-search markupView="lexicon" />
+			</aui:form>
+		</aui:nav-bar-search>
+	</c:if>
 </aui:nav-bar>
 
-<c:if test="<%= teamsCount > 0 %>">
-	<liferay-frontend:management-bar>
-		<liferay-frontend:management-bar-buttons>
-			<liferay-frontend:management-bar-filters>
-				<liferay-frontend:management-bar-navigation
-					navigationKeys='<%= new String[] {"all"} %>'
-					portletURL="<%= PortletURLUtil.clone(portletURL, liferayPortletResponse) %>"
-				/>
-			</liferay-frontend:management-bar-filters>
-
-			<liferay-frontend:management-bar-display-buttons
-				displayViews='<%= new String[] {"list"} %>'
+<liferay-frontend:management-bar
+	disabled="<%= teamsCount <= 0 %>"
+>
+	<liferay-frontend:management-bar-buttons>
+		<liferay-frontend:management-bar-filters>
+			<liferay-frontend:management-bar-navigation
+				navigationKeys='<%= new String[] {"all"} %>'
 				portletURL="<%= PortletURLUtil.clone(portletURL, liferayPortletResponse) %>"
-				selectedDisplayStyle="<%= displayStyle %>"
 			/>
-		</liferay-frontend:management-bar-buttons>
-	</liferay-frontend:management-bar>
-</c:if>
+
+			<liferay-frontend:management-bar-sort
+				orderByCol="<%= teamSearch.getOrderByCol() %>"
+				orderByType="<%= teamSearch.getOrderByType() %>"
+				orderColumns='<%= new String[] {"name"} %>'
+				portletURL="<%= PortletURLUtil.clone(portletURL, liferayPortletResponse) %>"
+			/>
+		</liferay-frontend:management-bar-filters>
+
+		<liferay-frontend:management-bar-display-buttons
+			displayViews='<%= new String[] {"list"} %>'
+			portletURL="<%= PortletURLUtil.clone(portletURL, liferayPortletResponse) %>"
+			selectedDisplayStyle="<%= displayStyle %>"
+		/>
+	</liferay-frontend:management-bar-buttons>
+</liferay-frontend:management-bar>
 
 <aui:form cssClass="container-fluid-1280" name="selectTeamFm">
 	<liferay-ui:search-container
@@ -77,53 +86,33 @@ teamSearch.setTotal(teamsCount);
 		/>
 
 		<liferay-ui:search-container-row
-			className="com.liferay.portal.model.TeamModel"
+			className="com.liferay.portal.kernel.model.TeamModel"
 			keyProperty="teamId"
 			modelVar="curTeam"
 			rowVar="row"
 		>
 			<liferay-ui:search-container-column-text
+				cssClass="text-strong"
 				name="name"
 			>
 
 				<%
-				boolean disabled = false;
+				Map<String, Object> data = new HashMap<String, Object>();
 
-				Group group = GroupLocalServiceUtil.getGroup(scopeGroupId);
+				data.put("teamdescription", curTeam.getDescription());
+				data.put("teamid", curTeam.getTeamId());
+				data.put("teamname", curTeam.getName());
+
+				Group group = themeDisplay.getScopeGroup();
 
 				long[] defaultTeamIds = StringUtil.split(group.getTypeSettingsProperties().getProperty("defaultTeamIds"), 0L);
 
-				for (long defaultTeamId : defaultTeamIds) {
-					Team team = TeamLocalServiceUtil.getTeam(defaultTeamId);
+				long[] teamIds = ParamUtil.getLongValues(request, "teamIds", defaultTeamIds);
 
-					if (team.getTeamId() == curTeam.getTeamId()) {
-						disabled = true;
-
-						break;
-					}
-				}
+				boolean disabled = ArrayUtil.contains(teamIds, curTeam.getTeamId());
 				%>
 
-				<c:choose>
-					<c:when test="<%= !disabled %>">
-
-						<%
-						Map<String, Object> data = new HashMap<String, Object>();
-
-						data.put("teamdescription", curTeam.getDescription());
-						data.put("teamid", curTeam.getTeamId());
-						data.put("teamname", curTeam.getName());
-						data.put("teamsearchcontainername", "teams");
-						%>
-
-						<aui:a cssClass="selector-button" data="<%= data %>" href="javascript:;">
-							<%= HtmlUtil.escape(curTeam.getName()) %>
-						</aui:a>
-					</c:when>
-					<c:otherwise>
-						<%= HtmlUtil.escape(curTeam.getName()) %>
-					</c:otherwise>
-				</c:choose>
+				<aui:button cssClass="btn btn-link selector-button" data="<%= data %>" disabled="<%= disabled %>" value="<%= HtmlUtil.escape(curTeam.getName()) %>" />
 			</liferay-ui:search-container-column-text>
 
 			<liferay-ui:search-container-column-text
@@ -136,17 +125,6 @@ teamSearch.setTotal(teamsCount);
 	</liferay-ui:search-container>
 </aui:form>
 
-<aui:script use="aui-base">
-	var Util = Liferay.Util;
-
-	var openingLiferay = Util.getOpener().Liferay;
-
-	openingLiferay.fire(
-		'<portlet:namespace />enableRemovedTeams',
-		{
-			selectors: A.all('.selector-button:disabled')
-		}
-	);
-
-	Util.selectEntityHandler('#<portlet:namespace />selectTeamFm', '<%= HtmlUtil.escapeJS(eventName) %>');
+<aui:script>
+	Liferay.Util.selectEntityHandler('#<portlet:namespace />selectTeamFm', '<%= HtmlUtil.escapeJS(eventName) %>');
 </aui:script>

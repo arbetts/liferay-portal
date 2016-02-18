@@ -26,24 +26,26 @@
 
 			event.portlet.remove(true);
 
-			A.io.request(
-				themeDisplay.getPathMain() + '/portal/update_layout',
-				{
-					after: {
-						success: function() {
-							Liferay.fire('updatedLayout');
+			if (!event.nestedPortlet) {
+				A.io.request(
+					themeDisplay.getPathMain() + '/portal/update_layout',
+					{
+						after: {
+							success: function() {
+								Liferay.fire('updatedLayout');
+							}
+						},
+						data: {
+							cmd: 'delete',
+							doAsUserId: event.doAsUserId,
+							p_auth: Liferay.authToken,
+							p_l_id: event.plid,
+							p_p_id: event.portletId,
+							p_v_l_s_g_id: themeDisplay.getSiteGroupId()
 						}
-					},
-					data: {
-						cmd: 'delete',
-						doAsUserId: event.doAsUserId,
-						p_auth: Liferay.authToken,
-						p_l_id: event.plid,
-						p_p_id: event.portletId,
-						p_v_l_s_g_id: themeDisplay.getSiteGroupId()
 					}
-				}
-			);
+				);
+			}
 		},
 
 		_loadMarkupHeadElements: function(response, loadHTML) {
@@ -157,6 +159,10 @@
 				}
 
 				instance.list.push(portlet.portletId);
+
+				if (portlet) {
+					portlet.attr('data-qa-id', 'app-loaded');
+				}
 
 				Liferay.fire(
 					'addPortlet',
@@ -621,6 +627,10 @@
 							data: A.mix(params, data, true),
 							onComplete: function(portlet, portletId) {
 								portlet.refreshURL = url;
+
+								if (portlet) {
+									portlet.attr('data-qa-id', 'app-refreshed');
+								}
 
 								Liferay.fire(
 									portlet.portletId + ':portletRefreshed',

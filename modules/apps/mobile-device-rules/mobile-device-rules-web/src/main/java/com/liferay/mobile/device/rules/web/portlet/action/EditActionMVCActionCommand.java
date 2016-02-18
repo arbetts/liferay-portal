@@ -24,14 +24,13 @@ import com.liferay.mobile.device.rules.service.MDRActionService;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.service.ServiceContextFactory;
 
 import java.util.Locale;
 import java.util.Map;
@@ -65,8 +64,7 @@ public class EditActionMVCActionCommand extends BaseMVCActionCommand {
 			deleteActionIds = new long[] {actionId};
 		}
 		else {
-			deleteActionIds = StringUtil.split(
-				ParamUtil.getString(actionRequest, "actionIds"), 0L);
+			deleteActionIds = ParamUtil.getLongValues(actionRequest, "rowIds");
 		}
 
 		for (long deleteActionId : deleteActionIds) {

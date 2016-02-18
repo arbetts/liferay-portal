@@ -20,17 +20,22 @@
 String className = ParamUtil.getString(request, "className");
 long classPK = ParamUtil.getLong(request, "classPK");
 
+int ruleGroupInstancesCount = MDRRuleGroupInstanceServiceUtil.getRuleGroupInstancesCount(className, classPK);
+
 PortletURL portletURL = (PortletURL)request.getAttribute("mobile_device_rules_header.jspf-portletURL");
 %>
 
-<%@ include file="/layout/mobile_device_rules_toolbar.jspf" %>
+<c:if test="<%= ruleGroupInstancesCount <= 0 %>">
+	<p class="text-muted">
+		<%= StringUtil.toLowerCase(LanguageUtil.get(request, "none")) %>
+	</p>
+</c:if>
 
 <liferay-ui:search-container
 	deltaConfigurable="<%= false %>"
-	emptyResultsMessage="no-device-rules-are-configured"
-	headerNames="name,description,priority"
+	id="rules"
 	iteratorURL="<%= portletURL %>"
-	total="<%= MDRRuleGroupInstanceServiceUtil.getRuleGroupInstancesCount(className, classPK) %>"
+	total="<%= ruleGroupInstancesCount %>"
 >
 	<liferay-ui:search-container-results
 		results="<%= MDRRuleGroupInstanceServiceUtil.getRuleGroupInstances(className, classPK, searchContainer.getStart(), searchContainer.getEnd(), new RuleGroupInstancePriorityComparator()) %>"
@@ -55,33 +60,33 @@ PortletURL portletURL = (PortletURL)request.getAttribute("mobile_device_rules_he
 	<liferay-ui:search-iterator markupView="lexicon" type="more" />
 </liferay-ui:search-container>
 
-<aui:script>
-	function <portlet:namespace />mobileDeviceActionHandler(href) {
-		<portlet:namespace />mobileDeviceOpenWindow(
-			{
-				uri: href
-			}
-		);
-	}
+<%@ include file="/layout/mobile_device_rules_toolbar.jspf" %>
 
-	function <portlet:namespace />mobileDeviceOpenWindow(config) {
-		var data = AUI._.defaults(
-			config,
-			{
-				dialog: {
-					on: {
-						visibleChange: function(event) {
-							<portlet:namespace />updateRuleGroupInstances();
+<aui:script use="aui-base">
+	A.one('#<portlet:namespace />rules').delegate(
+		'click',
+		function(event) {
+			var currentTarget = event.currentTarget;
+
+			Liferay.Util.openWindow(
+				{
+					dialog: {
+						on: {
+							visibleChange: function(event) {
+								<portlet:namespace />updateRuleGroupInstances();
+							}
 						}
 					},
-					width: 1024
-				},
-				title: '<liferay-ui:message key="javax.portlet.title.com_liferay_mobile_device_rules_web_portlet_MDRPortlet" />'
-			}
-		);
-
-		Liferay.Util.openWindow(data);
-	}
+					dialogIframe: {
+						bodyCssClass: 'dialog-with-footer'
+					},
+					title: currentTarget.attr('data-title'),
+					uri: currentTarget.attr('data-uri')
+				}
+			);
+		},
+		'.actions'
+	);
 </aui:script>
 
 <c:if test="<%= themeDisplay.isStateExclusive() %>">

@@ -44,8 +44,10 @@ ruleGroupSearch.setResults(mdrRuleGroups);
 %>
 
 <aui:nav-bar cssClass="collapse-basic-search" markupView="lexicon">
+	<portlet:renderURL var="mainURL" />
+
 	<aui:nav cssClass="navbar-nav">
-		<aui:nav-item label="device-families" selected="<%= true %>" />
+		<aui:nav-item href="<%= mainURL.toString() %>" label="device-families" selected="<%= true %>" />
 	</aui:nav>
 
 	<c:if test="<%= (mdrRuleGroupsCount > 0) || searchTerms.isSearch() %>">
@@ -57,49 +59,48 @@ ruleGroupSearch.setResults(mdrRuleGroups);
 	</c:if>
 </aui:nav-bar>
 
-<c:if test="<%= (mdrRuleGroupsCount > 0) || searchTerms.isSearch() %>">
-	<liferay-frontend:management-bar
-		includeCheckBox="<%= true %>"
-		searchContainerId="deviceFamilies"
-	>
+<liferay-frontend:management-bar
+	disabled="<%= mdrRuleGroupsCount <= 0 %>"
+	includeCheckBox="<%= true %>"
+	searchContainerId="deviceFamilies"
+>
 
-		<%
-		PortletURL displayStyleURL = PortletURLUtil.clone(portletURL, renderResponse);
-		%>
+	<%
+	PortletURL displayStyleURL = PortletURLUtil.clone(portletURL, renderResponse);
+	%>
 
-		<liferay-frontend:management-bar-buttons>
-			<liferay-frontend:management-bar-display-buttons
-				displayViews='<%= new String[] {"list"} %>'
-				portletURL="<%= displayStyleURL %>"
-				selectedDisplayStyle="<%= displayStyle %>"
-			/>
-		</liferay-frontend:management-bar-buttons>
+	<liferay-frontend:management-bar-buttons>
+		<liferay-frontend:management-bar-display-buttons
+			displayViews='<%= new String[] {"list"} %>'
+			portletURL="<%= displayStyleURL %>"
+			selectedDisplayStyle="<%= displayStyle %>"
+		/>
+	</liferay-frontend:management-bar-buttons>
 
-		<%
-		PortletURL iteratorURL = PortletURLUtil.clone(portletURL, renderResponse);
+	<%
+	PortletURL iteratorURL = PortletURLUtil.clone(portletURL, renderResponse);
 
-		iteratorURL.setParameter("displayStyle", displayStyle);
-		%>
+	iteratorURL.setParameter("displayStyle", displayStyle);
+	%>
 
-		<liferay-frontend:management-bar-filters>
-			<liferay-frontend:management-bar-navigation
-				navigationKeys='<%= new String[] {"all"} %>'
-				portletURL="<%= iteratorURL %>"
-			/>
+	<liferay-frontend:management-bar-filters>
+		<liferay-frontend:management-bar-navigation
+			navigationKeys='<%= new String[] {"all"} %>'
+			portletURL="<%= iteratorURL %>"
+		/>
 
-			<liferay-frontend:management-bar-sort
-				orderByCol="<%= ruleGroupSearch.getOrderByCol() %>"
-				orderByType="<%= ruleGroupSearch.getOrderByType() %>"
-				orderColumns='<%= new String[] {"create-date"} %>'
-				portletURL="<%= iteratorURL %>"
-			/>
-		</liferay-frontend:management-bar-filters>
+		<liferay-frontend:management-bar-sort
+			orderByCol="<%= ruleGroupSearch.getOrderByCol() %>"
+			orderByType="<%= ruleGroupSearch.getOrderByType() %>"
+			orderColumns='<%= new String[] {"create-date"} %>'
+			portletURL="<%= iteratorURL %>"
+		/>
+	</liferay-frontend:management-bar-filters>
 
-		<liferay-frontend:management-bar-action-buttons>
-			<liferay-frontend:management-bar-button href="javascript:;" icon="trash" id="deleteSelectedDeviceFamilies" label="delete" />
-		</liferay-frontend:management-bar-action-buttons>
-	</liferay-frontend:management-bar>
-</c:if>
+	<liferay-frontend:management-bar-action-buttons>
+		<liferay-frontend:management-bar-button href="javascript:;" icon="trash" id="deleteSelectedDeviceFamilies" label="delete" />
+	</liferay-frontend:management-bar-action-buttons>
+</liferay-frontend:management-bar>
 
 <portlet:actionURL name="/mobile_device_rules/edit_rule_group" var="editRuleGroupURL">
 	<portlet:param name="mvcRenderCommandName" value="/mobile_device_rules/edit_rule_group" />
@@ -144,7 +145,7 @@ ruleGroupSearch.setResults(mdrRuleGroups);
 	</liferay-portlet:renderURL>
 
 	<liferay-frontend:add-menu>
-		<liferay-frontend:add-menu-item title='<%= LanguageUtil.get(request, "add-device-family") %>' url="<%= addRuleGroupURL %>" />
+		<liferay-frontend:add-menu-item title='<%= LanguageUtil.get(resourceBundle, "add-device-family") %>' url="<%= addRuleGroupURL %>" />
 	</liferay-frontend:add-menu>
 </c:if>
 
@@ -152,7 +153,7 @@ ruleGroupSearch.setResults(mdrRuleGroups);
 	$('#<portlet:namespace />deleteSelectedDeviceFamilies').on(
 		'click',
 		function() {
-			if (confirm('<%= UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-delete-this") %>')) {
+			if (confirm('<%= UnicodeLanguageUtil.get(resourceBundle, "are-you-sure-you-want-to-delete-this") %>')) {
 				submitForm($(document.<portlet:namespace />fm));
 			}
 		}

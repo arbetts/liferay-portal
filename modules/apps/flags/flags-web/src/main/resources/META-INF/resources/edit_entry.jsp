@@ -40,10 +40,9 @@ long reportedUserId = ParamUtil.getLong(request, "reportedUserId");
 
 		<aui:fieldset>
 			<aui:select label="reason-for-the-report" name="reason">
-				<aui:option value="" />
 
 				<%
-				for (String reason : PropsValues.FLAGS_REASONS) {
+				for (String reason : flagsGroupServiceConfiguration.reasons()) {
 				%>
 
 					<aui:option label="<%= reason %>" />
@@ -60,7 +59,10 @@ long reportedUserId = ParamUtil.getLong(request, "reportedUserId");
 			</span>
 
 			<c:if test="<%= !themeDisplay.isSignedIn() %>">
-				<aui:input label="email-address" name="reporterEmailAddress" />
+				<aui:input label="email-address" name="reporterEmailAddress">
+					<aui:validator name="email" />
+					<aui:validator name="required" />
+				</aui:input>
 			</c:if>
 		</aui:fieldset>
 
@@ -126,7 +128,7 @@ long reportedUserId = ParamUtil.getLong(request, "reportedUserId");
 		var errorMessage = (errorMessageNode && errorMessageNode.html()) || '';
 
 		A.io.request(
-			'<liferay-portlet:actionURL portletName="<%= PageFlagsPortletKeys.FLAGS %>" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="mvcRenderCommandName" value="/flags/edit_entry" /></liferay-portlet:actionURL>',
+			'<liferay-portlet:actionURL name="/flags/edit_entry" portletName="<%= PageFlagsPortletKeys.FLAGS %>" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="mvcRenderCommandName" value="/flags/edit_entry" /></liferay-portlet:actionURL>',
 			{
 				data: data,
 				on: {

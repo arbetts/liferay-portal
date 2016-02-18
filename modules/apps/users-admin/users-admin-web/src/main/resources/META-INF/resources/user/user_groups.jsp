@@ -23,7 +23,7 @@ List<UserGroup> userGroups = (List<UserGroup>)request.getAttribute("user.userGro
 currentURLObj.setParameter("historyKey", renderResponse.getNamespace() + "userGroups");
 %>
 
-<liferay-ui:error-marker key="errorSection" value="user-groups" />
+<liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="user-groups" />
 
 <liferay-ui:membership-policy-error />
 
@@ -52,7 +52,7 @@ currentURLObj.setParameter("historyKey", renderResponse.getNamespace() + "userGr
 	/>
 
 	<liferay-ui:search-container-row
-		className="com.liferay.portal.model.UserGroup"
+		className="com.liferay.portal.kernel.model.UserGroup"
 		escapedModel="<%= true %>"
 		keyProperty="userGroupId"
 		modelVar="userGroup"

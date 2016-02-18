@@ -26,8 +26,8 @@ if (selLayout != null) {
 }
 %>
 
-<liferay-ui:error-marker key="errorSection" value="javascript" />
+<liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="javascript" />
 
 <aui:model-context bean="<%= selLayout %>" model="<%= Layout.class %>" />
 
-<aui:input cssClass="lfr-textarea-container" label="paste-javascript-code-that-is-executed-at-the-bottom-of-the-page" name="TypeSettingsProperties--javascript--" style="height: 300px" type="textarea" value='<%= layoutTypeSettings.getProperty("javascript") %>' wrap="soft" />
+<aui:input label="paste-javascript-code-that-is-executed-at-the-bottom-of-the-page" name="TypeSettingsProperties--javascript--" placeholder="javascript" type="textarea" value='<%= layoutTypeSettings.getProperty("javascript") %>' wrap="soft" />

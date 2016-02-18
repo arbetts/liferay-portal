@@ -21,12 +21,18 @@
 <!--THREAD-->
 <tr>
 	<td>THREAD_BODY</td>
-	<td>//div[@class='message-content']</td>
+	<td>//div[@class='message-content' and contains(.,'${key_threadBody}')]</td>
 	<td></td>
 </tr>
 <tr>
+	<td>THREAD_BODY_2</td>
+	<td>xpath=(//div[@class='message-content' and contains(.,'${key_threadBody}')])[2]</td>
+	<td></td>
+</tr>
+
+<tr>
 	<td>THREAD_REPLY_BUTTON</td>
-	<td>//div[contains(@class,'message-container') and contains(.,'${key_threadSubject}')]//a[contains(@class,'btn')]</td>
+	<td>//div[@class='thread-container' and contains(.,'${key_threadSubject}')]//span[contains(.,'Reply to Main Thread')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -35,8 +41,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>THREAD_SUBJECT_2</td>
+	<td>xpath=(//div[@class='panel-heading' and contains(.,'${key_threadSubject}')]//h4[contains(.,'${key_threadSubject}')])[2]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>THREAD_USERNAME</td>
 	<td>//div[@class='panel-heading' and contains(.,'${key_threadSubject}')]//h5[contains(.,'${key_userName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>THREAD_USERNAME_2</td>
+	<td>xpath=(//div[@class='panel-heading' and contains(.,'${key_threadSubject}')]//h5[contains(.,'${key_userName}')])[2]</td>
 	<td></td>
 </tr>
 <tr>
@@ -255,7 +271,7 @@
 </tr>
 <tr>
 	<td>MESSAGE_ANSWER_1</td>
-	<td>xpath=(//span[.='Answer'])[3]</td>
+	<td>//h4[contains(.,'Answer')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -435,12 +451,12 @@
 </tr>
 <tr>
 	<td>MESSAGE_ATTACHMENT_IMAGE</td>
-	<td>//div[@class='message-attachments']/div/img[contains(@src,'${key_mbThreadAttachment}')]</td>
+	<td>//div[@class='message-attachments']//img[contains(@src,'${key_mbThreadAttachment}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MESSAGE_BODY_ATTACHMENT_1</td>
-	<td>//div[@class='thread-body']/div/ul/li[@class='message-attachment']/span/a/span</td>
+	<td>//li[@class='message-attachment']/span/a</td>
 	<td></td>
 </tr>
 <tr>

@@ -14,12 +14,15 @@
 
 package com.liferay.portal.upgrade.v6_2_0;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFileEntryMetadata;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.metadata.RawMetadataProcessor;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -27,7 +30,6 @@ import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.upgrade.v6_2_0.util.DDMTemplateTable;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.util.xml.XMLUtil;
 
 import java.sql.Connection;
@@ -45,6 +47,37 @@ public class UpgradeDynamicDataMapping extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
+		updateSchema();
+
+		updateStructures();
+		updateStructuresClassNameId();
+
+		updateTemplates();
+	}
+
+	protected void updateMetadataElement(
+		Element metadataElement, String[] relocatedMetadadaEntryNames,
+		String[] removedMetadataEntryNames) {
+
+		Element parentElement = metadataElement.getParent();
+
+		List<Element> entryElements = metadataElement.elements("entry");
+
+		for (Element entryElement : entryElements) {
+			String name = entryElement.attributeValue("name");
+
+			if (ArrayUtil.contains(removedMetadataEntryNames, name)) {
+				metadataElement.remove(entryElement);
+			}
+			else if (ArrayUtil.contains(relocatedMetadadaEntryNames, name)) {
+				parentElement.addAttribute(name, entryElement.getText());
+
+				metadataElement.remove(entryElement);
+			}
+		}
+	}
+
+	protected void updateSchema() throws Exception {
 		try {
 			runSQL("alter table DDMTemplate add classNameId LONG");
 
@@ -68,32 +101,6 @@ public class UpgradeDynamicDataMapping extends UpgradeProcess {
 		catch (Exception e) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(e, e);
-			}
-		}
-
-		updateStructures();
-
-		updateTemplates();
-	}
-
-	protected void updateMetadataElement(
-		Element metadataElement, String[] relocatedMetadadaEntryNames,
-		String[] removedMetadataEntryNames) {
-
-		Element parentElement = metadataElement.getParent();
-
-		List<Element> entryElements = metadataElement.elements("entry");
-
-		for (Element entryElement : entryElements) {
-			String name = entryElement.attributeValue("name");
-
-			if (ArrayUtil.contains(removedMetadataEntryNames, name)) {
-				metadataElement.remove(entryElement);
-			}
-			else if (ArrayUtil.contains(relocatedMetadadaEntryNames, name)) {
-				parentElement.addAttribute(name, entryElement.getText());
-
-				metadataElement.remove(entryElement);
 			}
 		}
 	}
@@ -156,6 +163,33 @@ public class UpgradeDynamicDataMapping extends UpgradeProcess {
 
 				updateStructure(
 					structureId, structureKey, updateXSD(xsd, structureKey));
+			}
+		}
+		finally {
+			DataAccess.cleanUp(con, ps, rs);
+		}
+	}
+
+	protected void updateStructuresClassNameId() throws Exception {
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			con = DataAccess.getUpgradeOptimizedConnection();
+
+			ps = con.prepareStatement(
+				"update DDMStructure set classNameId = ? where " +
+					"classNameId = ?");
+
+			ps.setLong(1, PortalUtil.getClassNameId(DLFileEntryMetadata.class));
+			ps.setLong(2, PortalUtil.getClassNameId(DLFileEntry.class));
+
+			ps.executeUpdate();
+		}
+		catch (SQLException sqle) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(sqle, sqle);
 			}
 		}
 		finally {

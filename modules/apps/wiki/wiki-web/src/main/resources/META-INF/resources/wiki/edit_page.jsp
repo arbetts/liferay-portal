@@ -110,13 +110,15 @@ if (portletTitleBasedNavigation) {
 }
 %>
 
-<c:if test="<%= portletTitleBasedNavigation && (wikiPage != null) && !newPage %>">
-	<div class="panel text-center">
+<c:if test="<%= portletTitleBasedNavigation && !newPage %>">
+	<liferay-frontend:info-bar>
 		<aui:workflow-status markupView="lexicon" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= wikiPage.getStatus() %>" version="<%= String.valueOf(wikiPage.getVersion()) %>" />
-	</div>
+	</liferay-frontend:info-bar>
 </c:if>
 
-<portlet:actionURL name="/wiki/edit_page" var="editPageActionURL" />
+<portlet:actionURL name="/wiki/edit_page" var="editPageActionURL">
+	<portlet:param name="mvcRenderCommandName" value="/wiki/edit_page" />
+</portlet:actionURL>
 
 <portlet:renderURL var="editPageRenderURL">
 	<portlet:param name="mvcRenderCommandName" value="/wiki/edit_page" />
@@ -205,9 +207,11 @@ if (portletTitleBasedNavigation) {
 							</div>
 						</c:if>
 
-						<div class="alert alert-info">
-							<liferay-ui:message key="this-page-does-not-exist-yet-use-the-form-below-to-create-it" />
-						</div>
+						<c:if test="<%= newPage && Validator.isNotNull(title) %>">
+							<div class="alert alert-info">
+								<liferay-ui:message key="this-page-does-not-exist-yet-use-the-form-below-to-create-it" />
+							</div>
+						</c:if>
 
 						<c:choose>
 							<c:when test="<%= editTitle %>">

@@ -9,7 +9,7 @@
 
 	<#if hasFieldValue>
 		<#if !disabled>
-			<@aui.input
+			<@liferay_aui.input
 				name=namespacedFieldName
 				type="hidden"
 				value=fieldValue
@@ -18,7 +18,7 @@
 
 		<#assign fieldLayoutJSONObject = jsonFactoryUtil.createJSONObject(fieldRawValue)>
 
-		<#assign layoutLocalService = serviceLocator.findService("com.liferay.portal.service.LayoutLocalService")>
+		<#assign layoutLocalService = serviceLocator.findService("com.liferay.portal.kernel.service.LayoutLocalService")>
 
 		<#if (fieldLayoutJSONObject.getLong("groupId") > 0)>
 			<#assign fieldLayoutGroupId = fieldLayoutJSONObject.getLong("groupId")>

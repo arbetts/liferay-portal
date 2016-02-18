@@ -11,6 +11,11 @@ AUI.add(
 						value: true
 					},
 
+					icon: {
+						validator: Lang.isString,
+						value: 'info-circle'
+					},
+
 					message: {
 						validator: Lang.isString,
 						value: ''
@@ -37,7 +42,7 @@ AUI.add(
 
 					TPL_ALERTS_CONTAINER: '<div class="lfr-alert-container"></div>',
 
-					TPL_CONTENT: '<strong class="lead">{title}</strong>{message}',
+					TPL_CONTENT: '<strong class="lead"><svg class="lexicon-icon"><use xlink:href="{pathThemeImages}/lexicon/icons.svg#{icon}" /></svg> {title}</strong>{message}',
 
 					bindUI: function() {
 						var instance = this;
@@ -45,7 +50,7 @@ AUI.add(
 						var boundingBox = instance.get('boundingBox');
 
 						instance._eventHandles = [
-							instance.after(['messageChange', 'titleChange'], instance._updateBodyContent, instance),
+							instance.after(['iconChange', 'messageChange', 'titleChange'], instance._updateBodyContent, instance),
 							instance.after('typeChange', instance._afterTypeChange, instance),
 							boundingBox.on('mouseenter', instance._cancelHide, instance),
 							boundingBox.on('mouseleave', instance._onMouseLeave, instance)
@@ -96,7 +101,7 @@ AUI.add(
 									targetNode.prepend(alertsContainer);
 								}
 								else {
-									var navbar = rootNode.one('.navbar');
+									var navbar = rootNode.one('.portlet-body > .navbar');
 
 									if (navbar) {
 										navbar.placeAfter(alertsContainer);
@@ -187,7 +192,7 @@ AUI.add(
 								{
 									duration: instance.get('duration') / 1000,
 									easing: 'ease-out',
-									height: visible ? instance.get('boundingBox').getComputedStyle('height') : 0
+									height: visible ? instance.get('boundingBox').outerHeight() + 'px' : 0
 								},
 								function() {
 									parentNode.toggleClass('in', visible);
@@ -213,7 +218,9 @@ AUI.add(
 						var bodyContent = Lang.sub(
 							instance.TPL_CONTENT,
 							{
+								icon: instance.get('icon'),
 								message: instance.get('message'),
+								pathThemeImages: themeDisplay.getPathThemeImages(),
 								title: instance.get('title') || ''
 							}
 						);

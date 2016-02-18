@@ -16,7 +16,7 @@
 
 <%@ include file="/html/taglib/ui/alert/init.jsp" %>
 
-<aui:script use="liferay-alert">
+<aui:script position="inline" use="liferay-alert">
 	new Liferay.Alert(
 		{
 			closeable: <%= closeable %>,
@@ -25,10 +25,11 @@
 				show: 0
 			},
 			duration: <%= animationTime %>,
+			icon: '<%= icon %>',
 			message: '<%= HtmlUtil.escapeJS(message) %>',
 			namespace: '<portlet:namespace />',
 			title: '<%= title %>',
 			type: '<%= type %>'
 		}
-	).render();
+	).render('<%= targetContainer %>');
 </aui:script>

@@ -14,15 +14,21 @@
 
 package com.liferay.portlet;
 
+import com.liferay.portal.kernel.model.Portlet;
+import com.liferay.portal.kernel.model.PortletApp;
+import com.liferay.portal.kernel.model.PortletConstants;
+import com.liferay.portal.kernel.portlet.InvokerFilterContainer;
+import com.liferay.portal.kernel.portlet.InvokerPortlet;
+import com.liferay.portal.kernel.portlet.InvokerPortletFactory;
 import com.liferay.portal.kernel.portlet.PortletBag;
 import com.liferay.portal.kernel.portlet.PortletBagPool;
+import com.liferay.portal.kernel.portlet.PortletConfigFactoryUtil;
+import com.liferay.portal.kernel.portlet.PortletContextFactoryUtil;
+import com.liferay.portal.kernel.portlet.PortletInstanceFactory;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.util.ClassLoaderUtil;
-import com.liferay.portal.model.Portlet;
-import com.liferay.portal.model.PortletApp;
-import com.liferay.portal.model.PortletConstants;
-import com.liferay.portal.service.PortletLocalServiceUtil;
-import com.liferay.portal.util.PortletKeys;
+import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.registry.Filter;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
@@ -98,6 +104,19 @@ public class PortletInstanceFactoryImpl implements PortletInstanceFactory {
 	@Override
 	public InvokerPortlet create(Portlet portlet, ServletContext servletContext)
 		throws PortletException {
+
+		return create (portlet, servletContext, false);
+	}
+
+	@Override
+	public InvokerPortlet create(
+			Portlet portlet, ServletContext servletContext,
+			boolean destroyPrevious)
+		throws PortletException {
+
+		if (destroyPrevious) {
+			destroyRelated(portlet);
+		}
 
 		boolean instanceable = false;
 
@@ -227,10 +246,14 @@ public class PortletInstanceFactoryImpl implements PortletInstanceFactory {
 
 		clear(portlet);
 
-		PortletConfigFactoryUtil.destroy(portlet);
-		PortletContextFactory.destroy(portlet);
+		destroyRelated(portlet);
 
 		PortletLocalServiceUtil.destroyPortlet(portlet);
+	}
+
+	protected void destroyRelated(Portlet portlet) {
+		PortletConfigFactoryUtil.destroy(portlet);
+		PortletContextFactoryUtil.destroy(portlet);
 	}
 
 	protected InvokerPortlet init(

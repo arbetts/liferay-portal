@@ -155,8 +155,7 @@ AUI.add(
 							);
 						},
 						resultFormatter: function(query, results) {
-							return AArray.map(
-								results,
+							return results.map(
 								function(result) {
 									var calendar = result.raw;
 									var calendarResourceName = calendar.calendarResourceName;
@@ -274,6 +273,20 @@ AUI.add(
 				scheduler.removeEvents(schedulerEvent);
 
 				scheduler.syncEventsUI();
+			},
+
+			getCalendar: function(calendarId, callback) {
+				var instance = this;
+
+				instance.invokeResourceURL(
+					{
+						callback: callback,
+						queryParameters: {
+							calendarId: calendarId
+						},
+						resourceId: 'calendar'
+					}
+				);
 			},
 
 			getCalendarBookingInvitees: function(calendarBookingId, callback) {
@@ -1562,6 +1575,28 @@ AUI.add(
 
 						var editCalendarBookingURL = decodeURIComponent(recorder.get('editCalendarBookingURL'));
 
+						var date = instance.get('date');
+
+						var data = {
+							activeView: activeViewName,
+							calendarId: calendarId,
+							titleCurrentValue: ''
+						};
+
+						var now = new Date();
+
+						data.startTimeDay = date.getDate();
+						data.startTimeHour = now.getHours() + 1;
+						data.startTimeMinute = 0;
+						data.startTimeMonth = date.getMonth();
+						data.startTimeYear = date.getFullYear();
+
+						data.endTimeDay = date.getDate();
+						data.endTimeHour = now.getHours() + 2;
+						data.endTimeMinute = 0;
+						data.endTimeMonth = date.getMonth();
+						data.endTimeYear = date.getFullYear();
+
 						Liferay.Util.openWindow(
 							{
 								dialog: {
@@ -1574,14 +1609,7 @@ AUI.add(
 									modal: true
 								},
 								title: Liferay.Language.get('new-calendar-booking'),
-								uri: Lang.sub(
-									editCalendarBookingURL,
-									{
-										activeView: activeViewName,
-										calendarId: calendarId,
-										titleCurrentValue: ''
-									}
-								)
+								uri: Lang.sub(editCalendarBookingURL, data)
 							}
 						);
 					},
@@ -2241,8 +2269,7 @@ AUI.add(
 					_syncInviteesContent: function(contentNode, calendarResources) {
 						var instance = this;
 
-						var values = AArray.map(
-							calendarResources,
+						var values = calendarResources.map(
 							function(item) {
 								return item.name;
 							}

@@ -128,12 +128,10 @@ if (!resultRowSplitterEntries.isEmpty()) {
 		%>
 
 			<c:if test="<%= Validator.isNotNull(resultRowSplitterEntry.getTitle()) %>">
-				<tr>
+				<tr class="splitter">
 					<td colspan="<%= (headerNames != null) ? headerNames.size() : StringPool.BLANK %>">
-						<div class="panel panel-default">
-							<div class="panel-heading">
-								<liferay-ui:message key="<%= resultRowSplitterEntry.getTitle() %>" />
-							</div>
+						<div class="splitter">
+							<liferay-ui:message key="<%= resultRowSplitterEntry.getTitle() %>" />
 						</div>
 					</td>
 				</tr>
@@ -209,17 +207,19 @@ if (!resultRowSplitterEntries.isEmpty()) {
 						String columnClassName = entry.getCssClass();
 					%>
 
-						<td class="<%= columnClassName %> text-<%= entry.getAlign() %> text-<%= entry.getValign() %> text-default" colspan="<%= entry.getColspan() %>">
+						<td class="<%= columnClassName %> <%= entry.isTruncate() ? "clamp-horizontal table-cell-content" : "table-cell-field" %> text-<%= entry.getAlign() %> text-<%= entry.getValign() %> text-default" colspan="<%= entry.getColspan() %>">
 
 						<c:choose>
 							<c:when test="<%= entry.isTruncate() %>">
-								<span class="truncate-text">
+								<div class="clamp-container">
+									<span class="truncate-text">
 
-									<%
-									entry.print(pageContext.getOut(), request, response);
-									%>
+										<%
+										entry.print(pageContext.getOut(), request, response);
+										%>
 
-								</span>
+									</span>
+								</div>
 							</c:when>
 							<c:otherwise>
 

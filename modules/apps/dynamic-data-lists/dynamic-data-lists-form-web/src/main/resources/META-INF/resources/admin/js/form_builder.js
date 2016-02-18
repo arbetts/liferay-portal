@@ -109,7 +109,8 @@ AUI.add(
 								{
 									builder: instance,
 									dataProviders: instance.get('dataProviders'),
-									portletNamespace: instance.get('portletNamespace')
+									portletNamespace: instance.get('portletNamespace'),
+									readOnly: true
 								}
 							)
 						);
@@ -119,6 +120,20 @@ AUI.add(
 						var instance = this;
 
 						field.destroy();
+					},
+
+					editField: function(field) {
+						var instance = this;
+
+						var fieldType = instance.findTypeOfField(field);
+
+						instance.showFieldSettingsPanel(
+							field,
+							Lang.sub(
+								Liferay.Language.get('edit-x-field'),
+								[fieldType.get('label')]
+							)
+						);
 					},
 
 					findTypeOfField: function(field) {
@@ -340,7 +355,7 @@ AUI.add(
 								portletNamespace: instance.get('portletNamespace'),
 								resizable: false,
 								strings: {
-									addField: Liferay.Language.get('choose-field')
+									addField: Liferay.Language.get('choose-a-field-type')
 								},
 								visible: false
 							}

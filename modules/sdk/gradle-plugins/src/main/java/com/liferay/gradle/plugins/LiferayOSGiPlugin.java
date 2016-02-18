@@ -14,6 +14,7 @@
 
 package com.liferay.gradle.plugins;
 
+import aQute.bnd.header.Parameters;
 import aQute.bnd.osgi.Constants;
 
 import com.liferay.gradle.plugins.extensions.LiferayExtension;
@@ -23,6 +24,7 @@ import com.liferay.gradle.plugins.util.FileUtil;
 import com.liferay.gradle.plugins.util.GradleUtil;
 import com.liferay.gradle.plugins.wsdd.builder.BuildWSDDTask;
 import com.liferay.gradle.plugins.wsdd.builder.WSDDBuilderPlugin;
+import com.liferay.gradle.util.Validator;
 
 import groovy.lang.Closure;
 
@@ -185,10 +187,8 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 					Jar jar = (Jar)GradleUtil.getTask(
 						project, JavaPlugin.JAR_TASK_NAME);
 
-					String deployedPluginDirName = jar.getArchiveName();
-
-					deployedPluginDirName = deployedPluginDirName.substring(
-						0, deployedPluginDirName.lastIndexOf('.'));
+					String deployedPluginDirName = FileUtil.stripExtension(
+						jar.getArchiveName());
 
 					File deployedPluginDir = new File(
 						directDeployTask.getAppServerDeployDir(),
@@ -480,6 +480,18 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 		String bundleSymbolicName = getBundleInstruction(
 			project, Constants.BUNDLE_SYMBOLICNAME);
 
+		if (Validator.isNull(bundleSymbolicName)) {
+			return;
+		}
+
+		Parameters parameters = new Parameters(bundleSymbolicName);
+
+		Set<String> keys = parameters.keySet();
+
+		Iterator<String> iterator = keys.iterator();
+
+		bundleSymbolicName = iterator.next();
+
 		basePluginConvention.setArchivesBaseName(bundleSymbolicName);
 	}
 
@@ -528,10 +540,16 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 	}
 
 	protected void configureDescription(Project project) {
-		String bundleName = getBundleInstruction(
-			project, Constants.BUNDLE_NAME);
+		String description = getBundleInstruction(
+			project, Constants.BUNDLE_DESCRIPTION);
 
-		project.setDescription(bundleName);
+		if (Validator.isNull(description)) {
+			description = getBundleInstruction(project, Constants.BUNDLE_NAME);
+		}
+
+		if (Validator.isNotNull(description)) {
+			project.setDescription(description);
+		}
 	}
 
 	protected void configureSourceSetMain(Project project) {
@@ -569,7 +587,9 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 		String bundleVersion = getBundleInstruction(
 			project, Constants.BUNDLE_VERSION);
 
-		project.setVersion(bundleVersion);
+		if (Validator.isNotNull(bundleVersion)) {
+			project.setVersion(bundleVersion);
+		}
 	}
 
 	protected String getBundleInstruction(Project project, String key) {
@@ -625,7 +645,11 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 			while (iterator.hasNext()) {
 				File file = iterator.next();
 
-				if (_classpathFiles.contains(file) || !file.exists()) {
+				String fileName = file.getName();
+
+				if (_classpathFiles.contains(file) ||
+					fileName.endsWith(".pom") || !file.exists()) {
+
 					iterator.remove();
 
 					continue;

@@ -12,11 +12,12 @@
 	</command>
 
 	<command name="gotoAddCurrentSiteCalendars">
-		<execute macro="TestCase#getDefaultSiteName">
-			<return from="defaultSiteName" name="defaultSiteName" />
+		<execute macro="TestCase#getSiteName">
+			<return from="siteName" name="siteName" />
+			<var name="siteName" value="${siteName}" />
 		</execute>
 
-		<var name="key_siteName" value="${defaultSiteName}" />
+		<var name="key_siteName" value="${siteName}" />
 
 		<execute function="Click" locator1="Calendar#CURRENT_SITE_CALENDARS_MENULIST_ARROW" />
 
@@ -67,7 +68,7 @@
 	</command>
 
 	<command name="gotoAddEventViaAssetPublisher">
-		<execute function="AssertClick" locator1="AP#ADD_NEW_DROPDOWN" value1="Add New" />
+		<execute function="Click#makeVisibleClickAt" locator1="AP#ADD_ASSET_PLUS_ICON" />
 
 		<execute function="AssertClick" locator1="MenuItem#CALENDAR_EVENT" value1="Calendar Event" />
 
@@ -111,11 +112,12 @@
 	</command>
 
 	<command name="gotoCurrentSiteCalendarsManage">
-		<execute macro="TestCase#getDefaultSiteName">
-			<return from="defaultSiteName" name="defaultSiteName" />
+		<execute macro="TestCase#getSiteName">
+			<return from="siteName" name="siteName" />
+			<var name="siteName" value="${siteName}" />
 		</execute>
 
-		<var name="key_siteName" value="${defaultSiteName}" />
+		<var name="key_siteName" value="${siteName}" />
 
 		<execute function="Click" locator1="Calendar#CURRENT_SITE_CALENDARS_MENULIST_ARROW" />
 

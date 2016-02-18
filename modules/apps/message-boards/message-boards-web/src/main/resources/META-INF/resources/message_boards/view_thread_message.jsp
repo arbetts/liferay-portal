@@ -33,13 +33,11 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 <div class="card list-group-card panel">
 	<div class="panel-heading">
 		<div class="card-row card-row-padded">
-			<c:if test="<%= !message.isAnonymous() %>">
-				<div class="card-col-field">
-					<div class="list-group-card-icon">
-						<liferay-ui:user-portrait cssClass="user-icon-lg" userId="<%= message.getUserId() %>" />
-					</div>
+			<div class="card-col-field">
+				<div class="list-group-card-icon">
+					<liferay-ui:user-portrait cssClass="user-icon-lg" userId="<%= !message.isAnonymous() ? message.getUserId() : 0 %>" />
 				</div>
-			</c:if>
+			</div>
 
 			<div class="card-col-content card-col-gutters">
 
@@ -72,6 +70,10 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 							<%= HtmlUtil.escape(message.getSubject()) %>
 						</c:otherwise>
 					</c:choose>
+
+					<c:if test="<%= message.isAnswer() %>">
+						(<liferay-ui:message key="answer" />)
+					</c:if>
 				</h4>
 
 				<%
@@ -118,6 +120,12 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 								method="get"
 								url="<%= recentPostsURL.toString() %>"
 							/>
+						</span>
+					</c:if>
+
+					<c:if test="<%= !message.isApproved() %>">
+						<span class="h5 text-default">
+							<aui:workflow-status markupView="lexicon" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= message.getStatus() %>" />
 						</span>
 					</c:if>
 
@@ -169,7 +177,7 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 						</c:if>
 
 						<c:if test="<%= enableFlags %>">
-							<liferay-ui:flags
+							<liferay-flags:flags
 								className="<%= MBMessage.class.getName() %>"
 								classPK="<%= message.getMessageId() %>"
 								contentTitle="<%= message.getSubject() %>"
@@ -195,22 +203,39 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 					if (!message.isRoot()) {
 						MBMessage rootMessage = MBMessageLocalServiceUtil.getMessage(thread.getRootMessageId());
 
-						showAnswerFlag = MBMessagePermission.contains(permissionChecker, rootMessage, ActionKeys.UPDATE) && !message.isAnswer() && (thread.isQuestion() || MBThreadLocalServiceUtil.hasAnswerMessage(thread.getThreadId()));
+						showAnswerFlag = MBMessagePermission.contains(permissionChecker, rootMessage, ActionKeys.UPDATE) && (thread.isQuestion() || MBThreadLocalServiceUtil.hasAnswerMessage(thread.getThreadId()));
 					}
 					%>
 
 					<c:if test="<%= showAnswerFlag || hasReplyPermission || hasUpdatePermission || hasPermissionsPermission || hasMoveThreadPermission || hasDeletePermission %>">
 						<liferay-ui:icon-menu direction="left-side" icon="<%= StringPool.BLANK %>" markupView="lexicon" message="<%= StringPool.BLANK %>" showWhenSingleIcon="<%= true %>">
 							<c:if test="<%= showAnswerFlag %>">
+								<c:choose>
+									<c:when test="<%= !message.isAnswer() %>">
+										<portlet:actionURL name="/message_boards/edit_message" var="addAnswerURL">
+											<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD_ANSWER %>" />
+											<portlet:param name="redirect" value="<%= currentURL %>" />
+											<portlet:param name="messageId" value="<%= String.valueOf(message.getMessageId()) %>" />
+										</portlet:actionURL>
 
-								<%
-								String taglibMarkAsAnswerURL = "javascript:" + renderResponse.getNamespace() + "addAnswerFlag('" + message.getMessageId() + "');";
-								%>
+										<liferay-ui:icon
+											message="mark-as-an-answer"
+											url="<%= addAnswerURL %>"
+										/>
+									</c:when>
+									<c:otherwise>
+										<portlet:actionURL name="/message_boards/edit_message" var="deleteAnswerURL">
+											<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.DELETE_ANSWER %>" />
+											<portlet:param name="redirect" value="<%= currentURL %>" />
+											<portlet:param name="messageId" value="<%= String.valueOf(message.getMessageId()) %>" />
+										</portlet:actionURL>
 
-								<liferay-ui:icon
-									message="mark-as-an-answer"
-									url="<%= taglibMarkAsAnswerURL %>"
-								/>
+										<liferay-ui:icon
+											message="unmark-as-an-answer"
+											url="<%= deleteAnswerURL %>"
+										/>
+									</c:otherwise>
+								</c:choose>
 							</c:if>
 
 							<c:if test="<%= hasReplyPermission && !thread.isLocked() %>">
@@ -244,7 +269,7 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 								/>
 
 								<%
-								String taglibQuickReplyURL = "javascript:" + renderResponse.getNamespace() + "addQuickReply('reply', '" + message.getMessageId() + "');";
+								String taglibQuickReplyURL = "javascript:" + liferayPortletResponse.getNamespace() + "addQuickReply('reply', '" + message.getMessageId() + "');";
 								%>
 
 								<liferay-ui:icon
@@ -300,7 +325,7 @@ MBThread thread = (MBThread)request.getAttribute("edit_message.jsp-thread");
 							<c:if test="<%= hasDeletePermission %>">
 
 								<%
-								PortletURL categoryURL = renderResponse.createRenderURL();
+								PortletURL categoryURL = liferayPortletResponse.createRenderURL();
 
 								if (message.getCategoryId() == MBCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
 									categoryURL.setParameter("mvcRenderCommandName", "/message_boards/view");

@@ -24,11 +24,11 @@ String defaultRobots = RobotsUtil.getRobots(layoutsAdminDisplayContext.getSelLay
 String robots = ParamUtil.getString(request, "robots", defaultRobots);
 %>
 
-<liferay-ui:error-marker key="errorSection" value="robots" />
+<liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="robots" />
 
 <c:choose>
 	<c:when test="<%= Validator.isNotNull(virtualHostName) %>">
-		<aui:input cols="60" label="set-the-robots-txt" name="robots" rows="15" type="textarea" value="<%= robots %>" />
+		<aui:input label="set-the-robots-txt" name="robots" placeholder="robots" type="textarea" value="<%= robots %>" />
 	</c:when>
 	<c:otherwise>
 		<div class="alert alert-info">

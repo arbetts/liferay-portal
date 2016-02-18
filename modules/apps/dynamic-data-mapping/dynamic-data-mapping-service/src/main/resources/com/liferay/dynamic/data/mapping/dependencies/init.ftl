@@ -1,10 +1,6 @@
 <#-- Tag libraries -->
 
-<#assign aui = PortalJspTagLibs["/WEB-INF/tld/liferay-aui.tld"] />
 <#assign fmt = PortalJspTagLibs["/WEB-INF/tld/fmt.tld"] />
-<#assign liferay_map = PortalJspTagLibs["/META-INF/resources/liferay-map.tld"] />
-<#assign liferay_portlet = PortalJspTagLibs["/WEB-INF/tld/liferay-portlet.tld"] />
-<#assign liferay_ui = PortalJspTagLibs["/WEB-INF/tld/liferay-ui.tld"] />
 
 <#-- CSS class -->
 
@@ -142,7 +138,7 @@
 	</#if>
 </#function>
 
-<#assign dlAppServiceUtil = serviceLocator.findService("com.liferay.portlet.documentlibrary.service.DLAppService")>
+<#assign dlAppServiceUtil = serviceLocator.findService("com.liferay.document.library.kernel.service.DLAppService")>
 
 <#function getFileEntry fileJSONObject>
 	<#assign fileEntryUUID = fileJSONObject.getString("uuid")>

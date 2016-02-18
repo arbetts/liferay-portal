@@ -59,7 +59,7 @@ if (layoutSetBranches.contains(layoutSetBranch)) {
 			/>
 
 			<liferay-ui:search-container-row
-				className="com.liferay.portal.model.LayoutSetBranch"
+				className="com.liferay.portal.kernel.model.LayoutSetBranch"
 				escapedModel="<%= true %>"
 				keyProperty="layoutSetBranchId"
 				modelVar="curLayoutSetBranch"
@@ -87,7 +87,7 @@ if (layoutSetBranches.contains(layoutSetBranch)) {
 	</aui:form>
 </div>
 
-<aui:script >
+<aui:script>
 	function <portlet:namespace />selectLayoutSetBranch(layoutSetBranchId) {
 		var layoutSetBranch = AUI.$('#<portlet:namespace />' + layoutSetBranchId);
 

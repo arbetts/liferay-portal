@@ -97,8 +97,6 @@
 	</command>
 
 	<command name="addSubfolderPG">
-		<var name="key_assetName" value="${folderName}" />
-
 		<execute function="Click#makeVisibleClickAt" locator1="Portlet#ICON_PLUS_SIGN" />
 
 		<execute function="AssertClick" locator1="MenuItem#SUBFOLDER" value1="Subfolder" />
@@ -111,8 +109,8 @@
 		<execute function="AssertTextEquals#assertPartialText" locator1="Message#SUCCESS" value1="Your request completed successfully." />
 
 		<execute macro="BookmarksFolder#viewFolder">
-			<var name="folderDescription" value="${subfolderDescription}" />
-			<var name="folderName" value="${subfolderName}" />
+			<var name="folderDescription" value="${folderDescription}" />
+			<var name="folderName" value="${folderName}" />
 		</execute>
 	</command>
 
@@ -122,7 +120,7 @@
 
 		<execute function="AssertTextEquals" locator1="Bookmarks#DESCRIPTIVE_ENTRY_TITLE" value1="${folderName}" />
 
-		<execute function="Click" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
 
 		<execute function="AssertClick" locator1="MenuItem#MOVE_TO_THE_RECYCLE_BIN" value1="Move to the Recycle Bin" />
 
@@ -140,7 +138,7 @@
 	<command name="editCP">
 		<var name="key_rowEntry" value="${folderName}" />
 
-		<execute function="Click" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
 
 		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
 
@@ -160,7 +158,7 @@
 	<command name="editPG">
 		<var name="key_rowEntry" value="${folderName}" />
 
-		<execute function="Click" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
 
 		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
 
@@ -187,7 +185,7 @@
 
 		<var name="key_rowEntry" value="${subfolderName}" />
 
-		<execute function="Click" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
 
 		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
 
@@ -241,6 +239,10 @@
 		<var name="key_assetName" value="${subfolderName}" />
 
 		<execute function="AssertClick#assertPartialTextClickAtAndWait" locator1="Bookmarks#DESCRIPTIVE_ENTRY_TITLE" value1="${subfolderName}" />
+
+		<var name="key_folderName" value="${subfolderName}" />
+
+		<execute function="AssertVisible" locator1="Bookmarks#BREADCRUMB_FOLDER_NAME" />
 	</command>
 
 	<command name="mergeSubfolderToFolderCP">
@@ -252,7 +254,7 @@
 
 		<var name="key_rowEntry" value="${subfolderName}" />
 
-		<execute function="Click" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
 
 		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
 
@@ -276,9 +278,15 @@
 	</command>
 
 	<command name="moveSubfolderToRecycleBinPG">
-		<execute function="AssertClick" locator1="NavListItem#MOVE_TO_THE_RECYCLE_BIN" value1="Move to the Recycle Bin" />
+		<var name="key_rowEntry" value="${subfolderName}" />
 
-		<execute function="AssertTextEquals#assertPartialText" locator1="Message#SUCCESS" value1="The ${assetType} ${subfolderName} was moved to the Recycle Bin." />
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
+
+		<execute function="AssertClick" locator1="MenuItem#MOVE_TO_THE_RECYCLE_BIN" value1="Move to the Recycle Bin" />
+
+		<var name="key_assetType" value="Bookmarks Folder" />
+
+		<execute function="AssertTextEquals#assertPartialText" locator1="Message#SUCCESS" value1="The ${assetType} ${subfolderName} was moved to the Recycle Bin. Undo" />
 	</command>
 
 	<command name="moveToRecycleBinCP">
@@ -294,7 +302,7 @@
 
 		<var name="key_rowEntry" value="${folderName}" />
 
-		<execute function="Click" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#ROW_VERTICAL_ELLIPSIS" />
 
 		<execute function="AssertClick" locator1="MenuItem#MOVE_TO_THE_RECYCLE_BIN" value1="Move to the Recycle Bin" />
 
@@ -327,7 +335,7 @@
 			<then>
 				<execute function="Check#checkAll" locator1="Checkbox#SELECT_ALL" />
 
-				<execute function="Click" locator1="Icon#DELETE" />
+				<execute function="Click" locator1="Icon#MOVE_TO_RECYCLE_BIN" />
 
 				<execute function="AssertTextEquals#assertPartialText" locator1="Message#SUCCESS" value1="moved to the Recycle Bin. Undo" />
 				<execute function="AssertElementPresent" locator1="Message#EMPTY_INFO" />

@@ -1,9 +1,7 @@
-<#assign aui = taglibLiferayHash["/WEB-INF/tld/liferay-aui.tld"] />
-
 <#if entries?has_content>
-	<@aui.layout>
+	<@liferay_aui.row>
 		<#list entries as entry>
-			<@aui.column columnWidth=25>
+			<@liferay_aui.col width=25>
 				<div class="results-header">
 					<h3>
 						${entry.getUnambiguousTitle(entries, themeDisplay.getSiteGroupId(), themeDisplay.getLocale())}
@@ -13,9 +11,9 @@
 				<#assign categories = entry.getCategories()>
 
 				<@displayCategories categories=categories />
-			</@aui.column>
+			</@liferay_aui.col>
 		</#list>
-	</@aui.layout>
+	</@liferay_aui.row>
 </#if>
 
 <#macro displayCategories
@@ -33,7 +31,7 @@
 					<a href="${categoryURL}">${category.getName()}</a>
 
 					<#if serviceLocator??>
-						<#assign assetCategoryService = serviceLocator.findService("com.liferay.portlet.asset.service.AssetCategoryService")>
+						<#assign assetCategoryService = serviceLocator.findService("com.liferay.asset.kernel.service.AssetCategoryService")>
 
 						<#assign childCategories = assetCategoryService.getChildCategories(category.getCategoryId())>
 

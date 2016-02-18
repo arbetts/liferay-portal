@@ -8,6 +8,7 @@
 			groups: {
 				ddm: {
 					base: PATH_DDM_WEB + '/js/',
+					combine: Liferay.AUI.getCombine(),
 					filter: LiferayAUI.getFilterConfig(),
 					modules: {
 						'liferay-portlet-dynamic-data-mapping': {

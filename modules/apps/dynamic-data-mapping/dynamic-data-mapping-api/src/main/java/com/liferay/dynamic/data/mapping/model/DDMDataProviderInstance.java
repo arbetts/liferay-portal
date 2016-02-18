@@ -17,8 +17,8 @@ package com.liferay.dynamic.data.mapping.model;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.annotation.ImplementationClassName;
+import com.liferay.portal.kernel.model.PersistedModel;
 import com.liferay.portal.kernel.util.Accessor;
-import com.liferay.portal.model.PersistedModel;
 
 /**
  * The extended model interface for the DDMDataProviderInstance service. Represents a row in the &quot;DDMDataProviderInstance&quot; database table, with each column mapped to a property of this class.
@@ -55,7 +55,4 @@ public interface DDMDataProviderInstance extends DDMDataProviderInstanceModel,
 				return DDMDataProviderInstance.class;
 			}
 		};
-
-	public java.util.List<com.liferay.portal.kernel.util.KeyValuePair> getData()
-		throws com.liferay.portal.kernel.exception.PortalException;
 }

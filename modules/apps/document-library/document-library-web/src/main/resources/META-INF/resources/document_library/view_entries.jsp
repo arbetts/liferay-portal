@@ -47,7 +47,7 @@ String displayStyle = GetterUtil.getString((String)request.getAttribute("view.js
 
 PortletURL portletURL = liferayPortletResponse.createRenderURL();
 
-portletURL.setParameter("mvcRenderCommandName", "/document_library/view");
+portletURL.setParameter("mvcRenderCommandName", (folderId == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) ? "/document_library/view" : "/document_library/view_folder");
 portletURL.setParameter("navigation", navigation);
 portletURL.setParameter("curFolder", currentFolder);
 portletURL.setParameter("deltaFolder", deltaFolder);
@@ -60,6 +60,10 @@ EntriesChecker entriesChecker = new EntriesChecker(liferayPortletRequest, lifera
 entriesChecker.setCssClass("entry-selector");
 
 EntriesMover entriesMover = new EntriesMover(scopeGroupId);
+
+String[] entryColumns = dlPortletInstanceSettingsHelper.getEntryColumns();
+
+dlSearchContainer.setHeaderNames(ListUtil.fromArray(entryColumns));
 
 String orderByCol = GetterUtil.getString((String)request.getAttribute("view.jsp-orderByCol"));
 String orderByType = GetterUtil.getString((String)request.getAttribute("view.jsp-orderByType"));
@@ -206,8 +210,6 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 <div class="document-container" id="<portlet:namespace />entriesContainer">
 
 	<%
-	String[] entryColumns = dlPortletInstanceSettingsHelper.getEntryColumns();
-
 	String searchContainerId = ParamUtil.getString(request, "searchContainerId");
 	%>
 
@@ -272,6 +274,8 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 					rowData.put("title", fileEntry.getTitle());
 
 					row.setData(rowData);
+
+					String thumbnailSrc = DLUtil.getThumbnailSrc(fileEntry, latestFileVersion, themeDisplay);
 					%>
 
 					<c:choose>
@@ -279,13 +283,26 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 							<c:choose>
 								<c:when test="<%= fileShortcut != null %>">
 									<liferay-ui:search-container-column-icon
-										icon="icon-share-alt"
+										icon="shortcut"
 										toggleRowChecker="<%= true %>"
 									/>
 								</c:when>
-								<c:otherwise>
+								<c:when test="<%= Validator.isNotNull(thumbnailSrc) %>">
 									<liferay-ui:search-container-column-image
-										src="<%= DLUtil.getThumbnailSrc(fileEntry, latestFileVersion, themeDisplay) %>"
+										src="<%= thumbnailSrc %>"
+										toggleRowChecker="<%= true %>"
+									/>
+								</c:when>
+								<c:when test="<%= Validator.isNotNull(latestFileVersion.getExtension()) %>">
+									<liferay-ui:search-container-column-text>
+										<div class="sticker-default sticker-lg <%= dlViewFileVersionDisplayContext.getCssClassFileMimeType() %>">
+											<%= StringUtil.shorten(StringUtil.upperCase(latestFileVersion.getExtension()), 3, StringPool.BLANK) %>
+										</div>
+									</liferay-ui:search-container-column-text>
+								</c:when>
+								<c:otherwise>
+									<liferay-ui:search-container-column-icon
+										icon="documents-and-media"
 										toggleRowChecker="<%= true %>"
 									/>
 								</c:otherwise>
@@ -316,30 +333,36 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 								rowURL.setParameter("fileEntryId", String.valueOf(fileEntry.getFileEntryId()));
 								%>
 
-								<liferay-frontend:vertical-card
-									actionJsp="/document_library/file_entry_action.jsp"
-									actionJspServletContext="<%= application %>"
-									cssClass="entry-display-style"
-									imageUrl="<%= DLUtil.getThumbnailSrc(fileEntry, latestFileVersion, themeDisplay) %>"
-									resultRow="<%= row %>"
-									rowChecker="<%= entriesChecker %>"
-									title="<%= latestFileVersion.getTitle() %>"
-									url="<%= rowURL != null ? rowURL.toString() : null %>"
-								>
-									<liferay-frontend:vertical-card-sticker-bottom>
-										<div class="sticker sticker-bottom <%= dlViewFileVersionDisplayContext.getCssClassFileMimeType() %>">
-											<%= StringUtil.shorten(StringUtil.upperCase(latestFileVersion.getExtension()), 3, StringPool.BLANK) %>
-										</div>
-									</liferay-frontend:vertical-card-sticker-bottom>
-
-									<liferay-frontend:vertical-card-header>
-										<%= LanguageUtil.format(request, "x-ago-by-x", new String[] {LanguageUtil.getTimeDescription(locale, System.currentTimeMillis() - latestFileVersion.getCreateDate().getTime(), true), HtmlUtil.escape(latestFileVersion.getUserName())}, false) %>
-									</liferay-frontend:vertical-card-header>
-
-									<liferay-frontend:vertical-card-footer>
-										<aui:workflow-status markupView="lexicon" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= latestFileVersion.getStatus() %>" />
-									</liferay-frontend:vertical-card-footer>
-								</liferay-frontend:vertical-card>
+								<c:choose>
+									<c:when test="<%= Validator.isNull(thumbnailSrc) %>">
+										<liferay-frontend:icon-vertical-card
+											actionJsp="/document_library/file_entry_action.jsp"
+											actionJspServletContext="<%= application %>"
+											cssClass="entry-display-style"
+											icon="documents-and-media"
+											resultRow="<%= row %>"
+											rowChecker="<%= entriesChecker %>"
+											title="<%= latestFileVersion.getTitle() %>"
+											url="<%= rowURL != null ? rowURL.toString() : null %>"
+										>
+											<%@ include file="/document_library/file_entry_vertical_card.jspf" %>
+										</liferay-frontend:icon-vertical-card>
+									</c:when>
+									<c:otherwise>
+										<liferay-frontend:vertical-card
+											actionJsp="/document_library/file_entry_action.jsp"
+											actionJspServletContext="<%= application %>"
+											cssClass="entry-display-style"
+											imageUrl="<%= thumbnailSrc %>"
+											resultRow="<%= row %>"
+											rowChecker="<%= entriesChecker %>"
+											title="<%= latestFileVersion.getTitle() %>"
+											url="<%= rowURL != null ? rowURL.toString() : null %>"
+										>
+											<%@ include file="/document_library/file_entry_vertical_card.jspf" %>
+										</liferay-frontend:vertical-card>
+									</c:otherwise>
+								</c:choose>
 							</liferay-ui:search-container-column-text>
 						</c:when>
 						<c:otherwise>
@@ -354,10 +377,22 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 								%>
 
 								<liferay-ui:search-container-column-text
-									href="<%= rowURL %>"
 									name="title"
-									value="<%= latestFileVersion.getTitle() %>"
-								/>
+								>
+									<aui:a href="<%= rowURL.toString() %>"><%= latestFileVersion.getTitle() %></aui:a>
+
+									<c:if test="<%= fileEntry.hasLock() %>">
+										<span>
+											<aui:icon cssClass="icon-monospaced" image="lock" markupView="lexicon" message="locked" />
+										</span>
+									</c:if>
+
+									<c:if test="<%= fileShortcut != null %>">
+										<span>
+											<aui:icon cssClass="icon-monospaced" image="shortcut" markupView="lexicon" message="shortcut" />
+										</span>
+									</c:if>
+								</liferay-ui:search-container-column-text>
 							</c:if>
 
 							<c:if test='<%= ArrayUtil.contains(entryColumns, "size") %>'>
@@ -457,7 +492,7 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 
 							PortletURL rowURL = liferayPortletResponse.createRenderURL();
 
-							rowURL.setParameter("mvcRenderCommandName", "/document_library/view");
+							rowURL.setParameter("mvcRenderCommandName", "/document_library/view_folder");
 							rowURL.setParameter("redirect", currentURL);
 							rowURL.setParameter("folderId", String.valueOf(curFolder.getFolderId()));
 							%>
@@ -471,9 +506,11 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 									text="<%= HtmlUtil.escape(curFolder.getName()) %>"
 									url="<%= rowURL.toString() %>"
 								>
-									<liferay-frontend:horizontal-card-icon>
-										<span class="icon-monospaced <%= curFolder.isMountPoint() ? "icon-hdd" : "icon-folder-close-alt" %>"></span>
-									</liferay-frontend:horizontal-card-icon>
+									<liferay-frontend:horizontal-card-col>
+										<liferay-frontend:horizontal-card-icon
+											icon='<%= curFolder.isMountPoint() ? "repository" : "folder" %>'
+										/>
+									</liferay-frontend:horizontal-card-col>
 								</liferay-frontend:horizontal-card>
 							</liferay-ui:search-container-column-text>
 						</c:when>
@@ -483,7 +520,7 @@ if (portletTitleBasedNavigation && (folderId != DLFolderConstants.DEFAULT_PARENT
 								<%
 								PortletURL rowURL = liferayPortletResponse.createRenderURL();
 
-								rowURL.setParameter("mvcRenderCommandName", "/document_library/view");
+								rowURL.setParameter("mvcRenderCommandName", "/document_library/view_folder");
 								rowURL.setParameter("redirect", currentURL);
 								rowURL.setParameter("folderId", String.valueOf(curFolder.getFolderId()));
 								%>

@@ -30,7 +30,7 @@ String description = BeanParamUtil.getString(recordSet, request, "description");
 portletDisplay.setShowBackIcon(true);
 portletDisplay.setURLBack(redirect);
 
-renderResponse.setTitle((recordSet == null) ? LanguageUtil.get(request, "new-form") : recordSet.getName(locale));
+renderResponse.setTitle((recordSet == null) ? LanguageUtil.get(request, "new-form") : LanguageUtil.get(request, "edit-form"));
 %>
 
 <portlet:actionURL name="addRecordSet" var="addRecordSetURL">
@@ -98,13 +98,13 @@ renderResponse.setTitle((recordSet == null) ? LanguageUtil.get(request, "new-for
 		<aui:fieldset cssClass="ddl-form-basic-info">
 			<div class="container-fluid-1280">
 				<h1>
-					<liferay-ui:input-editor contents="<%= HtmlUtil.escape(LocalizationUtil.getLocalization(name, themeDisplay.getLanguageId())) %>" cssClass="ddl-form-name" editorName="alloyeditor" name="nameEditor" placeholder="untitled-form" showSource="<%= false %>" />
+					<liferay-ui:input-editor contents="<%= HtmlUtil.escape(LocalizationUtil.getLocalization(name, themeDisplay.getLanguageId())) %>" cssClass="ddl-form-name" editorName="alloyeditor" name="nameEditor" onChangeMethod="OnChangeEditor" onInitMethod="OnInitEditor" placeholder="untitled-form" showSource="<%= false %>" />
 				</h1>
 
 				<aui:input name="name" type="hidden" />
 
 				<h2>
-					<liferay-ui:input-editor contents="<%= HtmlUtil.escape(LocalizationUtil.getLocalization(description, themeDisplay.getLanguageId())) %>" cssClass="ddl-form-description" editorName="alloyeditor" name="descriptionEditor" placeholder="add-a-short-description-for-this-page" showSource="<%= false %>" />
+					<liferay-ui:input-editor contents="<%= HtmlUtil.escape(LocalizationUtil.getLocalization(description, themeDisplay.getLanguageId())) %>" cssClass="ddl-form-description" editorName="alloyeditor" name="descriptionEditor" placeholder="add-a-short-description-for-this-form" showSource="<%= false %>" />
 				</h2>
 
 				<aui:input name="description" type="hidden" />
@@ -127,6 +127,18 @@ renderResponse.setTitle((recordSet == null) ? LanguageUtil.get(request, "new-for
 				<aui:button cssClass="btn-lg" href="<%= redirect %>" name="cancelButton" type="cancel" />
 			</aui:button-row>
 		</div>
+
+		<aui:script>
+			function <portlet:namespace />OnChangeEditor(html) {
+				Liferay.Util.toggleDisabled('#<portlet:namespace />submit', !html.trim());
+			}
+
+			function <portlet:namespace />OnInitEditor() {
+				var html = window['<portlet:namespace />nameEditor'].getHTML();
+
+				Liferay.Util.toggleDisabled('#<portlet:namespace />submit', !html.trim());
+			}
+		</aui:script>
 
 		<div class="container-fluid-1280 ddl-publish-modal hide" id="<portlet:namespace />publishModal">
 			<div class="alert alert-info">
@@ -236,6 +248,7 @@ renderResponse.setTitle((recordSet == null) ? LanguageUtil.get(request, "new-for
 			Liferay.Util.openWindow(
 				{
 					dialog: {
+						cssClass: 'ddl-form-settings-modal',
 						height: 620,
 						resizable: false,
 						'toolbars.footer': [

@@ -14,7 +14,7 @@
 
 package com.liferay.portal.dao.db;
 
-import com.liferay.counter.service.CounterLocalServiceUtil;
+import com.liferay.counter.kernel.service.CounterLocalServiceUtil;
 import com.liferay.portal.dao.orm.common.SQLTransformer;
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.dao.db.DB;
@@ -185,6 +185,11 @@ public abstract class BaseDB implements DB {
 	}
 
 	@Override
+	public String getTemplateBlob() {
+		return getTemplate()[5];
+	}
+
+	@Override
 	public String getTemplateFalse() {
 		return getTemplate()[2];
 	}
@@ -269,8 +274,8 @@ public abstract class BaseDB implements DB {
 					sql = sql.substring(0, sql.length() - 1);
 				}
 
-				if (sql.endsWith("go")) {
-					sql = sql.substring(0, sql.length() - 2);
+				if (sql.endsWith(" go")) {
+					sql = sql.substring(0, sql.length() - 3);
 				}
 
 				if (_log.isDebugEnabled()) {
@@ -409,6 +414,7 @@ public abstract class BaseDB implements DB {
 				}
 				else {
 					sb.append(line);
+					sb.append(StringPool.NEW_LINE);
 
 					if (line.endsWith(";")) {
 						String sql = sb.toString();
@@ -760,7 +766,7 @@ public abstract class BaseDB implements DB {
 				}
 			}
 			else if (!tablesSQLLowerCase.contains(
-						"create table " + tableNameLowerCase + " (")) {
+						CREATE_TABLE + tableNameLowerCase + " (")) {
 
 				continue;
 			}
@@ -969,7 +975,7 @@ public abstract class BaseDB implements DB {
 
 					String[] columns = StringUtil.split(line.substring(x, y));
 
-					x = portalData.indexOf("create table " + table + " (");
+					x = portalData.indexOf(CREATE_TABLE + table + " (");
 					y = portalData.indexOf(");", x);
 
 					String portalTableData = portalData.substring(x, y);
@@ -1096,6 +1102,8 @@ public abstract class BaseDB implements DB {
 	protected static final String ALTER_COLUMN_TYPE = "alter_column_type ";
 
 	protected static final String ALTER_TABLE_NAME = "alter_table_name ";
+
+	protected static final String CREATE_TABLE = "create table ";
 
 	protected static final String DROP_INDEX = "drop index";
 

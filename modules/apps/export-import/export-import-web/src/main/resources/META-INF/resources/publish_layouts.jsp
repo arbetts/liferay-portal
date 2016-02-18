@@ -64,6 +64,8 @@ else {
 	}
 }
 
+boolean configuredPublish = (exportImportConfiguration == null) ? false : true;
+
 long layoutSetBranchId = MapUtil.getLong(parameterMap, "layoutSetBranchId", ParamUtil.getLong(request, "layoutSetBranchId"));
 String layoutSetBranchName = MapUtil.getString(parameterMap, "layoutSetBranchName", ParamUtil.getString(request, "layoutSetBranchName"));
 
@@ -177,12 +179,14 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 						data-value="custom"
 						iconCssClass="icon-puzzle"
 						label="custom"
+						selected='<%= publishConfigurationButtons.equals("custom") %>'
 					/>
 
 					<aui:nav-item
 						data-value="saved"
 						iconCssClass="icon-archive"
 						label="publish-templates"
+						selected='<%= publishConfigurationButtons.equals("saved") %>'
 					/>
 
 					<portlet:renderURL var="simplePublishRedirectURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
@@ -194,10 +198,15 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 
 					<portlet:renderURL var="simplePublishURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
 						<portlet:param name="mvcRenderCommandName" value="publishLayoutsSimple" />
+						<portlet:param name="<%= Constants.CMD %>" value="<%= (localPublishing) ? Constants.PUBLISH_TO_LIVE : Constants.PUBLISH_TO_REMOTE %>" />
 						<portlet:param name="redirect" value="<%= simplePublishRedirectURL %>" />
+						<portlet:param name="lastImportUserName" value="<%= user.getFullName() %>" />
+						<portlet:param name="lastImportUserUuid" value="<%= String.valueOf(user.getUserUuid()) %>" />
+						<portlet:param name="layoutSetBranchId" value="<%= String.valueOf(layoutSetBranchId) %>" />
+						<portlet:param name="layoutSetBranchName" value="<%= layoutSetBranchName %>" />
 						<portlet:param name="localPublishing" value="<%= String.valueOf(localPublishing) %>" />
 						<portlet:param name="privateLayout" value="<%= String.valueOf(privateLayout) %>" />
-						<portlet:param name="quickPublish" value="<%= Boolean.FALSE.toString() %>" />
+						<portlet:param name="quickPublish" value="<%= Boolean.TRUE.toString() %>" />
 						<portlet:param name="remoteAddress" value='<%= liveGroupTypeSettings.getProperty("remoteAddress") %>' />
 						<portlet:param name="remotePort" value='<%= liveGroupTypeSettings.getProperty("remotePort") %>' />
 						<portlet:param name="remotePathContext" value='<%= liveGroupTypeSettings.getProperty("remotePathContext") %>' />
@@ -233,6 +242,7 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 				<aui:input name="layoutSetBranchName" type="hidden" value="<%= layoutSetBranchName %>" />
 				<aui:input name="lastImportUserName" type="hidden" value="<%= user.getFullName() %>" />
 				<aui:input name="lastImportUserUuid" type="hidden" value="<%= String.valueOf(user.getUserUuid()) %>" />
+				<aui:input name="treeId" type="hidden" value="<%= treeId %>" />
 				<aui:input name="<%= PortletDataHandlerKeys.PORTLET_ARCHIVED_SETUPS_ALL %>" type="hidden" value="<%= true %>" />
 				<aui:input name="<%= PortletDataHandlerKeys.PORTLET_CONFIGURATION_ALL %>" type="hidden" value="<%= true %>" />
 				<aui:input name="<%= PortletDataHandlerKeys.PORTLET_SETUP_ALL %>" type="hidden" value="<%= true %>" />
@@ -328,7 +338,7 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 								%>
 
 								<aui:fieldset>
-									<aui:input name="name" />
+									<aui:input name="name" placeholder="process-name-placeholder" />
 								</aui:fieldset>
 
 								<aui:fieldset collapsible="<%= true %>" cssClass="options-group" label="date">
@@ -344,12 +354,13 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 									%>
 
 									<liferay-util:include page="/select_pages.jsp" servletContext="<%= application %>">
-										<liferay-util:param name="<%= Constants.CMD %>" value="<%= Constants.PUBLISH %>" />
-										<liferay-util:param name="groupId" value="<%= String.valueOf(stagingGroupId) %>" />
+										<liferay-util:param name="<%= Constants.CMD %>" value="<%= cmd %>" />
+										<liferay-util:param name="groupId" value="<%= String.valueOf(groupId) %>" />
 										<liferay-util:param name="layoutSetBranchId" value="<%= String.valueOf(layoutSetBranchId) %>" />
 										<liferay-util:param name="privateLayout" value="<%= String.valueOf(privateLayout) %>" />
 										<liferay-util:param name="treeId" value="<%= treeId %>" />
 										<liferay-util:param name="selectedLayoutIds" value="<%= StringUtil.merge(selectedLayoutIds) %>" />
+										<liferay-util:param name="disableInputs" value="<%= String.valueOf(configuredPublish) %>" />
 									</liferay-util:include>
 								</aui:fieldset>
 							</c:if>
@@ -358,11 +369,9 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 
 							<c:if test="<%= !quickPublish %>">
 								<liferay-staging:deletions cmd="<%= Constants.PUBLISH %>" />
-							</c:if>
 
-							<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" cssClass="options-group" label="permissions">
-								<aui:input helpMessage='<%= group.isCompany() ? "publish-global-permissions-help" : "export-import-permissions-help" %>' label="permissions" name="<%= PortletDataHandlerKeys.PERMISSIONS %>" type="toggle-switch" value="<%= MapUtil.getBoolean(parameterMap, PortletDataHandlerKeys.PERMISSIONS, false) %>" />
-							</aui:fieldset>
+								<liferay-staging:permissions action="publish" descriptionCSSClass="permissions-description" global="<%= group.isCompany() %>" labelCSSClass="permissions-label" parameterMap="<%= parameterMap %>" />
+							</c:if>
 
 							<c:if test="<%= !localPublishing %>">
 								<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" cssClass="options-group" label="remote-live-connection-settings">
@@ -439,13 +448,10 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 	new Liferay.ExportImport(
 		{
 			commentsNode: '#<%= PortletDataHandlerKeys.COMMENTS %>',
-			deleteMissingLayoutsNode: '#<%= PortletDataHandlerKeys.DELETE_MISSING_LAYOUTS %>',
 			deletionsNode: '#<%= PortletDataHandlerKeys.DELETIONS %>',
 			form: document.<portlet:namespace />exportPagesFm,
 			incompleteProcessMessageNode: '#<portlet:namespace />incompleteProcessMessage',
-			layoutSetSettingsNode: '#<%= PortletDataHandlerKeys.LAYOUT_SET_SETTINGS %>',
 			locale: '<%= locale.toLanguageTag() %>',
-			logoNode: '#<%= PortletDataHandlerKeys.LOGO %>',
 			namespace: '<portlet:namespace />',
 			pageTreeId: '<%= treeId %>',
 			processesNode: '#publishProcesses',
@@ -461,7 +467,6 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 			remotePortNode: '#<portlet:namespace />remotePort',
 			secureConnectionNode: '#secureConnection',
 			setupNode: '#<%= PortletDataHandlerKeys.PORTLET_SETUP_ALL %>',
-			themeReferenceNode: '#<%= PortletDataHandlerKeys.THEME_REFERENCE %>',
 			timeZone: '<%= timeZone.getID() %>',
 			userPreferencesNode: '#<%= PortletDataHandlerKeys.PORTLET_USER_PREFERENCES_ALL %>'
 		}
@@ -477,15 +482,22 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 		var customConfiguration = A.one('#<portlet:namespace />customConfiguration');
 		var savedConfigurations = A.one('#<portlet:namespace />savedConfigurations');
 
+		var customConfigurationsNavItem = A.one('li[data-value=custom]');
+		var savedConfigurationsNavItem = A.one('li[data-value=saved]');
+
 		if (dataValue === 'custom') {
 			savedConfigurations.hide();
+			savedConfigurationsNavItem.removeClass('active');
 
 			customConfiguration.show();
+			customConfigurationsNavItem.addClass('active');
 		}
 		else if (dataValue === 'saved') {
 			customConfiguration.hide();
+			customConfigurationsNavItem.removeClass('active');
 
 			savedConfigurations.show();
+			savedConfigurationsNavItem.addClass('active');
 		}
 	};
 

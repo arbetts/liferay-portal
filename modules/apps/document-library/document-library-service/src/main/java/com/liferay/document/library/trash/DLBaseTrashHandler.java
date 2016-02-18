@@ -14,7 +14,12 @@
 
 package com.liferay.document.library.trash;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFileShortcutConstants;
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.ContainerModel;
 import com.liferay.portal.kernel.repository.DocumentRepository;
 import com.liferay.portal.kernel.repository.Repository;
 import com.liferay.portal.kernel.repository.RepositoryProviderUtil;
@@ -28,13 +33,9 @@ import com.liferay.portal.kernel.trash.BaseTrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.trash.TrashRenderer;
+import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.model.ContainerModel;
-import com.liferay.portlet.documentlibrary.model.DLFileEntry;
-import com.liferay.portlet.documentlibrary.model.DLFileShortcutConstants;
-import com.liferay.portlet.documentlibrary.model.DLFolder;
-import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -223,6 +224,68 @@ public abstract class DLBaseTrashHandler extends BaseTrashHandler {
 
 			TrashRenderer trashRenderer = trashHandler.getTrashRenderer(
 				folder.getPrimaryKey());
+
+			trashRenderers.add(trashRenderer);
+		}
+
+		return trashRenderers;
+	}
+
+	@Override
+	public int getTrashModelsCount(long classPK) throws PortalException {
+		DocumentRepository documentRepository = getDocumentRepository(classPK);
+
+		return documentRepository.getFileEntriesAndFileShortcutsCount(
+			classPK, WorkflowConstants.STATUS_IN_TRASH);
+	}
+
+	@Override
+	public List<TrashRenderer> getTrashModelTrashRenderers(
+			long classPK, int start, int end, OrderByComparator obc)
+		throws PortalException {
+
+		List<TrashRenderer> trashRenderers = new ArrayList<>();
+
+		DocumentRepository documentRepository = getDocumentRepository(classPK);
+
+		List<RepositoryEntry> repositoryEntries =
+			documentRepository.getFoldersAndFileEntriesAndFileShortcuts(
+				classPK, WorkflowConstants.STATUS_IN_TRASH, false, start, end,
+				obc);
+
+		for (RepositoryEntry repositoryEntry : repositoryEntries) {
+			TrashRenderer trashRenderer = null;
+
+			if (repositoryEntry instanceof FileShortcut) {
+				FileShortcut fileShortcut = (FileShortcut)repositoryEntry;
+
+				TrashHandler trashHandler =
+					TrashHandlerRegistryUtil.getTrashHandler(
+						DLFileShortcutConstants.getClassName());
+
+				trashRenderer = trashHandler.getTrashRenderer(
+					fileShortcut.getPrimaryKey());
+			}
+			else if (repositoryEntry instanceof FileEntry) {
+				FileEntry fileEntry = (FileEntry)repositoryEntry;
+
+				TrashHandler trashHandler =
+					TrashHandlerRegistryUtil.getTrashHandler(
+						DLFileEntry.class.getName());
+
+				trashRenderer = trashHandler.getTrashRenderer(
+					fileEntry.getPrimaryKey());
+			}
+			else {
+				Folder folder = (Folder)repositoryEntry;
+
+				TrashHandler trashHandler =
+					TrashHandlerRegistryUtil.getTrashHandler(
+						DLFolder.class.getName());
+
+				trashRenderer = trashHandler.getTrashRenderer(
+					folder.getPrimaryKey());
+			}
 
 			trashRenderers.add(trashRenderer);
 		}
