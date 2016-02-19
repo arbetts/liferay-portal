@@ -47,4 +47,12 @@ public class BackgroundTaskExecutorNames {
 		"com.liferay.exportimport.background.task." +
 			"PortletStagingBackgroundTaskExecutor";
 
+	public static final String RIENDEX_PORTAL_BACKGROUND_TASK_EXECUTOR =
+		"com.liferay.portal.search.internal.background.task." +
+			"ReindexPortalBackgroundTaskExecutor";
+
+	public static final String RIENDEX_SINGLE_BACKGROUND_TASK_EXECUTOR =
+		"com.liferay.portal.search.internal.background.task." +
+			"ReindexSingleIndexerBackgroundTaskExecutor";
+
 }
