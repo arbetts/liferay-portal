@@ -804,14 +804,6 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 					group.getCompanyId(), String.valueOf(group.getGroupId()));
 
 			for (ResourcePermission resourcePermission : resourcePermissions) {
-				if ((resourcePermission.getScope() ==
-						ResourceConstants.SCOPE_INDIVIDUAL) &&
-					!group.isStagingGroup() && group.isOrganization() &&
-					group.isSite()) {
-
-					continue;
-				}
-
 				resourcePermissionLocalService.deleteResourcePermission(
 					resourcePermission);
 			}
