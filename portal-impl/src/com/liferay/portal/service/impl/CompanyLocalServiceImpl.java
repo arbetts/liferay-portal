@@ -32,6 +32,8 @@ import com.liferay.portal.kernel.instance.lifecycle.PortalInstanceLifecycleManag
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.messaging.proxy.ProxyModeThreadLocal;
+import com.liferay.portal.kernel.messaging.proxy.ProxyModeThreadLocalCloseable;
 import com.liferay.portal.kernel.model.Account;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.CompanyConstants;
@@ -496,16 +498,19 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 
 		Long currentCompanyId = CompanyThreadLocal.getCompanyId();
 		boolean deleteInProcess = CompanyThreadLocal.isDeleteInProcess();
+		boolean forceSync = ProxyModeThreadLocal.isForceSync();
 
 		try {
 			CompanyThreadLocal.setCompanyId(companyId);
 			CompanyThreadLocal.setDeleteInProcess(true);
+			ProxyModeThreadLocal.setForceSync(true);
 
 			return doDeleteCompany(companyId);
 		}
 		finally {
 			CompanyThreadLocal.setCompanyId(currentCompanyId);
 			CompanyThreadLocal.setDeleteInProcess(deleteInProcess);
+			ProxyModeThreadLocal.setForceSync(forceSync);
 		}
 	}
 
