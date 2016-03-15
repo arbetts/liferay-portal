@@ -1232,17 +1232,13 @@ public class HookHotDeployListener
 		}
 
 		if (baseLanguageURL != null) {
-			Locale locale = new Locale(StringPool.BLANK);
-
-			String languageId = LocaleUtil.toLanguageId(locale);
-
 			try (InputStream inputStream = baseLanguageURL.openStream()) {
 				ResourceBundle resourceBundle = new LiferayResourceBundle(
 					inputStream, StringPool.UTF8);
 
 				Map<String, Object> properties = new HashMap<>();
 
-				properties.put("language.id", languageId);
+				properties.put("language.id", StringPool.BLANK);
 
 				registerService(
 					servletContextName, baseLanguagePropertiesLocation,
