@@ -49,7 +49,7 @@ public class LocaleUtilTest extends PowerMockito {
 		mockStatic(LanguageUtil.class);
 
 		when(
-			LanguageUtil.isAvailableLocale(Locale.US)
+			LanguageUtil.isAvailableLocale("en_US")
 		).thenReturn(
 			true
 		);
