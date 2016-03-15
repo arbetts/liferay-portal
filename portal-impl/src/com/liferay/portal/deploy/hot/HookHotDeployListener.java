@@ -1203,6 +1203,9 @@ public class HookHotDeployListener
 					continue;
 				}
 			}
+			else {
+				locale = new Locale(StringPool.BLANK);
+			}
 
 			URL url = portletClassLoader.getResource(
 				languagePropertiesLocation);
