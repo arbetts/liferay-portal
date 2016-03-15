@@ -44,12 +44,8 @@ public abstract class UpgradeCompanyId extends UpgradeProcess {
 		List<Callable<Void>> callables = new ArrayList<>();
 
 		for (TableUpdater tableUpdater : getTableUpdaters()) {
-			if (hasColumn(tableUpdater.getTableName(), "companyId")) {
-				if (_log.isInfoEnabled()) {
-					_log.info("Skipping table " + tableUpdater.getTableName());
-				}
-
-				continue;
+			if (!hasColumn(tableUpdater.getTableName(), "companyId")) {
+				tableUpdater.setCreateCompanyIdColumn(true);
 			}
 
 			callables.add(tableUpdater);
@@ -97,13 +93,32 @@ public abstract class UpgradeCompanyId extends UpgradeProcess {
 
 		@Override
 		public final Void call() throws Exception {
-			if (_log.isInfoEnabled()) {
-				_log.info("Adding column companyId to table " + getTableName());
+			try {
+				_con = DataAccess.getUpgradeOptimizedConnection();
+
+				if (_createCompanyIdColumn) {
+					if (_log.isInfoEnabled()) {
+						_log.info(
+							"Adding column companyId to table " + _tableName);
+					}
+
+					runSQL(
+						_con,
+						"alter table " + _tableName +" add companyId LONG");
+				}
+				else {
+					if (_log.isInfoEnabled()) {
+						_log.info(
+							"Skipping the creation of companyId column for " +
+								"table " + _tableName);
+					}
+				}
+
+				update();
 			}
-
-			runSQL("alter table " + getTableName() + " add companyId LONG");
-
-			update();
+			finally {
+				DataAccess.cleanUp(_con);
+			}
 
 			return null;
 		}
@@ -112,18 +127,20 @@ public abstract class UpgradeCompanyId extends UpgradeProcess {
 			return _tableName;
 		}
 
+		public void setCreateCompanyIdColumn(boolean createCompanyIdColumn) {
+			_createCompanyIdColumn = createCompanyIdColumn;
+		}
+
 		public void update() throws IOException, SQLException {
-			try (Connection con = DataAccess.getUpgradeOptimizedConnection()) {
-				for (String[] foreignNames : _foreignNamesArray) {
-					runSQL(con, getUpdateSQL(foreignNames[0], foreignNames[1]));
-				}
+			for (String[] foreignNames : _foreignNamesArray) {
+				runSQL(_con, getUpdateSQL(foreignNames[0], foreignNames[1]));
 			}
 		}
 
 		protected List<Long> getCompanyIds() throws SQLException {
 			List<Long> companyIds = new ArrayList<>();
 
-			try (PreparedStatement ps = connection.prepareStatement(
+			try (PreparedStatement ps = _con.prepareStatement(
 					"select companyId from Company");
 				ResultSet rs = ps.executeQuery()) {
 
@@ -184,6 +201,8 @@ public abstract class UpgradeCompanyId extends UpgradeProcess {
 		}
 
 		private final String _columnName;
+		private Connection _con;
+		private boolean _createCompanyIdColumn;
 		private final String[][] _foreignNamesArray;
 		private final String _tableName;
 

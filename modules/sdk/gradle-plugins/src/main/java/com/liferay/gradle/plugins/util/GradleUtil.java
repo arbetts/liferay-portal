@@ -14,41 +14,32 @@
 
 package com.liferay.gradle.plugins.util;
 
+import com.liferay.gradle.plugins.BasePortalToolDefaultsPlugin;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
-import org.gradle.api.artifacts.ModuleVersionSelector;
+import org.gradle.api.Project;
 
 /**
  * @author Andrea Di Giorgi
  */
 public class GradleUtil extends com.liferay.gradle.util.GradleUtil {
 
-	public static boolean isPortal(
-		ModuleVersionSelector moduleVersionSelector) {
+	public static final String PORTAL_TOOL_GROUP = "com.liferay";
 
-		String group = moduleVersionSelector.getGroup();
+	public static String getPortalToolVersion(
+		Project project, String portalToolName) {
 
-		if (!group.equals("com.liferay")) {
-			return false;
-		}
+		String portalToolVersion = _portalToolVersions.getProperty(
+			portalToolName);
 
-		String name = moduleVersionSelector.getName();
-
-		if (name.equals("com.liferay.portal.impl") ||
-			name.equals("com.liferay.portal.kernel") ||
-			name.equals("com.liferay.portal.test") ||
-			name.equals("com.liferay.portal.test.internal") ||
-			name.equals("com.liferay.portal.web") ||
-			name.equals("com.liferay.util.bridges") ||
-			name.equals("com.liferay.util.java") ||
-			name.equals("com.liferay.util.slf4j") ||
-			name.equals("com.liferay.util.taglib")) {
-
-			return true;
-		}
-
-		return false;
+		return GradleUtil.getProperty(
+			project, portalToolName + ".version", portalToolVersion);
 	}
 
 	public static Map<String, String> toStringMap(Map<String, ?> map) {
@@ -62,6 +53,23 @@ public class GradleUtil extends com.liferay.gradle.util.GradleUtil {
 		}
 
 		return stringMap;
+	}
+
+	private static final Properties _portalToolVersions = new Properties();
+
+	static {
+		ClassLoader classLoader =
+			BasePortalToolDefaultsPlugin.class.getClassLoader();
+
+		try (InputStream inputStream = classLoader.getResourceAsStream(
+				"com/liferay/gradle/plugins/dependencies" +
+					"/portal-tools.properties")) {
+
+			_portalToolVersions.load(inputStream);
+		}
+		catch (IOException ioe) {
+			throw new ExceptionInInitializerError(ioe);
+		}
 	}
 
 }

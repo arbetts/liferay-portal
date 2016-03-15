@@ -1,11 +1,8 @@
 <definition>
 	<command name="gotoAbstractField">
-		<if>
-			<condition function="IsVisible" locator1="Button#COG" />
-			<then>
-				<execute function="Click" locator1="Button#COG" />
-			</then>
-		</if>
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Configuration" />
+		</execute>
 	</command>
 
 	<command name="gotoAddEntry">
@@ -121,16 +118,6 @@
 		<execute function="AssertClick#assertTextClickAtAndWait" locator1="BlogsEntry#TITLE_LINK" value1="${entryTitle}" />
 	</command>
 
-	<command name="gotoEntrySpecific">
-		<var name="key_entryContent" value="${entryContent}" />
-		<var name="key_entryTitle" value="${entryTitle}" />
-
-		<execute function="AssertTextEquals" locator1="BlogsEntry#TITLE" value1="${entryTitle}" />
-		<execute function="AssertTextEquals" locator1="BlogsEntry#ENTRY_CONTENT_SPECIFIC" value1="${entryContent}" />
-
-		<execute function="AssertClick" locator1="BlogsEntry#TITLE_LINK" value1="${entryTitle}" />
-	</command>
-
 	<command name="gotoEntryWithAbstractPG">
 		<var name="key_entryAbstractDescription" value="${entryAbstractDescription}" />
 		<var name="key_entryTitle" value="${entryTitle}" />
@@ -155,21 +142,6 @@
 		</if>
 
 		<execute function="AssertTextEquals" locator1="BlogsEntry#TITLE" value1="${entryTitle}" />
-	</command>
-
-	<command name="gotoSettings">
-		<execute function="Pause" locator1="3000" />
-
-		<if>
-			<not>
-				<condition function="IsVisible" locator1="BlogsEditEntry#SETTINGS_SECTION" />
-			</not>
-			<then>
-				<execute function="Click" locator1="Button#COG" />
-
-				<execute function="AssertVisible" locator1="BlogsEditEntry#SETTINGS_SECTION" />
-			</then>
-		</if>
 	</command>
 
 	<command name="moveToRecycleBinCP">
