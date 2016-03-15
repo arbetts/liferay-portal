@@ -1192,6 +1192,9 @@ public class HookHotDeployListener
 					continue;
 				}
 			}
+			else {
+				languageId = StringPool.BLANK;
+			}
 
 			if (locale != null) {
 				if (!checkPermission(
@@ -1202,6 +1205,9 @@ public class HookHotDeployListener
 
 					continue;
 				}
+			}
+			else {
+				locale = new Locale(StringPool.BLANK);
 			}
 
 			URL url = portletClassLoader.getResource(
