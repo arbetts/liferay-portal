@@ -1212,8 +1212,6 @@ public class HookHotDeployListener
 			}
 
 			if (locale != null) {
-				languageId = LocaleUtil.toLanguageId(locale);
-
 				try (InputStream inputStream = url.openStream()) {
 					ResourceBundle resourceBundle = new LiferayResourceBundle(
 						inputStream, StringPool.UTF8);
