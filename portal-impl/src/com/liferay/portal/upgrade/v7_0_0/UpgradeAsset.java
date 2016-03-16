@@ -41,9 +41,10 @@ public class UpgradeAsset extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		alterColumnType(
-			AssetEntryTable.class, new String[] {"description", "TEXT null"},
-			new String[] {"summary", "TEXT null"});
+		alter(
+			AssetEntryTable.class,
+			new AlterColumnType("description", "TEXT null"),
+			new AlterColumnType("summary", "TEXT null"));
 
 		updateAssetEntries();
 		updateAssetVocabularies();
@@ -70,32 +71,6 @@ public class UpgradeAsset extends UpgradeProcess {
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
 			long classNameId = PortalUtil.getClassNameId(
 				"com.liferay.journal.model.JournalArticle");
-
-			try (PreparedStatement ps1 = connection.prepareStatement(
-					"select resourcePrimKey, structureId from JournalArticle " +
-						"where structureId != ''");
-				ResultSet rs = ps1.executeQuery();
-				PreparedStatement ps2 =
-					AutoBatchPreparedStatementUtil.autoBatch(
-						connection.prepareStatement(
-							"update AssetEntry set classTypeId = ? where " +
-								"classNameId = ? and classPK = ?"))) {
-
-				while (rs.next()) {
-					long resourcePrimKey = rs.getLong("resourcePrimKey");
-					String structureId = rs.getString("structureId");
-
-					long ddmStructureId = getDDMStructureId(structureId);
-
-					ps2.setLong(1, ddmStructureId);
-					ps2.setLong(2, classNameId);
-					ps2.setLong(3, resourcePrimKey);
-
-					ps2.addBatch();
-				}
-
-				ps2.executeBatch();
-			}
 
 			StringBundler sb = new StringBundler(9);
 

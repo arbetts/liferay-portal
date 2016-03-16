@@ -480,7 +480,7 @@ public class HookHotDeployListener
 
 		Element rootElement = document.getRootElement();
 
-		ClassLoader portletClassLoader = hotDeployEvent.getContextClassLoader();
+		ClassLoader portletClassLoader = servletContext.getClassLoader();
 
 		initPortalProperties(
 			servletContextName, portletClassLoader, rootElement);
@@ -498,8 +498,7 @@ public class HookHotDeployListener
 				_log.warn(servletContextName + " will be undeployed");
 			}
 
-			HotDeployUtil.fireUndeployEvent(
-				new HotDeployEvent(servletContext, portletClassLoader));
+			HotDeployUtil.fireUndeployEvent(new HotDeployEvent(servletContext));
 
 			DeployManagerUtil.undeploy(servletContextName);
 
@@ -543,8 +542,6 @@ public class HookHotDeployListener
 
 		// End backwards compatibility for 5.1.0
 
-		registerClpMessageListeners(servletContext, portletClassLoader);
-
 		DirectServletRegistryUtil.clearServlets();
 		FileAvailabilityUtil.clearAvailabilities();
 
@@ -583,8 +580,6 @@ public class HookHotDeployListener
 			destroyPortalProperties(servletContextName, portalProperties);
 		}
 
-		unregisterClpMessageListeners(servletContext);
-
 		Map<Object, ServiceRegistration<?>> serviceRegistrations =
 			_serviceRegistrations.remove(servletContextName);
 
@@ -601,21 +596,6 @@ public class HookHotDeployListener
 		if (_log.isInfoEnabled()) {
 			_log.info("Hook for " + servletContextName + " was unregistered");
 		}
-	}
-
-	protected Locale getLocale(String languagePropertiesLocation) {
-		int x = languagePropertiesLocation.indexOf(CharPool.UNDERLINE);
-		int y = languagePropertiesLocation.indexOf(".properties");
-
-		Locale locale = null;
-
-		if ((x != -1) && (y != 1)) {
-			String localeKey = languagePropertiesLocation.substring(x + 1, y);
-
-			locale = LocaleUtil.fromLanguageId(localeKey, true, false);
-		}
-
-		return locale;
 	}
 
 	protected BasePersistence<?> getPersistence(
@@ -1177,16 +1157,31 @@ public class HookHotDeployListener
 		List<Element> languagePropertiesElements = parentElement.elements(
 			"language-properties");
 
-		String baseLanguagePropertiesLocation = null;
-		URL baseLanguageURL = null;
-
 		for (Element languagePropertiesElement : languagePropertiesElements) {
 			String languagePropertiesLocation =
 				languagePropertiesElement.getText();
 
-			Locale locale = getLocale(languagePropertiesLocation);
+			String languageId;
 
-			if (locale != null) {
+			int x = languagePropertiesLocation.indexOf(CharPool.UNDERLINE);
+			int y = languagePropertiesLocation.indexOf(".properties");
+
+			if ((x != -1) && (y != -1)) {
+				languageId = languagePropertiesLocation.substring(x + 1, y);
+
+				Locale locale = LocaleUtil.fromLanguageId(
+					languageId, true, false);
+
+				if (locale == null) {
+					if (_log.isInfoEnabled()) {
+						_log.info(
+							"Ignoring " + languagePropertiesLocation + ": " +
+								languageId + " is not valid");
+					}
+
+					continue;
+				}
+
 				if (!checkPermission(
 						PACLConstants.
 							PORTAL_HOOK_PERMISSION_LANGUAGE_PROPERTIES_LOCALE,
@@ -1196,6 +1191,9 @@ public class HookHotDeployListener
 					continue;
 				}
 			}
+			else {
+				languageId = StringPool.BLANK;
+			}
 
 			URL url = portletClassLoader.getResource(
 				languagePropertiesLocation);
@@ -1204,34 +1202,7 @@ public class HookHotDeployListener
 				continue;
 			}
 
-			if (locale != null) {
-				String languageId = LocaleUtil.toLanguageId(locale);
-
-				try (InputStream inputStream = url.openStream()) {
-					ResourceBundle resourceBundle = new LiferayResourceBundle(
-						inputStream, StringPool.UTF8);
-
-					Map<String, Object> properties = new HashMap<>();
-
-					properties.put("language.id", languageId);
-
-					registerService(
-						servletContextName, languagePropertiesLocation,
-						ResourceBundle.class, resourceBundle, properties);
-				}
-			}
-			else {
-				baseLanguagePropertiesLocation = languagePropertiesLocation;
-				baseLanguageURL = url;
-			}
-		}
-
-		if (baseLanguageURL != null) {
-			Locale locale = new Locale(StringPool.BLANK);
-
-			String languageId = LocaleUtil.toLanguageId(locale);
-
-			try (InputStream inputStream = baseLanguageURL.openStream()) {
+			try (InputStream inputStream = url.openStream()) {
 				ResourceBundle resourceBundle = new LiferayResourceBundle(
 					inputStream, StringPool.UTF8);
 
@@ -1240,7 +1211,7 @@ public class HookHotDeployListener
 				properties.put("language.id", languageId);
 
 				registerService(
-					servletContextName, baseLanguagePropertiesLocation,
+					servletContextName, languagePropertiesLocation,
 					ResourceBundle.class, resourceBundle, properties);
 			}
 		}
