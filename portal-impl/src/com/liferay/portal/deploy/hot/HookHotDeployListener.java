@@ -598,17 +598,6 @@ public class HookHotDeployListener
 		}
 	}
 
-	protected String getLanguageId(String languagePropertiesLocation) {
-		int x = languagePropertiesLocation.indexOf(CharPool.UNDERLINE);
-		int y = languagePropertiesLocation.indexOf(".properties");
-
-		if ((x != -1) && (y != 1)) {
-			return languagePropertiesLocation.substring(x + 1, y);
-		}
-
-		return null;
-	}
-
 	protected BasePersistence<?> getPersistence(
 		String servletContextName, String modelName) {
 
@@ -1172,9 +1161,14 @@ public class HookHotDeployListener
 			String languagePropertiesLocation =
 				languagePropertiesElement.getText();
 
-			String languageId = getLanguageId(languagePropertiesLocation);
+			String languageId;
 
-			if (Validator.isNotNull(languageId)) {
+			int x = languagePropertiesLocation.indexOf(CharPool.UNDERLINE);
+			int y = languagePropertiesLocation.indexOf(".properties");
+
+			if ((x != -1) && (y != 1)) {
+				languageId = languagePropertiesLocation.substring(x + 1, y);
+
 				Locale locale = LocaleUtil.fromLanguageId(
 					languageId, true, false);
 
