@@ -1166,7 +1166,7 @@ public class HookHotDeployListener
 			int x = languagePropertiesLocation.indexOf(CharPool.UNDERLINE);
 			int y = languagePropertiesLocation.indexOf(".properties");
 
-			if ((x != -1) && (y != 1)) {
+			if ((x != -1) && (y != -1)) {
 				languageId = languagePropertiesLocation.substring(x + 1, y);
 
 				Locale locale = LocaleUtil.fromLanguageId(
