@@ -23,7 +23,9 @@
 		</if>
 	</tear-down>
 
-	<command name="ValidateXSSVulnerabilities" priority="4">
+	<command name="ValidateXSSVulnerabilities" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<var name="maliciousURL1">
 			<![CDATA[
 				http://localhost:8080/group/guest/home?p_p_id=82&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_pos=1&p_p_col_count=2&_82_struts_action=%2Flanguage%2Fview&languageId=&lt;/script&gt;&lt;script&gt;alert(document.domain)&lt;/script>
@@ -86,8 +88,6 @@
 
 		<execute macro="Navigator#openURL" />
 
-		<execute function="AssertTextEquals#assertPartialText" locator1="PGSignin#PORTLET_CONTENT_USER_NAME" value1="${userLastNameEdit}" />
-
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="Bookmarks" />
 		</execute>
@@ -106,7 +106,8 @@
 		<execute function="AssertAlertNotPresent" />
 	</command>
 
-	<command name="ViewControlPanelNoXSS" priority="4">
+	<command name="ViewControlPanelNoXSS" priority="5">
+		<property name="portal.acceptance" value="true" />
 		<var name="siteName"><![CDATA[<script>alert(123)</script>]]></var>
 
 		<execute macro="ProductMenu#gotoControlPanelSites">
@@ -133,12 +134,16 @@
 
 		<execute function="AssertAlertNotPresent" />
 
+		<execute function="AssertTextEquals" locator1="Portlet#HEADER" value1="Public Pages" />
+
 		<var name="key_siteName" value="${siteName}" />
 
 		<execute function="AssertTextEquals" locator1="ProductMenu#PRODUCT_MENU_PANEL_SITE_ADMINISTRATION_SITE_NAME" value1="${key_siteName}" />
 	</command>
 
-	<command name="ViewGoogleAnalyticsIDNoXSS" priority="4">
+	<command name="ViewGoogleAnalyticsIDNoXSS" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Navigator#openURL" />
 
 		<execute macro="ProductMenu#gotoSitesConfiguration">
@@ -153,19 +158,22 @@
 		<execute function="AssertAlertNotPresent" />
 	</command>
 
-	<command name="ViewJSONWSNoXSS" priority="4">
+	<command name="ViewJSONWSNoXSS" priority="5">
+		<property name="portal.acceptance" value="true" />
 		<var name="url" value="http://localhost:8080/api/jsonws?contextPath=%22%3E%3Cimg%20src=x%20onerror=alert%28/contextPath/%29%3E" />
 
 		<execute function="Open" locator1="${url}" />
 		<execute function="AssertAlertNotPresent" />
 	</command>
 
-	<command name="ViewLiferayPortletListNoXSS" priority="4">
+	<command name="ViewLiferayPortletListNoXSS" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<execute macro="Page#add">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -186,14 +194,16 @@
 		<execute function="AssertAlertNotPresent" />
 	</command>
 
-	<command name="ViewLookAndFeelNoXSS" priority="4">
+	<command name="ViewLookAndFeelNoXSS" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<var name="pageName"><![CDATA[<script>alert(123)</script>]]></var>
 
 		<execute macro="Page#add">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -203,13 +213,15 @@
 
 		<execute macro="Portlet#gotoPortletOptions">
 			<var name="portletName" value="Blogs" />
-			<var name="portletOption" value="Look and Feel" />
+			<var name="portletOption" value="Look and Feel Configuration" />
 		</execute>
 
 		<execute function="AssertAlertNotPresent" />
 	</command>
 
-	<command name="ViewRecycleBinNoXSS" priority="4">
+	<command name="ViewRecycleBinNoXSS" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<var name="entryTitle"><![CDATA[<script>alert(123)</script>]]></var>
 
 		<execute macro="Navigator#openURL" />
@@ -255,7 +267,9 @@
 		<execute function="AssertAlertNotPresent" />
 	</command>
 
-	<command name="ViewURLValidateNoXSS" priority="4">
+	<command name="ViewURLValidateNoXSS" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<var name="maliciousURL1">
 			<![CDATA[
 				http://localhost:8080/c/portal/flash?title=abc</title><script%0d%0a>alert(3.1415926)</script%0d%0a><title>aaa
@@ -306,7 +320,9 @@
 		<execute function="AssertAlertNotPresent" />
 	</command>
 
-	<command name="ViewWikiNoXSS" priority="4">
+	<command name="ViewWikiNoXSS" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<var name="userFirstNameEdit"><![CDATA[<script>alert(123)</script>]]></var>
 		<var name="userLastNameEdit"><![CDATA[<script>alert(123)</script>]]></var>
 		<var name="userMiddleNameEdit"><![CDATA[<script>alert(123)</script>]]></var>
@@ -358,11 +374,13 @@
 			<var name="wikiNodeName" value="Wiki Node Name" />
 		</execute>
 
+		<execute function="Click" locator1="Icon#INFO" />
+
 		<var name="key_wikiPageTitle" value="Wiki Page Title" />
 
-		<execute function="AssertClick" locator1="WikiTable#ALL_PAGES_WIKI_PAGE_TITLE" value1="Wiki Page Title" />
+		<execute function="AssertClick" locator1="Wiki#DESCRIPTIVE_VIEW_ENTRY_CHECKBOX" value1="Wiki Page Title" />
 
-		<execute function="AssertClick" locator1="Link#DETAILS" value1="Details" />
+		<execute function="AssertClick" locator1="NavBar#DETAILS" value1="Details" />
 
 		<execute function="AssertAlertNotPresent" />
 	</command>

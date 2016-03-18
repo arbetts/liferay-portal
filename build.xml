@@ -487,13 +487,6 @@
 					/>
 				</copy>
 
-				<copy todir="${app.server.temp.dir}/liferay/com/liferay/portal/deploy/dependencies">
-					<fileset
-						dir="lib/development"
-						includes="resin.jar,script-10.jar"
-					/>
-				</copy>
-
 				<if>
 					<equals arg1="${app.server.type}" arg2="tomcat" />
 					<then>
@@ -569,15 +562,15 @@
 	</target>
 
 	<target name="install-portal-snapshots">
-		<install-portal-snapshot artifact.dir="portal-impl" artifact.name="portal-impl" />
-		<install-portal-snapshot artifact.dir="portal-kernel" artifact.name="portal-kernel" />
-		<install-portal-snapshot artifact.dir="portal-test" artifact.name="portal-test" />
-		<install-portal-snapshot artifact.dir="portal-test-internal" artifact.name="portal-test-internal" />
-		<install-portal-snapshot artifact.dir="portal-web" artifact.name="portal-web" />
-		<install-portal-snapshot artifact.dir="util-bridges" artifact.name="util-bridges" />
-		<install-portal-snapshot artifact.dir="util-java" artifact.name="util-java" />
-		<install-portal-snapshot artifact.dir="util-slf4j" artifact.name="util-slf4j" />
-		<install-portal-snapshot artifact.dir="util-taglib" artifact.name="util-taglib" />
+		<ant dir="portal-impl" target="install-portal-snapshot" inheritAll="false" />
+		<ant dir="portal-kernel" target="install-portal-snapshot" inheritAll="false" />
+		<ant dir="portal-test" target="install-portal-snapshot" inheritAll="false" />
+		<ant dir="portal-test-internal" target="install-portal-snapshot" inheritAll="false" />
+		<ant dir="portal-web" target="install-portal-snapshot" inheritAll="false" />
+		<ant dir="util-bridges" target="install-portal-snapshot" inheritAll="false" />
+		<ant dir="util-java" target="install-portal-snapshot" inheritAll="false" />
+		<ant dir="util-slf4j" target="install-portal-snapshot" inheritAll="false" />
+		<ant dir="util-taglib" target="install-portal-snapshot" inheritAll="false" />
 	</target>
 
 	<target name="jar">
