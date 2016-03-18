@@ -716,7 +716,9 @@ public abstract class PortletResponseImpl implements LiferayPortletResponse {
 			portletURLImpl.setPortletMode(_portletRequestImpl.getPortletMode());
 		}
 		catch (PortletModeException pme) {
-			_log.error(pme.getMessage());
+			if (portletName.equals(portlet.getPortletId())) {
+				_log.error(pme.getMessage());
+			}
 		}
 
 		if (lifecycle.equals(PortletRequest.RESOURCE_PHASE)) {
