@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.documentlibrary.service.impl;
 
+import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetLink;
 import com.liferay.asset.kernel.model.AssetLinkConstants;
@@ -59,6 +60,7 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.social.SocialActivityManagerUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.GroupSubscriptionCheckSubscriptionSender;
@@ -152,9 +154,9 @@ public class DLAppHelperLocalServiceImpl
 				fileEntry.getModifiedDate(),
 				DLFileEntryConstants.getClassName(), fileEntry.getFileEntryId(),
 				fileEntry.getUuid(), fileEntryTypeId, assetCategoryIds,
-				assetTagNames, false, null, null, null, fileEntry.getMimeType(),
-				fileEntry.getTitle(), fileEntry.getDescription(), null, null,
-				null, 0, 0, null);
+				assetTagNames, true, false, null, null, null,
+				fileEntry.getMimeType(), fileEntry.getTitle(),
+				fileEntry.getDescription(), null, null, null, 0, 0, null);
 		}
 
 		AssetEntry fileVersionAssetEntry = assetEntryLocalService.fetchEntry(
@@ -177,12 +179,12 @@ public class DLAppHelperLocalServiceImpl
 				fileEntry.getModifiedDate(),
 				DLFileEntryConstants.getClassName(),
 				fileVersion.getFileVersionId(), fileEntry.getUuid(),
-				fileEntryTypeId, assetCategoryIds, assetTagNames, false, null,
-				null, null, fileEntry.getMimeType(), fileEntry.getTitle(),
+				fileEntryTypeId, assetCategoryIds, assetTagNames, true, false,
+				null, null, null, fileEntry.getMimeType(), fileEntry.getTitle(),
 				fileEntry.getDescription(), null, null, null, 0, 0, null);
 
 			List<AssetLink> assetLinks = assetLinkLocalService.getDirectLinks(
-				fileEntryAssetEntry.getEntryId());
+				fileEntryAssetEntry.getEntryId(), false);
 
 			long[] assetLinkIds = ListUtil.toLongArray(
 				assetLinks, AssetLink.ENTRY_ID2_ACCESSOR);
@@ -800,7 +802,7 @@ public class DLAppHelperLocalServiceImpl
 			DLFileEntryConstants.getClassName(), assetClassPk);
 
 		List<AssetLink> assetLinks = assetLinkLocalService.getDirectLinks(
-			assetEntry.getEntryId());
+			assetEntry.getEntryId(), false);
 
 		long[] assetLinkIds = ListUtil.toLongArray(
 			assetLinks, AssetLink.ENTRY_ID2_ACCESSOR);
@@ -864,7 +866,7 @@ public class DLAppHelperLocalServiceImpl
 				List<AssetLink> assetLinks =
 					assetLinkLocalService.getDirectLinks(
 						previousAssetEntry.getEntryId(),
-						AssetLinkConstants.TYPE_RELATED);
+						AssetLinkConstants.TYPE_RELATED, false);
 
 				assetLinkEntryIds = ListUtil.toLongArray(
 					assetLinks, AssetLink.ENTRY_ID2_ACCESSOR);
@@ -875,8 +877,8 @@ public class DLAppHelperLocalServiceImpl
 				fileEntry.getModifiedDate(),
 				DLFileEntryConstants.getClassName(),
 				fileVersion.getFileVersionId(), fileEntry.getUuid(),
-				fileEntryTypeId, assetCategoryIds, assetTagNames, false, null,
-				null, null, fileEntry.getMimeType(), fileEntry.getTitle(),
+				fileEntryTypeId, assetCategoryIds, assetTagNames, true, false,
+				null, null, null, fileEntry.getMimeType(), fileEntry.getTitle(),
 				fileEntry.getDescription(), null, null, null, 0, 0, null);
 		}
 		else {
@@ -885,7 +887,7 @@ public class DLAppHelperLocalServiceImpl
 				fileEntry.getModifiedDate(),
 				DLFileEntryConstants.getClassName(), fileEntry.getFileEntryId(),
 				fileEntry.getUuid(), fileEntryTypeId, assetCategoryIds,
-				assetTagNames, visible, null, null, null,
+				assetTagNames, true, visible, null, null, null,
 				fileEntry.getMimeType(), fileEntry.getTitle(),
 				fileEntry.getDescription(), null, null, null, 0, 0, null);
 
@@ -901,7 +903,7 @@ public class DLAppHelperLocalServiceImpl
 					DLFileShortcutConstants.getClassName(),
 					dlFileShortcut.getFileShortcutId(),
 					dlFileShortcut.getUuid(), fileEntryTypeId, assetCategoryIds,
-					assetTagNames, true, null, null, null,
+					assetTagNames, true, true, null, null, null,
 					fileEntry.getMimeType(), fileEntry.getTitle(),
 					fileEntry.getDescription(), null, null, null, 0, 0, null);
 			}
@@ -941,8 +943,9 @@ public class DLAppHelperLocalServiceImpl
 			userId, folder.getGroupId(), folder.getCreateDate(),
 			folder.getModifiedDate(), DLFolderConstants.getClassName(),
 			folder.getFolderId(), folder.getUuid(), 0, assetCategoryIds,
-			assetTagNames, visible, null, null, null, null, folder.getName(),
-			folder.getDescription(), null, null, null, 0, 0, null);
+			assetTagNames, true, visible, null, null, null, null,
+			folder.getName(), folder.getDescription(), null, null, null, 0, 0,
+			null);
 
 		assetLinkLocalService.updateLinks(
 			userId, assetEntry.getEntryId(), assetLinkEntryIds,
@@ -984,6 +987,19 @@ public class DLAppHelperLocalServiceImpl
 
 		if (!DLAppHelperThreadLocal.isEnabled()) {
 			return;
+		}
+
+		if (Validator.equals(serviceContext.getCommand(), Constants.REVERT)) {
+			List<AssetCategory> assetCategories =
+				assetCategoryLocalService.getCategories(
+					DLFileEntryConstants.getClassName(),
+					fileEntry.getFileEntryId());
+
+			List<Long> assetCategoryIds = ListUtil.toList(
+				assetCategories, AssetCategory.CATEGORY_ID_ACCESSOR);
+
+			serviceContext.setAssetCategoryIds(
+				ArrayUtil.toLongArray(assetCategoryIds));
 		}
 
 		updateAsset(
@@ -1040,7 +1056,7 @@ public class DLAppHelperLocalServiceImpl
 						List<AssetLink> assetLinks =
 							assetLinkLocalService.getDirectLinks(
 								draftAssetEntry.getEntryId(),
-								AssetLinkConstants.TYPE_RELATED);
+								AssetLinkConstants.TYPE_RELATED, false);
 
 						long[] assetLinkEntryIds = ListUtil.toLongArray(
 							assetLinks, AssetLink.ENTRY_ID2_ACCESSOR);
@@ -1053,7 +1069,7 @@ public class DLAppHelperLocalServiceImpl
 								DLFileEntryConstants.getClassName(),
 								fileEntry.getFileEntryId(), fileEntry.getUuid(),
 								fileEntryTypeId, assetCategoryIds,
-								assetTagNames, true, null, null, null,
+								assetTagNames, true, true, null, null, null,
 								draftAssetEntry.getMimeType(),
 								fileEntry.getTitle(),
 								fileEntry.getDescription(), null, null, null, 0,

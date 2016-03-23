@@ -841,6 +841,10 @@ public interface PropsKeys {
 
 	public static final String IMAGE_IO_USE_DISK_CACHE = "image.io.use.disk.cache";
 
+	public static final String IMAGE_TOOL_IMAGE_MAX_HEIGHT = "image.tool.image.max.height";
+
+	public static final String IMAGE_TOOL_IMAGE_MAX_WIDTH = "image.tool.image.max.width";
+
 	public static final String IMAGEMAGICK_ENABLED = "imagemagick.enabled";
 
 	public static final String IMAGEMAGICK_GLOBAL_SEARCH_PATH = "imagemagick.global.search.path";
@@ -1108,8 +1112,6 @@ public interface PropsKeys {
 	public static final String LAYOUT_VIEW_PAGE = "layout.view.page";
 
 	public static final String LDAP_ATTRS_TRANSFORMER_IMPL = "ldap.attrs.transformer.impl";
-
-	public static final String LIBRARY_DOWNLOAD_URL = "library.download.url.";
 
 	public static final String LIFERAY_HOME = "liferay.home";
 

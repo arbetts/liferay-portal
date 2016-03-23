@@ -24,13 +24,16 @@ import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.io.unsync.UnsyncBufferedReader;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.upgrade.util.UpgradeColumn;
 import com.liferay.portal.kernel.upgrade.util.UpgradeTable;
 import com.liferay.portal.kernel.upgrade.util.UpgradeTableFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ClassUtil;
+import com.liferay.portal.kernel.util.LoggingTimer;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.IOException;
@@ -123,115 +126,236 @@ public abstract class UpgradeProcess
 		upgradeProcess.upgrade();
 	}
 
-	protected void alterColumnType(
-			Class<?> tableClass, String columnName, String columnType)
-		throws Exception {
+	public interface Alterable {
 
-		alterColumnType(tableClass, new String[] {columnName, columnType});
+		public String getIndexedColumnName();
+
+		public String getSQL(String tableName);
+
 	}
 
-	protected void alterColumnType(
-			Class<?> tableClass, String[]... columnNamesAndColumnTypes)
+	public class AlterColumnName implements Alterable {
+
+		public AlterColumnName(String oldColumnName, String newColumn) {
+			_oldColumnName = oldColumnName;
+			_newColumn = newColumn;
+		}
+
+		@Override
+		public String getIndexedColumnName() {
+			return _oldColumnName;
+		}
+
+		@Override
+		public String getSQL(String tableName) {
+			StringBundler sb = new StringBundler(6);
+
+			sb.append("alter_column_name ");
+			sb.append(tableName);
+			sb.append(StringPool.SPACE);
+			sb.append(_oldColumnName);
+			sb.append(StringPool.SPACE);
+			sb.append(_newColumn);
+
+			return sb.toString();
+		}
+
+		private final String _newColumn;
+		private final String _oldColumnName;
+
+	}
+
+	public class AlterColumnType implements Alterable {
+
+		public AlterColumnType(String columnName, String newType) {
+			_columnName = columnName;
+			_newType = newType;
+		}
+
+		@Override
+		public String getIndexedColumnName() {
+			return _columnName;
+		}
+
+		@Override
+		public String getSQL(String tableName) {
+			StringBundler sb = new StringBundler(6);
+
+			sb.append("alter_column_type ");
+			sb.append(tableName);
+			sb.append(StringPool.SPACE);
+			sb.append(_columnName);
+			sb.append(StringPool.SPACE);
+			sb.append(_newType);
+
+			return sb.toString();
+		}
+
+		private final String _columnName;
+		private final String _newType;
+
+	}
+
+	public class AlterTableAddColumn implements Alterable {
+
+		public AlterTableAddColumn(String columnName) {
+			_columnName = columnName;
+		}
+
+		@Override
+		public String getIndexedColumnName() {
+			return null;
+		}
+
+		@Override
+		public String getSQL(String tableName) {
+			StringBundler sb = new StringBundler(4);
+
+			sb.append("alter table ");
+			sb.append(tableName);
+			sb.append(" add ");
+			sb.append(_columnName);
+
+			return sb.toString();
+		}
+
+		private final String _columnName;
+
+	}
+
+	public class AlterTableDropColumn implements Alterable {
+
+		public AlterTableDropColumn(String columnName) {
+			_columnName = columnName;
+		}
+
+		@Override
+		public String getIndexedColumnName() {
+			return _columnName;
+		}
+
+		@Override
+		public String getSQL(String tableName) {
+			StringBundler sb = new StringBundler(4);
+
+			sb.append("alter table ");
+			sb.append(tableName);
+			sb.append(" drop column ");
+			sb.append(_columnName);
+
+			return sb.toString();
+		}
+
+		private final String _columnName;
+
+	}
+
+	protected void alter(Class<?> tableClass, Alterable... alterables)
 		throws Exception {
 
-		Field tableNameField = tableClass.getField("TABLE_NAME");
+		try (LoggingTimer loggingTimer = new LoggingTimer()) {
+			Field tableNameField = tableClass.getField("TABLE_NAME");
 
-		String tableName = (String)tableNameField.get(null);
+			String tableName = (String)tableNameField.get(null);
 
-		DatabaseMetaData databaseMetaData = connection.getMetaData();
+			DatabaseMetaData databaseMetaData = connection.getMetaData();
 
-		try (ResultSet rs1 = databaseMetaData.getPrimaryKeys(
-				null, null, tableName);
-			ResultSet rs2 = databaseMetaData.getIndexInfo(
-				null, null, normalizeName(tableName, databaseMetaData), false,
-				false)) {
+			try (ResultSet rs1 = databaseMetaData.getPrimaryKeys(
+					null, null, tableName);
+				ResultSet rs2 = databaseMetaData.getIndexInfo(
+					null, null, normalizeName(tableName, databaseMetaData),
+					false, false)) {
 
-			Set<String> primaryKeyNames = new HashSet<>();
+				Set<String> primaryKeyNames = new HashSet<>();
 
-			while (rs1.next()) {
-				String primaryKeyName = rs1.getString("PK_NAME");
+				while (rs1.next()) {
+					String primaryKeyName = rs1.getString("PK_NAME");
 
-				if (primaryKeyName != null) {
-					primaryKeyNames.add(primaryKeyName);
-				}
-			}
-
-			Map<String, Set<String>> columnNamesMap = new HashMap<>();
-
-			while (rs2.next()) {
-				String indexName = rs2.getString("INDEX_NAME");
-
-				if ((indexName == null) ||
-					primaryKeyNames.contains(indexName)) {
-
-					continue;
-				}
-
-				Set<String> columnNames = columnNamesMap.get(indexName);
-
-				if (columnNames == null) {
-					columnNames = new HashSet<>();
-
-					columnNamesMap.put(indexName, columnNames);
-				}
-
-				columnNames.add(rs2.getString("COLUMN_NAME"));
-			}
-
-			for (String[] columnNameAndColumnType : columnNamesAndColumnTypes) {
-				String columnName = columnNameAndColumnType[0];
-
-				for (Map.Entry<String, Set<String>> entry :
-						columnNamesMap.entrySet()) {
-
-					Set<String> columnNames = entry.getValue();
-
-					if (columnNames.contains(columnName)) {
-						runSQL(
-							"drop index " + entry.getKey() + " on " +
-								tableName);
+					if (primaryKeyName != null) {
+						primaryKeyNames.add(primaryKeyName);
 					}
 				}
 
-				StringBundler sb = new StringBundler(6);
+				Map<String, Set<String>> columnNamesMap = new HashMap<>();
 
-				sb.append("alter_column_type ");
-				sb.append(tableName);
-				sb.append(" ");
-				sb.append(columnName);
-				sb.append(" ");
-				sb.append(columnNameAndColumnType[1]);
+				while (rs2.next()) {
+					String indexName = rs2.getString("INDEX_NAME");
 
-				runSQL(sb.toString());
+					if ((indexName == null) ||
+						primaryKeyNames.contains(indexName)) {
 
-				for (ObjectValuePair<String, IndexMetadata> objectValuePair :
-						getIndexesSQL(tableClass.getClassLoader(), tableName)) {
+						continue;
+					}
 
-					IndexMetadata indexMetadata = objectValuePair.getValue();
+					Set<String> columnNames = columnNamesMap.get(indexName);
 
-					if (ArrayUtil.contains(
-							indexMetadata.getColumnNames(), columnName)) {
+					if (columnNames == null) {
+						columnNames = new HashSet<>();
+
+						columnNamesMap.put(indexName, columnNames);
+					}
+
+					columnNames.add(rs2.getString("COLUMN_NAME"));
+				}
+
+				for (Alterable alterable : alterables) {
+					String columnName = alterable.getIndexedColumnName();
+
+					for (Map.Entry<String, Set<String>> entry :
+							columnNamesMap.entrySet()) {
+
+						Set<String> columnNames = entry.getValue();
+
+						if (columnNames.contains(columnName)) {
+							runSQL(
+								"drop index " + entry.getKey() + " on " +
+									tableName);
+						}
+					}
+
+					runSQL(alterable.getSQL(tableName));
+
+					List<ObjectValuePair<String, IndexMetadata>>
+						objectValuePairs = getIndexesSQL(
+							tableClass.getClassLoader(), tableName);
+
+					if (objectValuePairs == null) {
+						continue;
+					}
+
+					for (ObjectValuePair<String, IndexMetadata>
+							objectValuePair : objectValuePairs) {
+
+						IndexMetadata indexMetadata =
+							objectValuePair.getValue();
+
+						if (!ArrayUtil.contains(
+								indexMetadata.getColumnNames(), columnName)) {
+
+							continue;
+						}
 
 						runSQLTemplateString(
 							objectValuePair.getKey(), false, true);
 					}
 				}
 			}
-		}
-		catch (SQLException sqle) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Fallback to recreating the table", sqle);
+			catch (SQLException sqle) {
+				if (_log.isWarnEnabled()) {
+					_log.warn("Fallback to recreating the table", sqle);
+				}
+
+				Field tableColumnsField = tableClass.getField("TABLE_COLUMNS");
+				Field tableSQLCreateField = tableClass.getField(
+					"TABLE_SQL_CREATE");
+				Field tableSQLAddIndexesField = tableClass.getField(
+					"TABLE_SQL_ADD_INDEXES");
+
+				upgradeTable(
+					tableName, (Object[][])tableColumnsField.get(null),
+					(String)tableSQLCreateField.get(null),
+					(String[])tableSQLAddIndexesField.get(null));
 			}
-
-			Field tableColumnsField = tableClass.getField("TABLE_COLUMNS");
-			Field tableSQLCreateField = tableClass.getField("TABLE_SQL_CREATE");
-			Field tableSQLAddIndexesField = tableClass.getField(
-				"TABLE_SQL_ADD_INDEXES");
-
-			upgradeTable(
-				tableName, (Object[][])tableColumnsField.get(null),
-				(String)tableSQLCreateField.get(null),
-				(String[])tableSQLAddIndexesField.get(null));
 		}
 	}
 
@@ -325,6 +449,12 @@ public abstract class UpgradeProcess
 		return db.increment(name);
 	}
 
+	protected long increment(String name, int size) {
+		DB db = DBManagerUtil.getDB();
+
+		return db.increment(name, size);
+	}
+
 	protected boolean isSupportsAlterColumnName() {
 		DB db = DBManagerUtil.getDB();
 
@@ -374,17 +504,19 @@ public abstract class UpgradeProcess
 	}
 
 	protected void upgradeTable(
-			String tableName, Object[][] tableColumns, String sqlCreate,
-			String[] sqlAddIndexes)
+			String tableName, Object[][] tableColumns, String createSQL,
+			String[] indexesSQL, UpgradeColumn... upgradeColumns)
 		throws Exception {
 
-		UpgradeTable upgradeTable = UpgradeTableFactoryUtil.getUpgradeTable(
-			tableName, tableColumns);
+		try (LoggingTimer loggingTimer = new LoggingTimer(tableName)) {
+			UpgradeTable upgradeTable = UpgradeTableFactoryUtil.getUpgradeTable(
+				tableName, tableColumns, upgradeColumns);
 
-		upgradeTable.setCreateSQL(sqlCreate);
-		upgradeTable.setIndexesSQL(sqlAddIndexes);
+			upgradeTable.setCreateSQL(createSQL);
+			upgradeTable.setIndexesSQL(indexesSQL);
 
-		upgradeTable.updateTable();
+			upgradeTable.updateTable();
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(UpgradeProcess.class);

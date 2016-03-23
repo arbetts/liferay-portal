@@ -25,13 +25,16 @@ import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.plugins.WarPluginConvention;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
 
 /**
@@ -71,7 +74,6 @@ public class JspCPlugin implements Plugin<Project> {
 				@Override
 				public void execute(Project project) {
 					addJspCDependencies(project);
-					addJspCToolDependencies(project);
 					configureJspcExtension(project, jspCExtension);
 
 					jspCExtension.copyTo(generateJSPJavaTask);
@@ -94,20 +96,39 @@ public class JspCPlugin implements Plugin<Project> {
 	protected void addJspCDependencies(Project project) {
 		DependencyHandler dependencyHandler = project.getDependencies();
 
+		Jar jar = (Jar)GradleUtil.getTask(project, JavaPlugin.JAR_TASK_NAME);
+
+		ConfigurableFileCollection configurableFileCollection = project.files(
+			jar);
+
+		configurableFileCollection.builtBy(jar);
+
+		dependencyHandler.add(CONFIGURATION_NAME, configurableFileCollection);
+
 		SourceSet sourceSet = GradleUtil.getSourceSet(
 			project, SourceSet.MAIN_SOURCE_SET_NAME);
 
 		dependencyHandler.add(CONFIGURATION_NAME, sourceSet.getOutput());
 
 		Configuration configuration = GradleUtil.getConfiguration(
-			project, JavaPlugin.RUNTIME_CONFIGURATION_NAME);
+			project, JavaPlugin.COMPILE_CONFIGURATION_NAME);
 
 		dependencyHandler.add(CONFIGURATION_NAME, configuration);
 	}
 
-	protected Configuration addJspCToolConfiguration(Project project) {
+	protected Configuration addJspCToolConfiguration(final Project project) {
 		Configuration configuration = GradleUtil.addConfiguration(
 			project, TOOL_CONFIGURATION_NAME);
+
+		configuration.defaultDependencies(
+			new Action<DependencySet>() {
+
+				@Override
+				public void execute(DependencySet dependencySet) {
+					addJspCToolDependencies(project);
+				}
+
+			});
 
 		configuration.setDescription(
 			"Configures Liferay Jasper JspC for this project.");
@@ -117,15 +138,11 @@ public class JspCPlugin implements Plugin<Project> {
 	}
 
 	protected void addJspCToolDependencies(Project project) {
-		JspCExtension jspCExtension = GradleUtil.getExtension(
-			project, JspCExtension.class);
-
 		GradleUtil.addDependency(
-			project, TOOL_CONFIGURATION_NAME, "org.apache.ant", "ant",
-			jspCExtension.getAntVersion());
+			project, TOOL_CONFIGURATION_NAME, "org.apache.ant", "ant", "1.9.4");
 		GradleUtil.addDependency(
 			project, TOOL_CONFIGURATION_NAME, "com.liferay",
-			"com.liferay.jasper.jspc", jspCExtension.getJspCVersion());
+			"com.liferay.jasper.jspc", "latest.release");
 	}
 
 	protected JavaCompile addTaskCompileJSP(
