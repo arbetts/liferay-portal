@@ -17,6 +17,7 @@ package com.liferay.source.formatter;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.tools.ImportsFormatter;
 
 import java.io.File;
 
@@ -41,6 +42,10 @@ public class BNDSourceProcessor extends BaseSourceProcessor {
 		throws Exception {
 
 		content = trimContent(content, false);
+
+		content = StringUtil.replace(
+			content, new String[] {"/\n", "/,\\\n"},
+			new String[] {"\n", ",\\\n"});
 
 		// LPS-61288
 
@@ -69,10 +74,16 @@ public class BNDSourceProcessor extends BaseSourceProcessor {
 				content, matcher.group(1), StringPool.SPACE, matcher.start());
 		}
 
-		content = BNDImportsFormatter.formatBNDImports(
-			content, _exportsPattern);
-		content = BNDImportsFormatter.formatBNDImports(
-			content, _importsPattern);
+		ImportsFormatter importsFormatter = new BNDImportsFormatter();
+
+		content = importsFormatter.format(content, _exportsPattern);
+		content = importsFormatter.format(content, _importsPattern);
+
+		if (portalSource && isModulesFile(absolutePath) &&
+			!fileName.endsWith("test-bnd.bnd")) {
+
+			content = formatIncludeResource(content);
+		}
 
 		return sortDefinitions(content);
 	}
@@ -80,6 +91,60 @@ public class BNDSourceProcessor extends BaseSourceProcessor {
 	@Override
 	protected List<String> doGetFileNames() throws Exception {
 		return getFileNames(new String[0], getIncludes());
+	}
+
+	protected String formatIncludeResource(String content) {
+		Matcher matcher = _includeResourcePattern.matcher(content);
+
+		if (!matcher.find()) {
+			return content;
+		}
+
+		String includeResources = matcher.group();
+
+		for (String includeResourceDir : _INCLUDE_RESOURCE_DIRS_BLACKLIST) {
+			Pattern includeResourceDirPattern = Pattern.compile(
+				"(\t|: )" + includeResourceDir + "(,\\\\\n|\n||\\Z)");
+
+			Matcher matcher2 = includeResourceDirPattern.matcher(
+				includeResources);
+
+			if (!matcher2.find()) {
+				continue;
+			}
+
+			String beforeIncludeResourceDir = matcher2.group(1);
+
+			if (!beforeIncludeResourceDir.equals("\t")) {
+				return StringUtil.replace(
+					content, includeResources, StringPool.BLANK);
+			}
+
+			String afterIncludeResourceDir = matcher2.group(2);
+
+			int x = includeResources.lastIndexOf("\\", matcher2.start());
+			int y = matcher2.end();
+
+			String replacement = null;
+
+			if (afterIncludeResourceDir.equals(",\\\n")) {
+				replacement =
+					includeResources.substring(0, x + 1) +
+						includeResources.substring(y - 1);
+			}
+			else {
+				replacement = includeResources.substring(0, x - 1);
+
+				if (afterIncludeResourceDir.equals("\n")) {
+					replacement += "\n";
+				}
+			}
+
+			return StringUtil.replace(
+				content, includeResources, replacement);
+		}
+
+		return content;
 	}
 
 	protected String sortDefinitions(String content) {
@@ -121,6 +186,14 @@ public class BNDSourceProcessor extends BaseSourceProcessor {
 		return content;
 	}
 
+	private static final String[] _INCLUDE_RESOURCE_DIRS_BLACKLIST =
+		new String[] {
+			"classes",
+			"META-INF/resources=src/main/resources/META-INF/resources",
+			"META-INF/resources/content=src/main/resources/content",
+			"WEB-INF=src/main/resources/WEB-INF"
+		};
+
 	private static final String[] _INCLUDES = new String[] {"**/*.bnd"};
 
 	private Pattern _bndDefinitionPattern = Pattern.compile(
@@ -131,6 +204,9 @@ public class BNDSourceProcessor extends BaseSourceProcessor {
 	private Pattern _importsPattern = Pattern.compile(
 		"\nImport-Package:\\\\\n(.*?\n)[^\t]",
 		Pattern.DOTALL | Pattern.MULTILINE);
+	private Pattern _includeResourcePattern = Pattern.compile(
+		"^(-liferay)?-includeresource:[\\s\\S]*?([^\\\\]\n|\\Z)",
+		Pattern.MULTILINE);
 	private Pattern _incorrectTabPattern = Pattern.compile(
 		"\n[^\t].*:\\\\\n(\t{2,})[^\t]");
 	private Pattern _singleValueOnMultipleLinesPattern = Pattern.compile(

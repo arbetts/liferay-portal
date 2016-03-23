@@ -14,38 +14,86 @@
 
 package com.liferay.gradle.plugins.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.liferay.gradle.plugins.BasePortalToolDefaultsPlugin;
 
-import org.gradle.api.artifacts.ModuleVersionSelector;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import org.gradle.api.Project;
+import org.gradle.api.file.SourceDirectorySet;
 
 /**
  * @author Andrea Di Giorgi
  */
 public class GradleUtil extends com.liferay.gradle.util.GradleUtil {
 
-	public static boolean isPortal(
-		ModuleVersionSelector moduleVersionSelector) {
+	public static final String PORTAL_TOOL_GROUP = "com.liferay";
 
-		String group = moduleVersionSelector.getGroup();
+	public static String getPortalToolVersion(
+		Project project, String portalToolName) {
 
-		if (!group.equals("com.liferay")) {
-			return false;
+		String portalToolVersion = _portalToolVersions.getProperty(
+			portalToolName);
+
+		return GradleUtil.getProperty(
+			project, portalToolName + ".version", portalToolVersion);
+	}
+
+	public static File getSrcDir(SourceDirectorySet sourceDirectorySet) {
+		Set<File> srcDirs = sourceDirectorySet.getSrcDirs();
+
+		Iterator<File> iterator = srcDirs.iterator();
+
+		return iterator.next();
+	}
+
+	/**
+	 * Copied from <code>com.liferay.portal.kernel.util.ThreadUtil</code>.
+	 */
+	public static Thread[] getThreads() {
+		Thread currentThread = Thread.currentThread();
+
+		ThreadGroup threadGroup = currentThread.getThreadGroup();
+
+		while (threadGroup.getParent() != null) {
+			threadGroup = threadGroup.getParent();
 		}
 
-		String name = moduleVersionSelector.getName();
+		int threadCountGuess = threadGroup.activeCount();
 
-		if (name.equals("com.liferay.portal.impl") ||
-			name.equals("com.liferay.portal.kernel") ||
-			name.equals("com.liferay.portal.test") ||
-			name.equals("com.liferay.portal.test.internal") ||
-			name.equals("com.liferay.portal.web") ||
-			name.equals("com.liferay.util.bridges") ||
-			name.equals("com.liferay.util.java") ||
-			name.equals("com.liferay.util.slf4j") ||
-			name.equals("com.liferay.util.taglib")) {
+		Thread[] threads = new Thread[threadCountGuess];
 
-			return true;
+		int threadCountActual = threadGroup.enumerate(threads);
+
+		while (threadCountActual == threadCountGuess) {
+			threadCountGuess *= 2;
+
+			threads = new Thread[threadCountGuess];
+
+			threadCountActual = threadGroup.enumerate(threads);
+		}
+
+		return threads;
+	}
+
+	public static boolean isRunningInsideDaemon() {
+		for (Thread thread : getThreads()) {
+			if (thread == null) {
+				continue;
+			}
+
+			String name = thread.getName();
+
+			if (name.startsWith("Daemon worker")) {
+				return true;
+			}
 		}
 
 		return false;
@@ -62,6 +110,23 @@ public class GradleUtil extends com.liferay.gradle.util.GradleUtil {
 		}
 
 		return stringMap;
+	}
+
+	private static final Properties _portalToolVersions = new Properties();
+
+	static {
+		ClassLoader classLoader =
+			BasePortalToolDefaultsPlugin.class.getClassLoader();
+
+		try (InputStream inputStream = classLoader.getResourceAsStream(
+				"com/liferay/gradle/plugins/dependencies" +
+					"/portal-tools.properties")) {
+
+			_portalToolVersions.load(inputStream);
+		}
+		catch (IOException ioe) {
+			throw new ExceptionInInitializerError(ioe);
+		}
 	}
 
 }

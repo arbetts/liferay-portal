@@ -16,6 +16,7 @@ package com.liferay.portal.servlet;
 
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.SingleVMPoolUtil;
+import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -143,12 +144,23 @@ public class ComboServlet extends HttpServlet {
 				name = name.replaceFirst(contextPath, StringPool.BLANK);
 			}
 
+			String pathProxy = PortalUtil.getPathProxy();
+
+			if (name.startsWith(pathProxy)) {
+				name = name.replaceFirst(pathProxy, StringPool.BLANK);
+			}
+
 			modulePathsSet.add(name);
 		}
 
 		if (modulePathsSet.isEmpty()) {
-			throw new IllegalArgumentException(
-				"Query string translates to an empty module paths set");
+			PortalUtil.sendError(
+				HttpServletResponse.SC_NOT_FOUND,
+				new NoSuchLayoutException(
+					"Query string translates to an empty module paths set"),
+				request, response);
+
+			return;
 		}
 
 		String[] modulePaths = modulePathsSet.toArray(
@@ -343,6 +355,9 @@ public class ComboServlet extends HttpServlet {
 				else if (minifierType.equals("js")) {
 					stringFileContent = MinifierUtil.minifyJavaScript(
 						resourcePath, stringFileContent);
+
+					stringFileContent = stringFileContent.concat(
+						StringPool.NEW_LINE);
 				}
 			}
 
