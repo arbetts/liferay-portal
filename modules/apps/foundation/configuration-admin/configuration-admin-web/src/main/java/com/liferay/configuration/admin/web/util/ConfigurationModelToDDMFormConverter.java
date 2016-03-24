@@ -88,7 +88,9 @@ public class ConfigurationModelToDDMFormConverter {
 
 			ddmFormField.setShowLabel(true);
 
-			setDDMFormFieldRepeatable(attributeDefinition, ddmFormField);
+			if (attributeDefinition.getCardinality() != 0) {
+				ddmFormField.setRepeatable(true);
+			}
 
 			setDDMFormFieldDisplayStyle(ddmFormField);
 
@@ -258,16 +260,6 @@ public class ConfigurationModelToDDMFormConverter {
 		predefinedValue.addString(_locale, translate(predefinedValueString));
 
 		ddmFormField.setPredefinedValue(predefinedValue);
-	}
-
-	protected void setDDMFormFieldRepeatable(
-		AttributeDefinition attributeDefinition, DDMFormField ddmFormField) {
-
-		if (attributeDefinition.getCardinality() == 0) {
-			return;
-		}
-
-		ddmFormField.setRepeatable(true);
 	}
 
 	protected void setDDMFormFieldTip(
