@@ -68,10 +68,10 @@ public class ConfigurationModelToDDMFormValuesConverter {
 			return;
 		}
 
+		Configuration configuration = _configurationModel.getConfiguration();
+
 		for (AttributeDefinition attributeDefinition : attributeDefinitions) {
 			String[] values = null;
-
-			Configuration configuration = _configurationModel.getConfiguration();
 
 			if (configuration != null) {
 				values = AttributeDefinitionUtil.getProperty(
