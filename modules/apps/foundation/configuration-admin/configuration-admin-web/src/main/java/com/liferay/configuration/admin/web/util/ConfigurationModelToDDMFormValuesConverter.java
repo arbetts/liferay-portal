@@ -37,38 +37,38 @@ import org.osgi.service.metatype.AttributeDefinition;
 public class ConfigurationModelToDDMFormValuesConverter {
 
 	public ConfigurationModelToDDMFormValuesConverter(
-		ConfigurationModel configurationModel, DDMForm ddmForm, Locale locale,
-		ResourceBundle resourceBundle) {
+		DDMForm ddmForm, Locale locale, ResourceBundle resourceBundle) {
 
-		_configurationModel = configurationModel;
 		_ddmForm = ddmForm;
 		_ddmFormFieldsMap = ddmForm.getDDMFormFieldsMap(false);
 		_locale = locale;
 		_resourceBundle = resourceBundle;
 	}
 
-	public DDMFormValues getDDMFormValues() {
+	public DDMFormValues getDDMFormValues(
+		ConfigurationModel configurationModel) {
+
 		DDMFormValues ddmFormValues = new DDMFormValues(_ddmForm);
 
 		ddmFormValues.addAvailableLocale(_locale);
 		ddmFormValues.setDefaultLocale(_locale);
 
-		addDDMFormFieldValues(
-			_configurationModel.getAttributeDefinitions(ConfigurationModel.ALL),
-			ddmFormValues);
+		addDDMFormFieldValues(configurationModel, ddmFormValues);
 
 		return ddmFormValues;
 	}
 
 	protected void addDDMFormFieldValues(
-		AttributeDefinition[] attributeDefinitions,
-		DDMFormValues ddmFormValues) {
+		ConfigurationModel configurationModel, DDMFormValues ddmFormValues) {
+
+		AttributeDefinition[] attributeDefinitions =
+			configurationModel.getAttributeDefinitions(ConfigurationModel.ALL);
 
 		if (attributeDefinitions == null) {
 			return;
 		}
 
-		Configuration configuration = _configurationModel.getConfiguration();
+		Configuration configuration = configurationModel.getConfiguration();
 
 		for (AttributeDefinition attributeDefinition : attributeDefinitions) {
 			String[] values = null;
@@ -124,7 +124,6 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		ddmFormFieldValue.setValue(localizedValue);
 	}
 
-	private final ConfigurationModel _configurationModel;
 	private final DDMForm _ddmForm;
 	private final Map<String, DDMFormField> _ddmFormFieldsMap;
 	private final Locale _locale;
