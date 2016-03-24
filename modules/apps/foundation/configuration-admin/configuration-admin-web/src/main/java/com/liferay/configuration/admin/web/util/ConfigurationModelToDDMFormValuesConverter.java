@@ -45,7 +45,8 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		ddmFormValues.addAvailableLocale(locale);
 		ddmFormValues.setDefaultLocale(locale);
 
-		addDDMFormFieldValues(configurationModel, ddmFormValues, locale, resourceBundle);
+		addDDMFormFieldValues(
+			configurationModel, ddmFormValues, locale, resourceBundle);
 
 		return ddmFormValues;
 	}
@@ -87,8 +88,8 @@ public class ConfigurationModelToDDMFormValuesConverter {
 				ddmFormFieldValue.setInstanceId(StringUtil.randomString());
 
 				setDDMFormFieldValueLocalizedValue(
-					value, ddmFormFieldValue, ddmFormFieldsMap,
-					locale, resourceBundle);
+					value, ddmFormFieldValue, ddmFormFieldsMap, locale,
+					resourceBundle);
 
 				ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
 			}
