@@ -54,14 +54,17 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		ConfigurationModel configurationModel, DDMFormValues ddmFormValues,
 		Locale locale, ResourceBundle resourceBundle) {
 
-		DDMForm ddmForm = ddmFormValues.getDDMForm();
-
 		AttributeDefinition[] attributeDefinitions =
 			configurationModel.getAttributeDefinitions(ConfigurationModel.ALL);
 
 		if (attributeDefinitions == null) {
 			return;
 		}
+
+		DDMForm ddmForm = ddmFormValues.getDDMForm();
+
+		Map<String, DDMFormField> ddmFormFieldsMap =
+			ddmForm.getDDMFormFieldsMap(false);
 
 		Configuration configuration = configurationModel.getConfiguration();
 
@@ -84,7 +87,8 @@ public class ConfigurationModelToDDMFormValuesConverter {
 				ddmFormFieldValue.setInstanceId(StringUtil.randomString());
 
 				setDDMFormFieldValueLocalizedValue(
-					value, ddmFormFieldValue, ddmForm, locale, resourceBundle);
+					value, ddmFormFieldValue, ddmFormFieldsMap,
+					locale, resourceBundle);
 
 				ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
 			}
@@ -92,11 +96,9 @@ public class ConfigurationModelToDDMFormValuesConverter {
 	}
 
 	protected static void setDDMFormFieldValueLocalizedValue(
-		String value, DDMFormFieldValue ddmFormFieldValue, DDMForm ddmForm,
-		Locale locale, ResourceBundle resourceBundle) {
-
-		Map<String, DDMFormField> ddmFormFieldsMap =
-			ddmForm.getDDMFormFieldsMap(false);
+		String value, DDMFormFieldValue ddmFormFieldValue,
+		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale,
+		ResourceBundle resourceBundle) {
 
 		DDMFormField ddmFormField = ddmFormFieldsMap.get(
 			ddmFormFieldValue.getName());
