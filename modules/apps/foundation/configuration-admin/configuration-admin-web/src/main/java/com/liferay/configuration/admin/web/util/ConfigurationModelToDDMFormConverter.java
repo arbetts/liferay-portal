@@ -39,7 +39,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  */
 public class ConfigurationModelToDDMFormConverter {
 
-	public DDMForm getDDMForm(
+	public static DDMForm getDDMForm(
 		ConfigurationModel configurationModel, Locale locale,
 		ResourceBundle resourceBundle) {
 
@@ -68,7 +68,7 @@ public class ConfigurationModelToDDMFormConverter {
 		return ddmForm;
 	}
 
-	protected void addDDMFormFields(
+	protected static void addDDMFormFields(
 		AttributeDefinition[] attributeDefinitions, DDMForm ddmForm,
 		boolean required, Locale locale, ResourceBundle resourceBundle) {
 
@@ -125,7 +125,7 @@ public class ConfigurationModelToDDMFormConverter {
 		}
 	}
 
-	protected String getDDMFormFieldDataType(
+	protected static String getDDMFormFieldDataType(
 		AttributeDefinition attributeDefinition) {
 
 		int type = attributeDefinition.getType();
@@ -152,7 +152,7 @@ public class ConfigurationModelToDDMFormConverter {
 		return FieldConstants.STRING;
 	}
 
-	protected String getDDMFormFieldPredefinedValue(String dataType) {
+	protected static String getDDMFormFieldPredefinedValue(String dataType) {
 		if (dataType.equals(FieldConstants.BOOLEAN)) {
 			return "false";
 		}
@@ -171,7 +171,7 @@ public class ConfigurationModelToDDMFormConverter {
 		return StringPool.BLANK;
 	}
 
-	protected String getDDMFormFieldType(
+	protected static String getDDMFormFieldType(
 		AttributeDefinition attributeDefinition) {
 
 		int type = attributeDefinition.getType();
@@ -195,7 +195,7 @@ public class ConfigurationModelToDDMFormConverter {
 		return DDMFormFieldType.TEXT;
 	}
 
-	protected void setDDMFormFieldOptions(
+	protected static void setDDMFormFieldOptions(
 		AttributeDefinition attributeDefinition, DDMFormField ddmFormField,
 		Locale locale, ResourceBundle resourceBundle) {
 
@@ -215,7 +215,7 @@ public class ConfigurationModelToDDMFormConverter {
 		ddmFormField.setDDMFormFieldOptions(ddmFormFieldOptions);
 	}
 
-	protected void setDDMFormFieldPredefinedValue(
+	protected static void setDDMFormFieldPredefinedValue(
 		DDMFormField ddmFormField, Locale locale,
 		ResourceBundle resourceBundle) {
 
@@ -237,7 +237,9 @@ public class ConfigurationModelToDDMFormConverter {
 		ddmFormField.setPredefinedValue(predefinedValue);
 	}
 
-	protected String translate(String key, ResourceBundle resourceBundle) {
+	protected static String translate(
+		String key, ResourceBundle resourceBundle) {
+
 		if ((resourceBundle == null) || (key == null)) {
 			return key;
 		}

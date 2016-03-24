@@ -104,11 +104,7 @@ public class BindConfigurationMVCActionCommand implements MVCActionCommand {
 		ResourceBundle resourceBundle = resourceBundleLoader.loadResourceBundle(
 			themeDisplay.getLanguageId());
 
-		ConfigurationModelToDDMFormConverter
-			configurationModelToDDMFormConverter =
-				new ConfigurationModelToDDMFormConverter();
-
-		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
+		DDMForm ddmForm = ConfigurationModelToDDMFormConverter.getDDMForm(
 			configurationModel, themeDisplay.getLocale(), resourceBundle);
 
 		DDMFormValues ddmFormValues = getDDMFormValues(actionRequest, ddmForm);

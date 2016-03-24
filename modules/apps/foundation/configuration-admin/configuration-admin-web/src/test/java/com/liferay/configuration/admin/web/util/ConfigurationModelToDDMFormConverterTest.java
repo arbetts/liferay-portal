@@ -69,11 +69,7 @@ public class ConfigurationModelToDDMFormConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, null, null, null, false);
 
-		ConfigurationModelToDDMFormConverter
-			configurationModelToDDMFormConverter =
-				new ConfigurationModelToDDMFormConverter();
-
-		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
+		DDMForm ddmForm = ConfigurationModelToDDMFormConverter.getDDMForm(
 			configurationModel, _enLocale, new EmptyResourceBundle());
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
@@ -113,11 +109,7 @@ public class ConfigurationModelToDDMFormConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, null, null, null, false);
 
-		ConfigurationModelToDDMFormConverter
-			configurationModelToDDMFormConverter =
-				new ConfigurationModelToDDMFormConverter();
-
-		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
+		DDMForm ddmForm = ConfigurationModelToDDMFormConverter.getDDMForm(
 			configurationModel, _enLocale, new EmptyResourceBundle());
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
@@ -162,11 +154,7 @@ public class ConfigurationModelToDDMFormConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, null, null, null, false);
 
-		ConfigurationModelToDDMFormConverter
-			configurationModelToDDMFormConverter =
-				new ConfigurationModelToDDMFormConverter();
-
-		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
+		DDMForm ddmForm = ConfigurationModelToDDMFormConverter.getDDMForm(
 			configurationModel, _enLocale, new EmptyResourceBundle());
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
@@ -224,11 +212,7 @@ public class ConfigurationModelToDDMFormConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, null, null, null, false);
 
-		ConfigurationModelToDDMFormConverter
-			configurationModelToDDMFormConverter =
-				new ConfigurationModelToDDMFormConverter();
-
-		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
+		DDMForm ddmForm = ConfigurationModelToDDMFormConverter.getDDMForm(
 			configurationModel, _enLocale, new EmptyResourceBundle());
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
