@@ -322,11 +322,10 @@ public class ConfigurationModelToDDMFormValuesConverterTest extends Mockito {
 
 		ConfigurationModelToDDMFormValuesConverter
 			configurationModelToDDMFormValuesConverter =
-				new ConfigurationModelToDDMFormValuesConverter(
-					new EmptyResourceBundle());
+				new ConfigurationModelToDDMFormValuesConverter();
 
 		return configurationModelToDDMFormValuesConverter.getDDMFormValues(
-			configurationModel, ddmForm, _enLocale);
+			configurationModel, ddmForm, _enLocale, new EmptyResourceBundle());
 	}
 
 	protected String getValueString(DDMFormFieldValue ddmFormFieldValue) {

@@ -36,28 +36,26 @@ import org.osgi.service.metatype.AttributeDefinition;
  */
 public class ConfigurationModelToDDMFormValuesConverter {
 
-	public ConfigurationModelToDDMFormValuesConverter(
-		ResourceBundle resourceBundle) {
-
-		_resourceBundle = resourceBundle;
+	public ConfigurationModelToDDMFormValuesConverter() {
 	}
 
 	public DDMFormValues getDDMFormValues(
-		ConfigurationModel configurationModel, DDMForm ddmForm, Locale locale) {
+		ConfigurationModel configurationModel, DDMForm ddmForm, Locale locale,
+		ResourceBundle resourceBundle) {
 
 		DDMFormValues ddmFormValues = new DDMFormValues(ddmForm);
 
 		ddmFormValues.addAvailableLocale(locale);
 		ddmFormValues.setDefaultLocale(locale);
 
-		addDDMFormFieldValues(configurationModel, ddmFormValues, locale);
+		addDDMFormFieldValues(configurationModel, ddmFormValues, locale, resourceBundle);
 
 		return ddmFormValues;
 	}
 
 	protected void addDDMFormFieldValues(
 		ConfigurationModel configurationModel, DDMFormValues ddmFormValues,
-		Locale locale) {
+		Locale locale, ResourceBundle resourceBundle) {
 
 		DDMForm ddmForm = ddmFormValues.getDDMForm();
 
@@ -89,7 +87,7 @@ public class ConfigurationModelToDDMFormValuesConverter {
 				ddmFormFieldValue.setInstanceId(StringUtil.randomString());
 
 				setDDMFormFieldValueLocalizedValue(
-					value, ddmFormFieldValue, ddmForm, locale);
+					value, ddmFormFieldValue, ddmForm, locale, resourceBundle);
 
 				ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
 			}
@@ -98,7 +96,7 @@ public class ConfigurationModelToDDMFormValuesConverter {
 
 	protected void setDDMFormFieldValueLocalizedValue(
 		String value, DDMFormFieldValue ddmFormFieldValue, DDMForm ddmForm,
-		Locale locale) {
+		Locale locale, ResourceBundle resourceBundle) {
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
 			ddmForm.getDDMFormFieldsMap(false);
@@ -114,10 +112,11 @@ public class ConfigurationModelToDDMFormValuesConverter {
 
 		LocalizedValue localizedValue = new LocalizedValue(locale);
 
-		if ((_resourceBundle != null) && (value != null)) {
+		if ((resourceBundle != null) && (value != null)) {
 			String resourceBundleValue = null;
 
-			resourceBundleValue = ResourceBundleUtil.getString(_resourceBundle, value);
+			resourceBundleValue = ResourceBundleUtil.getString(
+				resourceBundle, value);
 
 			if (resourceBundleValue != null) {
 				value = resourceBundleValue;
@@ -128,7 +127,5 @@ public class ConfigurationModelToDDMFormValuesConverter {
 
 		ddmFormFieldValue.setValue(localizedValue);
 	}
-
-	private final ResourceBundle _resourceBundle;
 
 }
