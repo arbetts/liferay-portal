@@ -87,7 +87,13 @@ public class ConfigurationModelToDDMFormConverter {
 
 			setDDMFormFieldOptions(attributeDefinition, ddmFormField);
 			setDDMFormFieldPredefinedValue(ddmFormField);
-			setDDMFormFieldTip(attributeDefinition, ddmFormField);
+
+			LocalizedValue tip = new LocalizedValue(_locale);
+
+			tip.addString(
+				_locale, translate(attributeDefinition.getDescription()));
+
+			ddmFormField.setTip(tip);
 
 			ddmFormField.setLocalizable(true);
 
@@ -229,16 +235,6 @@ public class ConfigurationModelToDDMFormConverter {
 		predefinedValue.addString(_locale, translate(predefinedValueString));
 
 		ddmFormField.setPredefinedValue(predefinedValue);
-	}
-
-	protected void setDDMFormFieldTip(
-		AttributeDefinition attributeDefinition, DDMFormField ddmFormField) {
-
-		LocalizedValue tip = new LocalizedValue(_locale);
-
-		tip.addString(_locale, translate(attributeDefinition.getDescription()));
-
-		ddmFormField.setTip(tip);
 	}
 
 	protected String translate(String key) {
