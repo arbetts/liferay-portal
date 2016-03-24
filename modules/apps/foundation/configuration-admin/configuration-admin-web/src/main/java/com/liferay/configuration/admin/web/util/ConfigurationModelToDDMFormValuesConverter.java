@@ -61,34 +61,6 @@ public class ConfigurationModelToDDMFormValuesConverter {
 	}
 
 	protected void addDDMFormFieldValues(
-		AttributeDefinition attributeDefinition, DDMFormValues ddmFormValues) {
-
-		String[] values = null;
-
-		Configuration configuration = _configurationModel.getConfiguration();
-
-		if (configuration != null) {
-			values = AttributeDefinitionUtil.getProperty(
-				attributeDefinition, configuration);
-		}
-		else {
-			values = AttributeDefinitionUtil.getDefaultValue(
-				attributeDefinition);
-		}
-
-		for (String value : values) {
-			DDMFormFieldValue ddmFormFieldValue = new DDMFormFieldValue();
-
-			ddmFormFieldValue.setName(attributeDefinition.getID());
-			ddmFormFieldValue.setInstanceId(StringUtil.randomString());
-
-			setDDMFormFieldValueLocalizedValue(value, ddmFormFieldValue);
-
-			ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
-		}
-	}
-
-	protected void addDDMFormFieldValues(
 		AttributeDefinition[] attributeDefinitions,
 		DDMFormValues ddmFormValues) {
 
@@ -97,7 +69,29 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		}
 
 		for (AttributeDefinition attributeDefinition : attributeDefinitions) {
-			addDDMFormFieldValues(attributeDefinition, ddmFormValues);
+			String[] values = null;
+
+			Configuration configuration = _configurationModel.getConfiguration();
+
+			if (configuration != null) {
+				values = AttributeDefinitionUtil.getProperty(
+					attributeDefinition, configuration);
+			}
+			else {
+				values = AttributeDefinitionUtil.getDefaultValue(
+					attributeDefinition);
+			}
+
+			for (String value : values) {
+				DDMFormFieldValue ddmFormFieldValue = new DDMFormFieldValue();
+
+				ddmFormFieldValue.setName(attributeDefinition.getID());
+				ddmFormFieldValue.setInstanceId(StringUtil.randomString());
+
+				setDDMFormFieldValueLocalizedValue(value, ddmFormFieldValue);
+
+				ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
+			}
 		}
 	}
 
