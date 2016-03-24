@@ -58,7 +58,7 @@ public class ConfigurationModelToDDMFormConverter {
 		}
 
 		attributeDefinitions = configurationModel.getAttributeDefinitions(
-				ObjectClassDefinition.OPTIONAL);
+			ObjectClassDefinition.OPTIONAL);
 
 		if (attributeDefinitions != null) {
 			addDDMFormFields(
@@ -78,8 +78,7 @@ public class ConfigurationModelToDDMFormConverter {
 			DDMFormField ddmFormField = new DDMFormField(
 				attributeDefinition.getID(), type);
 
-			String dataType = getDDMFormFieldDataType(
-				attributeDefinition);
+			String dataType = getDDMFormFieldDataType(attributeDefinition);
 
 			ddmFormField.setDataType(dataType);
 
@@ -207,8 +206,8 @@ public class ConfigurationModelToDDMFormConverter {
 		if ((optionLabels != null) && (optionValues != null)) {
 			for (int i = 0; i < optionLabels.length; i++) {
 				ddmFormFieldOptions.addOptionLabel(
-					optionValues[i], locale, translate(optionLabels[i],
-					resourceBundle));
+					optionValues[i], locale,
+					translate(optionLabels[i], resourceBundle));
 			}
 		}
 
