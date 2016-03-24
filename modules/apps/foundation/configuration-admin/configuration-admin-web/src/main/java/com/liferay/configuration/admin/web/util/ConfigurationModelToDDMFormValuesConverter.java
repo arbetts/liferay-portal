@@ -95,16 +95,13 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		}
 	}
 
-	protected String getDDMFormFieldType(String ddmFormFieldName) {
-		DDMFormField ddmFormField = _ddmFormFieldsMap.get(ddmFormFieldName);
-
-		return ddmFormField.getType();
-	}
-
 	protected void setDDMFormFieldValueLocalizedValue(
 		String value, DDMFormFieldValue ddmFormFieldValue) {
 
-		String type = getDDMFormFieldType(ddmFormFieldValue.getName());
+		DDMFormField ddmFormField = _ddmFormFieldsMap.get(
+			ddmFormFieldValue.getName());
+
+		String type = ddmFormField.getType();
 
 		if (type.equals(DDMFormFieldType.SELECT)) {
 			value = "[\"" + value + "\"]";
