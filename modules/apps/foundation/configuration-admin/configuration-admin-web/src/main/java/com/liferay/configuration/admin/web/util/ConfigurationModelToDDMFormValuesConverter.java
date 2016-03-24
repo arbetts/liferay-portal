@@ -60,19 +60,6 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		return ddmFormValues;
 	}
 
-	protected void addDDMFormFieldValue(
-		String name, String value, DDMFormValues ddmFormValues) {
-
-		DDMFormFieldValue ddmFormFieldValue = new DDMFormFieldValue();
-
-		ddmFormFieldValue.setName(name);
-		ddmFormFieldValue.setInstanceId(StringUtil.randomString());
-
-		setDDMFormFieldValueLocalizedValue(value, ddmFormFieldValue);
-
-		ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
-	}
-
 	protected void addDDMFormFieldValues(
 		AttributeDefinition attributeDefinition, DDMFormValues ddmFormValues) {
 
@@ -109,8 +96,15 @@ public class ConfigurationModelToDDMFormValuesConverter {
 	protected void addDDMFormFieldValues(
 		String name, String[] values, DDMFormValues ddmFormValues) {
 
-		for (int i = 0; i < values.length; i++) {
-			addDDMFormFieldValue(name, values[i], ddmFormValues);
+		for (String value : values) {
+			DDMFormFieldValue ddmFormFieldValue = new DDMFormFieldValue();
+
+			ddmFormFieldValue.setName(name);
+			ddmFormFieldValue.setInstanceId(StringUtil.randomString());
+
+			setDDMFormFieldValueLocalizedValue(value, ddmFormFieldValue);
+
+			ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
 		}
 	}
 
