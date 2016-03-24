@@ -37,18 +37,16 @@ import org.osgi.service.metatype.AttributeDefinition;
 public class ConfigurationModelToDDMFormValuesConverter {
 
 	public ConfigurationModelToDDMFormValuesConverter(
-		DDMForm ddmForm, Locale locale, ResourceBundle resourceBundle) {
+		Locale locale, ResourceBundle resourceBundle) {
 
-		_ddmForm = ddmForm;
-		_ddmFormFieldsMap = ddmForm.getDDMFormFieldsMap(false);
 		_locale = locale;
 		_resourceBundle = resourceBundle;
 	}
 
 	public DDMFormValues getDDMFormValues(
-		ConfigurationModel configurationModel) {
+		ConfigurationModel configurationModel, DDMForm ddmForm) {
 
-		DDMFormValues ddmFormValues = new DDMFormValues(_ddmForm);
+		DDMFormValues ddmFormValues = new DDMFormValues(ddmForm);
 
 		ddmFormValues.addAvailableLocale(_locale);
 		ddmFormValues.setDefaultLocale(_locale);
@@ -60,6 +58,8 @@ public class ConfigurationModelToDDMFormValuesConverter {
 
 	protected void addDDMFormFieldValues(
 		ConfigurationModel configurationModel, DDMFormValues ddmFormValues) {
+
+		DDMForm ddmForm = ddmFormValues.getDDMForm();
 
 		AttributeDefinition[] attributeDefinitions =
 			configurationModel.getAttributeDefinitions(ConfigurationModel.ALL);
@@ -88,7 +88,8 @@ public class ConfigurationModelToDDMFormValuesConverter {
 				ddmFormFieldValue.setName(attributeDefinition.getID());
 				ddmFormFieldValue.setInstanceId(StringUtil.randomString());
 
-				setDDMFormFieldValueLocalizedValue(value, ddmFormFieldValue);
+				setDDMFormFieldValueLocalizedValue(
+					value, ddmFormFieldValue, ddmForm);
 
 				ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
 			}
@@ -96,9 +97,12 @@ public class ConfigurationModelToDDMFormValuesConverter {
 	}
 
 	protected void setDDMFormFieldValueLocalizedValue(
-		String value, DDMFormFieldValue ddmFormFieldValue) {
+		String value, DDMFormFieldValue ddmFormFieldValue, DDMForm ddmForm) {
 
-		DDMFormField ddmFormField = _ddmFormFieldsMap.get(
+		Map<String, DDMFormField> ddmFormFieldsMap =
+			ddmForm.getDDMFormFieldsMap(false);
+
+		DDMFormField ddmFormField = ddmFormFieldsMap.get(
 			ddmFormFieldValue.getName());
 
 		String type = ddmFormField.getType();
@@ -124,8 +128,6 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		ddmFormFieldValue.setValue(localizedValue);
 	}
 
-	private final DDMForm _ddmForm;
-	private final Map<String, DDMFormField> _ddmFormFieldsMap;
 	private final Locale _locale;
 	private final ResourceBundle _resourceBundle;
 

@@ -115,10 +115,10 @@ public class DDMFormRendererHelper {
 		ConfigurationModelToDDMFormValuesConverter
 			configurationModelToDDMFormValuesConverter =
 				new ConfigurationModelToDDMFormValuesConverter(
-					ddmForm, getLocale(), resourceBundle);
+					getLocale(), resourceBundle);
 
 		return configurationModelToDDMFormValuesConverter.getDDMFormValues(
-			_configurationModel);
+			_configurationModel, ddmForm);
 	}
 
 	protected Locale getLocale() {
