@@ -125,26 +125,6 @@ public class ConfigurationModelToDDMFormConverter {
 		addDDMFormFields(requiredAttributeDefinitions, ddmForm, true);
 	}
 
-	protected DDMFormFieldOptions getDDMFieldOptions(
-		AttributeDefinition attributeDefinition) {
-
-		DDMFormFieldOptions ddmFormFieldOptions = new DDMFormFieldOptions();
-
-		String[] optionLabels = attributeDefinition.getOptionLabels();
-		String[] optionValues = attributeDefinition.getOptionValues();
-
-		if ((optionLabels == null) || (optionValues == null)) {
-			return ddmFormFieldOptions;
-		}
-
-		for (int i = 0; i < optionLabels.length; i++) {
-			ddmFormFieldOptions.addOptionLabel(
-				optionValues[i], _locale, translate(optionLabels[i]));
-		}
-
-		return ddmFormFieldOptions;
-	}
-
 	protected String getDDMFormFieldDataType(
 		AttributeDefinition attributeDefinition) {
 
@@ -218,8 +198,17 @@ public class ConfigurationModelToDDMFormConverter {
 	protected void setDDMFormFieldOptions(
 		AttributeDefinition attributeDefinition, DDMFormField ddmFormField) {
 
-		DDMFormFieldOptions ddmFormFieldOptions = getDDMFieldOptions(
-			attributeDefinition);
+		DDMFormFieldOptions ddmFormFieldOptions = new DDMFormFieldOptions();
+
+		String[] optionLabels = attributeDefinition.getOptionLabels();
+		String[] optionValues = attributeDefinition.getOptionValues();
+
+		if ((optionLabels != null) && (optionValues != null)) {
+			for (int i = 0; i < optionLabels.length; i++) {
+				ddmFormFieldOptions.addOptionLabel(
+					optionValues[i], _locale, translate(optionLabels[i]));
+			}
+		}
 
 		ddmFormField.setDDMFormFieldOptions(ddmFormFieldOptions);
 	}
