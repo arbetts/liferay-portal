@@ -79,7 +79,12 @@ public class ConfigurationModelToDDMFormConverter {
 
 			ddmFormField.setDataType(dataType);
 
-			setDDMFormFieldLabel(attributeDefinition, ddmFormField);
+			LocalizedValue label = new LocalizedValue(_locale);
+
+			label.addString(_locale, translate(attributeDefinition.getName()));
+
+			ddmFormField.setLabel(label);
+
 			setDDMFormFieldOptions(attributeDefinition, ddmFormField);
 			setDDMFormFieldPredefinedValue(ddmFormField);
 			setDDMFormFieldTip(attributeDefinition, ddmFormField);
@@ -208,16 +213,6 @@ public class ConfigurationModelToDDMFormConverter {
 		}
 
 		return DDMFormFieldType.TEXT;
-	}
-
-	protected void setDDMFormFieldLabel(
-		AttributeDefinition attributeDefinition, DDMFormField ddmFormField) {
-
-		LocalizedValue label = new LocalizedValue(_locale);
-
-		label.addString(_locale, translate(attributeDefinition.getName()));
-
-		ddmFormField.setLabel(label);
 	}
 
 	protected void setDDMFormFieldOptions(
