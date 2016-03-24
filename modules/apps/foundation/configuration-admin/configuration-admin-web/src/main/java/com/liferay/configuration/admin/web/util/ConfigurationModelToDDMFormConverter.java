@@ -74,7 +74,11 @@ public class ConfigurationModelToDDMFormConverter {
 			DDMFormField ddmFormField = new DDMFormField(
 				attributeDefinition.getID(), type);
 
-			setDDMFormFieldDataType(attributeDefinition, ddmFormField);
+			String dataType = getDDMFormFieldDataType(
+				attributeDefinition);
+
+			ddmFormField.setDataType(dataType);
+
 			setDDMFormFieldLabel(attributeDefinition, ddmFormField);
 			setDDMFormFieldOptions(attributeDefinition, ddmFormField);
 			setDDMFormFieldPredefinedValue(attributeDefinition, ddmFormField);
@@ -210,14 +214,6 @@ public class ConfigurationModelToDDMFormConverter {
 		}
 
 		return DDMFormFieldType.TEXT;
-	}
-
-	protected void setDDMFormFieldDataType(
-		AttributeDefinition attributeDefinition, DDMFormField ddmFormField) {
-
-		String dataType = getDDMFormFieldDataType(attributeDefinition);
-
-		ddmFormField.setDataType(dataType);
 	}
 
 	protected void setDDMFormFieldLabel(
