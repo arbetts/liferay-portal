@@ -97,9 +97,10 @@ public class DDMFormRendererHelper {
 		ConfigurationModelToDDMFormConverter
 			configurationModelToDDMFormConverter =
 				new ConfigurationModelToDDMFormConverter(
-					_configurationModel, getLocale(), resourceBundle);
+					getLocale(), resourceBundle);
 
-		return configurationModelToDDMFormConverter.getDDMForm();
+		return configurationModelToDDMFormConverter.getDDMForm(
+			_configurationModel);
 	}
 
 	protected DDMFormValues getDDMFormValues(DDMForm ddmForm) {

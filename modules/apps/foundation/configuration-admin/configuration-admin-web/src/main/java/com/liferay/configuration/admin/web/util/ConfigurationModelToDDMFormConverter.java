@@ -40,29 +40,27 @@ import org.osgi.service.metatype.ObjectClassDefinition;
 public class ConfigurationModelToDDMFormConverter {
 
 	public ConfigurationModelToDDMFormConverter(
-		ConfigurationModel configurationModel, Locale locale,
-		ResourceBundle resourceBundle) {
+		Locale locale, ResourceBundle resourceBundle) {
 
-		_configurationModel = configurationModel;
 		_locale = locale;
 		_resourceBundle = resourceBundle;
 	}
 
-	public DDMForm getDDMForm() {
+	public DDMForm getDDMForm(ConfigurationModel configurationModel) {
 		DDMForm ddmForm = new DDMForm();
 
 		ddmForm.addAvailableLocale(_locale);
 		ddmForm.setDefaultLocale(_locale);
 
 		AttributeDefinition[] attributeDefinitions =
-			_configurationModel.getAttributeDefinitions(
+			configurationModel.getAttributeDefinitions(
 				ObjectClassDefinition.REQUIRED);
 
 		if (attributeDefinitions != null) {
 			addDDMFormFields(attributeDefinitions, ddmForm, true);
 		}
 
-		attributeDefinitions = _configurationModel.getAttributeDefinitions(
+		attributeDefinitions = configurationModel.getAttributeDefinitions(
 				ObjectClassDefinition.OPTIONAL);
 
 		if (attributeDefinitions != null) {
@@ -243,7 +241,6 @@ public class ConfigurationModelToDDMFormConverter {
 		return value;
 	}
 
-	private final ConfigurationModel _configurationModel;
 	private final Locale _locale;
 	private final ResourceBundle _resourceBundle;
 
