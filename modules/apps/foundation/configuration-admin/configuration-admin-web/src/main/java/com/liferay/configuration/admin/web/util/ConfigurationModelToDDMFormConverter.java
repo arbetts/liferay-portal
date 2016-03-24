@@ -54,7 +54,11 @@ public class ConfigurationModelToDDMFormConverter {
 		ddmForm.addAvailableLocale(_locale);
 		ddmForm.setDefaultLocale(_locale);
 
-		addRequiredDDMFormFields(ddmForm);
+		AttributeDefinition[] requiredAttributeDefinitions =
+			_configurationModel.getAttributeDefinitions(
+				ObjectClassDefinition.REQUIRED);
+
+		addDDMFormFields(requiredAttributeDefinitions, ddmForm, true);
 
 		AttributeDefinition[] optionalAttributeDefinitions =
 			_configurationModel.getAttributeDefinitions(
@@ -118,14 +122,6 @@ public class ConfigurationModelToDDMFormConverter {
 
 			ddmForm.addDDMFormField(ddmFormField);
 		}
-	}
-
-	protected void addRequiredDDMFormFields(DDMForm ddmForm) {
-		AttributeDefinition[] requiredAttributeDefinitions =
-			_configurationModel.getAttributeDefinitions(
-				ObjectClassDefinition.REQUIRED);
-
-		addDDMFormFields(requiredAttributeDefinitions, ddmForm, true);
 	}
 
 	protected String getDDMFormFieldDataType(
