@@ -39,12 +39,9 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  */
 public class ConfigurationModelToDDMFormConverter {
 
-	public ConfigurationModelToDDMFormConverter(ResourceBundle resourceBundle) {
-		_resourceBundle = resourceBundle;
-	}
-
 	public DDMForm getDDMForm(
-		ConfigurationModel configurationModel, Locale locale) {
+		ConfigurationModel configurationModel, Locale locale,
+		ResourceBundle resourceBundle) {
 
 		DDMForm ddmForm = new DDMForm();
 
@@ -56,14 +53,16 @@ public class ConfigurationModelToDDMFormConverter {
 				ObjectClassDefinition.REQUIRED);
 
 		if (attributeDefinitions != null) {
-			addDDMFormFields(attributeDefinitions, ddmForm, true, locale);
+			addDDMFormFields(
+				attributeDefinitions, ddmForm, true, locale, resourceBundle);
 		}
 
 		attributeDefinitions = configurationModel.getAttributeDefinitions(
 				ObjectClassDefinition.OPTIONAL);
 
 		if (attributeDefinitions != null) {
-			addDDMFormFields(attributeDefinitions, ddmForm, false, locale);
+			addDDMFormFields(
+				attributeDefinitions, ddmForm, false, locale, resourceBundle);
 		}
 
 		return ddmForm;
@@ -71,7 +70,7 @@ public class ConfigurationModelToDDMFormConverter {
 
 	protected void addDDMFormFields(
 		AttributeDefinition[] attributeDefinitions, DDMForm ddmForm,
-		boolean required, Locale locale) {
+		boolean required, Locale locale, ResourceBundle resourceBundle) {
 
 		for (AttributeDefinition attributeDefinition : attributeDefinitions) {
 			String type = getDDMFormFieldType(attributeDefinition);
@@ -86,17 +85,23 @@ public class ConfigurationModelToDDMFormConverter {
 
 			LocalizedValue label = new LocalizedValue(locale);
 
-			label.addString(locale, translate(attributeDefinition.getName()));
+			label.addString(
+				locale,
+				translate(attributeDefinition.getName(), resourceBundle));
 
 			ddmFormField.setLabel(label);
 
-			setDDMFormFieldOptions(attributeDefinition, ddmFormField, locale);
-			setDDMFormFieldPredefinedValue(ddmFormField, locale);
+			setDDMFormFieldOptions(
+				attributeDefinition, ddmFormField, locale, resourceBundle);
+			setDDMFormFieldPredefinedValue(
+				ddmFormField, locale, resourceBundle);
 
 			LocalizedValue tip = new LocalizedValue(locale);
 
 			tip.addString(
-				locale, translate(attributeDefinition.getDescription()));
+				locale,
+				translate(
+					attributeDefinition.getDescription(), resourceBundle));
 
 			ddmFormField.setTip(tip);
 
@@ -192,7 +197,7 @@ public class ConfigurationModelToDDMFormConverter {
 
 	protected void setDDMFormFieldOptions(
 		AttributeDefinition attributeDefinition, DDMFormField ddmFormField,
-		Locale locale) {
+		Locale locale, ResourceBundle resourceBundle) {
 
 		DDMFormFieldOptions ddmFormFieldOptions = new DDMFormFieldOptions();
 
@@ -202,7 +207,8 @@ public class ConfigurationModelToDDMFormConverter {
 		if ((optionLabels != null) && (optionValues != null)) {
 			for (int i = 0; i < optionLabels.length; i++) {
 				ddmFormFieldOptions.addOptionLabel(
-					optionValues[i], locale, translate(optionLabels[i]));
+					optionValues[i], locale, translate(optionLabels[i],
+					resourceBundle));
 			}
 		}
 
@@ -210,7 +216,8 @@ public class ConfigurationModelToDDMFormConverter {
 	}
 
 	protected void setDDMFormFieldPredefinedValue(
-		DDMFormField ddmFormField, Locale locale) {
+		DDMFormField ddmFormField, Locale locale,
+		ResourceBundle resourceBundle) {
 
 		String dataType = ddmFormField.getDataType();
 
@@ -224,17 +231,18 @@ public class ConfigurationModelToDDMFormConverter {
 
 		LocalizedValue predefinedValue = new LocalizedValue(locale);
 
-		predefinedValue.addString(locale, translate(predefinedValueString));
+		predefinedValue.addString(
+			locale, translate(predefinedValueString, resourceBundle));
 
 		ddmFormField.setPredefinedValue(predefinedValue);
 	}
 
-	protected String translate(String key) {
-		if ((_resourceBundle == null) || (key == null)) {
+	protected String translate(String key, ResourceBundle resourceBundle) {
+		if ((resourceBundle == null) || (key == null)) {
 			return key;
 		}
 
-		String value = ResourceBundleUtil.getString(_resourceBundle, key);
+		String value = ResourceBundleUtil.getString(resourceBundle, key);
 
 		if (value == null) {
 			return key;
@@ -242,7 +250,5 @@ public class ConfigurationModelToDDMFormConverter {
 
 		return value;
 	}
-
-	private final ResourceBundle _resourceBundle;
 
 }
