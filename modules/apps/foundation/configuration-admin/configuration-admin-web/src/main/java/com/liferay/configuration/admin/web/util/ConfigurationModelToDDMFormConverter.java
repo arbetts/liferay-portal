@@ -69,8 +69,25 @@ public class ConfigurationModelToDDMFormConverter {
 		}
 
 		for (AttributeDefinition attributeDefinition : attributeDefinitions) {
-			DDMFormField ddmFormField = getDDMFormField(
-				attributeDefinition, required);
+			String type = getDDMFormFieldType(attributeDefinition);
+
+			DDMFormField ddmFormField = new DDMFormField(
+				attributeDefinition.getID(), type);
+
+			setDDMFormFieldDataType(attributeDefinition, ddmFormField);
+			setDDMFormFieldLabel(attributeDefinition, ddmFormField);
+			setDDMFormFieldOptions(attributeDefinition, ddmFormField);
+			setDDMFormFieldPredefinedValue(attributeDefinition, ddmFormField);
+			setDDMFormFieldRequired(
+				attributeDefinition, ddmFormField, required);
+			setDDMFormFieldTip(attributeDefinition, ddmFormField);
+
+			ddmFormField.setLocalizable(true);
+			ddmFormField.setShowLabel(true);
+
+			setDDMFormFieldRepeatable(attributeDefinition, ddmFormField);
+
+			setDDMFormFieldDisplayStyle(ddmFormField);
 
 			ddmForm.addDDMFormField(ddmFormField);
 		}
@@ -110,31 +127,6 @@ public class ConfigurationModelToDDMFormConverter {
 		}
 
 		return ddmFormFieldOptions;
-	}
-
-	protected DDMFormField getDDMFormField(
-		AttributeDefinition attributeDefinition, boolean required) {
-
-		String type = getDDMFormFieldType(attributeDefinition);
-
-		DDMFormField ddmFormField = new DDMFormField(
-			attributeDefinition.getID(), type);
-
-		setDDMFormFieldDataType(attributeDefinition, ddmFormField);
-		setDDMFormFieldLabel(attributeDefinition, ddmFormField);
-		setDDMFormFieldOptions(attributeDefinition, ddmFormField);
-		setDDMFormFieldPredefinedValue(attributeDefinition, ddmFormField);
-		setDDMFormFieldRequired(attributeDefinition, ddmFormField, required);
-		setDDMFormFieldTip(attributeDefinition, ddmFormField);
-
-		ddmFormField.setLocalizable(true);
-		ddmFormField.setShowLabel(true);
-
-		setDDMFormFieldRepeatable(attributeDefinition, ddmFormField);
-
-		setDDMFormFieldDisplayStyle(ddmFormField);
-
-		return ddmFormField;
 	}
 
 	protected String getDDMFormFieldDataType(
