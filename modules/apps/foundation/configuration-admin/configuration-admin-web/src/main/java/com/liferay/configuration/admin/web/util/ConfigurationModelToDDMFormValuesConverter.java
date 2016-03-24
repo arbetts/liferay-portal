@@ -36,10 +36,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  */
 public class ConfigurationModelToDDMFormValuesConverter {
 
-	public ConfigurationModelToDDMFormValuesConverter() {
-	}
-
-	public DDMFormValues getDDMFormValues(
+	public static DDMFormValues getDDMFormValues(
 		ConfigurationModel configurationModel, DDMForm ddmForm, Locale locale,
 		ResourceBundle resourceBundle) {
 
@@ -53,7 +50,7 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		return ddmFormValues;
 	}
 
-	protected void addDDMFormFieldValues(
+	protected static void addDDMFormFieldValues(
 		ConfigurationModel configurationModel, DDMFormValues ddmFormValues,
 		Locale locale, ResourceBundle resourceBundle) {
 
@@ -94,7 +91,7 @@ public class ConfigurationModelToDDMFormValuesConverter {
 		}
 	}
 
-	protected void setDDMFormFieldValueLocalizedValue(
+	protected static void setDDMFormFieldValueLocalizedValue(
 		String value, DDMFormFieldValue ddmFormFieldValue, DDMForm ddmForm,
 		Locale locale, ResourceBundle resourceBundle) {
 
