@@ -78,11 +78,14 @@ public class ConfigurationModelToDDMFormConverter {
 			setDDMFormFieldLabel(attributeDefinition, ddmFormField);
 			setDDMFormFieldOptions(attributeDefinition, ddmFormField);
 			setDDMFormFieldPredefinedValue(attributeDefinition, ddmFormField);
-			setDDMFormFieldRequired(
-				attributeDefinition, ddmFormField, required);
 			setDDMFormFieldTip(attributeDefinition, ddmFormField);
 
 			ddmFormField.setLocalizable(true);
+
+			if (!DDMFormFieldType.CHECKBOX.equals(ddmFormField.getType())) {
+				ddmFormField.setRequired(required);
+			}
+
 			ddmFormField.setShowLabel(true);
 
 			setDDMFormFieldRepeatable(attributeDefinition, ddmFormField);
@@ -265,17 +268,6 @@ public class ConfigurationModelToDDMFormConverter {
 		}
 
 		ddmFormField.setRepeatable(true);
-	}
-
-	protected void setDDMFormFieldRequired(
-		AttributeDefinition attributeDefinition, DDMFormField ddmFormField,
-		boolean required) {
-
-		if (DDMFormFieldType.CHECKBOX.equals(ddmFormField.getType())) {
-			return;
-		}
-
-		ddmFormField.setRequired(required);
 	}
 
 	protected void setDDMFormFieldTip(
