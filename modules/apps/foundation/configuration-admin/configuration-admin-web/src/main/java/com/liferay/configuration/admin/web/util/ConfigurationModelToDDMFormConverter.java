@@ -39,32 +39,31 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  */
 public class ConfigurationModelToDDMFormConverter {
 
-	public ConfigurationModelToDDMFormConverter(
-		Locale locale, ResourceBundle resourceBundle) {
-
-		_locale = locale;
+	public ConfigurationModelToDDMFormConverter(ResourceBundle resourceBundle) {
 		_resourceBundle = resourceBundle;
 	}
 
-	public DDMForm getDDMForm(ConfigurationModel configurationModel) {
+	public DDMForm getDDMForm(
+		ConfigurationModel configurationModel, Locale locale) {
+
 		DDMForm ddmForm = new DDMForm();
 
-		ddmForm.addAvailableLocale(_locale);
-		ddmForm.setDefaultLocale(_locale);
+		ddmForm.addAvailableLocale(locale);
+		ddmForm.setDefaultLocale(locale);
 
 		AttributeDefinition[] attributeDefinitions =
 			configurationModel.getAttributeDefinitions(
 				ObjectClassDefinition.REQUIRED);
 
 		if (attributeDefinitions != null) {
-			addDDMFormFields(attributeDefinitions, ddmForm, true);
+			addDDMFormFields(attributeDefinitions, ddmForm, true, locale);
 		}
 
 		attributeDefinitions = configurationModel.getAttributeDefinitions(
 				ObjectClassDefinition.OPTIONAL);
 
 		if (attributeDefinitions != null) {
-			addDDMFormFields(attributeDefinitions, ddmForm, false);
+			addDDMFormFields(attributeDefinitions, ddmForm, false, locale);
 		}
 
 		return ddmForm;
@@ -72,7 +71,7 @@ public class ConfigurationModelToDDMFormConverter {
 
 	protected void addDDMFormFields(
 		AttributeDefinition[] attributeDefinitions, DDMForm ddmForm,
-		boolean required) {
+		boolean required, Locale locale) {
 
 		for (AttributeDefinition attributeDefinition : attributeDefinitions) {
 			String type = getDDMFormFieldType(attributeDefinition);
@@ -85,19 +84,19 @@ public class ConfigurationModelToDDMFormConverter {
 
 			ddmFormField.setDataType(dataType);
 
-			LocalizedValue label = new LocalizedValue(_locale);
+			LocalizedValue label = new LocalizedValue(locale);
 
-			label.addString(_locale, translate(attributeDefinition.getName()));
+			label.addString(locale, translate(attributeDefinition.getName()));
 
 			ddmFormField.setLabel(label);
 
-			setDDMFormFieldOptions(attributeDefinition, ddmFormField);
-			setDDMFormFieldPredefinedValue(ddmFormField);
+			setDDMFormFieldOptions(attributeDefinition, ddmFormField, locale);
+			setDDMFormFieldPredefinedValue(ddmFormField, locale);
 
-			LocalizedValue tip = new LocalizedValue(_locale);
+			LocalizedValue tip = new LocalizedValue(locale);
 
 			tip.addString(
-				_locale, translate(attributeDefinition.getDescription()));
+				locale, translate(attributeDefinition.getDescription()));
 
 			ddmFormField.setTip(tip);
 
@@ -192,7 +191,8 @@ public class ConfigurationModelToDDMFormConverter {
 	}
 
 	protected void setDDMFormFieldOptions(
-		AttributeDefinition attributeDefinition, DDMFormField ddmFormField) {
+		AttributeDefinition attributeDefinition, DDMFormField ddmFormField,
+		Locale locale) {
 
 		DDMFormFieldOptions ddmFormFieldOptions = new DDMFormFieldOptions();
 
@@ -202,14 +202,16 @@ public class ConfigurationModelToDDMFormConverter {
 		if ((optionLabels != null) && (optionValues != null)) {
 			for (int i = 0; i < optionLabels.length; i++) {
 				ddmFormFieldOptions.addOptionLabel(
-					optionValues[i], _locale, translate(optionLabels[i]));
+					optionValues[i], locale, translate(optionLabels[i]));
 			}
 		}
 
 		ddmFormField.setDDMFormFieldOptions(ddmFormFieldOptions);
 	}
 
-	protected void setDDMFormFieldPredefinedValue(DDMFormField ddmFormField) {
+	protected void setDDMFormFieldPredefinedValue(
+		DDMFormField ddmFormField, Locale locale) {
+
 		String dataType = ddmFormField.getDataType();
 
 		String predefinedValueString = getDDMFormFieldPredefinedValue(dataType);
@@ -220,9 +222,9 @@ public class ConfigurationModelToDDMFormConverter {
 			predefinedValueString = "[\"" + predefinedValueString + "\"]";
 		}
 
-		LocalizedValue predefinedValue = new LocalizedValue(_locale);
+		LocalizedValue predefinedValue = new LocalizedValue(locale);
 
-		predefinedValue.addString(_locale, translate(predefinedValueString));
+		predefinedValue.addString(locale, translate(predefinedValueString));
 
 		ddmFormField.setPredefinedValue(predefinedValue);
 	}
@@ -241,7 +243,6 @@ public class ConfigurationModelToDDMFormConverter {
 		return value;
 	}
 
-	private final Locale _locale;
 	private final ResourceBundle _resourceBundle;
 
 }

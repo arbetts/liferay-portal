@@ -72,10 +72,10 @@ public class ConfigurationModelToDDMFormConverterTest extends Mockito {
 		ConfigurationModelToDDMFormConverter
 			configurationModelToDDMFormConverter =
 				new ConfigurationModelToDDMFormConverter(
-					_enLocale, new EmptyResourceBundle());
+					new EmptyResourceBundle());
 
 		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
-			configurationModel);
+			configurationModel, _enLocale);
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
 			ddmForm.getDDMFormFieldsMap(false);
@@ -117,10 +117,10 @@ public class ConfigurationModelToDDMFormConverterTest extends Mockito {
 		ConfigurationModelToDDMFormConverter
 			configurationModelToDDMFormConverter =
 				new ConfigurationModelToDDMFormConverter(
-					_enLocale, new EmptyResourceBundle());
+					new EmptyResourceBundle());
 
 		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
-			configurationModel);
+			configurationModel, _enLocale);
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
 			ddmForm.getDDMFormFieldsMap(false);
@@ -167,10 +167,10 @@ public class ConfigurationModelToDDMFormConverterTest extends Mockito {
 		ConfigurationModelToDDMFormConverter
 			configurationModelToDDMFormConverter =
 				new ConfigurationModelToDDMFormConverter(
-					_enLocale, new EmptyResourceBundle());
+					new EmptyResourceBundle());
 
 		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
-			configurationModel);
+			configurationModel, _enLocale);
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
 			ddmForm.getDDMFormFieldsMap(false);
@@ -230,10 +230,10 @@ public class ConfigurationModelToDDMFormConverterTest extends Mockito {
 		ConfigurationModelToDDMFormConverter
 			configurationModelToDDMFormConverter =
 				new ConfigurationModelToDDMFormConverter(
-					_enLocale, new EmptyResourceBundle());
+					new EmptyResourceBundle());
 
 		DDMForm ddmForm = configurationModelToDDMFormConverter.getDDMForm(
-			configurationModel);
+			configurationModel, _enLocale);
 
 		Map<String, DDMFormField> ddmFormFieldsMap =
 			ddmForm.getDDMFormFieldsMap(false);
