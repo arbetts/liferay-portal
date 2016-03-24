@@ -92,7 +92,11 @@ public class ConfigurationModelToDDMFormConverter {
 				ddmFormField.setRepeatable(true);
 			}
 
-			setDDMFormFieldDisplayStyle(ddmFormField);
+			if (Validator.equals(
+				ddmFormField.getDataType(), FieldConstants.STRING)) {
+
+				ddmFormField.setProperty("displayStyle", "multiline");
+			}
 
 			ddmForm.addDDMFormField(ddmFormField);
 		}
@@ -214,14 +218,6 @@ public class ConfigurationModelToDDMFormConverter {
 		String dataType = getDDMFormFieldDataType(attributeDefinition);
 
 		ddmFormField.setDataType(dataType);
-	}
-
-	protected void setDDMFormFieldDisplayStyle(DDMFormField ddmFormField) {
-		String dataType = ddmFormField.getDataType();
-
-		if (Validator.equals(dataType, FieldConstants.STRING)) {
-			ddmFormField.setProperty("displayStyle", "multiline");
-		}
 	}
 
 	protected void setDDMFormFieldLabel(
