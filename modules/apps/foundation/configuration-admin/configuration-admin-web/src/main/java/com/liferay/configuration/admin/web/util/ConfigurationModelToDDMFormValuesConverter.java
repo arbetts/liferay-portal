@@ -109,23 +109,19 @@ public class ConfigurationModelToDDMFormValuesConverter {
 
 		LocalizedValue localizedValue = new LocalizedValue(_locale);
 
-		localizedValue.addString(_locale, translate(value));
+		if ((_resourceBundle != null) && (value != null)) {
+			String resourceBundleValue = null;
+
+			resourceBundleValue = ResourceBundleUtil.getString(_resourceBundle, value);
+
+			if (resourceBundleValue != null) {
+				value = resourceBundleValue;
+			}
+		}
+
+		localizedValue.addString(_locale, value);
 
 		ddmFormFieldValue.setValue(localizedValue);
-	}
-
-	protected String translate(String key) {
-		if ((_resourceBundle == null) || (key == null)) {
-			return key;
-		}
-
-		String value = ResourceBundleUtil.getString(_resourceBundle, key);
-
-		if (value == null) {
-			return key;
-		}
-
-		return value;
 	}
 
 	private final ConfigurationModel _configurationModel;
