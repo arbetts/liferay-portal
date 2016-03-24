@@ -81,7 +81,7 @@ public class ConfigurationModelToDDMFormConverter {
 
 			setDDMFormFieldLabel(attributeDefinition, ddmFormField);
 			setDDMFormFieldOptions(attributeDefinition, ddmFormField);
-			setDDMFormFieldPredefinedValue(attributeDefinition, ddmFormField);
+			setDDMFormFieldPredefinedValue(ddmFormField);
 			setDDMFormFieldTip(attributeDefinition, ddmFormField);
 
 			ddmFormField.setLocalizable(true);
@@ -96,9 +96,7 @@ public class ConfigurationModelToDDMFormConverter {
 				ddmFormField.setRepeatable(true);
 			}
 
-			if (Validator.equals(
-				ddmFormField.getDataType(), FieldConstants.STRING)) {
-
+			if (Validator.equals(dataType, FieldConstants.STRING)) {
 				ddmFormField.setProperty("displayStyle", "multiline");
 			}
 
@@ -169,11 +167,7 @@ public class ConfigurationModelToDDMFormConverter {
 		return FieldConstants.STRING;
 	}
 
-	protected String getDDMFormFieldPredefinedValue(
-		AttributeDefinition attributeDefinition) {
-
-		String dataType = getDDMFormFieldDataType(attributeDefinition);
-
+	protected String getDDMFormFieldPredefinedValue(String dataType) {
 		if (dataType.equals(FieldConstants.BOOLEAN)) {
 			return "false";
 		}
@@ -235,13 +229,12 @@ public class ConfigurationModelToDDMFormConverter {
 		ddmFormField.setDDMFormFieldOptions(ddmFormFieldOptions);
 	}
 
-	protected void setDDMFormFieldPredefinedValue(
-		AttributeDefinition attributeDefinition, DDMFormField ddmFormField) {
+	protected void setDDMFormFieldPredefinedValue(DDMFormField ddmFormField) {
+		String dataType = ddmFormField.getDataType();
+
+		String predefinedValueString = getDDMFormFieldPredefinedValue(dataType);
 
 		String type = ddmFormField.getType();
-
-		String predefinedValueString = getDDMFormFieldPredefinedValue(
-			attributeDefinition);
 
 		if (type.equals(DDMFormFieldType.SELECT)) {
 			predefinedValueString = "[\"" + predefinedValueString + "\"]";
