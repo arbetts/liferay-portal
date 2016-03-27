@@ -121,10 +121,10 @@ public class MBThreadLocalServiceImpl extends MBThreadLocalServiceBaseImpl {
 				message.getUserId(), message.getGroupId(),
 				thread.getStatusDate(), thread.getLastPostDate(),
 				MBThread.class.getName(), thread.getThreadId(),
-				thread.getUuid(), 0, new long[0], new String[0], false, null,
-				null, null, null, String.valueOf(thread.getRootMessageId()),
-				null, null, null, null, 0, 0,
-				serviceContext.getAssetPriority());
+				thread.getUuid(), 0, new long[0], new String[0], true, false,
+				null, null, null, null,
+				String.valueOf(thread.getRootMessageId()), null, null, null,
+				null, 0, 0, serviceContext.getAssetPriority());
 		}
 
 		return thread;
@@ -980,9 +980,12 @@ public class MBThreadLocalServiceImpl extends MBThreadLocalServiceBaseImpl {
 		}
 
 		MBCategory category = message.getCategory();
+
 		MBThread oldThread = message.getThread();
+
 		MBMessage rootMessage = mbMessagePersistence.findByPrimaryKey(
 			oldThread.getRootMessageId());
+
 		long oldAttachmentsFolderId = message.getAttachmentsFolderId();
 
 		// Message flags

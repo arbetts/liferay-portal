@@ -1146,8 +1146,7 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 		if (portalSource && !isModulesFile(absolutePath)) {
 			if (_tablesContent == null) {
 				_tablesContent = getContent(
-					"sql/portal-tables.sql",
-					BaseSourceProcessor.PORTAL_MAX_DIR_LEVEL);
+					"sql/portal-tables.sql", PORTAL_MAX_DIR_LEVEL);
 			}
 
 			return _tablesContent;
@@ -1216,7 +1215,8 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 						!trimmedLine.startsWith("<%") &&
 						!trimmedLine.startsWith("<!")) {
 
-						line = sortAttributes(fileName, line, lineCount, false);
+						line = sortAttributes(
+							fileName, line, trimmedLine, lineCount, true);
 					}
 					else if (trimmedLine.startsWith("<![CDATA[") &&
 							 !trimmedLine.endsWith("]]>")) {

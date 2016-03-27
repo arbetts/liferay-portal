@@ -107,7 +107,7 @@ public class CustomizationSettingsProcessor implements ColumnProcessor {
 
 		inputTag.setDisabled(!_customizationEnabled);
 		inputTag.setDynamicAttribute(
-			StringPool.BLANK, "labelOff", "no-customizable");
+			StringPool.BLANK, "labelOff", "not-customizable");
 		inputTag.setDynamicAttribute(
 			StringPool.BLANK, "labelOn", "customizable");
 		inputTag.setLabel(StringPool.BLANK);
@@ -131,15 +131,6 @@ public class CustomizationSettingsProcessor implements ColumnProcessor {
 	@Override
 	public String processMax() throws Exception {
 		return StringPool.BLANK;
-	}
-
-	/**
-	 * @deprecated As of 6.2.0, replaced by {@link #processMax()}
-	 */
-	@Deprecated
-	@Override
-	public String processMax(String classNames) throws Exception {
-		return processMax();
 	}
 
 	@Override

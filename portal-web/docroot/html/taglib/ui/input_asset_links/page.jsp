@@ -24,11 +24,9 @@
 	/>
 </liferay-util:buffer>
 
-<p class="text-muted <%= (inputAssetLinksDisplayContext.getAssetLinksCount() <= 0) ? StringPool.BLANK : "hide" %>" id="<%= inputAssetLinksDisplayContext.getRandomNamespace() + "emptyResultMessage" %>">
-	<%= StringUtil.toLowerCase(LanguageUtil.get(resourceBundle, "none")) %>
-</p>
-
 <liferay-ui:search-container
+	compactEmptyResultsMessage="<%= true %>"
+	emptyResultsMessage="none"
 	headerNames="type,title,scope,null"
 	total="<%= inputAssetLinksDisplayContext.getAssetLinksCount() %>"
 >
@@ -47,22 +45,26 @@
 		%>
 
 		<liferay-ui:search-container-column-text
+			cssClass="text-column type-column"
 			name="type"
 			value="<%= inputAssetLinksDisplayContext.getAssetType(assetLinkEntry) %>"
 		/>
 
 		<liferay-ui:search-container-column-text
+			cssClass="content-column title-column"
 			name="title"
+			truncate="<%= true %>"
 			value="<%= HtmlUtil.escape(assetLinkEntry.getTitle(locale)) %>"
 		/>
 
 		<liferay-ui:search-container-column-text
+			cssClass="scope-column text-column"
 			name="scope"
 			value="<%= HtmlUtil.escape(inputAssetLinksDisplayContext.getGroupDescriptiveName(assetLinkEntry)) %>"
 		/>
 
 		<liferay-ui:search-container-column-text
-			cssClass="list-group-item-field"
+			cssClass="entry-action-column"
 		>
 			<a class="modify-link" data-rowId="<%= assetLinkEntry.getEntryId() %>" href="javascript:;"><%= removeLinkIcon %></a>
 		</liferay-ui:search-container-column-text>
@@ -137,8 +139,6 @@
 					searchContainer.addRow([event.assettype, A.Escape.html(event.assettitle), A.Escape.html(event.groupdescriptivename), entryLink], event.assetentryid);
 
 					searchContainer.updateDataStore();
-
-					A.one('#<%= inputAssetLinksDisplayContext.getRandomNamespace() %>emptyResultMessage').hide();
 				}
 			);
 		},
@@ -157,10 +157,6 @@
 			var tr = link.ancestor('tr');
 
 			searchContainer.deleteRow(tr, link.getAttribute('data-rowId'));
-
-			if (searchContainer.getSize()) {
-				A.one('#<%= inputAssetLinksDisplayContext.getRandomNamespace() %>emptyResultMessage').show();
-			}
 		},
 		'.modify-link'
 	);

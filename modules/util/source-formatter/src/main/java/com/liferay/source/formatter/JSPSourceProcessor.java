@@ -186,10 +186,12 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 	protected void checkDefineObjectsVariables(
 		String line, String fileName, int lineCount) {
 
-		for (String[] defineObject : _LIFERAY_FRONTEND_DEFINE_OBJECTS) {
-			checkDefineObjectsVariable(
-				line, fileName, lineCount, defineObject[0], defineObject[1],
-				defineObject[2], "liferay-frontend");
+		if (portalSource) {
+			for (String[] defineObject : _LIFERAY_FRONTEND_DEFINE_OBJECTS) {
+				checkDefineObjectsVariable(
+					line, fileName, lineCount, defineObject[0], defineObject[1],
+					defineObject[2], "liferay-frontend");
+			}
 		}
 
 		for (String[] defineObject : _LIFERAY_THEME_DEFINE_OBJECTS) {
@@ -350,9 +352,11 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 		if (_stripJSPImports && !_jspContents.isEmpty()) {
 			try {
 				newContent = formatJSPImportsOrTaglibs(
-					fileName, newContent, _jspImportPattern, true);
+					fileName, newContent, _compressedJSPImportPattern,
+					_uncompressedJSPImportPattern, true);
 				newContent = formatJSPImportsOrTaglibs(
-					fileName, newContent, _jspTaglibPattern, false);
+					fileName, newContent, _compressedJSPTaglibPattern,
+					_uncompressedJSPTaglibPattern, false);
 			}
 			catch (RuntimeException re) {
 				_stripJSPImports = false;
@@ -409,6 +413,10 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 		checkLanguageKeys(
 			fileName, absolutePath, newContent, _taglibLanguageKeyPattern3);
 
+		newContent = formatJSONObject(newContent);
+
+		newContent = formatStringBundler(fileName, newContent, -1);
+
 		checkXSS(fileName, newContent);
 
 		// LPS-47682
@@ -432,6 +440,14 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			processErrorMessage(
 				fileName, "Do not use Registry in modules: " + fileName);
 		}
+
+		// LPS-62786
+
+		checkPropertyUtils(fileName, newContent);
+
+		// LPS-63953
+
+		checkStringUtilReplace(fileName, newContent);
 
 		Matcher matcher = _javaClassPattern.matcher(newContent);
 
@@ -689,9 +705,10 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 				String trimmedPreviousLine = StringUtil.trimLeading(
 					previousLine);
 
-				checkChaining(trimmedLine, fileName, lineCount);
-
-				checkStringBundler(trimmedLine, fileName, lineCount);
+				if (line.matches(".*\\WgetClass\\(\\)\\..+")) {
+					processErrorMessage(
+						fileName, "chaining: " + fileName + " " + lineCount);
+				}
 
 				checkEmptyCollection(trimmedLine, fileName, lineCount);
 
@@ -832,40 +849,11 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 					checkIfClauseParentheses(ifClause, fileName, lineCount);
 				}
 
-				matcher = _jspTagAttributes.matcher(line);
+				matcher = _jspTaglibPattern.matcher(line);
 
-				if (matcher.find()) {
-					String attributes = matcher.group(1);
-
-					Matcher attributeValueMatcher =
-						_jspTagAttributeValue.matcher(attributes);
-
-					while (attributeValueMatcher.find()) {
-						String delimeter = attributeValueMatcher.group(1);
-						String javaCode = attributeValueMatcher.group(2);
-
-						if (delimeter.equals(StringPool.QUOTE) ^
-							javaCode.contains(StringPool.QUOTE)) {
-
-							continue;
-						}
-
-						String newDelimeter = StringPool.QUOTE;
-
-						if (delimeter.equals(StringPool.QUOTE)) {
-							newDelimeter = StringPool.APOSTROPHE;
-						}
-
-						String match = attributeValueMatcher.group();
-
-						String replacement = StringUtil.replaceFirst(
-							match, delimeter, newDelimeter);
-
-						replacement = StringUtil.replaceLast(
-							replacement, delimeter, newDelimeter);
-
-						line = StringUtil.replace(line, match, replacement);
-					}
+				while (matcher.find()) {
+					line = sortAttributes(
+						fileName, line, matcher.group(), lineCount, false);
 				}
 
 				if (readAttributes) {
@@ -910,7 +898,7 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 							else if (trimmedLine.endsWith(StringPool.QUOTE) &&
 									 tag.contains(StringPool.COLON) &&
 									 (StringUtil.count(
-										 trimmedLine, StringPool.QUOTE) > 2)) {
+										 trimmedLine, CharPool.QUOTE) > 2)) {
 
 								processErrorMessage(
 									fileName,
@@ -996,7 +984,8 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 						readAttributes = true;
 					}
 					else {
-						line = sortAttributes(fileName, line, lineCount, true);
+						line = sortAttributes(
+							fileName, line, trimmedLine, lineCount, false);
 					}
 				}
 
@@ -1090,15 +1079,15 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 	}
 
 	protected String formatJSPImportsOrTaglibs(
-			String fileName, String content, Pattern pattern,
-			boolean checkUnusedImports)
+			String fileName, String content, Pattern compressedPattern,
+			Pattern uncompressedPattern, boolean checkUnusedImports)
 		throws IOException {
 
 		if (fileName.endsWith("init-ext.jsp")) {
 			return content;
 		}
 
-		Matcher matcher = pattern.matcher(content);
+		Matcher matcher = compressedPattern.matcher(content);
 
 		if (!matcher.find()) {
 			return content;
@@ -1106,7 +1095,7 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 		String imports = matcher.group();
 
-		imports = StringUtil.replace(
+		String newImports = StringUtil.replace(
 			imports, new String[] {"<%@\r\n", "<%@\n", " %><%@ "},
 			new String[] {"\r\n<%@ ", "\n<%@ ", " %>\n<%@ "});
 
@@ -1114,7 +1103,7 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			List<String> importLines = new ArrayList<>();
 
 			UnsyncBufferedReader unsyncBufferedReader =
-				new UnsyncBufferedReader(new UnsyncStringReader(imports));
+				new UnsyncBufferedReader(new UnsyncStringReader(newImports));
 
 			String line = null;
 
@@ -1130,35 +1119,16 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			addJSPUnusedImports(fileName, importLines, unneededImports);
 
 			for (String unneededImport : unneededImports) {
-				imports = StringUtil.replace(
-					imports, unneededImport, StringPool.BLANK);
+				newImports = StringUtil.replace(
+					newImports, unneededImport, StringPool.BLANK);
 			}
 		}
 
+		content = StringUtil.replaceFirst(content, imports, newImports);
+
 		ImportsFormatter importsFormatter = new JSPImportsFormatter();
 
-		imports = importsFormatter.format(imports);
-
-		String beforeImports = content.substring(0, matcher.start());
-
-		if (Validator.isNull(imports)) {
-			beforeImports = StringUtil.replaceLast(
-				beforeImports, "\n", StringPool.BLANK);
-		}
-
-		String afterImports = content.substring(matcher.end());
-
-		if (Validator.isNull(afterImports)) {
-			imports = StringUtil.replaceLast(imports, "\n", StringPool.BLANK);
-
-			content = beforeImports + imports;
-
-			return content;
-		}
-
-		content = beforeImports + imports + "\n" + afterImports;
-
-		return content;
+		return importsFormatter.format(content, uncompressedPattern);
 	}
 
 	protected String formatLogFileName(String absolutePath, String content) {
@@ -1224,7 +1194,7 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 	@Override
 	protected String formatTagAttributeType(
-			String line, String tag, String attributeAndValue)
+			String line, String tagName, String attributeAndValue)
 		throws Exception {
 
 		if (!attributeAndValue.endsWith(StringPool.QUOTE) ||
@@ -1233,11 +1203,11 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			return line;
 		}
 
-		if (tag.startsWith("liferay-")) {
-			tag = tag.substring(8);
+		if (tagName.startsWith("liferay-")) {
+			tagName = tagName.substring(8);
 		}
 
-		JavaClass tagJavaClass = getTagJavaClass(tag);
+		JavaClass tagJavaClass = getTagJavaClass(tagName);
 
 		if (tagJavaClass == null) {
 			return line;
@@ -1344,6 +1314,14 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			if (!matcher.find()) {
 				throw new RuntimeException(
 					"Invalid include " + includeFileName);
+			}
+
+			String extension = matcher.group(1);
+
+			if (extension.equals("svg")) {
+				x = y;
+
+				continue;
 			}
 
 			includeFileName = buildFullPathIncludeFileName(
@@ -1503,8 +1481,7 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 			return _utilTaglibDirName;
 		}
 
-		File utilTaglibDir = getFile(
-			"util-taglib", BaseSourceProcessor.PORTAL_MAX_DIR_LEVEL);
+		File utilTaglibDir = getFile("util-taglib", PORTAL_MAX_DIR_LEVEL);
 
 		if (utilTaglibDir != null) {
 			_utilTaglibDirName = utilTaglibDir.getAbsolutePath();
@@ -1958,6 +1935,10 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 	};
 
 	private Set<String> _checkedForIncludesFileNames = new HashSet<>();
+	private final Pattern _compressedJSPImportPattern = Pattern.compile(
+		"(<.*\n*page.import=\".*>\n*)+", Pattern.MULTILINE);
+	private final Pattern _compressedJSPTaglibPattern = Pattern.compile(
+		"(<.*\n*taglib uri=\".*>\n*)+", Pattern.MULTILINE);
 	private final Pattern _defineObjectsPattern = Pattern.compile(
 		"\n\t*(<.*:defineObjects />)\n");
 	private final List<String> _duplicateImportClassNames = new ArrayList<>();
@@ -1978,16 +1959,10 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 		"\n(private|protected|public).* class ([A-Za-z0-9]+) " +
 			"([\\s\\S]*?)\n\\}\n");
 	private final Map<String, String> _jspContents = new HashMap<>();
-	private final Pattern _jspImportPattern = Pattern.compile(
-		"(<.*\n*page.import=\".*>\n*)+", Pattern.MULTILINE);
 	private final Pattern _jspIncludeFilePattern = Pattern.compile(
-		"/.*[.]jsp[f]?");
-	private final Pattern _jspTagAttributes = Pattern.compile(
-		"<[-\\w]+:[-\\w]+ (.*?[^%])>");
-	private final Pattern _jspTagAttributeValue = Pattern.compile(
-		"('|\")<%= (.+?) %>('|\")");
+		"/.*\\.(jsp[f]?|svg)");
 	private final Pattern _jspTaglibPattern = Pattern.compile(
-		"(<.*\n*taglib uri=\".*>\n*)+", Pattern.MULTILINE);
+		"<[-\\w]+:[-\\w]+ (.*?[^%])>");
 	private final Pattern _logPattern = Pattern.compile(
 		"Log _log = LogFactoryUtil\\.getLog\\(\"(.*?)\"\\)");
 	private final Pattern _missingEmptyLineBetweenDefineOjbectsPattern =
@@ -2013,6 +1988,10 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 	private final Pattern _taglibLanguageKeyPattern3 = Pattern.compile(
 		"(liferay-ui:)(?:input-resource) .*id=\"([^<=%\\[\\s]+)\"(?!.*title=" +
 			"(?:'|\").+(?:'|\"))");
+	private final Pattern _uncompressedJSPImportPattern = Pattern.compile(
+		"(<.*page.import=\".*>\n*)+", Pattern.MULTILINE);
+	private final Pattern _uncompressedJSPTaglibPattern = Pattern.compile(
+		"(<.*taglib uri=\".*>\n*)+", Pattern.MULTILINE);
 	private List<String> _unusedVariablesExcludes;
 	private String _utilTaglibDirName;
 	private final Pattern _xssPattern = Pattern.compile(

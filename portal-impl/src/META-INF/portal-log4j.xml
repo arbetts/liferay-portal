@@ -800,6 +800,10 @@
 		<priority value="ERROR" />
 	</category>
 
+	<category name="com.liferay.portal.template.URLResourceParser">
+		<priority value="INFO" />
+	</category>
+
 	<category name="com.liferay.portal.theme.ThemeLoader">
 		<priority value="INFO" />
 	</category>
@@ -1225,6 +1229,10 @@
 	</category>
 
 	<category name="osgi.logging">
+		<priority value="WARN" />
+	</category>
+
+	<category name="osgi.logging.org_eclipse_osgi">
 		<priority value="WARN" />
 	</category>
 

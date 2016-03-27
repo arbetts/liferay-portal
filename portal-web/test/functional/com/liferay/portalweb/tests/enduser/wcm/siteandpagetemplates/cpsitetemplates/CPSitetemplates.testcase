@@ -179,7 +179,7 @@
 
 		<execute macro="SiteTemplates#viewDefaultDataLocalizedCP">
 			<var name="siteTemplateDescriptionList" value="Sitio con foros y Wiki,Sitio con noticias y documentos" />
-			<var name="siteTemplateNameList" value="Sitio de la comunidad,Sitio de la intranet" />
+			<var name="siteTemplateNameList" value="Sitio de la Comunidad,Sitio de intranet" />
 		</execute>
 
 		<execute macro="Navigator#openURL" />
@@ -221,6 +221,10 @@
 			<var name="columnNumberFrom" value="2" />
 			<var name="columnNumberTo" value="1" />
 			<var name="portletName" value="User Statistics" />
+		</execute>
+
+		<execute macro="Navigator#openSiteURL">
+			<var name="siteName" value="Site Name" />
 		</execute>
 
 		<execute macro="SiteTemplates#resetPageChanges">

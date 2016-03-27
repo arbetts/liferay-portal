@@ -132,7 +132,7 @@
 
 		<execute macro="Role#definePermissionCP">
 			<var name="permissionDefinitionKey" value="CONTROL_PANEL_GENERAL_PERMISSIONS_GO_TO_CONTROL_PANEL_CHECKBOX" />
-			<var name="permissionDefinitionValue" value="Go to Control Panel" />
+			<var name="permissionDefinitionValue" value="View Control Panel Menu" />
 			<var name="roleName" value="Roles Regrole Name" />
 		</execute>
 
@@ -476,7 +476,6 @@
 		</execute>
 
 		<execute macro="Page#add">
-			<var name="page" value="Public Pages" />
 			<var name="pageName" value="Site Page" />
 			<var name="siteName" value="Site Name" />
 		</execute>

@@ -201,6 +201,7 @@
 		<reference package-path="com.liferay.portal" entity="ResourcePermission" />
 		<reference package-path="com.liferay.portal" entity="Role" />
 		<reference package-path="com.liferay.portal" entity="User" />
+		<reference package-path="com.liferay.portal" entity="UserGroup" />
 		<reference package-path="com.liferay.portal" entity="VirtualHost" />
 	</entity>
 	<entity name="Contact" local-service="true" remote-service="true">
@@ -2185,6 +2186,11 @@
 			<finder-column name="name" />
 			<finder-column name="scope" />
 		</finder>
+		<finder name="C_S_P" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="scope" />
+			<finder-column name="primKey" />
+		</finder>
 		<finder name="C_N_S_P" return-type="Collection">
 			<finder-column name="companyId" />
 			<finder-column name="name" />
@@ -3349,6 +3355,7 @@
 		<exception>GroupInheritContent</exception>
 		<exception>GroupKey</exception>
 		<exception>GroupParent</exception>
+		<exception>ImageResolution</exception>
 		<exception>ImageType</exception>
 		<exception>InvalidRepository</exception>
 		<exception>LayoutBranchName</exception>

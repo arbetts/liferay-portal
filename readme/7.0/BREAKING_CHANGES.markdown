@@ -20,7 +20,7 @@ feature or API will be dropped in an upcoming version.
 replaces an old API, in spite of the old API being kept in Liferay Portal for
 backwards compatibility.
 
-*This document has been reviewed through commit `09adf28`.*
+*This document has been reviewed through commit `9dc624a`.*
 
 ## Breaking Changes Contribution Guidelines
 
@@ -72,6 +72,37 @@ The remaining content of this document consists of the breaking changes listed
 in ascending chronological order.
 
 ## Breaking Changes List
+
+### Removed Liferay Frontend Editor BBCode Web, previously Liferay BBCode Editor
+- **Date:** 2016-Mar-16
+- **JIRA Ticket:** LPS-48334
+
+#### What changed?
+
+- Removed the com.liferay.frontend.editor.bbcode.web OSGi bundle.
+- Removed all hardcoded references/logic for the editor.
+- Added Log Warning and logic to upgrade the editor property to `ckeditor_bbcode`
+if the old `bbcode` is being used. This Log Warning and logic will be remove in
+the future along with LPS-64099.
+
+#### Who is affected?
+
+Any one who has
+`editor.wysiwyg.portal-web.docroot.html.portlet.message_boards.edit_message.bb_code.jsp`
+set to `bbcode` in portal properties (e.g., `portal-ext.properties`).
+
+#### How should I update my code?
+
+You should modify your `portal-ext.properties` file to remove the property
+`editor.wysiwyg.portal-web.docroot.html.portlet.message_boards.edit_message.bb_code.jsp`
+
+#### Why was this change made?
+
+Since Liferay Frontend Editor BBCode Web has been deprecated since 6.1, it was
+time to remove it completely. This frees up development and support resources to
+focus on supported features.
+
+---------------------------------------
 
 ### The liferay-ui:logo-selector Tag Requires Parameter Changes
 - **Date:** 2013-Dec-05
@@ -3972,7 +4003,54 @@ You should change the entry from `site_administration.pages` to
 
 #### Why was this change made?
 
-This change standardizes naming conventions and separates concepts in Product
-Menu
+This change standardizes naming conventions and separates concepts in the
+Product Menu.
 
 ---------------------------------------
+
+### FlagsEntryService.addEntry Method Throws PortalException
+- **Date:** 2016-Mar-04
+- **JIRA Ticket:** LPS-63109
+
+#### What changed?
+
+The method `FlagsEntryService.addEntry` now throws a `PortalException` if the
+`reporterEmailAddress` is not a valid email address.
+
+#### Who is affected?
+
+Any caller of the method `FlagsEntryService.addEntry` is affected.
+
+#### How should I update my code?
+
+You should consider checking for the `PortalException` in try-catch blocks and
+adapt your code accordingly.
+
+#### Why was this change made?
+
+This change prevents providing an incorrect email address when adding flag
+entries.
+
+---------------------------------------
+
+### Removed PHP Portlet Support
+- **Date:** 2016-Mar-10
+- **JIRA Ticket:** LPS-64052
+
+#### What changed?
+
+PHP portlets are no longer supported.
+
+#### Who is affected?
+
+This affects any portlet using the class
+`com.liferay.util.bridges.php.PHPPortlet`.
+
+#### How should I update my code?
+
+You should port your PHP portlet to a different technology.
+
+#### Why was this change made?
+
+This change simplifies future maintenance of the portal. This support could be
+added back in the future as an independent module.

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.upgrade;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
@@ -32,6 +34,23 @@ import java.util.List;
  * @author Mate Thurzo
  */
 public abstract class BaseUpgradeLastPublishDate extends UpgradeProcess {
+
+	protected void addLastPublishDateColumn(String tableName) throws Exception {
+		try (LoggingTimer loggingTimer = new LoggingTimer(tableName)) {
+			if (hasColumn(tableName, "lastPublishDate")) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Table " + tableName +
+							" already has the column lastPublishDate");
+				}
+
+				return;
+			}
+
+			runSQL(
+				"alter table " + tableName + " add lastPublishDate DATE null");
+		}
+	}
 
 	protected Date getLayoutSetLastPublishDate(long groupId) throws Exception {
 		try (PreparedStatement ps = connection.prepareStatement(
@@ -122,7 +141,7 @@ public abstract class BaseUpgradeLastPublishDate extends UpgradeProcess {
 	protected void updateLastPublishDates(String portletId, String tableName)
 		throws Exception {
 
-		try (LoggingTimer loggingTimer = new LoggingTimer()) {
+		try (LoggingTimer loggingTimer = new LoggingTimer(tableName)) {
 			List<Long> stagedGroupIds = getStagedGroupIds();
 
 			for (long stagedGroupId : stagedGroupIds) {
@@ -158,5 +177,8 @@ public abstract class BaseUpgradeLastPublishDate extends UpgradeProcess {
 			ps.executeUpdate();
 		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		BaseUpgradeLastPublishDate.class);
 
 }

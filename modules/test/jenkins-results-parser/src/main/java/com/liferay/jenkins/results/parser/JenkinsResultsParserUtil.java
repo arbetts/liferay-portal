@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
@@ -29,8 +30,9 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +47,40 @@ import org.json.JSONObject;
  * @author Peter Yoo
  */
 public class JenkinsResultsParserUtil {
+
+	public static JSONObject createJSONObject(String jsonString)
+		throws Exception {
+
+		JSONObject jsonObject = new JSONObject(jsonString);
+
+		if (jsonObject.isNull("duration") ||
+			jsonObject.isNull("result") || jsonObject.isNull("url")) {
+
+			return jsonObject;
+		}
+
+		String url = jsonObject.getString("url");
+
+		if (!url.contains("AXIS_VARIABLE")) {
+			return jsonObject;
+		}
+
+		Object result = jsonObject.get("result");
+
+		if (result instanceof JSONObject) {
+			return jsonObject;
+		}
+
+		if ((jsonObject.getInt("duration") == 0) && result.equals("FAILURE")) {
+			String actualResult = getActualResult(url);
+
+			System.out.println("Actual Result: " + actualResult);
+
+			jsonObject.putOpt("result", actualResult);
+		}
+
+		return jsonObject;
+	}
 
 	public static URL createURL(String urlString) throws Exception {
 		URL url = new URL(urlString);
@@ -137,6 +173,26 @@ public class JenkinsResultsParserUtil {
 		return json;
 	}
 
+	public static String fixMarkdown(String markdown) {
+		markdown = markdown.replace("\\", "\\\\");
+		markdown = markdown.replace("`", "\\`");
+		markdown = markdown.replace("*", "\\*");
+		markdown = markdown.replace("_", "\\_");
+		markdown = markdown.replace("{", "\\{");
+		markdown = markdown.replace("}", "\\}");
+		markdown = markdown.replace("[", "\\[");
+		markdown = markdown.replace("]", "\\]");
+		markdown = markdown.replace("(", "\\(");
+		markdown = markdown.replace(")", "\\)");
+		markdown = markdown.replace("#", "\\#");
+		markdown = markdown.replace("+", "\\+");
+		markdown = markdown.replace("-", "\\-");
+		markdown = markdown.replace(".", "\\.");
+		markdown = markdown.replace("!", "\\!");
+
+		return markdown;
+	}
+
 	public static String fixURL(String url) {
 		url = url.replace("(", "%28");
 		url = url.replace(")", "%29");
@@ -155,6 +211,27 @@ public class JenkinsResultsParserUtil {
 		xmlWriter.write(element);
 
 		return writer.toString();
+	}
+
+	public static String getActualResult(String buildURL) throws Exception {
+		String progressiveText = toString(
+			getLocalURL(buildURL + "/logText/progressiveText"), false);
+
+		if (progressiveText.contains("Finished:")) {
+			if (progressiveText.contains("Finished: SUCCESS")) {
+				return "SUCCESS";
+			}
+
+			if (progressiveText.contains("Finished: UNSTABLE")) {
+				return "FAILURE";
+			}
+
+			if (progressiveText.contains("Finished: FAILURE")) {
+				return "FAILURE";
+			}
+		}
+
+		return null;
 	}
 
 	public static String getAxisVariable(JSONObject jsonObject)
@@ -233,8 +310,18 @@ public class JenkinsResultsParserUtil {
 		if (remoteURL.contains("${dependencies.url}")) {
 			remoteURL = fixFileName(remoteURL);
 
-			remoteURL = remoteURL.replace(
-				"${dependencies.url}", DEPENDENCIES_URL);
+			String fileURL = remoteURL.replace(
+				"${dependencies.url}", DEPENDENCIES_URL_FILE);
+
+			File file = new File(fileURL.substring("file:".length()));
+
+			if (file.exists()) {
+				remoteURL = fileURL;
+			}
+			else {
+				remoteURL = remoteURL.replace(
+					"${dependencies.url}", DEPENDENCIES_URL_HTTP);
+			}
 		}
 
 		if (remoteURL.startsWith("file")) {
@@ -281,14 +368,14 @@ public class JenkinsResultsParserUtil {
 	public static JSONObject toJSONObject(String url, boolean checkCache)
 		throws Exception {
 
-		return new JSONObject(toString(url, checkCache, 0));
+		return createJSONObject(toString(url, checkCache, 0));
 	}
 
 	public static JSONObject toJSONObject(
 			String url, boolean checkCache, int timeout)
 		throws Exception {
 
-		return new JSONObject(toString(url, checkCache, timeout));
+		return createJSONObject(toString(url, checkCache, timeout));
 	}
 
 	public static String toString(String url) throws Exception {
@@ -348,11 +435,17 @@ public class JenkinsResultsParserUtil {
 
 				bufferedReader.close();
 
-				if (!url.startsWith("file:")) {
-					_toStringCache.put(key, sb.toString());
+				String string = sb.toString();
+
+				byte[] bytes = string.getBytes();
+
+				if (!url.startsWith("file:") &&
+					(bytes.length < (3 * 1024 * 1024))) {
+
+					_toStringCache.put(key, string);
 				}
 
-				return sb.toString();
+				return string;
 			}
 			catch (FileNotFoundException fnfe) {
 				retryCount++;
@@ -383,14 +476,44 @@ public class JenkinsResultsParserUtil {
 		Files.write(Paths.get(file.toURI()), content.getBytes());
 	}
 
-	protected static final String DEPENDENCIES_URL =
+	protected static final String DEPENDENCIES_URL_FILE;
+
+	protected static final String DEPENDENCIES_URL_HTTP =
 		"http://mirrors-no-cache.lax.liferay.com/github.com/liferay" +
 			"/liferay-jenkins-results-parser-samples-ee/1/";
+
+	static {
+		File dependenciesDir = new File("src/test/resources/dependencies/");
+
+		try {
+			URI uri = dependenciesDir.toURI();
+
+			URL url = uri.toURL();
+
+			DEPENDENCIES_URL_FILE = url.toString();
+		}
+		catch (MalformedURLException murle) {
+			throw new RuntimeException(murle);
+		}
+	}
 
 	private static final Pattern _localURLPattern1 = Pattern.compile(
 		"https://test.liferay.com/([0-9]+)/");
 	private static final Pattern _localURLPattern2 = Pattern.compile(
 		"https://(test-[0-9]+-[0-9]+).liferay.com/");
-	private static final Map<String, String> _toStringCache = new HashMap<>();
+
+	private static final Map<String, String> _toStringCache =
+		new LinkedHashMap<String, String>(50) {
+
+			@Override
+			protected boolean removeEldestEntry(Entry<String, String> entry) {
+				if (size() > 50) {
+					return true;
+				}
+
+				return false;
+			}
+
+		};
 
 }
