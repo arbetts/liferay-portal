@@ -45,12 +45,9 @@ import org.osgi.service.metatype.AttributeDefinition;
  */
 public class DDMFormValuesToPropertiesConverter {
 
-	public DDMFormValuesToPropertiesConverter(Locale locale) {
-		_locale = locale;
-	}
-
 	public Dictionary<String, Object> getProperties(
-		ConfigurationModel configurationModel, DDMFormValues ddmFormValues) {
+		ConfigurationModel configurationModel, DDMFormValues ddmFormValues,
+		Locale locale) {
 
 		DDMForm ddmForm = ddmFormValues.getDDMForm();
 		
@@ -73,13 +70,15 @@ public class DDMFormValuesToPropertiesConverter {
 
 			if (attributeDefinition.getCardinality() == 0) {
 				value = toSimpleValue(
-					ddmFormFieldValues.get(0), ddmFormFieldsMap);
+					ddmFormFieldValues.get(0), ddmFormFieldsMap, locale);
 			}
 			else if (attributeDefinition.getCardinality() > 0) {
-				value = toArrayValue(ddmFormFieldValues, ddmFormFieldsMap);
+				value = toArrayValue(
+					ddmFormFieldValues, ddmFormFieldsMap, locale);
 			}
 			else if (attributeDefinition.getCardinality() < 0) {
-				value = toVectorValue(ddmFormFieldValues, ddmFormFieldsMap);
+				value = toVectorValue(
+					ddmFormFieldValues, ddmFormFieldsMap, locale);
 			}
 
 			properties.put(attributeDefinition.getID(), value);
@@ -106,11 +105,11 @@ public class DDMFormValuesToPropertiesConverter {
 
 	protected String getDDMFormFieldValueString(
 		DDMFormFieldValue ddmFormFieldValue,
-		Map<String, DDMFormField> ddmFormFieldsMap) {
+		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
 		Value value = ddmFormFieldValue.getValue();
 
-		String valueString = value.getString(_locale);
+		String valueString = value.getString(locale);
 
 		String type = getDDMFormFieldType(
 			ddmFormFieldValue.getName(), ddmFormFieldsMap);
@@ -134,7 +133,7 @@ public class DDMFormValuesToPropertiesConverter {
 
 	protected Serializable toArrayValue(
 		List<DDMFormFieldValue> ddmFormFieldValues,
-		Map<String, DDMFormField> ddmFormFieldsMap) {
+		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
 		DDMFormFieldValue ddmFormFieldValue = ddmFormFieldValues.get(0);
 
@@ -142,37 +141,36 @@ public class DDMFormValuesToPropertiesConverter {
 			ddmFormFieldValue.getName(), ddmFormFieldsMap);
 
 		Vector<Serializable> values = toVectorValue(
-			ddmFormFieldValues, ddmFormFieldsMap);
+			ddmFormFieldValues, ddmFormFieldsMap, locale);
 
 		return FieldConstants.getSerializable(dataType, values);
 	}
 
 	protected Serializable toSimpleValue(
 		DDMFormFieldValue ddmFormFieldValue, 
-		Map<String, DDMFormField> ddmFormFieldsMap) {
+		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
 		String dataType = getDDMFormFieldDataType(
 			ddmFormFieldValue.getName(), ddmFormFieldsMap);
 
 		String valueString = getDDMFormFieldValueString(
-			ddmFormFieldValue, ddmFormFieldsMap);
+			ddmFormFieldValue, ddmFormFieldsMap, locale);
 
 		return FieldConstants.getSerializable(dataType, valueString);
 	}
 
 	protected Vector<Serializable> toVectorValue(
 		List<DDMFormFieldValue> ddmFormFieldValues, 
-		Map<String, DDMFormField> ddmFormFieldsMap) {
+		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
 		Vector<Serializable> values = new Vector<>();
 
 		for (DDMFormFieldValue ddmFormFieldValue : ddmFormFieldValues) {
-			values.add(toSimpleValue(ddmFormFieldValue, ddmFormFieldsMap));
+			values.add(toSimpleValue(
+				ddmFormFieldValue, ddmFormFieldsMap, locale));
 		}
 
 		return values;
 	}
-
-	private final Locale _locale;
 
 }
