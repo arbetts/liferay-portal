@@ -24,7 +24,7 @@ import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.storage.FieldConstants;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONException;
-import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.util.ReflectionUtil;
 
 import java.io.Serializable;
@@ -46,13 +46,12 @@ import org.osgi.service.metatype.AttributeDefinition;
 public class DDMFormValuesToPropertiesConverter {
 
 	public DDMFormValuesToPropertiesConverter(
-		DDMFormValues ddmFormValues, JSONFactory jsonFactory, Locale locale) {
+		DDMFormValues ddmFormValues, Locale locale) {
 
 		DDMForm ddmForm = ddmFormValues.getDDMForm();
 
 		_ddmFormFieldsMap = ddmForm.getDDMFormFieldsMap(false);
 		_ddmFormFieldValuesMap = ddmFormValues.getDDMFormFieldValuesMap();
-		_jsonFactory = jsonFactory;
 		_locale = locale;
 	}
 
@@ -109,7 +108,8 @@ public class DDMFormValuesToPropertiesConverter {
 
 		if (type.equals(DDMFormFieldType.SELECT)) {
 			try {
-				JSONArray jsonArray = _jsonFactory.createJSONArray(valueString);
+				JSONArray jsonArray = JSONFactoryUtil.createJSONArray(
+					valueString);
 
 				if (jsonArray.length() == 1) {
 					valueString = jsonArray.getString(0);
@@ -157,7 +157,6 @@ public class DDMFormValuesToPropertiesConverter {
 
 	private final Map<String, DDMFormField> _ddmFormFieldsMap;
 	private final Map<String, List<DDMFormFieldValue>> _ddmFormFieldValuesMap;
-	private final JSONFactory _jsonFactory;
 	private final Locale _locale;
 
 }
