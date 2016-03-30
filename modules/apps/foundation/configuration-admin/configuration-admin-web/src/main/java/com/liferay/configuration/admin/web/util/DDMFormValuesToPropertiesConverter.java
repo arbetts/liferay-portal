@@ -46,23 +46,23 @@ import org.osgi.service.metatype.AttributeDefinition;
 public class DDMFormValuesToPropertiesConverter {
 
 	public DDMFormValuesToPropertiesConverter(
-		ConfigurationModel configurationModel, DDMFormValues ddmFormValues,
-		JSONFactory jsonFactory, Locale locale) {
+		DDMFormValues ddmFormValues, JSONFactory jsonFactory, Locale locale) {
 
 		DDMForm ddmForm = ddmFormValues.getDDMForm();
 
-		_configurationModel = configurationModel;
 		_ddmFormFieldsMap = ddmForm.getDDMFormFieldsMap(false);
 		_ddmFormFieldValuesMap = ddmFormValues.getDDMFormFieldValuesMap();
 		_jsonFactory = jsonFactory;
 		_locale = locale;
 	}
 
-	public Dictionary<String, Object> getProperties() {
+	public Dictionary<String, Object> getProperties(
+		ConfigurationModel configurationModel) {
+
 		Dictionary<String, Object> properties = new Hashtable<>();
 
 		AttributeDefinition[] attributeDefinitions =
-			_configurationModel.getAttributeDefinitions(ConfigurationModel.ALL);
+			configurationModel.getAttributeDefinitions(ConfigurationModel.ALL);
 
 		for (AttributeDefinition attributeDefinition : attributeDefinitions) {
 			Object value = null;
@@ -155,7 +155,6 @@ public class DDMFormValuesToPropertiesConverter {
 		return values;
 	}
 
-	private final ConfigurationModel _configurationModel;
 	private final Map<String, DDMFormField> _ddmFormFieldsMap;
 	private final Map<String, List<DDMFormFieldValue>> _ddmFormFieldValuesMap;
 	private final JSONFactory _jsonFactory;
