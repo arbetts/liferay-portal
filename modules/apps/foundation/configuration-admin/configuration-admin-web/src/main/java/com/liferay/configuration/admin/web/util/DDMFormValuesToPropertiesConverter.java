@@ -45,7 +45,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  */
 public class DDMFormValuesToPropertiesConverter {
 
-	public Dictionary<String, Object> getProperties(
+	public static Dictionary<String, Object> getProperties(
 		ConfigurationModel configurationModel, DDMFormValues ddmFormValues,
 		Locale locale) {
 
@@ -87,7 +87,7 @@ public class DDMFormValuesToPropertiesConverter {
 		return properties;
 	}
 
-	protected String getDDMFormFieldDataType(
+	protected static String getDDMFormFieldDataType(
 		String fieldName, Map<String, DDMFormField> ddmFormFieldsMap) {
 
 		DDMFormField ddmFormField = ddmFormFieldsMap.get(fieldName);
@@ -95,7 +95,7 @@ public class DDMFormValuesToPropertiesConverter {
 		return ddmFormField.getDataType();
 	}
 
-	protected String getDDMFormFieldType(
+	protected static String getDDMFormFieldType(
 		String fieldName, Map<String, DDMFormField> ddmFormFieldsMap) {
 
 		DDMFormField ddmFormField = ddmFormFieldsMap.get(fieldName);
@@ -103,7 +103,7 @@ public class DDMFormValuesToPropertiesConverter {
 		return ddmFormField.getType();
 	}
 
-	protected String getDDMFormFieldValueString(
+	protected static String getDDMFormFieldValueString(
 		DDMFormFieldValue ddmFormFieldValue,
 		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
@@ -131,7 +131,7 @@ public class DDMFormValuesToPropertiesConverter {
 		return valueString;
 	}
 
-	protected Serializable toArrayValue(
+	protected static Serializable toArrayValue(
 		List<DDMFormFieldValue> ddmFormFieldValues,
 		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
@@ -146,7 +146,7 @@ public class DDMFormValuesToPropertiesConverter {
 		return FieldConstants.getSerializable(dataType, values);
 	}
 
-	protected Serializable toSimpleValue(
+	protected static Serializable toSimpleValue(
 		DDMFormFieldValue ddmFormFieldValue, 
 		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
@@ -159,7 +159,7 @@ public class DDMFormValuesToPropertiesConverter {
 		return FieldConstants.getSerializable(dataType, valueString);
 	}
 
-	protected Vector<Serializable> toVectorValue(
+	protected static Vector<Serializable> toVectorValue(
 		List<DDMFormFieldValue> ddmFormFieldValues, 
 		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 

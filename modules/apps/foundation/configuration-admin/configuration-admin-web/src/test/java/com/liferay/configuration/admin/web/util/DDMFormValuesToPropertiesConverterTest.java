@@ -25,8 +25,6 @@ import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
 import com.liferay.portal.configuration.metatype.definitions.ExtendedAttributeDefinition;
 import com.liferay.portal.configuration.metatype.definitions.ExtendedObjectClassDefinition;
-import com.liferay.portal.json.JSONFactoryImpl;
-import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -97,11 +95,8 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter();
-
 		Dictionary<String, Object> properties =
-			ddmFormValuesToPropertiesConverter.getProperties(
+			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
 		Object value = properties.get("Boolean");
@@ -152,11 +147,8 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter();
-
 		Dictionary<String, Object> properties =
-			ddmFormValuesToPropertiesConverter.getProperties(
+			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
 		Assert.assertEquals(true, properties.get("Boolean"));
@@ -201,11 +193,8 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter();
-
 		Dictionary<String, Object> properties =
-			ddmFormValuesToPropertiesConverter.getProperties(
+			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
 		Assert.assertEquals(42, properties.get("Integer"));
@@ -250,11 +239,8 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter();
-
 		Dictionary<String, Object> properties =
-			ddmFormValuesToPropertiesConverter.getProperties(
+			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
 		Assert.assertEquals(42, properties.get("Select"));
@@ -304,11 +290,8 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter();
-
 		Dictionary<String, Object> properties =
-			ddmFormValuesToPropertiesConverter.getProperties(
+			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
 		Object value = properties.get("Boolean");

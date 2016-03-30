@@ -113,11 +113,8 @@ public class BindConfigurationMVCActionCommand implements MVCActionCommand {
 
 		DDMFormValues ddmFormValues = getDDMFormValues(actionRequest, ddmForm);
 
-		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter();
-
 		Dictionary<String, Object> properties =
-			ddmFormValuesToPropertiesConverter.getProperties(
+			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, themeDisplay.getLocale());
 
 		properties.put(Constants.SERVICE_PID, pid);
