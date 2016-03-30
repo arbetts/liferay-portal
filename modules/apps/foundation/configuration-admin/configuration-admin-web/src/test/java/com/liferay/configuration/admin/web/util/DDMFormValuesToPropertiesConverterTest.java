@@ -52,8 +52,6 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-
-		_jsonFactory = new JSONFactoryImpl();
 	}
 
 	@Test
@@ -100,8 +98,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 			extendedObjectClassDefinition, configuration, null, null, false);
 
 		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter(
-				ddmFormValues, _jsonFactory, _enLocale);
+			new DDMFormValuesToPropertiesConverter(ddmFormValues, _enLocale);
 
 		Dictionary<String, Object> properties =
 			ddmFormValuesToPropertiesConverter.getProperties(
@@ -156,8 +153,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 			extendedObjectClassDefinition, configuration, null, null, false);
 
 		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter(
-				ddmFormValues, _jsonFactory, _enLocale);
+			new DDMFormValuesToPropertiesConverter(ddmFormValues, _enLocale);
 
 		Dictionary<String, Object> properties =
 			ddmFormValuesToPropertiesConverter.getProperties(
@@ -206,8 +202,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 			extendedObjectClassDefinition, configuration, null, null, false);
 
 		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter(
-				ddmFormValues, _jsonFactory, _enLocale);
+			new DDMFormValuesToPropertiesConverter(ddmFormValues, _enLocale);
 
 		Dictionary<String, Object> properties =
 			ddmFormValuesToPropertiesConverter.getProperties(
@@ -256,8 +251,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 			extendedObjectClassDefinition, configuration, null, null, false);
 
 		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter(
-				ddmFormValues, _jsonFactory, _enLocale);
+			new DDMFormValuesToPropertiesConverter(ddmFormValues, _enLocale);
 
 		Dictionary<String, Object> properties =
 			ddmFormValuesToPropertiesConverter.getProperties(
@@ -311,8 +305,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 			extendedObjectClassDefinition, configuration, null, null, false);
 
 		DDMFormValuesToPropertiesConverter ddmFormValuesToPropertiesConverter =
-			new DDMFormValuesToPropertiesConverter(
-				ddmFormValues, _jsonFactory, _enLocale);
+			new DDMFormValuesToPropertiesConverter(ddmFormValues, _enLocale);
 
 		Dictionary<String, Object> properties =
 			ddmFormValuesToPropertiesConverter.getProperties(
@@ -378,6 +371,5 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 	}
 
 	private final Locale _enLocale = LocaleUtil.US;
-	private JSONFactory _jsonFactory;
 
 }
