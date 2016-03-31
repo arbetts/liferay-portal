@@ -29,9 +29,7 @@ import com.liferay.portal.kernel.util.ReflectionUtil;
 
 import java.io.Serializable;
 
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -51,8 +49,8 @@ public class DDMFormValuesToPropertiesConverter {
 		Locale locale) {
 
 		DDMForm ddmForm = ddmFormValues.getDDMForm();
-		
-		Map<String, DDMFormField> ddmFormFieldsMap = 
+
+		Map<String, DDMFormField> ddmFormFieldsMap =
 			ddmForm.getDDMFormFieldsMap(false);
 
 		Map<String, List<DDMFormFieldValue>> ddmFormFieldValuesMap =
@@ -148,7 +146,7 @@ public class DDMFormValuesToPropertiesConverter {
 	}
 
 	protected static Serializable toSimpleValue(
-		DDMFormFieldValue ddmFormFieldValue, 
+		DDMFormFieldValue ddmFormFieldValue,
 		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
 		String dataType = getDDMFormFieldDataType(
@@ -161,14 +159,14 @@ public class DDMFormValuesToPropertiesConverter {
 	}
 
 	protected static Vector<Serializable> toVectorValue(
-		List<DDMFormFieldValue> ddmFormFieldValues, 
+		List<DDMFormFieldValue> ddmFormFieldValues,
 		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
 		Vector<Serializable> values = new Vector<>(ddmFormFieldValues.size());
 
 		for (DDMFormFieldValue ddmFormFieldValue : ddmFormFieldValues) {
-			values.add(toSimpleValue(
-				ddmFormFieldValue, ddmFormFieldsMap, locale));
+			values.add(
+				toSimpleValue(ddmFormFieldValue, ddmFormFieldsMap, locale));
 		}
 
 		return values;
