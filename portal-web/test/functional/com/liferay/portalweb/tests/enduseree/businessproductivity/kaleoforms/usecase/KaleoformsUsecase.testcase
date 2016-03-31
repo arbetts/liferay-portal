@@ -50,7 +50,7 @@
 		</if>
 	</tear-down>
 
-	<command name="AssertCanEditPendingForm" priority="4">
+	<command name="AssertCanEditPendingForm" priority="3">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessDescription" value="Kaleo Forms Process Description" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
@@ -144,7 +144,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -162,7 +162,7 @@
 		<execute function="AssertTextEquals" locator1="KaleoFormsViewProcessRecord#WORKFLOW_STATUS" value1="${kfProcessStatus}" />
 	</command>
 
-	<command name="AssertEditFormNotUsedAsCreateForm" priority="4">
+	<command name="AssertEditFormNotUsedAsCreateForm" priority="3">
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
 		<execute macro="Navigator#openURL" />
@@ -288,7 +288,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -303,7 +303,7 @@
 		</execute>
 	</command>
 
-	<command name="AssertPendingFormPresentAfterDeletingDifferentProcessDefinition" priority="4">
+	<command name="AssertPendingFormPresentAfterDeletingDifferentProcessDefinition" priority="3">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcess1Description" value="Kaleo Forms Process 1 Description" />
 		<var name="kfProcess1Name" value="Kaleo Forms 1 Process" />
@@ -438,7 +438,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -463,7 +463,7 @@
 			<var name="kfProcessName" value="${kfProcess1Name}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -474,7 +474,7 @@
 		</execute>
 	</command>
 
-	<command name="AssignRolePermissionsAddProcessCP" priority="4">
+	<command name="AssignRolePermissionsAddProcessCP" priority="3">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -614,7 +614,7 @@
 		</execute>
 	</command>
 
-	<command name="AssignRolePermissionsApprovePG" priority="4">
+	<command name="AssignRolePermissionsApprovePG" priority="3">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -746,7 +746,7 @@
 			<var name="kfProcessName" value="Kaleo Forms Process" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -774,7 +774,7 @@
 			<var name="userLoginFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -796,7 +796,7 @@
 		</execute>
 	</command>
 
-	<command name="AssignRolePermissionsCompleteFormPG" priority="4">
+	<command name="AssignRolePermissionsCompleteFormPG" priority="3">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -928,7 +928,7 @@
 			<var name="kfProcessName" value="Kaleo Forms Process" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -951,7 +951,7 @@
 			<var name="workflowDefinitionTitle" value="Single Approver" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -966,7 +966,7 @@
 			<var name="userLoginFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -993,7 +993,7 @@
 		</execute>
 	</command>
 
-	<command name="AssignRolePermissionsRejectPG" priority="4">
+	<command name="AssignRolePermissionsRejectPG" priority="3">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -1125,7 +1125,7 @@
 			<var name="kfProcessName" value="Kaleo Forms Process" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -1153,7 +1153,7 @@
 			<var name="userLoginFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -1175,7 +1175,7 @@
 		</execute>
 	</command>
 
-	<command name="AssignRolePermissionsSubmitProcessPG" priority="4">
+	<command name="AssignRolePermissionsSubmitProcessPG" priority="3">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -1256,7 +1256,7 @@
 			<var name="userLoginFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -1348,7 +1348,7 @@
 			<var name="userLoginFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -1431,7 +1431,7 @@
 			<var name="userLoginFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -1456,7 +1456,7 @@
 			<var name="userLoginFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -1563,7 +1563,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -1578,7 +1578,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -1618,7 +1618,7 @@
 			<var name="kfProcessFieldData" value="Test 1 EDIT" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -1648,7 +1648,7 @@
 			<var name="kfProcessFieldData" value="Test 2 EDIT" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -1675,7 +1675,7 @@
 			<var name="kfProcessFieldData" value="Test 1 EDIT new edit" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -1840,7 +1840,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -1878,7 +1878,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -2181,7 +2181,7 @@
 			<var name="userLoginFullName" value="${user1FirstName} ${user1LastName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2229,7 +2229,7 @@
 			<var name="userLoginFullName" value="${user2FirstName} ${user2LastName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2264,7 +2264,7 @@
 
 		<execute function="Open" locator1="http://localhost:8080" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2305,7 +2305,7 @@
 			<var name="userLoginFullName" value="${user3FirstName} ${user3LastName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2350,7 +2350,7 @@
 			<var name="userLoginFullName" value="${user2FirstName} ${user2LastName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2369,7 +2369,7 @@
 			<var name="userLoginFullName" value="${user1FirstName} ${user1LastName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2415,7 +2415,7 @@
 			<var name="fieldName" value="${fieldName}" />
 		</execute>
 
-		<execute macro="DDLDataDefinition#saveCP" />
+		<execute macro="DDLDataDefinition#save" />
 
 		<execute macro="Navigator#openURL" />
 
@@ -2490,7 +2490,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2504,7 +2504,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2518,7 +2518,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -2780,7 +2780,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -3078,7 +3078,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -3252,7 +3252,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -3410,7 +3410,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -3579,7 +3579,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -3753,7 +3753,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -3932,7 +3932,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -4244,7 +4244,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -4412,7 +4412,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -4576,7 +4576,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -4624,7 +4624,7 @@
 			<var name="kfProcessName" value="${kfProcessName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -4756,7 +4756,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -4814,8 +4814,7 @@
 			<var name="kfProcessName" value="${kfProcessName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
-			<var name="kfProcessName" value="${kfProcessName}" />
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -4833,7 +4832,7 @@
 
 		<execute function="AssertElementNotPresent" locator1="DDLEditRecord#FIELD_FIELDSET" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -4945,7 +4944,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5015,7 +5014,7 @@
 			<var name="kfProcessName" value="${kfProcessName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5179,7 +5178,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5193,7 +5192,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5327,7 +5326,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5369,7 +5368,7 @@
 			<var name="kfProcessName" value="${kfProcessName} Edited" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5476,7 +5475,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5513,7 +5512,7 @@
 			<var name="kfProcessName" value="${kfProcessName} Edited" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5647,7 +5646,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5711,7 +5710,7 @@
 			<var name="kfProcessName" value="${kfProcessName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5887,7 +5886,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -5901,7 +5900,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6063,7 +6062,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6117,7 +6116,7 @@
 			<var name="ddlTemplateName" value="Task Form" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6163,7 +6162,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6325,7 +6324,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6379,7 +6378,7 @@
 			<var name="ddlTemplateName" value="Review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6425,7 +6424,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6568,7 +6567,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6735,7 +6734,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6785,7 +6784,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6856,7 +6855,7 @@
 			<var name="fieldName" value="${fieldName}" />
 		</execute>
 
-		<execute macro="DDLDataDefinition#saveCP" />
+		<execute macro="DDLDataDefinition#save" />
 
 		<execute macro="Navigator#openURL" />
 
@@ -6931,7 +6930,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -6996,7 +6995,7 @@
 			<var name="fieldName" value="${fieldName}" />
 		</execute>
 
-		<execute macro="DDLDataDefinition#saveCP" />
+		<execute macro="DDLDataDefinition#save" />
 
 		<execute macro="Navigator#openURL" />
 
@@ -7071,7 +7070,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -7085,7 +7084,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -7099,7 +7098,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -7121,7 +7120,7 @@
 
 		<execute macro="KaleoFormsPortlet#resubmitPendingProcessViaMyPendingRequests" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -7166,7 +7165,7 @@
 			<var name="fieldName" value="${fieldName}" />
 		</execute>
 
-		<execute macro="DDLDataDefinition#saveCP" />
+		<execute macro="DDLDataDefinition#save" />
 
 		<execute macro="Navigator#openURL" />
 
@@ -7241,7 +7240,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -7258,7 +7257,7 @@
 			<var name="kfProcessName" value="${kfProcessName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -7405,7 +7404,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -7426,7 +7425,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewApprovedProcessRecords" priority="4">
+	<command name="ViewApprovedProcessRecords" priority="5">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -7526,7 +7525,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -7557,7 +7556,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewApprovedProcessRecordsSeparateAuthor" priority="4">
+	<command name="ViewApprovedProcessRecordsSeparateAuthor" priority="5">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -7678,7 +7677,7 @@
 			<var name="userLoginFullName" value="userfn userln" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -7700,7 +7699,7 @@
 			<var name="userLoginFullName" value="Test Test" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -7731,7 +7730,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewAssignedProcessRecords" priority="4">
+	<command name="ViewAssignedProcessRecords" priority="5">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -7831,7 +7830,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -7857,7 +7856,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewEmailNotificationSentToTaskAssignees" priority="4">
+	<command name="ViewEmailNotificationSentToTaskAssignees" priority="5">
 		<description message="This is a use case for LPS-50688 and LPS-35263." />
 
 		<property name="test.assert.javascript.errors" value="false" />
@@ -8156,7 +8155,7 @@
 			<var name="userLoginFullName" value="${user1FirstName} ${user1LastName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -8184,7 +8183,7 @@
 			<var name="userLoginFullName" value="${user3FirstName} ${user3FirstName}" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -8241,7 +8240,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewKaleoProcessNameOpenedViaNotifications" priority="4">
+	<command name="ViewKaleoProcessNameOpenedViaNotifications" priority="5">
 		<description message="This is a use case for LPS-51098." />
 
 		<property name="portlet.plugins.includes" value="kaleo-designer-portlet,kaleo-forms-portlet,notifications-portlet" />
@@ -8341,7 +8340,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -8359,7 +8358,7 @@
 			<var name="workflowTask" value="Review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -8368,7 +8367,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -8386,7 +8385,7 @@
 			<var name="workflowTask" value="Review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -8395,7 +8394,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
@@ -8412,7 +8411,7 @@
 		<execute macro="KaleoFormsPortlet#viewMyCompletedRequestsTasks" />
 	</command>
 
-	<command name="ViewMultipleProcessRecords" priority="4">
+	<command name="ViewMultipleProcessRecords" priority="5">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -8512,7 +8511,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -8560,7 +8559,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewNoDuplicatesCreatedByAddFormSaveAndContinue" priority="4">
+	<command name="ViewNoDuplicatesCreatedByAddFormSaveAndContinue" priority="5">
 		<description message="This is a use case for LPS-48995." />
 
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
@@ -8630,7 +8629,7 @@
 		<execute function="AssertElementNotPresent" locator1="KaleoFormsAdminEditProcessForm#FORM_TABLE_NAME_2" />
 	</command>
 
-	<command name="ViewProcessWithComments" priority="4">
+	<command name="ViewProcessWithComments" priority="5">
 		<var name="commentList" value="Assigned initial task.,Updating the due date on a process assigned to my roles.,Assign process to Test Test.,Updating the due date on a process assigned to me.,Please make changes and resubmit.,Assigned initial task.,Resubmitting.,Assigned initial task.,Assign process to Test Test again.,Process is approved." />
 		<var name="ddldataDefinitionDescription" value="Data Definition Description" />
 		<var name="ddldataDefinitionName" value="Data Definition" />
@@ -8660,7 +8659,7 @@
 			<var name="fieldName" value="${fieldName}" />
 		</execute>
 
-		<execute macro="DDLDataDefinition#saveCP" />
+		<execute macro="DDLDataDefinition#save" />
 
 		<execute macro="Navigator#openURL" />
 
@@ -8735,7 +8734,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -8767,7 +8766,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -8777,7 +8776,7 @@
 			<var name="workflowTask" value="update" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -8793,7 +8792,7 @@
 			<var name="workflowTask" value="review" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 
@@ -8814,7 +8813,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewRejectedProcessRecords" priority="4">
+	<command name="ViewRejectedProcessRecords" priority="5">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -8914,7 +8913,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms" />
 		</execute>
 
@@ -8945,7 +8944,7 @@
 		</execute>
 	</command>
 
-	<command name="ViewSubmittedProcessRecords" priority="4">
+	<command name="ViewSubmittedProcessRecords" priority="5">
 		<var name="kfFieldSetName" value="Field Set Data Definition" />
 		<var name="kfProcessName" value="Kaleo Forms Process" />
 
@@ -9062,7 +9061,7 @@
 		</execute>
 	</command>
 
-	<command name="WithdrawProcess" priority="4">
+	<command name="WithdrawProcess" priority="5">
 		<var name="ddldataDefinitionDescription" value="Data Definition Description" />
 		<var name="ddldataDefinitionName" value="Data Definition" />
 		<var name="field" value="Text" />
@@ -9091,7 +9090,7 @@
 			<var name="fieldName" value="${fieldName}" />
 		</execute>
 
-		<execute macro="DDLDataDefinition#saveCP" />
+		<execute macro="DDLDataDefinition#save" />
 
 		<execute macro="Navigator#openURL" />
 
@@ -9166,7 +9165,7 @@
 
 		<execute macro="KaleoFormsPortlet#saveProcessRecord" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Kaleo Forms Page" />
 		</execute>
 

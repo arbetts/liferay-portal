@@ -26,8 +26,6 @@ import com.liferay.gradle.plugins.wsdd.builder.BuildWSDDTask;
 import com.liferay.gradle.plugins.wsdd.builder.WSDDBuilderPlugin;
 import com.liferay.gradle.util.Validator;
 
-import groovy.lang.Closure;
-
 import java.io.File;
 
 import java.util.ArrayList;
@@ -55,12 +53,9 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
-import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.BasePluginConvention;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.specs.Spec;
-import org.gradle.api.tasks.Copy;
-import org.gradle.api.tasks.Delete;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
 import org.gradle.api.tasks.TaskContainer;
@@ -68,6 +63,8 @@ import org.gradle.api.tasks.TaskInputs;
 import org.gradle.api.tasks.TaskOutputs;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.bundling.War;
+import org.gradle.api.tasks.compile.CompileOptions;
+import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.internal.Factory;
 
 /**
@@ -87,6 +84,11 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 		configureArchivesBaseName(project);
 		configureDescription(project);
 		configureSourceSetMain(project);
+
+		if (GradleUtil.isRunningInsideDaemon()) {
+			configureTasksJavaCompileFork(project, true);
+		}
+
 		configureVersion(project);
 
 		project.afterEvaluate(
@@ -103,32 +105,6 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 				}
 
 			});
-	}
-
-	protected void addCleanDeployedFile(
-		Project project, final Callable<String> callable) {
-
-		Delete delete = (Delete)GradleUtil.getTask(
-			project, BasePlugin.CLEAN_TASK_NAME);
-
-		if (!isCleanDeployed(delete)) {
-			return;
-		}
-
-		final Copy copy = (Copy)GradleUtil.getTask(project, DEPLOY_TASK_NAME);
-
-		Closure<File> closure = new Closure<File>(null) {
-
-			@SuppressWarnings("unused")
-			public File doCall() throws Exception {
-				return new File(
-					copy.getDestinationDir(),
-					getDeployedFileName(copy.getProject(), callable.call()));
-			}
-
-		};
-
-		delete.delete(closure);
 	}
 
 	protected DirectDeployTask addTaskAutoUpdateXml(final Project project) {
@@ -400,53 +376,9 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 
 		buildWSDDTask.finalizedBy(jar);
 
-		addCleanDeployedFile(
-			project,
-			new Callable<String>() {
-
-				@Override
-				public String call() throws Exception {
-					return jar.getArchiveName();
-				}
-
-			});
-
-		Task task = GradleUtil.getTask(project, DEPLOY_TASK_NAME);
-
-		if (task instanceof Copy) {
-			Copy copy = (Copy)task;
-
-			copy.from(
-				new Callable<File>() {
-
-					@Override
-					public File call() throws Exception {
-						return jar.getArchivePath();
-					}
-
-				});
-		}
+		addDeployedFile(jar, true);
 
 		return jar;
-	}
-
-	@Override
-	protected Copy addTaskDeploy(
-		final Project project, LiferayExtension liferayExtension) {
-
-		Copy copy = super.addTaskDeploy(project, liferayExtension);
-
-		copy.rename(
-			new Closure<String>(null) {
-
-				@SuppressWarnings("unused")
-				public String doCall(String fileName) {
-					return getDeployedFileName(project, fileName);
-				}
-
-			});
-
-		return copy;
 	}
 
 	protected void addTasksBuildWSDDJar(Project project) {
@@ -583,6 +515,31 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 		resourcesSourceDirectorySet.setSrcDirs(srcDirs);
 	}
 
+	protected void configureTaskJavaCompileFork(
+		JavaCompile javaCompile, boolean fork) {
+
+		CompileOptions compileOptions = javaCompile.getOptions();
+
+		compileOptions.setFork(fork);
+	}
+
+	protected void configureTasksJavaCompileFork(
+		Project project, final boolean fork) {
+
+		TaskContainer taskContainer = project.getTasks();
+
+		taskContainer.withType(
+			JavaCompile.class,
+			new Action<JavaCompile>() {
+
+				@Override
+				public void execute(JavaCompile javaCompile) {
+					configureTaskJavaCompileFork(javaCompile, fork);
+				}
+
+			});
+	}
+
 	protected void configureVersion(Project project) {
 		String bundleVersion = getBundleInstruction(
 			project, Constants.BUNDLE_VERSION);
@@ -603,19 +560,6 @@ public class LiferayOSGiPlugin extends LiferayJavaPlugin {
 			project, BundleExtension.class);
 
 		return (Map<String, String>)bundleExtension.getInstructions();
-	}
-
-	@Override
-	protected String getDeployedFileName(Project project, File sourceFile) {
-		return getDeployedFileName(project, sourceFile.getName());
-	}
-
-	protected String getDeployedFileName(
-		Project project, String sourceFileName) {
-
-		return sourceFileName.replace(
-			"-" + project.getVersion() + "." + Jar.DEFAULT_EXTENSION,
-			"." + Jar.DEFAULT_EXTENSION);
 	}
 
 	@Override

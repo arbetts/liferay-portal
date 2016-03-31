@@ -21,10 +21,16 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.InstancePool;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
+import com.liferay.registry.ServiceRegistration;
 import com.liferay.registry.collections.ServiceTrackerCollections;
+import com.liferay.registry.collections.ServiceTrackerMap;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -43,7 +49,7 @@ public class EventsProcessorUtil {
 	public static void process(String key, String[] classes)
 		throws ActionException {
 
-		_instance._process(key, classes, new LifecycleEvent());
+		_instance.doProcess(key, classes, new LifecycleEvent());
 	}
 
 	public static void process(
@@ -51,66 +57,49 @@ public class EventsProcessorUtil {
 			HttpServletResponse response)
 		throws ActionException {
 
-		_instance._process(key, classes, new LifecycleEvent(request, response));
+		_instance.doProcess(
+			key, classes, new LifecycleEvent(request, response));
 	}
 
 	public static void process(
 			String key, String[] classes, HttpSession session)
 		throws ActionException {
 
-		_instance._process(key, classes, new LifecycleEvent(session));
+		_instance.doProcess(key, classes, new LifecycleEvent(session));
 	}
 
 	public static void process(
 			String key, String[] classes, LifecycleEvent lifecycleEvent)
 		throws ActionException {
 
-		_instance._process(key, classes, lifecycleEvent);
+		_instance.doProcess(key, classes, lifecycleEvent);
 	}
 
 	public static void process(String key, String[] classes, String[] ids)
 		throws ActionException {
 
-		_instance._process(key, classes, new LifecycleEvent(ids));
+		_instance.doProcess(key, classes, new LifecycleEvent(ids));
 	}
 
 	public static void processEvent(
 			LifecycleAction lifecycleAction, LifecycleEvent lifecycleEvent)
 		throws ActionException {
 
-		_instance._processEvent(lifecycleAction, lifecycleEvent);
+		_instance.doProcessEvent(lifecycleAction, lifecycleEvent);
 	}
 
 	public static void registerEvent(String key, Object event) {
-		_instance._registerEvent(key, event);
+		_instance.doRegisterEvent(key, event);
 	}
 
 	public static void unregisterEvent(String key, Object event) {
-		_instance._unregisterEvent(key, event);
+		_instance.doUnregisterEvent(key, event);
 	}
 
 	protected EventsProcessorUtil() {
 	}
 
-	protected Collection<LifecycleAction> _getLifecycleActions(String key) {
-		Collection<LifecycleAction> lifecycleActions = _lifecycleActions.get(
-			key);
-
-		if (lifecycleActions == null) {
-			Map<String, Object> properties = new HashMap<>();
-
-			properties.put("key", key);
-
-			lifecycleActions = ServiceTrackerCollections.openList(
-				LifecycleAction.class, "(key=" + key + ")", properties);
-
-			_lifecycleActions.putIfAbsent(key, lifecycleActions);
-		}
-
-		return lifecycleActions;
-	}
-
-	protected void _process(
+	protected void doProcess(
 			String key, String[] classes, LifecycleEvent lifecycleEvent)
 		throws ActionException {
 
@@ -133,32 +122,71 @@ public class EventsProcessorUtil {
 			return;
 		}
 
-		for (LifecycleAction lifecycleAction : _instance._getLifecycleActions(
+		for (LifecycleAction lifecycleAction : _instance.getLifecycleActions(
 				key)) {
 
 			lifecycleAction.processLifecycleEvent(lifecycleEvent);
 		}
 	}
 
-	protected void _processEvent(
+	protected void doProcessEvent(
 			LifecycleAction lifecycleAction, LifecycleEvent lifecycleEvent)
 		throws ActionException {
 
 		lifecycleAction.processLifecycleEvent(lifecycleEvent);
 	}
 
-	protected void _registerEvent(String key, Object event) {
-		Collection<LifecycleAction> lifecycleActions =
-			_instance._getLifecycleActions(key);
+	protected void doRegisterEvent(String key, Object event) {
+		Registry registry = RegistryUtil.getRegistry();
 
-		lifecycleActions.add((LifecycleAction)event);
+		Map<String, Object> properties = new HashMap<>();
+
+		properties.put("key", key);
+
+		ServiceRegistration<LifecycleAction> serviceRegistration =
+			registry.registerService(
+				LifecycleAction.class, (LifecycleAction)event, properties);
+
+		Map<Object, ServiceRegistration<LifecycleAction>>
+			serviceRegistrationMap = _serviceRegistrationMaps.get(key);
+
+		if (serviceRegistrationMap == null) {
+			_serviceRegistrationMaps.putIfAbsent(
+				key,
+				new ConcurrentHashMap
+					<Object, ServiceRegistration<LifecycleAction>>());
+
+			serviceRegistrationMap = _serviceRegistrationMaps.get(key);
+		}
+
+		serviceRegistrationMap.put(event, serviceRegistration);
 	}
 
-	protected void _unregisterEvent(String key, Object event) {
-		Collection<LifecycleAction> lifecycleActions =
-			_instance._getLifecycleActions(key);
+	protected void doUnregisterEvent(String key, Object event) {
+		Map<Object, ServiceRegistration<LifecycleAction>>
+			serviceRegistrationMap = _serviceRegistrationMaps.get(key);
 
-		lifecycleActions.remove(event);
+		if (serviceRegistrationMap != null) {
+			ServiceRegistration<LifecycleAction> serviceRegistration =
+				serviceRegistrationMap.remove(event);
+
+			if (serviceRegistration != null) {
+				serviceRegistration.unregister();
+			}
+
+			_serviceRegistrationMaps.remove(key, Collections.emptyList());
+		}
+	}
+
+	protected Collection<LifecycleAction> getLifecycleActions(String key) {
+		List<LifecycleAction> lifecycleActions = _lifecycleActions.getService(
+			key);
+
+		if (lifecycleActions == null) {
+			lifecycleActions = Collections.emptyList();
+		}
+
+		return lifecycleActions;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -167,7 +195,11 @@ public class EventsProcessorUtil {
 	private static final EventsProcessorUtil _instance =
 		new EventsProcessorUtil();
 
-	private final ConcurrentMap<String, Collection<LifecycleAction>>
-		_lifecycleActions = new ConcurrentHashMap<>();
+	private final ServiceTrackerMap<String, List<LifecycleAction>>
+		_lifecycleActions = ServiceTrackerCollections.openMultiValueMap(
+			LifecycleAction.class, "key");
+	private final
+		ConcurrentMap<String, Map<Object, ServiceRegistration<LifecycleAction>>>
+			_serviceRegistrationMaps = new ConcurrentHashMap<>();
 
 }

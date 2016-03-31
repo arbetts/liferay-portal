@@ -740,6 +740,11 @@ public class PortalImpl implements Portal {
 		}
 
 		if (layout.isTypeControlPanel()) {
+			if (Validator.isNotNull(themeDisplay.getPpid())) {
+				url = HttpUtil.setParameter(
+					url, "p_p_id", themeDisplay.getPpid());
+			}
+
 			if (themeDisplay.getDoAsGroupId() > 0) {
 				url = HttpUtil.setParameter(
 					url, "doAsGroupId", themeDisplay.getDoAsGroupId());
@@ -2329,6 +2334,28 @@ public class PortalImpl implements Portal {
 	}
 
 	@Override
+	public String getForwardedHost(HttpServletRequest request) {
+		if (!PropsValues.WEB_SERVER_FORWARDED_HOST_ENABLED) {
+			return request.getServerName();
+		}
+
+		return GetterUtil.get(
+			request.getHeader(PropsValues.WEB_SERVER_FORWARDED_HOST_HEADER),
+			request.getServerName());
+	}
+
+	@Override
+	public int getForwardedPort(HttpServletRequest request) {
+		if (!PropsValues.WEB_SERVER_FORWARDED_PORT_ENABLED) {
+			return request.getServerPort();
+		}
+
+		return GetterUtil.getInteger(
+			request.getHeader(PropsValues.WEB_SERVER_FORWARDED_PORT_HEADER),
+			request.getServerPort());
+	}
+
+	@Override
 	public String getFullName(
 		String firstName, String middleName, String lastName) {
 
@@ -3567,45 +3594,54 @@ public class PortalImpl implements Portal {
 	public HttpServletRequest getOriginalServletRequest(
 		HttpServletRequest request) {
 
-		List<PersistentHttpServletRequestWrapper>
-			persistentHttpServletRequestWrappers = new ArrayList<>();
+		HttpServletRequest originalRequest = null;
 
-		HttpServletRequest originalRequest = request;
+		HttpServletRequestWrapper currentRequestWrapper = null;
 
-		while (originalRequest instanceof HttpServletRequestWrapper) {
-			if (originalRequest instanceof
+		HttpServletRequest currentRequest = request;
+
+		while (currentRequest instanceof HttpServletRequestWrapper) {
+			if (currentRequest instanceof
 					PersistentHttpServletRequestWrapper) {
 
 				PersistentHttpServletRequestWrapper
 					persistentHttpServletRequestWrapper =
-						(PersistentHttpServletRequestWrapper)originalRequest;
+						(PersistentHttpServletRequestWrapper)currentRequest;
 
-				persistentHttpServletRequestWrappers.add(
-					persistentHttpServletRequestWrapper.clone());
+				persistentHttpServletRequestWrapper =
+					persistentHttpServletRequestWrapper.clone();
+
+				if (originalRequest == null) {
+					originalRequest = persistentHttpServletRequestWrapper;
+				}
+
+				if (currentRequestWrapper != null) {
+					currentRequestWrapper.setRequest(
+						persistentHttpServletRequestWrapper);
+				}
+
+				currentRequestWrapper = persistentHttpServletRequestWrapper;
 			}
 
 			// Get original request so that portlets inside portlets render
 			// properly
 
 			HttpServletRequestWrapper httpServletRequestWrapper =
-				(HttpServletRequestWrapper)originalRequest;
+				(HttpServletRequestWrapper)currentRequest;
 
-			originalRequest =
+			currentRequest =
 				(HttpServletRequest)httpServletRequestWrapper.getRequest();
 		}
 
-		for (int i = persistentHttpServletRequestWrappers.size() - 1; i >= 0;
-			i--) {
-
-			HttpServletRequestWrapper httpServletRequestWrapper =
-				persistentHttpServletRequestWrappers.get(i);
-
-			httpServletRequestWrapper.setRequest(originalRequest);
-
-			originalRequest = httpServletRequestWrapper;
+		if (currentRequestWrapper != null) {
+			currentRequestWrapper.setRequest(currentRequest);
 		}
 
-		return originalRequest;
+		if (originalRequest != null) {
+			return originalRequest;
+		}
+
+		return currentRequest;
 	}
 
 	@Override
@@ -3925,8 +3961,10 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public String getPortalURL(HttpServletRequest request, boolean secure) {
-		return getPortalURL(
-			request.getServerName(), request.getServerPort(), secure);
+		String serverName = getForwardedHost(request);
+		int serverPort = getForwardedPort(request);
+
+		return getPortalURL(serverName, serverPort, secure);
 	}
 
 	@Override
@@ -3949,17 +3987,25 @@ public class PortalImpl implements Portal {
 					refererPlid);
 			}
 
-			LayoutSet virtualHostLayoutSet = virtualHostLayout.getLayoutSet();
+			return getPortalURL(virtualHostLayout.getLayoutSet(), themeDisplay);
+		}
 
-			String virtualHostname = virtualHostLayoutSet.getVirtualHostname();
+		return getPortalURL(
+			serverName, themeDisplay.getServerPort(), themeDisplay.isSecure());
+	}
 
-			String domain = HttpUtil.getDomain(themeDisplay.getURLPortal());
+	@Override
+	public String getPortalURL(LayoutSet layoutSet, ThemeDisplay themeDisplay) {
+		String serverName = themeDisplay.getServerName();
 
-			if (Validator.isNotNull(virtualHostname) &&
-				domain.startsWith(virtualHostname)) {
+		String virtualHostname = layoutSet.getVirtualHostname();
 
-				serverName = virtualHostname;
-			}
+		String domain = HttpUtil.getDomain(themeDisplay.getURLPortal());
+
+		if (Validator.isNotNull(virtualHostname) &&
+			domain.startsWith(virtualHostname)) {
+
+			serverName = virtualHostname;
 		}
 
 		return getPortalURL(
@@ -4043,7 +4089,7 @@ public class PortalImpl implements Portal {
 	public String getPortalURL(ThemeDisplay themeDisplay)
 		throws PortalException {
 
-		return getPortalURL(null, themeDisplay);
+		return getPortalURL((Layout)null, themeDisplay);
 	}
 
 	@Override
@@ -5679,6 +5725,8 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public String getUserPassword(HttpServletRequest request) {
+		request = getOriginalServletRequest(request);
+
 		HttpSession session = request.getSession();
 
 		return getUserPassword(session);
@@ -6085,6 +6133,22 @@ public class PortalImpl implements Portal {
 	}
 
 	@Override
+	public boolean isForwardedSecure(HttpServletRequest request) {
+		if (PropsValues.WEB_SERVER_FORWARDED_PROTOCOL_ENABLED) {
+			String forwardedProtocol = request.getHeader(
+				PropsValues.WEB_SERVER_FORWARDED_PROTOCOL_HEADER);
+
+			if (Validator.isNotNull(forwardedProtocol) &&
+				Validator.equals(Http.HTTPS, forwardedProtocol)) {
+
+				return true;
+			}
+		}
+
+		return request.isSecure();
+	}
+
+	@Override
 	public boolean isGroupAdmin(User user, long groupId) throws Exception {
 		PermissionChecker permissionChecker =
 			PermissionCheckerFactoryUtil.create(user);
@@ -6233,6 +6297,12 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public boolean isSecure(HttpServletRequest request) {
+		boolean secure = false;
+
+		if (PropsValues.WEB_SERVER_FORWARDED_PROTOCOL_ENABLED) {
+			return isForwardedSecure(request);
+		}
+
 		HttpSession session = request.getSession();
 
 		if (session == null) {
@@ -6241,8 +6311,6 @@ public class PortalImpl implements Portal {
 
 		Boolean httpsInitial = (Boolean)session.getAttribute(
 			WebKeys.HTTPS_INITIAL);
-
-		boolean secure = false;
 
 		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS &&
 			!PropsValues.SESSION_ENABLE_PHISHING_PROTECTION &&

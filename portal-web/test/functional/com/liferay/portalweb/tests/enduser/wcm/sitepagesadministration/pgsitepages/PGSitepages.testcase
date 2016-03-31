@@ -30,7 +30,7 @@
 			<var name="pageName" value="Site Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Site Page" />
 		</execute>
 
@@ -39,11 +39,11 @@
 			<var name="pageTemplateName" value="Content Display Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Site Page Name" />
 		</execute>
 
-		<for list="Tags Navigation,Search,Categories Navigation,Asset Publisher" param="portletName">
+		<for list="Tags Navigation,Categories Navigation,Asset Publisher" param="portletName">
 			<execute macro="Portlet#viewSpecificPG">
 				<var name="portletName" value="${portletName}" />
 			</execute>
@@ -57,7 +57,7 @@
 			<var name="pageName" value="Site Page" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoEditPage">
+		<execute macro="SitePageNavigator#gotoEditPage">
 			<var name="page" value="Site Page" />
 		</execute>
 
@@ -65,7 +65,7 @@
 			<var name="pageNameEdit" value="Site Page Edit" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Site Page Edit" />
 		</execute>
 

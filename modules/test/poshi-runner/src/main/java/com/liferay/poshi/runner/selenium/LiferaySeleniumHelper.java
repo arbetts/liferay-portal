@@ -786,8 +786,7 @@ public class LiferaySeleniumHelper {
 		DirectoryScanner directoryScanner = new DirectoryScanner();
 
 		directoryScanner.setIncludes(
-			new String[] {PropsValues.TEST_CONSOLE_LOG_FILE_NAME}
-		);
+			new String[] {PropsValues.TEST_CONSOLE_LOG_FILE_NAME});
 
 		directoryScanner.scan();
 
@@ -1895,7 +1894,7 @@ public class LiferaySeleniumHelper {
 		return bufferedReader;
 	}
 
-	private static List<ScreenRegion> getScreenRegions(
+	private static List<ScreenRegion> _getScreenRegions(
 			LiferaySelenium liferaySelenium, String image)
 		throws Exception {
 

@@ -412,10 +412,6 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 			"**/tools/node**"
 		};
 
-		_numericalPortletNameElementExcludes = getPropertyList(
-			"numerical.portlet.name.element.excludes");
-		_xmlExcludes = getPropertyList("xml.excludes");
-
 		return getFileNames(excludes, getIncludes());
 	}
 
@@ -1146,8 +1142,7 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 		if (portalSource && !isModulesFile(absolutePath)) {
 			if (_tablesContent == null) {
 				_tablesContent = getContent(
-					"sql/portal-tables.sql",
-					BaseSourceProcessor.PORTAL_MAX_DIR_LEVEL);
+					"sql/portal-tables.sql", PORTAL_MAX_DIR_LEVEL);
 			}
 
 			return _tablesContent;
@@ -1185,6 +1180,13 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 		return tablesContent;
 	}
 
+	@Override
+	protected void preFormat() {
+		_numericalPortletNameElementExcludes = getPropertyList(
+			"numerical.portlet.name.element.excludes");
+		_xmlExcludes = getPropertyList("xml.excludes");
+	}
+
 	protected Document readXML(String content) throws DocumentException {
 		SAXReader saxReader = SAXReaderFactory.getSAXReader(null, false, false);
 
@@ -1216,7 +1218,8 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 						!trimmedLine.startsWith("<%") &&
 						!trimmedLine.startsWith("<!")) {
 
-						line = sortAttributes(fileName, line, lineCount, false);
+						line = formatAttributes(
+							fileName, line, trimmedLine, lineCount, true);
 					}
 					else if (trimmedLine.startsWith("<![CDATA[") &&
 							 !trimmedLine.endsWith("]]>")) {

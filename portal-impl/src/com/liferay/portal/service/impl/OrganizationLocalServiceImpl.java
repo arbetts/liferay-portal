@@ -45,8 +45,11 @@ import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
+import com.liferay.portal.kernel.tree.TreeModelTasksAdapter;
+import com.liferay.portal.kernel.tree.TreePathUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -57,8 +60,6 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.TreeModelTasksAdapter;
-import com.liferay.portal.kernel.util.TreePathUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.comparator.OrganizationIdComparator;
 import com.liferay.portal.kernel.util.comparator.OrganizationNameComparator;
@@ -176,6 +177,7 @@ public class OrganizationLocalServiceImpl
 		// Organization
 
 		User user = userPersistence.findByPrimaryKey(userId);
+
 		parentOrganizationId = getParentOrganizationId(
 			user.getCompanyId(), parentOrganizationId);
 
@@ -340,12 +342,13 @@ public class OrganizationLocalServiceImpl
 	public Organization deleteOrganization(Organization organization)
 		throws PortalException {
 
-		if ((userLocalService.getOrganizationUsersCount(
+		if (!CompanyThreadLocal.isDeleteInProcess() &&
+			((userLocalService.getOrganizationUsersCount(
 				organization.getOrganizationId(),
 				WorkflowConstants.STATUS_APPROVED) > 0) ||
-			(organizationPersistence.countByC_P(
-				organization.getCompanyId(),
-				organization.getOrganizationId()) > 0)) {
+			 (organizationPersistence.countByC_P(
+				 organization.getCompanyId(),
+				 organization.getOrganizationId()) > 0))) {
 
 			throw new RequiredOrganizationException();
 		}
@@ -979,8 +982,7 @@ public class OrganizationLocalServiceImpl
 						new OrganizationIdComparator(true));
 				}
 
-			}
-		);
+			});
 	}
 
 	/**
@@ -1617,9 +1619,9 @@ public class OrganizationLocalServiceImpl
 		assetEntryLocalService.updateEntry(
 			userId, companyGroup.getGroupId(), null, null,
 			Organization.class.getName(), organization.getOrganizationId(),
-			organization.getUuid(), 0, assetCategoryIds, assetTagNames, false,
-			null, null, null, null, organization.getName(), StringPool.BLANK,
-			null, null, null, 0, 0, null);
+			organization.getUuid(), 0, assetCategoryIds, assetTagNames, true,
+			false, null, null, null, null, organization.getName(),
+			StringPool.BLANK, null, null, null, 0, 0, null);
 	}
 
 	/**

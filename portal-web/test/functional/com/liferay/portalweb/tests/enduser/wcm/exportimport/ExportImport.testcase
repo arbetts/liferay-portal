@@ -142,7 +142,7 @@
 			<var name="exportTemplateName" value="Export Template Name" />
 		</execute>
 
-		<var method="selenium#getText('//div[contains(@id,\'exportLayoutProcessesSearchContainer\')]//table//tr/td[7]/span/a/span')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 
@@ -175,7 +175,7 @@
 		</execute>
 
 		<execute macro="WebContentNavigator#gotoEditCP">
-			<var name="webContentTitle" value="WC WebContent Title" />
+			<var name="webContentTitle" value="Web Content Title" />
 		</execute>
 
 		<execute macro="WebContent#viewCP">
@@ -213,7 +213,7 @@
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesExport#CURRENT_AND_PREVIOUS_STATUS" value1="Successful" />
 
-		<var method="selenium#getText('//div[contains(@id,\'exportLayoutProcessesSearchContainer\')]//table//tr/td[7]/span/a/span')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 
@@ -257,7 +257,6 @@
 		</execute>
 
 		<execute macro="Page#add">
-			<var name="page" value="Public Pages" />
 			<var name="pageName" value="Test Page" />
 			<var name="siteName" value="Site Name" />
 		</execute>
@@ -281,7 +280,7 @@
 			<var name="fieldName" value="TextName" />
 		</execute>
 
-		<execute macro="DDLDataDefinition#saveCP" />
+		<execute macro="DDLDataDefinition#save" />
 
 		<execute macro="ProductMenu#gotoSite">
 			<var name="site" value="Global" />
@@ -300,7 +299,7 @@
 			<var name="ddlDataDefinitionName" value="DDL Definition" />
 		</execute>
 
-		<execute macro="DDLList#saveCP" />
+		<execute macro="DDLList#save" />
 
 		<execute macro="DDLRecord#addCP">
 			<var name="ddlDataDefinitionName" value="DDL Definition" />
@@ -383,7 +382,7 @@
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesExport#CURRENT_AND_PREVIOUS_STATUS" value1="Successful" />
 
-		<var method="selenium#getText('//tr/td[7]/span/a')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 
@@ -420,8 +419,6 @@
 			<var name="portletName" value="Documents and Media" />
 		</execute>
 
-		<execute function="Refresh" />
-
 		<execute macro="DMPortlet#configureRootFolderPG">
 			<var name="dmFolderName" value="DM Folder Name" />
 		</execute>
@@ -432,7 +429,7 @@
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesExport#CURRENT_AND_PREVIOUS_STATUS" value1="Successful" />
 
-		<var method="selenium#getText('//tr/td[7]/span/a')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 
@@ -448,10 +445,9 @@
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Test Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="DMPortlet#viewRootFolderPG">
@@ -484,7 +480,7 @@
 			<var name="entryTitle" value="Blogs Entry Title" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Test Page Name" />
 		</execute>
 
@@ -492,7 +488,7 @@
 			<var name="adtType" value="Blogs" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Test Page Name" />
 		</execute>
 
@@ -508,7 +504,7 @@
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesExport#CURRENT_AND_PREVIOUS_STATUS" value1="Successful" />
 
-		<var method="selenium#getText('//tr/td[7]/span/a')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 
@@ -532,10 +528,9 @@
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Test Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<var name="key_entryTitle" value="Blogs Entry Title" />
@@ -553,7 +548,7 @@
 			<var name="pageName" value="Test Page Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Test Page Name" />
 		</execute>
 
@@ -589,15 +584,13 @@
 		</execute>
 
 		<execute macro="Page#add">
-			<var name="page" value="Public Pages" />
 			<var name="pageName" value="Test Site Page" />
 			<var name="siteName" value="Test Site Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Test Site Page" />
 			<var name="siteName" value="Test Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -608,10 +601,9 @@
 			<var name="larFileName" value="SampleLARPortlet.lar" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Test Site Page" />
 			<var name="siteName" value="Test Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="SampleLARPortlet#viewSampleBookingNumber">
@@ -682,7 +674,7 @@
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesExport#CURRENT_AND_PREVIOUS_STATUS" value1="Successful" />
 
-		<var method="selenium#getText('//tr/td[7]/span/a')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 
@@ -755,6 +747,7 @@
 		<execute macro="PortletEntry#publish" />
 
 		<execute macro="LAR#configureExportSiteCP">
+			<var name="checkContentNameList" value="Blogs" />
 			<var name="mainContent" value="Blogs" />
 			<var name="uncheckContentNameList" value="Documents and Media" />
 			<var name="uncheckSubContent" value="Referenced Content" />
@@ -764,7 +757,7 @@
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesExport#CURRENT_AND_PREVIOUS_STATUS" value1="Successful" />
 
-		<var method="selenium#getText('//tr/td[7]/span/a')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 
@@ -774,6 +767,14 @@
 
 		<execute function="Click" locator1="SitePagesExport#CURRENT_AND_PREVIOUS_DOWNLOAD" />
 		<execute function="DownloadTempFile" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Documents and Media" />
+		</execute>
+
+		<execute macro="DMDocument#deleteCP">
+			<var name="dmDocumentTitle" value="DM Document Title" />
+		</execute>
 
 		<execute macro="ProductMenu#gotoControlPanelSites">
 			<var name="portlet" value="Sites" />
@@ -817,7 +818,7 @@
 			<var name="exportTemplateName" value="Export Template Name" />
 		</execute>
 
-		<var method="selenium#getText('//div[contains(@id,\'exportLayoutProcessesSearchContainer\')]//table//tr/td[7]/span/a/span')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 
@@ -883,7 +884,7 @@
 			<var name="pageName" value="WSRP Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="WSRP Page" />
 		</execute>
 
@@ -907,7 +908,7 @@
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesExport#CURRENT_AND_PREVIOUS_STATUS" value1="Successful" />
 
-		<var method="selenium#getText('//tr/td[7]/span/a')" name="valueName" />
+		<var method="selenium#getText('//ul/li/div/h5')" name="valueName" />
 
 		<echo message="value name ${valueName}" />
 

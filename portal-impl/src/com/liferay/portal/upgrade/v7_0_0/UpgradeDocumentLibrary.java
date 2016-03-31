@@ -17,6 +17,7 @@ package com.liferay.portal.upgrade.v7_0_0;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
 import com.liferay.document.library.kernel.model.DLFileEntryTypeConstants;
 import com.liferay.document.library.kernel.util.DLUtil;
+import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -39,8 +40,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Michael Young
@@ -80,8 +83,8 @@ public class UpgradeDocumentLibrary extends UpgradeProcess {
 		}
 		catch (Exception e) {
 			_log.error(
-				"Unable to add dynamic data mapping structure link " +
-					"for file entry type " + classPK);
+				"Unable to add dynamic data mapping structure link for file " +
+					"entry type " + classPK);
 
 			throw e;
 		}
@@ -106,21 +109,28 @@ public class UpgradeDocumentLibrary extends UpgradeProcess {
 
 		// DLFolder
 
-		alterColumnType(DLFolderTable.class, "name", "VARCHAR(255) null");
+		alter(
+			DLFolderTable.class,
+			new AlterColumnType("name", "VARCHAR(255) null"));
 
 		updateRepositoryClassNameIds();
 	}
 
-	protected boolean hasFileEntry(long groupId, long folderId, String fileName)
+	protected boolean hasFileEntry(
+			long groupId, long folderId, long fileEntryId, String title,
+			String fileName)
 		throws Exception {
 
 		try (PreparedStatement ps = connection.prepareStatement(
 				"select count(*) from DLFileEntry where groupId = ? and " +
-					"folderId = ? and fileName = ?")) {
+					"folderId = ? and ((fileEntryId <> ? and title = ?) or " +
+						"fileName = ?)")) {
 
 			ps.setLong(1, groupId);
 			ps.setLong(2, folderId);
-			ps.setString(3, fileName);
+			ps.setLong(3, fileEntryId);
+			ps.setString(4, title);
+			ps.setString(5, fileName);
 
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
@@ -136,27 +146,27 @@ public class UpgradeDocumentLibrary extends UpgradeProcess {
 		}
 	}
 
-	protected void updateFileEntryFileName(long fileEntryId, String fileName)
-		throws Exception {
-
-		try (PreparedStatement ps = connection.prepareStatement(
-				"update DLFileEntry set fileName = ? where fileEntryId = ?")) {
-
-			ps.setString(1, fileName);
-			ps.setLong(2, fileEntryId);
-
-			ps.executeUpdate();
-		}
-	}
-
 	protected void updateFileEntryFileNames() throws Exception {
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
 			runSQL("alter table DLFileEntry add fileName VARCHAR(255) null");
 
-			try (PreparedStatement ps = connection.prepareStatement(
+			Set<String> generatedUniqueFileNames = new HashSet<>();
+			Set<String> generatedUniqueTitles = new HashSet<>();
+
+			try (PreparedStatement ps1 = connection.prepareStatement(
 					"select fileEntryId, groupId, folderId, extension, title," +
 						" version from DLFileEntry");
-				ResultSet rs = ps.executeQuery()) {
+				PreparedStatement ps2 =
+					AutoBatchPreparedStatementUtil.autoBatch(
+						connection.prepareStatement(
+							"update DLFileEntry set fileName = ?, title = ? " +
+								"where fileEntryId = ?"));
+				PreparedStatement ps3 =
+					AutoBatchPreparedStatementUtil.concurrentAutoBatch(
+						connection,
+						"update DLFileVersion set title = ? where " +
+							"fileEntryId = " + "? and version = ?");
+				ResultSet rs = ps1.executeQuery()) {
 
 				while (rs.next()) {
 					long fileEntryId = rs.getLong("fileEntryId");
@@ -178,12 +188,21 @@ public class UpgradeDocumentLibrary extends UpgradeProcess {
 						titleWithoutExtension = FileUtil.stripExtension(title);
 					}
 
-					String uniqueTitle = StringPool.BLANK;
+					boolean generatedUniqueFileName = false;
+					String uniqueTitle = title;
 
 					for (int i = 1;; i++) {
-						if (!hasFileEntry(groupId, folderId, uniqueFileName)) {
+						if (!generatedUniqueFileNames.contains(
+								uniqueFileName) &&
+							!generatedUniqueTitles.contains(uniqueTitle) &&
+							!hasFileEntry(
+								groupId, folderId, fileEntryId, uniqueTitle,
+								uniqueFileName)) {
+
 							break;
 						}
+
+						generatedUniqueFileName = true;
 
 						uniqueTitle =
 							titleWithoutExtension + StringPool.UNDERLINE +
@@ -198,37 +217,36 @@ public class UpgradeDocumentLibrary extends UpgradeProcess {
 							uniqueTitle, extension);
 					}
 
-					updateFileEntryFileName(fileEntryId, uniqueFileName);
+					if (generatedUniqueFileName) {
+						generatedUniqueFileNames.add(uniqueFileName);
+						generatedUniqueTitles.add(uniqueTitle);
+					}
+
+					ps2.setString(1, uniqueFileName);
 
 					if (Validator.isNotNull(uniqueTitle)) {
-						updateFileEntryTitle(fileEntryId, uniqueTitle, version);
+						ps2.setString(2, uniqueTitle);
+					}
+					else {
+						ps2.setString(2, title);
+					}
+
+					ps2.setLong(3, fileEntryId);
+
+					ps2.addBatch();
+
+					if (Validator.isNotNull(uniqueTitle)) {
+						ps3.setString(1, uniqueTitle);
+						ps3.setLong(2, fileEntryId);
+						ps3.setString(3, version);
+
+						ps3.addBatch();
 					}
 				}
-			}
-		}
-	}
 
-	protected void updateFileEntryTitle(
-			long fileEntryId, String title, String version)
-		throws Exception {
+				ps2.executeBatch();
 
-		try (PreparedStatement ps1 = connection.prepareStatement(
-				"update DLFileEntry set title = ? where fileEntryId = ?")) {
-
-			ps1.setString(1, title);
-			ps1.setLong(2, fileEntryId);
-
-			ps1.executeUpdate();
-
-			try (PreparedStatement ps2 = connection.prepareStatement(
-					"update DLFileVersion set title = ? where fileEntryId = " +
-						"? and version = ?")) {
-
-				ps2.setString(1, title);
-				ps2.setLong(2, fileEntryId);
-				ps2.setString(3, version);
-
-				ps2.executeUpdate();
+				ps3.executeBatch();
 			}
 		}
 	}
@@ -425,26 +443,21 @@ public class UpgradeDocumentLibrary extends UpgradeProcess {
 	protected void updateFileVersionFileName(
 			long fileVersionId, String fileName)
 		throws Exception {
-
-		try (PreparedStatement ps = connection.prepareStatement(
-				"update DLFileVersion set fileName = ? where " +
-					"fileVersionId = ?")) {
-
-			ps.setString(1, fileName);
-			ps.setLong(2, fileVersionId);
-
-			ps.executeUpdate();
-		}
 	}
 
 	protected void updateFileVersionFileNames() throws Exception {
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
 			runSQL("alter table DLFileVersion add fileName VARCHAR(255) null");
 
-			try (PreparedStatement ps = connection.prepareStatement(
+			try (PreparedStatement ps1 = connection.prepareStatement(
 					"select fileVersionId, extension, title from " +
 						"DLFileVersion");
-				ResultSet rs = ps.executeQuery()) {
+				PreparedStatement ps2 =
+					AutoBatchPreparedStatementUtil.concurrentAutoBatch(
+						connection,
+						"update DLFileVersion set fileName = ? where " +
+							"fileVersionId = ?");
+				ResultSet rs = ps1.executeQuery()) {
 
 				while (rs.next()) {
 					long fileVersionId = rs.getLong("fileVersionId");
@@ -455,8 +468,13 @@ public class UpgradeDocumentLibrary extends UpgradeProcess {
 					String fileName = DLUtil.getSanitizedFileName(
 						title, extension);
 
-					updateFileVersionFileName(fileVersionId, fileName);
+					ps2.setString(1, fileName);
+					ps2.setLong(2, fileVersionId);
+
+					ps2.addBatch();
 				}
+
+				ps2.executeBatch();
 			}
 		}
 	}

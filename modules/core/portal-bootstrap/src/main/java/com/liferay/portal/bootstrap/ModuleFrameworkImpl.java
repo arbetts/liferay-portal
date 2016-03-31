@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.Props;
@@ -67,6 +68,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.jar.Attributes;
 import java.util.jar.JarInputStream;
@@ -233,6 +235,8 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		if (_log.isDebugEnabled()) {
 			_log.debug("Initializing the OSGi framework");
 		}
+
+		_initFelixFileInstallDirs();
 
 		List<ServiceLoaderCondition> serviceLoaderConditions =
 			ServiceLoader.load(ServiceLoaderCondition.class);
@@ -520,6 +524,27 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 	}
 
 	@Override
+	public void unregisterContext(Object context) {
+		if (context == null) {
+			return;
+		}
+
+		if (_log.isDebugEnabled()) {
+			_log.debug("Unregistering context " + context);
+		}
+
+		if (!(context instanceof ApplicationContext)) {
+			return;
+		}
+
+		_unregisterApplicationContext((ApplicationContext)context);
+
+		if (_log.isDebugEnabled()) {
+			_log.debug("Registered context " + context);
+		}
+	}
+
+	@Override
 	public void updateBundle(long bundleId) throws PortalException {
 		updateBundle(bundleId, null);
 	}
@@ -781,6 +806,18 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		return false;
 	}
 
+	private void _initFelixFileInstallDirs() {
+		if (_log.isDebugEnabled()) {
+			_log.debug("Initializing Felix file install directories");
+		}
+
+		String[] dirNames = StringUtil.split(_getFelixFileInstallDir());
+
+		for (String dirName : dirNames) {
+			FileUtil.mkdirs(dirName);
+		}
+	}
+
 	private void _installInitialBundle(String location) {
 		boolean start = false;
 		int startLevel = PropsValues.MODULE_FRAMEWORK_BEGINNING_START_LEVEL;
@@ -955,7 +992,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 			_log.debug("Register application context");
 		}
 
-		BundleContext bundleContext = _framework.getBundleContext();
+		List<ServiceRegistration<?>> serviceRegistrations = new ArrayList<>();
 
 		for (String beanName : applicationContext.getBeanDefinitionNames()) {
 			Object bean = null;
@@ -970,12 +1007,19 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 			}
 
 			if (bean != null) {
-				_registerService(bundleContext, beanName, bean);
+				ServiceRegistration<?> serviceRegistration = _registerService(
+					_framework.getBundleContext(), beanName, bean);
+
+				if (serviceRegistration != null) {
+					serviceRegistrations.add(serviceRegistration);
+				}
 			}
 		}
+
+		_springContextServices.put(applicationContext, serviceRegistrations);
 	}
 
-	private void _registerService(
+	private ServiceRegistration<?> _registerService(
 		BundleContext bundleContext, String beanName, Object bean) {
 
 		Set<Class<?>> interfaces = OSGiBeanProperties.Service.interfaces(bean);
@@ -993,7 +1037,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 
 		if (names.isEmpty()) {
-			return;
+			return null;
 		}
 
 		ServiceRegistration<?> serviceRegistration =
@@ -1005,6 +1049,8 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 			_log.debug(
 				"Registered service as " + serviceRegistration.getReference());
 		}
+
+		return serviceRegistration;
 	}
 
 	private void _registerServletContext(ServletContext servletContext) {
@@ -1067,9 +1113,37 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 	}
 
+	private void _unregisterApplicationContext(
+		ApplicationContext applicationContext) {
+
+		List<ServiceRegistration<?>> serviceRegistrations =
+			_springContextServices.remove(applicationContext);
+
+		if (serviceRegistrations == null) {
+			return;
+		}
+
+		for (ServiceRegistration<?> serviceRegistration :
+				serviceRegistrations) {
+
+			try {
+				serviceRegistration.unregister();
+			}
+			catch (IllegalStateException ise) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(
+						"Service registration " + serviceRegistration +
+							" is already unregistered");
+				}
+			}
+		}
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		ModuleFrameworkImpl.class);
 
 	private Framework _framework;
+	private final Map<ApplicationContext, List<ServiceRegistration<?>>>
+		_springContextServices = new ConcurrentHashMap<>();
 
 }

@@ -466,6 +466,27 @@ public interface AssetEntryLocalService extends BaseLocalService,
 		java.lang.String assetCategoryIds, java.lang.String assetTagNames,
 		int status, boolean andSearch, int start, int end);
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long searchCount(long companyId, long[] groupIds, long userId,
+		java.lang.String className, long classTypeId,
+		java.lang.String keywords, boolean showNonindexable, int[] statuses);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long searchCount(long companyId, long[] groupIds, long userId,
+		java.lang.String className, long classTypeId,
+		java.lang.String userName, java.lang.String title,
+		java.lang.String description, java.lang.String assetCategoryIds,
+		java.lang.String assetTagNames, boolean showInvisible,
+		boolean showNonindexable, int[] statuses, boolean andSearch);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long searchCount(long companyId, long[] groupIds, long userId,
+		java.lang.String className, long classTypeId,
+		java.lang.String userName, java.lang.String title,
+		java.lang.String description, java.lang.String assetCategoryIds,
+		java.lang.String assetTagNames, boolean showNonindexable,
+		int[] statuses, boolean andSearch);
+
 	public void setAssetCategoryAssetEntries(long categoryId, long[] entryIds);
 
 	public void setAssetTagAssetEntries(long tagId, long[] entryIds);
@@ -480,9 +501,23 @@ public interface AssetEntryLocalService extends BaseLocalService,
 	public AssetEntry updateAssetEntry(AssetEntry assetEntry);
 
 	public AssetEntry updateEntry(java.lang.String className, long classPK,
+		Date publishDate, Date expirationDate, boolean listable, boolean visible)
+		throws PortalException;
+
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #updateEntry(String, long,
+	Date, Date, boolean, boolean)}
+	*/
+	@java.lang.Deprecated
+	public AssetEntry updateEntry(java.lang.String className, long classPK,
 		Date publishDate, Date expirationDate, boolean visible)
 		throws PortalException;
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #updateEntry(String, long,
+	Date, Date, boolean, boolean)}
+	*/
+	@java.lang.Deprecated
 	public AssetEntry updateEntry(java.lang.String className, long classPK,
 		Date publishDate, boolean visible) throws PortalException;
 
@@ -493,18 +528,18 @@ public interface AssetEntryLocalService extends BaseLocalService,
 	public AssetEntry updateEntry(long userId, long groupId, Date createDate,
 		Date modifiedDate, java.lang.String className, long classPK,
 		java.lang.String classUuid, long classTypeId, long[] categoryIds,
-		java.lang.String[] tagNames, boolean visible, Date startDate,
-		Date endDate, Date expirationDate, java.lang.String mimeType,
-		java.lang.String title, java.lang.String description,
-		java.lang.String summary, java.lang.String url,
-		java.lang.String layoutUuid, int height, int width,
-		java.lang.Double priority) throws PortalException;
+		java.lang.String[] tagNames, boolean listable, boolean visible,
+		Date startDate, Date endDate, Date expirationDate,
+		java.lang.String mimeType, java.lang.String title,
+		java.lang.String description, java.lang.String summary,
+		java.lang.String url, java.lang.String layoutUuid, int height,
+		int width, java.lang.Double priority) throws PortalException;
 
 	/**
 	* @deprecated As of 7.0.0, replaced by {@link #updateEntry(long, long,
 	Date, Date, String, long, String, long, long[], String[],
-	boolean, Date, Date, Date, String, String, String, String,
-	String, String, int, int, Double)}
+	boolean, boolean, Date, Date, Date, String, String, String,
+	String, String, String, int, int, Double)}
 	*/
 	@java.lang.Deprecated
 	public AssetEntry updateEntry(long userId, long groupId, Date createDate,

@@ -892,6 +892,7 @@
 
 		<copy file="copyright.txt" todir="tools/zip_tmpl/license" />
 		<copy file="lib/versions.html" todir="tools/zip_tmpl/license" />
+		<copy file="readme.markdown" todir="tools/zip_tmpl" />
 
 		<antcall target="zip-portal-war" />
 
@@ -2661,7 +2662,7 @@ and put it in ${app.server.parent.dir}. Then rerun this task.
 
 		<replace file="${app.server.wildfly.dir}/standalone/configuration/standalone.xml">
 			<replacetoken><![CDATA[<deployment-scanner ]]></replacetoken>
-			<replacevalue><![CDATA[<deployment-scanner deployment-timeout="240" ]]></replacevalue>
+			<replacevalue><![CDATA[<deployment-scanner deployment-timeout="360" ]]></replacevalue>
 		</replace>
 
 		<replace file="${app.server.wildfly.dir}/standalone/configuration/standalone.xml">
@@ -2927,6 +2928,21 @@ plugins.includes=</echo>
 				</zip>
 
 				<if>
+					<available file="${zip.executable.dir}/../deploy" />
+					<then>
+						<zip
+							destfile="dist/${zip.executable.file}-${lp.version}.zip"
+							update="true"
+						>
+							<zipfileset
+								dir="${zip.executable.dir}/../deploy"
+								prefix="liferay-portal-${lp.version}/deploy"
+							/>
+						</zip>
+					</then>
+				</if>
+
+				<if>
 					<available file="${zip.executable.dir}/../osgi" />
 					<then>
 						<zip
@@ -2990,6 +3006,21 @@ plugins.includes=</echo>
 								filemode="744"
 								includes="**/*.sh"
 								prefix="liferay-portal-${lp.version}/patching-tool"
+							/>
+						</zip>
+					</then>
+				</if>
+
+				<if>
+					<available file="${zip.executable.dir}/../work" />
+					<then>
+						<zip
+							destfile="dist/${zip.executable.file}-${lp.version}.zip"
+							update="true"
+						>
+							<zipfileset
+								dir="${zip.executable.dir}/../work"
+								prefix="liferay-portal-${lp.version}/work"
 							/>
 						</zip>
 					</then>

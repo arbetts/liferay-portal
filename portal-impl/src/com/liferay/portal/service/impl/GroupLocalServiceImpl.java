@@ -78,6 +78,8 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.spring.aop.Skip;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.kernel.tree.TreeModelTasksAdapter;
+import com.liferay.portal.kernel.tree.TreePathUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
@@ -95,8 +97,6 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.TreeModelTasksAdapter;
-import com.liferay.portal.kernel.util.TreePathUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.comparator.GroupIdComparator;
@@ -800,20 +800,13 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 			// Resources
 
 			List<ResourcePermission> resourcePermissions =
-				resourcePermissionPersistence.findByC_LikeP(
-					group.getCompanyId(), String.valueOf(group.getGroupId()));
+				resourcePermissionPersistence.findByC_S_P(
+					group.getCompanyId(), ResourceConstants.SCOPE_GROUP,
+					String.valueOf(group.getGroupId()));
 
 			for (ResourcePermission resourcePermission : resourcePermissions) {
 				resourcePermissionLocalService.deleteResourcePermission(
 					resourcePermission);
-			}
-
-			if (!group.isStagingGroup() &&
-				(group.isOrganization() || group.isRegularSite())) {
-
-				resourceLocalService.deleteResource(
-					group.getCompanyId(), Group.class.getName(),
-					ResourceConstants.SCOPE_INDIVIDUAL, group.getGroupId());
 			}
 
 			// Trash
@@ -878,6 +871,14 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 
 					userGroupGroupRoleLocalService.
 						deleteUserGroupGroupRolesByGroupId(group.getGroupId());
+				}
+
+				if (!group.isStagingGroup() &&
+					(group.isOrganization() || group.isRegularSite())) {
+
+					resourceLocalService.deleteResource(
+						group.getCompanyId(), Group.class.getName(),
+						ResourceConstants.SCOPE_INDIVIDUAL, group.getGroupId());
 				}
 
 				groupPersistence.remove(group);
@@ -1965,8 +1966,7 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 						QueryUtil.ALL_POS, size, new GroupIdComparator(true));
 				}
 
-			}
-		);
+			});
 	}
 
 	/**
@@ -3075,9 +3075,9 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 		assetEntryLocalService.updateEntry(
 			userId, companyGroup.getGroupId(), null, null,
 			Group.class.getName(), group.getGroupId(), null, 0,
-			assetCategoryIds, assetTagNames, false, null, null, null, null,
-			group.getDescriptiveName(), group.getDescription(), null, null,
-			null, 0, 0, null);
+			assetCategoryIds, assetTagNames, true, false, null, null, null,
+			null, group.getDescriptiveName(), group.getDescription(), null,
+			null, null, 0, 0, null);
 	}
 
 	/**
@@ -4286,7 +4286,7 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 			}
 		}
 
-		if (StringUtil.count(friendlyURL, StringPool.SLASH) > 1) {
+		if (StringUtil.count(friendlyURL, CharPool.SLASH) > 1) {
 			throw new GroupFriendlyURLException(
 				GroupFriendlyURLException.TOO_DEEP);
 		}

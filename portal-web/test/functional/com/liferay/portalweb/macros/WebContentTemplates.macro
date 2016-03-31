@@ -6,7 +6,9 @@
 
 		<execute function="Type#clickAtSendKeys" locator1="TextInput#NAME" value1="${templateName}" />
 
-		<execute macro="WebContentNavigator#showTemplateDetails" />
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Details" />
+		</execute>
 
 		<if>
 			<isset var="templateDescription" />
@@ -28,6 +30,26 @@
 			</elseif>
 			<else>
 				<execute function="Select" locator1="DDMEditTemplate#DETAILS_LANGUAGE_SELECT" value1="Velocity (.vm)" />
+			</else>
+		</if>
+
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Details" />
+		</execute>
+
+		<if>
+			<equals arg1="${templateLanguage}" arg2="ftl" />
+			<then>
+				<execute function="AssertSelectedLabel" locator1="DDMEditTemplate#DETAILS_LANGUAGE_SELECT" value1="FreeMarker (.ftl)" />
+			</then>
+			<elseif>
+				<equals arg1="${templateLanguage}" arg2="xsl" />
+				<then>
+					<execute function="AssertSelectedLabel" locator1="DDMEditTemplate#DETAILS_LANGUAGE_SELECT" value1="Extensible Stylesheet Language (.xsl)" />
+				</then>
+			</elseif>
+			<else>
+				<execute function="AssertSelectedLabel" locator1="DDMEditTemplate#DETAILS_LANGUAGE_SELECT" value1="Velocity (.vm)" />
 			</else>
 		</if>
 
@@ -92,8 +114,6 @@
 
 		<execute function="SelectFrame" locator1="DDMSelectStructure#DDM_STRUCTURES_IFRAME" />
 
-		<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${structureName}" />
-
 		<execute function="Click" locator1="Icon#BASIC_SEARCH" />
 
 		<var name="key_ddlDatadefinitionName" value="${structureName}" />
@@ -105,10 +125,6 @@
 		<execute function="Confirm" value1="Selecting a new structure changes the available input fields and available templates. Do you want to proceed?" />
 
 		<execute function="SelectFrameTop" />
-
-		<execute macro="WebContentNavigator#showTemplateDetails" />
-
-		<execute function="AssertTextEquals#assertValue" locator1="TextInput#STRUCTURE" value1="${structureName}" />
 
 		<if>
 			<equals arg1="${templateLanguage}" arg2="ftl" />
@@ -242,7 +258,7 @@
 			</then>
 		</while>
 
-		<execute function="AssertTextEquals" locator1="Message#EMPTY_INFO" value1="There are no results." />
+		<execute macro="Portlet#viewEmptyMessage" />
 	</command>
 
 	<command name="viewCP">
@@ -282,7 +298,9 @@
 
 		<execute function="AssertTextEquals" locator1="TextInput#NAME" value1="${templateName}" />
 
-		<execute macro="WebContentNavigator#showTemplateDetails" />
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Details" />
+		</execute>
 
 		<execute function="AssertTextEquals" locator1="TextArea#DESCRIPTION" value1="${templateDescription}" />
 

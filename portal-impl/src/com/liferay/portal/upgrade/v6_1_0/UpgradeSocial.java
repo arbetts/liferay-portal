@@ -14,10 +14,6 @@
 
 package com.liferay.portal.upgrade.v6_1_0;
 
-import com.liferay.blogs.kernel.model.BlogsEntry;
-import com.liferay.message.boards.kernel.model.MBCategory;
-import com.liferay.message.boards.kernel.model.MBMessage;
-import com.liferay.message.boards.kernel.model.MBThread;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
@@ -49,38 +45,44 @@ public class UpgradeSocial extends UpgradeProcess {
 
 	public UpgradeSocial() {
 		putEquityToActivityMap(
-			BlogsEntry.class.getName(), ActionKeys.ADD_DISCUSSION,
+			"com.liferay.portlet.blogs.model.BlogsEntry",
+			ActionKeys.ADD_DISCUSSION,
 			SocialActivityConstants.TYPE_ADD_COMMENT);
 		putEquityToActivityMap(
-			BlogsEntry.class.getName(), ActionKeys.ADD_ENTRY, 2);
+			"com.liferay.portlet.blogs.model.BlogsEntry", ActionKeys.ADD_ENTRY,
+			2);
 		putEquityToActivityMap(
-			BlogsEntry.class.getName(), ActionKeys.ADD_VOTE,
+			"com.liferay.portlet.blogs.model.BlogsEntry", ActionKeys.ADD_VOTE,
 			SocialActivityConstants.TYPE_ADD_VOTE);
 		putEquityToActivityMap(
-			BlogsEntry.class.getName(), ActionKeys.SUBSCRIBE,
+			"com.liferay.portlet.blogs.model.BlogsEntry", ActionKeys.SUBSCRIBE,
 			SocialActivityConstants.TYPE_SUBSCRIBE);
 		putEquityToActivityMap(
-			BlogsEntry.class.getName(), ActionKeys.UPDATE, 3);
+			"com.liferay.portlet.blogs.model.BlogsEntry", ActionKeys.UPDATE, 3);
 		putEquityToActivityMap(
-			BlogsEntry.class.getName(), ActionKeys.VIEW,
+			"com.liferay.portlet.blogs.model.BlogsEntry", ActionKeys.VIEW,
 			SocialActivityConstants.TYPE_VIEW);
 
 		putEquityToActivityMap(
-			MBCategory.class.getName(), ActionKeys.SUBSCRIBE,
+			"com.liferay.portlet.messageboards.model.MBCategory",
+			ActionKeys.SUBSCRIBE, SocialActivityConstants.TYPE_SUBSCRIBE);
+		putEquityToActivityMap(
+			"com.liferay.portlet.messageboards.model.MBMessage",
+			ActionKeys.ADD_MESSAGE, 1);
+		putEquityToActivityMap(
+			"com.liferay.portlet.messageboards.model.MBMessage",
+			ActionKeys.ADD_VOTE, SocialActivityConstants.TYPE_ADD_VOTE);
+		putEquityToActivityMap(
+			"com.liferay.portlet.messageboards.model.MBMessage",
+			ActionKeys.REPLY_TO_MESSAGE, 2);
+		putEquityToActivityMap(
+			"com.liferay.portlet.messageboards.model.MBMessage",
+			ActionKeys.VIEW, SocialActivityConstants.TYPE_VIEW);
+		putEquityToActivityMap(
+			"com.liferay.portlet.messageboards.model.MBThread",
+			ActionKeys.SUBSCRIBE,
+			"com.liferay.portlet.messageboards.model.MBMessage",
 			SocialActivityConstants.TYPE_SUBSCRIBE);
-		putEquityToActivityMap(
-			MBMessage.class.getName(), ActionKeys.ADD_MESSAGE, 1);
-		putEquityToActivityMap(
-			MBMessage.class.getName(), ActionKeys.ADD_VOTE,
-			SocialActivityConstants.TYPE_ADD_VOTE);
-		putEquityToActivityMap(
-			MBMessage.class.getName(), ActionKeys.REPLY_TO_MESSAGE, 2);
-		putEquityToActivityMap(
-			MBMessage.class.getName(), ActionKeys.VIEW,
-			SocialActivityConstants.TYPE_VIEW);
-		putEquityToActivityMap(
-			MBThread.class.getName(), ActionKeys.SUBSCRIBE,
-			MBMessage.class.getName(), SocialActivityConstants.TYPE_SUBSCRIBE);
 
 		putEquityToActivityMap(
 			"com.liferay.portlet.journal.model.JournalArticle",
@@ -97,23 +99,25 @@ public class UpgradeSocial extends UpgradeProcess {
 			SocialActivityConstants.TYPE_VIEW);
 
 		putEquityToActivityMap(
-			"com.liferay.wiki.model.WikiNode", ActionKeys.SUBSCRIBE,
+			"com.liferay.portlet.wiki.model.WikiNode", ActionKeys.SUBSCRIBE,
 			SocialActivityConstants.TYPE_SUBSCRIBE);
 		putEquityToActivityMap(
-			"com.liferay.wiki.model.WikiPage", ActionKeys.ADD_ATTACHMENT,
+			"com.liferay.portlet.wiki.model.WikiPage",
+			ActionKeys.ADD_ATTACHMENT,
 			SocialActivityConstants.TYPE_ADD_ATTACHMENT);
 		putEquityToActivityMap(
-			"com.liferay.wiki.model.WikiPage", ActionKeys.ADD_DISCUSSION,
+			"com.liferay.portlet.wiki.model.WikiPage",
+			ActionKeys.ADD_DISCUSSION,
 			SocialActivityConstants.TYPE_ADD_COMMENT);
 		putEquityToActivityMap(
-			"com.liferay.wiki.model.WikiPage", ActionKeys.ADD_PAGE, 1);
+			"com.liferay.portlet.wiki.model.WikiPage", ActionKeys.ADD_PAGE, 1);
 		putEquityToActivityMap(
-			"com.liferay.wiki.model.WikiPage", ActionKeys.SUBSCRIBE,
+			"com.liferay.portlet.wiki.model.WikiPage", ActionKeys.SUBSCRIBE,
 			SocialActivityConstants.TYPE_SUBSCRIBE);
 		putEquityToActivityMap(
-			"com.liferay.wiki.model.WikiPage", ActionKeys.UPDATE, 2);
+			"com.liferay.portlet.wiki.model.WikiPage", ActionKeys.UPDATE, 2);
 		putEquityToActivityMap(
-			"com.liferay.wiki.model.WikiPage", ActionKeys.VIEW,
+			"com.liferay.portlet.wiki.model.WikiPage", ActionKeys.VIEW,
 			SocialActivityConstants.TYPE_VIEW);
 	}
 
@@ -129,8 +133,8 @@ public class UpgradeSocial extends UpgradeProcess {
 		sb.append("insert into SocialActivityCounter (activityCounterId, ");
 		sb.append("groupId, companyId, classNameId, classPK, name, ");
 		sb.append("ownerType, currentValue, totalValue, graceValue, ");
-		sb.append("startPeriod, endPeriod) values (?, ?, ?, ?, ?, ?, ?, ");
-		sb.append("?, ?, ?, ?, ?)");
+		sb.append("startPeriod, endPeriod) values (?, ?, ?, ?, ?, ?, ?, ?, ");
+		sb.append("?, ?, ?, ?)");
 
 		try (PreparedStatement ps = connection.prepareStatement(
 				sb.toString())) {
@@ -233,9 +237,9 @@ public class UpgradeSocial extends UpgradeProcess {
 		StringBundler sb = new StringBundler(4);
 
 		sb.append("select activityCounterId, totalValue from ");
-		sb.append("SocialActivityCounter where groupId = ? and ");
-		sb.append("classNameId = ? and classPK = ? and name = ? and ");
-		sb.append("ownerType = ? and startPeriod = ? and endPeriod = ?");
+		sb.append("SocialActivityCounter where groupId = ? and classNameId ");
+		sb.append("= ? and classPK = ? and name = ? and ownerType = ? and ");
+		sb.append("startPeriod = ? and endPeriod = ?");
 
 		try (PreparedStatement ps = connection.prepareStatement(
 				sb.toString())) {
@@ -290,8 +294,8 @@ public class UpgradeSocial extends UpgradeProcess {
 
 		StringBundler sb = new StringBundler(5);
 
-		sb.append("select groupId, companyId, userId from AssetEntry ");
-		sb.append("where classNameId = ");
+		sb.append("select groupId, companyId, userId from AssetEntry where ");
+		sb.append("classNameId = ");
 		sb.append(classNameId);
 		sb.append(" and classPK = ");
 		sb.append(classPK);
@@ -335,9 +339,9 @@ public class UpgradeSocial extends UpgradeProcess {
 		StringBundler sb = new StringBundler(4);
 
 		sb.append("select max(totalValue) as totalValue from ");
-		sb.append("SocialActivityCounter where groupId = ? and ");
-		sb.append("classNameId = ? and classPK = ? and name = ? and ");
-		sb.append("ownerType = ? and startPeriod < ?");
+		sb.append("SocialActivityCounter where groupId = ? and classNameId ");
+		sb.append("= ? and classPK = ? and name = ? and ownerType = ? and ");
+		sb.append("startPeriod < ?");
 
 		try (PreparedStatement ps = connection.prepareStatement(
 				sb.toString())) {
@@ -381,17 +385,17 @@ public class UpgradeSocial extends UpgradeProcess {
 			StringBundler sb = new StringBundler(7);
 
 			sb.append("select groupId from SocialActivitySetting where ");
-			sb.append("activityType = 0 and name = 'enabled' and ");
-			sb.append("value = 'true' and classNameId in (");
+			sb.append("activityType = 0 and name = 'enabled' and value = ");
+			sb.append("'true' and classNameId in (");
 
 			long mbMessageClassNameId = PortalUtil.getClassNameId(
-				MBMessage.class);
+				"com.liferay.portlet.messageboards.model.MBMessage");
 
 			sb.append(mbMessageClassNameId);
 			sb.append(", ");
 
 			long mbThreadClassNameId = PortalUtil.getClassNameId(
-				MBThread.class);
+				"com.liferay.portlet.messageboards.model.MBThread");
 
 			sb.append(mbThreadClassNameId);
 			sb.append(StringPool.CLOSE_PARENTHESIS);
@@ -440,7 +444,9 @@ public class UpgradeSocial extends UpgradeProcess {
 
 			String className = PortalUtil.getClassName(classNameId);
 
-			if (className.equals(MBThread.class.getName())) {
+			if (className.equals(
+					"com.liferay.portlet.messageboards.model.MBThread")) {
+
 				long classPK = assetEntryArray[4];
 
 				long mbThreadRootMessageId = getMBThreadRootMessageId(classPK);
@@ -450,7 +456,8 @@ public class UpgradeSocial extends UpgradeProcess {
 				}
 
 				assetEntryArray = getAssetEntryArray(
-					MBMessage.class.getName(), mbThreadRootMessageId);
+					"com.liferay.portlet.messageboards.model.MBMessage",
+					mbThreadRootMessageId);
 
 				if (assetEntryArray == null) {
 					return;
@@ -527,9 +534,9 @@ public class UpgradeSocial extends UpgradeProcess {
 			sb = new StringBundler(4);
 
 			sb.append("select groupId, classNameId, classPK, name, ");
-			sb.append("max(startPeriod) as startPeriod ");
-			sb.append("from SocialActivityCounter group by groupId, ");
-			sb.append("classNameId, classPK, name");
+			sb.append("max(startPeriod) as startPeriod from ");
+			sb.append("SocialActivityCounter group by groupId, classNameId, ");
+			sb.append("classPK, name");
 
 			try (PreparedStatement ps = connection.prepareStatement(
 					sb.toString());

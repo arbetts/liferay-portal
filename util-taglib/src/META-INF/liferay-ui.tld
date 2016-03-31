@@ -820,6 +820,11 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
+		<attribute>
+			<name>portletURL</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 	</tag>
 	<tag>
 		<name>asset-metadata</name>
@@ -1311,6 +1316,12 @@
 		<tag-class>com.liferay.taglib.ui.EmptyResultMessageTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
+			<name>cssClass</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Whether to use only the empty results message and text styling, and not use the large smiley face animation. The default value is <![CDATA[<code>false</code>]]>.</description>
 			<name>compact</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1361,6 +1372,12 @@
 			<name>rowBreak</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>targetNode</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
 			<description>Whether to translate the message into the user's language. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -3760,6 +3777,7 @@
 		<tei-class>com.liferay.taglib.ui.SearchContainerTei</tei-class>
 		<body-content>JSP</body-content>
 		<attribute>
+			<description>Whether to use only the empty results message and text styling, and not use the large smiley face animation. The default value is <![CDATA[<code>false</code>]]>.</description>
 			<name>compactEmptyResultsMessage</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -3803,6 +3821,11 @@
 		<attribute>
 			<description>A message displayed when the search container is empty.</description>
 			<name>emptyResultsMessage</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>emptyResultsMessageCssClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
@@ -4720,6 +4743,11 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<name>activitySets</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<name>className</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -4899,7 +4927,7 @@
 		<description>Creates a success message to display to the user.</description>
 		<name>success</name>
 		<tag-class>com.liferay.taglib.ui.SuccessTag</tag-class>
-		<body-content>empty</body-content>
+		<body-content>JSP</body-content>
 		<attribute>
 			<description>A key to be placed in the <![CDATA[<code>SessionMessages</code>]]> object to trigger the success message.</description>
 			<name>key</name>
@@ -4909,13 +4937,19 @@
 		<attribute>
 			<description>Explicit message text or the name of a language key from which to derive the message text.</description>
 			<name>message</name>
-			<required>true</required>
+			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
 			<name>targetNode</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>timeout</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
 			<description>Whether to translate the success message into the user's language. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -4988,6 +5022,12 @@
 		<attribute>
 			<description>A URL for navigating back to.</description>
 			<name>backURL</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>A CSS class for styling the component.</description>
+			<name>cssClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
@@ -5467,13 +5507,6 @@
 		<name>user-search-container-results</name>
 		<tag-class>com.liferay.taglib.ui.UserSearchContainerResultsTag</tag-class>
 		<body-content>JSP</body-content>
-		<attribute>
-			<description>Whether to use the indexer for search. The default value is <![CDATA[<code>true</code>]]>.</description>
-			<name>useIndexer</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<type>boolean</type>
-		</attribute>
 		<attribute>
 			<name>userParams</name>
 			<required>true</required>

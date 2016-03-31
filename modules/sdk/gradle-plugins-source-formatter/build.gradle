@@ -2,9 +2,5 @@ dependencies {
 	compile gradleApi()
 	compile group: "com.liferay", name: "com.liferay.gradle.util", version: "1.0.23"
 
-	provided project(":util:source-formatter")
-}
-
-updateFileVersions {
-	match(/"com\.liferay\.gradle\.plugins\.source\.formatter", version: "(.+)"/, "../gradle-plugins/build.gradle")
+	provided group: "com.liferay", name: "com.liferay.source.formatter", version: "1.0.178"
 }

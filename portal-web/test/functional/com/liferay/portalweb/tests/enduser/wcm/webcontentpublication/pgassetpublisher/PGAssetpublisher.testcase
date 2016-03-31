@@ -10,7 +10,7 @@
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -54,7 +54,7 @@
 	</tear-down>
 
 	<command name="AddAPMultiplePortlet" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -63,7 +63,7 @@
 			<var name="portletName" value="Asset Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -78,7 +78,7 @@
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -86,7 +86,7 @@
 			<var name="portletName" value="Bookmarks" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -95,7 +95,7 @@
 			<var name="folderName" value="Test Folder Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -103,10 +103,10 @@
 			<var name="bookmarkDescription" value="Test Bookmark Description" />
 			<var name="bookmarkFolderName" value="Test Folder Name" />
 			<var name="bookmarkName" value="Test Bookmark Name" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -120,7 +120,7 @@
 			<var name="pageName" value="Test Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Test Page" />
 		</execute>
 
@@ -131,14 +131,14 @@
 		<execute function="Refresh" />
 
 		<execute macro="Portlet#gotoPortletOptions">
-			<var name="portletOption" value="Look and Feel" />
+			<var name="portletOption" value="Look and Feel Configuration" />
 		</execute>
 
 		<execute macro="Portlet#configureCustomTitleViaLookandfeelPG">
 			<var name="portletName" value="Asset Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Test Page" />
 		</execute>
 
@@ -152,7 +152,7 @@
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -160,7 +160,7 @@
 			<var name="portletName" value="Bookmarks" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -169,17 +169,17 @@
 			<var name="folderName" value="Test Folder Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
 		<execute macro="Bookmark#addPG">
 			<var name="bookmarkDescription" value="Test Bookmark Description" />
 			<var name="bookmarkName" value="Test Bookmark Name" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -192,7 +192,7 @@
 			<var name="displayTemplate" value="Full Content" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -200,7 +200,7 @@
 			<var name="assetTitle" value="Test Bookmark Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -213,7 +213,7 @@
 			<var name="displayTemplate" value="Table" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -223,7 +223,7 @@
 			<var name="bookmarkName" value="Test Bookmark Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -236,7 +236,7 @@
 			<var name="displayTemplate" value="Title List" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -248,11 +248,19 @@
 	</command>
 
 	<command name="ConfigureAPPortletEnableRatings" priority="4">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="Liferay" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Asset Publisher Page" />
+		</execute>
+
 		<execute macro="AssetPublisherPortlet#configureFlaggableDisplaySettingsPG">
 			<var name="enableRatings" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -260,7 +268,7 @@
 			<var name="enableRatings" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -269,7 +277,7 @@
 			<var name="webContentTitle" value="WC WebContent Title" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -282,13 +290,13 @@
 			<var name="displayTemplate" value="Full Content" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#rate4StarsPG" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="assetTitle" value="WC WebContent Title" />
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
@@ -305,7 +313,7 @@
 			<var name="siteName" value="Test Site" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -313,7 +321,7 @@
 			<var name="portletName" value="Asset Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -321,7 +329,7 @@
 			<var name="otherSite" value="Test Site" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -336,7 +344,7 @@
 			<var name="selectedAsset" value="Blogs Entry" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -351,7 +359,7 @@
 			<var name="selectedAsset" value="Bookmarks Entry" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -366,12 +374,12 @@
 			<var name="selectedAsset" value="Document" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="AssetPublisherPortlet#viewSelectedPG">
-			<var name="selectedAsset" value="Document" />
+			<var name="selectedAsset" value="Basic Document" />
 			<var name="selectedAssetConfiguration" value="Document" />
 		</execute>
 	</command>
@@ -383,7 +391,7 @@
 			<var name="selectedAsset" value="Web Content Article" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -398,7 +406,7 @@
 			<var name="setAsDefaultPage" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -412,7 +420,7 @@
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -420,7 +428,7 @@
 			<var name="portletName" value="Bookmarks" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
@@ -429,17 +437,17 @@
 			<var name="folderName" value="Test Folder Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Bookmarks Page" />
 		</execute>
 
 		<execute macro="Bookmark#addPG">
 			<var name="bookmarkDescription" value="Test Bookmark Description" />
 			<var name="bookmarkName" value="Test Bookmark Name" />
-			<var name="bookmarkURL" value="http://www.liferay.com" />
+			<var name="bookmarkURL" value="https://www.liferay.com" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -447,7 +455,7 @@
 			<var name="selectContent" value="Bookmarks Entry" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -455,7 +463,7 @@
 			<var name="assetTitle" value="Test Bookmark Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -464,7 +472,7 @@
 			<var name="selectContent" value="Bookmarks Entry" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -478,7 +486,7 @@
 			<var name="pageName" value="Tags Navigation Page" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tags Navigation Page" />
 		</execute>
 
@@ -490,7 +498,7 @@
 			<var name="displayTemplate" value="Number" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tags Navigation Page" />
 		</execute>
 
@@ -498,7 +506,7 @@
 			<var name="showAssetCount" value="true" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tags Navigation Page" />
 		</execute>
 
@@ -545,7 +553,7 @@
 			<var name="tagNameList" value="first tag" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tags Navigation Page" />
 		</execute>
 
@@ -558,7 +566,7 @@
 			<var name="assetTitleList" value="DM Document Title,Web Content Title" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Tags Navigation Page" />
 		</execute>
 
@@ -582,7 +590,7 @@
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -592,7 +600,7 @@
 	</command>
 
 	<command name="OrderContentByModifiedDateViaAP" priority="3">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -601,7 +609,7 @@
 			<var name="sortOrder" value="Descending" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -610,7 +618,7 @@
 			<var name="webContentTitle" value="WebContent Title 1" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -619,7 +627,7 @@
 			<var name="webContentTitle" value="WebContent Title 2" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -628,7 +636,7 @@
 			<var name="webContentTitle" value="WebContent Title 3" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -644,7 +652,7 @@
 			<var name="webContentTitleEdit" value="WebContent Title 1 Edit" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -656,7 +664,7 @@
 	</command>
 
 	<command name="OrderWCByModifiedDateViaAP" priority="3">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -665,7 +673,7 @@
 			<var name="selectedAsset" value="Web Content Article" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -674,37 +682,34 @@
 			<var name="sortOrder" value="Descending" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 1" />
 			<var name="webContentTitle" value="WebContent Title 1" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 2" />
 			<var name="webContentTitle" value="WebContent Title 2" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 3" />
 			<var name="webContentTitle" value="WebContent Title 3" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -720,7 +725,7 @@
 			<var name="webContentTitleEdit" value="WebContent Title 1 Edit" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -732,7 +737,7 @@
 	</command>
 
 	<command name="OrderWCByPublishDateViaAP" priority="3">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -741,7 +746,7 @@
 			<var name="selectedAsset" value="Web Content Article" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -750,41 +755,38 @@
 			<var name="sortOrder" value="Descending" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 1" />
 			<var name="webContentTitle" value="WebContent Title 1" />
 		</execute>
 
 		<execute function="Pause" locator1="65000" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 2" />
 			<var name="webContentTitle" value="WebContent Title 2" />
 		</execute>
 
 		<execute function="Pause" locator1="65000" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
 		<execute macro="WebContent#addPGViaAP" >
-			<var name="assetTypeConfigured" value="true" />
 			<var name="webContentContent" value="WebContent Content 3" />
 			<var name="webContentTitle" value="WebContent Title 3" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
@@ -796,33 +798,68 @@
 	</command>
 
 	<command name="RestoreAPArchivedSetup" priority="4">
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Web Content" />
+		</execute>
+
+		<execute macro="WebContentNavigator#gotoAddCP" />
+
+		<execute macro="WebContent#addCP">
+			<var name="webContentContent" value="WC WebContent Content" />
+			<var name="webContentTitle" value="WC WebContent Title" />
+		</execute>
+
+		<execute macro="PortletEntry#publish" />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Asset Publisher Page" />
+		</execute>
+
 		<execute macro="AssetPublisherPortlet#configureManualAssetSelectionPG" />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Asset Publisher Page" />
+		</execute>
 
 		<execute macro="AssetPublisherPortlet#saveConfigurationTemplatePG">
 			<var name="configurationName" value="AP Manual Display" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#restoreArchivedSetupPG">
+		<execute macro="Portlet#deletePG">
+			<var name="portletName" value="Asset Publisher" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Asset Publisher Page" />
+		</execute>
+
+		<execute macro="Portlet#addPG">
+			<var name="portletName" value="Asset Publisher" />
+		</execute>
+
+		<execute macro="AssetPublisherPortlet#restoreConfigurationTemplatePG">
 			<var name="configurationName" value="AP Manual Display" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#viewRestoredSetupPG">
-			<var name="configurationName" value="AP Manual Display" />
-		</execute>
+		<execute macro="AssetPublisherPortlet#viewManualNoAssetsMessagePG" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="AssetPublisherPortlet#viewRestoredSetupPG" />
+
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#deleteArchivedSetupPG">
+		<execute macro="AssetPublisherPortlet#deleteConfigurationTemplatePG">
 			<var name="configurationName" value="AP Manual Display" />
 		</execute>
 	</command>

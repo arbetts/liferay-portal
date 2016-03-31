@@ -14,12 +14,11 @@
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoSitesPages">
+		<execute macro="SitePageNavigator#gotoPages">
 			<var name="page" value="Public Pages" />
 		</execute>
 
 		<execute macro="Page#add">
-			<var name="page" value="Public Pages" />
 			<var name="pageName" value="Site Page Name" />
 		</execute>
 	</set-up>
@@ -43,17 +42,14 @@
 	</tear-down>
 
 	<command name="AddFeedBetweenFeeds" priority="3">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="Portlet#gotoPortletOptions">
 			<var name="portletName" value="RSS Publisher" />
@@ -69,10 +65,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#gotoPortletOptions">
@@ -89,10 +84,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<for list="Technology,NBA,Latimes > Technology News" param="feedTitle" >
@@ -103,17 +97,14 @@
 	</command>
 
 	<command name="AddFeedWithWrongUrl" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="Portlet#gotoPortletOptions">
 			<var name="portletName" value="RSS Publisher" />
@@ -131,10 +122,9 @@
 			<var name="errorMessage" value="The following are invalid URLs: www.theverge.com/rss/index.xml." />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="RSS#viewDeleteFeed">
@@ -155,10 +145,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="RSS#viewDefaultDisplayFeedTitle">
@@ -167,17 +156,14 @@
 	</command>
 
 	<command name="AddRSSFeed" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="Portlet#gotoPortletOptions">
 			<var name="portletName" value="RSS Publisher" />
@@ -193,10 +179,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<for list="Technology,Latimes > Technology News" param="feedTitle" >
@@ -207,17 +192,14 @@
 	</command>
 
 	<command name="ChangeDefaultToNavigationDisplay" priority="3">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="Portlet#gotoPortletOptions">
 			<var name="portletName" value="RSS Publisher" />
@@ -230,10 +212,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="RSS#viewNavigationDisplayFeedTitle">
@@ -242,17 +223,14 @@
 	</command>
 
 	<command name="ChangeOrderOfRSSFeeds" priority="3">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="Portlet#gotoPortletOptions">
 			<var name="portletName" value="RSS Publisher" />
@@ -268,10 +246,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#gotoPortletOptions">
@@ -299,10 +276,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#gotoPortletOptions">
@@ -324,7 +300,7 @@
 	</command>
 
 	<command name="DeleteFeedFromRSS" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Welcome" />
 		</execute>
 
@@ -335,8 +311,6 @@
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="Portlet#gotoPortletOptions">
 			<var name="portletName" value="RSS Publisher" />
@@ -352,7 +326,7 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Page Name" />
 		</execute>
 
@@ -373,7 +347,7 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Page Name" />
 		</execute>
 
@@ -383,17 +357,14 @@
 	</command>
 
 	<command name="DisabledFeedTitle" priority="3">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="Portlet#viewSpecificPG">
 			<var name="portletName" value="RSS Publisher" />
@@ -412,10 +383,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="RSS#viewNoFeedTitle">
@@ -424,37 +394,32 @@
 	</command>
 
 	<command name="EnableRSSFeedFromAssetpublisher" priority="3">
-		<execute macro="ProductMenu#gotoSitesPages">
+		<execute macro="SitePageNavigator#gotoPages">
 			<var name="page" value="Public Pages" />
 			<var name="site" value="Site Name" />
 		</execute>
 
 		<execute macro="Page#add">
-			<var name="page" value="Public Pages" />
 			<var name="pageName" value="Site Page Name 2" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name 2" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="Asset Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="WebContent#addPGViaAP">
 			<var name="webContentContent" value="This is the web content test for rss feed" />
@@ -472,18 +437,16 @@
 
 		<execute macro="IFrame#selectTopFrame" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name 2" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<var attribute="href" locator="//div[@class='subscribe-action']/span/a[contains(@href,'asset_publisher')]" name="rssFeedUrl" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="Portlet#gotoPortletOptions">
@@ -500,10 +463,9 @@
 
 		<execute macro="PortletEntry#save" />
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
-			<var name="siteURL" value="true" />
 		</execute>
 
 		<execute macro="RSS#viewDefaultDisplayFeedTitle">
@@ -521,7 +483,7 @@
 	</command>
 
 	<command name="RemoveRSSPortlet" priority="4">
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Welcome" />
 		</execute>
 
@@ -532,8 +494,6 @@
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
-
-		<execute function="Refresh" />
 
 		<execute macro="Portlet#viewSpecificPG">
 			<var name="portletName" value="RSS Publisher" />
@@ -547,7 +507,7 @@
 			<var name="portletName" value="RSS Publisher" />
 		</execute>
 
-		<execute macro="Page#gotoPG">
+		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Page Name" />
 		</execute>
 

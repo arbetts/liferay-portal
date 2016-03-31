@@ -75,7 +75,17 @@ request.setAttribute("view.jsp-portletURL", portletURL);
 SearchContainer searchContainer = new SearchContainer(renderRequest, null, null, "cur1", 0, SearchContainer.DEFAULT_DELTA, portletURL, null, "there-are-no-threads-nor-categories");
 
 searchContainer.setId("mbEntries");
-searchContainer.setRowChecker(new EntriesChecker(liferayPortletRequest, liferayPortletResponse));
+
+EntriesChecker entriesChecker = new EntriesChecker(liferayPortletRequest, liferayPortletResponse);
+
+searchContainer.setRowChecker(entriesChecker);
+
+if (categoryId == 0) {
+	entriesChecker.setRememberCheckBoxStateURLRegex("mvcRenderCommandName=/message_boards/view(&.|$)");
+}
+else {
+	entriesChecker.setRememberCheckBoxStateURLRegex("mbCategoryId=" + categoryId);
+}
 
 MBListDisplayContext mbListDisplayContext = mbDisplayContextProvider.getMbListDisplayContext(request, response, categoryId);
 
@@ -115,24 +125,11 @@ mbListDisplayContext.populateResultsAndTotal(searchContainer);
 	</liferay-frontend:management-bar-filters>
 
 	<liferay-frontend:management-bar-action-buttons>
+		<liferay-frontend:management-bar-button href='<%= "javascript:" + renderResponse.getNamespace() + "deleteEntries();" %>' icon='<%= TrashUtil.isTrashEnabled(scopeGroupId) ? "trash" : "times" %>' label='<%= TrashUtil.isTrashEnabled(scopeGroupId) ? "recycle-bin" : "delete" %>' />
 
-		<%
-		String taglibURL = "javascript:" + renderResponse.getNamespace() + "deleteEntries();";
-		%>
+		<liferay-frontend:management-bar-button href='<%= "javascript:" + renderResponse.getNamespace() + "lockEntries();" %>' icon="lock" label="lock" />
 
-		<liferay-frontend:management-bar-button href="<%= taglibURL %>" icon='<%= TrashUtil.isTrashEnabled(scopeGroupId) ? "trash" : "times" %>' label='<%= TrashUtil.isTrashEnabled(scopeGroupId) ? "recycle-bin" : "delete" %>' />
-
-		<%
-		taglibURL = "javascript:" + renderResponse.getNamespace() + "lockEntries();";
-		%>
-
-		<liferay-frontend:management-bar-button href="<%= taglibURL %>" icon="lock" label="lock" />
-
-		<%
-		taglibURL = "javascript:" + renderResponse.getNamespace() + "unlockEntries();";
-		%>
-
-		<liferay-frontend:management-bar-button href="<%= taglibURL %>" icon="unlock" label="unlock" />
+		<liferay-frontend:management-bar-button href='<%= "javascript:" + renderResponse.getNamespace() + "unlockEntries();" %>' icon="unlock" label="unlock" />
 	</liferay-frontend:management-bar-action-buttons>
 </liferay-frontend:management-bar>
 

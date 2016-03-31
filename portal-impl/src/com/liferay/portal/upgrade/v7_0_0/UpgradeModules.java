@@ -36,13 +36,12 @@ public class UpgradeModules extends UpgradeProcess {
 
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
-		StringBundler sb = new StringBundler(5);
+		StringBundler sb = new StringBundler(4);
 
 		sb.append("insert into Release_ (mvccVersion, releaseId, ");
 		sb.append("createDate, modifiedDate, servletContextName, ");
-		sb.append("schemaVersion, buildNumber, buildDate, verified, ");
-		sb.append("state_, testString) values (?, ?, ?, ?, ?, ?, ?, ?, ");
-		sb.append("?, ?, ?)");
+		sb.append("schemaVersion, buildNumber, buildDate, verified, state_, ");
+		sb.append("testString) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 		try (PreparedStatement ps = connection.prepareStatement(
 				sb.toString())) {
@@ -171,14 +170,14 @@ public class UpgradeModules extends UpgradeProcess {
 		"com.liferay.polls.service",
 		"com.liferay.portal.background.task.service",
 		"com.liferay.portal.instances.web", "com.liferay.portal.lock.service",
-		"com.liferay.portal.scheduler.quartz",
+		"com.liferay.portal.scheduler.quartz", "com.liferay.portal.search.web",
 		"com.liferay.portal.settings.web",
 		"com.liferay.portlet.configuration.css.web",
 		"com.liferay.portlet.configuration.web", "com.liferay.quick.note.web",
 		"com.liferay.ratings.page.ratings.web", "com.liferay.rss.web",
-		"com.liferay.search.web", "com.liferay.server.admin.web",
-		"com.liferay.shopping.service", "com.liferay.shopping.web",
-		"com.liferay.site.browser.web", "com.liferay.site.my.sites.web",
+		"com.liferay.server.admin.web", "com.liferay.shopping.service",
+		"com.liferay.shopping.web", "com.liferay.site.browser.web",
+		"com.liferay.site.my.sites.web",
 		"com.liferay.site.navigation.breadcrumb.web",
 		"com.liferay.site.navigation.directory.web",
 		"com.liferay.site.navigation.language.web",
@@ -198,21 +197,25 @@ public class UpgradeModules extends UpgradeProcess {
 			"calendar-portlet", "com.liferay.calendar.service", "Calendar"
 		},
 		{
-			"social-networking-portlet",
-			"com.liferay.social.networking.service", "SN"
+			"kaleo-web", "com.liferay.portal.workflow.kaleo.service", "Kaleo"
 		},
 		{
 			"marketplace-portlet", "com.liferay.marketplace.service",
 			"Marketplace"
 		},
 		{
-			"kaleo-web", "com.liferay.portal.workflow.kaleo.service", "Kaleo"
-		},
-		{
 			"microblogs-portlet", "com.liferay.microblogs.service", "Microblogs"
 		},
 		{
+			"notifications-portlet", "com.liferay.notifications.web",
+			"Notifications"
+		},
+		{
 			"so-portlet", "com.liferay.invitation.invite.members.service", "SO"
+		},
+		{
+			"social-networking-portlet",
+			"com.liferay.social.networking.service", "SN"
 		}
 	};
 

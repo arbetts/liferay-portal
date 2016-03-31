@@ -80,6 +80,10 @@ public class DownloadFileEvent extends BaseEvent {
 
 		sb.append(syncAccount.getUrl());
 
+		if (ServerInfo.supportsModuleFramework(getSyncAccountId())) {
+			sb.append("/o");
+		}
+
 		sb.append(_URL_PATH);
 		sb.append("/");
 		sb.append(syncFile.getRepositoryId());
@@ -106,8 +110,12 @@ public class DownloadFileEvent extends BaseEvent {
 		if (ServerInfo.supportsPartialDownloads(getSyncAccountId()) &&
 			Files.exists(tempFilePath)) {
 
-			httpGet.setHeader(
-				"Range", "bytes=" + Files.size(tempFilePath) + "-");
+			long size = Files.size(tempFilePath);
+
+			if (syncFile.getSize() > size) {
+				httpGet.setHeader(
+					"Range", "bytes=" + Files.size(tempFilePath) + "-");
+			}
 		}
 
 		executeAsynchronousGet(httpGet);

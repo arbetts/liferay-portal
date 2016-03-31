@@ -168,8 +168,10 @@ public class DLFileEntryLocalServiceImpl
 		// File entry
 
 		User user = userPersistence.findByPrimaryKey(userId);
+
 		folderId = dlFolderLocalService.getFolderId(
 			user.getCompanyId(), folderId);
+
 		String name = String.valueOf(
 			counterLocalService.increment(DLFileEntry.class.getName()));
 		String extension = DLAppUtil.getExtension(title, sourceFileName);
@@ -1306,10 +1308,9 @@ public class DLFileEntryLocalServiceImpl
 			}
 		}
 
-		StringBundler sb = new StringBundler(8);
+		StringBundler sb = new StringBundler(7);
 
-		sb.append("No DLFileEntry exists with the key {");
-		sb.append("groupId=");
+		sb.append("No DLFileEntry exists with the key {groupId=");
 		sb.append(groupId);
 		sb.append(", folderId=");
 		sb.append(folderId);

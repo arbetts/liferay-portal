@@ -75,6 +75,8 @@ import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.portal.util.LayoutURLUtil;
 import com.liferay.social.kernel.model.SocialActivityConstants;
+import com.liferay.trash.kernel.exception.RestoreEntryException;
+import com.liferay.trash.kernel.exception.TrashEntryException;
 import com.liferay.trash.kernel.model.TrashEntry;
 import com.liferay.trash.kernel.model.TrashVersion;
 import com.liferay.trash.kernel.util.TrashUtil;
@@ -1541,6 +1543,11 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		WikiPage page = getPage(nodeId, title);
 
+		if (!page.isInTrash()) {
+			throw new RestoreEntryException(
+				RestoreEntryException.INVALID_STATUS);
+		}
+
 		if (page.isInTrashExplicitly()) {
 			movePageFromTrash(userId, page, newNodeId, newParentTitle);
 		}
@@ -1592,6 +1599,10 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 	@Override
 	public WikiPage movePageToTrash(long userId, WikiPage page)
 		throws PortalException {
+
+		if (page.isInTrash()) {
+			throw new TrashEntryException();
+		}
 
 		// Page
 
@@ -1800,6 +1811,11 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 	public void restorePageFromTrash(long userId, WikiPage page)
 		throws PortalException {
 
+		if (!page.isInTrash()) {
+			throw new RestoreEntryException(
+				RestoreEntryException.INVALID_STATUS);
+		}
+
 		if (page.isInTrashExplicitly()) {
 			movePageFromTrash(
 				userId, page, page.getNodeId(), page.getParentTitle());
@@ -1875,15 +1891,16 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 				userId, page.getGroupId(), page.getCreateDate(),
 				page.getModifiedDate(), WikiPage.class.getName(),
 				page.getPrimaryKey(), page.getUuid(), 0, assetCategoryIds,
-				assetTagNames, false, null, null, null, ContentTypes.TEXT_HTML,
-				page.getTitle(), null, null, null, null, 0, 0, priority);
+				assetTagNames, true, false, null, null, null,
+				ContentTypes.TEXT_HTML, page.getTitle(), null, null, null, null,
+				0, 0, priority);
 		}
 		else {
 			assetEntry = assetEntryLocalService.updateEntry(
 				userId, page.getGroupId(), page.getCreateDate(),
 				page.getModifiedDate(), WikiPage.class.getName(),
 				page.getResourcePrimKey(), page.getUuid(), 0, assetCategoryIds,
-				assetTagNames, page.isApproved(), null, null, null,
+				assetTagNames, true, page.isApproved(), null, null, null,
 				ContentTypes.TEXT_HTML, page.getTitle(), null, null, null, null,
 				0, 0, priority);
 		}
@@ -2017,7 +2034,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 					List<AssetLink> assetLinks =
 						assetLinkLocalService.getDirectLinks(
 							draftAssetEntry.getEntryId(),
-							AssetLinkConstants.TYPE_RELATED);
+							AssetLinkConstants.TYPE_RELATED, false);
 
 					long[] assetLinkEntryIds = ListUtil.toLongArray(
 						assetLinks, AssetLink.ENTRY_ID2_ACCESSOR);
@@ -2026,9 +2043,9 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 						userId, page.getGroupId(), page.getCreateDate(),
 						page.getModifiedDate(), WikiPage.class.getName(),
 						page.getResourcePrimKey(), page.getUuid(), 0,
-						assetCategoryIds, assetTagNames, true, null, null, null,
-						ContentTypes.TEXT_HTML, page.getTitle(), null, null,
-						null, null, 0, 0, null);
+						assetCategoryIds, assetTagNames, true, true, null, null,
+						null, ContentTypes.TEXT_HTML, page.getTitle(), null,
+						null, null, null, 0, 0, null);
 
 					// Asset Links
 
