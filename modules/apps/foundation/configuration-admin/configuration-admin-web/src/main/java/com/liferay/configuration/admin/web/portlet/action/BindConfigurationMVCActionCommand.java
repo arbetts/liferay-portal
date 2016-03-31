@@ -113,7 +113,7 @@ public class BindConfigurationMVCActionCommand implements MVCActionCommand {
 
 		DDMFormValues ddmFormValues = getDDMFormValues(actionRequest, ddmForm);
 
-		Dictionary<String, Object> properties =
+		Map<String, Object> properties =
 			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, themeDisplay.getLocale());
 
@@ -130,7 +130,7 @@ public class BindConfigurationMVCActionCommand implements MVCActionCommand {
 
 	protected void configureTargetService(
 			ConfigurationModel configurationModel, Configuration configuration,
-			Dictionary<String, Object> properties)
+			Map<String, Object> properties)
 		throws PortletException {
 
 		if (_log.isDebugEnabled()) {
@@ -164,22 +164,18 @@ public class BindConfigurationMVCActionCommand implements MVCActionCommand {
 				configuration.getProperties();
 
 			if (configuredProperties == null) {
-				configuredProperties = new Hashtable<>();
+				configuredProperties = new Hashtable<>(properties);
+			}
+			else {
+				for (Map.Entry<String, Object> entry : properties.entrySet()) {
+					configuredProperties.put(entry.getKey(), entry.getValue());
+				}
 			}
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(
 					"Configuration properties: " +
 						configuration.getProperties());
-			}
-
-			Enumeration<String> keys = properties.keys();
-
-			while (keys.hasMoreElements()) {
-				String key = keys.nextElement();
-				Object value = properties.get(key);
-
-				configuredProperties.put(key, value);
 			}
 
 			if (configurationModel.isCompanyFactory()) {

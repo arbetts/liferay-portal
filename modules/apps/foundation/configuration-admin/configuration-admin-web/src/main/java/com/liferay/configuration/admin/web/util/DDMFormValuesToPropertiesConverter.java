@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.util.ReflectionUtil;
 import java.io.Serializable;
 
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -45,7 +46,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  */
 public class DDMFormValuesToPropertiesConverter {
 
-	public static Dictionary<String, Object> getProperties(
+	public static Map<String, Object> getProperties(
 		ConfigurationModel configurationModel, DDMFormValues ddmFormValues,
 		Locale locale) {
 
@@ -57,7 +58,7 @@ public class DDMFormValuesToPropertiesConverter {
 		Map<String, List<DDMFormFieldValue>> ddmFormFieldValuesMap =
 			ddmFormValues.getDDMFormFieldValuesMap();
 
-		Dictionary<String, Object> properties = new Hashtable<>();
+		Map<String, Object> properties = new HashMap<>();
 
 		AttributeDefinition[] attributeDefinitions =
 			configurationModel.getAttributeDefinitions(ConfigurationModel.ALL);
