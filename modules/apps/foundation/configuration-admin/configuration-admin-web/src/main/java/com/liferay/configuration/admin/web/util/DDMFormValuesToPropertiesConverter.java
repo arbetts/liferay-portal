@@ -163,7 +163,7 @@ public class DDMFormValuesToPropertiesConverter {
 		List<DDMFormFieldValue> ddmFormFieldValues,
 		Map<String, DDMFormField> ddmFormFieldsMap, Locale locale) {
 
-		Vector<Serializable> values = new Vector<>();
+		Vector<Serializable> values = new Vector<>(ddmFormFieldValues.size());
 
 		for (DDMFormFieldValue ddmFormFieldValue : ddmFormFieldValues) {
 			values.add(
