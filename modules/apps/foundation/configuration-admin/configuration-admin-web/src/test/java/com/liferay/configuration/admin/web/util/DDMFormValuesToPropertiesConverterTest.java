@@ -25,8 +25,13 @@ import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
 import com.liferay.portal.configuration.metatype.definitions.ExtendedAttributeDefinition;
 import com.liferay.portal.configuration.metatype.definitions.ExtendedObjectClassDefinition;
+import com.liferay.portal.json.JSONFactoryImpl;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+
+import java.lang.reflect.Field;
 
 import java.util.Dictionary;
 import java.util.Locale;
@@ -34,6 +39,7 @@ import java.util.Vector;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.mockito.Matchers;
@@ -46,6 +52,14 @@ import org.osgi.service.cm.Configuration;
  * @author Marcellus Tavares
  */
 public class DDMFormValuesToPropertiesConverterTest extends Mockito {
+
+	@BeforeClass
+	public static void setUpClass() throws Exception {
+		Field field = ReflectionTestUtil.getField(
+			JSONFactoryUtil.class, "_jsonFactory");
+
+		field.set(null, new JSONFactoryImpl());
+	}
 
 	@Before
 	public void setUp() {
