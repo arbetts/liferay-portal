@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 
 import java.lang.reflect.Field;
+
 import java.util.Dictionary;
 import java.util.Locale;
 import java.util.Vector;
