@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 
 import java.util.Dictionary;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Vector;
 
 import org.junit.Assert;
@@ -109,7 +110,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		Dictionary<String, Object> properties =
+		Map<String, Object> properties =
 			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
@@ -161,7 +162,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		Dictionary<String, Object> properties =
+		Map<String, Object> properties =
 			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
@@ -207,7 +208,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		Dictionary<String, Object> properties =
+		Map<String, Object> properties =
 			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
@@ -253,7 +254,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		Dictionary<String, Object> properties =
+		Map<String, Object> properties =
 			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
@@ -304,7 +305,7 @@ public class DDMFormValuesToPropertiesConverterTest extends Mockito {
 		ConfigurationModel configurationModel = new ConfigurationModel(
 			extendedObjectClassDefinition, configuration, null, null, false);
 
-		Dictionary<String, Object> properties =
+		Map<String, Object> properties =
 			DDMFormValuesToPropertiesConverter.getProperties(
 				configurationModel, ddmFormValues, _enLocale);
 
