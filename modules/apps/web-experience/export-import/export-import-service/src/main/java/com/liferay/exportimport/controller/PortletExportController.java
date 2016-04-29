@@ -732,7 +732,7 @@ public class PortletExportController implements ExportController {
 
 			// Company
 
-			PortletPreferences portletPreferences2 = getPortletPreferences(
+			PortletPreferences portletPreferences = getPortletPreferences(
 				portletDataContext.getCompanyId(),
 				PortletKeys.PREFS_OWNER_TYPE_COMPANY, plid,
 				portlet.getRootPortletId());
@@ -740,12 +740,12 @@ public class PortletExportController implements ExportController {
 			exportPortletPreference(
 				portletDataContext, portletDataContext.getCompanyId(),
 				PortletKeys.PREFS_OWNER_TYPE_COMPANY, false,
-				portletPreferences2, portlet.getRootPortletId(), plid,
+				portletPreferences, portlet.getRootPortletId(), plid,
 				portletElement);
 
 			// Group
 
-			PortletPreferences portletPreferences1 = getPortletPreferences(
+			portletPreferences = getPortletPreferences(
 				portletDataContext.getScopeGroupId(),
 				PortletKeys.PREFS_OWNER_TYPE_GROUP,
 				PortletKeys.PREFS_PLID_SHARED, portlet.getRootPortletId());
@@ -753,12 +753,12 @@ public class PortletExportController implements ExportController {
 			exportPortletPreference(
 				portletDataContext, portletDataContext.getScopeGroupId(),
 				PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
-				portletPreferences1, portlet.getRootPortletId(),
+				portletPreferences, portlet.getRootPortletId(),
 				PortletKeys.PREFS_PLID_SHARED, portletElement);
 
 			// Layout
 
-			PortletPreferences portletPreferences = getPortletPreferences(
+			portletPreferences = getPortletPreferences(
 				PortletKeys.PREFS_OWNER_ID_DEFAULT,
 				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid,
 				portletDataContext.getPortletId());
@@ -793,16 +793,10 @@ public class PortletExportController implements ExportController {
 						defaultUser = true;
 					}
 
-					PortletPreferences portletPreferences1 =
-						getPortletPreferences(
-							portletPreferences.getOwnerId(),
-							PortletKeys.PREFS_OWNER_TYPE_USER, plid,
-							portletDataContext.getPortletId());
-
 					exportPortletPreference(
 						portletDataContext, portletPreferences.getOwnerId(),
 						PortletKeys.PREFS_OWNER_TYPE_USER, defaultUser,
-						portletPreferences1, portletDataContext.getPortletId(),
+						portletPreferences, portletDataContext.getPortletId(),
 						plid, portletElement);
 				}
 			}
