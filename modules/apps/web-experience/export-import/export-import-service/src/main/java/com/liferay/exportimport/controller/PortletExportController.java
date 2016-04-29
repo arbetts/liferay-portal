@@ -732,10 +732,11 @@ public class PortletExportController implements ExportController {
 
 			// Company
 
-			PortletPreferences portletPreferences = getPortletPreferences(
-				portletDataContext.getCompanyId(),
-				PortletKeys.PREFS_OWNER_TYPE_COMPANY, plid,
-				portlet.getRootPortletId());
+			PortletPreferences portletPreferences =
+				getPortletPreferencesSharedPlid(
+					portletDataContext.getCompanyId(),
+					PortletKeys.PREFS_OWNER_TYPE_COMPANY,
+					portlet.getRootPortletId());
 
 			exportPortletPreference(
 				portletDataContext, portletDataContext.getCompanyId(),
@@ -745,10 +746,11 @@ public class PortletExportController implements ExportController {
 
 			// Group
 
-			portletPreferences = getPortletPreferences(
-				portletDataContext.getScopeGroupId(),
-				PortletKeys.PREFS_OWNER_TYPE_GROUP,
-				PortletKeys.PREFS_PLID_SHARED, portlet.getRootPortletId());
+			portletPreferences =
+				getPortletPreferencesSharedPlid(
+					portletDataContext.getScopeGroupId(),
+					PortletKeys.PREFS_OWNER_TYPE_GROUP,
+					portlet.getRootPortletId());
 
 			exportPortletPreference(
 				portletDataContext, portletDataContext.getScopeGroupId(),
@@ -801,22 +803,17 @@ public class PortletExportController implements ExportController {
 				}
 			}
 
-			try {
-				PortletPreferences groupPortletPreferences =
-					_portletPreferencesLocalService.getPortletPreferences(
-						portletDataContext.getScopeGroupId(),
-						PortletKeys.PREFS_OWNER_TYPE_GROUP,
-						PortletKeys.PREFS_PLID_SHARED,
-						portlet.getRootPortletId());
+			PortletPreferences groupPortletPreferences =
+				getPortletPreferencesSharedPlid(
+					portletDataContext.getScopeGroupId(),
+					PortletKeys.PREFS_OWNER_TYPE_GROUP,
+					portlet.getRootPortletId());
 
-				exportPortletPreference(
-					portletDataContext, portletDataContext.getScopeGroupId(),
-					PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
-					groupPortletPreferences, portlet.getRootPortletId(),
-					PortletKeys.PREFS_PLID_SHARED, portletElement);
-			}
-			catch (NoSuchPortletPreferencesException nsppe) {
-			}
+			exportPortletPreference(
+				portletDataContext, portletDataContext.getScopeGroupId(),
+				PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
+				groupPortletPreferences, portlet.getRootPortletId(),
+				PortletKeys.PREFS_PLID_SHARED, portletElement);
 		}
 
 		// Archived setups
@@ -829,10 +826,11 @@ public class PortletExportController implements ExportController {
 					PortletPreferences.class.getName());
 
 			for (PortletItem portletItem : portletItems) {
-				PortletPreferences portletPreferences = getPortletPreferences(
-					portletItem.getPortletItemId(),
-					PortletKeys.PREFS_OWNER_TYPE_ARCHIVED, plid,
-					portletItem.getPortletId());
+				PortletPreferences portletPreferences =
+					getPortletPreferencesSharedPlid(
+						portletItem.getPortletItemId(),
+						PortletKeys.PREFS_OWNER_TYPE_ARCHIVED,
+						portletItem.getPortletId());
 
 				exportPortletPreference(
 					portletDataContext, portletItem.getPortletItemId(),
@@ -1197,26 +1195,22 @@ public class PortletExportController implements ExportController {
 		return portletDataContext;
 	}
 
+	protected PortletPreferences getPortletPreferencesSharedPlid(
+		long ownerId, int ownerType, String portletId) {
+
+		return getPortletPreferences(ownerId, ownerType,
+			PortletKeys.PREFS_PLID_SHARED, portletId);
+	}
+
 	protected PortletPreferences getPortletPreferences(
 		long ownerId, int ownerType, long plid, String portletId) {
 
 		PortletPreferences portletPreferences = null;
 
 		try {
-			if ((ownerType == PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) ||
-				(ownerType == PortletKeys.PREFS_OWNER_TYPE_COMPANY) ||
-				(ownerType == PortletKeys.PREFS_OWNER_TYPE_GROUP)) {
-
-				portletPreferences =
-					_portletPreferencesLocalService.getPortletPreferences(
-						ownerId, ownerType, LayoutConstants.DEFAULT_PLID,
-						portletId);
-			}
-			else {
-				portletPreferences =
-					_portletPreferencesLocalService.getPortletPreferences(
-						ownerId, ownerType, plid, portletId);
-			}
+			portletPreferences =
+				_portletPreferencesLocalService.getPortletPreferences(
+					ownerId, ownerType, plid, portletId);
 		}
 		catch (PortalException pe) {
 			if (_log.isDebugEnabled()) {
