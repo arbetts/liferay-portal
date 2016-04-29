@@ -727,59 +727,57 @@ public class PortletExportController implements ExportController {
 
 			// Company
 
-			long ownerId1 = portletDataContext.getCompanyId();
-			String portletId2 = portlet.getRootPortletId();
-
 			PortletPreferences portletPreferences2 = getPortletPreferences(
-				ownerId1, PortletKeys.PREFS_OWNER_TYPE_COMPANY, plid,
-				portletId2);
+				portletDataContext.getCompanyId(),
+				PortletKeys.PREFS_OWNER_TYPE_COMPANY, plid,
+				portlet.getRootPortletId());
 
 			LayoutTypePortlet layoutTypePortlet =
 				(LayoutTypePortlet)layout.getLayoutType();
 
 			if ((layoutTypePortlet == null) ||
-				layoutTypePortlet.hasPortletId(portletId2)) {
+				layoutTypePortlet.hasPortletId(portlet.getRootPortletId())) {
 
 				exportPortletPreference(
-					portletDataContext, ownerId1,
+					portletDataContext, portletDataContext.getCompanyId(),
 					PortletKeys.PREFS_OWNER_TYPE_COMPANY, false,
-					portletPreferences2, portletId2, plid, portletElement);
+					portletPreferences2, portlet.getRootPortletId(), plid,
+					portletElement);
 			}
 
 			// Group
 
-			long ownerId = portletDataContext.getScopeGroupId();
-			String portletId1 = portlet.getRootPortletId();
-
 			PortletPreferences portletPreferences1 = getPortletPreferences(
-					ownerId, PortletKeys.PREFS_OWNER_TYPE_GROUP,
-					PortletKeys.PREFS_PLID_SHARED, portletId1);
+				portletDataContext.getScopeGroupId(),
+				PortletKeys.PREFS_OWNER_TYPE_GROUP,
+				PortletKeys.PREFS_PLID_SHARED, portlet.getRootPortletId());
 
 			if ((layoutTypePortlet == null) ||
-				layoutTypePortlet.hasPortletId(portletId1)) {
+				layoutTypePortlet.hasPortletId(portlet.getRootPortletId())) {
 
 				exportPortletPreference(
-					portletDataContext, ownerId,
+					portletDataContext, portletDataContext.getScopeGroupId(),
 					PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
-					portletPreferences1, portletId1,
+					portletPreferences1, portlet.getRootPortletId(),
 					PortletKeys.PREFS_PLID_SHARED, portletElement);
 			}
 
 			// Layout
 
-			String portletId = portletDataContext.getPortletId();
-
 			PortletPreferences portletPreferences = getPortletPreferences(
 				PortletKeys.PREFS_OWNER_ID_DEFAULT,
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid, portletId);
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid,
+				portletDataContext.getPortletId());
 
 			if ((layoutTypePortlet == null) ||
-				layoutTypePortlet.hasPortletId(portletId)) {
+				layoutTypePortlet.hasPortletId(
+					portletDataContext.getPortletId())) {
 
 				exportPortletPreference(
 					portletDataContext, PortletKeys.PREFS_OWNER_ID_DEFAULT,
 					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, false,
-					portletPreferences, portletId, plid, portletElement);
+					portletPreferences, portletDataContext.getPortletId(), plid,
+					portletElement);
 			}
 		}
 
@@ -802,23 +800,23 @@ public class PortletExportController implements ExportController {
 					defaultUser = true;
 				}
 
-				long ownerId = portletPreferences.getOwnerId();
-				String portletId = portletDataContext.getPortletId();
-
 				PortletPreferences portletPreferences1 = getPortletPreferences(
-					ownerId, PortletKeys.PREFS_OWNER_TYPE_USER, plid,
-					portletId);
+					portletPreferences.getOwnerId(),
+					PortletKeys.PREFS_OWNER_TYPE_USER, plid,
+					portletDataContext.getPortletId());
 
 				LayoutTypePortlet layoutTypePortlet =
 					(LayoutTypePortlet)layout.getLayoutType();
 
 				if ((layoutTypePortlet == null) ||
-					layoutTypePortlet.hasPortletId(portletId)) {
+					layoutTypePortlet.hasPortletId(
+						portletDataContext.getPortletId())) {
 
 					exportPortletPreference(
-						portletDataContext, ownerId,
+						portletDataContext, portletPreferences.getOwnerId(),
 						PortletKeys.PREFS_OWNER_TYPE_USER, defaultUser,
-						portletPreferences1, portletId, plid, portletElement);
+						portletPreferences1, portletDataContext.getPortletId(),
+						plid, portletElement);
 				}
 			}
 
@@ -850,17 +848,16 @@ public class PortletExportController implements ExportController {
 					PortletPreferences.class.getName());
 
 			for (PortletItem portletItem : portletItems) {
-				long ownerId = portletItem.getPortletItemId();
-				String portletId = portletItem.getPortletId();
-
 				PortletPreferences portletPreferences = getPortletPreferences(
-					ownerId, PortletKeys.PREFS_OWNER_TYPE_ARCHIVED, plid,
-					portletId);
+					portletItem.getPortletItemId(),
+					PortletKeys.PREFS_OWNER_TYPE_ARCHIVED, plid,
+					portletItem.getPortletId());
 
 				exportPortletPreference(
-					portletDataContext, ownerId,
+					portletDataContext, portletItem.getPortletItemId(),
 					PortletKeys.PREFS_OWNER_TYPE_ARCHIVED, false,
-					portletPreferences, portletId, plid, portletElement);
+					portletPreferences, portletItem.getPortletId(), plid,
+					portletElement);
 			}
 		}
 
