@@ -735,15 +735,9 @@ public class PortletExportController implements ExportController {
 			long ownerId1 = portletDataContext.getCompanyId();
 			String portletId2 = portlet.getRootPortletId();
 
-			PortletPreferences portletPreferences2 = null;
-
-			try {
-				portletPreferences2 = getPortletPreferences(
-					ownerId1, PortletKeys.PREFS_OWNER_TYPE_COMPANY, plid,
-					portletId2);
-			}
-			catch (NoSuchPortletPreferencesException nsppe2) {
-			}
+			PortletPreferences portletPreferences2 = getPortletPreferences(
+				ownerId1, PortletKeys.PREFS_OWNER_TYPE_COMPANY, plid,
+				portletId2);
 
 			LayoutTypePortlet layoutTypePortlet2 = null;
 
@@ -765,15 +759,9 @@ public class PortletExportController implements ExportController {
 			long ownerId = portletDataContext.getScopeGroupId();
 			String portletId1 = portlet.getRootPortletId();
 
-			PortletPreferences portletPreferences1 = null;
-
-			try {
-				portletPreferences1 = getPortletPreferences(
+			PortletPreferences portletPreferences1 = getPortletPreferences(
 					ownerId, PortletKeys.PREFS_OWNER_TYPE_GROUP,
 					PortletKeys.PREFS_PLID_SHARED, portletId1);
-			}
-			catch (NoSuchPortletPreferencesException nsppe1) {
-			}
 
 			LayoutTypePortlet layoutTypePortlet1 = null;
 
@@ -795,15 +783,9 @@ public class PortletExportController implements ExportController {
 
 			String portletId = portletDataContext.getPortletId();
 
-			PortletPreferences portletPreferences = null;
-
-			try {
-				portletPreferences = getPortletPreferences(
-					PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid, portletId);
-			}
-			catch (NoSuchPortletPreferencesException nsppe) {
-			}
+			PortletPreferences portletPreferences = getPortletPreferences(
+				PortletKeys.PREFS_OWNER_ID_DEFAULT,
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid, portletId);
 
 			LayoutTypePortlet layoutTypePortlet = null;
 
@@ -843,15 +825,9 @@ public class PortletExportController implements ExportController {
 				long ownerId = portletPreferences.getOwnerId();
 				String portletId = portletDataContext.getPortletId();
 
-				PortletPreferences portletPreferences1 = null;
-
-				try {
-					portletPreferences1 = getPortletPreferences(
-						ownerId, PortletKeys.PREFS_OWNER_TYPE_USER, plid,
-						portletId);
-				}
-				catch (NoSuchPortletPreferencesException nsppe) {
-				}
+				PortletPreferences portletPreferences1 = getPortletPreferences(
+					ownerId, PortletKeys.PREFS_OWNER_TYPE_USER, plid,
+					portletId);
 
 				LayoutTypePortlet layoutTypePortlet = null;
 
@@ -901,15 +877,9 @@ public class PortletExportController implements ExportController {
 				long ownerId = portletItem.getPortletItemId();
 				String portletId = portletItem.getPortletId();
 
-				PortletPreferences portletPreferences = null;
-
-				try {
-					portletPreferences = getPortletPreferences(
-						ownerId, PortletKeys.PREFS_OWNER_TYPE_ARCHIVED, plid,
-						portletId);
-				}
-				catch (NoSuchPortletPreferencesException nsppe) {
-				}
+				PortletPreferences portletPreferences = getPortletPreferences(
+					ownerId, PortletKeys.PREFS_OWNER_TYPE_ARCHIVED, plid,
+					portletId);
 
 				LayoutTypePortlet layoutTypePortlet = null;
 
@@ -1162,6 +1132,10 @@ public class PortletExportController implements ExportController {
 			Element parentElement)
 		throws Exception {
 
+		if (portletPreferences == null) {
+			return;
+		}
+
 		String preferencesXML = portletPreferences.getPreferences();
 
 		if (Validator.isNull(preferencesXML)) {
@@ -1223,15 +1197,8 @@ public class PortletExportController implements ExportController {
 			String serviceName, Element parentElement)
 		throws Exception {
 
-		PortletPreferences portletPreferences = null;
-
-		try {
-			portletPreferences = getPortletPreferences(
-				ownerId, ownerType, LayoutConstants.DEFAULT_PLID, serviceName);
-		}
-		catch (NoSuchPortletPreferencesException nsppe) {
-			return;
-		}
+		PortletPreferences portletPreferences = getPortletPreferences(
+			ownerId, ownerType, LayoutConstants.DEFAULT_PLID, serviceName);
 
 		exportServicePortletPreference(
 			portletDataContext, ownerId, ownerType, portletPreferences,
@@ -1288,24 +1255,30 @@ public class PortletExportController implements ExportController {
 	}
 
 	protected PortletPreferences getPortletPreferences(
-			long ownerId, int ownerType, long plid, String portletId)
-		throws PortalException {
+		long ownerId, int ownerType, long plid, String portletId) {
 
 		PortletPreferences portletPreferences = null;
 
-		if ((ownerType == PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) ||
-			(ownerType == PortletKeys.PREFS_OWNER_TYPE_COMPANY) ||
-			(ownerType == PortletKeys.PREFS_OWNER_TYPE_GROUP)) {
+		try {
+			if ((ownerType == PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) ||
+				(ownerType == PortletKeys.PREFS_OWNER_TYPE_COMPANY) ||
+				(ownerType == PortletKeys.PREFS_OWNER_TYPE_GROUP)) {
 
-			portletPreferences =
-				_portletPreferencesLocalService.getPortletPreferences(
-					ownerId, ownerType, LayoutConstants.DEFAULT_PLID,
-					portletId);
+				portletPreferences =
+					_portletPreferencesLocalService.getPortletPreferences(
+						ownerId, ownerType, LayoutConstants.DEFAULT_PLID,
+						portletId);
+			}
+			else {
+				portletPreferences =
+					_portletPreferencesLocalService.getPortletPreferences(
+						ownerId, ownerType, plid, portletId);
+			}
 		}
-		else {
-			portletPreferences =
-				_portletPreferencesLocalService.getPortletPreferences(
-					ownerId, ownerType, plid, portletId);
+		catch (PortalException pe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(pe, pe);
+			}
 		}
 
 		return portletPreferences;
