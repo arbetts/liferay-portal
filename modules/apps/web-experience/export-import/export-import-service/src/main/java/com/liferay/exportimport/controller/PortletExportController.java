@@ -885,6 +885,10 @@ public class PortletExportController implements ExportController {
 			String portletId, long plid, Element parentElement)
 		throws Exception {
 
+		if (portletPreferences == null) {
+			return;
+		}
+
 		String preferencesXML = portletPreferences.getPreferences();
 
 		if (Validator.isNull(preferencesXML)) {
@@ -1012,7 +1016,6 @@ public class PortletExportController implements ExportController {
 				ownerId, ownerType, plid, portletId);
 		}
 		catch (NoSuchPortletPreferencesException nsppe) {
-			return;
 		}
 
 		LayoutTypePortlet layoutTypePortlet = null;
