@@ -50,7 +50,6 @@ import com.liferay.exportimport.portlet.preferences.processor.ExportImportPortle
 import com.liferay.petra.xml.DocUtil;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
-import com.liferay.portal.kernel.exception.NoSuchPortletPreferencesException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -741,7 +740,7 @@ public class PortletExportController implements ExportController {
 			exportPortletPreference(
 				portletDataContext, portletDataContext.getCompanyId(),
 				PortletKeys.PREFS_OWNER_TYPE_COMPANY, false,
-				portletPreferences, portlet.getRootPortletId(), plid,
+				portletPreferences, portlet.getRootPortletId(),
 				portletElement);
 
 			// Group
@@ -756,7 +755,7 @@ public class PortletExportController implements ExportController {
 				portletDataContext, portletDataContext.getScopeGroupId(),
 				PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
 				portletPreferences, portlet.getRootPortletId(),
-				PortletKeys.PREFS_PLID_SHARED, portletElement);
+				portletElement);
 
 			// Layout
 
@@ -768,7 +767,7 @@ public class PortletExportController implements ExportController {
 			exportPortletPreference(
 				portletDataContext, PortletKeys.PREFS_OWNER_ID_DEFAULT,
 				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, false,
-				portletPreferences, portletDataContext.getPortletId(), plid,
+				portletPreferences, portletDataContext.getPortletId(),
 				portletElement);
 		}
 
@@ -799,7 +798,7 @@ public class PortletExportController implements ExportController {
 						portletDataContext, portletPreferences.getOwnerId(),
 						PortletKeys.PREFS_OWNER_TYPE_USER, defaultUser,
 						portletPreferences, portletDataContext.getPortletId(),
-						plid, portletElement);
+						portletElement);
 				}
 			}
 
@@ -813,7 +812,7 @@ public class PortletExportController implements ExportController {
 				portletDataContext, portletDataContext.getScopeGroupId(),
 				PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
 				groupPortletPreferences, portlet.getRootPortletId(),
-				PortletKeys.PREFS_PLID_SHARED, portletElement);
+				portletElement);
 		}
 
 		// Archived setups
@@ -835,7 +834,7 @@ public class PortletExportController implements ExportController {
 				exportPortletPreference(
 					portletDataContext, portletItem.getPortletItemId(),
 					PortletKeys.PREFS_OWNER_TYPE_ARCHIVED, false,
-					portletPreferences, portletItem.getPortletId(), plid,
+					portletPreferences, portletItem.getPortletId(),
 					portletElement);
 			}
 		}
@@ -909,7 +908,7 @@ public class PortletExportController implements ExportController {
 	protected void exportPortletPreference(
 			PortletDataContext portletDataContext, long ownerId, int ownerType,
 			boolean defaultUser, PortletPreferences portletPreferences,
-			String portletId, long plid, Element parentElement)
+			String portletId, Element parentElement)
 		throws Exception {
 
 		if (portletPreferences == null) {
@@ -1020,7 +1019,8 @@ public class PortletExportController implements ExportController {
 		}
 
 		String path = ExportImportPathUtil.getPortletPreferencesPath(
-			portletDataContext, portletId, ownerId, ownerType, plid);
+			portletDataContext, portletId, ownerId, ownerType,
+			portletPreferences.getPlid());
 
 		portletPreferencesElement.addAttribute("path", path);
 
