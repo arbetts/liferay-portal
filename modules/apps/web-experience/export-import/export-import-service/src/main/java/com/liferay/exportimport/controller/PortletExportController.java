@@ -726,49 +726,48 @@ public class PortletExportController implements ExportController {
 		LayoutTypePortlet layoutTypePortlet =
 			(LayoutTypePortlet)layout.getLayoutType();
 
-		if (exportPortletSetup) {
-			if ((layoutTypePortlet == null) ||
-				layoutTypePortlet.hasPortletId(portlet.getRootPortletId())) {
+		if (exportPortletSetup &&
+			((layoutTypePortlet == null) ||
+				layoutTypePortlet.hasPortletId(portlet.getRootPortletId()))) {
 
-				// Company
+			// Company
 
-				PortletPreferences portletPreferences2 = getPortletPreferences(
-					portletDataContext.getCompanyId(),
-					PortletKeys.PREFS_OWNER_TYPE_COMPANY, plid,
-					portlet.getRootPortletId());
+			PortletPreferences portletPreferences2 = getPortletPreferences(
+				portletDataContext.getCompanyId(),
+				PortletKeys.PREFS_OWNER_TYPE_COMPANY, plid,
+				portlet.getRootPortletId());
 
-				exportPortletPreference(
-					portletDataContext, portletDataContext.getCompanyId(),
-					PortletKeys.PREFS_OWNER_TYPE_COMPANY, false,
-					portletPreferences2, portlet.getRootPortletId(), plid,
-					portletElement);
+			exportPortletPreference(
+				portletDataContext, portletDataContext.getCompanyId(),
+				PortletKeys.PREFS_OWNER_TYPE_COMPANY, false,
+				portletPreferences2, portlet.getRootPortletId(), plid,
+				portletElement);
 
-				// Group
+			// Group
 
-				PortletPreferences portletPreferences1 = getPortletPreferences(
-					portletDataContext.getScopeGroupId(),
-					PortletKeys.PREFS_OWNER_TYPE_GROUP,
-					PortletKeys.PREFS_PLID_SHARED, portlet.getRootPortletId());
+			PortletPreferences portletPreferences1 = getPortletPreferences(
+				portletDataContext.getScopeGroupId(),
+				PortletKeys.PREFS_OWNER_TYPE_GROUP,
+				PortletKeys.PREFS_PLID_SHARED, portlet.getRootPortletId());
 
-				exportPortletPreference(
-					portletDataContext, portletDataContext.getScopeGroupId(),
-					PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
-					portletPreferences1, portlet.getRootPortletId(),
-					PortletKeys.PREFS_PLID_SHARED, portletElement);
+			exportPortletPreference(
+				portletDataContext, portletDataContext.getScopeGroupId(),
+				PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
+				portletPreferences1, portlet.getRootPortletId(),
+				PortletKeys.PREFS_PLID_SHARED, portletElement);
 
-				// Layout
+			// Layout
 
-				PortletPreferences portletPreferences = getPortletPreferences(
-					PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid,
-					portletDataContext.getPortletId());
+			PortletPreferences portletPreferences = getPortletPreferences(
+				PortletKeys.PREFS_OWNER_ID_DEFAULT,
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid,
+				portletDataContext.getPortletId());
 
-				exportPortletPreference(
-					portletDataContext, PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, false,
-					portletPreferences, portletDataContext.getPortletId(), plid,
-					portletElement);
-			}
+			exportPortletPreference(
+				portletDataContext, PortletKeys.PREFS_OWNER_ID_DEFAULT,
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, false,
+				portletPreferences, portletDataContext.getPortletId(), plid,
+				portletElement);
 		}
 
 		// Portlet user preferences
