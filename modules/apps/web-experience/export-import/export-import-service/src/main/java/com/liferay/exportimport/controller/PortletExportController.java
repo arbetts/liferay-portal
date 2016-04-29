@@ -992,8 +992,6 @@ public class PortletExportController implements ExportController {
 		rootElement.addAttribute("owner-id", String.valueOf(ownerId));
 		rootElement.addAttribute("owner-type", String.valueOf(ownerType));
 		rootElement.addAttribute("default-user", String.valueOf(defaultUser));
-		rootElement.addAttribute("plid", String.valueOf(plid));
-		rootElement.addAttribute("portlet-id", portletId);
 
 		if (ownerType == PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
 			PortletItem portletItem = _portletItemLocalService.getPortletItem(
