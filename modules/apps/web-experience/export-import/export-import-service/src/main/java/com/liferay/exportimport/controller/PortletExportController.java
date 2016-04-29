@@ -738,9 +738,7 @@ public class PortletExportController implements ExportController {
 					portlet.getRootPortletId());
 
 			exportPortletPreference(
-				portletDataContext, portletDataContext.getCompanyId(),
-				PortletKeys.PREFS_OWNER_TYPE_COMPANY, false,
-				portletPreferences, portlet.getRootPortletId(),
+				portletDataContext, false, portletPreferences, portlet,
 				portletElement);
 
 			// Group
@@ -752,9 +750,7 @@ public class PortletExportController implements ExportController {
 					portlet.getRootPortletId());
 
 			exportPortletPreference(
-				portletDataContext, portletDataContext.getScopeGroupId(),
-				PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
-				portletPreferences, portlet.getRootPortletId(),
+				portletDataContext, false, portletPreferences, portlet,
 				portletElement);
 
 			// Layout
@@ -765,9 +761,7 @@ public class PortletExportController implements ExportController {
 				portletDataContext.getPortletId());
 
 			exportPortletPreference(
-				portletDataContext, PortletKeys.PREFS_OWNER_ID_DEFAULT,
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, false,
-				portletPreferences, portletDataContext.getPortletId(),
+				portletDataContext, false, portletPreferences, portlet,
 				portletElement);
 		}
 
@@ -795,10 +789,8 @@ public class PortletExportController implements ExportController {
 					}
 
 					exportPortletPreference(
-						portletDataContext, portletPreferences.getOwnerId(),
-						PortletKeys.PREFS_OWNER_TYPE_USER, defaultUser,
-						portletPreferences, portletDataContext.getPortletId(),
-						portletElement);
+						portletDataContext, defaultUser, portletPreferences,
+						portlet, portletElement);
 				}
 			}
 
@@ -809,9 +801,7 @@ public class PortletExportController implements ExportController {
 					portlet.getRootPortletId());
 
 			exportPortletPreference(
-				portletDataContext, portletDataContext.getScopeGroupId(),
-				PortletKeys.PREFS_OWNER_TYPE_GROUP, false,
-				groupPortletPreferences, portlet.getRootPortletId(),
+				portletDataContext, false, groupPortletPreferences, portlet,
 				portletElement);
 		}
 
@@ -832,9 +822,7 @@ public class PortletExportController implements ExportController {
 						portletItem.getPortletId());
 
 				exportPortletPreference(
-					portletDataContext, portletItem.getPortletItemId(),
-					PortletKeys.PREFS_OWNER_TYPE_ARCHIVED, false,
-					portletPreferences, portletItem.getPortletId(),
+					portletDataContext, false, portletPreferences, portlet,
 					portletElement);
 			}
 		}
@@ -906,9 +894,9 @@ public class PortletExportController implements ExportController {
 	}
 
 	protected void exportPortletPreference(
-			PortletDataContext portletDataContext, long ownerId, int ownerType,
+			PortletDataContext portletDataContext,
 			boolean defaultUser, PortletPreferences portletPreferences,
-			String portletId, Element parentElement)
+			Portlet portlet, Element parentElement)
 		throws Exception {
 
 		if (portletPreferences == null) {
@@ -923,9 +911,6 @@ public class PortletExportController implements ExportController {
 
 		javax.portlet.PortletPreferences jxPortletPreferences =
 			PortletPreferencesFactoryUtil.fromDefaultXML(preferencesXML);
-
-		Portlet portlet = _portletLocalService.getPortletById(
-			portletDataContext.getCompanyId(), portletId);
 
 		Element portletPreferencesElement = parentElement.addElement(
 			"portlet-preferences");
@@ -973,7 +958,8 @@ public class PortletExportController implements ExportController {
 
 					jxPortletPreferences =
 						portletDataHandler.processExportPortletPreferences(
-							portletDataContext, portletId,
+							portletDataContext,
+							portletPreferences.getPortletId(),
 							jxPortletPreferences);
 				}
 			}
@@ -988,20 +974,28 @@ public class PortletExportController implements ExportController {
 
 		Element rootElement = document.getRootElement();
 
-		rootElement.addAttribute("owner-id", String.valueOf(ownerId));
-		rootElement.addAttribute("owner-type", String.valueOf(ownerType));
-		rootElement.addAttribute("default-user", String.valueOf(defaultUser));
+		rootElement.addAttribute(
+			"owner-id", String.valueOf(portletPreferences.getOwnerId()));
+		rootElement.addAttribute(
+			"owner-type", String.valueOf(portletPreferences.getOwnerType()));
+		rootElement.addAttribute(
+			"default-user", String.valueOf(defaultUser));
 
-		if (ownerType == PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
+		if (portletPreferences.getOwnerType() ==
+			PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
+
 			PortletItem portletItem = _portletItemLocalService.getPortletItem(
-				ownerId);
+				portletPreferences.getOwnerId());
 
 			rootElement.addAttribute(
 				"archive-user-uuid", portletItem.getUserUuid());
 			rootElement.addAttribute("archive-name", portletItem.getName());
 		}
-		else if (ownerType == PortletKeys.PREFS_OWNER_TYPE_USER) {
-			User user = _userLocalService.fetchUserById(ownerId);
+		else if (portletPreferences.getOwnerType() ==
+			PortletKeys.PREFS_OWNER_TYPE_USER) {
+
+			User user = _userLocalService.fetchUserById(
+				portletPreferences.getOwnerId());
 
 			if (user == null) {
 				return;
@@ -1019,7 +1013,8 @@ public class PortletExportController implements ExportController {
 		}
 
 		String path = ExportImportPathUtil.getPortletPreferencesPath(
-			portletDataContext, portletId, ownerId, ownerType,
+			portletDataContext, portletPreferences.getPortletId(),
+			portletPreferences.getOwnerId(), portletPreferences.getOwnerType(),
 			portletPreferences.getPlid());
 
 		portletPreferencesElement.addAttribute("path", path);
@@ -1066,9 +1061,8 @@ public class PortletExportController implements ExportController {
 	}
 
 	protected void exportServicePortletPreference(
-			PortletDataContext portletDataContext, long ownerId, int ownerType,
-			PortletPreferences portletPreferences, String serviceName,
-			Element parentElement)
+			PortletDataContext portletDataContext,
+			PortletPreferences portletPreferences, Element parentElement)
 		throws Exception {
 
 		if (portletPreferences == null) {
@@ -1089,21 +1083,29 @@ public class PortletExportController implements ExportController {
 
 		Element rootElement = document.getRootElement();
 
-		rootElement.addAttribute("owner-id", String.valueOf(ownerId));
-		rootElement.addAttribute("owner-type", String.valueOf(ownerType));
+		rootElement.addAttribute(
+			"owner-id", String.valueOf(portletPreferences.getOwnerId()));
+		rootElement.addAttribute(
+			"owner-type", String.valueOf(portletPreferences.getOwnerType()));
 		rootElement.addAttribute("default-user", String.valueOf(false));
-		rootElement.addAttribute("service-name", serviceName);
+		rootElement.addAttribute(
+			"service-name", portletPreferences.getPortletId());
 
-		if (ownerType == PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
+		if (portletPreferences.getOwnerType() ==
+			PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
+
 			PortletItem portletItem = _portletItemLocalService.getPortletItem(
-				ownerId);
+				portletPreferences.getOwnerId());
 
 			rootElement.addAttribute(
 				"archive-user-uuid", portletItem.getUserUuid());
 			rootElement.addAttribute("archive-name", portletItem.getName());
 		}
-		else if (ownerType == PortletKeys.PREFS_OWNER_TYPE_USER) {
-			User user = _userLocalService.fetchUserById(ownerId);
+		else if (portletPreferences.getOwnerType() ==
+			 PortletKeys.PREFS_OWNER_TYPE_USER) {
+
+			User user = _userLocalService.fetchUserById(
+				portletPreferences.getOwnerId());
 
 			if (user == null) {
 				return;
@@ -1123,10 +1125,12 @@ public class PortletExportController implements ExportController {
 		Element serviceElement = parentElement.addElement("service");
 
 		String path = ExportImportPathUtil.getServicePortletPreferencesPath(
-			portletDataContext, serviceName, ownerId, ownerType);
+			portletDataContext, portletPreferences.getPortletId(),
+			portletPreferences.getOwnerId(), portletPreferences.getOwnerType());
 
 		serviceElement.addAttribute("path", path);
-		serviceElement.addAttribute("service-name", serviceName);
+		serviceElement.addAttribute(
+			"service-name", portletPreferences.getPortletId());
 
 		portletDataContext.addZipEntry(path, document.formattedString());
 	}
@@ -1136,12 +1140,11 @@ public class PortletExportController implements ExportController {
 			String serviceName, Element parentElement)
 		throws Exception {
 
-		PortletPreferences portletPreferences = getPortletPreferences(
-			ownerId, ownerType, LayoutConstants.DEFAULT_PLID, serviceName);
+		PortletPreferences portletPreferences = getPortletPreferencesSharedPlid(
+			ownerId, ownerType, serviceName);
 
 		exportServicePortletPreference(
-			portletDataContext, ownerId, ownerType, portletPreferences,
-			serviceName, parentElement);
+			portletDataContext, portletPreferences, parentElement);
 	}
 
 	protected String getLockPath(
