@@ -58,7 +58,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.PortletConstants;
@@ -969,6 +968,29 @@ public class PortletExportController implements ExportController {
 			}
 		}
 
+		Document document = getPortletPreferencesDocument(
+			portletPreferences, defaultUser, jxPortletPreferences);
+
+		if (document == null) {
+			return;
+		}
+
+		String path = ExportImportPathUtil.getPortletPreferencesPath(
+			portletDataContext, portletPreferences.getPortletId(),
+			portletPreferences.getOwnerId(), portletPreferences.getOwnerType(),
+			portletPreferences.getPlid());
+
+		portletPreferencesElement.addAttribute("path", path);
+
+		portletDataContext.addZipEntry(
+			path, document.formattedString(StringPool.TAB, false, false));
+	}
+
+	protected Document getPortletPreferencesDocument(
+			PortletPreferences portletPreferences, boolean defaultUser,
+			javax.portlet.PortletPreferences jxPortletPreferences)
+		throws Exception {
+
 		Document document = SAXReaderUtil.read(
 			PortletPreferencesFactoryUtil.toXML(jxPortletPreferences));
 
@@ -978,8 +1000,7 @@ public class PortletExportController implements ExportController {
 			"owner-id", String.valueOf(portletPreferences.getOwnerId()));
 		rootElement.addAttribute(
 			"owner-type", String.valueOf(portletPreferences.getOwnerType()));
-		rootElement.addAttribute(
-			"default-user", String.valueOf(defaultUser));
+		rootElement.addAttribute("default-user", String.valueOf(defaultUser));
 
 		if (portletPreferences.getOwnerType() ==
 			PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
@@ -998,7 +1019,7 @@ public class PortletExportController implements ExportController {
 				portletPreferences.getOwnerId());
 
 			if (user == null) {
-				return;
+				return null;
 			}
 
 			rootElement.addAttribute("user-uuid", user.getUserUuid());
@@ -1012,15 +1033,7 @@ public class PortletExportController implements ExportController {
 			document.remove(node);
 		}
 
-		String path = ExportImportPathUtil.getPortletPreferencesPath(
-			portletDataContext, portletPreferences.getPortletId(),
-			portletPreferences.getOwnerId(), portletPreferences.getOwnerType(),
-			portletPreferences.getPlid());
-
-		portletPreferencesElement.addAttribute("path", path);
-
-		portletDataContext.addZipEntry(
-			path, document.formattedString(StringPool.TAB, false, false));
+		return document;
 	}
 
 	protected void exportService(
@@ -1078,49 +1091,17 @@ public class PortletExportController implements ExportController {
 		javax.portlet.PortletPreferences jxPortletPreferences =
 			PortletPreferencesFactoryUtil.fromDefaultXML(preferencesXML);
 
-		Document document = SAXReaderUtil.read(
-			PortletPreferencesFactoryUtil.toXML(jxPortletPreferences));
+		Document document = getPortletPreferencesDocument(
+			portletPreferences, false, jxPortletPreferences);
+
+		if (document == null) {
+			return;
+		}
 
 		Element rootElement = document.getRootElement();
 
 		rootElement.addAttribute(
-			"owner-id", String.valueOf(portletPreferences.getOwnerId()));
-		rootElement.addAttribute(
-			"owner-type", String.valueOf(portletPreferences.getOwnerType()));
-		rootElement.addAttribute("default-user", String.valueOf(false));
-		rootElement.addAttribute(
 			"service-name", portletPreferences.getPortletId());
-
-		if (portletPreferences.getOwnerType() ==
-			PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
-
-			PortletItem portletItem = _portletItemLocalService.getPortletItem(
-				portletPreferences.getOwnerId());
-
-			rootElement.addAttribute(
-				"archive-user-uuid", portletItem.getUserUuid());
-			rootElement.addAttribute("archive-name", portletItem.getName());
-		}
-		else if (portletPreferences.getOwnerType() ==
-			 PortletKeys.PREFS_OWNER_TYPE_USER) {
-
-			User user = _userLocalService.fetchUserById(
-				portletPreferences.getOwnerId());
-
-			if (user == null) {
-				return;
-			}
-
-			rootElement.addAttribute("user-uuid", user.getUserUuid());
-		}
-
-		List<Node> nodes = document.selectNodes(
-			"/portlet-preferences/preference[name/text() = " +
-				"'last-publish-date']");
-
-		for (Node node : nodes) {
-			document.remove(node);
-		}
 
 		Element serviceElement = parentElement.addElement("service");
 
