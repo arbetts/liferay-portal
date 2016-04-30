@@ -991,6 +991,19 @@ public class PortletExportController implements ExportController {
 			javax.portlet.PortletPreferences jxPortletPreferences)
 		throws Exception {
 
+		User user = null;
+
+		if (portletPreferences.getOwnerType() ==
+			PortletKeys.PREFS_OWNER_TYPE_USER) {
+
+			user = _userLocalService.fetchUserById(
+				portletPreferences.getOwnerId());
+
+			if (user == null) {
+				return null;
+			}
+		}
+
 		Document document = SAXReaderUtil.read(
 			PortletPreferencesFactoryUtil.toXML(jxPortletPreferences));
 
@@ -1014,13 +1027,6 @@ public class PortletExportController implements ExportController {
 		}
 		else if (portletPreferences.getOwnerType() ==
 			PortletKeys.PREFS_OWNER_TYPE_USER) {
-
-			User user = _userLocalService.fetchUserById(
-				portletPreferences.getOwnerId());
-
-			if (user == null) {
-				return null;
-			}
 
 			rootElement.addAttribute("user-uuid", user.getUserUuid());
 		}
