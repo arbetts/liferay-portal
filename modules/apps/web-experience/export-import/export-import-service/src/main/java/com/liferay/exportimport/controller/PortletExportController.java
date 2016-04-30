@@ -728,21 +728,9 @@ public class PortletExportController implements ExportController {
 			((layoutTypePortlet == null) ||
 				layoutTypePortlet.hasPortletId(portlet.getRootPortletId()))) {
 
-			// Company
-
-			PortletPreferences portletPreferences =
-				getPortletPreferencesSharedPlid(
-					portletDataContext.getCompanyId(),
-					PortletKeys.PREFS_OWNER_TYPE_COMPANY,
-					portlet.getRootPortletId());
-
-			exportPortletPreference(
-				portletDataContext, false, portletPreferences, portlet,
-				portletElement);
-
 			// Group
 
-			portletPreferences =
+			PortletPreferences portletPreferences =
 				getPortletPreferencesSharedPlid(
 					portletDataContext.getScopeGroupId(),
 					PortletKeys.PREFS_OWNER_TYPE_GROUP,
