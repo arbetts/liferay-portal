@@ -726,7 +726,7 @@ public class PortletExportController implements ExportController {
 
 		if (exportPortletSetup &&
 			((layoutTypePortlet == null) ||
-				layoutTypePortlet.hasPortletId(portlet.getRootPortletId()))) {
+			 layoutTypePortlet.hasPortletId(portlet.getRootPortletId()))) {
 
 			// Group
 
@@ -881,9 +881,9 @@ public class PortletExportController implements ExportController {
 	}
 
 	protected void exportPortletPreference(
-			PortletDataContext portletDataContext,
-			boolean defaultUser, PortletPreferences portletPreferences,
-			Portlet portlet, Element parentElement)
+			PortletDataContext portletDataContext, boolean defaultUser,
+			PortletPreferences portletPreferences, Portlet portlet,
+			Element parentElement)
 		throws Exception {
 
 		if (portletPreferences == null) {
@@ -972,62 +972,6 @@ public class PortletExportController implements ExportController {
 
 		portletDataContext.addZipEntry(
 			path, document.formattedString(StringPool.TAB, false, false));
-	}
-
-	protected Document getPortletPreferencesDocument(
-			PortletPreferences portletPreferences, boolean defaultUser,
-			javax.portlet.PortletPreferences jxPortletPreferences)
-		throws Exception {
-
-		User user = null;
-
-		if (portletPreferences.getOwnerType() ==
-			PortletKeys.PREFS_OWNER_TYPE_USER) {
-
-			user = _userLocalService.fetchUserById(
-				portletPreferences.getOwnerId());
-
-			if (user == null) {
-				return null;
-			}
-		}
-
-		Document document = SAXReaderUtil.read(
-			PortletPreferencesFactoryUtil.toXML(jxPortletPreferences));
-
-		Element rootElement = document.getRootElement();
-
-		rootElement.addAttribute(
-			"owner-id", String.valueOf(portletPreferences.getOwnerId()));
-		rootElement.addAttribute(
-			"owner-type", String.valueOf(portletPreferences.getOwnerType()));
-		rootElement.addAttribute("default-user", String.valueOf(defaultUser));
-
-		if (portletPreferences.getOwnerType() ==
-			PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
-
-			PortletItem portletItem = _portletItemLocalService.getPortletItem(
-				portletPreferences.getOwnerId());
-
-			rootElement.addAttribute(
-				"archive-user-uuid", portletItem.getUserUuid());
-			rootElement.addAttribute("archive-name", portletItem.getName());
-		}
-		else if (portletPreferences.getOwnerType() ==
-			PortletKeys.PREFS_OWNER_TYPE_USER) {
-
-			rootElement.addAttribute("user-uuid", user.getUserUuid());
-		}
-
-		List<Node> nodes = document.selectNodes(
-			"/portlet-preferences/preference[name/text() = " +
-				"'last-publish-date']");
-
-		for (Node node : nodes) {
-			document.remove(node);
-		}
-
-		return document;
 	}
 
 	protected void exportService(
@@ -1171,13 +1115,6 @@ public class PortletExportController implements ExportController {
 		return portletDataContext;
 	}
 
-	protected PortletPreferences getPortletPreferencesSharedPlid(
-		long ownerId, int ownerType, String portletId) {
-
-		return getPortletPreferences(ownerId, ownerType,
-			PortletKeys.PREFS_PLID_SHARED, portletId);
-	}
-
 	protected PortletPreferences getPortletPreferences(
 		long ownerId, int ownerType, long plid, String portletId) {
 
@@ -1195,6 +1132,69 @@ public class PortletExportController implements ExportController {
 		}
 
 		return portletPreferences;
+	}
+
+	protected Document getPortletPreferencesDocument(
+			PortletPreferences portletPreferences, boolean defaultUser,
+			javax.portlet.PortletPreferences jxPortletPreferences)
+		throws Exception {
+
+		User user = null;
+
+		if (portletPreferences.getOwnerType() ==
+				PortletKeys.PREFS_OWNER_TYPE_USER) {
+
+			user = _userLocalService.fetchUserById(
+				portletPreferences.getOwnerId());
+
+			if (user == null) {
+				return null;
+			}
+		}
+
+		Document document = SAXReaderUtil.read(
+			PortletPreferencesFactoryUtil.toXML(jxPortletPreferences));
+
+		Element rootElement = document.getRootElement();
+
+		rootElement.addAttribute(
+			"owner-id", String.valueOf(portletPreferences.getOwnerId()));
+		rootElement.addAttribute(
+			"owner-type", String.valueOf(portletPreferences.getOwnerType()));
+		rootElement.addAttribute("default-user", String.valueOf(defaultUser));
+
+		if (portletPreferences.getOwnerType() ==
+				PortletKeys.PREFS_OWNER_TYPE_ARCHIVED) {
+
+			PortletItem portletItem = _portletItemLocalService.getPortletItem(
+				portletPreferences.getOwnerId());
+
+			rootElement.addAttribute(
+				"archive-user-uuid", portletItem.getUserUuid());
+			rootElement.addAttribute("archive-name", portletItem.getName());
+		}
+		else if (portletPreferences.getOwnerType() ==
+					PortletKeys.PREFS_OWNER_TYPE_USER) {
+
+			rootElement.addAttribute("user-uuid", user.getUserUuid());
+		}
+
+		List<Node> nodes = document.selectNodes(
+			"/portlet-preferences/preference[name/text() = " +
+				"'last-publish-date']");
+
+		for (Node node : nodes) {
+			document.remove(node);
+		}
+
+		return document;
+	}
+
+	protected PortletPreferences getPortletPreferencesSharedPlid(
+		long ownerId, int ownerType, String portletId) {
+
+		return getPortletPreferences(
+			ownerId, ownerType, PortletKeys.PREFS_PLID_SHARED, portletId);
 	}
 
 	protected int getProcessFlag() {
