@@ -3,9 +3,8 @@
 ; https://github.com/git-commands/git-subrepo#readme for more information.
 ;
 [subrepo]
-	branch = 7.0.x
 	cmdver = liferay
-	commit = 648c6614c49e32acd9f09351df07a5a3ee7c64d3
+	commit = 0f3b7f2129918ee5b0f97056f049d5846daa28b6
 	mode = push
-	parent = b43c343d56748d7c7505551a2d51b7105079a700
-	remote = git@github.com:liferay-continuous-integration/com-liferay-ip-geocoder.git
+	parent = 081dbbe71f96c387152c658ff02f0b0c19fc4f1c
+	remote = git@github.com:liferay/com-liferay-ip-geocoder.git

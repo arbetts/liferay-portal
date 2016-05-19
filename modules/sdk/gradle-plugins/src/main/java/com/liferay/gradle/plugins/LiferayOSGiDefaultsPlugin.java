@@ -323,6 +323,26 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 			});
 	}
 
+	protected static void configureRepositories(Project project) {
+		RepositoryHandler repositoryHandler = project.getRepositories();
+
+		if (!_MAVEN_LOCAL_IGNORE) {
+			repositoryHandler.mavenLocal();
+		}
+
+		repositoryHandler.maven(
+			new Action<MavenArtifactRepository>() {
+
+				@Override
+				public void execute(
+					MavenArtifactRepository mavenArtifactRepository) {
+
+					mavenArtifactRepository.setUrl(_REPOSITORY_URL);
+				}
+
+			});
+	}
+
 	protected static boolean isTestProject(Project project) {
 		String projectName = project.getName();
 
@@ -1290,6 +1310,11 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 				@Override
 				public File call() throws Exception {
+					if (FileUtil.exists(project, "static.build")) {
+						return new File(
+							liferayExtension.getLiferayHome(), "osgi/static");
+					}
+
 					String archivesBaseName = GradleUtil.getArchivesBaseName(
 						project);
 
@@ -1297,10 +1322,9 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 						return new File(
 							liferayExtension.getLiferayHome(), "osgi/portal");
 					}
-					else {
-						return new File(
-							liferayExtension.getLiferayHome(), "osgi/modules");
-					}
+
+					return new File(
+						liferayExtension.getLiferayHome(), "osgi/modules");
 				}
 
 			});
@@ -1421,26 +1445,6 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 		GradleUtil.setProperty(
 			project, "plugin.full.version",
 			String.valueOf(project.getVersion()));
-	}
-
-	protected void configureRepositories(Project project) {
-		RepositoryHandler repositoryHandler = project.getRepositories();
-
-		if (!_MAVEN_LOCAL_IGNORE) {
-			repositoryHandler.mavenLocal();
-		}
-
-		repositoryHandler.maven(
-			new Action<MavenArtifactRepository>() {
-
-				@Override
-				public void execute(
-					MavenArtifactRepository mavenArtifactRepository) {
-
-					mavenArtifactRepository.setUrl(_REPOSITORY_URL);
-				}
-
-			});
 	}
 
 	protected void configureSourceSetClassesDir(
