@@ -3,9 +3,8 @@
 ; https://github.com/git-commands/git-subrepo#readme for more information.
 ;
 [subrepo]
-	branch = 7.0.x
 	cmdver = liferay
-	commit = 386d0cf75bd915bcb653c817372786bcb5746aef
+	commit = 0ec3550c5ab7e80e41a6f09030ede9dcdf3d681a
 	mode = push
-	parent = 9fd8e07343e06fe8feaa90ee2ef4f01beca168fd
-	remote = git@github.com:liferay-continuous-integration/com-liferay-license-manager.git
+	parent = c10d5e000b62177f04a3c32c64ff01e61eefbaf4
+	remote = git@github.com:liferay/com-liferay-license-manager.git

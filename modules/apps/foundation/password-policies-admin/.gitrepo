@@ -3,9 +3,8 @@
 ; https://github.com/git-commands/git-subrepo#readme for more information.
 ;
 [subrepo]
-	branch = 7.0.x
 	cmdver = liferay
-	commit = 70406f5eab4aeb0946d1c8e93c1ca2ce0a99943d
+	commit = 55844d0885b2ee814ee6cf57d3af2b0ea213175c
 	mode = push
-	parent = f087cd06c9438b7e3a7da13b44c408ef0dae696e
-	remote = git@github.com:liferay-continuous-integration/com-liferay-password-policies-admin.git
+	parent = 20949e0994022864758f8915e76eaaa92459d4ff
+	remote = git@github.com:liferay/com-liferay-password-policies-admin.git

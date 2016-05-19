@@ -3,9 +3,8 @@
 ; https://github.com/git-commands/git-subrepo#readme for more information.
 ;
 [subrepo]
-	branch = 7.0.x
 	cmdver = liferay
-	commit = 1a605dfac7266dffdbce75fde9956bae55f61ee2
+	commit = 7bbf34f74a8d36ba45dddaf22492015acb658947
 	mode = push
-	parent = 9088986b4100c81ecd07c2de626df7e6bd259665
-	remote = git@github.com:liferay-continuous-integration/com-liferay-portal-security-audit.git
+	parent = da1e127fb6a3c33f6d8e60b8bb7d297d913aeb96
+	remote = git@github.com:liferay/com-liferay-portal-security-audit.git
