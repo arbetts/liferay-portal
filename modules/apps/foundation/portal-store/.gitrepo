@@ -4,7 +4,7 @@
 ;
 [subrepo]
 	cmdver = liferay
-	commit = 737acd76f334afde6d9fa4ba595bfe532719ed40
+	commit = a02d83fd0db3ce80ba08bda9020ee6723484499b
 	mode = push
-	parent = 1b4d2c62179afeed67f06932837f467ed2a8b45c
+	parent = ad8ef8a99b3b113bba11a213cfe3d577c025cfda
 	remote = git@github.com:liferay/com-liferay-portal-store.git
