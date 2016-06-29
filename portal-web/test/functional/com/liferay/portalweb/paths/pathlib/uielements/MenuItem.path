@@ -179,13 +179,8 @@
 	<td></td>
 </tr>
 <tr>
-	<td>ASSIGNEES</td>
-	<td>//a[@role='menuitem' and contains(.,'Assignees')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>BASIC_ARTICLE</td>
-	<td>//a[@role='menuitem' and contains(.,'Basic Article')]</td>
+	<td>//a[contains(@id,'menuItem') and contains(.,'Basic Article')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -495,7 +490,7 @@
 </tr>
 <tr>
 	<td>MANAGE_SITES_TEMPLATES</td>
-	<td>//a[contains(@id,'menuItem') and contains(.,'Manage Sites Templates')]</td>
+	<td>//a[contains(@role,'menuitem') and contains(.,'Manage Sites Templates')]</td>
 	<td></td>
 </tr>
 <tr>

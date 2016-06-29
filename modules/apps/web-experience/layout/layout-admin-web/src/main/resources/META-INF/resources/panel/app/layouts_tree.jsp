@@ -276,8 +276,8 @@ LayoutsTreeDisplayContext layoutsTreeDisplayContext = new LayoutsTreeDisplayCont
 	String targetNode = "#controlMenuAlertsContainer";
 	%>
 
-	<liferay-ui:success key="layoutAdded" message='<%= LanguageUtil.get(resourceBundle, "the-page-has-been-created-succesfully") %>' targetNode="<%= targetNode %>" />
-	<liferay-ui:success key="layoutDeleted" message='<%= LanguageUtil.get(resourceBundle, "the-page-has-been-deleted-succesfully") %>' targetNode="<%= targetNode %>" />
+	<liferay-ui:success key="layoutAdded" message='<%= LanguageUtil.get(resourceBundle, "the-page-was-created-succesfully") %>' targetNode="<%= targetNode %>" />
+	<liferay-ui:success key="layoutDeleted" message='<%= LanguageUtil.get(resourceBundle, "the-page-was-deleted-succesfully") %>' targetNode="<%= targetNode %>" />
 
 	<%@ include file="/layout_exception.jspf" %>
 
@@ -338,7 +338,7 @@ LayoutsTreeDisplayContext layoutsTreeDisplayContext = new LayoutsTreeDisplayCont
 				if (!expandedTreeDialog) {
 					expandedTreeDialog = new Liferay.UrlPreview(
 						{
-							title: '<%= LanguageUtil.get(request, "pages") %>',
+							title: '<%= HtmlUtil.escape(LanguageUtil.get(request, "pages")) %>',
 							url: '<%= treeURL.toString() %>',
 							width: Liferay.Util.isPhone() ? '100%' : '900px'
 						}

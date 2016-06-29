@@ -4,7 +4,7 @@
 ;
 [subrepo]
 	cmdver = liferay
-	commit = 3c6019c0ef6595bfc999ee64a7f301b6104ace9c
+	commit = 65b2ac2b682d609ca7966d574d9e5dbf53ae85c2
 	mode = push
-	parent = 651210aa3ec081dbabda48d28d0598c402c452be
+	parent = 0be93eedabf3250a5e82276eab75a4bca48b15a2
 	remote = git@github.com:liferay/com-liferay-ratings.git
