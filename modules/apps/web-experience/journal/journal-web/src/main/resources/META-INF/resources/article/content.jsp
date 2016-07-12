@@ -140,11 +140,11 @@ boolean changeStructure = GetterUtil.getBoolean(request.getAttribute("edit_artic
 <aui:script use="liferay-journal-content">
 	var journalContent = new Liferay.Portlet.JournalContent(
 		{
-			'ddm.basePortletURL': '<%= PortletURLFactoryUtil.create(request, PortletProviderUtil.getPortletId(DDMStructure.class.getName(), PortletProvider.Action.VIEW), themeDisplay.getPlid(), PortletRequest.RENDER_PHASE) %>',
+			'ddm.basePortletURL': '<%= PortletURLFactoryUtil.create(request, PortletProviderUtil.getPortletId(DDMStructure.class.getName(), PortletProvider.Action.VIEW), PortletRequest.RENDER_PHASE) %>',
 			'ddm.classNameId': '<%= PortalUtil.getClassNameId(DDMStructure.class) %>',
 			'ddm.classPK': <%= ddmStructure.getPrimaryKey() %>,
 			'ddm.groupId': <%= groupId %>,
-			'ddm.refererPortletName': '<%= JournalPortletKeys.JOURNAL %>',
+			'ddm.refererPortletName': '<%= JournalPortletKeys.JOURNAL + ".selectStructure" %>',
 			'ddm.resourceClassNameId': '<%= ddmStructure.getClassNameId() %>',
 			'ddm.templateId': <%= (ddmTemplate != null) ? ddmTemplate.getTemplateId() : 0 %>,
 			descriptionInputLocalized: Liferay.component('<portlet:namespace />description'),

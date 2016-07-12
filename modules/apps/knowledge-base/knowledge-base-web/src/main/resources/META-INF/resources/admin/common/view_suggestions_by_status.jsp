@@ -18,26 +18,24 @@
 
 <%
 KBSuggestionListDisplayContext kbSuggestionListDisplayContext = (KBSuggestionListDisplayContext)request.getAttribute(KBWebKeys.KNOWLEDGE_BASE_KB_SUGGESTION_LIST_DISPLAY_CONTEXT);
+
+SearchContainer kbCommentsSearchContainer = (SearchContainer)request.getAttribute("view_suggestions.jsp-searchContainer");
+
+KBCommentResultRowSplitter resultRowSplitter = (KBCommentResultRowSplitter)request.getAttribute("view_suggestions.jsp-resultRowSplitter");
 %>
 
-<liferay-portlet:renderURL varImpl="iteratorURL" />
+<liferay-portlet:actionURL name="deleteKBComments" varImpl="deleteKBCommentsURL">
+	<portlet:param name="redirect" value="<%= currentURL %>" />
+</liferay-portlet:actionURL>
 
-<%
-kbSuggestionListDisplayContext.getViewSuggestionURL(iteratorURL);
-%>
-
-<div id="<portlet:namespace />kbArticleCommentsWrapper">
+<aui:form action="<%= deleteKBCommentsURL %>" name="fm">
 	<liferay-ui:search-container
-		emptyResultsMessage="no-suggestions-were-found"
-		iteratorURL="<%= iteratorURL %>"
-		total="<%= kbSuggestionListDisplayContext.getKBCommentsCount() %>"
+		id="kbComments"
+		searchContainer="<%= kbCommentsSearchContainer %>"
 	>
-		<liferay-ui:search-container-results
-			results="<%= kbSuggestionListDisplayContext.getKBComments(searchContainer) %>"
-		/>
-
 		<liferay-ui:search-container-row
 			className="com.liferay.knowledge.base.model.KBComment"
+			keyProperty="kbCommentId"
 			modelVar="kbComment"
 		>
 			<liferay-ui:search-container-column-user
@@ -59,10 +57,21 @@ kbSuggestionListDisplayContext.getViewSuggestionURL(iteratorURL);
 				</h5>
 
 				<h4>
-					<%= StringUtil.shorten(HtmlUtil.replaceNewLine(HtmlUtil.escape(kbComment.getContent())), 100) %>
+					<liferay-portlet:renderURL varImpl="rowURL">
+						<portlet:param name="mvcPath" value='<%= templatePath + "view_suggestion.jsp" %>' />
+						<portlet:param name="kbCommentId" value="<%= String.valueOf(kbComment.getKbCommentId()) %>" />
+						<portlet:param name="redirect" value="<%= currentURL %>" />
+					</liferay-portlet:renderURL>
+
+					<aui:a href="<%= rowURL.toString() %>">
+						<%= StringUtil.shorten(HtmlUtil.escape(kbComment.getContent()), 100) %>
+					</aui:a>
 				</h4>
 
-				<h5 class="text-default">
+				<h5>
+					<span class="kb-comment-status text-default">
+						<liferay-ui:message key="<%= KBUtil.getStatusLabel(kbComment.getStatus()) %>" />
+					</span>
 
 					<%
 					KBArticle kbArticle = KBArticleServiceUtil.getLatestKBArticle(kbComment.getClassPK(), WorkflowConstants.STATUS_ANY);
@@ -75,7 +84,7 @@ kbSuggestionListDisplayContext.getViewSuggestionURL(iteratorURL);
 					%>
 
 					<c:if test="<%= kbSuggestionListDisplayContext.isShowKBArticleTitle() %>">
-						<a href="<%= viewKBArticleURL.toString() %>"><%= HtmlUtil.escape(kbArticle.getTitle()) %></a>
+						<a class="kb-article-link text-default" href="<%= viewKBArticleURL.toString() %>"><%= HtmlUtil.escape(kbArticle.getTitle()) %></a>
 					</c:if>
 				</h5>
 			</liferay-ui:search-container-column-text>
@@ -85,18 +94,6 @@ kbSuggestionListDisplayContext.getViewSuggestionURL(iteratorURL);
 			/>
 		</liferay-ui:search-container-row>
 
-		<liferay-ui:search-iterator displayStyle="descriptive" markupView="lexicon" resultRowSplitter="<%= new KBCommentResultRowSplitter(kbSuggestionListDisplayContext, resourceBundle) %>" />
+		<liferay-ui:search-iterator displayStyle="descriptive" markupView="lexicon" resultRowSplitter="<%= resultRowSplitter %>" />
 	</liferay-ui:search-container>
-</div>
-
-<aui:script use="aui-base">
-	A.one('#<portlet:namespace />kbArticleCommentsWrapper').delegate(
-		'click',
-		function(e) {
-			if (confirm('<liferay-ui:message key="are-you-sure-you-want-to-delete-this" />')) {
-				location.href = this.getData('href');
-			}
-		},
-		'.kb-suggestion-actions .kb-suggestion-delete'
-	);
-</aui:script>
+</aui:form>
