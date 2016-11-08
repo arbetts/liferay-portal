@@ -567,6 +567,34 @@ to version 1.0.44.
 - [LPS-69026]: Update the [Liferay Gradle Plugins JS Transpiler] dependency to
 version 2.2.1.
 
+## 3.0.33 - 2016-11-02
+
+### Changed
+- [LPS-68923]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.45.
+- [LPS-68923]: Update the [Liferay Source Formatter] dependency to version
+1.0.311.
+
+## 3.0.34 - 2016-11-03
+
+### Changed
+- [LPS-66853]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.46.
+- [LPS-66853]: Update the [Liferay Source Formatter] dependency to version
+1.0.312.
+
+## 3.0.35 - 2016-11-03
+
+### Changed
+- [LPS-68298]: Update the [Liferay Gradle Plugins JS Module Config Generator]
+dependency to version 2.1.0.
+
+## 3.0.36 - 2016-11-04
+
+### Changed
+- [LPS-68298]: Update the [Liferay Gradle Plugins JS Module Config Generator]
+dependency to version 2.1.1.
+
 [Gradle Bundle Plugin]: https://github.com/TomDmitriev/gradle-bundle-plugin
 [Liferay Ant BND]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/ant-bnd
 [Liferay CSS Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/util/css-builder
@@ -582,7 +610,7 @@ version 2.2.1.
 [Liferay Lang Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/util/lang-builder
 [Liferay Portal Tools Service Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/util/portal-tools-service-builder
 [Liferay Portal Tools Upgrade Table Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/util/portal-tools-upgrade-table-builder
-[Liferay Portal Tools WSDD Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/util/portal-tools-wsd-builder
+[Liferay Portal Tools WSDD Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/util/portal-tools-wsdd-builder
 [Liferay Source Formatter]: https://github.com/liferay/liferay-portal/tree/master/modules/util/source-formatter
 [Liferay TLD Formatter]: https://github.com/liferay/liferay-portal/tree/master/modules/util/tld-formatter
 [Liferay XML Formatter]: https://github.com/liferay/liferay-portal/tree/master/modules/util/xml-formatter
@@ -607,6 +635,7 @@ version 2.2.1.
 [LPS-68131]: https://issues.liferay.com/browse/LPS-68131
 [LPS-68165]: https://issues.liferay.com/browse/LPS-68165
 [LPS-68297]: https://issues.liferay.com/browse/LPS-68297
+[LPS-68298]: https://issues.liferay.com/browse/LPS-68298
 [LPS-68334]: https://issues.liferay.com/browse/LPS-68334
 [LPS-68415]: https://issues.liferay.com/browse/LPS-68415
 [LPS-68485]: https://issues.liferay.com/browse/LPS-68485

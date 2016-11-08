@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.search.facet.collector.FacetCollector;
 import com.liferay.portal.kernel.search.facet.collector.TermCollector;
 import com.liferay.portal.kernel.search.facet.faceted.searcher.FacetedSearcher;
 import com.liferay.portal.kernel.test.IdempotentRetryAssert;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.SearchContextTestUtil;
 import com.liferay.portal.search.test.util.AssertUtils;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -56,7 +57,9 @@ public class AssetTagNamesFacetTest extends BaseFacetedSearcherTestCase {
 	public void testSearchByFacet() throws Exception {
 		Group group = userSearchFixture.addGroup();
 
-		final String tag = "enterprise. open-source for life";
+		String randomString = RandomTestUtil.randomString();
+
+		final String tag = randomString.toLowerCase();
 
 		userSearchFixture.addUser(group, tag);
 
