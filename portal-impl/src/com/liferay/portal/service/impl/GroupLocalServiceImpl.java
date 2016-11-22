@@ -878,6 +878,14 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 					}
 				}
 
+				if (!group.isStagingGroup() &&
+					(group.isOrganization() || group.isRegularSite())) {
+
+					resourceLocalService.deleteResource(
+						group.getCompanyId(), Group.class.getName(),
+						ResourceConstants.SCOPE_INDIVIDUAL, group.getGroupId());
+				}
+
 				groupPersistence.remove(group);
 			}
 
