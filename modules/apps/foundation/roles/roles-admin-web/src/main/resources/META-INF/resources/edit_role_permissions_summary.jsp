@@ -114,8 +114,11 @@ for (int i = 0; i < results.size(); i++) {
 	PermissionDisplay permissionDisplay = (PermissionDisplay)results.get(i);
 
 	Permission permission = permissionDisplay.getPermission();
+
 	Resource resource = permissionDisplay.getResource();
+
 	String curResource = resource.getName();
+
 	String curPortletName = permissionDisplay.getPortletName();
 	String curPortletLabel = permissionDisplay.getPortletLabel();
 	String curModelLabel = permissionDisplay.getModelLabel();
@@ -148,14 +151,7 @@ for (int i = 0; i < results.size(); i++) {
 		scope = ResourceConstants.SCOPE_GROUP_TEMPLATE;
 	}
 
-	boolean selected = false;
-
-	if (ResourceBlockLocalServiceUtil.isSupported(curResource)) {
-		selected = ResourceTypePermissionLocalServiceUtil.hasEitherScopePermission(company.getCompanyId(), curResource, role.getRoleId(), actionId);
-	}
-	else {
-		selected = ResourcePermissionLocalServiceUtil.hasScopeResourcePermission(company.getCompanyId(), curResource, scope, role.getRoleId(), actionId);
-	}
+	boolean selected = ResourcePermissionLocalServiceUtil.hasScopeResourcePermission(company.getCompanyId(), curResource, scope, role.getRoleId(), actionId);
 
 	if (!selected) {
 		continue;

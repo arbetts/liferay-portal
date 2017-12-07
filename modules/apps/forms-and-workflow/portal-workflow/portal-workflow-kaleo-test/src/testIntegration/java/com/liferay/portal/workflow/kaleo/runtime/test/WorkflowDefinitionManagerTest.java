@@ -95,6 +95,19 @@ public class WorkflowDefinitionManagerTest {
 	}
 
 	@Test
+	public void testValidateEmptyNotificationTemplateDefinition()
+		throws Exception {
+
+		InputStream inputStream = getResource(
+			"single-approver-definition-empty-notification-template.xml");
+
+		String error = assertInvalid(inputStream);
+
+		assertEquals(
+			"The review node has a empty notification template", error);
+	}
+
+	@Test
 	public void testValidateIncomingTransitionInitialStateDefinition()
 		throws Exception {
 
@@ -103,7 +116,7 @@ public class WorkflowDefinitionManagerTest {
 		String error = assertInvalid(inputStream);
 
 		assertEquals(
-			"An incoming transition was found for initial state start", error);
+			"The start node cannot have an incoming transition", error);
 	}
 
 	@Test
@@ -115,40 +128,54 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("There are errors between fork fork and join join", error);
+		assertEquals(
+			"Fix the errors between the fork node fork and join node join",
+			error);
 
 		inputStream = getResource("incoming-transitions-join-2.xml");
 
 		error = assertInvalid(inputStream);
 
 		assertEquals(
-			"There are errors between fork fork1 and join join1", error);
+			"Fix the errors between the fork node fork1 and join node join1",
+			error);
 
 		inputStream = getResource("incoming-transitions-join-3.xml");
 
 		error = assertInvalid(inputStream);
 
 		assertEquals(
-			"There are errors between fork fork1 and join join", error);
+			"Fix the errors between the fork node fork1 and join node join",
+			error);
 
 		inputStream = getResource("incoming-transitions-join-4.xml");
 
 		error = assertInvalid(inputStream);
 
-		assertEquals("There are errors between fork fork and join join", error);
+		assertEquals(
+			"Fix the errors between the fork node fork and join node join",
+			error);
 
 		inputStream = getResource("incoming-transitions-join-5.xml");
 
 		error = assertInvalid(inputStream);
 
 		assertEquals(
-			"There are errors between fork fork and join fork Join", error);
+			"Fix the errors between the fork node fork and join node fork Join",
+			error);
 
 		inputStream = getResource("incoming-transitions-join-6.xml");
 
 		assertValid(inputStream);
 
 		inputStream = getResource("incoming-transitions-join-7.xml");
+
+		assertValid(inputStream);
+	}
+
+	@Test
+	public void testValidateJoinXorDefinition() throws Exception {
+		InputStream inputStream = getResource("join-xor-definition.xml");
 
 		assertValid(inputStream);
 	}
@@ -170,7 +197,7 @@ public class WorkflowDefinitionManagerTest {
 		String error = assertInvalid(inputStream);
 
 		assertEquals(
-			"Less than 2 outgoing transitions found for condition condition",
+			"The condition node must have at least 2 outgoing transitions",
 			error);
 	}
 
@@ -184,7 +211,7 @@ public class WorkflowDefinitionManagerTest {
 		String error = assertInvalid(inputStream);
 
 		assertEquals(
-			"Less than 2 outgoing transitions found for fork fork", error);
+			"The fork node must have at least 2 outgoing transitions", error);
 	}
 
 	@Test
@@ -193,19 +220,19 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("Fork fork2 and join join1 are not paired", error);
+		assertEquals("Fork fork2 and join join1 nodes must be paired", error);
 
 		inputStream = getResource("matching-fork-and-join-2.xml");
 
 		error = assertInvalid(inputStream);
 
-		assertEquals("Fork fork2 and join join1 are not paired", error);
+		assertEquals("Fork fork2 and join join1 nodes must be paired", error);
 
 		inputStream = getResource("matching-fork-and-join-3.xml");
 
 		error = assertInvalid(inputStream);
 
-		assertEquals("Fork fork3 and join join6 are not paired", error);
+		assertEquals("Fork fork3 and join join6 nodes must be paired", error);
 	}
 
 	@Test
@@ -216,7 +243,10 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("Multiple initial states start1 and start2", error);
+		assertEquals(
+			"The workflow has too many start nodes (state nodes start1 and " +
+				"start2)",
+			error);
 	}
 
 	@Test
@@ -225,7 +255,8 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("No assignments for task task", error);
+		assertEquals(
+			"Specify at least one assignment for the task task node", error);
 	}
 
 	@Test
@@ -237,7 +268,7 @@ public class WorkflowDefinitionManagerTest {
 		String error = assertInvalid(inputStream);
 
 		assertEquals(
-			"No incoming transition found for condition condition", error);
+			"The condition node must have an incoming transition", error);
 	}
 
 	@Test
@@ -248,7 +279,7 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("No incoming transition found for fork fork", error);
+		assertEquals("The fork node must have an incoming transition", error);
 	}
 
 	@Test
@@ -259,7 +290,7 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("No incoming transition found for state state", error);
+		assertEquals("The state node must have an incoming transition", error);
 	}
 
 	@Test
@@ -270,7 +301,7 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("No incoming transition found for task task", error);
+		assertEquals("The task node must have an incoming transition", error);
 	}
 
 	@Test
@@ -279,7 +310,7 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("No initial state defined", error);
+		assertEquals("You must define a start node", error);
 	}
 
 	@Test
@@ -290,8 +321,7 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals(
-			"No outgoing transition found for initial state start", error);
+		assertEquals("The start node must have an outgoing transition", error);
 	}
 
 	@Test
@@ -302,8 +332,7 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals(
-			"No outgoing transition found for initial state start", error);
+		assertEquals("The start node must have an outgoing transition", error);
 	}
 
 	@Test
@@ -323,7 +352,7 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("No terminal states defined", error);
+		assertEquals("You must define an end node", error);
 	}
 
 	@Test
@@ -349,7 +378,7 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("Unable to find target node for transition end", error);
+		assertEquals("The end transition must end at a node", error);
 	}
 
 	@Test
@@ -358,7 +387,10 @@ public class WorkflowDefinitionManagerTest {
 
 		String error = assertInvalid(inputStream);
 
-		assertEquals("There are unbalanced fork and join nodes", error);
+		assertEquals(
+			"Each fork node requires a join node. Make sure all forks and" +
+				"joins are properly paired",
+			error);
 	}
 
 	@Test
@@ -401,7 +433,7 @@ public class WorkflowDefinitionManagerTest {
 		ClassLoader classLoader = clazz.getClassLoader();
 
 		return classLoader.getResourceAsStream(
-			"com/liferay/portal/workflow/kaleo/runtime/dependencies/" + name);
+			"com/liferay/portal/workflow/kaleo/dependencies/" + name);
 	}
 
 	private BundleContext _bundleContext;

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.util;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +26,7 @@ public class PrimitiveLongListTest {
 
 	@Test
 	public void testAdd() {
-		long[] expected = new long[] {10L, 11L, 12L};
+		long[] expected = {10L, 11L, 12L};
 
 		PrimitiveLongList primitiveLongList = new PrimitiveLongList();
 
@@ -36,7 +38,8 @@ public class PrimitiveLongListTest {
 
 		long[] actual = primitiveLongList.getArray();
 
-		Assert.assertEquals(expected.length, actual.length);
+		Assert.assertEquals(
+			Arrays.toString(actual), expected.length, actual.length);
 
 		for (int i = 0; i < actual.length; i++) {
 			Assert.assertEquals(expected[i], actual[i]);
@@ -45,7 +48,7 @@ public class PrimitiveLongListTest {
 
 	@Test
 	public void testAddAll() {
-		long[] expected = new long[] {10L, 11L, 12L};
+		long[] expected = {10L, 11L, 12L};
 
 		PrimitiveLongList primitiveLongList = new PrimitiveLongList();
 
@@ -55,7 +58,8 @@ public class PrimitiveLongListTest {
 
 		long[] actual = primitiveLongList.getArray();
 
-		Assert.assertEquals(expected.length, actual.length);
+		Assert.assertEquals(
+			Arrays.toString(actual), expected.length, actual.length);
 
 		for (int i = 0; i < actual.length; i++) {
 			Assert.assertEquals(expected[i], actual[i]);

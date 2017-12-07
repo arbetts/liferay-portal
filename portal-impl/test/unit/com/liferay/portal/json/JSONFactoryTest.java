@@ -14,10 +14,11 @@
 
 package com.liferay.portal.json;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONSerializer;
 import com.liferay.portal.kernel.test.AssertUtils;
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -170,25 +171,26 @@ public class JSONFactoryTest {
 				"\",\"foo\": \"boo\"}");
 
 		Assert.assertNotNull(map);
-		Assert.assertEquals(2, map.size());
+		Assert.assertEquals(map.toString(), 2, map.size());
 		Assert.assertEquals(
 			"com.liferay.portal.kernel.json.JSONFactoryUtil", map.get("class"));
 		Assert.assertEquals("boo", map.get("foo"));
 
 		map = (Map<?, ?>)JSONFactoryUtil.looseDeserialize(
-			"{\"class\":\"" + JSONFactoryUtil.class.getName() +
-				"\",\"foo\": \"boo\",\"jsonFactory\":{\"class\":\"" +
-					JSONFactoryImpl.class.getName() + "\"}}");
+			StringBundler.concat(
+				"{\"class\":\"", JSONFactoryUtil.class.getName(),
+				"\",\"foo\": \"boo\",\"jsonFactory\":{\"class\":\"",
+				JSONFactoryImpl.class.getName(), "\"}}"));
 
 		Assert.assertNotNull(map);
-		Assert.assertEquals(3, map.size());
+		Assert.assertEquals(map.toString(), 3, map.size());
 		Assert.assertEquals(JSONFactoryUtil.class.getName(), map.get("class"));
 		Assert.assertEquals("boo", map.get("foo"));
 
 		map = (Map<?, ?>)map.get("jsonFactory");
 
 		Assert.assertNotNull(map);
-		Assert.assertEquals(1, map.size());
+		Assert.assertEquals(map.toString(), 1, map.size());
 		Assert.assertEquals(JSONFactoryImpl.class.getName(), map.get("class"));
 	}
 
@@ -329,9 +331,8 @@ public class JSONFactoryTest {
 
 	private static final int _INTEGER_VALUE = 5;
 
-	private static final long[] _LONG_ARRAY = {
-		10000000000000L, 20000000000000L, 30000000000000L
-	};
+	private static final long[] _LONG_ARRAY =
+		{10000000000000L, 20000000000000L, 30000000000000L};
 
 	private static final String _LONG_ARRAY_STRING =
 		"[10000000000000,20000000000000,30000000000000]";

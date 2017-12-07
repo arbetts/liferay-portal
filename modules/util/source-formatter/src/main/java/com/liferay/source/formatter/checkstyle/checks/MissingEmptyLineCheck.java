@@ -16,7 +16,6 @@ package com.liferay.source.formatter.checkstyle.checks;
 
 import com.liferay.source.formatter.checkstyle.util.DetailASTUtil;
 
-import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
@@ -25,13 +24,7 @@ import java.util.List;
 /**
  * @author Hugo Huijser
  */
-public class MissingEmptyLineCheck extends AbstractCheck {
-
-	public static final String MSG_MISSING_EMPTY_LINE_AFTER_VARIABLE_REFERENCE =
-		"empty.line.missing.after.variable.reference";
-
-	public static final String MSG_MISSING_EMPTY_LINE_BEFORE_VARIABLE_USE =
-		"empty.line.missing.before.variable.use";
+public class MissingEmptyLineCheck extends BaseCheck {
 
 	@Override
 	public int[] getDefaultTokens() {
@@ -39,7 +32,7 @@ public class MissingEmptyLineCheck extends AbstractCheck {
 	}
 
 	@Override
-	public void visitToken(DetailAST detailAST) {
+	protected void doVisitToken(DetailAST detailAST) {
 		DetailAST firstChildAST = detailAST.getFirstChild();
 
 		if ((firstChildAST == null) ||
@@ -72,7 +65,7 @@ public class MissingEmptyLineCheck extends AbstractCheck {
 	private void _checkMissingEmptyLineAfterReferencingVariable(
 		DetailAST detailAST, String name, int endLine) {
 
-		boolean isReferenced = false;
+		boolean referenced = false;
 
 		DetailAST nextSibling = detailAST.getNextSibling();
 
@@ -106,14 +99,14 @@ public class MissingEmptyLineCheck extends AbstractCheck {
 			}
 
 			if (!expressionReferencesVariable) {
-				if (isReferenced) {
+				if (referenced) {
 					int startLineNextExpression = DetailASTUtil.getStartLine(
 						nextSibling);
 
 					if ((endLine + 1) == startLineNextExpression) {
 						log(
 							startLineNextExpression,
-							MSG_MISSING_EMPTY_LINE_AFTER_VARIABLE_REFERENCE,
+							_MSG_MISSING_EMPTY_LINE_AFTER_VARIABLE_REFERENCE,
 							startLineNextExpression, name);
 					}
 				}
@@ -121,7 +114,7 @@ public class MissingEmptyLineCheck extends AbstractCheck {
 				return;
 			}
 
-			isReferenced = true;
+			referenced = true;
 
 			endLine = DetailASTUtil.getEndLine(nextSibling);
 
@@ -165,7 +158,7 @@ public class MissingEmptyLineCheck extends AbstractCheck {
 			if (identName.equals(name)) {
 				log(
 					startLineNextExpression,
-					MSG_MISSING_EMPTY_LINE_BEFORE_VARIABLE_USE, name);
+					_MSG_MISSING_EMPTY_LINE_BEFORE_VARIABLE_USE, name);
 			}
 		}
 	}
@@ -197,5 +190,12 @@ public class MissingEmptyLineCheck extends AbstractCheck {
 
 		return false;
 	}
+
+	private static final String
+		_MSG_MISSING_EMPTY_LINE_AFTER_VARIABLE_REFERENCE =
+			"empty.line.missing.after.variable.reference";
+
+	private static final String _MSG_MISSING_EMPTY_LINE_BEFORE_VARIABLE_USE =
+		"empty.line.missing.before.variable.use";
 
 }

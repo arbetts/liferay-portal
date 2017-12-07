@@ -108,6 +108,8 @@ AUI.add(
 						var formattedDate = instance.formatDate(isoDate);
 
 						instance.getTriggerNode().val(formattedDate);
+
+						instance.set('value', isoDate);
 					},
 
 					showErrorMessage: function() {
@@ -119,7 +121,7 @@ AUI.add(
 
 						var inputGroup = container.one('.input-group-container');
 
-						inputGroup.insert(container.one('.help-block'), 'after');
+						inputGroup.insert(container.one('.form-feedback-indicator'), 'after');
 					},
 
 					_afterSelectionChange: function(event) {

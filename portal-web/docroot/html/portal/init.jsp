@@ -20,6 +20,8 @@
 page import="com.liferay.exportimport.kernel.lar.DefaultConfigurationPortletDataHandler" %><%@
 page import="com.liferay.portal.kernel.cluster.ClusterExecutorUtil" %><%@
 page import="com.liferay.portal.kernel.cluster.ClusterNode" %><%@
+page import="com.liferay.portal.kernel.dao.db.DBManagerUtil" %><%@
+page import="com.liferay.portal.kernel.dao.db.DBType" %><%@
 page import="com.liferay.portal.kernel.exception.LayoutPermissionException" %><%@
 page import="com.liferay.portal.kernel.exception.PortletActiveException" %><%@
 page import="com.liferay.portal.kernel.exception.RequiredLayoutException" %><%@
@@ -34,6 +36,7 @@ page import="com.liferay.portal.kernel.parsers.bbcode.BBCodeTranslatorUtil" %><%
 page import="com.liferay.portal.kernel.portlet.PortletConfigurationLayoutUtil" %><%@
 page import="com.liferay.portal.kernel.servlet.HttpHeaders" %><%@
 page import="com.liferay.portal.kernel.templateparser.TransformException" %><%@
+page import="com.liferay.portal.kernel.util.ClassUtil" %><%@
 page import="com.liferay.portal.kernel.util.ProgressTracker" %><%@
 page import="com.liferay.portal.kernel.util.TermsOfUseContentProvider" %><%@
 page import="com.liferay.portal.kernel.util.TermsOfUseContentProviderRegistryUtil" %><%@

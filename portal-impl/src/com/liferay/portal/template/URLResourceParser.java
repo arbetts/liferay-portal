@@ -14,13 +14,16 @@
 
 package com.liferay.portal.template;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateException;
 import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.template.URLTemplateResource;
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -75,9 +78,10 @@ public abstract class URLResourceParser implements TemplateResourceParser {
 
 				if (_log.isWarnEnabled()) {
 					_log.warn(
-						"Unable to load template " + templateId +
-							" because the template name contains one or more " +
-								"special characters: %, #, ?, or ;");
+						StringBundler.concat(
+							"Unable to load template ", templateId,
+							" because the template name contains one or more ",
+							"special characters: %, #, ?, or ;"));
 				}
 
 				return false;
@@ -96,7 +100,10 @@ public abstract class URLResourceParser implements TemplateResourceParser {
 
 		String extension = FileUtil.getExtension(templateId);
 
-		if (!extension.equals(langType)) {
+		if (!extension.equals(langType) &&
+			!ArrayUtil.contains(
+				TemplateConstants.ALLOWED_LANG_TYPES, extension)) {
+
 			return false;
 		}
 

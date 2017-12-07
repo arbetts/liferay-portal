@@ -23,8 +23,10 @@ import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileEntryTypeServiceUtil;
 import com.liferay.dynamic.data.mapping.io.DDMFormXSDDeserializer;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
+import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
@@ -34,9 +36,6 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
-import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
-import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
@@ -53,15 +52,15 @@ import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.security.permission.SimplePermissionChecker;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
+import com.liferay.portal.test.rule.PermissionCheckerTestRule;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -81,14 +80,11 @@ public class DLFileEntryTypeServiceTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
+			PermissionCheckerTestRule.INSTANCE,
 			SynchronousDestinationTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
-		setUpDDMFormXSDDeserializer();
-		setUpPermissionThreadLocal();
-		setUpPrincipalThreadLocal();
-
 		_group = GroupTestUtil.addGroup();
 
 		_folder = DLAppLocalServiceUtil.addFolder(
@@ -125,15 +121,35 @@ public class DLFileEntryTypeServiceTest {
 		}
 	}
 
-	@After
-	public void tearDown() {
-		PermissionThreadLocal.setPermissionChecker(_originalPermissionChecker);
+	@Test
+	public void testAddFileEntryTypeWithEmptyDDMForm() throws Exception {
+		int fileEntryTypesCount =
+			DLFileEntryTypeServiceUtil.getFileEntryTypesCount(
+				new long[] {_group.getGroupId()});
 
-		PrincipalThreadLocal.setName(_originalName);
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group, TestPropsValues.getUserId());
+
+		serviceContext.setAttribute(
+			"ddmForm", DDMBeanTranslatorUtil.translate(new DDMForm()));
+
+		DDMStructure ddmStructure = DDMStructureTestUtil.addStructure(
+			_group.getGroupId(), DLFileEntryMetadata.class.getName());
+
+		DLFileEntryTypeServiceUtil.addFileEntryType(
+			_group.getGroupId(), StringUtil.randomString(),
+			StringUtil.randomString(),
+			new long[] {ddmStructure.getStructureId()}, serviceContext);
+
+		Assert.assertEquals(
+			fileEntryTypesCount + 1,
+			DLFileEntryTypeServiceUtil.getFileEntryTypesCount(
+				new long[] {_group.getGroupId()}));
 	}
 
 	@Test
-	public void testAddFileEntryType() throws Exception {
+	public void testAddFileEntryTypeWithNonemptyDDMForm() throws Exception {
 		ServiceContext serviceContext = new ServiceContext();
 
 		byte[] testFileBytes = FileUtil.getBytes(
@@ -158,7 +174,7 @@ public class DLFileEntryTypeServiceTest {
 		List<com.liferay.dynamic.data.mapping.kernel.DDMStructure>
 			ddmStructures = dlFileEntryType.getDDMStructures();
 
-		Assert.assertEquals(1, ddmStructures.size());
+		Assert.assertEquals(ddmStructures.toString(), 1, ddmStructures.size());
 
 		DDMStructure ddmStructure = DDMStructureLocalServiceUtil.getStructure(
 			ddmStructures.get(0).getStructureId());
@@ -322,6 +338,49 @@ public class DLFileEntryTypeServiceTest {
 		}
 	}
 
+	@Test
+	public void testUpdateFileEntryTypeWithEmptyDDMForm() throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group, TestPropsValues.getUserId());
+
+		DDMStructure ddmStructure = DDMStructureTestUtil.addStructure(
+			_group.getGroupId(), DLFileEntryMetadata.class.getName());
+
+		DDMForm ddmForm = new DDMForm();
+
+		ddmForm.addDDMFormField(new DDMFormField("text", "Text"));
+		ddmForm.setAvailableLocales(
+			Collections.singleton(LocaleUtil.getDefault()));
+		ddmForm.setDefaultLocale(LocaleUtil.getDefault());
+
+		serviceContext.setAttribute(
+			"ddmForm", DDMBeanTranslatorUtil.translate(ddmForm));
+
+		DLFileEntryType dlFileEntryType =
+			DLFileEntryTypeServiceUtil.addFileEntryType(
+				_group.getGroupId(), StringUtil.randomString(),
+				StringUtil.randomString(),
+				new long[] {ddmStructure.getStructureId()}, serviceContext);
+
+		serviceContext.setAttribute(
+			"ddmForm", DDMBeanTranslatorUtil.translate(new DDMForm()));
+
+		long[] ddmStructureIds = _getDDMStructureIds(dlFileEntryType);
+
+		DLFileEntryTypeServiceUtil.updateFileEntryType(
+			dlFileEntryType.getFileEntryTypeId(), StringUtil.randomString(),
+			StringUtil.randomId(), ddmStructureIds, serviceContext);
+
+		dlFileEntryType = DLFileEntryTypeServiceUtil.getFileEntryType(
+			dlFileEntryType.getFileEntryTypeId());
+
+		List<com.liferay.dynamic.data.mapping.kernel.DDMStructure>
+			ddmStructures = dlFileEntryType.getDDMStructures();
+
+		Assert.assertEquals(ddmStructures.toString(), 1, ddmStructures.size());
+	}
+
 	protected void assertFileEntryType(
 		FileEntry fileEntry, DLFileEntryType dlFileEntryType) {
 
@@ -333,39 +392,23 @@ public class DLFileEntryTypeServiceTest {
 			dlFileEntryType.getPrimaryKey(), dlFileEntry.getFileEntryTypeId());
 	}
 
-	protected void setUpDDMFormXSDDeserializer() {
-		Registry registry = RegistryUtil.getRegistry();
+	private long[] _getDDMStructureIds(DLFileEntryType dlFileEntryType) {
+		List<com.liferay.dynamic.data.mapping.kernel.DDMStructure>
+			ddmStructures = dlFileEntryType.getDDMStructures();
 
-		_ddmFormXSDDeserializer = registry.getService(
-			DDMFormXSDDeserializer.class);
-	}
+		long[] ddmStructureIds = new long[ddmStructures.size()];
 
-	protected void setUpPermissionThreadLocal() throws Exception {
-		_originalPermissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
+		int i = 0;
 
-		PermissionThreadLocal.setPermissionChecker(
-			new SimplePermissionChecker() {
+		for (com.liferay.dynamic.data.mapping.kernel.DDMStructure ddmStructure :
+				ddmStructures) {
 
-				{
-					init(TestPropsValues.getUser());
-				}
+			ddmStructureIds[i] = ddmStructure.getStructureId();
 
-				@Override
-				public boolean hasOwnerPermission(
-					long companyId, String name, String primKey, long ownerId,
-					String actionId) {
+			i++;
+		}
 
-					return true;
-				}
-
-			});
-	}
-
-	protected void setUpPrincipalThreadLocal() throws Exception {
-		_originalName = PrincipalThreadLocal.getName();
-
-		PrincipalThreadLocal.setName(TestPropsValues.getUserId());
+		return ddmStructureIds;
 	}
 
 	private ServiceContext _getFolderServiceContext(
@@ -393,9 +436,11 @@ public class DLFileEntryTypeServiceTest {
 	private static final String _TEST_DDM_STRUCTURE =
 		"dependencies/ddmstructure.xml";
 
+	@Inject
+	private static DDMFormXSDDeserializer _ddmFormXSDDeserializer;
+
 	private DLFileEntryType _basicDocumentDLFileEntryType;
 	private DLFileEntryType _contractDLFileEntryType;
-	private DDMFormXSDDeserializer _ddmFormXSDDeserializer;
 	private List<DLFileEntryType> _dlFileEntryTypes;
 	private Folder _folder;
 
@@ -403,8 +448,6 @@ public class DLFileEntryTypeServiceTest {
 	private Group _group;
 
 	private DLFileEntryType _marketingBannerDLFileEntryType;
-	private String _originalName;
-	private PermissionChecker _originalPermissionChecker;
 	private Folder _subfolder;
 
 }

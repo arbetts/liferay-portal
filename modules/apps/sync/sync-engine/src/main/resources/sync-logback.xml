@@ -17,7 +17,7 @@
 		<file>${sync.logs.directory}/lan-server.log</file>
 
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>${sync.logs.directory}/archive/lan-server%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+			<fileNamePattern>${sync.logs.directory}/archive/lan-server-%d{yyyy-MM-dd}.log.zip</fileNamePattern>
 
 			<maxHistory>60</maxHistory>
 		</rollingPolicy>
@@ -70,6 +70,8 @@
 	</logger>
 
 	<logger level="ERROR" name="com.liferay.nativity" />
+
+	<logger level="ERROR" name="com.liferay.sync.engine.lan.session.SNISSLConnectionSocketFactory" />
 
 	<logger level="ERROR" name="io.netty" />
 

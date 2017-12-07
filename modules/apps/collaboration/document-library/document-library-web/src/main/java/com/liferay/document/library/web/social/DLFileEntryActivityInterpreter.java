@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -36,7 +37,6 @@ import com.liferay.social.kernel.model.BaseSocialActivityInterpreter;
 import com.liferay.social.kernel.model.SocialActivity;
 import com.liferay.social.kernel.model.SocialActivityConstants;
 import com.liferay.social.kernel.model.SocialActivityInterpreter;
-import com.liferay.trash.kernel.util.TrashUtil;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -58,6 +58,18 @@ public class DLFileEntryActivityInterpreter
 	}
 
 	@Override
+	protected String addNoSuchEntryRedirect(
+			String url, String className, long classPK,
+			ServiceContext serviceContext)
+		throws Exception {
+
+		String viewEntryURL = super.getViewEntryURL(
+			className, classPK, serviceContext);
+
+		return _http.setParameter(url, "noSuchEntryRedirect", viewEntryURL);
+	}
+
+	@Override
 	protected String getBody(
 			SocialActivity activity, ServiceContext serviceContext)
 		throws Exception {
@@ -65,10 +77,12 @@ public class DLFileEntryActivityInterpreter
 		FileEntry fileEntry = _dlAppLocalService.getFileEntry(
 			activity.getClassPK());
 
-		if (TrashUtil.isInTrash(
-				DLFileEntry.class.getName(), fileEntry.getFileEntryId())) {
+		if (fileEntry.getModel() instanceof DLFileEntry) {
+			DLFileEntry dlFileEntry = (DLFileEntry)fileEntry.getModel();
 
-			return StringPool.BLANK;
+			if (dlFileEntry.isInTrash()) {
+				return StringPool.BLANK;
+			}
 		}
 
 		StringBundler sb = new StringBundler(3);
@@ -202,6 +216,14 @@ public class DLFileEntryActivityInterpreter
 	}
 
 	@Override
+	protected String getViewEntryURL(
+			String className, long classPK, ServiceContext serviceContext)
+		throws Exception {
+
+		return StringPool.BLANK;
+	}
+
+	@Override
 	protected boolean hasPermissions(
 			PermissionChecker permissionChecker, SocialActivity activity,
 			String actionId, ServiceContext serviceContext)
@@ -231,6 +253,10 @@ public class DLFileEntryActivityInterpreter
 	private static final String[] _CLASS_NAMES = {DLFileEntry.class.getName()};
 
 	private DLAppLocalService _dlAppLocalService;
+
+	@Reference
+	private Http _http;
+
 	private ResourceBundleLoader _resourceBundleLoader;
 
 }

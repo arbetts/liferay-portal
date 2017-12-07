@@ -150,8 +150,58 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	}
 
 	@Override
-	public CacheModel<UserGroup> toCacheModel() {
-		return _userGroup.toCacheModel();
+	public java.lang.Object clone() {
+		return new UserGroupWrapper((UserGroup)_userGroup.clone());
+	}
+
+	@Override
+	public int compareTo(UserGroup userGroup) {
+		return _userGroup.compareTo(userGroup);
+	}
+
+	/**
+	* Returns the added by ldap import of this user group.
+	*
+	* @return the added by ldap import of this user group
+	*/
+	@Override
+	public boolean getAddedByLDAPImport() {
+		return _userGroup.getAddedByLDAPImport();
+	}
+
+	/**
+	* Returns the company ID of this user group.
+	*
+	* @return the company ID of this user group
+	*/
+	@Override
+	public long getCompanyId() {
+		return _userGroup.getCompanyId();
+	}
+
+	/**
+	* Returns the create date of this user group.
+	*
+	* @return the create date of this user group
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _userGroup.getCreateDate();
+	}
+
+	/**
+	* Returns the description of this user group.
+	*
+	* @return the description of this user group
+	*/
+	@Override
+	public java.lang.String getDescription() {
+		return _userGroup.getDescription();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _userGroup.getExpandoBridge();
 	}
 
 	@Override
@@ -161,70 +211,64 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	}
 
 	@Override
-	public UserGroup toEscapedModel() {
-		return new UserGroupWrapper(_userGroup.toEscapedModel());
-	}
-
-	@Override
-	public UserGroup toUnescapedModel() {
-		return new UserGroupWrapper(_userGroup.toUnescapedModel());
+	public long getGroupId()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userGroup.getGroupId();
 	}
 
 	/**
-	* Returns the added by l d a p import of this user group.
+	* Returns the modified date of this user group.
 	*
-	* @return the added by l d a p import of this user group
+	* @return the modified date of this user group
 	*/
 	@Override
-	public boolean getAddedByLDAPImport() {
-		return _userGroup.getAddedByLDAPImport();
-	}
-
-	@Override
-	public boolean hasPrivateLayouts()
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _userGroup.hasPrivateLayouts();
-	}
-
-	@Override
-	public boolean hasPublicLayouts()
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _userGroup.hasPublicLayouts();
+	public Date getModifiedDate() {
+		return _userGroup.getModifiedDate();
 	}
 
 	/**
-	* Returns <code>true</code> if this user group is added by l d a p import.
+	* Returns the mvcc version of this user group.
 	*
-	* @return <code>true</code> if this user group is added by l d a p import; <code>false</code> otherwise
+	* @return the mvcc version of this user group
 	*/
 	@Override
-	public boolean isAddedByLDAPImport() {
-		return _userGroup.isAddedByLDAPImport();
+	public long getMvccVersion() {
+		return _userGroup.getMvccVersion();
+	}
+
+	/**
+	* Returns the name of this user group.
+	*
+	* @return the name of this user group
+	*/
+	@Override
+	public java.lang.String getName() {
+		return _userGroup.getName();
+	}
+
+	/**
+	* Returns the parent user group ID of this user group.
+	*
+	* @return the parent user group ID of this user group
+	*/
+	@Override
+	public long getParentUserGroupId() {
+		return _userGroup.getParentUserGroupId();
+	}
+
+	/**
+	* Returns the primary key of this user group.
+	*
+	* @return the primary key of this user group
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _userGroup.getPrimaryKey();
 	}
 
 	@Override
-	public boolean isCachedModel() {
-		return _userGroup.isCachedModel();
-	}
-
-	@Override
-	public boolean isEscapedModel() {
-		return _userGroup.isEscapedModel();
-	}
-
-	@Override
-	public boolean isNew() {
-		return _userGroup.isNew();
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _userGroup.getExpandoBridge();
-	}
-
-	@Override
-	public int compareTo(UserGroup userGroup) {
-		return _userGroup.compareTo(userGroup);
+	public Serializable getPrimaryKeyObj() {
+		return _userGroup.getPrimaryKeyObj();
 	}
 
 	@Override
@@ -239,39 +283,24 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 		return _userGroup.getPublicLayoutsPageCount();
 	}
 
+	/**
+	* Returns the user group ID of this user group.
+	*
+	* @return the user group ID of this user group
+	*/
 	@Override
-	public int hashCode() {
-		return _userGroup.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _userGroup.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new UserGroupWrapper((UserGroup)_userGroup.clone());
+	public long getUserGroupId() {
+		return _userGroup.getUserGroupId();
 	}
 
 	/**
-	* Returns the description of this user group.
+	* Returns the user ID of this user group.
 	*
-	* @return the description of this user group
+	* @return the user ID of this user group
 	*/
 	@Override
-	public java.lang.String getDescription() {
-		return _userGroup.getDescription();
-	}
-
-	/**
-	* Returns the name of this user group.
-	*
-	* @return the name of this user group
-	*/
-	@Override
-	public java.lang.String getName() {
-		return _userGroup.getName();
+	public long getUserId() {
+		return _userGroup.getUserId();
 	}
 
 	/**
@@ -305,99 +334,45 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	}
 
 	@Override
-	public java.lang.String toString() {
-		return _userGroup.toString();
+	public int hashCode() {
+		return _userGroup.hashCode();
 	}
 
 	@Override
-	public java.lang.String toXmlString() {
-		return _userGroup.toXmlString();
-	}
-
-	/**
-	* Returns the create date of this user group.
-	*
-	* @return the create date of this user group
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _userGroup.getCreateDate();
-	}
-
-	/**
-	* Returns the modified date of this user group.
-	*
-	* @return the modified date of this user group
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _userGroup.getModifiedDate();
-	}
-
-	/**
-	* Returns the company ID of this user group.
-	*
-	* @return the company ID of this user group
-	*/
-	@Override
-	public long getCompanyId() {
-		return _userGroup.getCompanyId();
-	}
-
-	@Override
-	public long getGroupId()
+	public boolean hasPrivateLayouts()
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _userGroup.getGroupId();
+		return _userGroup.hasPrivateLayouts();
+	}
+
+	@Override
+	public boolean hasPublicLayouts()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userGroup.hasPublicLayouts();
 	}
 
 	/**
-	* Returns the mvcc version of this user group.
+	* Returns <code>true</code> if this user group is added by ldap import.
 	*
-	* @return the mvcc version of this user group
+	* @return <code>true</code> if this user group is added by ldap import; <code>false</code> otherwise
 	*/
 	@Override
-	public long getMvccVersion() {
-		return _userGroup.getMvccVersion();
+	public boolean isAddedByLDAPImport() {
+		return _userGroup.isAddedByLDAPImport();
 	}
 
-	/**
-	* Returns the parent user group ID of this user group.
-	*
-	* @return the parent user group ID of this user group
-	*/
 	@Override
-	public long getParentUserGroupId() {
-		return _userGroup.getParentUserGroupId();
+	public boolean isCachedModel() {
+		return _userGroup.isCachedModel();
 	}
 
-	/**
-	* Returns the primary key of this user group.
-	*
-	* @return the primary key of this user group
-	*/
 	@Override
-	public long getPrimaryKey() {
-		return _userGroup.getPrimaryKey();
+	public boolean isEscapedModel() {
+		return _userGroup.isEscapedModel();
 	}
 
-	/**
-	* Returns the user group ID of this user group.
-	*
-	* @return the user group ID of this user group
-	*/
 	@Override
-	public long getUserGroupId() {
-		return _userGroup.getUserGroupId();
-	}
-
-	/**
-	* Returns the user ID of this user group.
-	*
-	* @return the user ID of this user group
-	*/
-	@Override
-	public long getUserId() {
-		return _userGroup.getUserId();
+	public boolean isNew() {
+		return _userGroup.isNew();
 	}
 
 	@Override
@@ -406,9 +381,9 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	}
 
 	/**
-	* Sets whether this user group is added by l d a p import.
+	* Sets whether this user group is added by ldap import.
 	*
-	* @param addedByLDAPImport the added by l d a p import of this user group
+	* @param addedByLDAPImport the added by ldap import of this user group
 	*/
 	@Override
 	public void setAddedByLDAPImport(boolean addedByLDAPImport) {
@@ -573,6 +548,31 @@ public class UserGroupWrapper implements UserGroup, ModelWrapper<UserGroup> {
 	@Override
 	public void setUuid(java.lang.String uuid) {
 		_userGroup.setUuid(uuid);
+	}
+
+	@Override
+	public CacheModel<UserGroup> toCacheModel() {
+		return _userGroup.toCacheModel();
+	}
+
+	@Override
+	public UserGroup toEscapedModel() {
+		return new UserGroupWrapper(_userGroup.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _userGroup.toString();
+	}
+
+	@Override
+	public UserGroup toUnescapedModel() {
+		return new UserGroupWrapper(_userGroup.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _userGroup.toXmlString();
 	}
 
 	@Override

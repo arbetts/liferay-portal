@@ -32,6 +32,7 @@ import com.liferay.document.library.kernel.util.comparator.RepositoryModelModifi
 import com.liferay.document.library.kernel.util.comparator.RepositoryModelReadCountComparator;
 import com.liferay.document.library.kernel.util.comparator.RepositoryModelSizeComparator;
 import com.liferay.document.library.kernel.util.comparator.RepositoryModelTitleComparator;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -58,7 +59,6 @@ import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalServiceUtil;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -73,6 +73,7 @@ import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -461,6 +462,10 @@ public class DLImpl implements DL {
 		return sb.toString();
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public Set<Long> getFileEntryTypeSubscriptionClassPKs(long userId) {
 		List<Subscription> subscriptions =
@@ -509,11 +514,11 @@ public class DLImpl implements DL {
 
 		String previewQueryString = null;
 
-		if (PropsValues.DL_FILE_ENTRY_THUMBNAIL_ENABLED) {
-			if (ImageProcessorUtil.hasImages(fileVersion)) {
-				previewQueryString = "&imagePreview=1";
-			}
-			else if (PDFProcessorUtil.hasImages(fileVersion)) {
+		if (ImageProcessorUtil.isSupported(fileVersion.getMimeType())) {
+			previewQueryString = "&imagePreview=1";
+		}
+		else if (PropsValues.DL_FILE_ENTRY_PREVIEW_ENABLED) {
+			if (PDFProcessorUtil.hasImages(fileVersion)) {
 				previewQueryString = "&previewFileIndex=1";
 			}
 			else if (VideoProcessorUtil.hasVideo(fileVersion)) {
@@ -567,10 +572,10 @@ public class DLImpl implements DL {
 			fileName = TrashUtil.getOriginalTitle(fileEntry.getFileName());
 		}
 
-		sb.append(HttpUtil.encodeURL(HtmlUtil.unescape(fileName)));
+		sb.append(URLCodec.encodeURL(HtmlUtil.unescape(fileName)));
 
 		sb.append(StringPool.SLASH);
-		sb.append(HttpUtil.encodeURL(fileEntry.getUuid()));
+		sb.append(URLCodec.encodeURL(fileEntry.getUuid()));
 
 		if (appendVersion) {
 			sb.append("?version=");
@@ -914,7 +919,7 @@ public class DLImpl implements DL {
 			Folder curFolder = folder;
 
 			while (true) {
-				sb.insert(0, HttpUtil.encodeURL(curFolder.getName(), true));
+				sb.insert(0, URLCodec.encodeURL(curFolder.getName(), true));
 				sb.insert(0, StringPool.SLASH);
 
 				if (curFolder.getParentFolderId() ==
@@ -989,6 +994,13 @@ public class DLImpl implements DL {
 		return ArrayUtil.contains(_MICROSOFT_OFFICE_EXTENSIONS, extension);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.document.library.web.internal.util.
+	 *             DLSubscriptionUtil#isSubscribedToFileEntryType(long, long,
+	 *             long, long)}
+	 */
+	@Deprecated
 	@Override
 	public boolean isSubscribedToFileEntryType(
 		long companyId, long groupId, long userId, long fileEntryTypeId) {
@@ -1004,6 +1016,13 @@ public class DLImpl implements DL {
 			fileEntryTypeId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.document.library.web.internal.util.
+	 *             DLSubscriptionUtil#isSubscribedToFolder(long, long, long,
+	 *             long)}
+	 */
+	@Deprecated
 	@Override
 	public boolean isSubscribedToFolder(
 			long companyId, long groupId, long userId, long folderId)
@@ -1012,6 +1031,13 @@ public class DLImpl implements DL {
 		return isSubscribedToFolder(companyId, groupId, userId, folderId, true);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.document.library.web.internal.util.
+	 *             DLSubscriptionUtil#isSubscribedToFolder(long, long, long,
+	 *             long, boolean)}
+	 */
+	@Deprecated
 	@Override
 	public boolean isSubscribedToFolder(
 			long companyId, long groupId, long userId, long folderId,

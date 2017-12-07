@@ -14,22 +14,21 @@
 
 package com.liferay.portal.servlet.filters.aggregate;
 
-import com.liferay.portal.kernel.cache.key.CacheKeyGenerator;
-import com.liferay.portal.kernel.cache.key.CacheKeyGeneratorUtil;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.BrowserSniffer;
+import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
 import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.servlet.PortalWebResourceConstants;
 import com.liferay.portal.kernel.servlet.PortalWebResourcesUtil;
+import com.liferay.portal.kernel.servlet.ResourceUtil;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -42,6 +41,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.minifier.MinifierUtil;
 import com.liferay.portal.servlet.filters.IgnoreModuleRequestFilter;
 import com.liferay.portal.servlet.filters.dynamiccss.DynamicCSSUtil;
+import com.liferay.portal.servlet.filters.util.CacheFileNameGenerator;
 import com.liferay.portal.util.AggregateUtil;
 import com.liferay.portal.util.JavaScriptBundleUtil;
 import com.liferay.portal.util.PropsUtil;
@@ -133,14 +133,18 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 				String importContent = null;
 
 				if (Validator.isUrl(importFileName)) {
-					URL url = new URL(importFileName);
+					ServletPaths downServletPaths = servletPaths.down(
+						importFileName);
 
-					URLConnection urlConnection = url.openConnection();
-
-					importContent = StringUtil.read(
-						urlConnection.getInputStream());
+					importContent = downServletPaths.getContent();
 				}
 				else {
+					int queryPos = importFileName.indexOf(CharPool.QUESTION);
+
+					if (queryPos != -1) {
+						importFileName = importFileName.substring(0, queryPos);
+					}
+
 					ServletPaths importFileServletPaths = servletPaths.down(
 						importFileName);
 
@@ -286,7 +290,7 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 			long lastModified = PortalWebResourcesUtil.getLastModified(
 				PortalWebResourceConstants.RESOURCE_TYPE_JS);
 
-			if (lastModified <= cacheFile.lastModified()) {
+			if (lastModified == cacheFile.lastModified()) {
 				response.setContentType(ContentTypes.TEXT_JAVASCRIPT);
 
 				return cacheFile;
@@ -311,31 +315,16 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 		FileUtil.write(cacheFile, content);
 
+		cacheFile.setLastModified(
+			PortalWebResourcesUtil.getLastModified(
+				PortalWebResourceConstants.RESOURCE_TYPE_JS));
+
 		return content;
 	}
 
 	protected String getCacheFileName(HttpServletRequest request) {
-		CacheKeyGenerator cacheKeyGenerator =
-			CacheKeyGeneratorUtil.getCacheKeyGenerator(
-				AggregateFilter.class.getName());
-
-		cacheKeyGenerator.append(HttpUtil.getProtocol(request.isSecure()));
-		cacheKeyGenerator.append(StringPool.UNDERLINE);
-		cacheKeyGenerator.append(request.getRequestURI());
-
-		String requestURL = String.valueOf(request.getRequestURL());
-
-		if (requestURL != null) {
-			requestURL = HttpUtil.removeParameter(requestURL, "zx");
-
-			String queryString = HttpUtil.getQueryString(requestURL);
-
-			if (queryString != null) {
-				cacheKeyGenerator.append(sterilizeQueryString(queryString));
-			}
-		}
-
-		return String.valueOf(cacheKeyGenerator.finish());
+		return CacheFileNameGenerator.getCacheFileName(
+			request, AggregateFilter.class.getName());
 	}
 
 	protected Object getContent(
@@ -356,9 +345,7 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 			return null;
 		}
 
-		String requestURI = request.getRequestURI();
-
-		String resourcePath = requestURI;
+		String resourcePath = request.getRequestURI();
 
 		String contextPath = request.getContextPath();
 
@@ -376,26 +363,24 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 					resourcePath.substring(pos);
 		}
 
-		URL resourceURL = _servletContext.getResource(resourcePath);
+		URL resourceURL = ResourceUtil.getResourceURL(
+			resourcePath, request.getRequestURI(), _servletContext);
 
 		if (resourceURL == null) {
-			resourceURL = PortalWebResourcesUtil.getResource(resourcePath);
-
-			if (resourceURL == null) {
-				return null;
-			}
+			return null;
 		}
 
 		String cacheCommonFileName = getCacheFileName(request);
 
 		File cacheContentTypeFile = new File(
-			_tempDir, cacheCommonFileName + "_E_CONTENT_TYPE");
+			_tempDir, cacheCommonFileName + "_E_CTYPE");
 		File cacheDataFile = new File(
 			_tempDir, cacheCommonFileName + "_E_DATA");
 
 		if (cacheDataFile.exists() &&
-			(cacheDataFile.lastModified() >=
-				URLUtil.getLastModifiedTime(resourceURL))) {
+			(cacheDataFile.lastModified() ==
+				URLUtil.getLastModifiedTime(resourceURL)) &&
+			!_isLegacyIe(request)) {
 
 			if (cacheContentTypeFile.exists()) {
 				String contentType = FileUtil.read(cacheContentTypeFile);
@@ -418,7 +403,9 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 			response.setContentType(ContentTypes.TEXT_CSS);
 
-			FileUtil.write(cacheContentTypeFile, ContentTypes.TEXT_CSS);
+			if (!_isLegacyIe(request)) {
+				FileUtil.write(cacheContentTypeFile, ContentTypes.TEXT_CSS);
+			}
 		}
 		else if (resourcePath.endsWith(_JAVASCRIPT_EXTENSION)) {
 			if (_log.isInfoEnabled()) {
@@ -443,8 +430,6 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 				AggregateFilter.class.getName(), request,
 				bufferCacheServletResponse, filterChain);
 
-			bufferCacheServletResponse.finishResponse(false);
-
 			content = bufferCacheServletResponse.getString();
 
 			if (minifierType.equals("css")) {
@@ -465,27 +450,16 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 		FileUtil.write(cacheDataFile, content);
 
+		cacheDataFile.setLastModified(URLUtil.getLastModifiedTime(resourceURL));
+
 		return content;
 	}
 
 	protected String getCssContent(
 		HttpServletRequest request, HttpServletResponse response,
-		String resourcePath, String content) {
+		ServletContext cssServletContext, String resourcePath, String content) {
 
 		try {
-			ServletContext cssServletContext = null;
-
-			String requestURI = request.getRequestURI();
-
-			if (PortalWebResourcesUtil.hasContextPath(requestURI)) {
-				cssServletContext =
-					PortalWebResourcesUtil.getPathServletContext(requestURI);
-			}
-
-			if (cssServletContext == null) {
-				cssServletContext = _servletContext;
-			}
-
 			content = DynamicCSSUtil.replaceToken(
 				cssServletContext, request, content);
 		}
@@ -513,23 +487,57 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 	}
 
 	protected String getCssContent(
+		HttpServletRequest request, HttpServletResponse response,
+		String resourcePath, String content) {
+
+		try {
+			String requestURI = request.getRequestURI();
+
+			ServletContext cssServletContext =
+				ResourceUtil.getPathServletContext(
+					resourcePath, requestURI, _servletContext);
+
+			return getCssContent(
+				request, response, cssServletContext, resourcePath, content);
+		}
+		catch (Exception e) {
+			_log.error("Unable to detect servlet context " + resourcePath, e);
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(content);
+			}
+
+			response.setHeader(
+				HttpHeaders.CACHE_CONTROL,
+				HttpHeaders.CACHE_CONTROL_NO_CACHE_VALUE);
+
+			return content;
+		}
+	}
+
+	protected String getCssContent(
 			HttpServletRequest request, HttpServletResponse response,
 			URL resourceURL, String resourcePath)
 		throws IOException {
 
-		ServletContext cssServletContext = null;
 		String resourcePathRoot = null;
 
 		String requestURI = request.getRequestURI();
 
-		if (PortalWebResourcesUtil.hasContextPath(requestURI)) {
-			cssServletContext = PortalWebResourcesUtil.getPathServletContext(
-				requestURI);
-			resourcePathRoot = "/";
-		}
+		ServletContext cssServletContext = ResourceUtil.getPathServletContext(
+			resourcePath, requestURI, _servletContext);
 
-		if (cssServletContext == null) {
-			cssServletContext = _servletContext;
+		if (PortalWebResourcesUtil.hasContextPath(requestURI)) {
+			resourcePathRoot = PortalWebResourcesUtil.stripContextPath(
+				cssServletContext, resourcePath);
+
+			resourcePathRoot = ServletPaths.getParentPath(resourcePathRoot);
+
+			if (resourcePathRoot.equals(StringPool.BLANK)) {
+				resourcePathRoot = "/";
+			}
+		}
+		else {
 			resourcePathRoot = ServletPaths.getParentPath(resourcePath);
 		}
 
@@ -537,10 +545,16 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 
 		String content = StringUtil.read(urlConnection.getInputStream());
 
+		if (_isLegacyIe(request)) {
+			return getCssContent(
+				request, response, cssServletContext, resourcePath, content);
+		}
+
 		content = aggregateCss(
 			new ServletPaths(cssServletContext, resourcePathRoot), content);
 
-		return getCssContent(request, response, resourcePath, content);
+		return getCssContent(
+			request, response, cssServletContext, resourcePath, content);
 	}
 
 	protected String getJavaScriptContent(URL resourceURL) throws IOException {
@@ -589,10 +603,14 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 		}
 	}
 
-	protected String sterilizeQueryString(String queryString) {
-		return StringUtil.replace(
-			queryString, new char[] {CharPool.SLASH, CharPool.BACK_SLASH},
-			new char[] {CharPool.UNDERLINE, CharPool.UNDERLINE});
+	private boolean _isLegacyIe(HttpServletRequest request) {
+		if (BrowserSnifferUtil.isIe(request) &&
+			(BrowserSnifferUtil.getMajorVersion(request) < 10)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private static final String _BASE_URL = "@base_url@";

@@ -15,11 +15,17 @@
 package com.liferay.portlet.social.service.persistence.impl;
 
 import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 
 import com.liferay.social.kernel.model.SocialActivityCounter;
 import com.liferay.social.kernel.service.persistence.SocialActivityCounterPersistence;
 
+import java.lang.reflect.Field;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,6 +33,28 @@ import java.util.Set;
  * @generated
  */
 public class SocialActivityCounterFinderBaseImpl extends BasePersistenceImpl<SocialActivityCounter> {
+	public SocialActivityCounterFinderBaseImpl() {
+		setModelClass(SocialActivityCounter.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("active", "active_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
+	}
+
 	@Override
 	public Set<String> getBadColumnNames() {
 		return getSocialActivityCounterPersistence().getBadColumnNames();
@@ -53,4 +81,5 @@ public class SocialActivityCounterFinderBaseImpl extends BasePersistenceImpl<Soc
 
 	@BeanReference(type = SocialActivityCounterPersistence.class)
 	protected SocialActivityCounterPersistence socialActivityCounterPersistence;
+	private static final Log _log = LogFactoryUtil.getLog(SocialActivityCounterFinderBaseImpl.class);
 }

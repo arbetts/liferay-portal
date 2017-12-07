@@ -71,11 +71,22 @@ AUI.add(
 
 					content: {
 						getter: function(val) {
+							var content = val;
+
 							if (val) {
-								val = LString.escapeHTML(val);
+								content = LString.escapeHTML(val);
 							}
 
-							return val;
+							return content;
+						},
+						setter: function(val) {
+							var content = val;
+
+							if (val) {
+								content = LString.unescapeHTML(val);
+							}
+
+							return content;
 						}
 					},
 
@@ -254,6 +265,27 @@ AUI.add(
 						);
 					},
 
+					_isPastEvent: function() {
+						var instance = this;
+
+						var endDate = instance.get('endDate');
+
+						var result;
+
+						var scheduler = instance.get('scheduler');
+
+						if (scheduler) {
+							var currentTime = scheduler.get('currentTime');
+
+							result = endDate.getTime() < currentTime.getTime();
+						}
+						else {
+							result = false;
+						}
+
+						return result;
+					},
+
 					_onLoadingChange: function(event) {
 						var instance = this;
 
@@ -304,6 +336,7 @@ AUI.add(
 						var node = instance.get('node');
 
 						node.toggleClass('calendar-portlet-event-approved', val === CalendarWorkflow.STATUS_APPROVED);
+						node.toggleClass('calendar-portlet-event-denied', val === CalendarWorkflow.STATUS_DENIED);
 						node.toggleClass('calendar-portlet-event-draft', val === CalendarWorkflow.STATUS_DRAFT);
 						node.toggleClass('calendar-portlet-event-maybe', val === CalendarWorkflow.STATUS_MAYBE);
 						node.toggleClass('calendar-portlet-event-pending', val === CalendarWorkflow.STATUS_PENDING);
@@ -411,7 +444,7 @@ AUI.add(
 
 							var remoteServices = scheduler.get('remoteServices');
 
-							remoteServices.updateCalendarColor(calendarId, parseInt(color.substr(1), 16));
+							remoteServices.updateCalendarColor(calendarId, color);
 						}
 						else {
 							Liferay.Store('com.liferay.calendar.web_calendar' + calendarId + 'Color', color);
@@ -438,7 +471,19 @@ AUI.add(
 			A.SchedulerEvents,
 			[Liferay.SchedulerModelSync],
 			{
-				getLoadEndDate: function(activeView) {
+				getEventsPerPage: function(activeView, eventsPerPage) {
+					var instance = this;
+
+					var viewName = activeView.get('name');
+
+					if (viewName !== 'agenda') {
+						eventsPerPage = -1;
+					}
+
+					return eventsPerPage;
+				},
+
+				getLoadEndDate: function(activeView, maxDaysDisplayed) {
 					var instance = this;
 
 					var date = activeView.getNextDate();
@@ -446,7 +491,9 @@ AUI.add(
 					var viewName = activeView.get('name');
 
 					if (viewName === 'agenda') {
-						date = DateMath.add(date, DateMath.MONTH, 1);
+						date = DateMath.add(date, DateMath.DAY, maxDaysDisplayed);
+
+						date = DateMath.subtract(date, DateMath.MINUTES, 1);
 					}
 					else if (viewName === 'month') {
 						date = DateMath.add(date, DateMath.WEEK, 1);
@@ -476,7 +523,9 @@ AUI.add(
 					var scheduler = instance.get('scheduler');
 
 					var activeView = scheduler.get('activeView');
+					var eventsPerPage = scheduler.get('eventsPerPage');
 					var filterCalendarBookings = scheduler.get('filterCalendarBookings');
+					var maxDaysDisplayed = scheduler.get('maxDaysDisplayed');
 
 					var calendarContainer = scheduler.get('calendarContainer');
 
@@ -486,9 +535,10 @@ AUI.add(
 
 					remoteServices.getEvents(
 						calendarIds,
+						instance.getEventsPerPage(activeView, eventsPerPage),
 						instance.getLoadStartDate(activeView),
-						instance.getLoadEndDate(activeView),
-						[CalendarWorkflow.STATUS_APPROVED, CalendarWorkflow.STATUS_DRAFT, CalendarWorkflow.STATUS_MAYBE, CalendarWorkflow.STATUS_PENDING],
+						instance.getLoadEndDate(activeView, maxDaysDisplayed),
+						[CalendarWorkflow.STATUS_APPROVED, CalendarWorkflow.STATUS_DENIED, CalendarWorkflow.STATUS_DRAFT, CalendarWorkflow.STATUS_MAYBE, CalendarWorkflow.STATUS_PENDING],
 						function(calendarBookings) {
 							if (filterCalendarBookings) {
 								calendarBookings = calendarBookings.filter(filterCalendarBookings);

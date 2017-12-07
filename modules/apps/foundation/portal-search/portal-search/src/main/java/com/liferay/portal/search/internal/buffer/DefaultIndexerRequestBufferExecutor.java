@@ -16,6 +16,7 @@ package com.liferay.portal.search.internal.buffer;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.search.buffer.IndexerRequest;
 import com.liferay.portal.search.buffer.IndexerRequestBuffer;
 import com.liferay.portal.search.buffer.IndexerRequestBufferExecutor;
@@ -38,6 +39,7 @@ public class DefaultIndexerRequestBufferExecutor
 	extends BaseIndexerRequestBufferExecutor
 	implements IndexerRequestBufferExecutor {
 
+	@Override
 	public void execute(
 		IndexerRequestBuffer indexerRequestBuffer, int numRequests) {
 
@@ -50,8 +52,10 @@ public class DefaultIndexerRequestBufferExecutor
 				indexerRequestBuffer.getIndexerRequests();
 
 			_log.debug(
-				"Indexer request buffer size " + indexerRequests.size() +
-					" to execute " + numRequests + " requests");
+				StringBundler.concat(
+					"Indexer request buffer size ",
+					String.valueOf(indexerRequests.size()), " to execute ",
+					String.valueOf(numRequests), " requests"));
 		}
 
 		int i = 0;
@@ -61,8 +65,9 @@ public class DefaultIndexerRequestBufferExecutor
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(
-					"Executing indexer request " + (i++) + ": " +
-						indexerRequest);
+					StringBundler.concat(
+						"Executing indexer request ", String.valueOf(i++), ": ",
+						String.valueOf(indexerRequest)));
 			}
 
 			executeIndexerRequest(searchEngineIds, indexerRequest);
@@ -78,7 +83,9 @@ public class DefaultIndexerRequestBufferExecutor
 			indexerRequestBuffer.remove(indexerRequest);
 		}
 
-		commit(searchEngineIds);
+		if (!BufferOverflowThreadLocal.isOverflowMode()) {
+			commit(searchEngineIds);
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

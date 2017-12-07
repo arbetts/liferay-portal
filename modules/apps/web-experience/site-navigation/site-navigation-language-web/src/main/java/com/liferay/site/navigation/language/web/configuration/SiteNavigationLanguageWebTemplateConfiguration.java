@@ -25,11 +25,13 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.site.navigation.language.web.configuration.SiteNavigationLanguageWebTemplateConfiguration",
 	localization = "content/Language",
-	name = "site.navigation.language.web.template.configuration.name"
+	name = "site-navigation-language-web-template-configuration-name"
 )
 public interface SiteNavigationLanguageWebTemplateConfiguration {
 
-	@Meta.AD(deflt = "language-icon-ftl", required = false)
+	@Meta.AD(
+		deflt = "language-icon-ftl", name = "ddm-template-key", required = false
+	)
 	public String ddmTemplateKey();
 
 }

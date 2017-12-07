@@ -8,6 +8,7 @@ AUI.add(
 		var toInt = Lang.toInt;
 
 		var CalendarUtil = Liferay.CalendarUtil;
+		var MessageUtil = Liferay.CalendarMessageUtil;
 
 		var CalendarRemoteServices = A.Base.create(
 			'calendar-remote-services',
@@ -44,6 +45,7 @@ AUI.add(
 							success: function(data) {
 								if (success) {
 									success.call(instance, data);
+									MessageUtil.showSuccessMessage(instance.get('rootNode'));
 								}
 							}
 						}
@@ -58,6 +60,7 @@ AUI.add(
 							'/calendar.calendarbooking/delete-calendar-booking-instance': {
 								allFollowing: allFollowing,
 								calendarBookingId: schedulerEvent.get('calendarBookingId'),
+								deleteRecurringCalendarBookings: true,
 								instanceIndex: schedulerEvent.get('instanceIndex')
 							}
 						},
@@ -65,6 +68,7 @@ AUI.add(
 							success: function(data) {
 								if (success) {
 									success.call(instance, data);
+									MessageUtil.showSuccessMessage(instance.get('rootNode'));
 								}
 							}
 						}
@@ -105,7 +109,7 @@ AUI.add(
 					instance._invokeResourceURL(
 						{
 							callback: callback,
-							queryParameters: {
+							payload: {
 								calendarIds: calendarIds.join(),
 								endTime: endDate.getTime(),
 								ruleName: ruleName,
@@ -145,19 +149,20 @@ AUI.add(
 					);
 				},
 
-				getEvents: function(calendarIds, startDate, endDate, status, callback) {
+				getEvents: function(calendarIds, eventsPerPage, startDate, endDate, status, callback) {
 					var instance = this;
 
 					instance._invokeResourceURL(
 						{
 							callback: callback,
-							queryParameters: {
+							payload: {
 								calendarIds: calendarIds.join(','),
 								endTimeDay: endDate.getDate(),
 								endTimeHour: endDate.getHours(),
 								endTimeMinute: endDate.getMinutes(),
 								endTimeMonth: endDate.getMonth(),
 								endTimeYear: endDate.getFullYear(),
+								eventsPerPage: eventsPerPage,
 								startTimeDay: startDate.getDate(),
 								startTimeHour: startDate.getHours(),
 								startTimeMinute: startDate.getMinutes(),
@@ -180,6 +185,32 @@ AUI.add(
 								calendarResourceId: calendarResourceId
 							},
 							resourceId: 'resourceCalendars'
+						}
+					);
+				},
+
+				hasExclusiveCalendarBooking: function(calendarId, startDate, endDate, callback) {
+					var instance = this;
+
+					instance._invokeResourceURL(
+						{
+							callback: function(result) {
+								callback(result.hasExclusiveCalendarBooking);
+							},
+							queryParameters: {
+								calendarId: calendarId,
+								endTimeDay: endDate.getDate(),
+								endTimeHour: endDate.getHours(),
+								endTimeMinute: endDate.getMinutes(),
+								endTimeMonth: endDate.getMonth(),
+								endTimeYear: endDate.getFullYear(),
+								startTimeDay: startDate.getDate(),
+								startTimeHour: startDate.getHours(),
+								startTimeMinute: startDate.getMinutes(),
+								startTimeMonth: startDate.getMonth(),
+								startTimeYear: startDate.getFullYear()
+							},
+							resourceId: 'hasExclusiveCalendarBooking'
 						}
 					);
 				},
@@ -266,12 +297,14 @@ AUI.add(
 								if (data) {
 									if (data.exception) {
 										CalendarUtil.destroyEvent(schedulerEvent);
+										MessageUtil.showErrorMessage(instance.get('rootNode'), data.exception);
 									}
 									else {
 										CalendarUtil.setEventAttrs(schedulerEvent, data);
 
 										if (success) {
 											success.call(instance, data);
+											MessageUtil.showSuccessMessage(instance.get('rootNode'));
 										}
 									}
 								}
@@ -404,6 +437,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-base', 'aui-component', 'aui-io', 'liferay-calendar-util', 'liferay-portlet-base', 'liferay-portlet-url']
+		requires: ['aui-base', 'aui-component', 'aui-io', 'liferay-calendar-message-util', 'liferay-calendar-util', 'liferay-portlet-base', 'liferay-portlet-url']
 	}
 );

@@ -14,6 +14,7 @@
 
 package com.liferay.portal.security.pacl;
 
+import com.liferay.petra.log4j.Log4JUtil;
 import com.liferay.portal.kernel.process.ProcessCallable;
 import com.liferay.portal.kernel.process.ProcessChannel;
 import com.liferay.portal.kernel.process.ProcessConfig;
@@ -21,7 +22,6 @@ import com.liferay.portal.kernel.process.ProcessConfig.Builder;
 import com.liferay.portal.kernel.process.ProcessException;
 import com.liferay.portal.kernel.process.local.LocalProcessExecutor;
 import com.liferay.portal.kernel.process.local.LocalProcessLauncher.ProcessContext;
-import com.liferay.portal.kernel.process.log.ProcessOutputStream;
 import com.liferay.portal.kernel.resiliency.mpi.MPIHelperUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.ci.AutoBalanceTestCase;
@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.test.junit.BridgeJUnitTestRunner;
 import com.liferay.portal.kernel.test.junit.BridgeJUnitTestRunner.BridgeRunListener;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.ReflectionUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SystemProperties;
@@ -40,7 +41,6 @@ import com.liferay.portal.test.rule.callback.LogAssertionTestCallback;
 import com.liferay.portal.util.InitUtil;
 import com.liferay.portal.util.PropsImpl;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.util.log4j.Log4JUtil;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -58,6 +58,7 @@ import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -124,8 +125,6 @@ public class PACLAggregateTest extends AutoBalanceTestCase {
 
 		arguments.add("-Djava.security.policy==" + url.getFile());
 
-		arguments.add("-Dliferay.mode=test");
-
 		boolean junitDebug = Boolean.getBoolean("jvm.debug");
 
 		if (junitDebug) {
@@ -133,9 +132,29 @@ public class PACLAggregateTest extends AutoBalanceTestCase {
 			arguments.add("-Djvm.debug=true");
 		}
 
+		arguments.add("-Dliferay.mode=test");
+		arguments.add("-Dsun.zip.disableMemoryMapping=true");
+
+		String aspectjAgent = System.getProperty("aspectj.agent");
+
+		if (aspectjAgent != null) {
+			arguments.add(aspectjAgent);
+			arguments.add("-Daspectj.agent=" + aspectjAgent);
+
+			String aspectjConfiguration = System.getProperty(
+				"org.aspectj.weaver.loadtime.configuration");
+
+			if (aspectjConfiguration != null) {
+				arguments.add(
+					"-Dorg.aspectj.weaver.loadtime.configuration=" +
+						aspectjConfiguration);
+			}
+		}
+
 		arguments.add(
-			"-D" + PropsKeys.LIFERAY_LIB_PORTAL_DIR + "=" +
-				PropsValues.LIFERAY_LIB_PORTAL_DIR);
+			StringBundler.concat(
+				"-D", PropsKeys.LIFERAY_LIB_PORTAL_DIR, "=",
+				PropsValues.LIFERAY_LIB_PORTAL_DIR));
 		arguments.add(
 			"-Dportal:" + PropsKeys.CLUSTER_LINK_AUTODETECT_ADDRESS +
 				StringPool.EQUAL);
@@ -285,10 +304,19 @@ public class PACLAggregateTest extends AutoBalanceTestCase {
 
 			List<CaptureAppender> captureAppenders = null;
 
-			Path tempStatePath = null;
+			String originalTempDirName = System.getProperty(
+				SystemProperties.TMP_DIR);
+
+			Path newTempDirPath = Paths.get(originalTempDirName, "PACL");
 
 			try {
-				tempStatePath = Files.createTempDirectory(null);
+				Files.createDirectories(newTempDirPath);
+
+				System.setProperty(
+					SystemProperties.TMP_DIR, newTempDirPath.toString());
+
+				Path tempStatePath = Files.createTempDirectory(
+					newTempDirPath, null);
 
 				System.setProperty(
 					"portal:" + PropsKeys.MODULE_FRAMEWORK_STATE_DIR,
@@ -320,10 +348,13 @@ public class PACLAggregateTest extends AutoBalanceTestCase {
 
 				MPIHelperUtil.shutdown();
 
-				if (tempStatePath != null) {
+				System.setProperty(
+					SystemProperties.TMP_DIR, originalTempDirName);
+
+				if (newTempDirPath != null) {
 					try {
 						Files.walkFileTree(
-							tempStatePath,
+							newTempDirPath,
 							new SimpleFileVisitor<Path>() {
 
 								@Override
@@ -379,11 +410,8 @@ public class PACLAggregateTest extends AutoBalanceTestCase {
 
 		@Override
 		protected void bridge(final String methodName, final Object argument) {
-			ProcessOutputStream processOutputStream =
-				ProcessContext.getProcessOutputStream();
-
 			try {
-				processOutputStream.writeProcessCallable(
+				ProcessContext.writeProcessCallable(
 					new ProcessCallable<Serializable>() {
 
 						@Override

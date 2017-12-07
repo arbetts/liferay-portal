@@ -15,6 +15,7 @@
 package com.liferay.layout.prototype.internal.exportimport.data.handler.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutFriendlyURL;
@@ -28,7 +29,6 @@ import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
-import com.liferay.portal.lar.test.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.test.LayoutTestUtil;
 
@@ -98,7 +98,8 @@ public class LayoutPrototypeStagedModelDataHandlerTest
 			LayoutFriendlyURLLocalServiceUtil.getLayoutFriendlyURLs(
 				layout.getPlid());
 
-		Assert.assertEquals(1, layoutFriendlyURLs.size());
+		Assert.assertEquals(
+			layoutFriendlyURLs.toString(), 1, layoutFriendlyURLs.size());
 
 		addDependentStagedModel(
 			dependentStagedModelsMap, LayoutFriendlyURL.class,
@@ -150,7 +151,9 @@ public class LayoutPrototypeStagedModelDataHandlerTest
 		List<StagedModel> layoutDependentStagedModels =
 			dependentStagedModelsMap.get(Layout.class.getSimpleName());
 
-		Assert.assertEquals(1, layoutDependentStagedModels.size());
+		Assert.assertEquals(
+			layoutDependentStagedModels.toString(), 1,
+			layoutDependentStagedModels.size());
 
 		Layout layout = (Layout)layoutDependentStagedModels.get(0);
 

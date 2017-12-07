@@ -6,8 +6,8 @@
 			groups: {
 				'field-validation': {
 					base: MODULE_PATH + '/',
-					filter: LiferayAUI.getFilterConfig(),
 					combine: Liferay.AUI.getCombine(),
+					filter: LiferayAUI.getFilterConfig(),
 					modules: {
 						'liferay-ddm-form-field-validation': {
 							condition: {
@@ -16,15 +16,6 @@
 							path: 'validation_field.js',
 							requires: [
 								'liferay-ddm-form-renderer-field'
-							]
-						},
-						'liferay-ddm-form-field-validation-template': {
-							condition: {
-								trigger: 'liferay-ddm-form-renderer'
-							},
-							path: 'validation.soy.js',
-							requires: [
-								'soyutils'
 							]
 						}
 					},

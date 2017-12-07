@@ -14,6 +14,7 @@
 
 package com.liferay.message.boards.web.internal.portlet.action;
 
+import com.liferay.message.boards.constants.MBPortletKeys;
 import com.liferay.message.boards.kernel.exception.MessageBodyException;
 import com.liferay.message.boards.kernel.exception.MessageSubjectException;
 import com.liferay.message.boards.kernel.exception.NoSuchThreadException;
@@ -25,7 +26,6 @@ import com.liferay.message.boards.kernel.model.MBThreadConstants;
 import com.liferay.message.boards.kernel.service.MBMessageLocalService;
 import com.liferay.message.boards.kernel.service.MBMessageService;
 import com.liferay.message.boards.kernel.service.MBThreadService;
-import com.liferay.message.boards.web.constants.MBPortletKeys;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -35,7 +35,7 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portlet.ActionResponseImpl;
@@ -136,7 +136,7 @@ public class SplitThreadMVCActionCommand extends BaseMVCActionCommand {
 				MBGroupServiceSettings.getInstance(
 					themeDisplay.getScopeGroupId());
 
-			String layoutFullURL = PortalUtil.getLayoutFullURL(themeDisplay);
+			String layoutFullURL = _portal.getLayoutFullURL(themeDisplay);
 
 			String newThreadURL =
 				layoutFullURL + "/-/message_boards/view_message/" +
@@ -170,5 +170,8 @@ public class SplitThreadMVCActionCommand extends BaseMVCActionCommand {
 	private MBMessageLocalService _mbMessageLocalService;
 	private MBMessageService _mbMessageService;
 	private MBThreadService _mbThreadService;
+
+	@Reference
+	private Portal _portal;
 
 }

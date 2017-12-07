@@ -4,7 +4,7 @@
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
 	<appender class="org.apache.log4j.ConsoleAppender" name="CONSOLE">
 		<layout class="org.apache.log4j.EnhancedPatternLayout">
-			<param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%t][%c{1}:%L] %m%n" />
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%t][%c{1}:%L] %m%n" />
 		</layout>
 	</appender>
 
@@ -14,7 +14,7 @@
 		</rollingPolicy>
 
 		<layout class="org.apache.log4j.EnhancedPatternLayout">
-			<param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%t][%c{1}:%L] %m%n" />
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%t][%c{1}:%L] %m%n" />
 		</layout>
 	</appender>
 
@@ -130,6 +130,10 @@
 
 	<category name="com.liferay.portal.dao.orm.hibernate.SessionFactoryImpl">
 		<priority value="ERROR" />
+	</category>
+
+	<category name="com.liferay.portal.dao.orm.hibernate.VerifySessionFactoryWrapper">
+		<priority value="FATAL" />
 	</category>
 
 	<category name="com.liferay.portal.deploy">
@@ -276,6 +280,10 @@
 		<priority value="WARN" />
 	</category>
 
+	<category name="com.liferay.portal.kernel.cluster">
+		<priority value="WARN" />
+	</category>
+
 	<category name="com.liferay.portal.kernel.dao.orm.QueryUtil">
 		<priority value="WARN" />
 	</category>
@@ -306,6 +314,10 @@
 
 	<category name="com.liferay.portal.kernel.portlet.RestrictPortletServletRequest">
 		<priority value="ERROR" />
+	</category>
+
+	<category name="com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet">
+		<priority value="WARN" />
 	</category>
 
 	<category name="com.liferay.portal.kernel.process">
@@ -1032,10 +1044,6 @@
 		<priority value="INFO" />
 	</category>
 
-	<category name="com.liferay.taglib.util.IncludeTag">
-		<priority value="WARN" />
-	</category>
-
 	<category name="com.liferay.testhook">
 		<priority value="INFO" />
 	</category>
@@ -1238,6 +1246,7 @@
 
 	<root>
 		<priority value="INFO" />
+
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="TEXT_FILE" />
 		<appender-ref ref="XML_FILE" />

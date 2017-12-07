@@ -14,10 +14,9 @@
 
 package com.liferay.source.formatter.checkstyle.checks;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringUtil;
 
-import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FileContents;
 import com.puppycrawl.tools.checkstyle.api.FullIdent;
@@ -31,9 +30,7 @@ import java.util.List;
 /**
  * @author Hugo Huijser
  */
-public class ArquillianCheck extends AbstractCheck {
-
-	public static final String MSG_INVALID_IMPORT = "import.invalid";
+public class ArquillianCheck extends BaseCheck {
 
 	@Override
 	public int[] getDefaultTokens() {
@@ -41,7 +38,7 @@ public class ArquillianCheck extends AbstractCheck {
 	}
 
 	@Override
-	public void visitToken(DetailAST detailAST) {
+	protected void doVisitToken(DetailAST detailAST) {
 		FileContents fileContents = getFileContents();
 
 		String fileName = StringUtil.replace(
@@ -67,7 +64,7 @@ public class ArquillianCheck extends AbstractCheck {
 				"/testIntegration/resources/arquillian.xml");
 
 		if (!xmlFile.exists()) {
-			log(detailAST.getLineNo(), MSG_INVALID_IMPORT);
+			log(detailAST.getLineNo(), _MSG_INVALID_IMPORT);
 		}
 	}
 
@@ -91,5 +88,7 @@ public class ArquillianCheck extends AbstractCheck {
 
 		return importASTList;
 	}
+
+	private static final String _MSG_INVALID_IMPORT = "import.invalid";
 
 }

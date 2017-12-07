@@ -26,14 +26,14 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutFriendlyURLComposite;
 import com.liferay.portal.kernel.model.LayoutTypePortletConstants;
-import com.liferay.portal.kernel.model.PortletInstance;
 import com.liferay.portal.kernel.portlet.FriendlyURLResolver;
+import com.liferay.portal.kernel.portlet.PortletIdCodec;
 import com.liferay.portal.kernel.security.auth.AuthTokenUtil;
 import com.liferay.portal.kernel.service.LayoutLocalService;
-import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.InheritableMap;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
@@ -71,8 +71,7 @@ public class DisplayPageFriendlyURLResolver implements FriendlyURLResolver {
 		Layout layout = getJournalArticleLayout(
 			groupId, privateLayout, friendlyURL);
 
-		String layoutActualURL = PortalUtil.getLayoutActualURL(
-			layout, mainPath);
+		String layoutActualURL = _portal.getLayoutActualURL(layout, mainPath);
 
 		InheritableMap<String, String[]> actualParams = new InheritableMap<>();
 
@@ -90,11 +89,8 @@ public class DisplayPageFriendlyURLResolver implements FriendlyURLResolver {
 			defaultAssetPublisherPortletId;
 
 		if (Validator.isNull(defaultAssetPublisherPortletId)) {
-			PortletInstance portletInstance = new PortletInstance(
+			defaultAssetPublisherPortletId = PortletIdCodec.encode(
 				AssetPublisherPortletKeys.ASSET_PUBLISHER);
-
-			defaultAssetPublisherPortletId =
-				portletInstance.getPortletInstanceKey();
 		}
 
 		HttpServletRequest request = (HttpServletRequest)requestContext.get(
@@ -121,7 +117,7 @@ public class DisplayPageFriendlyURLResolver implements FriendlyURLResolver {
 		actualParams.put(
 			"p_j_a_id", new String[] {String.valueOf(journalArticle.getId())});
 
-		String namespace = PortalUtil.getPortletNamespace(
+		String namespace = _portal.getPortletNamespace(
 			defaultAssetPublisherPortletId);
 
 		actualParams.put(
@@ -138,7 +134,7 @@ public class DisplayPageFriendlyURLResolver implements FriendlyURLResolver {
 			namespace + "urlTitle",
 			new String[] {journalArticle.getUrlTitle()});
 
-		String queryString = HttpUtil.parameterMapToString(actualParams, false);
+		String queryString = _http.parameterMapToString(actualParams, false);
 
 		if (layoutActualURL.contains(StringPool.QUESTION)) {
 			layoutActualURL =
@@ -149,17 +145,17 @@ public class DisplayPageFriendlyURLResolver implements FriendlyURLResolver {
 				layoutActualURL + StringPool.QUESTION + queryString;
 		}
 
-		Locale locale = PortalUtil.getLocale(request);
+		Locale locale = _portal.getLocale(request);
 
-		PortalUtil.addPageSubtitle(journalArticle.getTitle(locale), request);
-		PortalUtil.addPageDescription(
+		_portal.addPageSubtitle(journalArticle.getTitle(locale), request);
+		_portal.addPageDescription(
 			journalArticle.getDescription(locale), request);
 
 		List<AssetTag> assetTags = _assetTagLocalService.getTags(
 			JournalArticle.class.getName(), journalArticle.getPrimaryKey());
 
 		if (!assetTags.isEmpty()) {
-			PortalUtil.addPageKeywords(
+			_portal.addPageKeywords(
 				ListUtil.toString(assetTags, AssetTag.NAME_ACCESSOR), request);
 		}
 
@@ -220,7 +216,14 @@ public class DisplayPageFriendlyURLResolver implements FriendlyURLResolver {
 	}
 
 	private AssetTagLocalService _assetTagLocalService;
+
+	@Reference
+	private Http _http;
+
 	private JournalArticleLocalService _journalArticleLocalService;
 	private LayoutLocalService _layoutLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

@@ -340,7 +340,7 @@ that may or may not be enforced with a unique index at the database level. Case
 			msg.append(${finderCol.name});
 
 			<#if !finderCol_has_next>
-				msg.append(StringPool.CLOSE_CURLY_BRACE);
+				msg.append("}");
 			</#if>
 		</#list>
 
@@ -418,7 +418,7 @@ that may or may not be enforced with a unique index at the database level. Case
 			msg.append(${finderCol.name});
 
 			<#if !finderCol_has_next>
-				msg.append(StringPool.CLOSE_CURLY_BRACE);
+				msg.append("}");
 			</#if>
 		</#list>
 
@@ -1183,13 +1183,13 @@ that may or may not be enforced with a unique index at the database level. Case
 						}
 						else if (${finderCol.names}.length > 1) {
 							${finderCol.names} =
-								<#if finderCol.type == "String">
+								<#if stringUtil.equals(finderCol.type, "String")>
 									ArrayUtil.distinct(${finderCol.names}, NULL_SAFE_STRING_COMPARATOR);
 								<#else>
 									ArrayUtil.unique(${finderCol.names});
 								</#if>
 
-							<#if finderCol.type == "String">
+							<#if stringUtil.equals(finderCol.type, "String")>
 								Arrays.sort(${finderCol.names}, NULL_SAFE_STRING_COMPARATOR);
 							<#else>
 								Arrays.sort(${finderCol.names});
@@ -1222,9 +1222,7 @@ that may or may not be enforced with a unique index at the database level. Case
 							QueryPos qPos = QueryPos.getInstance(q);
 						</#if>
 
-						<@finderQPos
-							_arrayable=true
-						/>
+						<@finderQPos _arrayable=true />
 
 						return (List<${entity.name}>)QueryUtil.list(q, getDialect(), start, end);
 					}
@@ -1299,9 +1297,7 @@ that may or may not be enforced with a unique index at the database level. Case
 							QueryPos qPos = QueryPos.getInstance(q);
 						</#if>
 
-						<@finderQPos
-							_arrayable=true
-						/>
+						<@finderQPos _arrayable=true />
 
 						return (List<${entity.name}>)QueryUtil.list(q, getDialect(), start, end);
 					}
@@ -1503,13 +1499,13 @@ that may or may not be enforced with a unique index at the database level. Case
 					}
 					else if (${finderCol.names}.length > 1) {
 						${finderCol.names} =
-							<#if finderCol.type == "String">
+							<#if stringUtil.equals(finderCol.type, "String")>
 								ArrayUtil.distinct(${finderCol.names}, NULL_SAFE_STRING_COMPARATOR);
 							<#else>
 								ArrayUtil.unique(${finderCol.names});
 							</#if>
 
-						<#if finderCol.type == "String">
+						<#if stringUtil.equals(finderCol.type, "String")>
 							Arrays.sort(${finderCol.names}, NULL_SAFE_STRING_COMPARATOR);
 						<#else>
 							Arrays.sort(${finderCol.names});
@@ -1651,9 +1647,7 @@ that may or may not be enforced with a unique index at the database level. Case
 						QueryPos qPos = QueryPos.getInstance(q);
 					</#if>
 
-					<@finderQPos
-						_arrayable=true
-					/>
+					<@finderQPos _arrayable=true />
 
 					if (!pagination) {
 						list = (List<${entity.name}>)QueryUtil.list(q, getDialect(), start, end, false);
@@ -1736,7 +1730,7 @@ that may or may not be enforced with a unique index at the database level. Case
 				msg.append(${finderCol.name});
 
 				<#if !finderCol_has_next>
-					msg.append(StringPool.CLOSE_CURLY_BRACE);
+					msg.append("}");
 				</#if>
 			</#list>
 

@@ -25,11 +25,14 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.site.navigation.breadcrumb.web.configuration.SiteNavigationBreadcrumbWebTemplateConfiguration",
 	localization = "content/Language",
-	name = "site.navigation.breadcrumb.web.template.configuration.name"
+	name = "site-navigation-breadcrumb-web-template-configuration-name"
 )
 public interface SiteNavigationBreadcrumbWebTemplateConfiguration {
 
-	@Meta.AD(deflt = "breadcrumb-horizontal-ftl", required = false)
+	@Meta.AD(
+		deflt = "breadcrumb-horizontal-ftl", name = "ddm-template-key-default",
+		required = false
+	)
 	public String ddmTemplateKeyDefault();
 
 }

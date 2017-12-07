@@ -17,11 +17,14 @@ package com.liferay.dynamic.data.mapping.type.checkbox.multiple.internal;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldValueAccessor;
 import com.liferay.dynamic.data.mapping.model.Value;
 import com.liferay.dynamic.data.mapping.storage.DDMFormFieldValue;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Locale;
@@ -48,21 +51,60 @@ public class CheckboxMultipleDDMFormFieldValueAccessor
 
 		Value value = ddmFormFieldValue.getValue();
 
-		String valueString = value.getString(locale);
+		return createJSONArray(value.getString(locale));
+	}
+
+	@Override
+	public boolean isEmpty(DDMFormFieldValue ddmFormFieldValue, Locale locale) {
+		JSONArray jsonArray = getValue(ddmFormFieldValue, locale);
+
+		if (jsonArray.length() > 0) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public Object map(Object value) {
+		if (Validator.isNull(value)) {
+			return value;
+		}
 
 		try {
-			return jsonFactory.createJSONArray(valueString);
-		}
-		catch (JSONException jsone) {
-			_log.error("Unable to parse JSON array", jsone);
+			JSONArray jsonArray = jsonFactory.createJSONArray(value.toString());
 
-			JSONArray jsonArray = jsonFactory.createJSONArray();
+			StringBundler sb = new StringBundler(jsonArray.length() * 2 - 1);
 
-			if (Validator.isNotNull(valueString)) {
-				jsonArray.put(valueString);
+			for (int i = 0; i < jsonArray.length(); i++) {
+				sb.append(jsonArray.get(i));
+
+				if (i < (jsonArray.length() - 1)) {
+					sb.append(CharPool.COMMA);
+				}
 			}
 
-			return jsonArray;
+			return sb.toString();
+		}
+		catch (JSONException jsone) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Unable to parse JSON array", jsone);
+			}
+
+			return StringPool.BLANK;
+		}
+	}
+
+	protected JSONArray createJSONArray(String json) {
+		try {
+			return jsonFactory.createJSONArray(json);
+		}
+		catch (JSONException jsone) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Unable to parse JSON array", jsone);
+			}
+
+			return jsonFactory.createJSONArray();
 		}
 	}
 

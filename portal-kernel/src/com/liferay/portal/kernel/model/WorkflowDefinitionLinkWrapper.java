@@ -161,68 +161,13 @@ public class WorkflowDefinitionLinkWrapper implements WorkflowDefinitionLink,
 	}
 
 	@Override
-	public CacheModel<WorkflowDefinitionLink> toCacheModel() {
-		return _workflowDefinitionLink.toCacheModel();
-	}
-
-	@Override
-	public WorkflowDefinitionLink toEscapedModel() {
-		return new WorkflowDefinitionLinkWrapper(_workflowDefinitionLink.toEscapedModel());
-	}
-
-	@Override
-	public WorkflowDefinitionLink toUnescapedModel() {
-		return new WorkflowDefinitionLinkWrapper(_workflowDefinitionLink.toUnescapedModel());
-	}
-
-	@Override
-	public boolean isCachedModel() {
-		return _workflowDefinitionLink.isCachedModel();
-	}
-
-	@Override
-	public boolean isEscapedModel() {
-		return _workflowDefinitionLink.isEscapedModel();
-	}
-
-	@Override
-	public boolean isNew() {
-		return _workflowDefinitionLink.isNew();
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _workflowDefinitionLink.getExpandoBridge();
+	public java.lang.Object clone() {
+		return new WorkflowDefinitionLinkWrapper((WorkflowDefinitionLink)_workflowDefinitionLink.clone());
 	}
 
 	@Override
 	public int compareTo(WorkflowDefinitionLink workflowDefinitionLink) {
 		return _workflowDefinitionLink.compareTo(workflowDefinitionLink);
-	}
-
-	/**
-	* Returns the workflow definition version of this workflow definition link.
-	*
-	* @return the workflow definition version of this workflow definition link
-	*/
-	@Override
-	public int getWorkflowDefinitionVersion() {
-		return _workflowDefinitionLink.getWorkflowDefinitionVersion();
-	}
-
-	@Override
-	public int hashCode() {
-		return _workflowDefinitionLink.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _workflowDefinitionLink.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new WorkflowDefinitionLinkWrapper((WorkflowDefinitionLink)_workflowDefinitionLink.clone());
 	}
 
 	/**
@@ -233,6 +178,116 @@ public class WorkflowDefinitionLinkWrapper implements WorkflowDefinitionLink,
 	@Override
 	public java.lang.String getClassName() {
 		return _workflowDefinitionLink.getClassName();
+	}
+
+	/**
+	* Returns the class name ID of this workflow definition link.
+	*
+	* @return the class name ID of this workflow definition link
+	*/
+	@Override
+	public long getClassNameId() {
+		return _workflowDefinitionLink.getClassNameId();
+	}
+
+	/**
+	* Returns the class pk of this workflow definition link.
+	*
+	* @return the class pk of this workflow definition link
+	*/
+	@Override
+	public long getClassPK() {
+		return _workflowDefinitionLink.getClassPK();
+	}
+
+	/**
+	* Returns the company ID of this workflow definition link.
+	*
+	* @return the company ID of this workflow definition link
+	*/
+	@Override
+	public long getCompanyId() {
+		return _workflowDefinitionLink.getCompanyId();
+	}
+
+	/**
+	* Returns the create date of this workflow definition link.
+	*
+	* @return the create date of this workflow definition link
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _workflowDefinitionLink.getCreateDate();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _workflowDefinitionLink.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this workflow definition link.
+	*
+	* @return the group ID of this workflow definition link
+	*/
+	@Override
+	public long getGroupId() {
+		return _workflowDefinitionLink.getGroupId();
+	}
+
+	/**
+	* Returns the modified date of this workflow definition link.
+	*
+	* @return the modified date of this workflow definition link
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _workflowDefinitionLink.getModifiedDate();
+	}
+
+	/**
+	* Returns the mvcc version of this workflow definition link.
+	*
+	* @return the mvcc version of this workflow definition link
+	*/
+	@Override
+	public long getMvccVersion() {
+		return _workflowDefinitionLink.getMvccVersion();
+	}
+
+	/**
+	* Returns the primary key of this workflow definition link.
+	*
+	* @return the primary key of this workflow definition link
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _workflowDefinitionLink.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _workflowDefinitionLink.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the type pk of this workflow definition link.
+	*
+	* @return the type pk of this workflow definition link
+	*/
+	@Override
+	public long getTypePK() {
+		return _workflowDefinitionLink.getTypePK();
+	}
+
+	/**
+	* Returns the user ID of this workflow definition link.
+	*
+	* @return the user ID of this workflow definition link
+	*/
+	@Override
+	public long getUserId() {
+		return _workflowDefinitionLink.getUserId();
 	}
 
 	/**
@@ -256,6 +311,16 @@ public class WorkflowDefinitionLinkWrapper implements WorkflowDefinitionLink,
 	}
 
 	/**
+	* Returns the workflow definition link ID of this workflow definition link.
+	*
+	* @return the workflow definition link ID of this workflow definition link
+	*/
+	@Override
+	public long getWorkflowDefinitionLinkId() {
+		return _workflowDefinitionLink.getWorkflowDefinitionLinkId();
+	}
+
+	/**
 	* Returns the workflow definition name of this workflow definition link.
 	*
 	* @return the workflow definition name of this workflow definition link
@@ -265,124 +330,34 @@ public class WorkflowDefinitionLinkWrapper implements WorkflowDefinitionLink,
 		return _workflowDefinitionLink.getWorkflowDefinitionName();
 	}
 
-	@Override
-	public java.lang.String toString() {
-		return _workflowDefinitionLink.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _workflowDefinitionLink.toXmlString();
-	}
-
 	/**
-	* Returns the create date of this workflow definition link.
+	* Returns the workflow definition version of this workflow definition link.
 	*
-	* @return the create date of this workflow definition link
+	* @return the workflow definition version of this workflow definition link
 	*/
 	@Override
-	public Date getCreateDate() {
-		return _workflowDefinitionLink.getCreateDate();
+	public int getWorkflowDefinitionVersion() {
+		return _workflowDefinitionLink.getWorkflowDefinitionVersion();
 	}
 
-	/**
-	* Returns the modified date of this workflow definition link.
-	*
-	* @return the modified date of this workflow definition link
-	*/
 	@Override
-	public Date getModifiedDate() {
-		return _workflowDefinitionLink.getModifiedDate();
+	public int hashCode() {
+		return _workflowDefinitionLink.hashCode();
 	}
 
-	/**
-	* Returns the class name ID of this workflow definition link.
-	*
-	* @return the class name ID of this workflow definition link
-	*/
 	@Override
-	public long getClassNameId() {
-		return _workflowDefinitionLink.getClassNameId();
+	public boolean isCachedModel() {
+		return _workflowDefinitionLink.isCachedModel();
 	}
 
-	/**
-	* Returns the class p k of this workflow definition link.
-	*
-	* @return the class p k of this workflow definition link
-	*/
 	@Override
-	public long getClassPK() {
-		return _workflowDefinitionLink.getClassPK();
+	public boolean isEscapedModel() {
+		return _workflowDefinitionLink.isEscapedModel();
 	}
 
-	/**
-	* Returns the company ID of this workflow definition link.
-	*
-	* @return the company ID of this workflow definition link
-	*/
 	@Override
-	public long getCompanyId() {
-		return _workflowDefinitionLink.getCompanyId();
-	}
-
-	/**
-	* Returns the group ID of this workflow definition link.
-	*
-	* @return the group ID of this workflow definition link
-	*/
-	@Override
-	public long getGroupId() {
-		return _workflowDefinitionLink.getGroupId();
-	}
-
-	/**
-	* Returns the mvcc version of this workflow definition link.
-	*
-	* @return the mvcc version of this workflow definition link
-	*/
-	@Override
-	public long getMvccVersion() {
-		return _workflowDefinitionLink.getMvccVersion();
-	}
-
-	/**
-	* Returns the primary key of this workflow definition link.
-	*
-	* @return the primary key of this workflow definition link
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _workflowDefinitionLink.getPrimaryKey();
-	}
-
-	/**
-	* Returns the type p k of this workflow definition link.
-	*
-	* @return the type p k of this workflow definition link
-	*/
-	@Override
-	public long getTypePK() {
-		return _workflowDefinitionLink.getTypePK();
-	}
-
-	/**
-	* Returns the user ID of this workflow definition link.
-	*
-	* @return the user ID of this workflow definition link
-	*/
-	@Override
-	public long getUserId() {
-		return _workflowDefinitionLink.getUserId();
-	}
-
-	/**
-	* Returns the workflow definition link ID of this workflow definition link.
-	*
-	* @return the workflow definition link ID of this workflow definition link
-	*/
-	@Override
-	public long getWorkflowDefinitionLinkId() {
-		return _workflowDefinitionLink.getWorkflowDefinitionLinkId();
+	public boolean isNew() {
+		return _workflowDefinitionLink.isNew();
 	}
 
 	@Override
@@ -411,9 +386,9 @@ public class WorkflowDefinitionLinkWrapper implements WorkflowDefinitionLink,
 	}
 
 	/**
-	* Sets the class p k of this workflow definition link.
+	* Sets the class pk of this workflow definition link.
 	*
-	* @param classPK the class p k of this workflow definition link
+	* @param classPK the class pk of this workflow definition link
 	*/
 	@Override
 	public void setClassPK(long classPK) {
@@ -506,9 +481,9 @@ public class WorkflowDefinitionLinkWrapper implements WorkflowDefinitionLink,
 	}
 
 	/**
-	* Sets the type p k of this workflow definition link.
+	* Sets the type pk of this workflow definition link.
 	*
-	* @param typePK the type p k of this workflow definition link
+	* @param typePK the type pk of this workflow definition link
 	*/
 	@Override
 	public void setTypePK(long typePK) {
@@ -574,6 +549,31 @@ public class WorkflowDefinitionLinkWrapper implements WorkflowDefinitionLink,
 	@Override
 	public void setWorkflowDefinitionVersion(int workflowDefinitionVersion) {
 		_workflowDefinitionLink.setWorkflowDefinitionVersion(workflowDefinitionVersion);
+	}
+
+	@Override
+	public CacheModel<WorkflowDefinitionLink> toCacheModel() {
+		return _workflowDefinitionLink.toCacheModel();
+	}
+
+	@Override
+	public WorkflowDefinitionLink toEscapedModel() {
+		return new WorkflowDefinitionLinkWrapper(_workflowDefinitionLink.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _workflowDefinitionLink.toString();
+	}
+
+	@Override
+	public WorkflowDefinitionLink toUnescapedModel() {
+		return new WorkflowDefinitionLinkWrapper(_workflowDefinitionLink.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _workflowDefinitionLink.toXmlString();
 	}
 
 	@Override

@@ -29,7 +29,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import com.liferay.wsrp.model.WSRPProducer;
 import com.liferay.wsrp.model.WSRPProducerModel;
@@ -61,7 +60,7 @@ public class WSRPProducerModelImpl extends BaseModelImpl<WSRPProducer>
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a w s r p producer model instance should use the {@link WSRPProducer} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a wsrp producer model instance should use the {@link WSRPProducer} interface instead.
 	 */
 	public static final String TABLE_NAME = "WSRP_WSRPProducer";
 	public static final Object[][] TABLE_COLUMNS = {
@@ -234,7 +233,7 @@ public class WSRPProducerModelImpl extends BaseModelImpl<WSRPProducer>
 	@Override
 	public String getUuid() {
 		if (_uuid == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _uuid;
@@ -337,7 +336,7 @@ public class WSRPProducerModelImpl extends BaseModelImpl<WSRPProducer>
 	@Override
 	public String getName() {
 		if (_name == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _name;
@@ -354,7 +353,7 @@ public class WSRPProducerModelImpl extends BaseModelImpl<WSRPProducer>
 	@Override
 	public String getVersion() {
 		if (_version == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _version;
@@ -369,7 +368,7 @@ public class WSRPProducerModelImpl extends BaseModelImpl<WSRPProducer>
 	@Override
 	public String getPortletIds() {
 		if (_portletIds == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _portletIds;

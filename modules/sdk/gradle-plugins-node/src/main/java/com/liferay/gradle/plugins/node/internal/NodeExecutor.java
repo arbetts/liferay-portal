@@ -15,6 +15,7 @@
 package com.liferay.gradle.plugins.node.internal;
 
 import com.liferay.gradle.plugins.node.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.node.internal.util.NodePluginUtil;
 import com.liferay.gradle.util.OSDetector;
 import com.liferay.gradle.util.Validator;
 
@@ -23,14 +24,18 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
+import org.gradle.process.ExecSpec;
 import org.gradle.util.CollectionUtils;
 import org.gradle.util.GUtil;
 
@@ -56,37 +61,20 @@ public class NodeExecutor {
 	}
 
 	public void execute() throws Exception {
-		ProcessBuilder processBuilder = new ProcessBuilder(_getCommandLine());
-
 		File workingDir = getWorkingDir();
-
-		processBuilder.directory(workingDir);
-
-		processBuilder.inheritIO();
-
-		_updateEnvironment(processBuilder.environment());
-
-		if (_logger.isInfoEnabled()) {
-			_logger.info(
-				"Running {} from {}", processBuilder.command(),
-				processBuilder.directory());
-		}
 
 		workingDir.mkdirs();
 
-		Process process = processBuilder.start();
-
-		int exitValue = process.waitFor();
-
-		if (exitValue != 0) {
-			throw new IOException(
-				"Process '" + processBuilder.command() +
-					"' finished with non-zero exit value " + exitValue);
+		if (isUseGradleExec()) {
+			_executeGradleExec();
+		}
+		else {
+			_executeProcessBuilder();
 		}
 	}
 
-	public List<String> getArgs() {
-		return GradleUtil.toStringList(_args);
+	public List<Object> getArgs() {
+		return _args;
 	}
 
 	public String getCommand() {
@@ -103,6 +91,10 @@ public class NodeExecutor {
 
 	public boolean isInheritProxy() {
 		return _inheritProxy;
+	}
+
+	public boolean isUseGradleExec() {
+		return _useGradleExec;
 	}
 
 	public void setArgs(Iterable<?> args) {
@@ -127,8 +119,52 @@ public class NodeExecutor {
 		_nodeDir = nodeDir;
 	}
 
+	public void setUseGradleExec(boolean useGradleExec) {
+		_useGradleExec = useGradleExec;
+	}
+
 	public void setWorkingDir(Object workingDir) {
 		_workingDir = workingDir;
+	}
+
+	private void _executeGradleExec() {
+		_project.exec(
+			new Action<ExecSpec>() {
+
+				@Override
+				public void execute(ExecSpec execSpec) {
+					execSpec.setCommandLine(_getCommandLine());
+					execSpec.setEnvironment(
+						_getEnvironment(execSpec.getEnvironment()));
+					execSpec.setWorkingDir(getWorkingDir());
+				}
+
+			});
+	}
+
+	private void _executeProcessBuilder() throws Exception {
+		ProcessBuilder processBuilder = new ProcessBuilder(_getCommandLine());
+
+		processBuilder.directory(getWorkingDir());
+		processBuilder.inheritIO();
+
+		_updateEnvironment(processBuilder.environment());
+
+		if (_logger.isInfoEnabled()) {
+			_logger.info(
+				"Running {} from {}", processBuilder.command(),
+				processBuilder.directory());
+		}
+
+		Process process = processBuilder.start();
+
+		int exitValue = process.waitFor();
+
+		if (exitValue != 0) {
+			throw new IOException(
+				"Process '" + processBuilder.command() +
+					"' finished with non-zero exit value " + exitValue);
+		}
 	}
 
 	private List<String> _getCommandLine() {
@@ -140,10 +176,20 @@ public class NodeExecutor {
 		}
 		else {
 			commandLine.add(_getExecutable());
-			commandLine.addAll(getArgs());
+			commandLine.addAll(GradleUtil.toStringList(getArgs()));
 		}
 
 		return commandLine;
+	}
+
+	private Map<String, String> _getEnvironment(Map<?, ?> environment) {
+		Map<String, String> newEnvironment = new HashMap<>();
+
+		GUtil.addToMap(newEnvironment, environment);
+
+		_updateEnvironment(newEnvironment);
+
+		return newEnvironment;
 	}
 
 	private String _getExecutable() {
@@ -167,7 +213,7 @@ public class NodeExecutor {
 			return null;
 		}
 
-		return new File(nodeDir, "bin");
+		return NodePluginUtil.getBinDir(nodeDir);
 	}
 
 	private List<String> _getWindowsArgs() {
@@ -190,7 +236,9 @@ public class NodeExecutor {
 			sb.append('"');
 		}
 
-		for (String arg : getArgs()) {
+		List<String> args = GradleUtil.toStringList(getArgs());
+
+		for (String arg : args) {
 			sb.append(" \"");
 
 			if (Validator.isNotNull(arg)) {
@@ -223,13 +271,13 @@ public class NodeExecutor {
 		String hosts = System.getProperty("http.nonProxyHosts");
 
 		if (Validator.isNotNull(hosts)) {
-			nonProxyHosts.addAll(Arrays.asList(hosts.split("\\|")));
+			Collections.addAll(nonProxyHosts, hosts.split("\\|"));
 		}
 
 		hosts = System.getProperty("https.nonProxyHosts");
 
 		if (Validator.isNotNull(hosts)) {
-			nonProxyHosts.addAll(Arrays.asList(hosts.split("\\|")));
+			Collections.addAll(nonProxyHosts, hosts.split("\\|"));
 		}
 
 		if (nonProxyHosts.isEmpty()) {
@@ -333,6 +381,7 @@ public class NodeExecutor {
 	private boolean _inheritProxy = true;
 	private Object _nodeDir;
 	private final Project _project;
+	private boolean _useGradleExec;
 	private Object _workingDir;
 
 }

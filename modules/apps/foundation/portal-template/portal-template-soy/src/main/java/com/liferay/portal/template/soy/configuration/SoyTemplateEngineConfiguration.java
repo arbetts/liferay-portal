@@ -25,11 +25,13 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.template.soy.configuration.SoyTemplateEngineConfiguration",
 	localization = "content/Language",
-	name = "soy.template.engine.configuration.name"
+	name = "soy-template-engine-configuration-name"
 )
 public interface SoyTemplateEngineConfiguration {
 
-	@Meta.AD(deflt = "60", required = false)
+	@Meta.AD(
+		deflt = "60", name = "resource-modification-check", required = false
+	)
 	public int resourceModificationCheck();
 
 }

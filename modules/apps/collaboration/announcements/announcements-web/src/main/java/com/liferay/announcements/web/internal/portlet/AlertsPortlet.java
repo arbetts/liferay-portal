@@ -14,7 +14,7 @@
 
 package com.liferay.announcements.web.internal.portlet;
 
-import com.liferay.announcements.web.constants.AnnouncementsPortletKeys;
+import com.liferay.announcements.constants.AnnouncementsPortletKeys;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
@@ -54,7 +54,7 @@ import org.osgi.service.component.annotations.Reference;
 public class AlertsPortlet extends MVCPortlet {
 
 	@Reference(
-		target = "(&(release.bundle.symbolic.name=com.liferay.announcements.web)(release.schema.version=1.0.2))",
+		target = "(&(release.bundle.symbolic.name=com.liferay.announcements.web)(release.schema.version=1.0.3))",
 		unbind = "-"
 	)
 	protected void setRelease(Release release) {

@@ -21,9 +21,15 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 
 /**
  * @author Brian Wing Shun Chan
+ * @deprecated
  * @generated
  */
+@Deprecated
 public class ResourceTypePermissionFinderBaseImpl extends BasePersistenceImpl<ResourceTypePermission> {
+	public ResourceTypePermissionFinderBaseImpl() {
+		setModelClass(ResourceTypePermission.class);
+	}
+
 	/**
 	 * Returns the resource type permission persistence.
 	 *

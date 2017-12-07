@@ -30,7 +30,7 @@ import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUti
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.IdentityServiceContextFunction;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.test.IdempotentRetryAssert;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
@@ -49,8 +50,6 @@ import com.liferay.portal.test.randomizerbumpers.BBCodeRandomizerBumper;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -257,20 +256,9 @@ public abstract class BaseSearchTestCase {
 			final int expectedCount, final SearchContext searchContext)
 		throws Exception {
 
-		IdempotentRetryAssert.retryAssert(
-			10, TimeUnit.SECONDS,
-			new Callable<Void>() {
+		Hits hits = searchBaseModelsCount(searchContext);
 
-				@Override
-				public Void call() throws Exception {
-					int actualCount = searchBaseModelsCount(searchContext);
-
-					Assert.assertEquals(expectedCount, actualCount);
-
-					return null;
-				}
-
-			});
+		Assert.assertEquals(hits.toString(), expectedCount, hits.getLength());
 	}
 
 	protected void assertBaseModelsCount(
@@ -288,25 +276,12 @@ public abstract class BaseSearchTestCase {
 		assertGroupEntriesCount(expectedCount, 0);
 	}
 
-	protected void assertGroupEntriesCount(
-			final long expectedCount, final long userId)
+	protected void assertGroupEntriesCount(long expectedCount, long userId)
 		throws Exception {
 
-		IdempotentRetryAssert.retryAssert(
-			3, TimeUnit.SECONDS,
-			new Callable<Void>() {
+		Hits hits = searchGroupEntries(group.getGroupId(), userId);
 
-				@Override
-				public Void call() throws Exception {
-					long actualCount = searchGroupEntriesCount(
-						group.getGroupId(), userId);
-
-					Assert.assertEquals(expectedCount, actualCount);
-
-					return null;
-				}
-
-			});
+		Assert.assertEquals(hits.toString(), expectedCount, hits.getLength());
 	}
 
 	protected void assertGroupEntriesCount(long expectedCount, User user)
@@ -435,7 +410,7 @@ public abstract class BaseSearchTestCase {
 		assertBaseModelsCount(initialBaseModelsSearchCount + 1, searchContext);
 	}
 
-	protected int searchBaseModelsCount(
+	protected Hits searchBaseModelsCount(
 			Class<?> clazz, long groupId, SearchContext searchContext)
 		throws Exception {
 
@@ -443,12 +418,10 @@ public abstract class BaseSearchTestCase {
 
 		searchContext.setGroupIds(new long[] {groupId});
 
-		Hits results = indexer.search(searchContext);
-
-		return results.getLength();
+		return indexer.search(searchContext);
 	}
 
-	protected int searchBaseModelsCount(SearchContext searchContext)
+	protected Hits searchBaseModelsCount(SearchContext searchContext)
 		throws Exception {
 
 		return searchBaseModelsCount(
@@ -648,9 +621,9 @@ public abstract class BaseSearchTestCase {
 		String keyword6 = getSearchKeywords() + 6;
 		String keyword7 = getSearchKeywords() + 7;
 
-		String combinedKeywords =
-			keyword1 + " " + keyword2 + " " + keyword3 + " " + keyword4 + " " +
-				keyword5 + " " + keyword6 + " " + keyword7;
+		String combinedKeywords = StringBundler.concat(
+			keyword1, " ", keyword2, " ", keyword3, " ", keyword4, " ",
+			keyword5, " ", keyword6, " ", keyword7);
 
 		searchContext.setKeywords(combinedKeywords);
 
@@ -669,21 +642,24 @@ public abstract class BaseSearchTestCase {
 		searchContext = SearchContextTestUtil.getSearchContext(
 			group.getGroupId());
 
-		searchContext.setKeywords("\"" + keyword1 + " " + keyword2 + "\"");
+		searchContext.setKeywords(
+			StringBundler.concat("\"", keyword1, " ", keyword2, "\""));
 
 		assertBaseModelsCount(initialBaseModelsSearchCount + 1, searchContext);
 
 		searchContext = SearchContextTestUtil.getSearchContext(
 			group.getGroupId());
 
-		searchContext.setKeywords("\"" + keyword2 + " " + keyword1 + "\"");
+		searchContext.setKeywords(
+			StringBundler.concat("\"", keyword2, " ", keyword1, "\""));
 
 		assertBaseModelsCount(initialBaseModelsSearchCount, searchContext);
 
 		searchContext = SearchContextTestUtil.getSearchContext(
 			group.getGroupId());
 
-		searchContext.setKeywords("\"" + keyword2 + " " + keyword4 + "\"");
+		searchContext.setKeywords(
+			StringBundler.concat("\"", keyword2, " ", keyword4, "\""));
 
 		assertBaseModelsCount(initialBaseModelsSearchCount, searchContext);
 
@@ -691,7 +667,8 @@ public abstract class BaseSearchTestCase {
 			group.getGroupId());
 
 		searchContext.setKeywords(
-			keyword1 + " \"" + keyword2 + " " + keyword3 + "\"");
+			StringBundler.concat(
+				keyword1, " \"", keyword2, " ", keyword3, "\""));
 
 		assertBaseModelsCount(initialBaseModelsSearchCount + 1, searchContext);
 
@@ -699,14 +676,16 @@ public abstract class BaseSearchTestCase {
 			group.getGroupId());
 
 		searchContext.setKeywords(
-			RandomTestUtil.randomString() + " \"" + keyword2 + " " + keyword3 +
-				"\" " + keyword5);
+			StringBundler.concat(
+				RandomTestUtil.randomString(), " \"", keyword2, " ", keyword3,
+				"\" ", keyword5));
 
 		assertBaseModelsCount(initialBaseModelsSearchCount + 1, searchContext);
 
 		searchContext.setKeywords(
-			RandomTestUtil.randomString() + " \"" + keyword2 + " " + keyword5 +
-				"\" " + RandomTestUtil.randomString());
+			StringBundler.concat(
+				RandomTestUtil.randomString(), " \"", keyword2, " ", keyword5,
+				"\" ", RandomTestUtil.randomString()));
 
 		assertBaseModelsCount(initialBaseModelsSearchCount, searchContext);
 	}
@@ -779,10 +758,10 @@ public abstract class BaseSearchTestCase {
 		}
 	}
 
-	protected long searchGroupEntriesCount(long groupId, long userId)
+	protected Hits searchGroupEntries(long groupId, long userId)
 		throws Exception {
 
-		return -1;
+		return null;
 	}
 
 	protected void searchMyEntries() throws Exception {
@@ -859,6 +838,9 @@ public abstract class BaseSearchTestCase {
 
 		assertGroupEntriesCount(initialUser1SearchGroupEntriesCount + 3, user1);
 		assertGroupEntriesCount(initialUser2SearchGroupEntriesCount + 2, user2);
+
+		UserLocalServiceUtil.deleteUser(user1);
+		UserLocalServiceUtil.deleteUser(user2);
 	}
 
 	protected void searchRecentEntries() throws Exception {
@@ -901,6 +883,9 @@ public abstract class BaseSearchTestCase {
 			baseModel = addBaseModel(
 				parentBaseModel2, true, RandomTestUtil.randomString(),
 				serviceContext);
+
+			UserLocalServiceUtil.deleteUser(user1);
+			UserLocalServiceUtil.deleteUser(user2);
 		}
 		finally {
 			PrincipalThreadLocal.setName(name);
@@ -1072,6 +1057,8 @@ public abstract class BaseSearchTestCase {
 			PermissionThreadLocal.setPermissionChecker(
 				originalPermissionChecker);
 		}
+
+		UserLocalServiceUtil.deleteUser(user);
 	}
 
 	protected BaseModel<?> updateBaseModel(

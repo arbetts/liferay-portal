@@ -22,7 +22,7 @@ import aQute.bnd.annotation.metatype.Meta;
 @Meta.OCD(
 	id = "com.liferay.portlet.tck.bridge.configuration.PortletTCKBridgeConfiguration",
 	localization = "content/Language",
-	name = "portlet.tck.bridge.configuration.name"
+	name = "portlet-tck-bridge-configuration-name"
 )
 public interface PortletTCKBridgeConfiguration {
 
@@ -32,7 +32,7 @@ public interface PortletTCKBridgeConfiguration {
 	@Meta.AD(deflt = "", required = false)
 	public String[] servletContextNames();
 
-	@Meta.AD(deflt = "300", required = false)
+	@Meta.AD(deflt = "1200", required = false)
 	public long timeout();
 
 }

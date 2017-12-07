@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.Reader;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -80,8 +81,9 @@ public class Table {
 
 		if (value == null) {
 			throw new UpgradeException(
-				"Nulls should never be inserted into the database. Attempted " +
-					"to append column to " + sb.toString() + ".");
+				StringBundler.concat(
+					"Nulls should never be inserted into the database. ",
+					"Attempted to append column to ", sb.toString(), "."));
 		}
 		else if (value instanceof byte[]) {
 			sb.append(Base64.encode((byte[])value));
@@ -164,7 +166,8 @@ public class Table {
 
 		if (_log.isInfoEnabled()) {
 			_log.info(
-				"Starting backup of " + _tableName + " to " + tempFileName);
+				StringBundler.concat(
+					"Starting backup of ", _tableName, " to ", tempFileName));
 		}
 
 		UnsyncBufferedWriter unsyncBufferedWriter = new UnsyncBufferedWriter(
@@ -190,16 +193,18 @@ public class Table {
 				catch (StagnantRowException sre) {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
-							"Skipping stagnant data in " + _tableName + ": " +
-								sre.getMessage());
+							StringBundler.concat(
+								"Skipping stagnant data in ", _tableName, ": ",
+								sre.getMessage()));
 					}
 				}
 			}
 
 			if (_log.isInfoEnabled()) {
 				_log.info(
-					"Finished backup of " + _tableName + " to " + tempFileName +
-						" in " + stopWatch.getTime() + " ms");
+					StringBundler.concat(
+						"Finished backup of ", _tableName, " to ", tempFileName,
+						" in ", String.valueOf(stopWatch.getTime()), " ms"));
 			}
 		}
 		catch (Exception e) {
@@ -399,22 +404,26 @@ public class Table {
 					value = StringPool.BLANK;
 				}
 				else {
-					UnsyncBufferedReader unsyncBufferedReader =
-						new UnsyncBufferedReader(clob.getCharacterStream());
+					try (Reader reader = clob.getCharacterStream();
+						UnsyncBufferedReader unsyncBufferedReader =
+							new UnsyncBufferedReader(reader)) {
 
-					StringBundler sb = new StringBundler();
+						StringBundler sb = new StringBundler();
 
-					String line = null;
+						String line = null;
 
-					while ((line = unsyncBufferedReader.readLine()) != null) {
-						if (sb.length() != 0) {
-							sb.append(_SAFE_TABLE_NEWLINE_CHARACTER);
+						while ((line =
+									unsyncBufferedReader.readLine()) != null) {
+
+							if (sb.length() != 0) {
+								sb.append(_SAFE_TABLE_NEWLINE_CHARACTER);
+							}
+
+							sb.append(line);
 						}
 
-						sb.append(line);
+						value = sb.toString();
 					}
-
-					value = sb.toString();
 				}
 			}
 			catch (Exception e) {
@@ -498,8 +507,9 @@ public class Table {
 
 				if (values.length != columns.length) {
 					throw new UpgradeException(
-						"Column lengths differ between temp file and schema. " +
-							"Attempted to insert row " + line + ".");
+						StringBundler.concat(
+							"Column lengths differ between temp file and ",
+							"schema. Attempted to insert row ", line, "."));
 				}
 
 				int[] order = getOrder();

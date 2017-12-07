@@ -16,24 +16,27 @@ package com.liferay.asset.categories.admin.web.internal.exportimport.data.handle
 
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
-import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
+import com.liferay.exportimport.lar.BaseStagedModelDataHandler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -117,6 +120,9 @@ public class AssetVocabularyStagedModelDataHandler
 			PortletDataContext portletDataContext, AssetVocabulary vocabulary)
 		throws Exception {
 
+		Locale locale = _portal.getSiteDefaultLocale(
+			portletDataContext.getScopeGroupId());
+
 		Element vocabularyElement = portletDataContext.getExportDataElement(
 			vocabulary);
 
@@ -125,6 +131,9 @@ public class AssetVocabularyStagedModelDataHandler
 		vocabularyElement.addAttribute("path", vocabularyPath);
 
 		vocabulary.setUserUuid(vocabulary.getUserUuid());
+
+		exportSettingsMetadata(
+			portletDataContext, vocabulary, vocabularyElement, locale);
 
 		portletDataContext.addReferenceElement(
 			vocabulary, vocabularyElement, vocabulary,
@@ -165,6 +174,9 @@ public class AssetVocabularyStagedModelDataHandler
 
 		ServiceContext serviceContext = createServiceContext(
 			portletDataContext, vocabulary);
+
+		vocabulary.setSettings(
+			getImportSettings(portletDataContext, vocabulary));
 
 		AssetVocabulary importedVocabulary = null;
 
@@ -210,6 +222,70 @@ public class AssetVocabularyStagedModelDataHandler
 			importedVocabulary.getVocabularyId());
 	}
 
+	protected void exportSettingsMetadata(
+			PortletDataContext portletDataContext, AssetVocabulary vocabulary,
+			Element vocabularyElement, Locale locale)
+		throws PortalException {
+
+		String settingsMetadataPath = ExportImportPathUtil.getModelPath(
+			vocabulary, _SETTINGS_METADATA + ".json");
+
+		vocabularyElement.addAttribute(
+			_SETTINGS_METADATA, settingsMetadataPath);
+
+		AssetVocabularySettingsExportHelper
+			assetVocabularySettingsExportHelper =
+				new AssetVocabularySettingsExportHelper(
+					vocabulary.getSettings(), _jsonFactory, locale);
+
+		portletDataContext.addZipEntry(
+			settingsMetadataPath,
+			assetVocabularySettingsExportHelper.getSettingsMetadata());
+	}
+
+	protected String getImportSettings(
+			PortletDataContext portletDataContext, AssetVocabulary vocabulary)
+		throws PortalException {
+
+		Element vocabularyElement = portletDataContext.getImportDataElement(
+			vocabulary);
+
+		JSONObject settingsMetadataJSONObject =
+			getImportSettingsMetadataJSONObject(
+				portletDataContext, vocabularyElement);
+
+		if (settingsMetadataJSONObject.length() == 0) {
+			return vocabulary.getSettings();
+		}
+
+		long groupId = portletDataContext.getScopeGroupId();
+
+		long[] groupIds = {portletDataContext.getCompanyGroupId(), groupId};
+
+		Locale locale = _portal.getSiteDefaultLocale(groupId);
+
+		AssetVocabularySettingsImportHelper
+			assetVocabularySettingsImportHelper =
+				new AssetVocabularySettingsImportHelper(
+					vocabulary.getSettings(), _classNameLocalService, groupIds,
+					locale, settingsMetadataJSONObject);
+
+		return assetVocabularySettingsImportHelper.getSettings();
+	}
+
+	protected JSONObject getImportSettingsMetadataJSONObject(
+			PortletDataContext portletDataContext, Element vocabularyElement)
+		throws PortalException {
+
+		String settingsMetadataPath = vocabularyElement.attributeValue(
+			_SETTINGS_METADATA);
+
+		String serializedSettingsMetadata =
+			portletDataContext.getZipEntryAsString(settingsMetadataPath);
+
+		return _jsonFactory.createJSONObject(serializedSettingsMetadata);
+	}
+
 	protected String getVocabularyName(
 			String uuid, long groupId, String name, int count)
 		throws Exception {
@@ -236,22 +312,29 @@ public class AssetVocabularyStagedModelDataHandler
 
 		Map<Locale, String> titleMap = vocabulary.getTitleMap();
 
-		if (titleMap == null) {
-			titleMap = new HashMap<>();
-		}
+		Locale locale = _portal.getSiteDefaultLocale(groupId);
 
-		titleMap.put(PortalUtil.getSiteDefaultLocale(groupId), name);
+		if (titleMap.isEmpty() || !Objects.equals(vocabulary.getName(), name) ||
+			!titleMap.containsKey(locale)) {
+
+			titleMap.put(locale, name);
+		}
 
 		return titleMap;
 	}
 
-	@Reference(unbind = "-")
-	protected void setAssetVocabularyLocalService(
-		AssetVocabularyLocalService assetVocabularyLocalService) {
+	private static final String _SETTINGS_METADATA = "settings-metadata";
 
-		_assetVocabularyLocalService = assetVocabularyLocalService;
-	}
-
+	@Reference
 	private AssetVocabularyLocalService _assetVocabularyLocalService;
+
+	@Reference
+	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
+	private JSONFactory _jsonFactory;
+
+	@Reference
+	private Portal _portal;
 
 }

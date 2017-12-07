@@ -29,13 +29,13 @@ import aQute.bnd.osgi.Jar;
 import aQute.bnd.osgi.Packages;
 import aQute.bnd.osgi.Resource;
 import aQute.bnd.service.AnalyzerPlugin;
-import aQute.lib.env.Header;
 
+import aQute.lib.env.Header;
 import aQute.lib.io.IO;
 import aQute.lib.strings.Strings;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -84,6 +84,8 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 
 		Set<String> keys = new HashSet<String>(resources.keySet());
 
+		Set<String> taglibURIs = new HashSet<>();
+
 		for (String key : keys) {
 			for (Instruction instruction : instructions.keySet()) {
 				if (instruction.matches(key)) {
@@ -97,7 +99,7 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 						resource.openInputStream(), "UTF-8");
 
 					addApiUses(analyzer, jsp);
-					addTaglibRequirements(analyzer, jsp);
+					addTaglibRequirements(analyzer, jsp, taglibURIs);
 
 					matches = true;
 				}
@@ -111,7 +113,9 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 		return false;
 	}
 
-	protected void addApiUses(Analyzer analyzer, String content) {
+	protected void addApiUses(Analyzer analyzer, String originalContent) {
+		String content = originalContent.replaceAll("<%--[\\s\\S]*?--%>", "");
+
 		int contentX = -1;
 		int contentY = content.length();
 
@@ -125,28 +129,48 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 			contentY = contentX;
 
 			int importX = content.indexOf("import=\"", contentY);
+
 			int importY = -1;
 
 			if (importX != -1) {
 				importX = importX + "import=\"".length();
+
 				importY = content.indexOf("\"", importX);
 			}
 
 			if ((importX != -1) && (importY != -1)) {
 				String contentFragment = content.substring(importX, importY);
 
-				int index = contentFragment.lastIndexOf('.');
+				String[] packageFragments = contentFragment.split("\\s*,\\s*");
 
-				if (index != -1) {
-					Packages packages = analyzer.getReferred();
+				for (String packageFragment : packageFragments) {
+					int index = packageFragment.lastIndexOf('.');
 
-					String packageName = contentFragment.substring(0, index);
+					Matcher matcher = _staticImportPattern.matcher(
+						packageFragment);
 
-					PackageRef packageRef = analyzer.getPackageRef(packageName);
+					if (matcher.matches()) {
+						packageFragment = matcher.group("package");
 
-					packages.put(packageRef, new Attrs());
+						packageFragment = packageFragment.substring(
+							0, packageFragment.length() - 1);
 
-					addApiUses(analyzer, contentFragment, packageRef);
+						index = packageFragment.length();
+					}
+
+					if (index != -1) {
+						Packages packages = analyzer.getReferred();
+
+						String packageName = packageFragment.substring(
+							0, index);
+
+						PackageRef packageRef = analyzer.getPackageRef(
+							packageName);
+
+						packages.put(packageRef, new Attrs());
+
+						addApiUses(analyzer, packageFragment, packageRef);
+					}
 				}
 			}
 
@@ -289,10 +313,17 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 		taglibRequirements.add(parameters.toString());
 	}
 
-	protected void addTaglibRequirements(Analyzer analyzer, String content) {
-		Set<String> taglibRequirements = new TreeSet<String>();
+	protected void addTaglibRequirements(
+		Analyzer analyzer, String content, Set<String> taglibURIs) {
+
+		Set<String> taglibRequirements = new TreeSet<>();
 
 		for (String uri : getTaglibURIs(content)) {
+			if (taglibURIs.contains(uri)) {
+				continue;
+			}
+
+			taglibURIs.add(uri);
 
 			// Check to see if the JAR provides this TLD itself which would
 			// indicate that it already has access to the required classes
@@ -339,43 +370,6 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 			Constants.REQUIRE_CAPABILITY, Strings.join(taglibRequirements));
 	}
 
-	protected Set<String> getTaglibURIs(String originalContent) {
-		String content = originalContent.replaceAll("<%--[\\s\\S]*?--%>","");
-
-		int contentX = -1;
-		int contentY = content.length();
-
-		Set<String> taglibURis = new HashSet<String>();
-
-		while (true) {
-			contentX = content.lastIndexOf("<%@", contentY);
-
-			if (contentX == -1) {
-				break;
-			}
-
-			contentY = contentX;
-
-			int importX = content.indexOf("uri=\"", contentY);
-			int importY = -1;
-
-			if (importX != -1) {
-				importX = importX + "uri=\"".length();
-				importY = content.indexOf("\"", importX);
-			}
-
-			if ((importX != -1) && (importY != -1)) {
-				String s = content.substring(importX, importY);
-
-				taglibURis.add(s);
-			}
-
-			contentY -= 3;
-		}
-
-		return taglibURis;
-	}
-
 	protected boolean containsTLD(
 		Analyzer analyzer, Jar jar, String root, String uri) {
 
@@ -383,7 +377,7 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 
 		Map<String, Resource> resourceMap = resourceMaps.get(root);
 
-		if (resourceMap == null || resourceMap.isEmpty()) {
+		if ((resourceMap == null) || resourceMap.isEmpty()) {
 			Resource resource = jar.getResource(root);
 
 			if ((resource != null) &&
@@ -439,7 +433,7 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 			}
 
 			try (ByteArrayOutputStream byteArrayOutputStream =
-					new ByteArrayOutputStream()){
+					new ByteArrayOutputStream()) {
 
 				resource.write(byteArrayOutputStream);
 
@@ -459,6 +453,45 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 		}
 
 		return false;
+	}
+
+	protected Set<String> getTaglibURIs(String originalContent) {
+		String content = originalContent.replaceAll("<%--[\\s\\S]*?--%>", "");
+
+		int contentX = -1;
+		int contentY = content.length();
+
+		Set<String> taglibURis = new HashSet<String>();
+
+		while (true) {
+			contentX = content.lastIndexOf("<%@", contentY);
+
+			if (contentX == -1) {
+				break;
+			}
+
+			contentY = contentX;
+
+			int importX = content.indexOf("uri=\"", contentY);
+
+			int importY = -1;
+
+			if (importX != -1) {
+				importX = importX + "uri=\"".length();
+
+				importY = content.indexOf("\"", importX);
+			}
+
+			if ((importX != -1) && (importY != -1)) {
+				String s = content.substring(importX, importY);
+
+				taglibURis.add(s);
+			}
+
+			contentY -= 3;
+		}
+
+		return taglibURis;
 	}
 
 	protected boolean matchesURI(
@@ -487,7 +520,7 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 		return false;
 	}
 
-	private static final String[] _JSTL_CORE_URIS = new String[] {
+	private static final String[] _JSTL_CORE_URIS = {
 		"http://java.sun.com/jsp/jstl/core", "http://java.sun.com/jsp/jstl/fmt",
 		"http://java.sun.com/jsp/jstl/functions",
 		"http://java.sun.com/jsp/jstl/sql", "http://java.sun.com/jsp/jstl/xml"
@@ -496,13 +529,17 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 	private static final String _LOAD_EXTERNAL_DTD =
 		"http://apache.org/xml/features/nonvalidating/load-external-dtd";
 
-	private static final String[] _REQUIRED_PACKAGE_NAMES = new String[] {
-		"javax.servlet", "javax.servlet.http"
-	};
+	private static final String[] _REQUIRED_PACKAGE_NAMES =
+		{"javax.servlet", "javax.servlet.http"};
 
 	private static final Pattern _packagePattern = Pattern.compile(
 		"[_A-Za-z$][_A-Za-z0-9$]*(\\.[_A-Za-z$][_A-Za-z0-9$]*)*");
-
+	private static final Pattern _staticImportPattern = Pattern.compile(
+		"\\s*static\\s+((?<package>(\\p{javaJavaIdentifierStart}" +
+			"\\p{javaJavaIdentifierPart}*\\.)+)(\\p{javaJavaIdentifierStart}" +
+				"\\p{javaJavaIdentifierPart}*\\.)" +
+					"(\\*|(\\p{javaJavaIdentifierStart}" +
+						"\\p{javaJavaIdentifierPart}*)))\\s*");
 	private static final Pattern _tldPattern = Pattern.compile(".*\\.tld");
 
 	private final SAXParserFactory _saxParserFactory =
@@ -511,9 +548,8 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 	private class NullEntityResolver implements EntityResolver {
 
 		@Override
-		public InputSource resolveEntity(
-				String publicId, String systemId)
-			throws SAXException, IOException {
+		public InputSource resolveEntity(String publicId, String systemId)
+			throws IOException, SAXException {
 
 			return new InputSource();
 		}
@@ -527,17 +563,6 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 		}
 
 		@Override
-		public void startElement(
-				String uri, String localName, String qName,
-				Attributes attributes)
-			throws SAXException {
-
-			if (qName.equals("uri")) {
-				_inURI = true;
-			}
-		}
-
-		@Override
 		public void characters(char[] chars, int start, int length)
 			throws SAXException {
 
@@ -548,6 +573,7 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 			String value = new String(chars, start, length);
 
 			_hasURI = _uri.equals(value.replaceAll("^\\s*(.*)\\s*$", "$1"));
+
 			_inURI = false;
 		}
 
@@ -555,9 +581,20 @@ public class JspAnalyzerPlugin implements AnalyzerPlugin {
 			return _hasURI;
 		}
 
+		@Override
+		public void startElement(
+				String uri, String localName, String qName,
+				Attributes attributes)
+			throws SAXException {
+
+			if (qName.equals("uri")) {
+				_inURI = true;
+			}
+		}
+
 		private boolean _hasURI;
 		private boolean _inURI;
-		private String _uri;
+		private final String _uri;
 
 	}
 

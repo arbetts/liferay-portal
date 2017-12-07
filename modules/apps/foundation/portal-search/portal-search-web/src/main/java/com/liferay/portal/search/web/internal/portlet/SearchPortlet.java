@@ -20,15 +20,20 @@ import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.search.PortalOpenSearchImpl;
 import com.liferay.portal.search.web.constants.SearchPortletKeys;
+import com.liferay.portal.search.web.internal.display.context.SearchDisplayContext;
+import com.liferay.portal.search.web.internal.display.context.SearchDisplayContextFactory;
 
 import java.io.IOException;
 
 import javax.portlet.Portlet;
 import javax.portlet.PortletException;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.portlet.ResourceURL;
@@ -38,6 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eudaldo Alonso
@@ -68,6 +74,21 @@ import org.osgi.service.component.annotations.Component;
 public class SearchPortlet extends MVCPortlet {
 
 	@Override
+	public void render(
+			RenderRequest renderRequest, RenderResponse renderResponse)
+		throws IOException, PortletException {
+
+		SearchDisplayContext searchDisplayContext =
+			searchDisplayContextFactory.create(
+				renderRequest, renderResponse, renderRequest.getPreferences());
+
+		renderRequest.setAttribute(
+			WebKeys.PORTLET_DISPLAY_CONTEXT, searchDisplayContext);
+
+		super.render(renderRequest, renderResponse);
+	}
+
+	@Override
 	public void serveResource(
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws IOException, PortletException {
@@ -76,10 +97,10 @@ public class SearchPortlet extends MVCPortlet {
 			resourceRequest.getResourceID());
 
 		if (resourceID.equals("getOpenSearchXML")) {
-			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+			HttpServletRequest request = _portal.getHttpServletRequest(
 				resourceRequest);
 
-			HttpServletResponse response = PortalUtil.getHttpServletResponse(
+			HttpServletResponse response = _portal.getHttpServletResponse(
 				resourceResponse);
 
 			try {
@@ -90,7 +111,7 @@ public class SearchPortlet extends MVCPortlet {
 			}
 			catch (Exception e) {
 				try {
-					PortalUtil.sendError(e, request, response);
+					_portal.sendError(e, request, response);
 				}
 				catch (ServletException se) {
 				}
@@ -124,7 +145,7 @@ public class SearchPortlet extends MVCPortlet {
 			openSearchResourceURL.toString(),
 			openSearchDescriptionXMLURL.toString());
 
-		HttpServletRequest request = PortalUtil.getHttpServletRequest(
+		HttpServletRequest request = _portal.getHttpServletRequest(
 			resourceRequest);
 
 		String xml = openSearch.search(
@@ -134,5 +155,11 @@ public class SearchPortlet extends MVCPortlet {
 
 		return xml.getBytes();
 	}
+
+	@Reference
+	protected SearchDisplayContextFactory searchDisplayContextFactory;
+
+	@Reference
+	private Portal _portal;
 
 }

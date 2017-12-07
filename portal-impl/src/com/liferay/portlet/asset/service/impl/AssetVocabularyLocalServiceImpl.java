@@ -81,6 +81,7 @@ public class AssetVocabularyLocalServiceImpl
 
 		ServiceContext serviceContext = new ServiceContext();
 
+		serviceContext.setAddGuestPermissions(true);
 		serviceContext.setScopeGroupId(groupId);
 
 		return assetVocabularyLocalService.addVocabulary(
@@ -98,7 +99,7 @@ public class AssetVocabularyLocalServiceImpl
 
 		// Vocabulary
 
-		User user = userPersistence.findByPrimaryKey(userId);
+		User user = userLocalService.getUser(userId);
 		String name = titleMap.get(LocaleUtil.getSiteDefault());
 
 		validate(groupId, name);

@@ -14,34 +14,35 @@
 
 package com.liferay.asset.publisher.web.internal.portlet.toolbar.contributor;
 
-import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
-import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.publisher.web.constants.AssetPublisherPortletKeys;
+import com.liferay.asset.publisher.web.constants.AssetPublisherWebKeys;
 import com.liferay.asset.publisher.web.display.context.AssetPublisherDisplayContext;
+import com.liferay.asset.publisher.web.internal.util.AssetPublisherWebUtil;
+import com.liferay.asset.publisher.web.util.AssetPublisherCustomizer;
+import com.liferay.asset.util.AssetHelper;
+import com.liferay.asset.util.impl.AssetPublisherAddItemHolder;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.portlet.toolbar.contributor.BasePortletToolbarContributor;
 import com.liferay.portal.kernel.portlet.toolbar.contributor.PortletToolbarContributor;
 import com.liferay.portal.kernel.service.GroupLocalService;
-import com.liferay.portal.kernel.servlet.taglib.ui.Menu;
 import com.liferay.portal.kernel.servlet.taglib.ui.MenuItem;
 import com.liferay.portal.kernel.servlet.taglib.ui.URLMenuItem;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.asset.util.AssetUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,25 +72,7 @@ import org.osgi.service.component.annotations.Reference;
 	}
 )
 public class AssetPublisherPortletToolbarContributor
-	implements PortletToolbarContributor {
-
-	@Override
-	public List<Menu> getPortletTitleMenus(
-		PortletRequest portletRequest, PortletResponse portletResponse) {
-
-		Menu addEntryPortletTitleMenu = getAddEntryPortletTitleMenu(
-			portletRequest, portletResponse);
-
-		if (addEntryPortletTitleMenu == null) {
-			return Collections.emptyList();
-		}
-
-		List<Menu> menus = new ArrayList<>();
-
-		menus.add(addEntryPortletTitleMenu);
-
-		return menus;
-	}
+	extends BasePortletToolbarContributor {
 
 	protected void addPortletTitleAddAssetEntryMenuItems(
 			List<MenuItem> menuItems, PortletRequest portletRequest,
@@ -99,56 +82,51 @@ public class AssetPublisherPortletToolbarContributor
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		Group scopeGroup = themeDisplay.getScopeGroup();
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
-		String portletName = portletDisplay.getPortletName();
+		AssetPublisherCustomizer assetPublisherCustomizer =
+			(AssetPublisherCustomizer)portletRequest.getAttribute(
+				AssetPublisherWebKeys.ASSET_PUBLISHER_CUSTOMIZER);
 
 		AssetPublisherDisplayContext assetPublisherDisplayContext =
 			new AssetPublisherDisplayContext(
-				portletRequest, portletResponse,
+				assetPublisherCustomizer, portletRequest, portletResponse,
 				portletRequest.getPreferences());
 
-		if (!assetPublisherDisplayContext.isShowAddContentButton() ||
-			(scopeGroup == null) || scopeGroup.isLayoutPrototype() ||
-			(scopeGroup.hasStagingGroup() && !scopeGroup.isStagingGroup() &&
-			 PropsValues.STAGING_LIVE_GROUP_LOCKING_ENABLED) ||
-			portletName.equals(
-				AssetPublisherPortletKeys.HIGHEST_RATED_ASSETS) ||
-			portletName.equals(AssetPublisherPortletKeys.MOST_VIEWED_ASSETS) ||
-			portletName.equals(AssetPublisherPortletKeys.RELATED_ASSETS)) {
-
+		if (!_isVisible(assetPublisherDisplayContext, portletRequest)) {
 			return;
 		}
 
-		Map<Long, Map<String, PortletURL>> scopeAddPortletURLs =
-			assetPublisherDisplayContext.getScopeAddPortletURLs(1);
+		Map<Long, List<AssetPublisherAddItemHolder>>
+			scopeAssetPublisherAddItemHolders =
+				assetPublisherDisplayContext.
+					getScopeAssetPublisherAddItemHolders(1);
 
-		if (MapUtil.isEmpty(scopeAddPortletURLs)) {
+		if (MapUtil.isEmpty(scopeAssetPublisherAddItemHolders)) {
 			return;
 		}
 
-		if (scopeAddPortletURLs.size() == 1) {
-			Set<Map.Entry<Long, Map<String, PortletURL>>> entrySet =
-				scopeAddPortletURLs.entrySet();
+		if (scopeAssetPublisherAddItemHolders.size() == 1) {
+			Set<Map.Entry<Long, List<AssetPublisherAddItemHolder>>> entrySet =
+				scopeAssetPublisherAddItemHolders.entrySet();
 
-			Iterator<Map.Entry<Long, Map<String, PortletURL>>> iterator =
-				entrySet.iterator();
+			Iterator<Map.Entry<Long, List<AssetPublisherAddItemHolder>>>
+				iterator = entrySet.iterator();
 
-			Map.Entry<Long, Map<String, PortletURL>> scopeAddPortletURL =
-				iterator.next();
+			Map.Entry<Long, List<AssetPublisherAddItemHolder>>
+				scopeAddPortletURL = iterator.next();
 
 			long groupId = scopeAddPortletURL.getKey();
 
-			Map<String, PortletURL> addPortletURLs =
+			List<AssetPublisherAddItemHolder> assetPublisherAddItemHolders =
 				scopeAddPortletURL.getValue();
 
-			for (Map.Entry<String, PortletURL> entry :
-					addPortletURLs.entrySet()) {
+			for (AssetPublisherAddItemHolder assetPublisherAddItemHolder :
+					assetPublisherAddItemHolders) {
 
 				URLMenuItem urlMenuItem = _getPortletTitleAddAssetEntryMenuItem(
 					themeDisplay, assetPublisherDisplayContext, groupId,
-					entry.getKey(), entry.getValue());
+					assetPublisherAddItemHolder);
 
 				menuItems.add(urlMenuItem);
 			}
@@ -176,7 +154,7 @@ public class AssetPublisherPortletToolbarContributor
 		urlMenuItem.setLabel(title);
 
 		LiferayPortletResponse liferayPortletResponse =
-			PortalUtil.getLiferayPortletResponse(portletResponse);
+			_portal.getLiferayPortletResponse(portletResponse);
 
 		PortletURL portletURL = liferayPortletResponse.createRenderURL();
 
@@ -191,36 +169,7 @@ public class AssetPublisherPortletToolbarContributor
 		menuItems.add(urlMenuItem);
 	}
 
-	protected Menu getAddEntryPortletTitleMenu(
-		PortletRequest portletRequest, PortletResponse portletResponse) {
-
-		List<MenuItem> portletTitleMenuItems = getPortletTitleMenuItems(
-			portletRequest, portletResponse);
-
-		if (ListUtil.isEmpty(portletTitleMenuItems)) {
-			return null;
-		}
-
-		Menu menu = new Menu();
-
-		Map<String, Object> data = new HashMap<>();
-
-		data.put("qa-id", "addButton");
-
-		menu.setData(data);
-
-		menu.setDirection("right");
-		menu.setExtended(false);
-		menu.setIcon("plus");
-		menu.setMarkupView("lexicon");
-		menu.setMenuItems(portletTitleMenuItems);
-		menu.setScroll(false);
-		menu.setShowArrow(false);
-		menu.setShowWhenSingleIcon(true);
-
-		return menu;
-	}
-
+	@Override
 	protected List<MenuItem> getPortletTitleMenuItems(
 		PortletRequest portletRequest, PortletResponse portletResponse) {
 
@@ -245,7 +194,7 @@ public class AssetPublisherPortletToolbarContributor
 	private URLMenuItem _getPortletTitleAddAssetEntryMenuItem(
 		ThemeDisplay themeDisplay,
 		AssetPublisherDisplayContext assetPublisherDisplayContext, long groupId,
-		String className, PortletURL portletURL) {
+		AssetPublisherAddItemHolder assetPublisherAddItemHolder) {
 
 		URLMenuItem urlMenuItem = new URLMenuItem();
 
@@ -256,8 +205,7 @@ public class AssetPublisherPortletToolbarContributor
 		data.put(
 			"id", HtmlUtil.escape(portletDisplay.getNamespace()) + "editAsset");
 
-		String message = AssetUtil.getClassNameMessage(
-			className, themeDisplay.getLocale());
+		String message = assetPublisherAddItemHolder.getModelResource();
 
 		String title = LanguageUtil.format(
 			themeDisplay.getLocale(), "new-x", message, false);
@@ -272,24 +220,22 @@ public class AssetPublisherPortletToolbarContributor
 
 		Group group = _groupLocalService.fetchGroup(groupId);
 
-		AssetRendererFactory<?> assetRendererFactory =
-			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
-				AssetUtil.getClassName(className));
-
-		if (!group.isStagedPortlet(assetRendererFactory.getPortletId()) &&
+		if (!group.isStagedPortlet(
+				assetPublisherAddItemHolder.getPortletId()) &&
 			!group.isStagedRemotely()) {
 
 			curGroupId = group.getLiveGroupId();
 		}
 
-		boolean addDisplayPageParameter = AssetUtil.isDefaultAssetPublisher(
-			themeDisplay.getLayout(), portletDisplay.getId(),
-			assetPublisherDisplayContext.getPortletResource());
+		boolean addDisplayPageParameter =
+			_assetPublisherWebUtil.isDefaultAssetPublisher(
+				themeDisplay.getLayout(), portletDisplay.getId(),
+				assetPublisherDisplayContext.getPortletResource());
 
-		String url = AssetUtil.getAddURLPopUp(
-			curGroupId, themeDisplay.getPlid(), portletURL,
-			assetRendererFactory.getPortletId(), addDisplayPageParameter,
-			themeDisplay.getLayout());
+		String url = _assetHelper.getAddURLPopUp(
+			curGroupId, themeDisplay.getPlid(),
+			assetPublisherAddItemHolder.getPortletURL(),
+			addDisplayPageParameter, themeDisplay.getLayout());
 
 		urlMenuItem.setURL(url);
 
@@ -298,9 +244,66 @@ public class AssetPublisherPortletToolbarContributor
 		return urlMenuItem;
 	}
 
+	private boolean _isVisible(
+		AssetPublisherDisplayContext assetPublisherDisplayContext,
+		PortletRequest portletRequest) {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (!assetPublisherDisplayContext.isShowAddContentButton()) {
+			return false;
+		}
+
+		Group scopeGroup = themeDisplay.getScopeGroup();
+
+		if (scopeGroup.hasStagingGroup() && !scopeGroup.isStagingGroup() &&
+			PropsValues.STAGING_LIVE_GROUP_LOCKING_ENABLED) {
+
+			return false;
+		}
+
+		Layout layout = themeDisplay.getLayout();
+
+		if (layout.isLayoutPrototypeLinkActive() &&
+			assetPublisherDisplayContext.isSelectionStyleManual()) {
+
+			return false;
+		}
+
+		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
+
+		String portletName = portletDisplay.getPortletName();
+
+		if (portletName.equals(
+				AssetPublisherPortletKeys.HIGHEST_RATED_ASSETS)) {
+
+			return false;
+		}
+
+		if (portletName.equals(AssetPublisherPortletKeys.MOST_VIEWED_ASSETS)) {
+			return false;
+		}
+
+		if (portletName.equals(AssetPublisherPortletKeys.RELATED_ASSETS)) {
+			return false;
+		}
+
+		return true;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		AssetPublisherPortletToolbarContributor.class);
 
+	@Reference
+	private AssetHelper _assetHelper;
+
+	@Reference
+	private AssetPublisherWebUtil _assetPublisherWebUtil;
+
 	private GroupLocalService _groupLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

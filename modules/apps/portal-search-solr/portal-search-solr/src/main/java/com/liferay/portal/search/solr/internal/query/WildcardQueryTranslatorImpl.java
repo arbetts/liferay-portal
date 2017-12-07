@@ -14,11 +14,13 @@
 
 package com.liferay.portal.search.solr.internal.query;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.search.QueryTerm;
 import com.liferay.portal.kernel.search.WildcardQuery;
 import com.liferay.portal.search.solr.query.WildcardQueryTranslator;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.QueryParser;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -37,13 +39,45 @@ public class WildcardQueryTranslatorImpl implements WildcardQueryTranslator {
 
 		org.apache.lucene.search.WildcardQuery luceneWildcardQuery =
 			new org.apache.lucene.search.WildcardQuery(
-				new Term(queryTerm.getField(), queryTerm.getValue()));
+				new Term(queryTerm.getField(), escape(queryTerm.getValue())));
 
 		if (!wildcardQuery.isDefaultBoost()) {
 			luceneWildcardQuery.setBoost(wildcardQuery.getBoost());
 		}
 
 		return luceneWildcardQuery;
+	}
+
+	protected String escape(String value) {
+		int x = 0;
+		int y = 0;
+		int length = value.length();
+
+		StringBuilder sb = new StringBuilder(length * 2);
+
+		while (y < length) {
+			char c = value.charAt(y);
+
+			if ((c == CharPool.QUESTION) || (c == CharPool.SPACE) ||
+				(c == CharPool.STAR)) {
+
+				sb.append(QueryParser.escape(value.substring(x, y)));
+
+				if (c == CharPool.SPACE) {
+					sb.append(CharPool.BACK_SLASH);
+				}
+
+				sb.append(c);
+
+				x = y + 1;
+			}
+
+			y++;
+		}
+
+		sb.append(QueryParser.escape(value.substring(x)));
+
+		return sb.toString();
 	}
 
 }

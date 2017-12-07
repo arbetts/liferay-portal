@@ -24,11 +24,11 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @ExtendedObjectClassDefinition(category = "foundation")
 @Meta.OCD(
 	id = "com.liferay.portal.osgi.web.wab.extender.internal.configuration.WabExtenderConfiguration",
-	localization = "content/Language", name = "wab.extender.configuration.name"
+	localization = "content/Language", name = "wab-extender-configuration-name"
 )
 public interface WabExtenderConfiguration {
 
-	@Meta.AD(deflt = "60000", required = false)
+	@Meta.AD(deflt = "60000", name = "stop-timeout", required = false)
 	public long stopTimeout();
 
 }

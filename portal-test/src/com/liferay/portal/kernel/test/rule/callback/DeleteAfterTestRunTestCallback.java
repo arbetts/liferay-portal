@@ -34,6 +34,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -85,9 +86,11 @@ public class DeleteAfterTestRunTestCallback
 							fieldClass.getComponentType())) {
 
 						throw new IllegalArgumentException(
-							"Unable to annotate field " + field +
-								" because it is not an array of type " +
-									PersistedModel.class.getName());
+							StringBundler.concat(
+								"Unable to annotate field ",
+								String.valueOf(field),
+								" because it is not an array of type ",
+								PersistedModel.class.getName()));
 					}
 
 					addField(
@@ -110,9 +113,11 @@ public class DeleteAfterTestRunTestCallback
 
 					if (collectionType == null) {
 						throw new IllegalArgumentException(
-							"Unable to annotate field " + field +
-								" because it is not a collection of type " +
-									PersistedModel.class.getName());
+							StringBundler.concat(
+								"Unable to annotate field ",
+								String.valueOf(field),
+								" because it is not a collection of type ",
+								PersistedModel.class.getName()));
 					}
 
 					addField(
@@ -210,7 +215,8 @@ public class DeleteAfterTestRunTestCallback
 				}
 
 				classes.add(clazz.getSuperclass());
-				classes.addAll(Arrays.asList(clazz.getInterfaces()));
+
+				Collections.addAll(classes, clazz.getInterfaces());
 			}
 		}
 

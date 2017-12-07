@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.util;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
 
 import java.io.Serializable;
@@ -94,7 +95,14 @@ public abstract class OrderByComparator<T>
 
 	@Override
 	public String toString() {
-		return getOrderBy();
+		String orderBy = getOrderBy();
+
+		if (orderBy == null) {
+			return super.toString();
+		}
+		else {
+			return orderBy;
+		}
 	}
 
 	private static final String _ORDER_BY_DESC = " DESC";

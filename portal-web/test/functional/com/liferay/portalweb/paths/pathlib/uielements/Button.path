@@ -19,6 +19,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ADD_ACTION</td>
+	<td>//span[contains(.,'Add Action')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ADD_ATTACHMENTS</td>
 	<td>//button[contains(.,'Add Attachments')]</td>
 	<td></td>
@@ -50,7 +55,7 @@
 </tr>
 <tr>
 	<td>ADD_ENTRY</td>
-	<td>//button[contains(.,'Add Entry')]</td>
+	<td>//button[contains(.,'Add Entry')]|//a[@data-original-title='Add Entry']</td>
 	<td></td>
 </tr>
 <tr>
@@ -131,6 +136,16 @@
 <tr>
 	<td>ADD_WIKI</td>
 	<td>//a[contains(@id,'addNodeButton') and contains(.,'Add Wiki')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADVANCED_REPLY</td>
+	<td>//button/span[contains(.,'Advanced Reply')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ANY</td>
+	<td>//a[normalize-space()='${key_text}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -255,7 +270,7 @@
 </tr>
 <tr>
 	<td>COLOR_EFFECT</td>
-	<td>//a[@class='btn']//*[name()='svg'][@data-icon='effects']</td>
+	<td>//a[contains(@class, 'btn')]//*[name()='svg'][@data-icon='effects']</td>
 	<td></td>
 </tr>
 <tr>
@@ -281,6 +296,16 @@
 <tr>
 	<td>COPY</td>
 	<td>//button[contains(.,'Copy')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COPY_FROM_LIVE</td>
+	<td>//button[contains(.,'Copy from Live')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CREATE_CERTIFICATE</td>
+	<td>//button[contains(.,'Create Certificate')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -324,8 +349,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DOWNLOAD_CERTIFICATE</td>
+	<td>//a[contains(.,'Download Certificate')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>EDIT</td>
 	<td>//a[contains(@class,'btn') and contains(.,'Edit')] | //a[contains(@id,'edit') and contains(@class,'btn')] | //button[contains(.,'Edit')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>EDIT_PENCIL</td>
+	<td>//a[contains(@class,'btn')]//i[contains(@class,'icon-pencil')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -360,7 +395,7 @@
 </tr>
 <tr>
 	<td>FILTER_EFFECT</td>
-	<td>//a[@class='btn' and (@data-control='effects')]//*[name()='svg'][contains(@class,'lexicon-icon')]</td>
+	<td>//a[contains(@class,'btn') and (@data-control='effects')]//*[name()='svg'][contains(@class,'lexicon-icon')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -416,6 +451,11 @@
 <tr>
 	<td>ITEMS_PER_PAGE</td>
 	<td>//a[contains(@title,'Items per Page')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>LEAVE</td>
+	<td>//button[contains(.,'Leave')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -504,6 +544,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PREVIOUS</td>
+	<td>//button[contains(.,'Previous')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PUBLISH</td>
 	<td>//button[span[contains(.,'Publish')]]</td>
 	<td></td>
@@ -549,6 +594,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>REPLACE_CERTIFICATE</td>
+	<td>//button[contains(.,'Replace Certificate')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>REPLY</td>
 	<td>//button[contains(.,'Reply')]</td>
 	<td></td>
@@ -570,12 +620,12 @@
 </tr>
 <tr>
 	<td>ROTATE_LEFT</td>
-	<td>//a[contains(@class,'btn') and (@data-onclick='rotateLeft')]</td>
+	<td>//div[contains(@id,'rotate')]/a[contains(@class,'btn-link')][1]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ROTATE_RIGHT</td>
-	<td>//a[contains(@class,'btn') and (@data-onclick='rotateRight')]</td>
+	<td>//div[contains(@id,'rotate')]/a[contains(@class,'btn-link')][2]</td>
 	<td></td>
 </tr>
 <tr>
@@ -644,6 +694,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SELECT_MOBILE_DEVICE_RULES</td>
+	<td>//div[@class='btn-toolbar']/button[contains(.,'Select')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SELECT_PAGES</td>
 	<td>//button[contains(.,'Select Pages')]</td>
 	<td></td>
@@ -694,8 +749,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>STAY</td>
+	<td>//button[contains(.,'Stay')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SUBMIT</td>
 	<td>//button[@type='submit']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>TAB_SUBMIT_BTN</td>
+	<td>//button[contains(@type,'submit') and contains(.,'${key_tab}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -705,7 +770,7 @@
 </tr>
 <tr>
 	<td>TRANSFORM</td>
-	<td>//a[@class='btn']//*[name()='svg'][@data-icon='transform']</td>
+	<td>//a[contains(@class, 'btn')]//*[name()='svg'][@data-icon='transform']</td>
 	<td></td>
 </tr>
 <tr>
@@ -716,6 +781,16 @@
 <tr>
 	<td>UNLOCK</td>
 	<td>//button[contains(.,'Unlock')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>UNPUBLISH</td>
+	<td>//button[contains(@id,'publish') and contains(.,'Unpublish')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>UNSUBSCRIBE</td>
+	<td>//button[contains(.,'Unsubscribe')]</td>
 	<td></td>
 </tr>
 <tr>

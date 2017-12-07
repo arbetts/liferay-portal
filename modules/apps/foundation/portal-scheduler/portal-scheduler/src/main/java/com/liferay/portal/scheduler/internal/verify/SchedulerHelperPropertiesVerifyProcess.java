@@ -18,8 +18,9 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.LoggingTimer;
 import com.liferay.portal.kernel.util.Props;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.scheduler.configuration.SchedulerEngineHelperConfiguration;
+import com.liferay.portal.scheduler.internal.configuration.SchedulerEngineHelperConfiguration;
 import com.liferay.portal.verify.VerifyProcess;
 
 import java.util.Dictionary;
@@ -33,7 +34,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Michael C. Han
  */
 @Component(
-	immediate = true,
+	enabled = false, immediate = true,
 	property = {"verify.process.name=com.liferay.portal.scheduler.internal.verify"},
 	service = VerifyProcess.class
 )
@@ -54,7 +55,8 @@ public class SchedulerHelperPropertiesVerifyProcess extends VerifyProcess {
 			}
 
 			Configuration configuration = configurationAdmin.getConfiguration(
-				SchedulerEngineHelperConfiguration.class.getName());
+				SchedulerEngineHelperConfiguration.class.getName(),
+				StringPool.QUESTION);
 
 			Dictionary<String, Object> properties = new HashMapDictionary<>();
 

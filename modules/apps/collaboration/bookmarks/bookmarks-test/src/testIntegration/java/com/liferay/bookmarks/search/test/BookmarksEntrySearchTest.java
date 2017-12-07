@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.search.test.BaseSearchTestCase;
+import com.liferay.portal.search.test.util.BaseSearchTestCase;
 import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
@@ -192,14 +192,12 @@ public class BookmarksEntrySearchTest extends BaseSearchTestCase {
 	}
 
 	@Override
-	protected long searchGroupEntriesCount(long groupId, long creatorUserId)
+	protected Hits searchGroupEntries(long groupId, long creatorUserId)
 		throws Exception {
 
-		Hits hits = BookmarksEntryServiceUtil.search(
+		return BookmarksEntryServiceUtil.search(
 			groupId, creatorUserId, WorkflowConstants.STATUS_APPROVED,
 			QueryUtil.ALL_POS, QueryUtil.ALL_POS);
-
-		return hits.getLength();
 	}
 
 	@Override

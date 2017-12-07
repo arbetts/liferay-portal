@@ -16,10 +16,13 @@ package com.liferay.item.selector.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.item.selector.ItemSelectorCriterion;
+import com.liferay.item.selector.ItemSelectorCriterionSerializer;
 import com.liferay.item.selector.ItemSelectorReturnType;
 import com.liferay.item.selector.ItemSelectorView;
 import com.liferay.item.selector.ItemSelectorViewReturnTypeProvider;
-import com.liferay.item.selector.web.ItemSelectorCriterionSerializer;
+import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.test.rule.Inject;
+import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,17 +30,16 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -46,29 +48,21 @@ import org.osgi.framework.ServiceRegistration;
 @RunWith(Arquillian.class)
 public class ItemSelectorCriterionSerializerTest {
 
+	@ClassRule
+	@Rule
+	public static final AggregateTestRule aggregateTestRule =
+		new LiferayIntegrationTestRule();
+
 	@Before
 	public void setUp() throws Exception {
-		_bundle = FrameworkUtil.getBundle(
+		Bundle bundle = FrameworkUtil.getBundle(
 			ItemSelectorCriterionSerializerTest.class);
 
-		_bundleContext = _bundle.getBundleContext();
-
-		_serviceReference = _bundleContext.getServiceReference(
-			ItemSelectorCriterionSerializer.class);
-
-		_itemSelectorCriterionSerializer = _bundleContext.getService(
-			_serviceReference);
-	}
-
-	@After
-	public void tearDown() throws BundleException {
-		_bundleContext.ungetService(_serviceReference);
+		_bundleContext = bundle.getBundleContext();
 	}
 
 	@Test
-	public void
-		testSerializationAndDeserializationWithProvidedSupportedReturnTypes() {
-
+	public void testSerializationAndDeserializationWithProvidedSupportedReturnTypes() {
 		TestItemSelectorView testItemSelectorView = new TestItemSelectorView();
 
 		ServiceRegistration<ItemSelectorView>
@@ -108,7 +102,8 @@ public class ItemSelectorCriterionSerializerTest {
 						getDesiredItemSelectorReturnTypes();
 
 			Assert.assertEquals(
-				1, deserializedDesiredItemSelectorReturnTypes.size());
+				deserializedDesiredItemSelectorReturnTypes.toString(), 1,
+				deserializedDesiredItemSelectorReturnTypes.size());
 
 			ItemSelectorReturnType deserializedItemSelectorReturnType =
 				deserializedDesiredItemSelectorReturnTypes.get(0);
@@ -160,9 +155,9 @@ public class ItemSelectorCriterionSerializerTest {
 		serviceRegistrations.forEach(ServiceRegistration::unregister);
 	}
 
-	private Bundle _bundle;
 	private BundleContext _bundleContext;
+
+	@Inject
 	private ItemSelectorCriterionSerializer _itemSelectorCriterionSerializer;
-	private ServiceReference<ItemSelectorCriterionSerializer> _serviceReference;
 
 }

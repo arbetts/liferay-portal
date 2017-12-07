@@ -1,8 +1,7 @@
-import Component from 'metal-component/src/Component';
-import Soy from 'metal-soy/src/Soy';
-
-import core from 'metal/src/core';
-import { CancellablePromise } from 'metal-promise/src/promise/Promise';
+import Component from 'metal-component';
+import Soy from 'metal-soy';
+import { CancellablePromise } from 'metal-promise';
+import { core } from 'metal';
 
 import componentTemplates from './CropComponent.soy';
 import controlsTemplates from './CropControls.soy';
@@ -25,7 +24,7 @@ class CropComponent extends Component {
 		var horizontalRatio = imageData.width / imageCanvas.offsetWidth;
 		var verticalRatio = imageData.height / imageCanvas.offsetHeight;
 
-		let cropHandles = this.components[this.key + 'CropHandles'];
+		let cropHandles = this.components[this.ref + 'CropHandles'];
 		let selection = {
 			height: cropHandles.element.offsetHeight,
 			left: cropHandles.element.offsetLeft - imageCanvas.offsetLeft,

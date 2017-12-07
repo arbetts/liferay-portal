@@ -45,7 +45,6 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
@@ -53,6 +52,8 @@ import com.liferay.portal.model.impl.GroupImpl;
 import com.liferay.portal.model.impl.GroupModelImpl;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Field;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -231,7 +232,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_UUID_3);
 			}
 			else {
@@ -318,7 +319,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append("uuid=");
 		msg.append(uuid);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -366,7 +367,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append("uuid=");
 		msg.append(uuid);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -456,7 +457,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		if (uuid == null) {
 			query.append(_FINDER_COLUMN_UUID_UUID_1);
 		}
-		else if (uuid.equals(StringPool.BLANK)) {
+		else if (uuid.equals("")) {
 			query.append(_FINDER_COLUMN_UUID_UUID_3);
 		}
 		else {
@@ -592,7 +593,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_UUID_3);
 			}
 			else {
@@ -671,7 +672,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			msg.append(", groupId=");
 			msg.append(groupId);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -734,7 +735,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_G_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_G_UUID_3);
 			}
 			else {
@@ -841,7 +842,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_G_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_G_UUID_3);
 			}
 			else {
@@ -1038,7 +1039,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 			}
 			else {
@@ -1133,7 +1134,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -1186,7 +1187,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -1280,7 +1281,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		if (uuid == null) {
 			query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 		}
-		else if (uuid.equals(StringPool.BLANK)) {
+		else if (uuid.equals("")) {
 			query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 		}
 		else {
@@ -1422,7 +1423,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 			}
 			else {
@@ -1681,7 +1682,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append("companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -1729,7 +1730,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append("companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -2000,7 +2001,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			msg.append("liveGroupId=");
 			msg.append(liveGroupId);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -2413,7 +2414,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", classNameId=");
 		msg.append(classNameId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -2467,7 +2468,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", classNameId=");
 		msg.append(classNameId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -2952,7 +2953,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", parentGroupId=");
 		msg.append(parentGroupId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -3007,7 +3008,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", parentGroupId=");
 		msg.append(parentGroupId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -3297,7 +3298,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			msg.append(", groupKey=");
 			msg.append(groupKey);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -3362,7 +3363,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (groupKey == null) {
 				query.append(_FINDER_COLUMN_C_GK_GROUPKEY_1);
 			}
-			else if (groupKey.equals(StringPool.BLANK)) {
+			else if (groupKey.equals("")) {
 				query.append(_FINDER_COLUMN_C_GK_GROUPKEY_3);
 			}
 			else {
@@ -3469,7 +3470,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (groupKey == null) {
 				query.append(_FINDER_COLUMN_C_GK_GROUPKEY_1);
 			}
-			else if (groupKey.equals(StringPool.BLANK)) {
+			else if (groupKey.equals("")) {
 				query.append(_FINDER_COLUMN_C_GK_GROUPKEY_3);
 			}
 			else {
@@ -3531,7 +3532,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the group where companyId = &#63; and friendlyURL = &#63; or throws a {@link NoSuchGroupException} if it could not be found.
 	 *
 	 * @param companyId the company ID
-	 * @param friendlyURL the friendly u r l
+	 * @param friendlyURL the friendly url
 	 * @return the matching group
 	 * @throws NoSuchGroupException if a matching group could not be found
 	 */
@@ -3551,7 +3552,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			msg.append(", friendlyURL=");
 			msg.append(friendlyURL);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -3567,7 +3568,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the group where companyId = &#63; and friendlyURL = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
 	 * @param companyId the company ID
-	 * @param friendlyURL the friendly u r l
+	 * @param friendlyURL the friendly url
 	 * @return the matching group, or <code>null</code> if a matching group could not be found
 	 */
 	@Override
@@ -3579,7 +3580,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the group where companyId = &#63; and friendlyURL = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param companyId the company ID
-	 * @param friendlyURL the friendly u r l
+	 * @param friendlyURL the friendly url
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching group, or <code>null</code> if a matching group could not be found
 	 */
@@ -3616,7 +3617,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (friendlyURL == null) {
 				query.append(_FINDER_COLUMN_C_F_FRIENDLYURL_1);
 			}
-			else if (friendlyURL.equals(StringPool.BLANK)) {
+			else if (friendlyURL.equals("")) {
 				query.append(_FINDER_COLUMN_C_F_FRIENDLYURL_3);
 			}
 			else {
@@ -3685,7 +3686,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Removes the group where companyId = &#63; and friendlyURL = &#63; from the database.
 	 *
 	 * @param companyId the company ID
-	 * @param friendlyURL the friendly u r l
+	 * @param friendlyURL the friendly url
 	 * @return the group that was removed
 	 */
 	@Override
@@ -3700,7 +3701,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the number of groups where companyId = &#63; and friendlyURL = &#63;.
 	 *
 	 * @param companyId the company ID
-	 * @param friendlyURL the friendly u r l
+	 * @param friendlyURL the friendly url
 	 * @return the number of matching groups
 	 */
 	@Override
@@ -3723,7 +3724,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (friendlyURL == null) {
 				query.append(_FINDER_COLUMN_C_F_FRIENDLYURL_1);
 			}
-			else if (friendlyURL.equals(StringPool.BLANK)) {
+			else if (friendlyURL.equals("")) {
 				query.append(_FINDER_COLUMN_C_F_FRIENDLYURL_3);
 			}
 			else {
@@ -3998,7 +3999,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", site=");
 		msg.append(site);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -4051,7 +4052,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", site=");
 		msg.append(site);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -4534,7 +4535,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", active=");
 		msg.append(active);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -4587,7 +4588,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", active=");
 		msg.append(active);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -4867,7 +4868,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns all the groups where classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @return the matching groups
 	 */
 	@Override
@@ -4884,7 +4885,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * </p>
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param start the lower bound of the range of groups
 	 * @param end the upper bound of the range of groups (not inclusive)
 	 * @return the range of matching groups
@@ -4903,7 +4904,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * </p>
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param start the lower bound of the range of groups
 	 * @param end the upper bound of the range of groups (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -4924,7 +4925,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * </p>
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param start the lower bound of the range of groups
 	 * @param end the upper bound of the range of groups (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -5047,7 +5048,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the first group in the ordered set where classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching group
 	 * @throws NoSuchGroupException if a matching group could not be found
@@ -5071,7 +5072,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", classPK=");
 		msg.append(classPK);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -5080,7 +5081,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the first group in the ordered set where classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching group, or <code>null</code> if a matching group could not be found
 	 */
@@ -5101,7 +5102,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the last group in the ordered set where classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching group
 	 * @throws NoSuchGroupException if a matching group could not be found
@@ -5125,7 +5126,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", classPK=");
 		msg.append(classPK);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -5134,7 +5135,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the last group in the ordered set where classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching group, or <code>null</code> if a matching group could not be found
 	 */
@@ -5162,7 +5163,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 *
 	 * @param groupId the primary key of the current group
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next group
 	 * @throws NoSuchGroupException if a group with the primary key could not be found
@@ -5312,7 +5313,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Removes all the groups where classNameId = &#63; and classPK = &#63; from the database.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 */
 	@Override
 	public void removeByC_CPK(long classNameId, long classPK) {
@@ -5326,7 +5327,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 * Returns the number of groups where classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @return the number of matching groups
 	 */
 	@Override
@@ -5606,7 +5607,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", active=");
 		msg.append(active);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -5659,7 +5660,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", active=");
 		msg.append(active);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -6147,7 +6148,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", parentGroupId=");
 		msg.append(parentGroupId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -6208,7 +6209,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", parentGroupId=");
 		msg.append(parentGroupId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -6341,7 +6342,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 *
 	 * @param companyId the company ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @return the matching group
 	 * @throws NoSuchGroupException if a matching group could not be found
 	 */
@@ -6364,7 +6365,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			msg.append(", classPK=");
 			msg.append(classPK);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -6381,7 +6382,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 *
 	 * @param companyId the company ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @return the matching group, or <code>null</code> if a matching group could not be found
 	 */
 	@Override
@@ -6394,7 +6395,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 *
 	 * @param companyId the company ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching group, or <code>null</code> if a matching group could not be found
 	 */
@@ -6492,7 +6493,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 *
 	 * @param companyId the company ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @return the group that was removed
 	 */
 	@Override
@@ -6508,7 +6509,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	 *
 	 * @param companyId the company ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @return the number of matching groups
 	 */
 	@Override
@@ -6819,7 +6820,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", parentGroupId=");
 		msg.append(parentGroupId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -6880,7 +6881,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", parentGroupId=");
 		msg.append(parentGroupId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -7403,7 +7404,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", site=");
 		msg.append(site);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -7464,7 +7465,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", site=");
 		msg.append(site);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -7778,7 +7779,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			msg.append(", groupKey=");
 			msg.append(groupKey);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -7848,7 +7849,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (groupKey == null) {
 				query.append(_FINDER_COLUMN_C_L_GK_GROUPKEY_1);
 			}
-			else if (groupKey.equals(StringPool.BLANK)) {
+			else if (groupKey.equals("")) {
 				query.append(_FINDER_COLUMN_C_L_GK_GROUPKEY_3);
 			}
 			else {
@@ -7962,7 +7963,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (groupKey == null) {
 				query.append(_FINDER_COLUMN_C_L_GK_GROUPKEY_1);
 			}
-			else if (groupKey.equals(StringPool.BLANK)) {
+			else if (groupKey.equals("")) {
 				query.append(_FINDER_COLUMN_C_L_GK_GROUPKEY_3);
 			}
 			else {
@@ -8012,6 +8013,614 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 	private static final String _FINDER_COLUMN_C_L_GK_GROUPKEY_1 = "group_.groupKey IS NULL";
 	private static final String _FINDER_COLUMN_C_L_GK_GROUPKEY_2 = "group_.groupKey = ?";
 	private static final String _FINDER_COLUMN_C_L_GK_GROUPKEY_3 = "(group_.groupKey IS NULL OR group_.groupKey = '')";
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_C_T_S = new FinderPath(GroupModelImpl.ENTITY_CACHE_ENABLED,
+			GroupModelImpl.FINDER_CACHE_ENABLED, GroupImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByC_T_S",
+			new String[] {
+				Long.class.getName(), String.class.getName(),
+				Boolean.class.getName(),
+				
+			Integer.class.getName(), Integer.class.getName(),
+				OrderByComparator.class.getName()
+			});
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_COUNT_BY_C_T_S = new FinderPath(GroupModelImpl.ENTITY_CACHE_ENABLED,
+			GroupModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "countByC_T_S",
+			new String[] {
+				Long.class.getName(), String.class.getName(),
+				Boolean.class.getName()
+			});
+
+	/**
+	 * Returns all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @return the matching groups
+	 */
+	@Override
+	public List<Group> findByC_T_S(long companyId, String treePath, boolean site) {
+		return findByC_T_S(companyId, treePath, site, QueryUtil.ALL_POS,
+			QueryUtil.ALL_POS, null);
+	}
+
+	/**
+	 * Returns a range of all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link GroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @param start the lower bound of the range of groups
+	 * @param end the upper bound of the range of groups (not inclusive)
+	 * @return the range of matching groups
+	 */
+	@Override
+	public List<Group> findByC_T_S(long companyId, String treePath,
+		boolean site, int start, int end) {
+		return findByC_T_S(companyId, treePath, site, start, end, null);
+	}
+
+	/**
+	 * Returns an ordered range of all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link GroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @param start the lower bound of the range of groups
+	 * @param end the upper bound of the range of groups (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching groups
+	 */
+	@Override
+	public List<Group> findByC_T_S(long companyId, String treePath,
+		boolean site, int start, int end,
+		OrderByComparator<Group> orderByComparator) {
+		return findByC_T_S(companyId, treePath, site, start, end,
+			orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link GroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @param start the lower bound of the range of groups
+	 * @param end the upper bound of the range of groups (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching groups
+	 */
+	@Override
+	public List<Group> findByC_T_S(long companyId, String treePath,
+		boolean site, int start, int end,
+		OrderByComparator<Group> orderByComparator, boolean retrieveFromCache) {
+		boolean pagination = true;
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
+
+		finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_C_T_S;
+		finderArgs = new Object[] {
+				companyId, treePath, site,
+				
+				start, end, orderByComparator
+			};
+
+		List<Group> list = null;
+
+		if (retrieveFromCache) {
+			list = (List<Group>)finderCache.getResult(finderPath, finderArgs,
+					this);
+
+			if ((list != null) && !list.isEmpty()) {
+				for (Group group : list) {
+					if ((companyId != group.getCompanyId()) ||
+							!StringUtil.wildcardMatches(group.getTreePath(),
+								treePath, '_', '%', '\\', true) ||
+							(site != group.getSite())) {
+						list = null;
+
+						break;
+					}
+				}
+			}
+		}
+
+		if (list == null) {
+			StringBundler query = null;
+
+			if (orderByComparator != null) {
+				query = new StringBundler(5 +
+						(orderByComparator.getOrderByFields().length * 2));
+			}
+			else {
+				query = new StringBundler(5);
+			}
+
+			query.append(_SQL_SELECT_GROUP__WHERE);
+
+			query.append(_FINDER_COLUMN_C_T_S_COMPANYID_2);
+
+			boolean bindTreePath = false;
+
+			if (treePath == null) {
+				query.append(_FINDER_COLUMN_C_T_S_TREEPATH_1);
+			}
+			else if (treePath.equals("")) {
+				query.append(_FINDER_COLUMN_C_T_S_TREEPATH_3);
+			}
+			else {
+				bindTreePath = true;
+
+				query.append(_FINDER_COLUMN_C_T_S_TREEPATH_2);
+			}
+
+			query.append(_FINDER_COLUMN_C_T_S_SITE_2);
+
+			if (orderByComparator != null) {
+				appendOrderByComparator(query, _ORDER_BY_ENTITY_ALIAS,
+					orderByComparator);
+			}
+			else
+			 if (pagination) {
+				query.append(GroupModelImpl.ORDER_BY_JPQL);
+			}
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				qPos.add(companyId);
+
+				if (bindTreePath) {
+					qPos.add(treePath);
+				}
+
+				qPos.add(site);
+
+				if (!pagination) {
+					list = (List<Group>)QueryUtil.list(q, getDialect(), start,
+							end, false);
+
+					Collections.sort(list);
+
+					list = Collections.unmodifiableList(list);
+				}
+				else {
+					list = (List<Group>)QueryUtil.list(q, getDialect(), start,
+							end);
+				}
+
+				cacheResult(list);
+
+				finderCache.putResult(finderPath, finderArgs, list);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * Returns the first group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching group
+	 * @throws NoSuchGroupException if a matching group could not be found
+	 */
+	@Override
+	public Group findByC_T_S_First(long companyId, String treePath,
+		boolean site, OrderByComparator<Group> orderByComparator)
+		throws NoSuchGroupException {
+		Group group = fetchByC_T_S_First(companyId, treePath, site,
+				orderByComparator);
+
+		if (group != null) {
+			return group;
+		}
+
+		StringBundler msg = new StringBundler(8);
+
+		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		msg.append("companyId=");
+		msg.append(companyId);
+
+		msg.append(", treePath=");
+		msg.append(treePath);
+
+		msg.append(", site=");
+		msg.append(site);
+
+		msg.append("}");
+
+		throw new NoSuchGroupException(msg.toString());
+	}
+
+	/**
+	 * Returns the first group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching group, or <code>null</code> if a matching group could not be found
+	 */
+	@Override
+	public Group fetchByC_T_S_First(long companyId, String treePath,
+		boolean site, OrderByComparator<Group> orderByComparator) {
+		List<Group> list = findByC_T_S(companyId, treePath, site, 0, 1,
+				orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the last group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching group
+	 * @throws NoSuchGroupException if a matching group could not be found
+	 */
+	@Override
+	public Group findByC_T_S_Last(long companyId, String treePath,
+		boolean site, OrderByComparator<Group> orderByComparator)
+		throws NoSuchGroupException {
+		Group group = fetchByC_T_S_Last(companyId, treePath, site,
+				orderByComparator);
+
+		if (group != null) {
+			return group;
+		}
+
+		StringBundler msg = new StringBundler(8);
+
+		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		msg.append("companyId=");
+		msg.append(companyId);
+
+		msg.append(", treePath=");
+		msg.append(treePath);
+
+		msg.append(", site=");
+		msg.append(site);
+
+		msg.append("}");
+
+		throw new NoSuchGroupException(msg.toString());
+	}
+
+	/**
+	 * Returns the last group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching group, or <code>null</code> if a matching group could not be found
+	 */
+	@Override
+	public Group fetchByC_T_S_Last(long companyId, String treePath,
+		boolean site, OrderByComparator<Group> orderByComparator) {
+		int count = countByC_T_S(companyId, treePath, site);
+
+		if (count == 0) {
+			return null;
+		}
+
+		List<Group> list = findByC_T_S(companyId, treePath, site, count - 1,
+				count, orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the groups before and after the current group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * @param groupId the primary key of the current group
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next group
+	 * @throws NoSuchGroupException if a group with the primary key could not be found
+	 */
+	@Override
+	public Group[] findByC_T_S_PrevAndNext(long groupId, long companyId,
+		String treePath, boolean site,
+		OrderByComparator<Group> orderByComparator) throws NoSuchGroupException {
+		Group group = findByPrimaryKey(groupId);
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			Group[] array = new GroupImpl[3];
+
+			array[0] = getByC_T_S_PrevAndNext(session, group, companyId,
+					treePath, site, orderByComparator, true);
+
+			array[1] = group;
+
+			array[2] = getByC_T_S_PrevAndNext(session, group, companyId,
+					treePath, site, orderByComparator, false);
+
+			return array;
+		}
+		catch (Exception e) {
+			throw processException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
+
+	protected Group getByC_T_S_PrevAndNext(Session session, Group group,
+		long companyId, String treePath, boolean site,
+		OrderByComparator<Group> orderByComparator, boolean previous) {
+		StringBundler query = null;
+
+		if (orderByComparator != null) {
+			query = new StringBundler(6 +
+					(orderByComparator.getOrderByConditionFields().length * 3) +
+					(orderByComparator.getOrderByFields().length * 3));
+		}
+		else {
+			query = new StringBundler(5);
+		}
+
+		query.append(_SQL_SELECT_GROUP__WHERE);
+
+		query.append(_FINDER_COLUMN_C_T_S_COMPANYID_2);
+
+		boolean bindTreePath = false;
+
+		if (treePath == null) {
+			query.append(_FINDER_COLUMN_C_T_S_TREEPATH_1);
+		}
+		else if (treePath.equals("")) {
+			query.append(_FINDER_COLUMN_C_T_S_TREEPATH_3);
+		}
+		else {
+			bindTreePath = true;
+
+			query.append(_FINDER_COLUMN_C_T_S_TREEPATH_2);
+		}
+
+		query.append(_FINDER_COLUMN_C_T_S_SITE_2);
+
+		if (orderByComparator != null) {
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
+
+			if (orderByConditionFields.length > 0) {
+				query.append(WHERE_AND);
+			}
+
+			for (int i = 0; i < orderByConditionFields.length; i++) {
+				query.append(_ORDER_BY_ENTITY_ALIAS);
+				query.append(orderByConditionFields[i]);
+
+				if ((i + 1) < orderByConditionFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(WHERE_GREATER_THAN_HAS_NEXT);
+					}
+					else {
+						query.append(WHERE_LESSER_THAN_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(WHERE_GREATER_THAN);
+					}
+					else {
+						query.append(WHERE_LESSER_THAN);
+					}
+				}
+			}
+
+			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
+
+			for (int i = 0; i < orderByFields.length; i++) {
+				query.append(_ORDER_BY_ENTITY_ALIAS);
+				query.append(orderByFields[i]);
+
+				if ((i + 1) < orderByFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(ORDER_BY_ASC_HAS_NEXT);
+					}
+					else {
+						query.append(ORDER_BY_DESC_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(ORDER_BY_ASC);
+					}
+					else {
+						query.append(ORDER_BY_DESC);
+					}
+				}
+			}
+		}
+		else {
+			query.append(GroupModelImpl.ORDER_BY_JPQL);
+		}
+
+		String sql = query.toString();
+
+		Query q = session.createQuery(sql);
+
+		q.setFirstResult(0);
+		q.setMaxResults(2);
+
+		QueryPos qPos = QueryPos.getInstance(q);
+
+		qPos.add(companyId);
+
+		if (bindTreePath) {
+			qPos.add(treePath);
+		}
+
+		qPos.add(site);
+
+		if (orderByComparator != null) {
+			Object[] values = orderByComparator.getOrderByConditionValues(group);
+
+			for (Object value : values) {
+				qPos.add(value);
+			}
+		}
+
+		List<Group> list = q.list();
+
+		if (list.size() == 2) {
+			return list.get(1);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Removes all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63; from the database.
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 */
+	@Override
+	public void removeByC_T_S(long companyId, String treePath, boolean site) {
+		for (Group group : findByC_T_S(companyId, treePath, site,
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
+			remove(group);
+		}
+	}
+
+	/**
+	 * Returns the number of groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param treePath the tree path
+	 * @param site the site
+	 * @return the number of matching groups
+	 */
+	@Override
+	public int countByC_T_S(long companyId, String treePath, boolean site) {
+		FinderPath finderPath = FINDER_PATH_WITH_PAGINATION_COUNT_BY_C_T_S;
+
+		Object[] finderArgs = new Object[] { companyId, treePath, site };
+
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
+
+		if (count == null) {
+			StringBundler query = new StringBundler(4);
+
+			query.append(_SQL_COUNT_GROUP__WHERE);
+
+			query.append(_FINDER_COLUMN_C_T_S_COMPANYID_2);
+
+			boolean bindTreePath = false;
+
+			if (treePath == null) {
+				query.append(_FINDER_COLUMN_C_T_S_TREEPATH_1);
+			}
+			else if (treePath.equals("")) {
+				query.append(_FINDER_COLUMN_C_T_S_TREEPATH_3);
+			}
+			else {
+				bindTreePath = true;
+
+				query.append(_FINDER_COLUMN_C_T_S_TREEPATH_2);
+			}
+
+			query.append(_FINDER_COLUMN_C_T_S_SITE_2);
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				qPos.add(companyId);
+
+				if (bindTreePath) {
+					qPos.add(treePath);
+				}
+
+				qPos.add(site);
+
+				count = (Long)q.uniqueResult();
+
+				finderCache.putResult(finderPath, finderArgs, count);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	private static final String _FINDER_COLUMN_C_T_S_COMPANYID_2 = "group_.companyId = ? AND ";
+	private static final String _FINDER_COLUMN_C_T_S_TREEPATH_1 = "group_.treePath IS NULL AND ";
+	private static final String _FINDER_COLUMN_C_T_S_TREEPATH_2 = "group_.treePath LIKE ? AND ";
+	private static final String _FINDER_COLUMN_C_T_S_TREEPATH_3 = "(group_.treePath IS NULL OR group_.treePath LIKE '') AND ";
+	private static final String _FINDER_COLUMN_C_T_S_SITE_2 = "group_.site = ?";
 	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_G_C_C_P = new FinderPath(GroupModelImpl.ENTITY_CACHE_ENABLED,
 			GroupModelImpl.FINDER_CACHE_ENABLED, GroupImpl.class,
 			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByG_C_C_P",
@@ -8261,7 +8870,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", parentGroupId=");
 		msg.append(parentGroupId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -8328,7 +8937,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", parentGroupId=");
 		msg.append(parentGroupId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -8506,7 +9115,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			msg.append(", groupKey=");
 			msg.append(groupKey);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -8585,7 +9194,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (groupKey == null) {
 				query.append(_FINDER_COLUMN_C_C_L_GK_GROUPKEY_1);
 			}
-			else if (groupKey.equals(StringPool.BLANK)) {
+			else if (groupKey.equals("")) {
 				query.append(_FINDER_COLUMN_C_C_L_GK_GROUPKEY_3);
 			}
 			else {
@@ -8711,7 +9320,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			if (groupKey == null) {
 				query.append(_FINDER_COLUMN_C_C_L_GK_GROUPKEY_1);
 			}
-			else if (groupKey.equals(StringPool.BLANK)) {
+			else if (groupKey.equals("")) {
 				query.append(_FINDER_COLUMN_C_C_L_GK_GROUPKEY_3);
 			}
 			else {
@@ -9036,7 +9645,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", inheritContent=");
 		msg.append(inheritContent);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -9103,7 +9712,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		msg.append(", inheritContent=");
 		msg.append(inheritContent);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchGroupException(msg.toString());
 	}
@@ -9395,6 +10004,26 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 
 	public GroupPersistenceImpl() {
 		setModelClass(Group.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+			dbColumnNames.put("type", "type_");
+			dbColumnNames.put("active", "active_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
 	}
 
 	/**
@@ -9488,7 +10117,7 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((GroupModelImpl)group);
+		clearUniqueFindersCache((GroupModelImpl)group, true);
 	}
 
 	@Override
@@ -9500,185 +10129,90 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			entityCache.removeResult(GroupModelImpl.ENTITY_CACHE_ENABLED,
 				GroupImpl.class, group.getPrimaryKey());
 
-			clearUniqueFindersCache((GroupModelImpl)group);
+			clearUniqueFindersCache((GroupModelImpl)group, true);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(GroupModelImpl groupModelImpl,
-		boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] {
-					groupModelImpl.getUuid(), groupModelImpl.getGroupId()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-				groupModelImpl);
-
-			args = new Object[] { groupModelImpl.getLiveGroupId() };
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_LIVEGROUPID, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_LIVEGROUPID, args,
-				groupModelImpl);
-
-			args = new Object[] {
-					groupModelImpl.getCompanyId(), groupModelImpl.getGroupKey()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_C_GK, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_C_GK, args,
-				groupModelImpl);
-
-			args = new Object[] {
-					groupModelImpl.getCompanyId(),
-					groupModelImpl.getFriendlyURL()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_C_F, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_C_F, args, groupModelImpl);
-
-			args = new Object[] {
-					groupModelImpl.getCompanyId(),
-					groupModelImpl.getClassNameId(), groupModelImpl.getClassPK()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_C_C_C, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_C_C_C, args,
-				groupModelImpl);
-
-			args = new Object[] {
-					groupModelImpl.getCompanyId(),
-					groupModelImpl.getLiveGroupId(),
-					groupModelImpl.getGroupKey()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_C_L_GK, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_C_L_GK, args,
-				groupModelImpl);
-
-			args = new Object[] {
-					groupModelImpl.getCompanyId(),
-					groupModelImpl.getClassNameId(),
-					groupModelImpl.getLiveGroupId(),
-					groupModelImpl.getGroupKey()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_C_C_L_GK, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_C_C_L_GK, args,
-				groupModelImpl);
-		}
-		else {
-			if ((groupModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						groupModelImpl.getUuid(), groupModelImpl.getGroupId()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-					groupModelImpl);
-			}
-
-			if ((groupModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_LIVEGROUPID.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] { groupModelImpl.getLiveGroupId() };
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_LIVEGROUPID, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_LIVEGROUPID, args,
-					groupModelImpl);
-			}
-
-			if ((groupModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_C_GK.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						groupModelImpl.getCompanyId(),
-						groupModelImpl.getGroupKey()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_C_GK, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_C_GK, args,
-					groupModelImpl);
-			}
-
-			if ((groupModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_C_F.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						groupModelImpl.getCompanyId(),
-						groupModelImpl.getFriendlyURL()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_C_F, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_C_F, args,
-					groupModelImpl);
-			}
-
-			if ((groupModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_C_C_C.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						groupModelImpl.getCompanyId(),
-						groupModelImpl.getClassNameId(),
-						groupModelImpl.getClassPK()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_C_C_C, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_C_C_C, args,
-					groupModelImpl);
-			}
-
-			if ((groupModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_C_L_GK.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						groupModelImpl.getCompanyId(),
-						groupModelImpl.getLiveGroupId(),
-						groupModelImpl.getGroupKey()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_C_L_GK, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_C_L_GK, args,
-					groupModelImpl);
-			}
-
-			if ((groupModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_C_C_L_GK.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						groupModelImpl.getCompanyId(),
-						groupModelImpl.getClassNameId(),
-						groupModelImpl.getLiveGroupId(),
-						groupModelImpl.getGroupKey()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_C_C_L_GK, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_C_C_L_GK, args,
-					groupModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(GroupModelImpl groupModelImpl) {
+	protected void cacheUniqueFindersCache(GroupModelImpl groupModelImpl) {
 		Object[] args = new Object[] {
 				groupModelImpl.getUuid(), groupModelImpl.getGroupId()
 			};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+			groupModelImpl, false);
+
+		args = new Object[] { groupModelImpl.getLiveGroupId() };
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_LIVEGROUPID, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_LIVEGROUPID, args,
+			groupModelImpl, false);
+
+		args = new Object[] {
+				groupModelImpl.getCompanyId(), groupModelImpl.getGroupKey()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_C_GK, args, Long.valueOf(1),
+			false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_GK, args, groupModelImpl,
+			false);
+
+		args = new Object[] {
+				groupModelImpl.getCompanyId(), groupModelImpl.getFriendlyURL()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_C_F, args, Long.valueOf(1),
+			false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_F, args, groupModelImpl,
+			false);
+
+		args = new Object[] {
+				groupModelImpl.getCompanyId(), groupModelImpl.getClassNameId(),
+				groupModelImpl.getClassPK()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_C_C_C, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_C_C, args, groupModelImpl,
+			false);
+
+		args = new Object[] {
+				groupModelImpl.getCompanyId(), groupModelImpl.getLiveGroupId(),
+				groupModelImpl.getGroupKey()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_C_L_GK, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_L_GK, args,
+			groupModelImpl, false);
+
+		args = new Object[] {
+				groupModelImpl.getCompanyId(), groupModelImpl.getClassNameId(),
+				groupModelImpl.getLiveGroupId(), groupModelImpl.getGroupKey()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_C_C_L_GK, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_C_L_GK, args,
+			groupModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(GroupModelImpl groupModelImpl,
+		boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					groupModelImpl.getUuid(), groupModelImpl.getGroupId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+		}
 
 		if ((groupModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					groupModelImpl.getOriginalUuid(),
 					groupModelImpl.getOriginalGroupId()
 				};
@@ -9687,29 +10221,33 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 		}
 
-		args = new Object[] { groupModelImpl.getLiveGroupId() };
-
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_LIVEGROUPID, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_LIVEGROUPID, args);
-
-		if ((groupModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_LIVEGROUPID.getColumnBitmask()) != 0) {
-			args = new Object[] { groupModelImpl.getOriginalLiveGroupId() };
+		if (clearCurrent) {
+			Object[] args = new Object[] { groupModelImpl.getLiveGroupId() };
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_LIVEGROUPID, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_LIVEGROUPID, args);
 		}
 
-		args = new Object[] {
-				groupModelImpl.getCompanyId(), groupModelImpl.getGroupKey()
-			};
+		if ((groupModelImpl.getColumnBitmask() &
+				FINDER_PATH_FETCH_BY_LIVEGROUPID.getColumnBitmask()) != 0) {
+			Object[] args = new Object[] { groupModelImpl.getOriginalLiveGroupId() };
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_GK, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_GK, args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_LIVEGROUPID, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_LIVEGROUPID, args);
+		}
+
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					groupModelImpl.getCompanyId(), groupModelImpl.getGroupKey()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_GK, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_GK, args);
+		}
 
 		if ((groupModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_GK.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					groupModelImpl.getOriginalCompanyId(),
 					groupModelImpl.getOriginalGroupKey()
 				};
@@ -9718,16 +10256,19 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_GK, args);
 		}
 
-		args = new Object[] {
-				groupModelImpl.getCompanyId(), groupModelImpl.getFriendlyURL()
-			};
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getFriendlyURL()
+				};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_F, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_F, args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_F, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_F, args);
+		}
 
 		if ((groupModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_F.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					groupModelImpl.getOriginalCompanyId(),
 					groupModelImpl.getOriginalFriendlyURL()
 				};
@@ -9736,17 +10277,19 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_F, args);
 		}
 
-		args = new Object[] {
-				groupModelImpl.getCompanyId(), groupModelImpl.getClassNameId(),
-				groupModelImpl.getClassPK()
-			};
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getClassNameId(), groupModelImpl.getClassPK()
+				};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_C, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_C_C, args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_C, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_C_C, args);
+		}
 
 		if ((groupModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_C_C.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					groupModelImpl.getOriginalCompanyId(),
 					groupModelImpl.getOriginalClassNameId(),
 					groupModelImpl.getOriginalClassPK()
@@ -9756,17 +10299,20 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_C_C, args);
 		}
 
-		args = new Object[] {
-				groupModelImpl.getCompanyId(), groupModelImpl.getLiveGroupId(),
-				groupModelImpl.getGroupKey()
-			};
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getLiveGroupId(),
+					groupModelImpl.getGroupKey()
+				};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_L_GK, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_L_GK, args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_L_GK, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_L_GK, args);
+		}
 
 		if ((groupModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_L_GK.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					groupModelImpl.getOriginalCompanyId(),
 					groupModelImpl.getOriginalLiveGroupId(),
 					groupModelImpl.getOriginalGroupKey()
@@ -9776,17 +10322,21 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_L_GK, args);
 		}
 
-		args = new Object[] {
-				groupModelImpl.getCompanyId(), groupModelImpl.getClassNameId(),
-				groupModelImpl.getLiveGroupId(), groupModelImpl.getGroupKey()
-			};
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getClassNameId(),
+					groupModelImpl.getLiveGroupId(),
+					groupModelImpl.getGroupKey()
+				};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_L_GK, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_C_L_GK, args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_L_GK, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_C_L_GK, args);
+		}
 
 		if ((groupModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_C_L_GK.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					groupModelImpl.getOriginalCompanyId(),
 					groupModelImpl.getOriginalClassNameId(),
 					groupModelImpl.getOriginalLiveGroupId(),
@@ -9947,8 +10497,113 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !GroupModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!GroupModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { groupModelImpl.getUuid() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getUuid(), groupModelImpl.getCompanyId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				args);
+
+			args = new Object[] { groupModelImpl.getCompanyId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_COMPANYID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getClassNameId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getParentGroupId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_P, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_P,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getCompanyId(), groupModelImpl.getSite()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_S, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_S,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getCompanyId(), groupModelImpl.getActive()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_A, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_A,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getClassNameId(), groupModelImpl.getClassPK()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_CPK, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_CPK,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getType(), groupModelImpl.getActive()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_T_A, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_T_A,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getClassNameId(),
+					groupModelImpl.getParentGroupId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_P, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_P,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getParentGroupId(), groupModelImpl.getSite()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_P_S, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_P_S,
+				args);
+
+			args = new Object[] {
+					groupModelImpl.getCompanyId(),
+					groupModelImpl.getParentGroupId(), groupModelImpl.getSite(),
+					groupModelImpl.getInheritContent()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_P_S_I, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_P_S_I,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -10203,8 +10858,8 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		entityCache.putResult(GroupModelImpl.ENTITY_CACHE_ENABLED,
 			GroupImpl.class, group.getPrimaryKey(), group, false);
 
-		clearUniqueFindersCache(groupModelImpl);
-		cacheUniqueFindersCache(groupModelImpl, isNew);
+		clearUniqueFindersCache(groupModelImpl, false);
+		cacheUniqueFindersCache(groupModelImpl);
 
 		group.resetOriginalValues();
 
@@ -10394,14 +11049,14 @@ public class GroupPersistenceImpl extends BasePersistenceImpl<Group>
 		query.append(_SQL_SELECT_GROUP__WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

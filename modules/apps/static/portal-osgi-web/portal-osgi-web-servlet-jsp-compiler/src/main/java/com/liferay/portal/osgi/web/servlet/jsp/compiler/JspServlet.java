@@ -14,8 +14,7 @@
 
 package com.liferay.portal.osgi.web.servlet.jsp.compiler;
 
-import com.liferay.portal.kernel.util.CharPool;
-import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -23,6 +22,8 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.osgi.web.servlet.jsp.compiler.internal.JspBundleClassloader;
 import com.liferay.portal.osgi.web.servlet.jsp.compiler.internal.JspServletContext;
 import com.liferay.portal.osgi.web.servlet.jsp.compiler.internal.JspTagHandlerPool;
+import com.liferay.portal.servlet.delegate.ServletContextDelegate;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.taglib.servlet.JspFactorySwapper;
 
 import java.io.File;
@@ -55,7 +56,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
@@ -229,7 +232,8 @@ public class JspServlet extends HttpServlet {
 	public void init(final ServletConfig servletConfig)
 		throws ServletException {
 
-		final ServletContext servletContext = servletConfig.getServletContext();
+		final ServletContext servletContext = ServletContextDelegate.create(
+			servletConfig.getServletContext());
 
 		ClassLoader classLoader = servletContext.getClassLoader();
 
@@ -297,6 +301,12 @@ public class JspServlet extends HttpServlet {
 		defaults.put(
 			TagHandlerPool.OPTION_TAGPOOL, JspTagHandlerPool.class.getName());
 
+		for (Entry<Object, Object> entry : _initParams.entrySet()) {
+			defaults.put(
+				String.valueOf(entry.getKey()),
+				String.valueOf(entry.getValue()));
+		}
+
 		Enumeration<String> names = servletConfig.getInitParameterNames();
 
 		Set<String> nameSet = new HashSet<>(Collections.list(names));
@@ -343,6 +353,9 @@ public class JspServlet extends HttpServlet {
 
 			});
 
+		_logVerbosityLevelDebug = Objects.equals(
+			_jspServlet.getInitParameter("logVerbosityLevel"), "DEBUG");
+
 		_bundleTracker = new BundleTracker<>(
 			_bundle.getBundleContext(), Bundle.RESOLVED,
 			new JspFragmentTrackerCustomizer());
@@ -372,10 +385,7 @@ public class JspServlet extends HttpServlet {
 		try {
 			currentThread.setContextClassLoader(_jspBundleClassloader);
 
-			if (Objects.equals(
-					_jspServlet.getInitParameter("logVerbosityLevel"),
-					"DEBUG")) {
-
+			if (_logVerbosityLevelDebug) {
 				String path = (String)request.getAttribute(
 					RequestDispatcher.INCLUDE_SERVLET_PATH);
 
@@ -397,7 +407,10 @@ public class JspServlet extends HttpServlet {
 					}
 				}
 
-				_jspServlet.log("[JSP DEBUG] " + _bundle + " invoking " + path);
+				_jspServlet.log(
+					StringBundler.concat(
+						"[JSP DEBUG] ", String.valueOf(_bundle), " invoking ",
+						path));
 			}
 
 			_jspServlet.service(request, response);
@@ -521,7 +534,7 @@ public class JspServlet extends HttpServlet {
 		catch (NoSuchMethodException nsme) {
 		}
 
-		return Collections.unmodifiableMap(methods);
+		return methods;
 	}
 
 	private void _deleteOutdatedJspFiles(String dir, List<Path> paths) {
@@ -548,15 +561,15 @@ public class JspServlet extends HttpServlet {
 
 	private static final String _INIT_PARAMETER_NAME_SCRATCH_DIR = "scratchdir";
 
-	private static final Class<?>[] _INTERFACES = {
-		JspServletContext.class, ServletContext.class
-	};
+	private static final Class<?>[] _INTERFACES =
+		{JspServletContext.class, ServletContext.class};
 
-	private static final String _WORK_DIR =
-		PropsUtil.get(PropsKeys.LIFERAY_HOME) + File.separator + "work" +
-			File.separator;
+	private static final String _WORK_DIR = StringBundler.concat(
+		PropsValues.LIFERAY_HOME, File.separator, "work", File.separator);
 
 	private static final Map<Method, Method> _contextAdapterMethods;
+	private static final Properties _initParams = PropsUtil.getProperties(
+		"jsp.servlet.init.param.", true);
 	private static final Bundle _jspBundle = FrameworkUtil.getBundle(
 		JspServlet.class);
 	private static final Pattern _originalJspPattern = Pattern.compile(
@@ -573,6 +586,7 @@ public class JspServlet extends HttpServlet {
 	private final HttpServlet _jspServlet =
 		new org.apache.jasper.servlet.JspServlet();
 	private Logger _logger;
+	private boolean _logVerbosityLevelDebug;
 	private final List<ServiceRegistration<?>> _serviceRegistrations =
 		new CopyOnWriteArrayList<>();
 
@@ -808,7 +822,7 @@ public class JspServlet extends HttpServlet {
 					}
 				}
 
-				return _jspBundle.getEntry(path);
+				return _jspBundle.getResource(path);
 			}
 			catch (MalformedURLException murle) {
 			}

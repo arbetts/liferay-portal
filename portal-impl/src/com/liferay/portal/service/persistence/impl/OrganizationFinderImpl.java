@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.service.persistence.OrganizationFinder;
 import com.liferay.portal.kernel.service.persistence.OrganizationUtil;
 import com.liferay.portal.kernel.service.persistence.UserUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -318,10 +319,18 @@ public class OrganizationFinderImpl
 
 			sql = StringUtil.replace(sql, "[$JOIN$]", getJoin(params));
 			sql = StringUtil.replace(sql, "[$WHERE$]", getWhere(params));
-			sql = StringUtil.replace(
-				sql, "[$PARENT_ORGANIZATION_ID_COMPARATOR$]",
-				parentOrganizationIdComparator.equals(StringPool.EQUAL) ?
-					StringPool.EQUAL : StringPool.NOT_EQUAL);
+
+			if (parentOrganizationIdComparator.equals(StringPool.EQUAL)) {
+				sql = StringUtil.replace(
+					sql, "[$PARENT_ORGANIZATION_ID_COMPARATOR$]",
+					StringPool.EQUAL);
+			}
+			else {
+				sql = StringUtil.replace(
+					sql, "[$PARENT_ORGANIZATION_ID_COMPARATOR$]",
+					StringPool.NOT_EQUAL);
+			}
+
 			sql = CustomSQLUtil.replaceAndOperator(sql, andOperator);
 
 			SQLQuery q = session.createSynchronizedSQLQuery(sql);
@@ -567,6 +576,10 @@ public class OrganizationFinderImpl
 
 			q.addEntity("Organization_", OrganizationImpl.class);
 
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			qPos.add(PortalUtil.getClassNameId(Organization.class.getName()));
+
 			return q.list(true);
 		}
 		catch (Exception e) {
@@ -691,10 +704,16 @@ public class OrganizationFinderImpl
 			sql, "lower(Address.city)", StringPool.LIKE, false, cities);
 		sql = CustomSQLUtil.replaceKeywords(
 			sql, "lower(Address.zip)", StringPool.LIKE, true, zips);
-		sql = StringUtil.replace(
-			sql, "[$PARENT_ORGANIZATION_ID_COMPARATOR$]",
-			parentOrganizationIdComparator.equals(StringPool.EQUAL) ?
-				StringPool.EQUAL : StringPool.NOT_EQUAL);
+
+		if (parentOrganizationIdComparator.equals(StringPool.EQUAL)) {
+			sql = StringUtil.replace(
+				sql, "[$PARENT_ORGANIZATION_ID_COMPARATOR$]", StringPool.EQUAL);
+		}
+		else {
+			sql = StringUtil.replace(
+				sql, "[$PARENT_ORGANIZATION_ID_COMPARATOR$]",
+				StringPool.NOT_EQUAL);
+		}
 
 		if (regionId == null) {
 			sql = StringUtil.replace(sql, _REGION_ID_SQL, StringPool.BLANK);
@@ -1044,7 +1063,10 @@ public class OrganizationFinderImpl
 
 			int size = organizationsTree.size();
 
-			if (!organizationsTree.isEmpty()) {
+			if (size == 0) {
+				join = "WHERE (Organization_.treePath = '')";
+			}
+			else {
 				StringBundler sb = new StringBundler(size * 2 + 1);
 
 				sb.append("WHERE (");

@@ -14,13 +14,13 @@
 
 package com.liferay.configuration.admin.web.internal.portlet.configuration.icon;
 
-import com.liferay.configuration.admin.web.internal.constants.ConfigurationAdminPortletKeys;
+import com.liferay.configuration.admin.constants.ConfigurationAdminPortletKeys;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.configuration.icon.BasePortletConfigurationIcon;
 import com.liferay.portal.kernel.portlet.configuration.icon.PortletConfigurationIcon;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -51,8 +51,7 @@ public class ExportAllConfigurationIcon extends BasePortletConfigurationIcon {
 			WebKeys.THEME_DISPLAY);
 
 		ResourceBundle resourceBundle =
-			_resourceBundleLoader.loadResourceBundle(
-				themeDisplay.getLanguageId());
+			_resourceBundleLoader.loadResourceBundle(themeDisplay.getLocale());
 
 		return LanguageUtil.get(resourceBundle, "export-all-settings");
 	}
@@ -67,7 +66,7 @@ public class ExportAllConfigurationIcon extends BasePortletConfigurationIcon {
 		PortletRequest portletRequest, PortletResponse portletResponse) {
 
 		LiferayPortletURL liferayPortletURL =
-			(LiferayPortletURL)PortalUtil.getControlPanelPortletURL(
+			(LiferayPortletURL)_portal.getControlPanelPortletURL(
 				portletRequest, ConfigurationAdminPortletKeys.SYSTEM_SETTINGS,
 				PortletRequest.RESOURCE_PHASE);
 
@@ -85,6 +84,9 @@ public class ExportAllConfigurationIcon extends BasePortletConfigurationIcon {
 	public boolean isShow(PortletRequest portletRequest) {
 		return true;
 	}
+
+	@Reference
+	private Portal _portal;
 
 	@Reference(
 		target = "(bundle.symbolic.name=com.liferay.configuration.admin.web)"

@@ -91,11 +91,9 @@ OrderByComparator<BackgroundTask> orderByComparator = BackgroundTaskComparatorFa
 		>
 
 			<%
-			String backgroundTaskName = backgroundTask.getName();
+			BackgroundTaskDisplay backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(backgroundTask);
 
-			if (backgroundTaskName.equals(StringPool.BLANK)) {
-				backgroundTaskName = LanguageUtil.get(request, "untitled");
-			}
+			String backgroundTaskName = backgroundTaskDisplay.getDisplayName(request);
 			%>
 
 			<c:choose>
@@ -288,7 +286,7 @@ OrderByComparator<BackgroundTask> orderByComparator = BackgroundTaskComparatorFa
 				<c:if test="<%= !backgroundTask.isInProgress() %>">
 					<liferay-ui:icon-menu direction="left-side" icon="<%= StringPool.BLANK %>" markupView="lexicon" message="<%= StringPool.BLANK %>" showWhenSingleIcon="<%= true %>">
 						<portlet:actionURL name="editExportConfiguration" var="relaunchURL">
-							<portlet:param name="mvcRenderCommandName" value="editExportConfiguration" />
+							<portlet:param name="mvcRenderCommandName" value="exportLayoutsView" />
 							<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.RELAUNCH %>" />
 							<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
 							<portlet:param name="backgroundTaskId" value="<%= String.valueOf(backgroundTask.getBackgroundTaskId()) %>" />

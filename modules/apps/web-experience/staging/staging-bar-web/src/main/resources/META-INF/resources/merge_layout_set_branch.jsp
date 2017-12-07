@@ -32,12 +32,20 @@ if (layoutSetBranches.contains(layoutSetBranch)) {
 }
 %>
 
-<liferay-ui:header
-	backURL="<%= redirect %>"
-	localizeTitle="<%= true %>"
-	showBackURL="<%= true %>"
-	title="merge-site-pages-variation"
-/>
+<div class="site-pages-variation taglib-header">
+	<a class="icon-monospaced list-unstyled portlet-icon-back text-default" href="<%= HtmlUtil.escapeAttribute(redirect) %>" title="<%= HtmlUtil.escapeAttribute(LanguageUtil.get(resourceBundle, "back")) %>">
+		<liferay-ui:icon
+			icon="angle-left"
+			markupView="lexicon"
+		/>
+	</a>
+
+	<h3 class="header-title">
+		<span>
+			<%= HtmlUtil.escape(LanguageUtil.get(resourceBundle, "merge-site-pages-variation")) %>
+		</span>
+	</h3>
+</div>
 
 <div id="<portlet:namespace />mergeLayoutSetBranch">
 	<portlet:actionURL name="mergeLayoutSetBranch" var="mergeLayoutSetBranchURL">
@@ -64,18 +72,20 @@ if (layoutSetBranches.contains(layoutSetBranch)) {
 				keyProperty="layoutSetBranchId"
 				modelVar="curLayoutSetBranch"
 			>
+
+				<%
+				long curLayoutSetBranchId = curLayoutSetBranch.getLayoutSetBranchId();
+
+				String layoutSetBranchDisplayName = layoutSetBranchDisplayContext.getLayoutSetBranchDisplayName(curLayoutSetBranch);
+				%>
+
 				<liferay-ui:search-container-column-text
 					name="branch"
-					value="<%= LanguageUtil.get(request, curLayoutSetBranch.getName()) %>"
+					value="<%= layoutSetBranchDisplayName %>"
 				/>
 
 				<liferay-ui:search-container-column-text>
-
-					<%
-					long curLayoutSetBranchId = curLayoutSetBranch.getLayoutSetBranchId();
-					%>
-
-					<a class="layout-set-branch" data-layoutSetBranchId="<%= curLayoutSetBranchId %>" data-layoutSetBranchMessage="<%= HtmlUtil.escapeAttribute(LanguageUtil.format(request, "are-you-sure-you-want-to-merge-changes-from-x", curLayoutSetBranch.getName(), false)) %>" data-layoutSetBranchName="<%= HtmlUtil.escapeAttribute(curLayoutSetBranch.getName()) %>" href="#" id="<portlet:namespace /><%= curLayoutSetBranchId %>" onClick="<portlet:namespace />selectLayoutSetBranch('<%= curLayoutSetBranchId %>');">
+					<a class="layout-set-branch" data-layoutSetBranchId="<%= curLayoutSetBranchId %>" data-layoutSetBranchMessage="<%= HtmlUtil.escapeAttribute(LanguageUtil.format(request, "are-you-sure-you-want-to-merge-changes-from-x", layoutSetBranchDisplayName, false)) %>" data-layoutSetBranchName="<%= HtmlUtil.escapeAttribute(curLayoutSetBranch.getName()) %>" href="#" id="<portlet:namespace /><%= curLayoutSetBranchId %>" onClick="<portlet:namespace />selectLayoutSetBranch('<%= curLayoutSetBranchId %>');">
 						<liferay-ui:message key="select" />
 					</a>
 				</liferay-ui:search-container-column-text>
@@ -91,7 +101,6 @@ if (layoutSetBranches.contains(layoutSetBranch)) {
 		var layoutSetBranch = AUI.$('#<portlet:namespace />' + layoutSetBranchId);
 
 		var mergeLayoutSetBranchId = layoutSetBranch.attr('data-layoutSetBranchId');
-		var mergeLayoutSetBranchName = layoutSetBranch.attr('data-layoutSetBranchName');
 		var mergeLayoutSetBranchMessage = layoutSetBranch.attr('data-layoutSetBranchMessage');
 
 		if (confirm(mergeLayoutSetBranchMessage)) {

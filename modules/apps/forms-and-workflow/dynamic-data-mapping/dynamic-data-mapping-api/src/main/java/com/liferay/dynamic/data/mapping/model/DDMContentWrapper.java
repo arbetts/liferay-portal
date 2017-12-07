@@ -144,13 +144,235 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	@Override
-	public DDMContent toEscapedModel() {
-		return new DDMContentWrapper(_ddmContent.toEscapedModel());
+	public java.lang.Object clone() {
+		return new DDMContentWrapper((DDMContent)_ddmContent.clone());
 	}
 
 	@Override
-	public DDMContent toUnescapedModel() {
-		return new DDMContentWrapper(_ddmContent.toUnescapedModel());
+	public int compareTo(DDMContent ddmContent) {
+		return _ddmContent.compareTo(ddmContent);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _ddmContent.getAvailableLanguageIds();
+	}
+
+	/**
+	* Returns the company ID of this ddm content.
+	*
+	* @return the company ID of this ddm content
+	*/
+	@Override
+	public long getCompanyId() {
+		return _ddmContent.getCompanyId();
+	}
+
+	/**
+	* Returns the content ID of this ddm content.
+	*
+	* @return the content ID of this ddm content
+	*/
+	@Override
+	public long getContentId() {
+		return _ddmContent.getContentId();
+	}
+
+	/**
+	* Returns the create date of this ddm content.
+	*
+	* @return the create date of this ddm content
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _ddmContent.getCreateDate();
+	}
+
+	/**
+	* Returns the data of this ddm content.
+	*
+	* @return the data of this ddm content
+	*/
+	@Override
+	public java.lang.String getData() {
+		return _ddmContent.getData();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _ddmContent.getDefaultLanguageId();
+	}
+
+	/**
+	* Returns the description of this ddm content.
+	*
+	* @return the description of this ddm content
+	*/
+	@Override
+	public java.lang.String getDescription() {
+		return _ddmContent.getDescription();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _ddmContent.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this ddm content.
+	*
+	* @return the group ID of this ddm content
+	*/
+	@Override
+	public long getGroupId() {
+		return _ddmContent.getGroupId();
+	}
+
+	/**
+	* Returns the modified date of this ddm content.
+	*
+	* @return the modified date of this ddm content
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _ddmContent.getModifiedDate();
+	}
+
+	/**
+	* Returns the name of this ddm content.
+	*
+	* @return the name of this ddm content
+	*/
+	@Override
+	public java.lang.String getName() {
+		return _ddmContent.getName();
+	}
+
+	/**
+	* Returns the localized name of this ddm content in the language. Uses the default language if no localization exists for the requested language.
+	*
+	* @param locale the locale of the language
+	* @return the localized name of this ddm content
+	*/
+	@Override
+	public java.lang.String getName(java.util.Locale locale) {
+		return _ddmContent.getName(locale);
+	}
+
+	/**
+	* Returns the localized name of this ddm content in the language, optionally using the default language if no localization exists for the requested language.
+	*
+	* @param locale the local of the language
+	* @param useDefault whether to use the default language if no localization exists for the requested language
+	* @return the localized name of this ddm content. If <code>useDefault</code> is <code>false</code> and no localization exists for the requested language, an empty string will be returned.
+	*/
+	@Override
+	public java.lang.String getName(java.util.Locale locale, boolean useDefault) {
+		return _ddmContent.getName(locale, useDefault);
+	}
+
+	/**
+	* Returns the localized name of this ddm content in the language. Uses the default language if no localization exists for the requested language.
+	*
+	* @param languageId the ID of the language
+	* @return the localized name of this ddm content
+	*/
+	@Override
+	public java.lang.String getName(java.lang.String languageId) {
+		return _ddmContent.getName(languageId);
+	}
+
+	/**
+	* Returns the localized name of this ddm content in the language, optionally using the default language if no localization exists for the requested language.
+	*
+	* @param languageId the ID of the language
+	* @param useDefault whether to use the default language if no localization exists for the requested language
+	* @return the localized name of this ddm content
+	*/
+	@Override
+	public java.lang.String getName(java.lang.String languageId,
+		boolean useDefault) {
+		return _ddmContent.getName(languageId, useDefault);
+	}
+
+	@Override
+	public java.lang.String getNameCurrentLanguageId() {
+		return _ddmContent.getNameCurrentLanguageId();
+	}
+
+	@Override
+	public java.lang.String getNameCurrentValue() {
+		return _ddmContent.getNameCurrentValue();
+	}
+
+	/**
+	* Returns a map of the locales and localized names of this ddm content.
+	*
+	* @return the locales and localized names of this ddm content
+	*/
+	@Override
+	public Map<java.util.Locale, java.lang.String> getNameMap() {
+		return _ddmContent.getNameMap();
+	}
+
+	/**
+	* Returns the primary key of this ddm content.
+	*
+	* @return the primary key of this ddm content
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _ddmContent.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _ddmContent.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the user ID of this ddm content.
+	*
+	* @return the user ID of this ddm content
+	*/
+	@Override
+	public long getUserId() {
+		return _ddmContent.getUserId();
+	}
+
+	/**
+	* Returns the user name of this ddm content.
+	*
+	* @return the user name of this ddm content
+	*/
+	@Override
+	public java.lang.String getUserName() {
+		return _ddmContent.getUserName();
+	}
+
+	/**
+	* Returns the user uuid of this ddm content.
+	*
+	* @return the user uuid of this ddm content
+	*/
+	@Override
+	public java.lang.String getUserUuid() {
+		return _ddmContent.getUserUuid();
+	}
+
+	/**
+	* Returns the uuid of this ddm content.
+	*
+	* @return the uuid of this ddm content
+	*/
+	@Override
+	public java.lang.String getUuid() {
+		return _ddmContent.getUuid();
+	}
+
+	@Override
+	public int hashCode() {
+		return _ddmContent.hashCode();
 	}
 
 	@Override
@@ -166,253 +388,6 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	@Override
 	public boolean isNew() {
 		return _ddmContent.isNew();
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _ddmContent.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<DDMContent> toCacheModel() {
-		return _ddmContent.toCacheModel();
-	}
-
-	@Override
-	public int compareTo(DDMContent ddmContent) {
-		return _ddmContent.compareTo(ddmContent);
-	}
-
-	@Override
-	public int hashCode() {
-		return _ddmContent.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _ddmContent.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new DDMContentWrapper((DDMContent)_ddmContent.clone());
-	}
-
-	/**
-	* Returns the data of this d d m content.
-	*
-	* @return the data of this d d m content
-	*/
-	@Override
-	public java.lang.String getData() {
-		return _ddmContent.getData();
-	}
-
-	@Override
-	public java.lang.String getDefaultLanguageId() {
-		return _ddmContent.getDefaultLanguageId();
-	}
-
-	/**
-	* Returns the description of this d d m content.
-	*
-	* @return the description of this d d m content
-	*/
-	@Override
-	public java.lang.String getDescription() {
-		return _ddmContent.getDescription();
-	}
-
-	/**
-	* Returns the name of this d d m content.
-	*
-	* @return the name of this d d m content
-	*/
-	@Override
-	public java.lang.String getName() {
-		return _ddmContent.getName();
-	}
-
-	/**
-	* Returns the localized name of this d d m content in the language. Uses the default language if no localization exists for the requested language.
-	*
-	* @param languageId the ID of the language
-	* @return the localized name of this d d m content
-	*/
-	@Override
-	public java.lang.String getName(java.lang.String languageId) {
-		return _ddmContent.getName(languageId);
-	}
-
-	/**
-	* Returns the localized name of this d d m content in the language, optionally using the default language if no localization exists for the requested language.
-	*
-	* @param languageId the ID of the language
-	* @param useDefault whether to use the default language if no localization exists for the requested language
-	* @return the localized name of this d d m content
-	*/
-	@Override
-	public java.lang.String getName(java.lang.String languageId,
-		boolean useDefault) {
-		return _ddmContent.getName(languageId, useDefault);
-	}
-
-	/**
-	* Returns the localized name of this d d m content in the language. Uses the default language if no localization exists for the requested language.
-	*
-	* @param locale the locale of the language
-	* @return the localized name of this d d m content
-	*/
-	@Override
-	public java.lang.String getName(java.util.Locale locale) {
-		return _ddmContent.getName(locale);
-	}
-
-	/**
-	* Returns the localized name of this d d m content in the language, optionally using the default language if no localization exists for the requested language.
-	*
-	* @param locale the local of the language
-	* @param useDefault whether to use the default language if no localization exists for the requested language
-	* @return the localized name of this d d m content. If <code>useDefault</code> is <code>false</code> and no localization exists for the requested language, an empty string will be returned.
-	*/
-	@Override
-	public java.lang.String getName(java.util.Locale locale, boolean useDefault) {
-		return _ddmContent.getName(locale, useDefault);
-	}
-
-	@Override
-	public java.lang.String getNameCurrentLanguageId() {
-		return _ddmContent.getNameCurrentLanguageId();
-	}
-
-	@Override
-	public java.lang.String getNameCurrentValue() {
-		return _ddmContent.getNameCurrentValue();
-	}
-
-	/**
-	* Returns the user name of this d d m content.
-	*
-	* @return the user name of this d d m content
-	*/
-	@Override
-	public java.lang.String getUserName() {
-		return _ddmContent.getUserName();
-	}
-
-	/**
-	* Returns the user uuid of this d d m content.
-	*
-	* @return the user uuid of this d d m content
-	*/
-	@Override
-	public java.lang.String getUserUuid() {
-		return _ddmContent.getUserUuid();
-	}
-
-	/**
-	* Returns the uuid of this d d m content.
-	*
-	* @return the uuid of this d d m content
-	*/
-	@Override
-	public java.lang.String getUuid() {
-		return _ddmContent.getUuid();
-	}
-
-	@Override
-	public java.lang.String toString() {
-		return _ddmContent.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _ddmContent.toXmlString();
-	}
-
-	@Override
-	public java.lang.String[] getAvailableLanguageIds() {
-		return _ddmContent.getAvailableLanguageIds();
-	}
-
-	/**
-	* Returns the create date of this d d m content.
-	*
-	* @return the create date of this d d m content
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _ddmContent.getCreateDate();
-	}
-
-	/**
-	* Returns the modified date of this d d m content.
-	*
-	* @return the modified date of this d d m content
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _ddmContent.getModifiedDate();
-	}
-
-	/**
-	* Returns a map of the locales and localized names of this d d m content.
-	*
-	* @return the locales and localized names of this d d m content
-	*/
-	@Override
-	public Map<java.util.Locale, java.lang.String> getNameMap() {
-		return _ddmContent.getNameMap();
-	}
-
-	/**
-	* Returns the company ID of this d d m content.
-	*
-	* @return the company ID of this d d m content
-	*/
-	@Override
-	public long getCompanyId() {
-		return _ddmContent.getCompanyId();
-	}
-
-	/**
-	* Returns the content ID of this d d m content.
-	*
-	* @return the content ID of this d d m content
-	*/
-	@Override
-	public long getContentId() {
-		return _ddmContent.getContentId();
-	}
-
-	/**
-	* Returns the group ID of this d d m content.
-	*
-	* @return the group ID of this d d m content
-	*/
-	@Override
-	public long getGroupId() {
-		return _ddmContent.getGroupId();
-	}
-
-	/**
-	* Returns the primary key of this d d m content.
-	*
-	* @return the primary key of this d d m content
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _ddmContent.getPrimaryKey();
-	}
-
-	/**
-	* Returns the user ID of this d d m content.
-	*
-	* @return the user ID of this d d m content
-	*/
-	@Override
-	public long getUserId() {
-		return _ddmContent.getUserId();
 	}
 
 	@Override
@@ -439,9 +414,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the company ID of this d d m content.
+	* Sets the company ID of this ddm content.
 	*
-	* @param companyId the company ID of this d d m content
+	* @param companyId the company ID of this ddm content
 	*/
 	@Override
 	public void setCompanyId(long companyId) {
@@ -449,9 +424,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the content ID of this d d m content.
+	* Sets the content ID of this ddm content.
 	*
-	* @param contentId the content ID of this d d m content
+	* @param contentId the content ID of this ddm content
 	*/
 	@Override
 	public void setContentId(long contentId) {
@@ -459,9 +434,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the create date of this d d m content.
+	* Sets the create date of this ddm content.
 	*
-	* @param createDate the create date of this d d m content
+	* @param createDate the create date of this ddm content
 	*/
 	@Override
 	public void setCreateDate(Date createDate) {
@@ -469,9 +444,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the data of this d d m content.
+	* Sets the data of this ddm content.
 	*
-	* @param data the data of this d d m content
+	* @param data the data of this ddm content
 	*/
 	@Override
 	public void setData(java.lang.String data) {
@@ -479,18 +454,13 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the description of this d d m content.
+	* Sets the description of this ddm content.
 	*
-	* @param description the description of this d d m content
+	* @param description the description of this ddm content
 	*/
 	@Override
 	public void setDescription(java.lang.String description) {
 		_ddmContent.setDescription(description);
-	}
-
-	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_ddmContent.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -500,14 +470,19 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_ddmContent.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext) {
 		_ddmContent.setExpandoBridgeAttributes(serviceContext);
 	}
 
 	/**
-	* Sets the group ID of this d d m content.
+	* Sets the group ID of this ddm content.
 	*
-	* @param groupId the group ID of this d d m content
+	* @param groupId the group ID of this ddm content
 	*/
 	@Override
 	public void setGroupId(long groupId) {
@@ -515,9 +490,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the modified date of this d d m content.
+	* Sets the modified date of this ddm content.
 	*
-	* @param modifiedDate the modified date of this d d m content
+	* @param modifiedDate the modified date of this ddm content
 	*/
 	@Override
 	public void setModifiedDate(Date modifiedDate) {
@@ -525,9 +500,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the name of this d d m content.
+	* Sets the name of this ddm content.
 	*
-	* @param name the name of this d d m content
+	* @param name the name of this ddm content
 	*/
 	@Override
 	public void setName(java.lang.String name) {
@@ -535,9 +510,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the localized name of this d d m content in the language.
+	* Sets the localized name of this ddm content in the language.
 	*
-	* @param name the localized name of this d d m content
+	* @param name the localized name of this ddm content
 	* @param locale the locale of the language
 	*/
 	@Override
@@ -546,9 +521,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the localized name of this d d m content in the language, and sets the default locale.
+	* Sets the localized name of this ddm content in the language, and sets the default locale.
 	*
-	* @param name the localized name of this d d m content
+	* @param name the localized name of this ddm content
 	* @param locale the locale of the language
 	* @param defaultLocale the default locale
 	*/
@@ -564,9 +539,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the localized names of this d d m content from the map of locales and localized names.
+	* Sets the localized names of this ddm content from the map of locales and localized names.
 	*
-	* @param nameMap the locales and localized names of this d d m content
+	* @param nameMap the locales and localized names of this ddm content
 	*/
 	@Override
 	public void setNameMap(Map<java.util.Locale, java.lang.String> nameMap) {
@@ -574,9 +549,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the localized names of this d d m content from the map of locales and localized names, and sets the default locale.
+	* Sets the localized names of this ddm content from the map of locales and localized names, and sets the default locale.
 	*
-	* @param nameMap the locales and localized names of this d d m content
+	* @param nameMap the locales and localized names of this ddm content
 	* @param defaultLocale the default locale
 	*/
 	@Override
@@ -591,9 +566,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the primary key of this d d m content.
+	* Sets the primary key of this ddm content.
 	*
-	* @param primaryKey the primary key of this d d m content
+	* @param primaryKey the primary key of this ddm content
 	*/
 	@Override
 	public void setPrimaryKey(long primaryKey) {
@@ -606,9 +581,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the user ID of this d d m content.
+	* Sets the user ID of this ddm content.
 	*
-	* @param userId the user ID of this d d m content
+	* @param userId the user ID of this ddm content
 	*/
 	@Override
 	public void setUserId(long userId) {
@@ -616,9 +591,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the user name of this d d m content.
+	* Sets the user name of this ddm content.
 	*
-	* @param userName the user name of this d d m content
+	* @param userName the user name of this ddm content
 	*/
 	@Override
 	public void setUserName(java.lang.String userName) {
@@ -626,9 +601,9 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the user uuid of this d d m content.
+	* Sets the user uuid of this ddm content.
 	*
-	* @param userUuid the user uuid of this d d m content
+	* @param userUuid the user uuid of this ddm content
 	*/
 	@Override
 	public void setUserUuid(java.lang.String userUuid) {
@@ -636,13 +611,38 @@ public class DDMContentWrapper implements DDMContent, ModelWrapper<DDMContent> {
 	}
 
 	/**
-	* Sets the uuid of this d d m content.
+	* Sets the uuid of this ddm content.
 	*
-	* @param uuid the uuid of this d d m content
+	* @param uuid the uuid of this ddm content
 	*/
 	@Override
 	public void setUuid(java.lang.String uuid) {
 		_ddmContent.setUuid(uuid);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<DDMContent> toCacheModel() {
+		return _ddmContent.toCacheModel();
+	}
+
+	@Override
+	public DDMContent toEscapedModel() {
+		return new DDMContentWrapper(_ddmContent.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _ddmContent.toString();
+	}
+
+	@Override
+	public DDMContent toUnescapedModel() {
+		return new DDMContentWrapper(_ddmContent.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _ddmContent.toXmlString();
 	}
 
 	@Override

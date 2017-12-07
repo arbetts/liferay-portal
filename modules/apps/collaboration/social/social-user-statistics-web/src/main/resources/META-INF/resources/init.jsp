@@ -19,9 +19,7 @@
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
 
 <%@ taglib uri="http://liferay.com/tld/aui" prefix="aui" %><%@
-taglib uri="http://liferay.com/tld/ddm" prefix="liferay-ddm" %><%@
 taglib uri="http://liferay.com/tld/portlet" prefix="liferay-portlet" %><%@
-taglib uri="http://liferay.com/tld/security" prefix="liferay-security" %><%@
 taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %><%@
 taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %><%@
 taglib uri="http://liferay.com/tld/util" prefix="liferay-util" %>
@@ -45,8 +43,8 @@ page import="com.liferay.social.kernel.model.SocialActivityCounterConstants" %><
 page import="com.liferay.social.kernel.service.SocialActivityCounterLocalServiceUtil" %><%@
 page import="com.liferay.social.kernel.util.SocialConfigurationUtil" %><%@
 page import="com.liferay.social.kernel.util.comparator.SocialActivityCounterNameComparator" %><%@
+page import="com.liferay.social.user.statistics.constants.SocialUserStatisticsPortletKeys" %><%@
 page import="com.liferay.social.user.statistics.web.configuration.SocialUserStatisticsPortletInstanceConfiguration" %><%@
-page import="com.liferay.social.user.statistics.web.constants.SocialUserStatisticsPortletKeys" %><%@
 page import="com.liferay.taglib.search.ResultRow" %>
 
 <%@ page import="java.util.ArrayList" %><%@

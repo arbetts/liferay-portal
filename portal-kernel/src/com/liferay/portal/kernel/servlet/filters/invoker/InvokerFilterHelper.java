@@ -23,6 +23,9 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.InstanceFactory;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Document;
@@ -91,10 +94,18 @@ public class InvokerFilterHelper {
 			String servletContextName = GetterUtil.getString(
 				servletContext.getServletContextName());
 
+			String portalServletContextName =
+				PortalUtil.getServletContextName();
+
+			if (servletContextName.equals(portalServletContextName)) {
+				servletContextName = StringPool.BLANK;
+			}
+
 			com.liferay.registry.Filter filter = registry.getFilter(
-				"(&(objectClass=" + Filter.class.getName() +
-					")(servlet-context-name=" + servletContextName +
-						")(servlet-filter-name=*))");
+				StringBundler.concat(
+					"(&(objectClass=", Filter.class.getName(),
+					")(servlet-context-name=", servletContextName,
+					")(servlet-filter-name=*))"));
 
 			_serviceTracker = registry.trackServices(
 				filter, new FilterServiceTrackerCustomizer());
@@ -319,8 +330,8 @@ public class InvokerFilterHelper {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by {@link
-	 *             #initFilter(ServletContext, String, FilterConfig)}
+	 * @deprecated As of 7.0.0, replaced by {@link #initFilter(ServletContext,
+	 *             String, FilterConfig)}
 	 */
 	@Deprecated
 	protected Filter initFilter(
@@ -476,7 +487,8 @@ public class InvokerFilterHelper {
 				String value = GetterUtil.getString(
 					serviceReference.getProperty(key));
 
-				initParameterMap.put(key, value);
+				initParameterMap.put(
+					StringUtil.replace(key, "init.param.", ""), value);
 			}
 
 			ServletContext servletContext = ServletContextPool.get(

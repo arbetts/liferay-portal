@@ -1,15 +1,15 @@
-import core from 'metal/src/core';
-import dom from 'metal-dom/src/dom';
-import State from 'metal-state/src/State';
+import core from 'metal';
+import dom from 'metal-dom';
+import Component from 'metal-component';
 
 /**
  * PortletBase provides some helper functions that simplify querying the DOM
  * for elements related to a specific portlet.
  *
  * @abstract
- * @extends {State}
+ * @extends {Component}
  */
-class PortletBase extends State {
+class PortletBase extends Component {
 	/**
 	 * Returns a NodeList containing all of the matching Element nodes within
 	 * the subtrees of the root object, in tree order. If there are no matching
@@ -25,7 +25,9 @@ class PortletBase extends State {
 	all(selectors, root) {
 		root = dom.toElement(root) || this.rootNode || document;
 
-		return root.querySelectorAll(this.namespaceSelectors_(this.namespace, selectors));
+		return root.querySelectorAll(
+			this.namespaceSelectors_(this.namespace, selectors)
+		);
 	}
 
 	/**
@@ -38,13 +40,16 @@ class PortletBase extends State {
 	 * @return {string} Namespaced id selectors
 	 */
 	namespaceSelectors_(namespace, selectors) {
-		return selectors.replace(new RegExp('(#|\\[id=(\\\"|\\\'))(?!' + namespace + ')', 'g'), '$1' + namespace);
+		return selectors.replace(
+			new RegExp('(#|\\[id=(\\"|\\\'))(?!' + namespace + ')', 'g'),
+			'$1' + namespace
+		);
 	}
 
 	/**
 	 * Appends the portlet's namespace to the given string or object properties.
 	 *
-	 * @param {!Object|string} The object or string to be namespaced
+	 * @param {!Object|string} obj The object or string to be namespaced
 	 * @return {Object|string} An object with its properties namespaced using
 	 * the portlet namespace or a namespaced string
 	 */
@@ -65,7 +70,9 @@ class PortletBase extends State {
 	one(selectors, root) {
 		root = dom.toElement(root) || this.rootNode || document;
 
-		return root.querySelector(this.namespaceSelectors_(this.namespace, selectors));
+		return root.querySelector(
+			this.namespaceSelectors_(this.namespace, selectors)
+		);
 	}
 
 	/**
@@ -94,7 +101,7 @@ PortletBase.STATE = {
 	 * @type {string}
 	 */
 	namespace: {
-		validator: core.isString
+		validator: core.isString,
 	},
 
 	/**
@@ -105,8 +112,8 @@ PortletBase.STATE = {
 	 */
 	rootNode: {
 		setter: dom.toElement,
-		valueFn: 'rootNodeValueFn_'
-	}
+		valueFn: 'rootNodeValueFn_',
+	},
 };
 
 export default PortletBase;

@@ -39,7 +39,7 @@ if (reminderAttempts == null) {
 
 	<liferay-ui:error exception="<%= CaptchaConfigurationException.class %>" message="a-captcha-error-occurred-please-contact-an-administrator" />
 	<liferay-ui:error exception="<%= CaptchaTextException.class %>" message="text-verification-failed" />
-	<liferay-ui:error exception="<%= NoSuchUserException.class %>" message='<%= "the-" + TextFormatter.format(authType, TextFormatter.K) + "-you-requested-is-not-registered-in-our-database" %>' />
+	<liferay-ui:error exception="<%= NoSuchUserException.class %>" message='<%= "the-" + TextFormatter.format(HtmlUtil.escape(authType), TextFormatter.K) + "-you-requested-is-not-registered-in-our-database" %>' />
 	<liferay-ui:error exception="<%= RequiredReminderQueryException.class %>" message="you-have-not-configured-a-reminder-query" />
 	<liferay-ui:error exception="<%= SendPasswordException.MustBeEnabled.class %>" message="password-recovery-is-disabled" />
 	<liferay-ui:error exception="<%= UserActiveException.class %>" message="your-account-is-not-active" />
@@ -53,7 +53,14 @@ if (reminderAttempts == null) {
 		UserLockoutException.PasswordPolicyLockout ule = (UserLockoutException.PasswordPolicyLockout)errorException;
 		%>
 
-		<liferay-ui:message arguments="<%= ule.user.getUnlockDate() %>" key="this-account-is-locked-until-x" translateArguments="<%= false %>" />
+		<c:choose>
+			<c:when test="<%= ule.passwordPolicy.isRequireUnlock() %>">
+				<liferay-ui:message key="this-account-is-locked" />
+			</c:when>
+			<c:otherwise>
+				<liferay-ui:message arguments="<%= ule.user.getUnlockDate() %>" key="this-account-is-locked-until-x" translateArguments="<%= false %>" />
+			</c:otherwise>
+		</c:choose>
 	</liferay-ui:error>
 
 	<liferay-ui:error exception="<%= UserReminderQueryException.class %>" message="your-answer-does-not-match-what-is-in-our-database" />
@@ -96,10 +103,10 @@ if (reminderAttempts == null) {
 					<aui:validator name="required" />
 				</aui:input>
 
-				<c:if test="<%= PropsValues.CAPTCHA_CHECK_PORTAL_SEND_PASSWORD %>">
+				<c:if test="<%= captchaConfiguration.sendPasswordCaptchaEnabled() %>">
 					<portlet:resourceURL id="/login/captcha" var="captchaURL" />
 
-					<liferay-ui:captcha url="<%= captchaURL %>" />
+					<liferay-captcha:captcha url="<%= captchaURL %>" />
 				</c:if>
 
 				<aui:button-row>
@@ -133,7 +140,7 @@ if (reminderAttempts == null) {
 					%>
 
 					<div class="alert alert-info">
-						<liferay-ui:message arguments="<%= login %>" key="a-new-password-will-be-sent-to-x-if-you-can-correctly-answer-the-following-question" translateArguments="<%= false %>" />
+						<liferay-ui:message arguments="<%= HtmlUtil.escape(login) %>" key="a-new-password-will-be-sent-to-x-if-you-can-correctly-answer-the-following-question" translateArguments="<%= false %>" />
 					</div>
 
 					<aui:input autoFocus="<%= true %>" label="<%= HtmlUtil.escape(LanguageUtil.get(request, user2.getReminderQueryQuestion())) %>" name="answer" type="text" />
@@ -149,7 +156,7 @@ if (reminderAttempts == null) {
 						<c:if test="<%= reminderAttempts >= 3 %>">
 							<portlet:resourceURL id="/login/captcha" var="captchaURL" />
 
-							<liferay-ui:captcha url="<%= captchaURL %>" />
+							<liferay-captcha:captcha url="<%= captchaURL %>" />
 						</c:if>
 
 						<aui:button-row>
@@ -167,4 +174,4 @@ if (reminderAttempts == null) {
 	</aui:fieldset>
 </aui:form>
 
-<liferay-util:include page="/navigation.jsp" servletContext="<%= application %>" />
+<%@ include file="/navigation.jspf" %>

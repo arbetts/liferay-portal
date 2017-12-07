@@ -15,6 +15,7 @@
 package com.liferay.source.formatter.checkstyle.checks;
 
 import com.liferay.source.formatter.checkstyle.util.DetailASTUtil;
+import com.liferay.source.formatter.util.DebugUtil;
 
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
@@ -28,20 +29,31 @@ import java.util.regex.Pattern;
 public class ConstantNameCheck
 	extends com.puppycrawl.tools.checkstyle.checks.naming.ConstantNameCheck {
 
-	public static final String MSG_INVALID_PRIVATE_NAME =
-		"name.invalidPrivatePattern";
-
-	public static final String MSG_INVALID_PROTECTED_PUBLIC_NAME =
-		"name.invalidProtectedPublicPattern";
-
-	public static final String MSG_PRIVATE_COLLECTION =
-		"name.collectionPrivatePattern";
-
-	public static final String MSG_PROTECTED_PUBLIC_COLLECTION =
-		"name.collectionProtectedPublicPattern";
+	public void setShowDebugInformation(boolean showDebugInformation) {
+		_showDebugInformation = showDebugInformation;
+	}
 
 	@Override
 	public void visitToken(DetailAST detailAST) {
+		if (!_showDebugInformation) {
+			_checkConstantName(detailAST);
+
+			return;
+		}
+
+		long startTime = System.currentTimeMillis();
+
+		_checkConstantName(detailAST);
+
+		long endTime = System.currentTimeMillis();
+
+		Class<?> clazz = getClass();
+
+		DebugUtil.increaseProcessingTime(
+			clazz.getSimpleName(), endTime - startTime);
+	}
+
+	private void _checkConstantName(DetailAST detailAST) {
 		if (!mustCheckName(detailAST)) {
 			return;
 		}
@@ -52,24 +64,28 @@ public class ConstantNameCheck
 		DetailAST modifiersAST = detailAST.findFirstToken(TokenTypes.MODIFIERS);
 
 		if (modifiersAST.branchContains(TokenTypes.LITERAL_PRIVATE)) {
-			if (DetailASTUtil.isCollection(detailAST)) {
-				message = MSG_PRIVATE_COLLECTION;
+			if (DetailASTUtil.isCollection(
+					detailAST.findFirstToken(TokenTypes.TYPE))) {
+
+				message = _MSG_PRIVATE_COLLECTION;
 				regex = "^_[a-z0-9][_a-zA-Z0-9]*$";
 			}
 			else {
-				message = MSG_INVALID_PRIVATE_NAME;
+				message = _MSG_INVALID_PRIVATE_NAME;
 				regex = "^_[_a-zA-Z0-9]*$";
 			}
 		}
 		else if (modifiersAST.branchContains(TokenTypes.LITERAL_PROTECTED) ||
 				 modifiersAST.branchContains(TokenTypes.LITERAL_PUBLIC)) {
 
-			if (DetailASTUtil.isCollection(detailAST)) {
-				message = MSG_PROTECTED_PUBLIC_COLLECTION;
+			if (DetailASTUtil.isCollection(
+					detailAST.findFirstToken(TokenTypes.TYPE))) {
+
+				message = _MSG_PROTECTED_PUBLIC_COLLECTION;
 				regex = "^[a-z0-9][_a-zA-Z0-9]*$";
 			}
 			else {
-				message = MSG_INVALID_PROTECTED_PUBLIC_NAME;
+				message = _MSG_INVALID_PROTECTED_PUBLIC_NAME;
 				regex = "^[a-zA-Z0-9][_a-zA-Z0-9]*$";
 			}
 		}
@@ -87,5 +103,19 @@ public class ConstantNameCheck
 			log(nameAST.getLineNo(), message, nameAST.getText(), regex);
 		}
 	}
+
+	private static final String _MSG_INVALID_PRIVATE_NAME =
+		"name.invalidPrivatePattern";
+
+	private static final String _MSG_INVALID_PROTECTED_PUBLIC_NAME =
+		"name.invalidProtectedPublicPattern";
+
+	private static final String _MSG_PRIVATE_COLLECTION =
+		"name.collectionPrivatePattern";
+
+	private static final String _MSG_PROTECTED_PUBLIC_COLLECTION =
+		"name.collectionProtectedPublicPattern";
+
+	private boolean _showDebugInformation;
 
 }

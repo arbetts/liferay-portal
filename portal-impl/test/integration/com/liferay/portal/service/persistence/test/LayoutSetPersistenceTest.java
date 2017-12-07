@@ -32,7 +32,6 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
@@ -191,9 +190,9 @@ public class LayoutSetPersistenceTest {
 
 	@Test
 	public void testCountByLayoutSetPrototypeUuid() throws Exception {
-		_persistence.countByLayoutSetPrototypeUuid(StringPool.BLANK);
+		_persistence.countByLayoutSetPrototypeUuid("");
 
-		_persistence.countByLayoutSetPrototypeUuid(StringPool.NULL);
+		_persistence.countByLayoutSetPrototypeUuid("null");
 
 		_persistence.countByLayoutSetPrototypeUuid((String)null);
 	}
@@ -204,6 +203,14 @@ public class LayoutSetPersistenceTest {
 			RandomTestUtil.randomBoolean());
 
 		_persistence.countByG_P(0L, RandomTestUtil.randomBoolean());
+	}
+
+	@Test
+	public void testCountByP_L() throws Exception {
+		_persistence.countByP_L(RandomTestUtil.randomBoolean(),
+			RandomTestUtil.nextLong());
+
+		_persistence.countByP_L(RandomTestUtil.randomBoolean(), 0L);
 	}
 
 	@Test
@@ -444,6 +451,14 @@ public class LayoutSetPersistenceTest {
 				existingLayoutSet.getPrivateLayout()),
 			ReflectionTestUtil.<Boolean>invoke(existingLayoutSet,
 				"getOriginalPrivateLayout", new Class<?>[0]));
+
+		Assert.assertEquals(Boolean.valueOf(
+				existingLayoutSet.getPrivateLayout()),
+			ReflectionTestUtil.<Boolean>invoke(existingLayoutSet,
+				"getOriginalPrivateLayout", new Class<?>[0]));
+		Assert.assertEquals(Long.valueOf(existingLayoutSet.getLogoId()),
+			ReflectionTestUtil.<Long>invoke(existingLayoutSet,
+				"getOriginalLogoId", new Class<?>[0]));
 	}
 
 	protected LayoutSet addLayoutSet() throws Exception {

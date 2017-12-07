@@ -14,11 +14,13 @@
 
 package com.liferay.portal.osgi.web.wab.generator.internal.connection;
 
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.osgi.web.wab.generator.WabGenerator;
 import com.liferay.portal.util.FastDateFormatFactoryImpl;
 import com.liferay.portal.util.FileImpl;
@@ -71,17 +73,48 @@ public class WabURLConnection extends URLConnection {
 					"Web-ContextPath");
 		}
 
-		File file = transferToTempFile(new URL(url.getPath()));
+		String path = url.getPath();
+		String[] protocols = parameters.get("protocol");
 
-		try {
-			File processedFile = _wabGenerator.generate(
-				_classLoader, file, parameters);
+		if (ArrayUtil.isEmpty(protocols)) {
+			if (path.startsWith("file:")) {
+				path = path.substring(5);
+				protocols = new String[] {"file"};
+			}
+			else {
+				throw new IllegalArgumentException(
+					"The parameter map does not contain the required " +
+						"parameter protocol");
+			}
+		}
 
-			return new FileInputStream(processedFile);
+		String[] portalProfileNames = parameters.get(
+			"liferay-portal-profile-names");
+
+		if (ArrayUtil.isNotEmpty(portalProfileNames)) {
+			path = path.concat("?liferay-portal-profile-names=");
+
+			path = path.concat(StringUtil.merge(portalProfileNames));
 		}
-		finally {
-			FileUtil.deltree(file.getParentFile());
-		}
+
+		final File file = transferToTempFile(new URL(protocols[0], null, path));
+
+		File processedFile = _wabGenerator.generate(
+			_classLoader, file, parameters);
+
+		return new FileInputStream(processedFile) {
+
+			@Override
+			public void close() throws IOException {
+				try {
+					super.close();
+				}
+				finally {
+					FileUtil.deltree(file.getParentFile());
+				}
+			}
+
+		};
 	}
 
 	protected File transferToTempFile(URL url) throws IOException {

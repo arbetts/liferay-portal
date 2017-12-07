@@ -19,9 +19,11 @@ import com.liferay.dynamic.data.mapping.io.DDMFormValuesJSONSerializer;
 import com.liferay.dynamic.data.mapping.model.DDMContent;
 import com.liferay.dynamic.data.mapping.model.DDMStorageLink;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.dynamic.data.mapping.model.DDMStructureVersion;
 import com.liferay.dynamic.data.mapping.service.DDMContentLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMStorageLinkLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
+import com.liferay.dynamic.data.mapping.service.DDMStructureVersionLocalService;
 import com.liferay.dynamic.data.mapping.storage.BaseStorageAdapter;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.storage.StorageAdapter;
@@ -29,7 +31,7 @@ import com.liferay.dynamic.data.mapping.storage.StorageType;
 import com.liferay.dynamic.data.mapping.validator.DDMFormValuesValidator;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 
 import java.util.List;
 
@@ -50,8 +52,7 @@ public class JSONStorageAdapter extends BaseStorageAdapter {
 
 		validate(ddmFormValues, serviceContext);
 
-		long classNameId = PortalUtil.getClassNameId(
-			DDMContent.class.getName());
+		long classNameId = _portal.getClassNameId(DDMContent.class.getName());
 
 		String serializedDDMFormValues = _ddmFormValuesJSONSerializer.serialize(
 			ddmFormValues);
@@ -61,9 +62,15 @@ public class JSONStorageAdapter extends BaseStorageAdapter {
 			DDMStorageLink.class.getName(), null, serializedDDMFormValues,
 			serviceContext);
 
+		DDMStructure ddmStructure = _ddmStructureLocalService.getDDMStructure(
+			ddmStructureId);
+
+		DDMStructureVersion ddmStructureVersion =
+			ddmStructure.getLatestStructureVersion();
+
 		_ddmStorageLinkLocalService.addStorageLink(
-			classNameId, ddmContent.getPrimaryKey(), ddmStructureId,
-			serviceContext);
+			classNameId, ddmContent.getPrimaryKey(),
+			ddmStructureVersion.getStructureVersionId(), serviceContext);
 
 		return ddmContent.getPrimaryKey();
 	}
@@ -123,12 +130,13 @@ public class JSONStorageAdapter extends BaseStorageAdapter {
 			_ddmStorageLinkLocalService.getClassStorageLink(
 				ddmContent.getPrimaryKey());
 
-		DDMStructure ddmStructure = _ddmStructureLocalService.getStructure(
-			ddmStorageLink.getStructureId());
+		DDMStructureVersion ddmStructureVersion =
+			_ddmStructureVersionLocalService.getDDMStructureVersion(
+				ddmStorageLink.getStructureVersionId());
 
 		DDMFormValues ddmFormValues =
 			_ddmFormValuesJSONDeserializer.deserialize(
-				ddmStructure.getDDMForm(), ddmContent.getData());
+				ddmStructureVersion.getDDMForm(), ddmContent.getData());
 
 		return ddmFormValues;
 	}
@@ -175,6 +183,13 @@ public class JSONStorageAdapter extends BaseStorageAdapter {
 		_ddmStructureLocalService = ddmStructureLocalService;
 	}
 
+	@Reference(unbind = "-")
+	protected void setDDMStructureVersionLocalService(
+		DDMStructureVersionLocalService ddmStructureVersionLocalService) {
+
+		_ddmStructureVersionLocalService = ddmStructureVersionLocalService;
+	}
+
 	protected void validate(
 			DDMFormValues ddmFormValues, ServiceContext serviceContext)
 		throws Exception {
@@ -195,5 +210,9 @@ public class JSONStorageAdapter extends BaseStorageAdapter {
 	private DDMFormValuesValidator _ddmFormValuesValidator;
 	private DDMStorageLinkLocalService _ddmStorageLinkLocalService;
 	private DDMStructureLocalService _ddmStructureLocalService;
+	private DDMStructureVersionLocalService _ddmStructureVersionLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

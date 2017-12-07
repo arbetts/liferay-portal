@@ -23,7 +23,8 @@ import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -35,6 +36,7 @@ import com.liferay.social.kernel.model.SocialActivityInterpreter;
 
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
+import javax.portlet.WindowState;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -69,8 +71,12 @@ public class CalendarActivityInterpreter extends BaseSocialActivityInterpreter {
 			SocialActivity activity, ServiceContext serviceContext)
 		throws Exception {
 
-		long plid = PortalUtil.getPlidFromPortletId(
-			serviceContext.getScopeGroupId(), CalendarPortletKeys.CALENDAR);
+		CalendarBooking calendarBooking =
+			_calendarBookingLocalService.getCalendarBooking(
+				activity.getClassPK());
+
+		long plid = _portal.getPlidFromPortletId(
+			calendarBooking.getGroupId(), CalendarPortletKeys.CALENDAR);
 
 		PortletURL portletURL = PortletURLFactoryUtil.create(
 			serviceContext.getRequest(), CalendarPortletKeys.CALENDAR, plid,
@@ -80,6 +86,7 @@ public class CalendarActivityInterpreter extends BaseSocialActivityInterpreter {
 		portletURL.setParameter("backURL", serviceContext.getCurrentURL());
 		portletURL.setParameter(
 			"calendarBookingId", String.valueOf(activity.getClassPK()));
+		portletURL.setWindowState(WindowState.MAXIMIZED);
 
 		return portletURL.toString();
 	}
@@ -158,6 +165,13 @@ public class CalendarActivityInterpreter extends BaseSocialActivityInterpreter {
 		{CalendarBooking.class.getName()};
 
 	private CalendarBookingLocalService _calendarBookingLocalService;
+
+	@Reference
+	private Http _http;
+
+	@Reference
+	private Portal _portal;
+
 	private ResourceBundleLoader _resourceBundleLoader;
 
 }

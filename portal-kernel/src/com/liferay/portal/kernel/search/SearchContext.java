@@ -387,8 +387,12 @@ public class SearchContext implements Serializable {
 		_portletIds = portletIds;
 	}
 
+	/**
+	 * @param      queryConfig
+	 * @deprecated As of 7.0.0, replaced by {@link #getQueryConfig()}
+	 */
+	@Deprecated
 	public void setQueryConfig(QueryConfig queryConfig) {
-		_queryConfig = queryConfig;
 	}
 
 	public void setScopeStrict(boolean scopeStrict) {
@@ -419,6 +423,10 @@ public class SearchContext implements Serializable {
 
 	public void setUserId(long userId) {
 		_userId = userId;
+
+		if (_attributes != null) {
+			_attributes.remove("searchPermissionContext");
+		}
 	}
 
 	private boolean _andSearch;

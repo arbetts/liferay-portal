@@ -17,12 +17,20 @@ package com.liferay.portal.search.facet.internal.faceted.searcher;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactory;
 import com.liferay.portal.kernel.search.IndexSearcherHelper;
 import com.liferay.portal.kernel.search.IndexerRegistry;
+import com.liferay.portal.kernel.search.SearchEngineHelper;
 import com.liferay.portal.kernel.search.facet.faceted.searcher.FacetedSearcher;
 import com.liferay.portal.kernel.search.facet.faceted.searcher.FacetedSearcherManager;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.search.permission.SearchPermissionFilterContributor;
+
+import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author André de Oliveira
@@ -34,7 +42,28 @@ public class FacetedSearcherManagerImpl implements FacetedSearcherManager {
 	public FacetedSearcher createFacetedSearcher() {
 		return new FacetedSearcherImpl(
 			expandoBridgeFactory, groupLocalService, indexerRegistry,
-			indexSearcherHelper);
+			indexSearcherHelper, searchEngineHelper,
+			_searchPermissionFilterContributors);
+	}
+
+	@Reference(
+		cardinality = ReferenceCardinality.MULTIPLE,
+		policy = ReferencePolicy.DYNAMIC,
+		policyOption = ReferencePolicyOption.GREEDY,
+		unbind = "removeSearchPermissionFilterContributor"
+	)
+	protected void addSearchPermissionFilterContributor(
+		SearchPermissionFilterContributor searchPermissionFilterContributor) {
+
+		_searchPermissionFilterContributors.add(
+			searchPermissionFilterContributor);
+	}
+
+	protected void removeSearchPermissionFilterContributor(
+		SearchPermissionFilterContributor searchPermissionFilterContributor) {
+
+		_searchPermissionFilterContributors.remove(
+			searchPermissionFilterContributor);
 	}
 
 	@Reference
@@ -48,5 +77,11 @@ public class FacetedSearcherManagerImpl implements FacetedSearcherManager {
 
 	@Reference
 	protected IndexSearcherHelper indexSearcherHelper;
+
+	@Reference
+	protected SearchEngineHelper searchEngineHelper;
+
+	private final Collection<SearchPermissionFilterContributor>
+		_searchPermissionFilterContributors = new CopyOnWriteArrayList<>();
 
 }

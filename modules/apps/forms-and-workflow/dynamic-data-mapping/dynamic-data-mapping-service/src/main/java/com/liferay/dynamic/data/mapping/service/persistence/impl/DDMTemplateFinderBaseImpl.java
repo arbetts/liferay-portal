@@ -18,8 +18,15 @@ import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMTemplatePersistence;
 
 import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 
+import java.lang.reflect.Field;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,24 +34,46 @@ import java.util.Set;
  * @generated
  */
 public class DDMTemplateFinderBaseImpl extends BasePersistenceImpl<DDMTemplate> {
+	public DDMTemplateFinderBaseImpl() {
+		setModelClass(DDMTemplate.class);
+
+		try {
+			Field field = ReflectionUtil.getDeclaredField(BasePersistenceImpl.class,
+					"_dbColumnNames");
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+			dbColumnNames.put("type", "type_");
+			dbColumnNames.put("mode", "mode_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
+	}
+
 	@Override
 	public Set<String> getBadColumnNames() {
 		return getDDMTemplatePersistence().getBadColumnNames();
 	}
 
 	/**
-	 * Returns the d d m template persistence.
+	 * Returns the ddm template persistence.
 	 *
-	 * @return the d d m template persistence
+	 * @return the ddm template persistence
 	 */
 	public DDMTemplatePersistence getDDMTemplatePersistence() {
 		return ddmTemplatePersistence;
 	}
 
 	/**
-	 * Sets the d d m template persistence.
+	 * Sets the ddm template persistence.
 	 *
-	 * @param ddmTemplatePersistence the d d m template persistence
+	 * @param ddmTemplatePersistence the ddm template persistence
 	 */
 	public void setDDMTemplatePersistence(
 		DDMTemplatePersistence ddmTemplatePersistence) {
@@ -53,4 +82,5 @@ public class DDMTemplateFinderBaseImpl extends BasePersistenceImpl<DDMTemplate> 
 
 	@BeanReference(type = DDMTemplatePersistence.class)
 	protected DDMTemplatePersistence ddmTemplatePersistence;
+	private static final Log _log = LogFactoryUtil.getLog(DDMTemplateFinderBaseImpl.class);
 }

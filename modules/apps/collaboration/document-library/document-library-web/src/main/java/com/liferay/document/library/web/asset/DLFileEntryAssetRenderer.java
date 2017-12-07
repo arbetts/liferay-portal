@@ -17,10 +17,14 @@ package com.liferay.document.library.web.asset;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.model.BaseJSPAssetRenderer;
 import com.liferay.asset.kernel.model.DDMFormValuesReader;
+import com.liferay.document.library.kernel.document.conversion.DocumentConversionUtil;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
 import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.document.library.web.constants.DLPortletKeys;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
@@ -32,7 +36,6 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.trash.TrashRenderer;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -43,8 +46,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.documentlibrary.asset.DLFileEntryDDMFormValuesReader;
 import com.liferay.portlet.documentlibrary.service.permission.DLFileEntryPermission;
-import com.liferay.portlet.documentlibrary.util.DocumentConversionUtil;
-import com.liferay.trash.kernel.util.TrashUtil;
+import com.liferay.trash.TrashHelper;
 
 import java.util.Date;
 import java.util.Locale;
@@ -67,11 +69,36 @@ import javax.servlet.http.HttpServletResponse;
 public class DLFileEntryAssetRenderer
 	extends BaseJSPAssetRenderer<FileEntry> implements TrashRenderer {
 
+	/**
+	 * @deprecated As of 1.2.0
+	 */
+	@Deprecated
 	public DLFileEntryAssetRenderer(
 		FileEntry fileEntry, FileVersion fileVersion) {
 
+		this(fileEntry, fileVersion, DLFileEntryLocalServiceUtil.getService());
+	}
+
+	/**
+	 * @deprecated As of 2.0.0
+	 */
+	@Deprecated
+	public DLFileEntryAssetRenderer(
+		FileEntry fileEntry, FileVersion fileVersion,
+		DLFileEntryLocalService dlFileEntryLocalService) {
+
+		this(fileEntry, fileVersion, dlFileEntryLocalService, null);
+	}
+
+	public DLFileEntryAssetRenderer(
+		FileEntry fileEntry, FileVersion fileVersion,
+		DLFileEntryLocalService dlFileEntryLocalService,
+		TrashHelper trashHelper) {
+
 		_fileEntry = fileEntry;
 		_fileVersion = fileVersion;
+		_dlFileEntryLocalService = dlFileEntryLocalService;
+		_trashHelper = trashHelper;
 	}
 
 	@Override
@@ -218,7 +245,11 @@ public class DLFileEntryAssetRenderer
 			title = _fileEntry.getTitle();
 		}
 
-		return TrashUtil.getOriginalTitle(title);
+		if (_trashHelper == null) {
+			return title;
+		}
+
+		return _trashHelper.getOriginalTitle(title);
 	}
 
 	@Override
@@ -385,6 +416,22 @@ public class DLFileEntryAssetRenderer
 	}
 
 	@Override
+	public boolean isCategorizable(long groupId) {
+		long classPK = getClassPK();
+
+		DLFileEntry dlFileEntry = _dlFileEntryLocalService.fetchDLFileEntry(
+			classPK);
+
+		if ((dlFileEntry == null) ||
+			(dlFileEntry.getRepositoryId() != groupId)) {
+
+			return false;
+		}
+
+		return super.isCategorizable(groupId);
+	}
+
+	@Override
 	public boolean isConvertible() {
 		return true;
 	}
@@ -394,7 +441,9 @@ public class DLFileEntryAssetRenderer
 		return false;
 	}
 
+	private final DLFileEntryLocalService _dlFileEntryLocalService;
 	private final FileEntry _fileEntry;
 	private FileVersion _fileVersion;
+	private final TrashHelper _trashHelper;
 
 }

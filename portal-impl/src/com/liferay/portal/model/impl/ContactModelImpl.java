@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
@@ -135,7 +134,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 		TABLE_COLUMNS_MAP.put("hoursOfOperation", Types.VARCHAR);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table Contact_ (mvccVersion LONG default 0 not null,contactId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,accountId LONG,parentContactId LONG,emailAddress VARCHAR(75) null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,prefixId LONG,suffixId LONG,male BOOLEAN,birthday DATE null,smsSn VARCHAR(75) null,facebookSn VARCHAR(75) null,jabberSn VARCHAR(75) null,skypeSn VARCHAR(75) null,twitterSn VARCHAR(75) null,employeeStatusId VARCHAR(75) null,employeeNumber VARCHAR(75) null,jobTitle VARCHAR(100) null,jobClass VARCHAR(75) null,hoursOfOperation VARCHAR(75) null)";
+	public static final String TABLE_SQL_CREATE = "create table Contact_ (mvccVersion LONG default 0 not null,contactId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,accountId LONG,parentContactId LONG,emailAddress VARCHAR(254) null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,prefixId LONG,suffixId LONG,male BOOLEAN,birthday DATE null,smsSn VARCHAR(75) null,facebookSn VARCHAR(75) null,jabberSn VARCHAR(75) null,skypeSn VARCHAR(75) null,twitterSn VARCHAR(75) null,employeeStatusId VARCHAR(75) null,employeeNumber VARCHAR(75) null,jobTitle VARCHAR(100) null,jobClass VARCHAR(75) null,hoursOfOperation VARCHAR(75) null)";
 	public static final String TABLE_SQL_DROP = "drop table Contact_";
 	public static final String ORDER_BY_JPQL = " ORDER BY contact.contactId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY Contact_.contactId ASC";
@@ -540,7 +539,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 			return user.getUuid();
 		}
 		catch (PortalException pe) {
-			return StringPool.BLANK;
+			return "";
 		}
 	}
 
@@ -552,7 +551,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getUserName() {
 		if (_userName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _userName;
@@ -595,7 +594,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getClassName() {
 		if (getClassNameId() <= 0) {
-			return StringPool.BLANK;
+			return "";
 		}
 
 		return PortalUtil.getClassName(getClassNameId());
@@ -696,7 +695,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getEmailAddress() {
 		if (_emailAddress == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _emailAddress;
@@ -712,7 +711,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getFirstName() {
 		if (_firstName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _firstName;
@@ -728,7 +727,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getMiddleName() {
 		if (_middleName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _middleName;
@@ -744,7 +743,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getLastName() {
 		if (_lastName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _lastName;
@@ -810,7 +809,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getSmsSn() {
 		if (_smsSn == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _smsSn;
@@ -826,7 +825,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getFacebookSn() {
 		if (_facebookSn == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _facebookSn;
@@ -842,7 +841,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getJabberSn() {
 		if (_jabberSn == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _jabberSn;
@@ -858,7 +857,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getSkypeSn() {
 		if (_skypeSn == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _skypeSn;
@@ -874,7 +873,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getTwitterSn() {
 		if (_twitterSn == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _twitterSn;
@@ -890,7 +889,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getEmployeeStatusId() {
 		if (_employeeStatusId == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _employeeStatusId;
@@ -906,7 +905,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getEmployeeNumber() {
 		if (_employeeNumber == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _employeeNumber;
@@ -922,7 +921,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getJobTitle() {
 		if (_jobTitle == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _jobTitle;
@@ -938,7 +937,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getJobClass() {
 		if (_jobClass == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _jobClass;
@@ -954,7 +953,7 @@ public class ContactModelImpl extends BaseModelImpl<Contact>
 	@Override
 	public String getHoursOfOperation() {
 		if (_hoursOfOperation == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _hoursOfOperation;

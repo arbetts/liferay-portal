@@ -17,7 +17,7 @@ package com.liferay.staging.configuration.web.internal.portlet;
 import com.liferay.exportimport.kernel.service.StagingLocalService;
 import com.liferay.exportimport.kernel.staging.StagingConstants;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
-import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManagerUtil;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.exception.NoSuchBackgroundTaskException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
@@ -30,7 +30,7 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.staging.constants.StagingConfigurationPortletKeys;
 import com.liferay.staging.constants.StagingProcessesPortletKeys;
@@ -84,7 +84,7 @@ public class StagingConfigurationPortlet extends MVCPortlet {
 			long backgroundTaskId = ParamUtil.getLong(
 				actionRequest, BackgroundTaskConstants.BACKGROUND_TASK_ID);
 
-			BackgroundTaskManagerUtil.deleteBackgroundTask(backgroundTaskId);
+			_backgroundTaskManager.deleteBackgroundTask(backgroundTaskId);
 
 			sendRedirect(actionRequest, actionResponse);
 		}
@@ -123,20 +123,19 @@ public class StagingConfigurationPortlet extends MVCPortlet {
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			actionRequest);
 
-		boolean forceDisable = ParamUtil.getBoolean(
-			actionRequest, "forceDisable");
-
 		boolean stagedGroup = true;
 
-		if (forceDisable) {
-			_groupLocalService.disableStaging(liveGroupId);
-		}
-		else if (stagingType == StagingConstants.TYPE_LOCAL_STAGING) {
+		if (stagingType == StagingConstants.TYPE_LOCAL_STAGING) {
 			stagedGroup = liveGroup.hasStagingGroup();
 
-			_stagingLocalService.enableLocalStaging(
-				themeDisplay.getUserId(), liveGroup, branchingPublic,
-				branchingPrivate, serviceContext);
+			try {
+				_stagingLocalService.enableLocalStaging(
+					themeDisplay.getUserId(), liveGroup, branchingPublic,
+					branchingPrivate, serviceContext);
+			}
+			catch (Exception e) {
+				SessionErrors.add(actionRequest, Exception.class, e);
+			}
 		}
 		else if (stagingType == StagingConstants.TYPE_REMOTE_STAGING) {
 			String remoteAddress = ParamUtil.getString(
@@ -169,13 +168,13 @@ public class StagingConfigurationPortlet extends MVCPortlet {
 			PortletURL portletURL = null;
 
 			if (stagingType == StagingConstants.TYPE_LOCAL_STAGING) {
-				portletURL = PortalUtil.getControlPanelPortletURL(
+				portletURL = _portal.getControlPanelPortletURL(
 					actionRequest, liveGroup.getStagingGroup(),
 					StagingProcessesPortletKeys.STAGING_PROCESSES, 0, 0,
 					PortletRequest.RENDER_PHASE);
 			}
 			else if (stagingType == StagingConstants.TYPE_REMOTE_STAGING) {
-				portletURL = PortalUtil.getControlPanelPortletURL(
+				portletURL = _portal.getControlPanelPortletURL(
 					actionRequest, liveGroup,
 					StagingProcessesPortletKeys.STAGING_PROCESSES, 0, 0,
 					PortletRequest.RENDER_PHASE);
@@ -191,7 +190,7 @@ public class StagingConfigurationPortlet extends MVCPortlet {
 			// Staging was turned off or remote staging configuration was
 			// modified
 
-			PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
+			PortletURL portletURL = _portal.getControlPanelPortletURL(
 				actionRequest, liveGroup,
 				StagingProcessesPortletKeys.STAGING_PROCESSES, 0, 0,
 				PortletRequest.RENDER_PHASE);
@@ -211,7 +210,7 @@ public class StagingConfigurationPortlet extends MVCPortlet {
 
 			// Local staging configuration was modified
 
-			PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
+			PortletURL portletURL = _portal.getControlPanelPortletURL(
 				actionRequest, liveGroup.getStagingGroup(),
 				StagingProcessesPortletKeys.STAGING_PROCESSES, 0, 0,
 				PortletRequest.RENDER_PHASE);
@@ -251,7 +250,14 @@ public class StagingConfigurationPortlet extends MVCPortlet {
 		_stagingLocalService = null;
 	}
 
+	@Reference
+	private BackgroundTaskManager _backgroundTaskManager;
+
 	private GroupLocalService _groupLocalService;
+
+	@Reference
+	private Portal _portal;
+
 	private StagingLocalService _stagingLocalService;
 
 }

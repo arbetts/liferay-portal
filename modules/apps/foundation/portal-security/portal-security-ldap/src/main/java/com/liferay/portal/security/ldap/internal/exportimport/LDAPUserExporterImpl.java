@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.security.ldap.LDAPSettings;
 import com.liferay.portal.kernel.service.UserGroupLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.security.exportimport.UserExporter;
@@ -56,6 +57,7 @@ import org.apache.commons.lang.time.StopWatch;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Michael C. Han
@@ -150,8 +152,9 @@ public class LDAPUserExporterImpl implements UserExporter {
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(
-					"Finished exporting contact " + contact + " in " +
-						stopWatch.getTime() + "ms");
+					StringBundler.concat(
+						"Finished exporting contact ", String.valueOf(contact),
+						" in ", String.valueOf(stopWatch.getTime()), "ms"));
 			}
 		}
 	}
@@ -171,7 +174,9 @@ public class LDAPUserExporterImpl implements UserExporter {
 			stopWatch.start();
 
 			_log.debug(
-				"Exporting user " + user + " in user group " + userGroupId);
+				StringBundler.concat(
+					"Exporting user ", String.valueOf(user), " in user group ",
+					String.valueOf(userGroupId)));
 		}
 
 		if (!_ldapSettings.isExportEnabled(companyId) ||
@@ -200,17 +205,24 @@ public class LDAPUserExporterImpl implements UserExporter {
 		Binding binding = _portalLDAP.getGroup(
 			ldapServerId, companyId, userGroup.getName());
 
-		try {
-			if (binding == null) {
-				if (userOperation == UserOperation.ADD) {
-					addGroup(
-						ldapServerId, ldapContext, userGroup, user,
-						groupMappings, userMappings);
+		if (binding == null) {
+			if (userOperation == UserOperation.ADD) {
+				addGroup(
+					ldapServerId, ldapContext, userGroup, user, groupMappings,
+					userMappings);
+			}
+			else {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to get or add LDAP bindings for user group " +
+							userGroup.getName());
 				}
-
-				return;
 			}
 
+			return;
+		}
+
+		try {
 			Name name = new CompositeName();
 
 			name.add(
@@ -227,6 +239,13 @@ public class LDAPUserExporterImpl implements UserExporter {
 			ldapContext.modifyAttributes(name, modificationItems);
 		}
 		catch (SchemaViolationException sve) {
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					"Unable to update LDAP bindings for user group " +
+						userGroup.getName(),
+					sve);
+			}
+
 			String fullGroupDN = _portalLDAP.getNameInNamespace(
 				ldapServerId, companyId, binding);
 
@@ -247,8 +266,10 @@ public class LDAPUserExporterImpl implements UserExporter {
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(
-					"Finished exporting user " + user + " in user group " +
-						userGroupId + " in " + stopWatch.getTime() + "ms");
+					StringBundler.concat(
+						"Finished exporting user ", String.valueOf(user),
+						" in user group ", String.valueOf(userGroupId), " in ",
+						String.valueOf(stopWatch.getTime()), "ms"));
 			}
 		}
 	}
@@ -378,7 +399,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 		}
 	}
 
-	@Reference(unbind = "-")
+	@Reference(policyOption = ReferencePolicyOption.GREEDY, unbind = "-")
 	public void setPortalToLDAPConverter(
 		PortalToLDAPConverter portalToLDAPConverter) {
 
@@ -446,7 +467,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 		_ldapSettings = ldapSettings;
 	}
 
-	@Reference(unbind = "-")
+	@Reference(policyOption = ReferencePolicyOption.GREEDY, unbind = "-")
 	protected void setPortalLDAP(PortalLDAP portalLDAP) {
 		_portalLDAP = portalLDAP;
 	}

@@ -15,8 +15,8 @@
 package com.liferay.staging.processes.web.internal.portlet.action;
 
 import com.liferay.exportimport.kernel.exception.RemoteExportException;
-import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
-import com.liferay.exportimport.kernel.staging.StagingUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportHelper;
+import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.portal.kernel.exception.LayoutPrototypeException;
 import com.liferay.portal.kernel.exception.RemoteOptionsException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -30,7 +30,7 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.staging.constants.StagingProcessesPortletKeys;
 import com.liferay.taglib.ui.util.SessionTreeJSClicks;
@@ -41,6 +41,7 @@ import javax.portlet.ActionResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Levente Hudák
@@ -63,7 +64,7 @@ public class PublishLayoutsMVCActionCommand extends BaseMVCActionCommand {
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
 		if (Validator.isNull(cmd)) {
-			String portletId = PortalUtil.getPortletId(actionRequest);
+			String portletId = _portal.getPortletId(actionRequest);
 
 			SessionMessages.add(actionRequest, portletId);
 
@@ -76,45 +77,45 @@ public class PublishLayoutsMVCActionCommand extends BaseMVCActionCommand {
 			if (cmd.equals("copy_from_live")) {
 				setLayoutIdMap(actionRequest);
 
-				StagingUtil.copyFromLive(actionRequest);
+				_staging.copyFromLive(actionRequest);
 			}
 			else if (cmd.equals(Constants.PUBLISH_TO_LIVE)) {
 				setLayoutIdMap(actionRequest);
 
 				hideDefaultSuccessMessage(actionRequest);
 
-				StagingUtil.publishToLive(actionRequest);
+				_staging.publishToLive(actionRequest);
 			}
 			else if (cmd.equals(Constants.PUBLISH_TO_REMOTE)) {
 				hideDefaultSuccessMessage(actionRequest);
 
 				setLayoutIdMap(actionRequest);
 
-				StagingUtil.publishToRemote(actionRequest);
+				_staging.publishToRemote(actionRequest);
 			}
 			else if (cmd.equals("schedule_copy_from_live")) {
 				setLayoutIdMap(actionRequest);
 
-				StagingUtil.scheduleCopyFromLive(actionRequest);
+				_staging.scheduleCopyFromLive(actionRequest);
 			}
 			else if (cmd.equals("schedule_publish_to_live")) {
 				setLayoutIdMap(actionRequest);
 
-				StagingUtil.schedulePublishToLive(actionRequest);
+				_staging.schedulePublishToLive(actionRequest);
 			}
 			else if (cmd.equals("schedule_publish_to_remote")) {
 				setLayoutIdMap(actionRequest);
 
-				StagingUtil.schedulePublishToRemote(actionRequest);
+				_staging.schedulePublishToRemote(actionRequest);
 			}
 			else if (cmd.equals("unschedule_copy_from_live")) {
-				StagingUtil.unscheduleCopyFromLive(actionRequest);
+				_staging.unscheduleCopyFromLive(actionRequest);
 			}
 			else if (cmd.equals("unschedule_publish_to_live")) {
-				StagingUtil.unschedulePublishToLive(actionRequest);
+				_staging.unschedulePublishToLive(actionRequest);
 			}
 			else if (cmd.equals("unschedule_publish_to_remote")) {
-				StagingUtil.unschedulePublishToRemote(actionRequest);
+				_staging.unschedulePublishToRemote(actionRequest);
 			}
 
 			sendRedirect(actionRequest, actionResponse, redirect);
@@ -153,7 +154,7 @@ public class PublishLayoutsMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	protected void setLayoutIdMap(ActionRequest actionRequest) {
-		HttpServletRequest portletRequest = PortalUtil.getHttpServletRequest(
+		HttpServletRequest portletRequest = _portal.getHttpServletRequest(
 			actionRequest);
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
@@ -165,11 +166,19 @@ public class PublishLayoutsMVCActionCommand extends BaseMVCActionCommand {
 		String openNodes = SessionTreeJSClicks.getOpenNodes(
 			portletRequest, treeId + "SelectedNode");
 
-		String selectedLayoutsJSON =
-			ExportImportHelperUtil.getSelectedLayoutsJSON(
-				groupId, privateLayout, openNodes);
+		String selectedLayoutsJSON = _exportImportHelper.getSelectedLayoutsJSON(
+			groupId, privateLayout, openNodes);
 
 		actionRequest.setAttribute("layoutIdMap", selectedLayoutsJSON);
 	}
+
+	@Reference
+	private ExportImportHelper _exportImportHelper;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private Staging _staging;
 
 }

@@ -27,6 +27,8 @@ import com.liferay.message.boards.kernel.model.MBThreadConstants;
 import com.liferay.message.boards.kernel.service.MBCategoryLocalServiceUtil;
 import com.liferay.message.boards.kernel.service.MBMessageLocalServiceUtil;
 import com.liferay.message.boards.kernel.service.MBThreadLocalServiceUtil;
+import com.liferay.petra.mail.JavaMailUtil;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -62,7 +64,6 @@ import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -78,7 +79,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.messageboards.MBGroupServiceSettings;
 import com.liferay.portlet.messageboards.service.permission.MBMessagePermission;
-import com.liferay.util.mail.JavaMailUtil;
 
 import java.io.InputStream;
 
@@ -297,6 +297,12 @@ public class MBUtil {
 		return GetterUtil.getLong(parts[0]);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.message.boards.web.internal.util.
+	 *             MBSubscriptionUtil#getCategorySubscriptionClassPKs(long)}
+	 */
+	@Deprecated
 	public static Set<Long> getCategorySubscriptionClassPKs(long userId) {
 		List<Subscription> subscriptions =
 			SubscriptionLocalServiceUtil.getUserSubscriptions(
@@ -521,9 +527,10 @@ public class MBUtil {
 			catch (Exception e) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
-						"Message boards search index is stale and contains " +
-							"entry {className=" + entryClassName + ", " +
-								"classPK=" + entryClassPK + "}");
+						StringBundler.concat(
+							"Message boards search index is stale and ",
+							"contains entry {className=", entryClassName,
+							", classPK=", String.valueOf(entryClassPK), "}"));
 				}
 
 				continue;
@@ -706,11 +713,12 @@ public class MBUtil {
 
 		String subject = message.getSubject();
 
-		if (subject.startsWith("RE:")) {
+		if (subject.startsWith(MBMessageConstants.MESSAGE_SUBJECT_PREFIX_RE)) {
 			return subject;
 		}
 		else {
-			return "RE: " + message.getSubject();
+			return MBMessageConstants.MESSAGE_SUBJECT_PREFIX_RE +
+				message.getSubject();
 		}
 	}
 
@@ -754,6 +762,12 @@ public class MBUtil {
 		return priorityPair;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.message.boards.web.internal.util.
+	 *             MBSubscriptionUtil#getThreadSubscriptionClassPKs(long)}
+	 */
+	@Deprecated
 	public static Set<Long> getThreadSubscriptionClassPKs(long userId) {
 		List<Subscription> subscriptions =
 			SubscriptionLocalServiceUtil.getUserSubscriptions(
@@ -768,6 +782,11 @@ public class MBUtil {
 		return classPKs;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.message.boards.internal.util.MBUtil#getUnbanDate(MBBan, int)}
+	 */
+	@Deprecated
 	public static Date getUnbanDate(MBBan ban, int expireInterval) {
 		Date banDate = ban.getCreateDate();
 
@@ -780,6 +799,11 @@ public class MBUtil {
 		return cal.getTime();
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.message.boards.web.internal.util.MBUserRankUtil}
+	 */
+	@Deprecated
 	public static String getUserRank(
 			MBGroupServiceSettings mbGroupServiceSettings, String languageId,
 			int posts)
@@ -806,6 +830,11 @@ public class MBUtil {
 		return rank;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.message.boards.web.internal.util.MBUserRankUtil}
+	 */
+	@Deprecated
 	public static String[] getUserRank(
 			MBGroupServiceSettings mbGroupServiceSettings, String languageId,
 			MBStatsUser statsUser)
@@ -1114,12 +1143,12 @@ public class MBUtil {
 
 		String parentMessageId = null;
 
-		String subject = StringUtil.reverse(message.getSubject());
+		String subject = message.getSubject();
 
-		int pos = subject.indexOf(CharPool.LESS_THAN);
+		int pos = subject.lastIndexOf(CharPool.LESS_THAN);
 
 		if (pos != -1) {
-			parentMessageId = StringUtil.reverse(subject.substring(0, pos + 1));
+			parentMessageId = subject.substring(pos);
 		}
 
 		return parentMessageId;
@@ -1143,6 +1172,11 @@ public class MBUtil {
 		}
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             com.liferay.message.boards.web.internal.util.MBUserRankUtil}
+	 */
+	@Deprecated
 	private static boolean _isEntityRank(
 			long companyId, MBStatsUser statsUser, String entityType,
 			String entityValue)

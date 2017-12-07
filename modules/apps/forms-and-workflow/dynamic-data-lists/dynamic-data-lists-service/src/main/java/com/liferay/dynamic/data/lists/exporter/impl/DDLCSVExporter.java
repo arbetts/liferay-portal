@@ -14,7 +14,6 @@
 
 package com.liferay.dynamic.data.lists.exporter.impl;
 
-import com.liferay.dynamic.data.lists.exporter.DDLExporter;
 import com.liferay.dynamic.data.lists.model.DDLRecord;
 import com.liferay.dynamic.data.lists.model.DDLRecordSet;
 import com.liferay.dynamic.data.lists.model.DDLRecordVersion;
@@ -28,9 +27,9 @@ import com.liferay.dynamic.data.mapping.storage.Field;
 import com.liferay.dynamic.data.mapping.storage.Fields;
 import com.liferay.dynamic.data.mapping.storage.StorageEngine;
 import com.liferay.dynamic.data.mapping.util.DDMFormValuesToFieldsConverter;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.CSVUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -38,14 +37,14 @@ import com.liferay.portal.kernel.util.StringPool;
 import java.util.Iterator;
 import java.util.List;
 
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Marcellus Tavares
- * @author Manuel de la Peña
+ * @author     Marcellus Tavares
+ * @author     Manuel de la Peña
+ * @deprecated As of 1.1.0, with no direct replacement
  */
-@Component(immediate = true, service = DDLExporter.class)
+@Deprecated
 public class DDLCSVExporter extends BaseDDLExporter {
 
 	@Override

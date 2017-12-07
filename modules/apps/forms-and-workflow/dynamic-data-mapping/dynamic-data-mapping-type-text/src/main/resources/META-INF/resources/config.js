@@ -20,15 +20,6 @@
 								'autocomplete-highlighters-accentfold',
 								'liferay-ddm-form-renderer-field'
 							]
-						},
-						'liferay-ddm-form-field-text-template': {
-							condition: {
-								trigger: 'liferay-ddm-form-renderer'
-							},
-							path: 'text.soy.js',
-							requires: [
-								'soyutils'
-							]
 						}
 					},
 					root: MODULE_PATH + '/'

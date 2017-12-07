@@ -25,6 +25,12 @@ long roleId = ParamUtil.getLong(request, "roleId");
 
 Role role = RoleServiceUtil.fetchRole(roleId);
 
+String roleName = null;
+
+if (role != null) {
+	roleName = role.getName();
+}
+
 int type = ParamUtil.getInteger(request, "type");
 String subtype = BeanParamUtil.getString(role, request, "subtype");
 
@@ -34,26 +40,33 @@ portletDisplay.setURLBack(backURL);
 renderResponse.setTitle((role == null) ? LanguageUtil.get(request, "new-role") : role.getTitle(locale));
 %>
 
-<portlet:actionURL name="editRole" var="editRoleURL">
-	<portlet:param name="mvcPath" value="/edit_role.jsp" />
-	<portlet:param name="backURL" value="<%= backURL %>" />
-</portlet:actionURL>
-
 <liferay-util:include page="/edit_role_tabs.jsp" servletContext="<%= application %>" />
 
 <c:if test="<%= role != null %>">
 	<c:choose>
 		<c:when test="<%= role.getType() == RoleConstants.TYPE_REGULAR %>">
-			<liferay-ui:success key="roleCreated" message='<%= LanguageUtil.format(request, "x-was-created-successfully.-you-can-now-define-its-permissions-and-assign-users", role.getName()) %>' />
+			<liferay-ui:success key="roleCreated" message='<%= LanguageUtil.format(request, "x-was-created-successfully.-you-can-now-define-its-permissions-and-assign-users", roleName) %>' />
 		</c:when>
 		<c:otherwise>
-			<liferay-ui:success key="roleCreated" message='<%= LanguageUtil.format(request, "x-was-created-successfully.-you-can-now-define-its-permissions", role.getName()) %>' />
+			<liferay-ui:success key="roleCreated" message='<%= LanguageUtil.format(request, "x-was-created-successfully.-you-can-now-define-its-permissions", roleName) %>' />
 		</c:otherwise>
 	</c:choose>
 </c:if>
 
+<portlet:actionURL name="editRole" var="editRoleURL">
+	<portlet:param name="mvcPath" value="/edit_role.jsp" />
+	<portlet:param name="backURL" value="<%= backURL %>" />
+</portlet:actionURL>
+
+<portlet:renderURL var="editRoleRenderURL">
+	<portlet:param name="mvcPath" value="/edit_role.jsp" />
+	<portlet:param name="tabs1" value="details" />
+	<portlet:param name="backURL" value="<%= backURL %>" />
+	<portlet:param name="type" value="<%= String.valueOf(type) %>" />
+</portlet:renderURL>
+
 <aui:form action="<%= editRoleURL %>" cssClass="container-fluid-1280" method="post" name="fm">
-	<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
+	<aui:input name="redirect" type="hidden" value="<%= editRoleRenderURL %>" />
 	<aui:input name="roleId" type="hidden" value="<%= roleId %>" />
 
 	<liferay-ui:error exception="<%= DuplicateRoleException.class %>" message="please-enter-a-unique-name" />
@@ -92,7 +105,9 @@ renderResponse.setTitle((role == null) ? LanguageUtil.get(request, "new-role") :
 			</c:choose>
 
 			<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" name="title">
-				<aui:validator name="required" />
+				<c:if test="<%= (role == null) || !role.isSystem() %>">
+					<aui:validator name="required" />
+				</c:if>
 			</aui:input>
 
 			<aui:input name="description" />
@@ -136,12 +151,16 @@ renderResponse.setTitle((role == null) ? LanguageUtil.get(request, "new-role") :
 
 			<c:choose>
 				<c:when test="<%= (role != null) && role.isSystem() %>">
-					<aui:input name="name" type="hidden" value="<%= role.getName() %>" />
+					<aui:input name="name" type="hidden" value="<%= roleName %>" />
 				</c:when>
 				<c:otherwise>
 					<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" helpMessage="key-field-help" label="key" name="name" />
 				</c:otherwise>
 			</c:choose>
+
+			<c:if test="<%= (role != null) && roleName.equals(RoleConstants.SITE_ADMINISTRATOR) %>">
+				<aui:input helpMessage="allow-subsite-management-help" label="allow-subsite-management" name="manageSubgroups" type="toggle-switch" value="<%= ResourcePermissionLocalServiceUtil.hasResourcePermission(company.getCompanyId(), Group.class.getName(), ResourceConstants.SCOPE_GROUP_TEMPLATE, String.valueOf(GroupConstants.DEFAULT_PARENT_GROUP_ID), roleId, ActionKeys.MANAGE_SUBGROUPS) %>" />
+			</c:if>
 
 			<%
 			ExpandoBridge roleExpandoBridge = ExpandoBridgeFactoryUtil.getExpandoBridge(company.getCompanyId(), Role.class.getName(), (role != null) ? role.getRoleId() : 0);
@@ -152,7 +171,7 @@ renderResponse.setTitle((role == null) ? LanguageUtil.get(request, "new-role") :
 			<c:if test="<%= roleCustomAttributes.size() > 0 %>">
 				<aui:fieldset-group markupView="lexicon">
 					<aui:fieldset>
-						<liferay-ui:custom-attribute-list
+						<liferay-expando:custom-attribute-list
 							className="<%= Role.class.getName() %>"
 							classPK="<%= (role != null) ? role.getRoleId() : 0 %>"
 							editable="<%= true %>"
@@ -165,7 +184,7 @@ renderResponse.setTitle((role == null) ? LanguageUtil.get(request, "new-role") :
 			<aui:button-row>
 				<aui:button cssClass="btn-lg" type="submit" />
 
-				<aui:button cssClass="btn-lg" href="<%= redirect %>" type="cancel" />
+				<aui:button cssClass="btn-lg" href="<%= backURL %>" type="cancel" />
 			</aui:button-row>
 		</aui:fieldset>
 	</aui:fieldset-group>

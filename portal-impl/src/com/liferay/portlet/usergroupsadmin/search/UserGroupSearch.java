@@ -51,8 +51,8 @@ public class UserGroupSearch extends SearchContainer<UserGroup> {
 		headerNames.add("name");
 		headerNames.add("description");
 
-		orderableHeaders.put("name", "name");
 		orderableHeaders.put("description", "description");
+		orderableHeaders.put("name", "name");
 	}
 
 	public UserGroupSearch(
@@ -108,7 +108,7 @@ public class UserGroupSearch extends SearchContainer<UserGroup> {
 			setOrderByComparator(orderByComparator);
 		}
 		catch (Exception e) {
-			_log.error(e);
+			_log.error("Unable to initialize user group search", e);
 		}
 	}
 

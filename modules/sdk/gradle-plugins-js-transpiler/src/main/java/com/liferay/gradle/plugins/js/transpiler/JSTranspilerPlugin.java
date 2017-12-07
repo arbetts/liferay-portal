@@ -14,11 +14,14 @@
 
 package com.liferay.gradle.plugins.js.transpiler;
 
+import com.liferay.gradle.plugins.js.transpiler.internal.util.JSTranspilerPluginUtil;
 import com.liferay.gradle.plugins.node.NodePlugin;
 import com.liferay.gradle.plugins.node.tasks.DownloadNodeModuleTask;
 import com.liferay.gradle.plugins.node.tasks.ExecuteNpmTask;
+import com.liferay.gradle.plugins.node.tasks.NpmInstallTask;
 import com.liferay.gradle.util.FileUtil;
 import com.liferay.gradle.util.GradleUtil;
+import com.liferay.gradle.util.copy.RenameDependencyClosure;
 
 import java.io.File;
 
@@ -41,6 +44,7 @@ import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.api.tasks.TaskDependency;
 
 /**
  * @author Andrea Di Giorgi
@@ -50,16 +54,27 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 	public static final String DOWNLOAD_METAL_CLI_TASK_NAME =
 		"downloadMetalCli";
 
+	/**
+	 * @deprecated As of 2.4.0, moved to {@link
+	 *             JSTranspilerBasePlugin.JS_COMPILE_CONFIGURATION_NAME}
+	 */
+	@Deprecated
+	public static final String JS_COMPILE_CONFIGURATION_NAME =
+		JSTranspilerBasePlugin.JS_COMPILE_CONFIGURATION_NAME;
+
 	public static final String SOY_COMPILE_CONFIGURATION_NAME = "soyCompile";
 
 	public static final String TRANSPILE_JS_TASK_NAME = "transpileJS";
 
 	@Override
 	public void apply(Project project) {
-		GradleUtil.applyPlugin(project, NodePlugin.class);
+		GradleUtil.applyPlugin(project, JSTranspilerBasePlugin.class);
 
-		final ExecuteNpmTask npmInstallTask =
-			(ExecuteNpmTask)GradleUtil.getTask(
+		Task expandJSCompileDependenciesTask = GradleUtil.getTask(
+			project,
+			JSTranspilerBasePlugin.EXPAND_JS_COMPILE_DEPENDENCIES_TASK_NAME);
+		final NpmInstallTask npmInstallTask =
+			(NpmInstallTask)GradleUtil.getTask(
 				project, NodePlugin.NPM_INSTALL_TASK_NAME);
 
 		final DownloadNodeModuleTask downloadMetalCliTask =
@@ -68,7 +83,8 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 		final Configuration soyCompileConfiguration =
 			_addConfigurationSoyCompile(project);
 
-		final TranspileJSTask transpileJSTask = _addTaskTranspileJS(project);
+		final TranspileJSTask transpileJSTask = _addTaskTranspileJS(
+			expandJSCompileDependenciesTask);
 
 		project.afterEvaluate(
 			new Action<Project>() {
@@ -106,53 +122,23 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 		return downloadNodeModuleTask;
 	}
 
-	private Copy _addTaskExpandSoyCompileDependency(
-		Project project, File file) {
-
-		String taskName = GradleUtil.getTaskName(
-			"expandSoyCompileDependency", file);
-
-		Copy copy = GradleUtil.addTask(project, taskName, Copy.class);
-
-		copy.doFirst(
-			new Action<Task>() {
-
-				@Override
-				public void execute(Task task) {
-					Copy copy = (Copy)task;
-
-					Project project = copy.getProject();
-
-					project.delete(copy.getDestinationDir());
-				}
-
-			});
-
-		copy.from(project.zipTree(file));
-
-		copy.setDescription(
-			"Expands " + file.getName() + " into a temporary directory.");
-
-		String name = file.getName();
-
-		int pos = name.lastIndexOf('.');
-
-		if (pos != -1) {
-			name = name.substring(0, pos);
-		}
-
-		copy.setDestinationDir(new File(project.getBuildDir(), name));
-
-		return copy;
-	}
-
 	private void _addTasksExpandSoyCompileDependencies(
-		TranspileJSTask transpileJSTask,
-		Iterable<File> soyCompileDependencyFiles) {
+		TranspileJSTask transpileJSTask, Configuration configuration) {
 
-		for (File file : soyCompileDependencyFiles) {
-			Copy copy = _addTaskExpandSoyCompileDependency(
-				transpileJSTask.getProject(), file);
+		Project project = transpileJSTask.getProject();
+
+		RenameDependencyClosure renameDependencyClosure =
+			new RenameDependencyClosure(project, configuration.getName());
+
+		Iterable<TaskDependency> taskDependencies =
+			JSTranspilerPluginUtil.getTaskDependencies(configuration);
+
+		for (File file : configuration) {
+			Copy copy = JSTranspilerPluginUtil.addTaskExpandCompileDependency(
+				project, file, project.getBuildDir(),
+				"expandSoyCompileDependency", renameDependencyClosure);
+
+			copy.dependsOn(taskDependencies);
 
 			transpileJSTask.dependsOn(copy);
 
@@ -164,10 +150,15 @@ public class JSTranspilerPlugin implements Plugin<Project> {
 		}
 	}
 
-	private TranspileJSTask _addTaskTranspileJS(Project project) {
+	private TranspileJSTask _addTaskTranspileJS(
+		Task expandJSCompileDependenciesTask) {
+
+		Project project = expandJSCompileDependenciesTask.getProject();
+
 		final TranspileJSTask transpileJSTask = GradleUtil.addTask(
 			project, TRANSPILE_JS_TASK_NAME, TranspileJSTask.class);
 
+		transpileJSTask.dependsOn(expandJSCompileDependenciesTask);
 		transpileJSTask.setDescription("Transpiles JS files.");
 		transpileJSTask.setGroup(BasePlugin.BUILD_GROUP);
 

@@ -27,20 +27,20 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	factory = true,
 	id = "com.liferay.portal.remote.soap.extender.configuration.SoapExtenderConfiguration",
-	localization = "content/Language", name = "soap.extender.configuration.name"
+	localization = "content/Language", name = "soap-extender-configuration-name"
 )
 public interface SoapExtenderConfiguration {
 
-	@Meta.AD(required = false)
+	@Meta.AD(name = "context-paths", required = false)
 	public String[] contextPaths();
 
-	@Meta.AD(name = "jax.ws.handler.filters", required = false)
+	@Meta.AD(name = "jax-ws-handler-filters", required = false)
 	public String[] jaxWsHandlerFilterStrings();
 
-	@Meta.AD(name = "jax.ws.service.filters", required = false)
+	@Meta.AD(name = "jax-ws-service-filters", required = false)
 	public String[] jaxWsServiceFilterStrings();
 
-	@Meta.AD(name = "soap.descriptor.builder", required = false)
+	@Meta.AD(name = "soap-descriptor-builder", required = false)
 	public String soapDescriptorBuilderFilter();
 
 }

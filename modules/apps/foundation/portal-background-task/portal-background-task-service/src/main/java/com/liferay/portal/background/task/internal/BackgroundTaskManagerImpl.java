@@ -190,9 +190,7 @@ public class BackgroundTaskManagerImpl implements BackgroundTaskManager {
 	}
 
 	@Override
-	public BackgroundTask
-		fetchBackgroundTask(long backgroundTaskId) {
-
+	public BackgroundTask fetchBackgroundTask(long backgroundTaskId) {
 		com.liferay.portal.background.task.model.BackgroundTask backgroundTask =
 			_backgroundTaskLocalService.fetchBackgroundTask(backgroundTaskId);
 
@@ -563,7 +561,7 @@ public class BackgroundTaskManagerImpl implements BackgroundTaskManager {
 
 		Destination backgroundTaskDestination = registerDestination(
 			bundleContext, DestinationConfiguration.DESTINATION_TYPE_PARALLEL,
-			DestinationNames.BACKGROUND_TASK);
+			DestinationNames.BACKGROUND_TASK, 5, 10);
 
 		BackgroundTaskMessageListener backgroundTaskMessageListener =
 			new BackgroundTaskMessageListener(
@@ -575,7 +573,7 @@ public class BackgroundTaskManagerImpl implements BackgroundTaskManager {
 
 		Destination backgroundTaskStatusDestination = registerDestination(
 			bundleContext, DestinationConfiguration.DESTINATION_TYPE_SERIAL,
-			DestinationNames.BACKGROUND_TASK_STATUS);
+			DestinationNames.BACKGROUND_TASK_STATUS, 1, 1);
 
 		BackgroundTaskQueuingMessageListener
 			backgroundTaskQueuingMessageListener =
@@ -614,10 +612,13 @@ public class BackgroundTaskManagerImpl implements BackgroundTaskManager {
 
 	protected Destination registerDestination(
 		BundleContext bundleContext, String destinationType,
-		String destinationName) {
+		String destinationName, int workersCoreSize, int workersMaxSize) {
 
 		DestinationConfiguration destinationConfiguration =
 			new DestinationConfiguration(destinationType, destinationName);
+
+		destinationConfiguration.setWorkersCoreSize(workersCoreSize);
+		destinationConfiguration.setWorkersMaxSize(workersMaxSize);
 
 		Destination destination = _destinationFactory.createDestination(
 			destinationConfiguration);

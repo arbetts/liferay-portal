@@ -14,9 +14,12 @@
 
 package com.liferay.portal.language.extender.internal;
 
+import com.liferay.osgi.felix.util.AbstractExtender;
+import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
+import com.liferay.portal.kernel.util.StringBundler;
+
 import java.util.List;
 
-import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.felix.utils.log.Logger;
 
@@ -26,6 +29,8 @@ import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Carlos Sierra Andrés
@@ -35,18 +40,21 @@ public class LanguageExtender extends AbstractExtender {
 
 	@Activate
 	protected void activate(BundleContext bundleContext) throws Exception {
-		_bundleContext = bundleContext;
-
-		setSynchronous(true);
-
 		_logger = new Logger(bundleContext);
 
 		start(bundleContext);
 	}
 
+	@Deactivate
+	protected void deactivate(BundleContext bundleContext) throws Exception {
+		stop(bundleContext);
+	}
+
 	@Override
 	protected void debug(Bundle bundle, String s) {
-		_logger.log(Logger.LOG_DEBUG, "[" + bundle + "] " + s);
+		_logger.log(
+			Logger.LOG_DEBUG,
+			StringBundler.concat("[", String.valueOf(bundle), "] ", s));
 	}
 
 	@Override
@@ -61,7 +69,7 @@ public class LanguageExtender extends AbstractExtender {
 		}
 
 		return new LanguageExtension(
-			_bundleContext, bundle, bundleCapabilities, _logger);
+			getBundleContext(), bundle, bundleCapabilities, _logger);
 	}
 
 	@Override
@@ -69,12 +77,18 @@ public class LanguageExtender extends AbstractExtender {
 		_logger.log(Logger.LOG_ERROR, s, throwable);
 	}
 
-	@Override
-	protected void warn(Bundle bundle, String s, Throwable throwable) {
-		_logger.log(Logger.LOG_WARNING, "[" + bundle + "] " + s);
+	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
+	protected void setModuleServiceLifecycle(
+		ModuleServiceLifecycle moduleServiceLifecycle) {
 	}
 
-	private BundleContext _bundleContext;
+	@Override
+	protected void warn(Bundle bundle, String s, Throwable throwable) {
+		_logger.log(
+			Logger.LOG_WARNING,
+			StringBundler.concat("[", String.valueOf(bundle), "] ", s));
+	}
+
 	private Logger _logger;
 
 }

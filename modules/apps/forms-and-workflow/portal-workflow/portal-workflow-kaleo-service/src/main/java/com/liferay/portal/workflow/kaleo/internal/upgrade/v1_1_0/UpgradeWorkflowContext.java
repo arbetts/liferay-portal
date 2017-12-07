@@ -17,6 +17,7 @@ package com.liferay.portal.workflow.kaleo.internal.upgrade.v1_1_0;
 import com.liferay.portal.kernel.model.PortletPreferencesIds;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.LoggingTimer;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.workflow.kaleo.internal.upgrade.v1_3_0.WorkflowContextUpgradeHelper;
 import com.liferay.portal.workflow.kaleo.runtime.util.WorkflowContextUtil;
@@ -67,9 +68,10 @@ public class UpgradeWorkflowContext extends UpgradeProcess {
 
 		try (LoggingTimer loggingTimer = new LoggingTimer(tableName);
 			PreparedStatement ps = connection.prepareStatement(
-				"select " + fieldName + ", workflowContext from " + tableName +
-					" where workflowContext is not null and workflowContext " +
-						"not like '%serializable%'");
+				StringBundler.concat(
+					"select ", fieldName, ", workflowContext from ", tableName,
+					" where workflowContext is not null and workflowContext ",
+					"not like '%serializable%'"));
 			ResultSet rs = ps.executeQuery()) {
 
 			JSONSerializer jsonSerializer = getJSONSerializer();
@@ -107,8 +109,9 @@ public class UpgradeWorkflowContext extends UpgradeProcess {
 		throws Exception {
 
 		try (PreparedStatement ps = connection.prepareStatement(
-				"update " + tableName + " set workflowContext = ? where " +
-					primaryKeyName + " = ?")) {
+				StringBundler.concat(
+					"update ", tableName, " set workflowContext = ? where ",
+					primaryKeyName, " = ?"))) {
 
 			ps.setString(1, workflowContext);
 			ps.setLong(2, primaryKeyValue);
@@ -183,7 +186,7 @@ public class UpgradeWorkflowContext extends UpgradeProcess {
 					"companyId");
 			}
 			catch (Exception e) {
-				throw new UnmarshallException("companyId is undefined");
+				throw new UnmarshallException("companyId is undefined", e);
 			}
 
 			long ownerId = 0;
@@ -192,7 +195,7 @@ public class UpgradeWorkflowContext extends UpgradeProcess {
 				ownerId = portletPreferencesIdsJSONObject.getLong("ownerId");
 			}
 			catch (Exception e) {
-				throw new UnmarshallException("ownerId is undefined");
+				throw new UnmarshallException("ownerId is undefined", e);
 			}
 
 			int ownerType = 0;
@@ -201,7 +204,7 @@ public class UpgradeWorkflowContext extends UpgradeProcess {
 				ownerType = portletPreferencesIdsJSONObject.getInt("ownerType");
 			}
 			catch (Exception e) {
-				throw new UnmarshallException("ownerType is undefined");
+				throw new UnmarshallException("ownerType is undefined", e);
 			}
 
 			long plid = 0;
@@ -210,7 +213,7 @@ public class UpgradeWorkflowContext extends UpgradeProcess {
 				plid = portletPreferencesIdsJSONObject.getLong("plid");
 			}
 			catch (Exception e) {
-				throw new UnmarshallException("plid is undefined");
+				throw new UnmarshallException("plid is undefined", e);
 			}
 
 			String portletId = null;
@@ -220,7 +223,7 @@ public class UpgradeWorkflowContext extends UpgradeProcess {
 					"portletId");
 			}
 			catch (Exception e) {
-				throw new UnmarshallException("portletId is undefined");
+				throw new UnmarshallException("portletId is undefined", e);
 			}
 
 			PortletPreferencesIds portletPreferencesIds =

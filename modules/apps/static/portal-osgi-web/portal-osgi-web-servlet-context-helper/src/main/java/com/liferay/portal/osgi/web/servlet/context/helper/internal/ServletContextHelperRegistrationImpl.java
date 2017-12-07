@@ -15,6 +15,7 @@
 package com.liferay.portal.osgi.web.servlet.context.helper.internal;
 
 import com.liferay.portal.kernel.servlet.PortletServlet;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.osgi.web.servlet.context.helper.ServletContextHelperRegistration;
@@ -27,6 +28,7 @@ import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -38,6 +40,7 @@ import org.apache.felix.utils.log.Logger;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.context.ServletContextHelper;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
@@ -90,7 +93,7 @@ public class ServletContextHelperRegistrationImpl
 		_bundleContext = _bundle.getBundleContext();
 
 		_customServletContextHelper = new CustomServletContextHelper(
-			_bundle, _wabShapedBundle,
+			_bundle, _logger,
 			_webXMLDefinition.getWebResourceCollectionDefinitions());
 
 		_servletContextHelperServiceRegistration = createServletContextHelper(
@@ -140,12 +143,32 @@ public class ServletContextHelperRegistrationImpl
 		return _wabShapedBundle;
 	}
 
-	/**
-	 * @deprecated As of 2.1.0, with no direct replacement
-	 */
-	@Deprecated
 	@Override
 	public void setProperties(Map<String, String> contextParameters) {
+		if (contextParameters.isEmpty()) {
+			return;
+		}
+
+		ServiceReference<ServletContextHelper> serviceReference =
+			_servletContextHelperServiceRegistration.getReference();
+
+		Dictionary<String, Object> properties = new Hashtable<>();
+
+		for (String key : serviceReference.getPropertyKeys()) {
+			properties.put(key, serviceReference.getProperty(key));
+		}
+
+		for (Entry<String, String> entry : contextParameters.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+
+			properties.put(
+				HttpWhiteboardConstants.
+					HTTP_WHITEBOARD_CONTEXT_INIT_PARAM_PREFIX + key,
+				value);
+		}
+
+		_servletContextHelperServiceRegistration.setProperties(properties);
 	}
 
 	protected String createContextSelectFilterString() {
@@ -245,10 +268,12 @@ public class ServletContextHelperRegistrationImpl
 			_servletContextName);
 		properties.put(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
-		properties.put("rtl.required", Boolean.TRUE.toString());
 
 		Map<String, String> contextParameters =
 			_webXMLDefinition.getContextParameters();
+
+		properties.put(
+			"rtl.required", String.valueOf(isRTLRequired(contextParameters)));
 
 		for (Map.Entry<String, String> entry : contextParameters.entrySet()) {
 			String key =
@@ -289,9 +314,7 @@ public class ServletContextHelperRegistrationImpl
 			return contextPath;
 		}
 
-		String symbolicName = _bundle.getSymbolicName();
-
-		return '/' + symbolicName.replaceAll("[^a-zA-Z0-9]", "");
+		return '/' + _bundle.getSymbolicName();
 	}
 
 	protected String getServletContextName(String contextPath) {
@@ -303,9 +326,25 @@ public class ServletContextHelperRegistrationImpl
 			return header;
 		}
 
-		contextPath = contextPath.substring(1);
+		return contextPath.substring(1);
+	}
 
-		return contextPath.replaceAll("[^a-zA-Z0-9\\-]", "");
+	protected boolean isRTLRequired(Map<String, String> contextParameters) {
+		String rtlRequired = contextParameters.get("rtl.required");
+
+		if (Validator.isNotNull(rtlRequired)) {
+			return GetterUtil.getBoolean(rtlRequired);
+		}
+
+		Dictionary<String, String> headers = _bundle.getHeaders();
+
+		rtlRequired = headers.get("Liferay-RTL-Support-Required");
+
+		if (Validator.isNotNull(rtlRequired)) {
+			return GetterUtil.getBoolean(rtlRequired);
+		}
+
+		return true;
 	}
 
 	protected void registerServletContext() {

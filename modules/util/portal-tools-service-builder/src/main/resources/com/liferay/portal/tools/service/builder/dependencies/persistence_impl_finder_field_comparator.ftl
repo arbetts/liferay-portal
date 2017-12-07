@@ -11,31 +11,31 @@
 		Objects.equals(${finderCol.name}, ${entity.varName}.get${finderCol.methodName}())
 	</#if>
 <#elseif finderCol.comparator == ">">
-	<#if finderCol.type == "Date">
+	<#if stringUtil.equals(finderCol.type, "Date")>
 		(${finderCol.name}.getTime() >= ${entity.varName}.get${finderCol.methodName}().getTime())
 	<#else>
 		(${finderCol.name} >= ${entity.varName}.get${finderCol.methodName}())
 	</#if>
 <#elseif finderCol.comparator == ">=">
-	<#if finderCol.type == "Date">
+	<#if stringUtil.equals(finderCol.type, "Date")>
 		(${finderCol.name}.getTime() > ${entity.varName}.get${finderCol.methodName}().getTime())
 	<#else>
 		(${finderCol.name} > ${entity.varName}.get${finderCol.methodName}())
 	</#if>
 <#elseif finderCol.comparator == "<">
-	<#if finderCol.type == "Date">
+	<#if stringUtil.equals(finderCol.type, "Date")>
 		(${finderCol.name}.getTime() <= ${entity.varName}.get${finderCol.methodName}().getTime())
 	<#else>
 		(${finderCol.name} <= ${entity.varName}.get${finderCol.methodName}())
 	</#if>
 <#elseif finderCol.comparator == "<=">
-	<#if finderCol.type == "Date">
+	<#if stringUtil.equals(finderCol.type, "Date")>
 		(${finderCol.name}.getTime() < ${entity.varName}.get${finderCol.methodName}().getTime())
 	<#else>
 		(${finderCol.name} < ${entity.varName}.get${finderCol.methodName}())
 	</#if>
-<#elseif finderCol.comparator == "LIKE">
-	!StringUtil.wildcardMatches(${entity.varName}.get${finderCol.methodName}(), ${finderCol.name}, CharPool.UNDERLINE, CharPool.PERCENT, CharPool.BACK_SLASH,
+<#elseif stringUtil.equals(finderCol.comparator, "LIKE")>
+	!StringUtil.wildcardMatches(${entity.varName}.get${finderCol.methodName}(), ${finderCol.name}, '_', '%', '\\',
 	<#if finderCol.isCaseSensitive()>
 		true
 	<#else>

@@ -23,10 +23,15 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Portlet;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.portlet.PortletPreferencesFactory;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.PortletLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.PredicateFilter;
+import com.liferay.portal.kernel.util.PrefsProps;
 
 import java.io.Serializable;
 
@@ -124,6 +129,30 @@ public class PanelAppRegistry {
 			});
 	}
 
+	public int getPanelAppsNotificationsCount(
+		String parentPanelCategoryKey, PermissionChecker permissionChecker,
+		Group group, User user) {
+
+		int count = 0;
+
+		for (PanelApp panelApp : getPanelApps(parentPanelCategoryKey)) {
+			int notificationsCount = panelApp.getNotificationsCount(user);
+
+			try {
+				if ((notificationsCount > 0) &&
+					panelApp.isShow(permissionChecker, group)) {
+
+					count += notificationsCount;
+				}
+			}
+			catch (PortalException pe) {
+				_log.error(pe, pe);
+			}
+		}
+
+		return count;
+	}
+
 	@Activate
 	protected void activate(BundleContext bundleContext) {
 		_serviceTrackerMap = ServiceTrackerMapFactory.openMultiValueMap(
@@ -155,6 +184,18 @@ public class PanelAppRegistry {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		PanelAppRegistry.class);
+
+	@Reference
+	private PortletPreferencesFactory _portletPreferencesFactory;
+
+	@Reference
+	private PrefsProps _prefsProps;
+
+	@Reference
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Reference
+	private RoleLocalService _roleLocalService;
 
 	private ServiceTrackerMap<String, List<PanelApp>> _serviceTrackerMap;
 

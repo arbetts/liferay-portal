@@ -14,6 +14,7 @@
 
 package com.liferay.polls.service.impl;
 
+import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
 import com.liferay.polls.exception.QuestionChoiceException;
 import com.liferay.polls.exception.QuestionDescriptionException;
 import com.liferay.polls.exception.QuestionExpirationDateException;
@@ -21,10 +22,22 @@ import com.liferay.polls.exception.QuestionTitleException;
 import com.liferay.polls.model.PollsChoice;
 import com.liferay.polls.model.PollsQuestion;
 import com.liferay.polls.service.base.PollsQuestionLocalServiceBaseImpl;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.search.Document;
+import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.Hits;
+import com.liferay.portal.kernel.search.Indexable;
+import com.liferay.portal.kernel.search.IndexableType;
+import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -32,10 +45,15 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Brian Wing Shun Chan
@@ -44,6 +62,7 @@ import java.util.Map;
 public class PollsQuestionLocalServiceImpl
 	extends PollsQuestionLocalServiceBaseImpl {
 
+	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public PollsQuestion addQuestion(
 			long userId, Map<Locale, String> titleMap,
@@ -195,6 +214,13 @@ public class PollsQuestionLocalServiceImpl
 		// Votes
 
 		pollsVotePersistence.removeByQuestionId(question.getQuestionId());
+
+		// Indexer
+
+		Indexer<PollsQuestion> indexer = IndexerRegistryUtil.getIndexer(
+			PollsQuestion.class.getName());
+
+		indexer.delete(question);
 	}
 
 	@Override
@@ -231,6 +257,29 @@ public class PollsQuestionLocalServiceImpl
 		long companyId, long[] groupIds, String keywords, int start, int end,
 		OrderByComparator<PollsQuestion> orderByComparator) {
 
+		try {
+			Hits hits = searchIndexer(
+				companyId, groupIds, keywords, start, end, orderByComparator);
+
+			List<PollsQuestion> pollsQuestions = new ArrayList<>(
+				hits.getLength());
+
+			for (Document document : hits.getDocs()) {
+				Long questionId = Long.parseLong(
+					document.get(Field.ENTRY_CLASS_PK));
+
+				pollsQuestions.add(
+					pollsQuestionPersistence.fetchByPrimaryKey(questionId));
+			}
+
+			return pollsQuestions;
+		}
+		catch (PortalException pe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(pe, pe);
+			}
+		}
+
 		return pollsQuestionFinder.findByKeywords(
 			companyId, groupIds, keywords, start, end, orderByComparator);
 	}
@@ -248,6 +297,19 @@ public class PollsQuestionLocalServiceImpl
 
 	@Override
 	public int searchCount(long companyId, long[] groupIds, String keywords) {
+		Indexer<PollsQuestion> indexer = IndexerRegistryUtil.getIndexer(
+			PollsQuestion.class.getName());
+
+		try {
+			return (int)indexer.searchCount(
+				buildSearchContext(companyId, groupIds, keywords));
+		}
+		catch (PortalException pe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(pe, pe);
+			}
+		}
+
 		return pollsQuestionFinder.countByKeywords(
 			companyId, groupIds, keywords);
 	}
@@ -261,6 +323,7 @@ public class PollsQuestionLocalServiceImpl
 			companyId, groupIds, title, description, andOperator);
 	}
 
+	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public PollsQuestion updateQuestion(
 			long userId, long questionId, Map<Locale, String> titleMap,
@@ -301,12 +364,7 @@ public class PollsQuestionLocalServiceImpl
 			return question;
 		}
 
-		int oldChoicesCount = pollsChoicePersistence.countByQuestionId(
-			questionId);
-
-		if (oldChoicesCount > choices.size()) {
-			throw new QuestionChoiceException();
-		}
+		deleteRemovedPollsChoices(questionId, choices);
 
 		for (PollsChoice choice : choices) {
 			String choiceName = choice.getName();
@@ -327,6 +385,95 @@ public class PollsQuestionLocalServiceImpl
 		}
 
 		return question;
+	}
+
+	protected SearchContext buildSearchContext(
+			long companyId, long[] groupIds, String keywords)
+		throws PortalException {
+
+		return buildSearchContext(
+			companyId, groupIds, keywords, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+	}
+
+	protected SearchContext buildSearchContext(
+			long companyId, long[] groupIds, String keywords, int start,
+			int end, OrderByComparator<PollsQuestion> orderByComparator)
+		throws PortalException {
+
+		SearchContext searchContext = new SearchContext();
+
+		searchContext.setKeywords(keywords);
+
+		searchContext.setAttribute("paginationType", "none");
+
+		searchContext.setCompanyId(companyId);
+
+		searchContext.setEnd(end);
+		searchContext.setGroupIds(groupIds);
+		searchContext.setStart(start);
+
+		if (orderByComparator != null) {
+			searchContext.setSorts(getSortFromComparator(orderByComparator));
+		}
+
+		return searchContext;
+	}
+
+	protected void deletePollsChoice(PollsChoice pollsChoice) {
+		pollsVotePersistence.removeByChoiceId(pollsChoice.getChoiceId());
+
+		pollsChoicePersistence.remove(pollsChoice);
+	}
+
+	protected void deleteRemovedPollsChoices(
+		long questionId, List<PollsChoice> choices) {
+
+		Stream<PollsChoice> stream = choices.stream();
+
+		Stream<String> choiceNamesStream = stream.map(
+			choice -> choice.getName());
+
+		List<String> choiceNames = choiceNamesStream.collect(
+			Collectors.toList());
+
+		List<PollsChoice> oldChoices = pollsChoicePersistence.findByQuestionId(
+			questionId);
+
+		Stream<PollsChoice> oldStream = oldChoices.stream();
+
+		oldStream = oldStream.filter(
+			oldChoice -> !choiceNames.contains(oldChoice.getName()));
+
+		oldStream.forEach(this::deletePollsChoice);
+	}
+
+	protected Sort getSortFromComparator(
+		OrderByComparator<PollsQuestion> orderByComparator) {
+
+		String[] fields = orderByComparator.getOrderByFields();
+		boolean reverse = !orderByComparator.isAscending();
+		String field = fields[0];
+
+		if (field.equals(Field.CREATE_DATE)) {
+			return new Sort(field, Sort.LONG_TYPE, reverse);
+		}
+
+		return new Sort(field, reverse);
+	}
+
+	protected Hits searchIndexer(
+			long companyId, long[] groupIds, String keywords, int start,
+			int end, OrderByComparator<PollsQuestion> orderByComparator)
+		throws PortalException {
+
+		Indexer<PollsQuestion> indexer = IndexerRegistryUtil.getIndexer(
+			PollsQuestion.class.getName());
+
+		SearchContext searchContext = buildSearchContext(
+			companyId, groupIds, keywords, start, end, orderByComparator);
+
+		return indexer.search(searchContext);
 	}
 
 	protected void validate(
@@ -353,19 +500,30 @@ public class PollsQuestionLocalServiceImpl
 		}
 
 		if (choices != null) {
+			Set<String> choiceDescriptions = new HashSet<>(choices.size());
+
 			for (PollsChoice choice : choices) {
 				String choiceDescription = choice.getDescription(locale);
 
-				if (Validator.isNull(choiceDescription)) {
+				if (Validator.isNull(choiceDescription) ||
+					choiceDescriptions.contains(choiceDescription)) {
+
 					throw new QuestionChoiceException();
 				}
+
+				choiceDescriptions.add(choiceDescription);
 			}
 		}
 
-		if ((expirationDate != null) && expirationDate.before(new Date())) {
-			throw new QuestionExpirationDateException(
-				"Expiration date " + expirationDate + " is in the past");
+		if (!ExportImportThreadLocal.isImportInProcess()) {
+			if ((expirationDate != null) && expirationDate.before(new Date())) {
+				throw new QuestionExpirationDateException(
+					"Expiration date " + expirationDate + " is in the past");
+			}
 		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		PollsQuestionLocalServiceImpl.class);
 
 }

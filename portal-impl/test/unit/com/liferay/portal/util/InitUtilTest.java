@@ -14,6 +14,8 @@
 
 package com.liferay.portal.util;
 
+import com.liferay.portal.kernel.cache.MultiVMPool;
+import com.liferay.portal.kernel.cache.SingleVMPool;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
@@ -21,11 +23,16 @@ import com.liferay.portal.kernel.util.SystemProperties;
 import com.liferay.portal.test.log.CaptureAppender;
 import com.liferay.portal.test.log.Log4JLoggerTestUtil;
 import com.liferay.portal.test.rule.LogAssertionTestRule;
+import com.liferay.portal.tools.ToolDependencies;
+import com.liferay.registry.BasicRegistryImpl;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
 
 import java.nio.file.Paths;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
@@ -59,6 +66,31 @@ public class InitUtilTest {
 
 		_fileImpl.mkdirs(PropsValues.MODULE_FRAMEWORK_BASE_DIR + "/static");
 
+		ToolDependencies.wireCaches();
+
+		Registry registry = RegistryUtil.getRegistry();
+
+		final MultiVMPool testMulitVMPool = registry.callService(
+			MultiVMPool.class, Function.identity());
+		final SingleVMPool testSingleVMPool = registry.callService(
+			SingleVMPool.class, Function.identity());
+
+		RegistryUtil.setRegistry(
+			new BasicRegistryImpl() {
+
+				@Override
+				public Registry setRegistry(Registry registry) {
+					registry.registerService(
+						MultiVMPool.class, testMulitVMPool);
+
+					registry.registerService(
+						SingleVMPool.class, testSingleVMPool);
+
+					return registry;
+				}
+
+			});
+
 		InitUtil.init();
 
 		ReflectionTestUtil.setFieldValue(InitUtil.class, "_initialized", false);
@@ -74,7 +106,8 @@ public class InitUtilTest {
 			List<LoggingEvent> loggingEvents =
 				captureAppender.getLoggingEvents();
 
-			Assert.assertEquals(1, loggingEvents.size());
+			Assert.assertEquals(
+				loggingEvents.toString(), 1, loggingEvents.size());
 
 			LoggingEvent loggingEvent = loggingEvents.get(0);
 

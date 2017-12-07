@@ -14,6 +14,7 @@
 
 package com.liferay.util.dao.orm;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.configuration.ConfigurationFactoryUtil;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
@@ -24,7 +25,6 @@ import com.liferay.portal.kernel.io.unsync.UnsyncStringReader;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
@@ -58,7 +58,7 @@ import java.util.Properties;
  * @author Brian Wing Shun Chan
  * @author Bruno Farache
  * @author Raymond Augé
- * @see com.liferay.portal.dao.orm.custom.sql.CustomSQL
+ * @see    com.liferay.portal.dao.orm.custom.sql.CustomSQL
  */
 public class CustomSQL {
 
@@ -754,7 +754,7 @@ public class CustomSQL {
 	protected String[] getConfigs() {
 		ClassLoader classLoader = CustomSQL.class.getClassLoader();
 
-		if (PortalClassLoaderUtil.getClassLoader() == classLoader) {
+		if (PortalClassLoaderUtil.isPortalClassLoader(classLoader)) {
 			Properties propsUtil = PortalUtil.getPortalProperties();
 
 			return StringUtil.split(
@@ -813,8 +813,17 @@ public class CustomSQL {
 			String line = null;
 
 			while ((line = unsyncBufferedReader.readLine()) != null) {
-				sb.append(line.trim());
-				sb.append(StringPool.SPACE);
+				line = line.trim();
+
+				if (line.startsWith(StringPool.CLOSE_PARENTHESIS)) {
+					sb.setIndex(sb.index() - 1);
+				}
+
+				sb.append(line);
+
+				if (!line.endsWith(StringPool.OPEN_PARENTHESIS)) {
+					sb.append(StringPool.SPACE);
+				}
 			}
 		}
 		catch (IOException ioe) {

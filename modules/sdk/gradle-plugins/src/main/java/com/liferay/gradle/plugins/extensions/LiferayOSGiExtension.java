@@ -52,7 +52,6 @@ public class LiferayOSGiExtension {
 			Constants.BUNDLE_SYMBOLICNAME, project.getName());
 		_bundleDefaultInstructions.put(
 			Constants.DONOTCOPY, "(" + DONOTCOPY_DEFAULT + ")");
-		_bundleDefaultInstructions.put(Constants.DSANNOTATIONS, "*");
 		_bundleDefaultInstructions.put(Constants.METATYPE, "*");
 		_bundleDefaultInstructions.put(
 			Constants.PLUGIN, StringUtil.merge(_BND_PLUGIN_CLASS_NAMES, ","));
@@ -122,6 +121,10 @@ public class LiferayOSGiExtension {
 		return _autoUpdateXml;
 	}
 
+	public boolean isExpandCompileInclude() {
+		return _expandCompileInclude;
+	}
+
 	public void setAutoUpdateXml(boolean autoUpdateXml) {
 		_autoUpdateXml = autoUpdateXml;
 	}
@@ -132,6 +135,10 @@ public class LiferayOSGiExtension {
 		_bundleDefaultInstructions.clear();
 
 		bundleDefaultInstructions(bundleDefaultInstructions);
+	}
+
+	public void setExpandCompileInclude(boolean expandCompileInclude) {
+		_expandCompileInclude = expandCompileInclude;
 	}
 
 	private CompileOptions _getCompileOptions() {
@@ -161,6 +168,7 @@ public class LiferayOSGiExtension {
 	private boolean _autoUpdateXml = true;
 	private final Map<String, Object> _bundleDefaultInstructions =
 		new HashMap<>();
+	private boolean _expandCompileInclude;
 	private final Project _project;
 
 }

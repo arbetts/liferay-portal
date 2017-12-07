@@ -14,6 +14,7 @@
 
 package com.liferay.portal.background.task.internal;
 
+import com.liferay.petra.lang.CentralizedThreadLocal;
 import com.liferay.portal.kernel.cache.thread.local.Lifecycle;
 import com.liferay.portal.kernel.cache.thread.local.ThreadLocalCacheManager;
 import com.liferay.portal.kernel.cluster.ClusterInvokeThreadLocal;
@@ -23,7 +24,6 @@ import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactory;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.util.CentralizedThreadLocal;
 import com.liferay.portal.kernel.util.GroupThreadLocal;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -113,7 +113,8 @@ public abstract class BaseBackgroundTaskTestCase {
 		Map<String, Serializable> threadLocalValues) {
 
 		Assert.assertTrue(MapUtil.isNotEmpty(threadLocalValues));
-		Assert.assertEquals(7, threadLocalValues.size());
+		Assert.assertEquals(
+			threadLocalValues.toString(), 7, threadLocalValues.size());
 		Assert.assertEquals(_companyId, threadLocalValues.get("companyId"));
 		Assert.assertEquals(
 			_clusterInvokeEnabled, threadLocalValues.get("clusterInvoke"));
@@ -142,8 +143,8 @@ public abstract class BaseBackgroundTaskTestCase {
 	protected HashMap<String, Serializable> initializeThreadLocalValues() {
 		HashMap<String, Serializable> threadLocalValues = new HashMap<>();
 
-		threadLocalValues.put("companyId", _companyId);
 		threadLocalValues.put("clusterInvoke", _clusterInvokeEnabled);
+		threadLocalValues.put("companyId", _companyId);
 		threadLocalValues.put("defaultLocale", _defaultLocale);
 		threadLocalValues.put("groupId", _groupId);
 		threadLocalValues.put("principalName", _principalName);

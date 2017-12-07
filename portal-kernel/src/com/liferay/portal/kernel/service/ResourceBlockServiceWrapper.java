@@ -21,24 +21,16 @@ import aQute.bnd.annotation.ProviderType;
  *
  * @author Brian Wing Shun Chan
  * @see ResourceBlockService
+ * @deprecated
  * @generated
  */
+@Deprecated
 @ProviderType
 public class ResourceBlockServiceWrapper implements ResourceBlockService,
 	ServiceWrapper<ResourceBlockService> {
 	public ResourceBlockServiceWrapper(
 		ResourceBlockService resourceBlockService) {
 		_resourceBlockService = resourceBlockService;
-	}
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	@Override
-	public java.lang.String getOSGiServiceIdentifier() {
-		return _resourceBlockService.getOSGiServiceIdentifier();
 	}
 
 	@Override
@@ -65,6 +57,16 @@ public class ResourceBlockServiceWrapper implements ResourceBlockService,
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_resourceBlockService.addIndividualScopePermission(companyId, groupId,
 			name, primKey, roleId, actionId);
+	}
+
+	/**
+	* Returns the OSGi service identifier.
+	*
+	* @return the OSGi service identifier
+	*/
+	@Override
+	public java.lang.String getOSGiServiceIdentifier() {
+		return _resourceBlockService.getOSGiServiceIdentifier();
 	}
 
 	@Override
@@ -122,20 +124,20 @@ public class ResourceBlockServiceWrapper implements ResourceBlockService,
 
 	@Override
 	public void setIndividualScopePermissions(long companyId, long groupId,
-		java.lang.String name, long primKey,
-		java.util.Map<java.lang.Long, java.lang.String[]> roleIdsToActionIds)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_resourceBlockService.setIndividualScopePermissions(companyId, groupId,
-			name, primKey, roleIdsToActionIds);
-	}
-
-	@Override
-	public void setIndividualScopePermissions(long companyId, long groupId,
 		java.lang.String name, long primKey, long roleId,
 		java.util.List<java.lang.String> actionIds)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_resourceBlockService.setIndividualScopePermissions(companyId, groupId,
 			name, primKey, roleId, actionIds);
+	}
+
+	@Override
+	public void setIndividualScopePermissions(long companyId, long groupId,
+		java.lang.String name, long primKey,
+		java.util.Map<java.lang.Long, java.lang.String[]> roleIdsToActionIds)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_resourceBlockService.setIndividualScopePermissions(companyId, groupId,
+			name, primKey, roleIdsToActionIds);
 	}
 
 	@Override

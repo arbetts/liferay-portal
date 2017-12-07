@@ -26,7 +26,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.search.configuration.SearchPermissionCheckerConfiguration",
 	localization = "content/Language",
-	name = "search.permission.checker.configuration.name"
+	name = "search-permission-checker-configuration-name"
 )
 @ProviderType
 public interface SearchPermissionCheckerConfiguration {
@@ -37,13 +37,13 @@ public interface SearchPermissionCheckerConfiguration {
 	@Deprecated
 	@Meta.AD(
 		deflt = "true", description = "include-inherited-permissions-help",
-		required = false
+		name = "include-inherited-permissions", required = false
 	)
 	public boolean includeInheritedPermissions();
 
 	@Meta.AD(
 		deflt = "250", description = "permission-terms-limit-help",
-		required = false
+		name = "permission-terms-limit", required = false
 	)
 	public int permissionTermsLimit();
 

@@ -46,8 +46,8 @@ import com.liferay.wiki.service.WikiPageLocalServiceUtil;
 import com.liferay.wiki.service.WikiPageServiceUtil;
 import com.liferay.wiki.service.permission.WikiNodePermissionChecker;
 import com.liferay.wiki.util.WikiUtil;
-import com.liferay.wiki.web.configuration.WikiPortletInstanceOverriddenConfiguration;
-import com.liferay.wiki.web.util.WikiWebComponentProvider;
+import com.liferay.wiki.web.configuration.WikiPortletInstanceConfiguration;
+import com.liferay.wiki.web.internal.util.WikiWebComponentProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,20 +107,18 @@ public class ActionUtil {
 
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
-		WikiPortletInstanceOverriddenConfiguration
-			wikiPortletInstanceOverriddenConfiguration =
-				ConfigurationProviderUtil.getConfiguration(
-					WikiPortletInstanceOverriddenConfiguration.class,
-					new PortletInstanceSettingsLocator(
-						themeDisplay.getLayout(), portletDisplay.getId()));
+		WikiPortletInstanceConfiguration wikiPortletInstanceConfiguration =
+			ConfigurationProviderUtil.getConfiguration(
+				WikiPortletInstanceConfiguration.class,
+				new PortletInstanceSettingsLocator(
+					themeDisplay.getLayout(), portletDisplay.getId()));
 
 		String[] visibleNodeNames =
-			wikiPortletInstanceOverriddenConfiguration.visibleNodes();
+			wikiPortletInstanceConfiguration.visibleNodes();
 
 		nodes = WikiUtil.orderNodes(nodes, visibleNodeNames);
 
-		String[] hiddenNodes =
-			wikiPortletInstanceOverriddenConfiguration.hiddenNodes();
+		String[] hiddenNodes = wikiPortletInstanceConfiguration.hiddenNodes();
 
 		Arrays.sort(hiddenNodes);
 
@@ -288,7 +286,7 @@ public class ActionUtil {
 			}
 		}
 		catch (NoSuchNodeException nsne) {
-			node = ActionUtil.getFirstVisibleNode(portletRequest);
+			node = getFirstVisibleNode(portletRequest);
 		}
 
 		return node;
@@ -396,11 +394,11 @@ public class ActionUtil {
 		throws PortletException {
 
 		try {
-			WikiNode node = ActionUtil.getNode(renderRequest);
+			WikiNode node = getNode(renderRequest);
 
 			renderRequest.setAttribute(WikiWebKeys.WIKI_NODE, node);
 
-			ActionUtil.getFirstVisiblePage(node.getNodeId(), renderRequest);
+			getFirstVisiblePage(node.getNodeId(), renderRequest);
 		}
 		catch (Exception e) {
 			if (e instanceof NoSuchNodeException ||
@@ -416,8 +414,9 @@ public class ActionUtil {
 		}
 
 		long categoryId = ParamUtil.getLong(renderRequest, "categoryId");
+		String tag = ParamUtil.getString(renderRequest, "tag");
 
-		if (categoryId > 0) {
+		if ((categoryId > 0) || Validator.isNotNull(tag)) {
 			return "/wiki/view_categorized_pages.jsp";
 		}
 		else {

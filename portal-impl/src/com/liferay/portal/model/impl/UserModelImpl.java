@@ -35,7 +35,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Serializable;
 
@@ -160,7 +159,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 		TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table User_ (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,userId LONG not null primary key,companyId LONG,createDate DATE null,modifiedDate DATE null,defaultUser BOOLEAN,contactId LONG,password_ VARCHAR(75) null,passwordEncrypted BOOLEAN,passwordReset BOOLEAN,passwordModifiedDate DATE null,digest VARCHAR(255) null,reminderQueryQuestion VARCHAR(75) null,reminderQueryAnswer VARCHAR(75) null,graceLoginCount INTEGER,screenName VARCHAR(75) null,emailAddress VARCHAR(75) null,facebookId LONG,googleUserId VARCHAR(75) null,ldapServerId LONG,openId VARCHAR(1024) null,portraitId LONG,languageId VARCHAR(75) null,timeZoneId VARCHAR(75) null,greeting VARCHAR(255) null,comments STRING null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,jobTitle VARCHAR(100) null,loginDate DATE null,loginIP VARCHAR(75) null,lastLoginDate DATE null,lastLoginIP VARCHAR(75) null,lastFailedLoginDate DATE null,failedLoginAttempts INTEGER,lockout BOOLEAN,lockoutDate DATE null,agreedToTermsOfUse BOOLEAN,emailAddressVerified BOOLEAN,status INTEGER)";
+	public static final String TABLE_SQL_CREATE = "create table User_ (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,userId LONG not null primary key,companyId LONG,createDate DATE null,modifiedDate DATE null,defaultUser BOOLEAN,contactId LONG,password_ VARCHAR(75) null,passwordEncrypted BOOLEAN,passwordReset BOOLEAN,passwordModifiedDate DATE null,digest VARCHAR(255) null,reminderQueryQuestion VARCHAR(75) null,reminderQueryAnswer VARCHAR(75) null,graceLoginCount INTEGER,screenName VARCHAR(75) null,emailAddress VARCHAR(254) null,facebookId LONG,googleUserId VARCHAR(75) null,ldapServerId LONG,openId VARCHAR(1024) null,portraitId LONG,languageId VARCHAR(75) null,timeZoneId VARCHAR(75) null,greeting VARCHAR(255) null,comments STRING null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,jobTitle VARCHAR(100) null,loginDate DATE null,loginIP VARCHAR(75) null,lastLoginDate DATE null,lastLoginIP VARCHAR(75) null,lastFailedLoginDate DATE null,failedLoginAttempts INTEGER,lockout BOOLEAN,lockoutDate DATE null,agreedToTermsOfUse BOOLEAN,emailAddressVerified BOOLEAN,status INTEGER)";
 	public static final String TABLE_SQL_DROP = "drop table User_";
 	public static final String ORDER_BY_JPQL = " ORDER BY user.userId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY User_.userId ASC";
@@ -679,7 +678,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getUuid() {
 		if (_uuid == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _uuid;
@@ -726,7 +725,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 			return user.getUuid();
 		}
 		catch (PortalException pe) {
-			return StringPool.BLANK;
+			return "";
 		}
 	}
 
@@ -865,7 +864,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getPassword() {
 		if (_password == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _password;
@@ -924,7 +923,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getDigest() {
 		if (_digest == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _digest;
@@ -940,7 +939,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getReminderQueryQuestion() {
 		if (_reminderQueryQuestion == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _reminderQueryQuestion;
@@ -956,7 +955,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getReminderQueryAnswer() {
 		if (_reminderQueryAnswer == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _reminderQueryAnswer;
@@ -983,7 +982,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getScreenName() {
 		if (_screenName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _screenName;
@@ -1009,7 +1008,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getEmailAddress() {
 		if (_emailAddress == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _emailAddress;
@@ -1058,7 +1057,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getGoogleUserId() {
 		if (_googleUserId == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _googleUserId;
@@ -1095,7 +1094,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getOpenId() {
 		if (_openId == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _openId;
@@ -1144,7 +1143,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getLanguageId() {
 		if (_languageId == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _languageId;
@@ -1160,7 +1159,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getTimeZoneId() {
 		if (_timeZoneId == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _timeZoneId;
@@ -1176,7 +1175,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getGreeting() {
 		if (_greeting == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _greeting;
@@ -1192,7 +1191,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getComments() {
 		if (_comments == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _comments;
@@ -1208,7 +1207,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getFirstName() {
 		if (_firstName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _firstName;
@@ -1224,7 +1223,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getMiddleName() {
 		if (_middleName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _middleName;
@@ -1240,7 +1239,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getLastName() {
 		if (_lastName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _lastName;
@@ -1256,7 +1255,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getJobTitle() {
 		if (_jobTitle == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _jobTitle;
@@ -1283,7 +1282,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getLoginIP() {
 		if (_loginIP == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _loginIP;
@@ -1310,7 +1309,7 @@ public class UserModelImpl extends BaseModelImpl<User> implements UserModel {
 	@Override
 	public String getLastLoginIP() {
 		if (_lastLoginIP == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _lastLoginIP;

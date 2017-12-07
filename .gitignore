@@ -2,6 +2,8 @@
 **/.gradle
 **/.settings
 **/.sonar
+**/liferay/logs/*.log
+**/liferay/logs/*.xml
 **/pmd-reports
 *.bak
 *.iml
@@ -11,6 +13,7 @@
 *~
 .ant-targets-build.xml
 .ant_targets
+.eslintrc
 .gh.json
 .sass-cache
 .sass_cache_*.css
@@ -22,6 +25,7 @@
 /.bnd
 /.checkstyle
 /.idea
+/.m2
 /.sonar
 /.xmlcatalog
 /ActiveMQ
@@ -39,11 +43,9 @@
 /classes/Test.class
 /dist
 /intellij
-/lib/development/db2jcc.jar
-/lib/development/db2jcc_license_cu.jar
-/lib/development/ojdbc14.jar
-/lib/development/ojdbc5.jar
-/lib/development/ojdbc6.jar
+/jacoco
+/modules/.releng/private
+/modules/private
 /nbproject/private
 /out
 /portal-client/*.ipr
@@ -102,6 +104,7 @@
 /portal-web/docroot/WEB-INF/portlet-ext.xml
 /portal-web/docroot/WEB-INF/src
 /portal-web/docroot/WEB-INF/tld/aui.tld
+/portal-web/docroot/WEB-INF/tld/c.tld
 /portal-web/docroot/WEB-INF/tld/ddm.tld
 /portal-web/docroot/WEB-INF/tld/liferay-*.tld
 /portal-web/docroot/WEB-INF/tmp
@@ -157,7 +160,7 @@
 /test-results
 /test.*.properties
 /tmp
-/tools/cobertura-agent/classes
+/tools/gradle-*-bin.zip
 /tools/maven/*.asc
 /tools/node*
 /tools/sdk
@@ -194,16 +197,6 @@
 /util-taglib/classes
 /util-taglib/util-taglib*.asc
 /util-taglib/util-taglib*.jar
+/working.dir.properties
 /WEB-INF
 _sass_cache_*.css
-cobertura.ser
-
-!/.gradle
-/.gradle/*
-!/.gradle/caches
-/.gradle/caches/*
-!/.gradle/caches/modules-2
-/.gradle/caches/modules-2/*
-!/.gradle/caches/modules-2/files-2.1
-/.gradle/caches/modules-2/files-2.1/**/*-sources.jar
-/.gradle/caches/modules-2/files-2.1/com.liferay.portal/*/*-SNAPSHOT

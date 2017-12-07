@@ -24,13 +24,12 @@ import com.liferay.exportimport.kernel.exception.LARFileSizeException;
 import com.liferay.exportimport.kernel.exception.LARTypeException;
 import com.liferay.exportimport.kernel.exception.LayoutImportException;
 import com.liferay.exportimport.kernel.lar.ExportImportHelper;
-import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
 import com.liferay.exportimport.kernel.lar.MissingReference;
 import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.kernel.service.ExportImportService;
-import com.liferay.exportimport.kernel.staging.StagingUtil;
+import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.portal.kernel.exception.LayoutPrototypeException;
 import com.liferay.portal.kernel.exception.LocaleException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -43,7 +42,6 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.LayoutService;
-import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.upload.UploadException;
@@ -52,8 +50,7 @@ import com.liferay.portal.kernel.upload.UploadRequestSizeException;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.io.InputStream;
@@ -90,7 +87,7 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 		throws Exception {
 
 		UploadPortletRequest uploadPortletRequest =
-			PortalUtil.getUploadPortletRequest(actionRequest);
+			_portal.getUploadPortletRequest(actionRequest);
 
 		checkExceededSizeLimit(uploadPortletRequest);
 
@@ -98,12 +95,10 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 		deleteTempFileEntry(groupId, folderName);
 
-		InputStream inputStream = null;
+		try (InputStream inputStream =
+				uploadPortletRequest.getFileAsStream("file")) {
 
-		try {
 			String sourceFileName = uploadPortletRequest.getFileName("file");
-
-			inputStream = uploadPortletRequest.getFileAsStream("file");
 
 			String contentType = uploadPortletRequest.getContentType("file");
 
@@ -135,9 +130,6 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 			else {
 				throw e;
 			}
-		}
-		finally {
-			StreamUtil.cleanUp(inputStream);
 		}
 	}
 
@@ -249,14 +241,14 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 					ExportImportHelper.TEMP_FOLDER_NAME, e);
 			}
 			else {
-				if ((e instanceof LARFileException) ||
-					(e instanceof LARFileSizeException) ||
-					(e instanceof LARTypeException)) {
+				if (e instanceof LARFileException ||
+					e instanceof LARFileSizeException ||
+					e instanceof LARTypeException) {
 
 					SessionErrors.add(actionRequest, e.getClass());
 				}
-				else if ((e instanceof LayoutPrototypeException) ||
-						 (e instanceof LocaleException)) {
+				else if (e instanceof LayoutPrototypeException ||
+						 e instanceof LocaleException) {
 
 					SessionErrors.add(actionRequest, e.getClass(), e);
 				}
@@ -275,7 +267,7 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 			String folderName, Exception e)
 		throws Exception {
 
-		HttpServletResponse response = PortalUtil.getHttpServletResponse(
+		HttpServletResponse response = _portal.getHttpServletResponse(
 			actionResponse);
 
 		response.setContentType(ContentTypes.TEXT_HTML);
@@ -286,14 +278,11 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 		deleteTempFileEntry(themeDisplay.getScopeGroupId(), folderName);
 
-		JSONObject jsonObject = StagingUtil.getExceptionMessagesJSONObject(
+		JSONObject jsonObject = _staging.getExceptionMessagesJSONObject(
 			themeDisplay.getLocale(), e, (ExportImportConfiguration)null);
 
 		JSONPortletResponseUtil.writeJSON(
 			actionRequest, actionResponse, jsonObject);
-
-		ServletResponseUtil.write(
-			response, String.valueOf(jsonObject.getInt("status")));
 	}
 
 	protected void importData(ActionRequest actionRequest, String folderName)
@@ -304,21 +293,15 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
 
-		FileEntry fileEntry = ExportImportHelperUtil.getTempFileEntry(
+		FileEntry fileEntry = _exportImportHelper.getTempFileEntry(
 			groupId, themeDisplay.getUserId(), folderName);
 
-		InputStream inputStream = null;
-
-		try {
-			inputStream = _dlFileEntryLocalService.getFileAsStream(
-				fileEntry.getFileEntryId(), fileEntry.getVersion(), false);
+		try (InputStream inputStream = _dlFileEntryLocalService.getFileAsStream(
+				fileEntry.getFileEntryId(), fileEntry.getVersion(), false)) {
 
 			importData(actionRequest, fileEntry.getTitle(), inputStream);
 
 			deleteTempFileEntry(groupId, folderName);
-		}
-		finally {
-			StreamUtil.cleanUp(inputStream);
 		}
 	}
 
@@ -390,14 +373,11 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
 
-		FileEntry fileEntry = ExportImportHelperUtil.getTempFileEntry(
+		FileEntry fileEntry = _exportImportHelper.getTempFileEntry(
 			groupId, themeDisplay.getUserId(), folderName);
 
-		InputStream inputStream = null;
-
-		try {
-			inputStream = _dlFileEntryLocalService.getFileAsStream(
-				fileEntry.getFileEntryId(), fileEntry.getVersion(), false);
+		try (InputStream inputStream = _dlFileEntryLocalService.getFileAsStream(
+				fileEntry.getFileEntryId(), fileEntry.getVersion(), false)) {
 
 			MissingReferences missingReferences = validateFile(
 				actionRequest, inputStream);
@@ -416,15 +396,12 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 				jsonObject.put(
 					"warningMessages",
-					StagingUtil.getWarningMessagesJSONArray(
+					_staging.getWarningMessagesJSONArray(
 						themeDisplay.getLocale(), weakMissingReferences));
 			}
 
 			JSONPortletResponseUtil.writeJSON(
 				actionRequest, actionResponse, jsonObject);
-		}
-		finally {
-			StreamUtil.cleanUp(inputStream);
 		}
 	}
 
@@ -463,7 +440,17 @@ public class ImportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 	private DLFileEntryLocalService _dlFileEntryLocalService;
 	private ExportImportConfigurationLocalService
 		_exportImportConfigurationLocalService;
+
+	@Reference
+	private ExportImportHelper _exportImportHelper;
+
 	private ExportImportService _exportImportService;
 	private LayoutService _layoutService;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private Staging _staging;
 
 }

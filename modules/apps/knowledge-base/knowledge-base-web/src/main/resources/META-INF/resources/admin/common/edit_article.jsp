@@ -95,23 +95,8 @@ if (portletTitleBasedNavigation) {
 			<liferay-ui:error exception="<%= KBArticleStatusException.class %>" message="this-article-cannot-be-published-because-its-parent-has-not-been-published" />
 			<liferay-ui:error exception="<%= KBArticleUrlTitleException.MustNotBeDuplicate.class %>" message="please-enter-a-unique-friendly-url" />
 
-			<%
-			long uploadServletRequestImplMaxSize = PrefsPropsUtil.getLong(PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_MAX_SIZE);
-			%>
-
 			<liferay-ui:error exception="<%= FileSizeException.class %>">
-
-				<%
-				long fileMaxSize = PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE);
-
-				if (fileMaxSize == 0) {
-					fileMaxSize = uploadServletRequestImplMaxSize;
-				}
-
-				fileMaxSize /= 1024;
-				%>
-
-				<liferay-ui:message arguments="<%= fileMaxSize %>" key="please-enter-a-file-with-a-valid-file-size-no-larger-than-x" translateArguments="<%= false %>" />
+				<liferay-ui:message arguments="<%= DLValidatorUtil.getMaxAllowableSize() / 1024 %>" key="please-enter-a-file-with-a-valid-file-size-no-larger-than-x" translateArguments="<%= false %>" />
 			</liferay-ui:error>
 
 			<liferay-ui:error exception="<%= KBArticleUrlTitleException.MustNotContainInvalidCharacters.class %>" message="please-enter-a-friendly-url-that-starts-with-a-slash-and-contains-alphanumeric-characters-dashes-and-underscores" />
@@ -134,12 +119,12 @@ if (portletTitleBasedNavigation) {
 			<liferay-ui:error exception="<%= NoSuchFileException.class %>" message="the-document-could-not-be-found" />
 
 			<liferay-ui:error exception="<%= UploadRequestSizeException.class %>">
-				<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(uploadServletRequestImplMaxSize, locale) %>" key="request-is-larger-than-x-and-could-not-be-processed" translateArguments="<%= false %>" />
+				<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(UploadServletRequestConfigurationHelperUtil.getMaxSize(), locale) %>" key="request-is-larger-than-x-and-could-not-be-processed" translateArguments="<%= false %>" />
 			</liferay-ui:error>
 
-			<liferay-ui:asset-categories-error />
+			<liferay-asset:asset-categories-error />
 
-			<liferay-ui:asset-tags-error />
+			<liferay-asset:asset-tags-error />
 
 			<c:choose>
 				<c:when test="<%= (kbArticle != null) && kbArticle.isApproved() %>">
@@ -186,6 +171,17 @@ if (portletTitleBasedNavigation) {
 					</div>
 				</aui:fieldset>
 
+				<liferay-expando:custom-attributes-available className="<%= KBArticle.class.getName() %>">
+					<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="custom-fields">
+						<liferay-expando:custom-attribute-list
+							className="<%= KBArticle.class.getName() %>"
+							classPK="<%= (kbArticle != null) ? kbArticle.getKbArticleId() : 0 %>"
+							editable="<%= true %>"
+							label="<%= true %>"
+						/>
+					</aui:fieldset>
+				</liferay-expando:custom-attributes-available>
+
 				<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="categorization">
 					<liferay-asset:asset-categories-selector className="<%= KBArticle.class.getName() %>" classPK="<%= (kbArticle != null) ? kbArticle.getClassPK() : 0 %>" />
 
@@ -193,7 +189,7 @@ if (portletTitleBasedNavigation) {
 				</aui:fieldset>
 
 				<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="related-assets">
-					<liferay-ui:input-asset-links
+					<liferay-asset:input-asset-links
 						className="<%= KBArticle.class.getName() %>"
 						classPK="<%= (kbArticle == null) ? KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY : kbArticle.getClassPK() %>"
 					/>
@@ -225,7 +221,7 @@ if (portletTitleBasedNavigation) {
 							for (Map.Entry<String, String> entry : sectionsMap.entrySet()) {
 							%>
 
-								<aui:option label="<%= entry.getKey() %>" selected="<%= ArrayUtil.contains(sections, entry.getValue()) %>" value="<%= entry.getValue() %>" />
+								<aui:option label="<%= HtmlUtil.escape(entry.getKey()) %>" selected="<%= ArrayUtil.contains(sections, entry.getValue()) %>" value="<%= HtmlUtil.escape(entry.getValue()) %>" />
 
 							<%
 							}
@@ -286,15 +282,7 @@ if (portletTitleBasedNavigation) {
 			var customUrl = urlTitleInput.getAttribute('data-customUrl');
 
 			if (customUrl === 'false') {
-				html = html.replace(/[^a-zA-Z0-9_-]/g, '-');
-
-				if (html[0] === '-') {
-					html = html.replace(/^-+/, '');
-				}
-
-				html = html.replace(/--+/g, '-');
-
-				urlTitleInput.value = html.toLowerCase();
+				urlTitleInput.value = Liferay.Util.normalizeFriendlyURL(html);
 			}
 		}
 	</c:if>
@@ -324,6 +312,14 @@ if (portletTitleBasedNavigation) {
 			if (workflowActionInput) {
 				workflowActionInput.val('<%= WorkflowConstants.ACTION_PUBLISH %>');
 			}
+
+			<c:if test="<%= kbArticle == null %>">
+				var customUrl = urlTitleInput.getAttribute('data-customUrl');
+
+				if (customUrl === 'false') {
+					urlTitleInput.val('');
+				}
+			</c:if>
 		}
 	);
 

@@ -14,10 +14,6 @@
 
 package com.liferay.portal.configuration.extender.internal;
 
-import com.liferay.portal.configuration.extender.BundleStorage;
-import com.liferay.portal.configuration.extender.NamedConfigurationContent;
-import com.liferay.portal.configuration.extender.NamedConfigurationContentFactory;
-import com.liferay.portal.configuration.extender.PropertiesFileNamedConfigurationContent;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MappingEnumeration;
 import com.liferay.portal.kernel.util.MappingEnumeration.Mapper;
@@ -41,14 +37,14 @@ public class NamedConfigurationPathContentFactory
 	public List<NamedConfigurationContent> create(BundleStorage bundleStorage) {
 		Dictionary<String, String> headers = bundleStorage.getHeaders();
 
-		String configurationPath = headers.get("ConfigurationPath");
+		String configurationPath = headers.get("Liferay-Configuration-Path");
 
 		if (configurationPath == null) {
 			return null;
 		}
 
 		final Enumeration<URL> entries = bundleStorage.findEntries(
-			configurationPath, "*", true);
+			configurationPath, "*.properties", true);
 
 		return ListUtil.fromEnumeration(
 			new MappingEnumeration<>(

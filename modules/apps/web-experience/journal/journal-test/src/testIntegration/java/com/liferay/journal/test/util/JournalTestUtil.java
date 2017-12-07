@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
-import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
@@ -268,6 +267,15 @@ public class JournalTestUtil {
 
 		serviceContext.setCommand(Constants.ADD);
 		serviceContext.setLayoutFullURL("http://localhost");
+
+		return addArticle(
+			groupId, folderId, articleId, autoArticleId, serviceContext);
+	}
+
+	public static JournalArticle addArticle(
+			long groupId, long folderId, String articleId,
+			boolean autoArticleId, ServiceContext serviceContext)
+		throws Exception {
 
 		return addArticle(
 			groupId, folderId, JournalArticleConstants.CLASSNAME_ID_DEFAULT,
@@ -702,7 +710,7 @@ public class JournalTestUtil {
 		return "$name.getData()";
 	}
 
-	public static int getSearchArticlesCount(long companyId, long groupId)
+	public static Hits getSearchArticles(long companyId, long groupId)
 		throws Exception {
 
 		Indexer<JournalArticle> indexer = IndexerRegistryUtil.getIndexer(
@@ -714,11 +722,13 @@ public class JournalTestUtil {
 		searchContext.setGroupIds(new long[] {groupId});
 		searchContext.setKeywords(StringPool.BLANK);
 
-		QueryConfig queryConfig = new QueryConfig();
+		return indexer.search(searchContext);
+	}
 
-		searchContext.setQueryConfig(queryConfig);
+	public static int getSearchArticlesCount(long companyId, long groupId)
+		throws Exception {
 
-		Hits results = indexer.search(searchContext);
+		Hits results = getSearchArticles(companyId, groupId);
 
 		return results.getLength();
 	}
@@ -953,8 +963,7 @@ public class JournalTestUtil {
 		return map;
 	}
 
-	private static final Locale[] _locales = {
-		LocaleUtil.US, LocaleUtil.GERMANY, LocaleUtil.SPAIN
-	};
+	private static final Locale[] _locales =
+		{LocaleUtil.US, LocaleUtil.GERMANY, LocaleUtil.SPAIN};
 
 }

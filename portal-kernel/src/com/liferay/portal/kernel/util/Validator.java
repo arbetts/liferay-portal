@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.util;
 
+import com.liferay.petra.string.CharPool;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -603,7 +605,7 @@ public class Validator {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean isEmailAddress(String emailAddress) {
-		if (Validator.isNull(emailAddress)) {
+		if (isNull(emailAddress)) {
 			return false;
 		}
 
@@ -665,7 +667,7 @@ public class Validator {
 		return true;
 	}
 
-	public static boolean isFilePath(String path, boolean isParentDirAllowed) {
+	public static boolean isFilePath(String path, boolean parentDirAllowed) {
 		if (isNull(path)) {
 			return false;
 		}
@@ -674,7 +676,7 @@ public class Validator {
 			return false;
 		}
 
-		if (isParentDirAllowed) {
+		if (parentDirAllowed) {
 			return true;
 		}
 
@@ -916,37 +918,33 @@ public class Validator {
 			return false;
 		}
 
-		number = StringUtil.reverse(number);
+		int sum = 0;
 
-		int total = 0;
+		int length = number.length();
 
-		for (int i = 0; i < number.length(); i++) {
-			int x = 0;
+		for (int i = 0; i < length; i++) {
+			int x = number.charAt(length - 1 - i) - CharPool.NUMBER_0;
 
-			if (((i + 1) % 2) == 0) {
-				x = GetterUtil.getInteger(number.substring(i, i + 1)) * 2;
+			if ((x > 9) || (x < 0)) {
+				return false;
+			}
 
-				if (x >= 10) {
-					String s = String.valueOf(x);
+			if ((i % 2) == 1) {
+				x *= 2;
 
-					x =
-						GetterUtil.getInteger(s.substring(0, 1)) +
-							GetterUtil.getInteger(s.substring(1, 2));
+				if (x > 9) {
+					x -= 9;
 				}
 			}
-			else {
-				x = GetterUtil.getInteger(number.substring(i, i + 1));
-			}
 
-			total = total + x;
+			sum += x;
 		}
 
-		if ((total % 10) == 0) {
+		if ((sum % 10) == 0) {
 			return true;
 		}
-		else {
-			return false;
-		}
+
+		return false;
 	}
 
 	/**
@@ -1232,7 +1230,9 @@ public class Validator {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean isVariableName(String variableName) {
-		if (isNull(variableName)) {
+		if (isNull(variableName) ||
+			ArrayUtil.contains(_JAVA_KEYWORDS, variableName)) {
+
 			return false;
 		}
 
@@ -1320,9 +1320,20 @@ public class Validator {
 
 	private static final int _DIGIT_END = 57;
 
-	private static final char[] _EMAIL_ADDRESS_SPECIAL_CHAR = new char[] {
+	private static final char[] _EMAIL_ADDRESS_SPECIAL_CHAR = {
 		'.', '!', '#', '$', '%', '&', '\'', '*', '+', '-', '/', '=', '?', '^',
 		'_', '`', '{', '|', '}', '~'
+	};
+
+	private static final String[] _JAVA_KEYWORDS = {
+		"abstract", "assert", "boolean", "break", "byte", "case", "catch",
+		"char", "class", "const", "continue", "default", "do", "double", "else",
+		"enum", "extends", "false", "final", "finally", "float", "for", "goto",
+		"if", "implements", "import", "instanceof", "int", "interface", "long",
+		"native", "new", "null", "package", "private", "protected", "public",
+		"return", "short", "static", "strictfp", "super", "switch",
+		"synchronized", "this", "throw", "throws", "transient", "true", "try",
+		"void", "volatile", "while"
 	};
 
 	private static final String _VARIABLE_TERM_BEGIN = "[$";

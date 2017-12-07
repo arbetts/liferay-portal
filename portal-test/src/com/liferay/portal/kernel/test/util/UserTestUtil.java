@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserServiceUtil;
 import com.liferay.portal.kernel.test.randomizerbumpers.NumericStringRandomizerBumper;
+import com.liferay.portal.kernel.test.randomizerbumpers.UniqueStringRandomizerBumper;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
@@ -58,12 +59,11 @@ public class UserTestUtil {
 	}
 
 	public static User addGroupAdminUser(Group group) throws Exception {
-		return UserTestUtil.addGroupUser(
-			group, RoleConstants.SITE_ADMINISTRATOR);
+		return addGroupUser(group, RoleConstants.SITE_ADMINISTRATOR);
 	}
 
 	public static User addGroupOwnerUser(Group group) throws Exception {
-		return UserTestUtil.addGroupUser(group, RoleConstants.SITE_OWNER);
+		return addGroupUser(group, RoleConstants.SITE_OWNER);
 	}
 
 	public static User addGroupUser(Group group, String roleName)
@@ -92,14 +92,14 @@ public class UserTestUtil {
 	public static User addOrganizationAdminUser(Organization organization)
 		throws Exception {
 
-		return UserTestUtil.addOrganizationUser(
+		return addOrganizationUser(
 			organization, RoleConstants.ORGANIZATION_ADMINISTRATOR);
 	}
 
 	public static User addOrganizationOwnerUser(Organization organization)
 		throws Exception {
 
-		return UserTestUtil.addOrganizationUser(
+		return addOrganizationUser(
 			organization, RoleConstants.ORGANIZATION_OWNER);
 	}
 
@@ -121,7 +121,9 @@ public class UserTestUtil {
 	public static User addUser() throws Exception {
 		return addUser(
 			TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
-			RandomTestUtil.randomString(NumericStringRandomizerBumper.INSTANCE),
+			RandomTestUtil.randomString(
+				NumericStringRandomizerBumper.INSTANCE,
+				UniqueStringRandomizerBumper.INSTANCE),
 			LocaleUtil.getDefault(), RandomTestUtil.randomString(),
 			RandomTestUtil.randomString(),
 			new long[] {TestPropsValues.getGroupId()},
@@ -184,7 +186,9 @@ public class UserTestUtil {
 	public static User addUser(Company company) throws Exception {
 		return addUser(
 			company.getCompanyId(), TestPropsValues.getUserId(),
-			RandomTestUtil.randomString(NumericStringRandomizerBumper.INSTANCE),
+			RandomTestUtil.randomString(
+				NumericStringRandomizerBumper.INSTANCE,
+				UniqueStringRandomizerBumper.INSTANCE),
 			LocaleUtil.getDefault(), RandomTestUtil.randomString(),
 			RandomTestUtil.randomString(),
 			new long[] {TestPropsValues.getGroupId()},
@@ -194,7 +198,9 @@ public class UserTestUtil {
 	public static User addUser(long... groupIds) throws Exception {
 		return addUser(
 			TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
-			RandomTestUtil.randomString(NumericStringRandomizerBumper.INSTANCE),
+			RandomTestUtil.randomString(
+				NumericStringRandomizerBumper.INSTANCE,
+				UniqueStringRandomizerBumper.INSTANCE),
 			LocaleUtil.getDefault(), RandomTestUtil.randomString(),
 			RandomTestUtil.randomString(), groupIds,
 			ServiceContextTestUtil.getServiceContext());
@@ -203,7 +209,9 @@ public class UserTestUtil {
 	public static User addUser(long groupId, Locale locale) throws Exception {
 		return addUser(
 			TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
-			RandomTestUtil.randomString(NumericStringRandomizerBumper.INSTANCE),
+			RandomTestUtil.randomString(
+				NumericStringRandomizerBumper.INSTANCE,
+				UniqueStringRandomizerBumper.INSTANCE),
 			locale, RandomTestUtil.randomString(),
 			RandomTestUtil.randomString(), new long[] {groupId},
 			ServiceContextTestUtil.getServiceContext());

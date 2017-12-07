@@ -22,34 +22,41 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  * @author Peter Fellwock
  */
 @ExtendedObjectClassDefinition(
-	scope = ExtendedObjectClassDefinition.Scope.COMPANY
+	category = "other", scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
 	id = "com.liferay.social.privatemessaging.configuration.PrivateMessagingConfiguration",
 	localization = "content/Language",
-	name = "privatemessaging.service.configuration.name"
+	name = "privatemessaging-service-configuration-name"
 )
 public interface PrivateMessagingConfiguration {
 
 	@Meta.AD(
 		deflt = "com/liferay/social/privatemessaging/dependencies/notification_message_body.tmpl",
-		required = false
+		name = "email-body", required = false
 	)
 	public String emailBody();
 
-	@Meta.AD(deflt = "20", required = false)
+	@Meta.AD(
+		deflt = "20", name = "autocomplete-recipient-max", required = false
+	)
 	public int autocompleteRecipientMax();
 
-	@Meta.AD(deflt = "", required = false)
+	@Meta.AD(
+		deflt = "", name = "autocomplete-recipient-site-excludes",
+		required = false
+	)
 	public String[] autocompleteRecipientSiteExcludes();
 
 	@Meta.AD(
 		deflt = "com/liferay/social/privatemessaging/dependencies/notification_message_subject.tmpl",
-		required = false
+		name = "email-subject", required = false
 	)
 	public String emailSubject();
 
-	@Meta.AD(deflt = "all", required = false)
+	@Meta.AD(
+		deflt = "all", name = "autocomplete-recipient-type", required = false
+	)
 	public String autocompleteRecipientType();
 
 }

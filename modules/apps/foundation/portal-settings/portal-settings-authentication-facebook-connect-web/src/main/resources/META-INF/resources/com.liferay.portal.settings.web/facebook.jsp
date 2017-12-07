@@ -17,7 +17,7 @@
 <%@ include file="/com.liferay.portal.settings.web/init.jsp" %>
 
 <%
-FacebookConnectConfiguration facebookConnectConfiguration = ConfigurationProviderUtil.getConfiguration(FacebookConnectConfiguration.class, new ParameterMapSettingsLocator(request.getParameterMap(), "facebook--", new CompanyServiceSettingsLocator(company.getCompanyId(), FacebookConnectConstants.SERVICE_NAME)));
+FacebookConnectConfiguration facebookConnectConfiguration = ConfigurationProviderUtil.getConfiguration(FacebookConnectConfiguration.class, new ParameterMapSettingsLocator(request.getParameterMap(), PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE, new CompanyServiceSettingsLocator(company.getCompanyId(), FacebookConnectConstants.SERVICE_NAME)));
 
 boolean authEnabled = facebookConnectConfiguration.enabled();
 boolean verifiedAccountRequired = facebookConnectConfiguration.verifiedAccountRequired();
@@ -43,19 +43,31 @@ String oauthRedirectURL = facebookConnectConfiguration.oauthRedirectURL();
 <aui:fieldset>
 	<aui:input name="<%= ActionRequest.ACTION_NAME %>" type="hidden" value="/portal_settings/facebook_connect" />
 
-	<aui:input label="enabled" name="facebook--enabled" type="checkbox" value="<%= authEnabled %>" />
+	<aui:input label="enabled" name='<%= PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE + "enabled" %>' type="checkbox" value="<%= authEnabled %>" />
 
-	<aui:input label="require-verified-account" name="facebook--verifiedAccountRequired" type="checkbox" value="<%= verifiedAccountRequired %>" />
+	<aui:input label="require-verified-account" name='<%= PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE + "verifiedAccountRequired" %>' type="checkbox" value="<%= verifiedAccountRequired %>" />
 
-	<aui:input cssClass="lfr-input-text-container" label="application-id" name="facebook--appId" type="text" value="<%= appId %>" />
+	<aui:input cssClass="lfr-input-text-container" label="application-id" name='<%= PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE + "appId" %>' type="text" value="<%= appId %>" />
 
-	<aui:input cssClass="lfr-input-text-container" label="application-secret" name="facebook--appSecret" type="password" value="<%= appSecret %>" />
+	<aui:input cssClass="lfr-input-text-container" label="application-secret" name='<%= PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE + "appSecret" %>' type="password" value="<%= appSecret %>" />
 
-	<aui:input cssClass="lfr-input-text-container" label="graph-url" name="facebook--graphURL" type="text" value="<%= graphURL %>" />
+	<aui:input cssClass="lfr-input-text-container" label="graph-url" name='<%= PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE + "graphURL" %>' type="text" value="<%= graphURL %>" />
 
-	<aui:input cssClass="lfr-input-text-container" label="oauth-authentication-url" name="facebook--oauthAuthURL" type="text" value="<%= oauthAuthURL %>" />
+	<aui:input cssClass="lfr-input-text-container" label="oauth-authentication-url" name='<%= PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE + "oauthAuthURL" %>' type="text" value="<%= oauthAuthURL %>" />
 
-	<aui:input cssClass="lfr-input-text-container" label="oauth-token-url" name="facebook--oauthTokenURL" type="text" value="<%= oauthTokenURL %>" />
+	<aui:input cssClass="lfr-input-text-container" label="oauth-token-url" name='<%= PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE + "oauthTokenURL" %>' type="text" value="<%= oauthTokenURL %>" />
 
-	<aui:input cssClass="lfr-input-text-container" label="oauth-redirect-url" name="facebook--oauthRedirectURL" type="text" value="<%= oauthRedirectURL %>" />
+	<aui:input cssClass="lfr-input-text-container" label="oauth-redirect-url" name='<%= PortalSettingsFacebookConnectConstants.FORM_PARAMETER_NAMESPACE + "oauthRedirectURL" %>' type="text" value="<%= oauthRedirectURL %>" />
+
+	<aui:button-row>
+		<portlet:actionURL name="/portal_settings/facebook_connect_delete" var="resetValuesURL">
+			<portlet:param name="tabs1" value="facebook_connect" />
+		</portlet:actionURL>
+
+		<%
+		String taglibOnClick = "if (confirm('" + UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-reset-the-configured-values") + "')) {submitForm(document.hrefFm, '" + resetValuesURL.toString() + "');}";
+		%>
+
+		<aui:button cssClass="btn-lg" onClick="<%= taglibOnClick %>" value="reset-values" />
+	</aui:button-row>
 </aui:fieldset>

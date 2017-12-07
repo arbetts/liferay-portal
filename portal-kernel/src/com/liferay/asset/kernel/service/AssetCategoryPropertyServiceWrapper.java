@@ -23,8 +23,11 @@ import com.liferay.portal.kernel.service.ServiceWrapper;
  *
  * @author Brian Wing Shun Chan
  * @see AssetCategoryPropertyService
+ * @deprecated As of 7.0.0, replaced by {@link
+com.liferay.asset.category.property.service.impl.AssetCategoryPropertyServiceImpl}
  * @generated
  */
+@Deprecated
 @ProviderType
 public class AssetCategoryPropertyServiceWrapper
 	implements AssetCategoryPropertyService,
@@ -43,30 +46,9 @@ public class AssetCategoryPropertyServiceWrapper
 	}
 
 	@Override
-	public com.liferay.asset.kernel.model.AssetCategoryProperty updateCategoryProperty(
-		long categoryPropertyId, java.lang.String key, java.lang.String value)
+	public void deleteCategoryProperty(long categoryPropertyId)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		return _assetCategoryPropertyService.updateCategoryProperty(categoryPropertyId,
-			key, value);
-	}
-
-	@Override
-	public com.liferay.asset.kernel.model.AssetCategoryProperty updateCategoryProperty(
-		long userId, long categoryPropertyId, java.lang.String key,
-		java.lang.String value)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _assetCategoryPropertyService.updateCategoryProperty(userId,
-			categoryPropertyId, key, value);
-	}
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	@Override
-	public java.lang.String getOSGiServiceIdentifier() {
-		return _assetCategoryPropertyService.getOSGiServiceIdentifier();
+		_assetCategoryPropertyService.deleteCategoryProperty(categoryPropertyId);
 	}
 
 	@Override
@@ -82,10 +64,31 @@ public class AssetCategoryPropertyServiceWrapper
 			key);
 	}
 
+	/**
+	* Returns the OSGi service identifier.
+	*
+	* @return the OSGi service identifier
+	*/
 	@Override
-	public void deleteCategoryProperty(long categoryPropertyId)
+	public java.lang.String getOSGiServiceIdentifier() {
+		return _assetCategoryPropertyService.getOSGiServiceIdentifier();
+	}
+
+	@Override
+	public com.liferay.asset.kernel.model.AssetCategoryProperty updateCategoryProperty(
+		long userId, long categoryPropertyId, java.lang.String key,
+		java.lang.String value)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		_assetCategoryPropertyService.deleteCategoryProperty(categoryPropertyId);
+		return _assetCategoryPropertyService.updateCategoryProperty(userId,
+			categoryPropertyId, key, value);
+	}
+
+	@Override
+	public com.liferay.asset.kernel.model.AssetCategoryProperty updateCategoryProperty(
+		long categoryPropertyId, java.lang.String key, java.lang.String value)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _assetCategoryPropertyService.updateCategoryProperty(categoryPropertyId,
+			key, value);
 	}
 
 	@Override

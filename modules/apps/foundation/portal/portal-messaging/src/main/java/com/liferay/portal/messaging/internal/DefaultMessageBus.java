@@ -14,9 +14,10 @@
 
 package com.liferay.portal.messaging.internal;
 
-import com.liferay.portal.kernel.concurrent.ConcurrentHashSet;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.messaging.BaseAsyncDestination;
 import com.liferay.portal.kernel.messaging.BaseDestination;
 import com.liferay.portal.kernel.messaging.Destination;
 import com.liferay.portal.kernel.messaging.DestinationEventListener;
@@ -24,18 +25,24 @@ import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBus;
 import com.liferay.portal.kernel.messaging.MessageBusEventListener;
 import com.liferay.portal.kernel.messaging.MessageListener;
-import com.liferay.portal.kernel.nio.intraband.messaging.IntrabandBridgeDestination;
-import com.liferay.portal.kernel.resiliency.spi.SPIUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.messaging.internal.configuration.DestinationWorkerConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.osgi.framework.Constants;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -46,8 +53,12 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 /**
  * @author Michael C. Han
  */
-@Component(immediate = true, service = MessageBus.class)
-public class DefaultMessageBus implements MessageBus {
+@Component(
+	immediate = true,
+	property = Constants.SERVICE_PID + "=com.liferay.portal.messaging.configuration.DestinationWorkerConfiguration",
+	service = {ManagedServiceFactory.class, MessageBus.class}
+)
+public class DefaultMessageBus implements ManagedServiceFactory, MessageBus {
 
 	@Override
 	public synchronized void addDestination(Destination destination) {
@@ -59,6 +70,14 @@ public class DefaultMessageBus implements MessageBus {
 		MessageBusEventListener messageBusEventListener) {
 
 		return _messageBusEventListeners.add(messageBusEventListener);
+	}
+
+	@Override
+	public void deleted(String factoryPid) {
+		String destinationName = _factoryPidsToDestinationName.remove(
+			factoryPid);
+
+		_destinationWorkerConfigurations.remove(destinationName);
 	}
 
 	@Override
@@ -79,6 +98,11 @@ public class DefaultMessageBus implements MessageBus {
 	@Override
 	public Collection<Destination> getDestinations() {
 		return _destinations.values();
+	}
+
+	@Override
+	public String getName() {
+		return "Default Message Bus";
 	}
 
 	@Override
@@ -239,6 +263,27 @@ public class DefaultMessageBus implements MessageBus {
 		return queuedMessageListeners.remove(messageListener);
 	}
 
+	@Override
+	public void updated(String factoryPid, Dictionary<String, ?> dictionary)
+		throws ConfigurationException {
+
+		DestinationWorkerConfiguration destinationWorkerConfiguration =
+			ConfigurableUtil.createConfigurable(
+				DestinationWorkerConfiguration.class, dictionary);
+
+		_factoryPidsToDestinationName.put(
+			factoryPid, destinationWorkerConfiguration.destinationName());
+
+		_destinationWorkerConfigurations.put(
+			destinationWorkerConfiguration.destinationName(),
+			destinationWorkerConfiguration);
+
+		Destination destination = _destinations.get(
+			destinationWorkerConfiguration.destinationName());
+
+		updateDestination(destination, destinationWorkerConfiguration);
+	}
+
 	@Deactivate
 	protected void deactivate() {
 		shutdown(true);
@@ -253,14 +298,6 @@ public class DefaultMessageBus implements MessageBus {
 	}
 
 	protected void doAddDestination(Destination destination) {
-		Class<?> clazz = destination.getClass();
-
-		if (SPIUtil.isSPI() &&
-			!clazz.equals(IntrabandBridgeDestination.class)) {
-
-			destination = new IntrabandBridgeDestination(destination);
-		}
-
 		_destinations.put(destination.getName(), destination);
 
 		for (MessageBusEventListener messageBusEventListener :
@@ -278,9 +315,10 @@ public class DefaultMessageBus implements MessageBus {
 
 		if (_log.isDebugEnabled()) {
 			_log.debug(
-				"Registering " + messageListeners.size() +
-					" queued message listeners for destination " +
-						destination.getName());
+				StringBundler.concat(
+					"Registering ", String.valueOf(messageListeners.size()),
+					" queued message listeners for destination ",
+					destination.getName()));
 		}
 
 		for (MessageListener messageListener : messageListeners) {
@@ -313,6 +351,11 @@ public class DefaultMessageBus implements MessageBus {
 		else {
 			doAddDestination(destination);
 		}
+
+		DestinationWorkerConfiguration destinationWorkerConfiguration =
+			_destinationWorkerConfigurations.get(destinationName);
+
+		updateDestination(destination, destinationWorkerConfiguration);
 	}
 
 	@Reference(
@@ -432,12 +475,37 @@ public class DefaultMessageBus implements MessageBus {
 		unregisterMessageListener(destinationName, messageListener);
 	}
 
+	protected void updateDestination(
+		Destination destination,
+		DestinationWorkerConfiguration destinationWorkerConfiguration) {
+
+		if ((destination == null) || (destinationWorkerConfiguration == null)) {
+			return;
+		}
+
+		if (destination instanceof BaseAsyncDestination) {
+			BaseAsyncDestination baseAsyncDestination =
+				(BaseAsyncDestination)destination;
+
+			baseAsyncDestination.setMaximumQueueSize(
+				destinationWorkerConfiguration.maxQueueSize());
+			baseAsyncDestination.setWorkersCoreSize(
+				destinationWorkerConfiguration.workerCoreSize());
+			baseAsyncDestination.setWorkersMaxSize(
+				destinationWorkerConfiguration.workerMaxSize());
+		}
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		DefaultMessageBus.class);
 
 	private final Map<String, Destination> _destinations = new HashMap<>();
+	private final Map<String, DestinationWorkerConfiguration>
+		_destinationWorkerConfigurations = new ConcurrentHashMap<>();
+	private final Map<String, String> _factoryPidsToDestinationName =
+		new ConcurrentHashMap<>();
 	private final Set<MessageBusEventListener> _messageBusEventListeners =
-		new ConcurrentHashSet<>();
+		Collections.newSetFromMap(new ConcurrentHashMap<>());
 	private final Map<String, List<MessageListener>> _queuedMessageListeners =
 		new HashMap<>();
 

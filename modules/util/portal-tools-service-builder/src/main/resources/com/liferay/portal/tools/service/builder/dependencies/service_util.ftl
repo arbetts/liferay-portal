@@ -8,14 +8,13 @@ import com.liferay.osgi.util.ServiceTrackerFactory;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.bean.PortletBeanLocatorUtil;
-import com.liferay.portal.kernel.service.Invokable${sessionTypeName}Service;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.util.tracker.ServiceTracker;
 
-<#if sessionTypeName == "Local">
+<#if stringUtil.equals(sessionTypeName, "Local")>
 /**
  * Provides the local service utility for ${entity.name}. This utility wraps
  * {@link ${packagePath}.service.impl.${entity.name}LocalServiceImpl} and is the
@@ -67,7 +66,7 @@ public class ${entity.name}${sessionTypeName}ServiceUtil {
 	 */
 
 	<#list methods as method>
-		<#if !method.isConstructor() && !method.isStatic() && method.isPublic() && serviceBuilder.isCustomMethod(method)>
+		<#if !method.isStatic() && method.isPublic() && serviceBuilder.isCustomMethod(method)>
 			${serviceBuilder.getJavadocComment(method)}
 
 			<#if serviceBuilder.hasAnnotation(method, "Deprecated")>
@@ -96,7 +95,7 @@ public class ${entity.name}${sessionTypeName}ServiceUtil {
 					throws
 				</#if>
 
-				${exception.value}
+				${exception.fullyQualifiedName}
 
 				<#if exception_has_next>
 					,
@@ -104,7 +103,7 @@ public class ${entity.name}${sessionTypeName}ServiceUtil {
 			</#list>
 
 			{
-				<#if method.returns.value != "void">
+				<#if !stringUtil.equals(method.returns.value, "void")>
 					return
 				</#if>
 
@@ -123,7 +122,7 @@ public class ${entity.name}${sessionTypeName}ServiceUtil {
 		</#if>
 	</#list>
 
-	<#if pluginName != "">
+	<#if validator.isNotNull(pluginName)>
 		public static void clearService() {
 			_service = null;
 		}
@@ -134,15 +133,8 @@ public class ${entity.name}${sessionTypeName}ServiceUtil {
 			return _serviceTracker.getService();
 		<#else>
 			if (_service == null) {
-				<#if pluginName != "">
-					Invokable${sessionTypeName}Service invokable${sessionTypeName}Service = (Invokable${sessionTypeName}Service)PortletBeanLocatorUtil.locate(ClpSerializer.getServletContextName(), ${entity.name}${sessionTypeName}Service.class.getName());
-
-					if (invokable${sessionTypeName}Service instanceof ${entity.name}${sessionTypeName}Service) {
-						_service = (${entity.name}${sessionTypeName}Service)invokable${sessionTypeName}Service;
-					}
-					else {
-						_service = new ${entity.name}${sessionTypeName}ServiceClp(invokable${sessionTypeName}Service);
-					}
+				<#if validator.isNotNull(pluginName)>
+					_service = (${entity.name}${sessionTypeName}Service)PortletBeanLocatorUtil.locate(ServletContextUtil.getServletContextName(), ${entity.name}${sessionTypeName}Service.class.getName());
 				<#else>
 					_service = (${entity.name}${sessionTypeName}Service)PortalBeanLocatorUtil.locate(${entity.name}${sessionTypeName}Service.class.getName());
 				</#if>

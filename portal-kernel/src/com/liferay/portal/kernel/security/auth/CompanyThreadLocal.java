@@ -16,12 +16,12 @@ package com.liferay.portal.kernel.security.auth;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.petra.lang.CentralizedThreadLocal;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
-import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.TimeZoneThreadLocal;
 
@@ -46,6 +46,10 @@ public class CompanyThreadLocal {
 	}
 
 	public static void setCompanyId(Long companyId) {
+		if (companyId.equals(_companyId.get())) {
+			return;
+		}
+
 		if (_log.isDebugEnabled()) {
 			_log.debug("setCompanyId " + companyId);
 		}
@@ -79,10 +83,12 @@ public class CompanyThreadLocal {
 		CompanyThreadLocal.class);
 
 	private static final ThreadLocal<Long> _companyId =
-		new AutoResetThreadLocal<>(
-			CompanyThreadLocal.class + "._companyId", CompanyConstants.SYSTEM);
+		new CentralizedThreadLocal<>(
+			CompanyThreadLocal.class + "._companyId",
+			() -> CompanyConstants.SYSTEM);
 	private static final ThreadLocal<Boolean> _deleteInProcess =
-		new AutoResetThreadLocal<>(
-			CompanyThreadLocal.class + "._deleteInProcess", false);
+		new CentralizedThreadLocal<>(
+			CompanyThreadLocal.class + "._deleteInProcess",
+			() -> Boolean.FALSE);
 
 }

@@ -27,8 +27,13 @@ public class NotExpression extends UnaryExpression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor) {
-		return visitor.visit(this);
+	public <T> T accept(ExpressionVisitor<T> expressionVisitor) {
+		return expressionVisitor.visit(this);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("not(%s)", getOperandExpression());
 	}
 
 }

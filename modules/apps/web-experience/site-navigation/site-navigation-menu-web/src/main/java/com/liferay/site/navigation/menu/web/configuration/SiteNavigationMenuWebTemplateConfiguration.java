@@ -25,11 +25,14 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.site.navigation.menu.web.configuration.SiteNavigationMenuWebTemplateConfiguration",
 	localization = "content/Language",
-	name = "site.navigation.menu.web.template.configuration.name"
+	name = "site-navigation-menu-web-template-configuration-name"
 )
 public interface SiteNavigationMenuWebTemplateConfiguration {
 
-	@Meta.AD(deflt = "navbar-blank-ftl", required = false)
+	@Meta.AD(
+		deflt = "navbar-blank-ftl", name = "ddm-template-key-default",
+		required = false
+	)
 	public String ddmTemplateKeyDefault();
 
 }

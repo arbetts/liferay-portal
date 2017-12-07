@@ -20,11 +20,25 @@ import com.liferay.dynamic.data.mapping.annotations.DDMFormLayout;
 import com.liferay.dynamic.data.mapping.annotations.DDMFormLayoutColumn;
 import com.liferay.dynamic.data.mapping.annotations.DDMFormLayoutPage;
 import com.liferay.dynamic.data.mapping.annotations.DDMFormLayoutRow;
+import com.liferay.dynamic.data.mapping.annotations.DDMFormRule;
 
 /**
  * @author Bruno Basto
  */
-@DDMForm
+@DDMForm(
+	rules = {
+		@DDMFormRule(
+			actions = {
+				"setVisible('emailFromAddress', getValue('sendEmailNotification'))",
+				"setVisible('emailFromName', getValue('sendEmailNotification'))",
+				"setVisible('emailSubject', getValue('sendEmailNotification'))",
+				"setVisible('emailToAddress', getValue('sendEmailNotification'))",
+				"setVisible('published', FALSE)"
+			},
+			condition = "TRUE"
+		)
+	}
+)
 @DDMFormLayout(
 	{
 		@DDMFormLayoutPage(
@@ -35,7 +49,8 @@ import com.liferay.dynamic.data.mapping.annotations.DDMFormLayoutRow;
 						@DDMFormLayoutColumn(
 							size = 12,
 							value = {
-								"requireCaptcha", "redirectURL", "storageType",
+								"requireAuthentication", "requireCaptcha",
+								"redirectURL", "storageType",
 								"workflowDefinition"
 							}
 						)
@@ -67,32 +82,24 @@ public interface DDLRecordSetSettings {
 	@DDMFormField(
 		label = "%from-address",
 		validationErrorMessage = "%please-enter-a-valid-email-address",
-		validationExpression = "isEmailAddress(emailFromAddress)",
-		visibilityExpression = "sendEmailNotification == TRUE"
+		validationExpression = "isEmailAddress(emailFromAddress)"
 	)
 	public String emailFromAddress();
 
-	@DDMFormField(
-		label = "%from-name",
-		visibilityExpression = "sendEmailNotification == TRUE"
-	)
+	@DDMFormField(label = "%from-name")
 	public String emailFromName();
 
-	@DDMFormField(
-		label = "%subject",
-		visibilityExpression = "sendEmailNotification == TRUE"
-	)
+	@DDMFormField(label = "%subject")
 	public String emailSubject();
 
 	@DDMFormField(
 		label = "%to-address",
-		validationErrorMessage = "%please-enter-a-valid-email-address",
-		validationExpression = "isEmailAddress(emailToAddress)",
-		visibilityExpression = "sendEmailNotification == TRUE"
+		validationErrorMessage = "%please-enter-valid-email-addresses-separated-by-commas",
+		validationExpression = "isEmailAddress(emailToAddress)"
 	)
 	public String emailToAddress();
 
-	@DDMFormField(visibilityExpression = "FALSE")
+	@DDMFormField
 	public boolean published();
 
 	@DDMFormField(
@@ -102,6 +109,14 @@ public interface DDLRecordSetSettings {
 		validationExpression = "isURL(redirectURL)"
 	)
 	public String redirectURL();
+
+	@DDMFormField(
+		label = "%require-user-authentication", predefinedValue = "false",
+		properties = {"showAsSwitcher=true"}
+	)
+	public default boolean requireAuthentication() {
+		return false;
+	}
 
 	@DDMFormField(
 		label = "%require-captcha", properties = {"showAsSwitcher=true"},
@@ -116,7 +131,7 @@ public interface DDLRecordSetSettings {
 	public boolean sendEmailNotification();
 
 	@DDMFormField(
-		label = "%select-a-storage-type",
+		label = "%select-a-storage-type", predefinedValue = "[\"json\"]",
 		properties = {
 			"dataSourceType=data-provider",
 			"ddmDataProviderInstanceId=ddm-storage-types"
@@ -126,7 +141,7 @@ public interface DDLRecordSetSettings {
 	public String storageType();
 
 	@DDMFormField(
-		label = "%select-a-workflow",
+		label = "%select-a-workflow", predefinedValue = "[\"no-workflow\"]",
 		properties = {
 			"dataSourceType=data-provider",
 			"ddmDataProviderInstanceId=workflow-definitions"

@@ -274,7 +274,7 @@ public class LiferayAlbumService implements AlbumService {
 			}
 		}
 
-		return new RestfulCollection<Album>(
+		return new RestfulCollection<>(
 			albums, collectionOptions.getFirst(), albums.size(),
 			collectionOptions.getMax());
 	}
@@ -296,7 +296,7 @@ public class LiferayAlbumService implements AlbumService {
 			albums.add(album);
 		}
 
-		return new RestfulCollection<Album>(
+		return new RestfulCollection<>(
 			albums, collectionOptions.getFirst(), albums.size(),
 			collectionOptions.getMax());
 	}
@@ -360,9 +360,8 @@ public class LiferayAlbumService implements AlbumService {
 		return album;
 	}
 
-	private static final Album.Field[] _ALBUM_FIELDS = {
-		Album.Field.LOCATION, Album.Field.THUMBNAIL_URL
-	};
+	private static final Album.Field[] _ALBUM_FIELDS =
+		{Album.Field.LOCATION, Album.Field.THUMBNAIL_URL};
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		LiferayAlbumService.class);

@@ -14,8 +14,8 @@
 
 package com.liferay.portal.store.jcr;
 
-import com.liferay.portal.kernel.memory.FinalizeManager;
-import com.liferay.portal.kernel.util.AutoResetThreadLocal;
+import com.liferay.petra.lang.CentralizedThreadLocal;
+import com.liferay.petra.memory.FinalizeManager;
 import com.liferay.portal.kernel.util.ClassLoaderUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.store.jcr.configuration.JCRStoreConfiguration;
@@ -80,7 +80,7 @@ public class JCRFactoryWrapper {
 			new JCRSessionInvocationHandler(jcrSession);
 
 		Object sessionProxy = ProxyUtil.newProxyInstance(
-			ClassLoaderUtil.getClassLoader(this.getClass()),
+			ClassLoaderUtil.getClassLoader(getClass()),
 			new Class<?>[] {Map.class, Session.class},
 			jcrSessionInvocationHandler);
 
@@ -118,9 +118,8 @@ public class JCRFactoryWrapper {
 	}
 
 	private static final ThreadLocal<Map<String, Session>> _sessions =
-		new AutoResetThreadLocal<Map<String, Session>>(
-			JCRFactoryWrapper.class + "._sessions",
-			new HashMap<String, Session>());
+		new CentralizedThreadLocal<>(
+			JCRFactoryWrapper.class + "._sessions", HashMap::new);
 
 	private final JCRFactory _jcrFactory;
 	private final JCRStoreConfiguration _jcrStoreConfiguration;

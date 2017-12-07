@@ -25,6 +25,7 @@ import com.liferay.calendar.service.CalendarResourceLocalServiceUtil;
 import com.liferay.calendar.service.CalendarServiceUtil;
 import com.liferay.calendar.service.permission.CalendarPermission;
 import com.liferay.calendar.util.comparator.CalendarNameComparator;
+import com.liferay.calendar.workflow.CalendarBookingWorkflowConstants;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -238,8 +239,9 @@ public class CalendarUtil {
 	}
 
 	public static JSONObject toCalendarBookingJSONObject(
-		ThemeDisplay themeDisplay, CalendarBooking calendarBooking,
-		TimeZone timeZone) {
+			ThemeDisplay themeDisplay, CalendarBooking calendarBooking,
+			TimeZone timeZone)
+		throws PortalException {
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
@@ -282,15 +284,19 @@ public class CalendarUtil {
 			"parentCalendarBookingId",
 			calendarBooking.getParentCalendarBookingId());
 
-		String recurrence = calendarBooking.getRecurrence();
+		CalendarBooking lastInstanceCalendarBooking =
+			CalendarBookingServiceUtil.getLastInstanceCalendarBooking(
+				calendarBooking.getCalendarBookingId());
+
+		String recurrence = lastInstanceCalendarBooking.getRecurrence();
 
 		java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
 			calendarBooking.getStartTime(), timeZone);
 
-		if (Validator.isNotNull(calendarBooking.getRecurrence())) {
+		if (Validator.isNotNull(recurrence)) {
 			Recurrence recurrenceObj = RecurrenceUtil.inTimeZone(
-				calendarBooking.getRecurrenceObj(), startTimeJCalendar,
-				timeZone);
+				lastInstanceCalendarBooking.getRecurrenceObj(),
+				startTimeJCalendar, timeZone);
 
 			recurrence = RecurrenceSerializer.serialize(recurrenceObj);
 		}
@@ -334,12 +340,20 @@ public class CalendarUtil {
 	}
 
 	public static JSONArray toCalendarBookingsJSONArray(
-		ThemeDisplay themeDisplay, List<CalendarBooking> calendarBookings,
-		TimeZone timeZone) {
+			ThemeDisplay themeDisplay, List<CalendarBooking> calendarBookings,
+			TimeZone timeZone)
+		throws PortalException {
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
 		for (CalendarBooking calendarBooking : calendarBookings) {
+			if ((calendarBooking.getStatus() ==
+					CalendarBookingWorkflowConstants.STATUS_DRAFT) &&
+				(calendarBooking.getUserId() != themeDisplay.getUserId())) {
+
+				continue;
+			}
+
 			JSONObject jsonObject = toCalendarBookingJSONObject(
 				themeDisplay, calendarBooking, timeZone);
 

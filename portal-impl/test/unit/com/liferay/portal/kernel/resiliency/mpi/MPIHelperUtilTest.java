@@ -42,6 +42,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.PropsUtilAdvice;
 import com.liferay.portal.kernel.util.ProxyUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.resiliency.spi.SPIRegistryImpl;
 import com.liferay.portal.test.rule.AdviseWith;
 import com.liferay.portal.test.rule.AspectJNewEnvTestRule;
@@ -78,7 +79,7 @@ public class MPIHelperUtilTest {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
-			CodeCoverageAssertor.INSTANCE, AspectJNewEnvTestRule.INSTANCE);
+			AspectJNewEnvTestRule.INSTANCE, CodeCoverageAssertor.INSTANCE);
 
 	@Before
 	public void setUp() {
@@ -242,7 +243,7 @@ public class MPIHelperUtilTest {
 
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
 
-			Assert.assertEquals(2, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 2, logRecords.size());
 
 			LogRecord logRecord = logRecords.get(0);
 
@@ -340,7 +341,7 @@ public class MPIHelperUtilTest {
 			Assert.assertTrue(
 				MPIHelperUtil.registerSPIProvider(mockSPIProvider1));
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			LogRecord logRecord1 = logRecords.get(0);
 
@@ -370,13 +371,15 @@ public class MPIHelperUtilTest {
 			Assert.assertFalse(
 				MPIHelperUtil.registerSPIProvider(mockSPIProvider3));
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord1 = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Not registering SPI provider " + mockSPIProvider3 +
-					" because it duplicates " + mockSPIProvider1,
+				StringBundler.concat(
+					"Not registering SPI provider ",
+					String.valueOf(mockSPIProvider3), " because it duplicates ",
+					String.valueOf(mockSPIProvider1)),
 				logRecord1.getMessage());
 
 			// Register SPI provider, duplicate name, without log
@@ -402,7 +405,8 @@ public class MPIHelperUtilTest {
 
 			List<SPIProvider> spiProviders = MPIHelperUtil.getSPIProviders();
 
-			Assert.assertEquals(2, spiProviders.size());
+			Assert.assertEquals(
+				spiProviders.toString(), 2, spiProviders.size());
 			Assert.assertTrue(spiProviders.contains(mockSPIProvider1));
 			Assert.assertTrue(spiProviders.contains(mockSPIProvider2));
 
@@ -427,7 +431,7 @@ public class MPIHelperUtilTest {
 			Assert.assertFalse(
 				MPIHelperUtil.unregisterSPIProvider(mockSPIProvider3));
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord1 = logRecords.get(0);
 
@@ -454,7 +458,7 @@ public class MPIHelperUtilTest {
 			Assert.assertFalse(
 				MPIHelperUtil.unregisterSPIProvider(
 					new MockSPIProvider(name2)));
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord1 = logRecords.get(0);
 
@@ -501,7 +505,7 @@ public class MPIHelperUtilTest {
 					oldSPIProviderContainers);
 			}
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord1 = logRecords.get(0);
 
@@ -546,7 +550,7 @@ public class MPIHelperUtilTest {
 
 			Assert.assertTrue(
 				MPIHelperUtil.unregisterSPIProvider(mockSPIProvider2));
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord1 = logRecords.get(0);
 
@@ -596,13 +600,15 @@ public class MPIHelperUtilTest {
 			Assert.assertFalse(mockSPI1.stopped);
 			Assert.assertFalse(mockSPI2.destroyed);
 			Assert.assertFalse(mockSPI2.stopped);
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord1 = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Unable to unregister SPI " + mockSPI1 +
-					" while unregistering SPI provider " + mockSPIProvider1,
+				StringBundler.concat(
+					"Unable to unregister SPI ", String.valueOf(mockSPI1),
+					" while unregistering SPI provider ",
+					String.valueOf(mockSPIProvider1)),
 				logRecord1.getMessage());
 
 			Throwable throwable = logRecord1.getThrown();
@@ -698,13 +704,15 @@ public class MPIHelperUtilTest {
 			Assert.assertTrue(mockSPI1.stopped);
 			Assert.assertFalse(mockSPI2.destroyed);
 			Assert.assertFalse(mockSPI2.stopped);
-			Assert.assertEquals(2, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 2, logRecords.size());
 
 			logRecord1 = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Unregistered SPI " + mockSPI1 +
-					" while unregistering SPI provider " + mockSPIProvider1,
+				StringBundler.concat(
+					"Unregistered SPI ", String.valueOf(mockSPI1),
+					" while unregistering SPI provider ",
+					String.valueOf(mockSPIProvider1)),
 				logRecord1.getMessage());
 
 			LogRecord logRecord2 = logRecords.get(1);
@@ -747,8 +755,10 @@ public class MPIHelperUtilTest {
 			LogRecord logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Not registering SPI " + mockSPI1 + " with foreign MPI " +
-					mockSPI1.mpi + " versus " + MPIHelperUtil.getMPI(),
+				StringBundler.concat(
+					"Not registering SPI ", String.valueOf(mockSPI1),
+					" with foreign MPI ", String.valueOf(mockSPI1.mpi),
+					" versus ", String.valueOf(MPIHelperUtil.getMPI())),
 				logRecord.getMessage());
 
 			// Mismatch MPI, without log
@@ -784,13 +794,14 @@ public class MPIHelperUtilTest {
 
 			Assert.assertFalse(MPIHelperUtil.registerSPI(mockSPI1));
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Not registering SPI " + mockSPI1 +
-					" with unknown SPI provider " + mockSPI1.spiProviderName,
+				StringBundler.concat(
+					"Not registering SPI ", String.valueOf(mockSPI1),
+					" with unknown SPI provider ", mockSPI1.spiProviderName),
 				logRecord.getMessage());
 
 			// No such SPI provider, without log
@@ -826,7 +837,7 @@ public class MPIHelperUtilTest {
 			logRecords = captureHandler.resetLogLevel(Level.INFO);
 
 			Assert.assertTrue(MPIHelperUtil.registerSPI(mockSPI1));
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord = logRecords.get(0);
 
@@ -875,13 +886,14 @@ public class MPIHelperUtilTest {
 			logRecords = captureHandler.resetLogLevel(Level.WARNING);
 
 			Assert.assertFalse(MPIHelperUtil.registerSPI(mockSPI1));
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Not registering SPI " + mockSPI1 + " because it duplicates " +
-					mockSPI1,
+				StringBundler.concat(
+					"Not registering SPI ", String.valueOf(mockSPI1),
+					" because it duplicates ", String.valueOf(mockSPI1)),
 				logRecord.getMessage());
 
 			// Duplicate register, without log
@@ -930,13 +942,13 @@ public class MPIHelperUtilTest {
 
 			List<SPI> spis = MPIHelperUtil.getSPIs();
 
-			Assert.assertEquals(1, spis.size());
+			Assert.assertEquals(spis.toString(), 1, spis.size());
 
 			mockSPI1 = (MockSPI)spis.get(0);
 
 			Assert.assertEquals(name, mockSPI1.spiProviderName);
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord = logRecords.get(0);
 
@@ -959,7 +971,7 @@ public class MPIHelperUtilTest {
 
 			spis = MPIHelperUtil.getSPIs(name);
 
-			Assert.assertEquals(1, spis.size());
+			Assert.assertEquals(spis.toString(), 1, spis.size());
 
 			mockSPI1 = (MockSPI)spis.get(0);
 
@@ -1001,13 +1013,15 @@ public class MPIHelperUtilTest {
 
 			Assert.assertFalse(MPIHelperUtil.unregisterSPI(mockSPI1));
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Not unregistering SPI " + mockSPI1 + " with foreign MPI " +
-					mockSPI1.mpi + " versus " + MPIHelperUtil.getMPI(),
+				StringBundler.concat(
+					"Not unregistering SPI ", String.valueOf(mockSPI1),
+					" with foreign MPI ", String.valueOf(mockSPI1.mpi),
+					" versus ", String.valueOf(MPIHelperUtil.getMPI())),
 				logRecord.getMessage());
 
 			// Unregister MPI mismatch, without log
@@ -1028,13 +1042,14 @@ public class MPIHelperUtilTest {
 
 			Assert.assertFalse(MPIHelperUtil.unregisterSPI(mockSPI1));
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord = logRecords.get(0);
 
 			Assert.assertEquals(
-				"Not unregistering SPI " + mockSPI1 +
-					" with unknown SPI provider " + mockSPI1.spiProviderName,
+				StringBundler.concat(
+					"Not unregistering SPI ", String.valueOf(mockSPI1),
+					" with unknown SPI provider ", mockSPI1.spiProviderName),
 				logRecord.getMessage());
 
 			// Unregister no such SPI provider, without log
@@ -1063,7 +1078,7 @@ public class MPIHelperUtilTest {
 
 			Assert.assertFalse(MPIHelperUtil.unregisterSPI(mockSPI1));
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord = logRecords.get(0);
 
@@ -1093,7 +1108,7 @@ public class MPIHelperUtilTest {
 			logRecords = captureHandler.resetLogLevel(Level.INFO);
 
 			Assert.assertTrue(MPIHelperUtil.unregisterSPI(mockSPI1));
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			logRecord = logRecords.get(0);
 

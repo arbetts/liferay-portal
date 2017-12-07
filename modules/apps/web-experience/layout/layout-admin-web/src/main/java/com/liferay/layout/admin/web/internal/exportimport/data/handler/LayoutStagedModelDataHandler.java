@@ -25,22 +25,23 @@ import com.liferay.counter.kernel.service.CounterLocalService;
 import com.liferay.exportimport.controller.PortletExportController;
 import com.liferay.exportimport.controller.PortletImportController;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
-import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportHelper;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
-import com.liferay.exportimport.kernel.lar.ExportImportProcessCallbackRegistryUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportProcessCallbackRegistry;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
-import com.liferay.exportimport.kernel.lar.PortletDataContextFactoryUtil;
+import com.liferay.exportimport.kernel.lar.PortletDataContextFactory;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.PortletDataHandlerKeys;
-import com.liferay.exportimport.kernel.lar.PortletDataHandlerStatusMessageSenderUtil;
+import com.liferay.exportimport.kernel.lar.PortletDataHandlerStatusMessageSender;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleManager;
 import com.liferay.exportimport.kernel.staging.LayoutStagingUtil;
-import com.liferay.exportimport.kernel.staging.StagingUtil;
+import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.exportimport.lar.LayoutCache;
 import com.liferay.exportimport.lar.PermissionImporter;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
@@ -84,7 +85,6 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.TransactionConfig;
 import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -176,9 +176,9 @@ public class LayoutStagedModelDataHandler
 		Map<String, String> referenceAttributes = new HashMap<>();
 
 		referenceAttributes.put(
-			"private-layout", String.valueOf(layout.isPrivateLayout()));
-		referenceAttributes.put(
 			"layout-id", String.valueOf(layout.getLayoutId()));
+		referenceAttributes.put(
+			"private-layout", String.valueOf(layout.isPrivateLayout()));
 
 		return referenceAttributes;
 	}
@@ -321,7 +321,8 @@ public class LayoutStagedModelDataHandler
 		exportTheme(portletDataContext, layout);
 
 		portletDataContext.addClassedModel(
-			layoutElement, ExportImportPathUtil.getModelPath(layout), layout);
+			layoutElement, ExportImportPathUtil.getModelPath(layout),
+			LayoutStagingUtil.mergeLayoutRevisionIntoLayout(layout));
 	}
 
 	@Override
@@ -432,8 +433,6 @@ public class LayoutStagedModelDataHandler
 			if (existingLayout == null) {
 				layoutId = _layoutLocalService.getNextLayoutId(
 					groupId, privateLayout);
-
-				friendlyURL = getFriendlyURL(friendlyURL, layoutId);
 			}
 		}
 		else if (layoutsImportMode.equals(
@@ -494,8 +493,6 @@ public class LayoutStagedModelDataHandler
 			if (existingLayout == null) {
 				layoutId = _layoutLocalService.getNextLayoutId(
 					groupId, privateLayout);
-
-				friendlyURL = getFriendlyURL(friendlyURL, layoutId);
 			}
 		}
 
@@ -534,8 +531,6 @@ public class LayoutStagedModelDataHandler
 
 				layoutId = _layoutLocalService.getNextLayoutId(
 					groupId, privateLayout);
-
-				friendlyURL = getFriendlyURL(friendlyURL, layoutId);
 			}
 			else {
 				importedLayout.setCreateDate(layout.getCreateDate());
@@ -651,6 +646,8 @@ public class LayoutStagedModelDataHandler
 		}
 		else if (importedLayout.getIconImageId() > 0) {
 			_imageLocalService.deleteImage(importedLayout.getIconImageId());
+
+			importedLayout.setIconImageId(0);
 		}
 
 		if (existingLayout == null) {
@@ -686,7 +683,7 @@ public class LayoutStagedModelDataHandler
 
 		importedLayout.setExpandoBridgeAttributes(serviceContext);
 
-		StagingUtil.updateLastImportSettings(
+		_staging.updateLastImportSettings(
 			layoutElement, importedLayout, portletDataContext);
 
 		fixImportTypeSettings(importedLayout);
@@ -788,14 +785,15 @@ public class LayoutStagedModelDataHandler
 			portletDataContext.setScopeLayoutUuid(scopeLayoutUuid);
 
 			Map<String, Boolean> exportPortletControlsMap =
-				ExportImportHelperUtil.getExportPortletControlsMap(
+				_exportImportHelper.getExportPortletControlsMap(
 					layout.getCompanyId(), portletId, parameterMap,
 					portletDataContext.getType());
 
 			try {
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_EXPORT_STARTED, getProcessFlag(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					portletDataContext.getExportImportProcessId(),
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext));
 
 				_portletExportController.exportPortlet(
@@ -812,13 +810,15 @@ public class LayoutStagedModelDataHandler
 
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_EXPORT_SUCCEEDED, getProcessFlag(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					portletDataContext.getExportImportProcessId(),
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext));
 			}
 			catch (Throwable t) {
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_EXPORT_FAILED, getProcessFlag(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					portletDataContext.getExportImportProcessId(),
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext),
 					t);
 
@@ -1044,14 +1044,6 @@ public class LayoutStagedModelDataHandler
 			url.substring(0, x) + group.getFriendlyURL() + url.substring(y));
 	}
 
-	protected String getFriendlyURL(String friendlyURL, long layoutId) {
-		if (!Validator.isNumber(friendlyURL.substring(1))) {
-			return friendlyURL;
-		}
-
-		return StringPool.SLASH + layoutId;
-	}
-
 	protected Map<String, Object[]> getPortletids(
 			PortletDataContext portletDataContext, Layout layout)
 		throws Exception {
@@ -1246,6 +1238,13 @@ public class LayoutStagedModelDataHandler
 
 		Element portletsElement = layoutElement.element("portlets");
 
+		if (portletsElement == null) {
+
+			// See LPS-75448
+
+			return;
+		}
+
 		for (Element portletElement : portletsElement.elements()) {
 			String portletPath = portletElement.attributeValue("path");
 			String portletId = portletElement.attributeValue("portlet-id");
@@ -1264,7 +1263,7 @@ public class LayoutStagedModelDataHandler
 			portletDataContext.setPortletId(portletId);
 
 			if (BackgroundTaskThreadLocal.hasBackgroundTask()) {
-				PortletDataHandlerStatusMessageSenderUtil.sendStatusMessage(
+				_portletDataHandlerStatusMessageSender.sendStatusMessage(
 					"portlet", portletId,
 					portletDataContext.getManifestSummary());
 			}
@@ -1286,7 +1285,7 @@ public class LayoutStagedModelDataHandler
 			Element portletDataElement = portletElement.element("portlet-data");
 
 			Map<String, Boolean> importPortletControlsMap =
-				ExportImportHelperUtil.getImportPortletControlsMap(
+				_exportImportHelper.getImportPortletControlsMap(
 					portletDataContext.getCompanyId(), portletId, parameterMap,
 					portletDataElement,
 					portletDataContext.getManifestSummary());
@@ -1298,7 +1297,8 @@ public class LayoutStagedModelDataHandler
 			try {
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_IMPORT_STARTED, getProcessFlag(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					portletDataContext.getExportImportProcessId(),
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext));
 
 				// Portlet preferences
@@ -1326,13 +1326,15 @@ public class LayoutStagedModelDataHandler
 
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_IMPORT_SUCCEEDED, getProcessFlag(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					portletDataContext.getExportImportProcessId(),
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext));
 			}
 			catch (Throwable t) {
 				_exportImportLifecycleManager.fireExportImportLifecycleEvent(
 					EVENT_PORTLET_IMPORT_FAILED, getProcessFlag(),
-					PortletDataContextFactoryUtil.clonePortletDataContext(
+					portletDataContext.getExportImportProcessId(),
+					_portletDataContextFactory.clonePortletDataContext(
 						portletDataContext),
 					t);
 
@@ -1387,7 +1389,8 @@ public class LayoutStagedModelDataHandler
 			return;
 		}
 
-		ExportImportProcessCallbackRegistryUtil.registerCallback(
+		_exportImportProcessCallbackRegistry.registerCallback(
+			portletDataContext.getExportImportProcessId(),
 			new ImportLinkedLayoutCallable(
 				portletDataContext.getScopeGroupId(),
 				portletDataContext.isPrivateLayout(), importedLayout.getUuid(),
@@ -1828,7 +1831,16 @@ public class LayoutStagedModelDataHandler
 			new Class<?>[] {PortalException.class, SystemException.class});
 
 	private CounterLocalService _counterLocalService;
+
+	@Reference
+	private ExportImportHelper _exportImportHelper;
+
 	private ExportImportLifecycleManager _exportImportLifecycleManager;
+
+	@Reference
+	private ExportImportProcessCallbackRegistry
+		_exportImportProcessCallbackRegistry;
+
 	private GroupLocalService _groupLocalService;
 	private ImageLocalService _imageLocalService;
 	private LayoutFriendlyURLLocalService _layoutFriendlyURLLocalService;
@@ -1839,10 +1851,21 @@ public class LayoutStagedModelDataHandler
 	private LayoutTemplateLocalService _layoutTemplateLocalService;
 	private final PermissionImporter _permissionImporter =
 		PermissionImporter.getInstance();
+
+	@Reference
+	private PortletDataContextFactory _portletDataContextFactory;
+
+	@Reference
+	private PortletDataHandlerStatusMessageSender
+		_portletDataHandlerStatusMessageSender;
+
 	private PortletExportController _portletExportController;
 	private PortletImportController _portletImportController;
 	private PortletLocalService _portletLocalService;
 	private ResourceLocalService _resourceLocalService;
+
+	@Reference
+	private Staging _staging;
 
 	private class ImportLinkedLayoutCallable implements Callable<Void> {
 

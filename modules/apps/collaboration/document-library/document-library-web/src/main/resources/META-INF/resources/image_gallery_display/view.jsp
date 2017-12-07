@@ -54,8 +54,6 @@ Map<String, Object> contextObjects = new HashMap<String, Object>();
 
 contextObjects.put("dlPortletInstanceSettings", dlPortletInstanceSettings);
 
-DLPortletInstanceSettingsHelper dlPortletInstanceSettingsHelper = new DLPortletInstanceSettingsHelper(igRequestHelper);
-
 String[] mediaGalleryMimeTypes = dlPortletInstanceSettings.getMimeTypes();
 
 List fileEntries = DLAppServiceUtil.getGroupFileEntries(scopeGroupId, 0, folderId, mediaGalleryMimeTypes, status, 0, SearchContainer.MAX_DELTA, null);
@@ -107,7 +105,7 @@ List fileEntries = DLAppServiceUtil.getGroupFileEntries(scopeGroupId, 0, folderI
 
 	<c:choose>
 		<c:when test="<%= useAssetEntryQuery %>">
-			<liferay-ui:categorization-filter
+			<liferay-asset:categorization-filter
 				assetType="images"
 				portletURL="<%= portletURL %>"
 			/>
@@ -197,14 +195,14 @@ List fileEntries = DLAppServiceUtil.getGroupFileEntries(scopeGroupId, 0, folderI
 						</div>
 					</div>
 
-					<liferay-ui:custom-attributes-available className="<%= DLFolderConstants.getClassName() %>">
-						<liferay-ui:custom-attribute-list
+					<liferay-expando:custom-attributes-available className="<%= DLFolderConstants.getClassName() %>">
+						<liferay-expando:custom-attribute-list
 							className="<%= DLFolderConstants.getClassName() %>"
 							classPK="<%= (folder != null) ? folder.getFolderId() : 0 %>"
 							editable="<%= false %>"
 							label="<%= true %>"
 						/>
-					</liferay-ui:custom-attributes-available>
+					</liferay-expando:custom-attributes-available>
 				</c:if>
 
 				<liferay-util:include page="/image_gallery_display/view_images.jsp" servletContext="<%= application %>" />

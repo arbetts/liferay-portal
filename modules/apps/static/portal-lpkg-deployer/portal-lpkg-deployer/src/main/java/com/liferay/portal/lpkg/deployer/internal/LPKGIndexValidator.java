@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.process.ProcessChannel;
 import com.liferay.portal.kernel.process.ProcessConfig;
 import com.liferay.portal.kernel.process.ProcessConfig.Builder;
 import com.liferay.portal.kernel.process.local.LocalProcessExecutor;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -56,6 +57,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +69,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -94,6 +100,12 @@ public class LPKGIndexValidator {
 		builder.setRuntimeClassPath(classpath);
 
 		_processConfig = builder.build();
+	}
+
+	@Activate
+	public void activate(BundleContext bundleContext) {
+		_enabled = GetterUtil.getBoolean(
+			bundleContext.getProperty("lpkg.index.validator.enabled"), true);
 	}
 
 	public boolean checkIntegrity(List<URI> indexURIs) {
@@ -138,9 +150,11 @@ public class LPKGIndexValidator {
 				Collections.sort(actualKeys);
 
 				_log.info(
-					"Running validation because expected keys: " +
-						expectedKeys + " do not match actual keys: " +
-							actualKeys);
+					StringBundler.concat(
+						"Running validation because expected keys: ",
+						String.valueOf(expectedKeys),
+						" do not match actual keys: ",
+						String.valueOf(actualKeys)));
 			}
 
 			return false;
@@ -227,6 +241,10 @@ public class LPKGIndexValidator {
 	}
 
 	public boolean validate(List<File> lpkgFiles) throws Exception {
+		if (!_enabled) {
+			return false;
+		}
+
 		long start = System.currentTimeMillis();
 
 		List<URI> allIndexURIs = new ArrayList<>();
@@ -312,6 +330,29 @@ public class LPKGIndexValidator {
 
 		additionalJarFiles.add(
 			new File(PropsValues.LIFERAY_LIB_PORTAL_DIR, "util-taglib.jar"));
+
+		Configuration configuration = _configurationAdmin.getConfiguration(
+			"com.liferay.modules.compat.internal.configuration." +
+				"ModuleCompatExtenderConfiguration",
+			StringPool.QUESTION);
+
+		Dictionary<String, Object> properties = configuration.getProperties();
+
+		boolean enabled = true;
+
+		if (properties != null) {
+			enabled = Boolean.valueOf((String)properties.get("enabled"));
+		}
+
+		if (enabled) {
+			File file = new File(
+				PropsValues.MODULE_FRAMEWORK_BASE_DIR,
+				"compat/com.liferay.modules.compat.data.jar");
+
+			if (file.exists()) {
+				additionalJarFiles.add(file);
+			}
+		}
 
 		try {
 			ProcessChannel<byte[]> processChannel =
@@ -419,6 +460,11 @@ public class LPKGIndexValidator {
 
 	@Reference
 	private BytesURLProtocolSupport _bytesURLProtocolSupport;
+
+	@Reference
+	private ConfigurationAdmin _configurationAdmin;
+
+	private boolean _enabled;
 
 	@Reference
 	private IndexerFactory _indexerFactory;

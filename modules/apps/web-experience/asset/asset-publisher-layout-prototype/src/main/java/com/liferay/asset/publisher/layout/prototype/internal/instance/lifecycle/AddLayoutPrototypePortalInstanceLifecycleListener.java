@@ -14,9 +14,9 @@
 
 package com.liferay.asset.publisher.layout.prototype.internal.instance.lifecycle;
 
-import com.liferay.asset.categories.navigation.web.constants.AssetCategoriesNavigationPortletKeys;
+import com.liferay.asset.categories.navigation.constants.AssetCategoriesNavigationPortletKeys;
 import com.liferay.asset.publisher.web.constants.AssetPublisherPortletKeys;
-import com.liferay.asset.tags.navigation.web.constants.AssetTagsNavigationPortletKeys;
+import com.liferay.asset.tags.navigation.constants.AssetTagsNavigationPortletKeys;
 import com.liferay.portal.instance.lifecycle.BasePortalInstanceLifecycleListener;
 import com.liferay.portal.instance.lifecycle.PortalInstanceLifecycleListener;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.language.LanguageResources;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -44,6 +45,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
+ * Provides the implementation of <code>PortalInstanceLifecycleListener</code>
+ * (in the <code>com.liferay.portal.instance.lifecycle</code> module), which
+ * adds a default layout prototype for the content display page when a new
+ * portal instance is registered.
+ *
  * @author Juergen Kappler
  */
 @Component(immediate = true, service = PortalInstanceLifecycleListener.class)
@@ -101,6 +107,13 @@ public class AddLayoutPrototypePortalInstanceLifecycleListener
 
 		String portletId = DefaultLayoutPrototypesUtil.addPortletId(
 			layout, AssetPublisherPortletKeys.ASSET_PUBLISHER, "column-2");
+
+		Map<String, String> preferences = new HashMap<>();
+
+		preferences.put("showOnlyLayoutAssets", Boolean.TRUE.toString());
+
+		DefaultLayoutPrototypesUtil.updatePortletSetup(
+			layout, portletId, preferences);
 
 		UnicodeProperties typeSettingsProperties =
 			layout.getTypeSettingsProperties();

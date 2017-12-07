@@ -68,6 +68,8 @@ Map<Long, Integer> groupUsersCounts = UserLocalServiceUtil.searchCounts(company.
 
 <liferay-ui:success key="membershipRequestSent" message="your-request-was-sent-you-will-receive-a-reply-by-email" />
 
+<liferay-ui:error key="membershipAlreadyRequested" message="membership-was-already-requested" />
+
 <aui:nav-bar cssClass="collapse-basic-search" markupView="lexicon">
 	<aui:nav cssClass="navbar-nav">
 
@@ -183,7 +185,7 @@ Map<Long, Integer> groupUsersCounts = UserLocalServiceUtil.searchCounts(company.
 						</c:if>
 
 						<h6 class="text-default">
-							<liferay-ui:asset-tags-summary
+							<liferay-asset:asset-tags-summary
 								className="<%= Group.class.getName() %>"
 								classPK="<%= group.getGroupId() %>"
 							/>
@@ -284,7 +286,7 @@ Map<Long, Integer> groupUsersCounts = UserLocalServiceUtil.searchCounts(company.
 					<liferay-ui:search-container-column-text
 						name="tags"
 					>
-						<liferay-ui:asset-tags-summary
+						<liferay-asset:asset-tags-summary
 							className="<%= Group.class.getName() %>"
 							classPK="<%= group.getGroupId() %>"
 						/>

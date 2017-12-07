@@ -1955,6 +1955,18 @@ public class JournalArticleServiceSoap {
 		}
 	}
 
+	public static void subscribe(long groupId, long articleId)
+		throws RemoteException {
+		try {
+			JournalArticleServiceUtil.subscribe(groupId, articleId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	/**
 	* Subscribes the user to changes in elements that belong to the web content
 	* article's DDM structure.
@@ -1968,6 +1980,18 @@ public class JournalArticleServiceSoap {
 		try {
 			JournalArticleServiceUtil.subscribeStructure(groupId, userId,
 				ddmStructureId);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void unsubscribe(long groupId, long articleId)
+		throws RemoteException {
+		try {
+			JournalArticleServiceUtil.unsubscribe(groupId, articleId);
 		}
 		catch (Exception e) {
 			_log.error(e, e);

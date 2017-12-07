@@ -193,18 +193,18 @@ public interface KaleoInstanceTokenModel extends BaseModel<KaleoInstanceToken>,
 	public void setModifiedDate(Date modifiedDate);
 
 	/**
-	 * Returns the kaleo definition ID of this kaleo instance token.
+	 * Returns the kaleo definition version ID of this kaleo instance token.
 	 *
-	 * @return the kaleo definition ID of this kaleo instance token
+	 * @return the kaleo definition version ID of this kaleo instance token
 	 */
-	public long getKaleoDefinitionId();
+	public long getKaleoDefinitionVersionId();
 
 	/**
-	 * Sets the kaleo definition ID of this kaleo instance token.
+	 * Sets the kaleo definition version ID of this kaleo instance token.
 	 *
-	 * @param kaleoDefinitionId the kaleo definition ID of this kaleo instance token
+	 * @param kaleoDefinitionVersionId the kaleo definition version ID of this kaleo instance token
 	 */
-	public void setKaleoDefinitionId(long kaleoDefinitionId);
+	public void setKaleoDefinitionVersionId(long kaleoDefinitionVersionId);
 
 	/**
 	 * Returns the kaleo instance ID of this kaleo instance token.
@@ -279,16 +279,16 @@ public interface KaleoInstanceTokenModel extends BaseModel<KaleoInstanceToken>,
 	public void setClassName(String className);
 
 	/**
-	 * Returns the class p k of this kaleo instance token.
+	 * Returns the class pk of this kaleo instance token.
 	 *
-	 * @return the class p k of this kaleo instance token
+	 * @return the class pk of this kaleo instance token
 	 */
 	public long getClassPK();
 
 	/**
-	 * Sets the class p k of this kaleo instance token.
+	 * Sets the class pk of this kaleo instance token.
 	 *
-	 * @param classPK the class p k of this kaleo instance token
+	 * @param classPK the class pk of this kaleo instance token
 	 */
 	public void setClassPK(long classPK);
 

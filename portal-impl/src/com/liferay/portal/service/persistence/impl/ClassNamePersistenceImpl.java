@@ -33,7 +33,6 @@ import com.liferay.portal.kernel.service.persistence.ClassNamePersistence;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.impl.ClassNameImpl;
 import com.liferay.portal.model.impl.ClassNameModelImpl;
 
@@ -111,7 +110,7 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 			msg.append("value=");
 			msg.append(value);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -170,7 +169,7 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 			if (value == null) {
 				query.append(_FINDER_COLUMN_VALUE_VALUE_1);
 			}
-			else if (value.equals(StringPool.BLANK)) {
+			else if (value.equals("")) {
 				query.append(_FINDER_COLUMN_VALUE_VALUE_3);
 			}
 			else {
@@ -270,7 +269,7 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 			if (value == null) {
 				query.append(_FINDER_COLUMN_VALUE_VALUE_1);
 			}
-			else if (value.equals(StringPool.BLANK)) {
+			else if (value.equals("")) {
 				query.append(_FINDER_COLUMN_VALUE_VALUE_3);
 			}
 			else {
@@ -384,7 +383,7 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((ClassNameModelImpl)className);
+		clearUniqueFindersCache((ClassNameModelImpl)className, true);
 	}
 
 	@Override
@@ -396,43 +395,32 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 			entityCache.removeResult(ClassNameModelImpl.ENTITY_CACHE_ENABLED,
 				ClassNameImpl.class, className.getPrimaryKey());
 
-			clearUniqueFindersCache((ClassNameModelImpl)className);
+			clearUniqueFindersCache((ClassNameModelImpl)className, true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		ClassNameModelImpl classNameModelImpl, boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] { classNameModelImpl.getValue() };
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_VALUE, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_VALUE, args,
-				classNameModelImpl);
-		}
-		else {
-			if ((classNameModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_VALUE.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] { classNameModelImpl.getValue() };
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_VALUE, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_VALUE, args,
-					classNameModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(
 		ClassNameModelImpl classNameModelImpl) {
 		Object[] args = new Object[] { classNameModelImpl.getValue() };
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_VALUE, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_VALUE, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_VALUE, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_VALUE, args,
+			classNameModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		ClassNameModelImpl classNameModelImpl, boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] { classNameModelImpl.getValue() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_VALUE, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_VALUE, args);
+		}
 
 		if ((classNameModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_VALUE.getColumnBitmask()) != 0) {
-			args = new Object[] { classNameModelImpl.getOriginalValue() };
+			Object[] args = new Object[] { classNameModelImpl.getOriginalValue() };
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_VALUE, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_VALUE, args);
@@ -570,15 +558,21 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !ClassNameModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!ClassNameModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		entityCache.putResult(ClassNameModelImpl.ENTITY_CACHE_ENABLED,
 			ClassNameImpl.class, className.getPrimaryKey(), className, false);
 
-		clearUniqueFindersCache(classNameModelImpl);
-		cacheUniqueFindersCache(classNameModelImpl, isNew);
+		clearUniqueFindersCache(classNameModelImpl, false);
+		cacheUniqueFindersCache(classNameModelImpl);
 
 		className.resetOriginalValues();
 
@@ -751,14 +745,14 @@ public class ClassNamePersistenceImpl extends BasePersistenceImpl<ClassName>
 		query.append(_SQL_SELECT_CLASSNAME_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

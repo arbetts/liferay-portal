@@ -34,16 +34,22 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.persistence.CompanyProvider;
 import com.liferay.portal.kernel.service.persistence.CompanyProviderWrapper;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
 
+import java.lang.reflect.Field;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,7 +60,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * The persistence implementation for the d d m storage link service.
+ * The persistence implementation for the ddm storage link service.
  *
  * <p>
  * Caching information and settings can be found in <code>portal.properties</code>
@@ -71,7 +77,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link DDMStorageLinkUtil} to access the d d m storage link persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
+	 * Never modify or reference this class directly. Always use {@link DDMStorageLinkUtil} to access the ddm storage link persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static final String FINDER_CLASS_NAME_ENTITY = DDMStorageLinkImpl.class.getName();
 	public static final String FINDER_CLASS_NAME_LIST_WITH_PAGINATION = FINDER_CLASS_NAME_ENTITY +
@@ -111,10 +117,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 			new String[] { String.class.getName() });
 
 	/**
-	 * Returns all the d d m storage links where uuid = &#63;.
+	 * Returns all the ddm storage links where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
-	 * @return the matching d d m storage links
+	 * @return the matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByUuid(String uuid) {
@@ -122,16 +128,16 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns a range of all the d d m storage links where uuid = &#63;.
+	 * Returns a range of all the ddm storage links where uuid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param uuid the uuid
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
-	 * @return the range of matching d d m storage links
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @return the range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByUuid(String uuid, int start, int end) {
@@ -139,17 +145,17 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m storage links where uuid = &#63;.
+	 * Returns an ordered range of all the ddm storage links where uuid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param uuid the uuid
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m storage links
+	 * @return the ordered range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByUuid(String uuid, int start, int end,
@@ -158,18 +164,18 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m storage links where uuid = &#63;.
+	 * Returns an ordered range of all the ddm storage links where uuid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param uuid the uuid
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m storage links
+	 * @return the ordered range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByUuid(String uuid, int start, int end,
@@ -289,12 +295,12 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the first d d m storage link in the ordered set where uuid = &#63;.
+	 * Returns the first ddm storage link in the ordered set where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m storage link
-	 * @throws NoSuchStorageLinkException if a matching d d m storage link could not be found
+	 * @return the first matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink findByUuid_First(String uuid,
@@ -320,11 +326,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the first d d m storage link in the ordered set where uuid = &#63;.
+	 * Returns the first ddm storage link in the ordered set where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m storage link, or <code>null</code> if a matching d d m storage link could not be found
+	 * @return the first matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByUuid_First(String uuid,
@@ -339,12 +345,12 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the last d d m storage link in the ordered set where uuid = &#63;.
+	 * Returns the last ddm storage link in the ordered set where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m storage link
-	 * @throws NoSuchStorageLinkException if a matching d d m storage link could not be found
+	 * @return the last matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink findByUuid_Last(String uuid,
@@ -369,11 +375,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the last d d m storage link in the ordered set where uuid = &#63;.
+	 * Returns the last ddm storage link in the ordered set where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m storage link, or <code>null</code> if a matching d d m storage link could not be found
+	 * @return the last matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByUuid_Last(String uuid,
@@ -395,13 +401,13 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the d d m storage links before and after the current d d m storage link in the ordered set where uuid = &#63;.
+	 * Returns the ddm storage links before and after the current ddm storage link in the ordered set where uuid = &#63;.
 	 *
-	 * @param storageLinkId the primary key of the current d d m storage link
+	 * @param storageLinkId the primary key of the current ddm storage link
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m storage link
-	 * @throws NoSuchStorageLinkException if a d d m storage link with the primary key could not be found
+	 * @return the previous, current, and next ddm storage link
+	 * @throws NoSuchStorageLinkException if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink[] findByUuid_PrevAndNext(long storageLinkId,
@@ -555,7 +561,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Removes all the d d m storage links where uuid = &#63; from the database.
+	 * Removes all the ddm storage links where uuid = &#63; from the database.
 	 *
 	 * @param uuid the uuid
 	 */
@@ -568,10 +574,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the number of d d m storage links where uuid = &#63;.
+	 * Returns the number of ddm storage links where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
-	 * @return the number of matching d d m storage links
+	 * @return the number of matching ddm storage links
 	 */
 	@Override
 	public int countByUuid(String uuid) {
@@ -659,11 +665,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 			new String[] { String.class.getName(), Long.class.getName() });
 
 	/**
-	 * Returns all the d d m storage links where uuid = &#63; and companyId = &#63;.
+	 * Returns all the ddm storage links where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @return the matching d d m storage links
+	 * @return the matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByUuid_C(String uuid, long companyId) {
@@ -672,7 +678,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns a range of all the d d m storage links where uuid = &#63; and companyId = &#63;.
+	 * Returns a range of all the ddm storage links where uuid = &#63; and companyId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -680,9 +686,9 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
-	 * @return the range of matching d d m storage links
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @return the range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByUuid_C(String uuid, long companyId,
@@ -691,7 +697,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m storage links where uuid = &#63; and companyId = &#63;.
+	 * Returns an ordered range of all the ddm storage links where uuid = &#63; and companyId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -699,10 +705,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m storage links
+	 * @return the ordered range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByUuid_C(String uuid, long companyId,
@@ -711,7 +717,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m storage links where uuid = &#63; and companyId = &#63;.
+	 * Returns an ordered range of all the ddm storage links where uuid = &#63; and companyId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -719,11 +725,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m storage links
+	 * @return the ordered range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByUuid_C(String uuid, long companyId,
@@ -853,13 +859,13 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the first d d m storage link in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the first ddm storage link in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m storage link
-	 * @throws NoSuchStorageLinkException if a matching d d m storage link could not be found
+	 * @return the first matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink findByUuid_C_First(String uuid, long companyId,
@@ -888,12 +894,12 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the first d d m storage link in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the first ddm storage link in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m storage link, or <code>null</code> if a matching d d m storage link could not be found
+	 * @return the first matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByUuid_C_First(String uuid, long companyId,
@@ -909,13 +915,13 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the last d d m storage link in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the last ddm storage link in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m storage link
-	 * @throws NoSuchStorageLinkException if a matching d d m storage link could not be found
+	 * @return the last matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink findByUuid_C_Last(String uuid, long companyId,
@@ -944,12 +950,12 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the last d d m storage link in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the last ddm storage link in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m storage link, or <code>null</code> if a matching d d m storage link could not be found
+	 * @return the last matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByUuid_C_Last(String uuid, long companyId,
@@ -971,14 +977,14 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the d d m storage links before and after the current d d m storage link in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the ddm storage links before and after the current ddm storage link in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
-	 * @param storageLinkId the primary key of the current d d m storage link
+	 * @param storageLinkId the primary key of the current ddm storage link
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m storage link
-	 * @throws NoSuchStorageLinkException if a d d m storage link with the primary key could not be found
+	 * @return the previous, current, and next ddm storage link
+	 * @throws NoSuchStorageLinkException if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink[] findByUuid_C_PrevAndNext(long storageLinkId,
@@ -1137,7 +1143,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Removes all the d d m storage links where uuid = &#63; and companyId = &#63; from the database.
+	 * Removes all the ddm storage links where uuid = &#63; and companyId = &#63; from the database.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
@@ -1151,11 +1157,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the number of d d m storage links where uuid = &#63; and companyId = &#63;.
+	 * Returns the number of ddm storage links where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @return the number of matching d d m storage links
+	 * @return the number of matching ddm storage links
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
@@ -1235,11 +1241,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 			new String[] { Long.class.getName() });
 
 	/**
-	 * Returns the d d m storage link where classPK = &#63; or throws a {@link NoSuchStorageLinkException} if it could not be found.
+	 * Returns the ddm storage link where classPK = &#63; or throws a {@link NoSuchStorageLinkException} if it could not be found.
 	 *
-	 * @param classPK the class p k
-	 * @return the matching d d m storage link
-	 * @throws NoSuchStorageLinkException if a matching d d m storage link could not be found
+	 * @param classPK the class pk
+	 * @return the matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink findByClassPK(long classPK)
@@ -1267,10 +1273,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the d d m storage link where classPK = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 * Returns the ddm storage link where classPK = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
-	 * @param classPK the class p k
-	 * @return the matching d d m storage link, or <code>null</code> if a matching d d m storage link could not be found
+	 * @param classPK the class pk
+	 * @return the matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByClassPK(long classPK) {
@@ -1278,11 +1284,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the d d m storage link where classPK = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 * Returns the ddm storage link where classPK = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the matching d d m storage link, or <code>null</code> if a matching d d m storage link could not be found
+	 * @return the matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByClassPK(long classPK, boolean retrieveFromCache) {
@@ -1362,10 +1368,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Removes the d d m storage link where classPK = &#63; from the database.
+	 * Removes the ddm storage link where classPK = &#63; from the database.
 	 *
-	 * @param classPK the class p k
-	 * @return the d d m storage link that was removed
+	 * @param classPK the class pk
+	 * @return the ddm storage link that was removed
 	 */
 	@Override
 	public DDMStorageLink removeByClassPK(long classPK)
@@ -1376,10 +1382,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the number of d d m storage links where classPK = &#63;.
+	 * Returns the number of ddm storage links where classPK = &#63;.
 	 *
-	 * @param classPK the class p k
-	 * @return the number of matching d d m storage links
+	 * @param classPK the class pk
+	 * @return the number of matching ddm storage links
 	 */
 	@Override
 	public int countByClassPK(long classPK) {
@@ -1451,10 +1457,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 			new String[] { Long.class.getName() });
 
 	/**
-	 * Returns all the d d m storage links where structureId = &#63;.
+	 * Returns all the ddm storage links where structureId = &#63;.
 	 *
 	 * @param structureId the structure ID
-	 * @return the matching d d m storage links
+	 * @return the matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByStructureId(long structureId) {
@@ -1463,16 +1469,16 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns a range of all the d d m storage links where structureId = &#63;.
+	 * Returns a range of all the ddm storage links where structureId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param structureId the structure ID
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
-	 * @return the range of matching d d m storage links
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @return the range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByStructureId(long structureId, int start,
@@ -1481,17 +1487,17 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m storage links where structureId = &#63;.
+	 * Returns an ordered range of all the ddm storage links where structureId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param structureId the structure ID
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m storage links
+	 * @return the ordered range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByStructureId(long structureId, int start,
@@ -1501,18 +1507,18 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m storage links where structureId = &#63;.
+	 * Returns an ordered range of all the ddm storage links where structureId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param structureId the structure ID
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m storage links
+	 * @return the ordered range of matching ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findByStructureId(long structureId, int start,
@@ -1618,12 +1624,12 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the first d d m storage link in the ordered set where structureId = &#63;.
+	 * Returns the first ddm storage link in the ordered set where structureId = &#63;.
 	 *
 	 * @param structureId the structure ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m storage link
-	 * @throws NoSuchStorageLinkException if a matching d d m storage link could not be found
+	 * @return the first matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink findByStructureId_First(long structureId,
@@ -1649,11 +1655,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the first d d m storage link in the ordered set where structureId = &#63;.
+	 * Returns the first ddm storage link in the ordered set where structureId = &#63;.
 	 *
 	 * @param structureId the structure ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m storage link, or <code>null</code> if a matching d d m storage link could not be found
+	 * @return the first matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByStructureId_First(long structureId,
@@ -1669,12 +1675,12 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the last d d m storage link in the ordered set where structureId = &#63;.
+	 * Returns the last ddm storage link in the ordered set where structureId = &#63;.
 	 *
 	 * @param structureId the structure ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m storage link
-	 * @throws NoSuchStorageLinkException if a matching d d m storage link could not be found
+	 * @return the last matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink findByStructureId_Last(long structureId,
@@ -1700,11 +1706,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the last d d m storage link in the ordered set where structureId = &#63;.
+	 * Returns the last ddm storage link in the ordered set where structureId = &#63;.
 	 *
 	 * @param structureId the structure ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m storage link, or <code>null</code> if a matching d d m storage link could not be found
+	 * @return the last matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByStructureId_Last(long structureId,
@@ -1726,13 +1732,13 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the d d m storage links before and after the current d d m storage link in the ordered set where structureId = &#63;.
+	 * Returns the ddm storage links before and after the current ddm storage link in the ordered set where structureId = &#63;.
 	 *
-	 * @param storageLinkId the primary key of the current d d m storage link
+	 * @param storageLinkId the primary key of the current ddm storage link
 	 * @param structureId the structure ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m storage link
-	 * @throws NoSuchStorageLinkException if a d d m storage link with the primary key could not be found
+	 * @return the previous, current, and next ddm storage link
+	 * @throws NoSuchStorageLinkException if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink[] findByStructureId_PrevAndNext(long storageLinkId,
@@ -1872,7 +1878,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Removes all the d d m storage links where structureId = &#63; from the database.
+	 * Removes all the ddm storage links where structureId = &#63; from the database.
 	 *
 	 * @param structureId the structure ID
 	 */
@@ -1885,10 +1891,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the number of d d m storage links where structureId = &#63;.
+	 * Returns the number of ddm storage links where structureId = &#63;.
 	 *
 	 * @param structureId the structure ID
-	 * @return the number of matching d d m storage links
+	 * @return the number of matching ddm storage links
 	 */
 	@Override
 	public int countByStructureId(long structureId) {
@@ -1936,15 +1942,824 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	private static final String _FINDER_COLUMN_STRUCTUREID_STRUCTUREID_2 = "ddmStorageLink.structureId = ?";
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_STRUCTUREVERSIONID =
+		new FinderPath(DDMStorageLinkModelImpl.ENTITY_CACHE_ENABLED,
+			DDMStorageLinkModelImpl.FINDER_CACHE_ENABLED,
+			DDMStorageLinkImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findByStructureVersionId",
+			new String[] {
+				Long.class.getName(),
+				
+			Integer.class.getName(), Integer.class.getName(),
+				OrderByComparator.class.getName()
+			});
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_STRUCTUREVERSIONID =
+		new FinderPath(DDMStorageLinkModelImpl.ENTITY_CACHE_ENABLED,
+			DDMStorageLinkModelImpl.FINDER_CACHE_ENABLED,
+			DDMStorageLinkImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"findByStructureVersionId", new String[] { Long.class.getName() },
+			DDMStorageLinkModelImpl.STRUCTUREVERSIONID_COLUMN_BITMASK);
+	public static final FinderPath FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID = new FinderPath(DDMStorageLinkModelImpl.ENTITY_CACHE_ENABLED,
+			DDMStorageLinkModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countByStructureVersionId", new String[] { Long.class.getName() });
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_COUNT_BY_STRUCTUREVERSIONID =
+		new FinderPath(DDMStorageLinkModelImpl.ENTITY_CACHE_ENABLED,
+			DDMStorageLinkModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"countByStructureVersionId", new String[] { Long.class.getName() });
 
-	public DDMStorageLinkPersistenceImpl() {
-		setModelClass(DDMStorageLink.class);
+	/**
+	 * Returns all the ddm storage links where structureVersionId = &#63;.
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @return the matching ddm storage links
+	 */
+	@Override
+	public List<DDMStorageLink> findByStructureVersionId(
+		long structureVersionId) {
+		return findByStructureVersionId(structureVersionId, QueryUtil.ALL_POS,
+			QueryUtil.ALL_POS, null);
 	}
 
 	/**
-	 * Caches the d d m storage link in the entity cache if it is enabled.
+	 * Returns a range of all the ddm storage links where structureVersionId = &#63;.
 	 *
-	 * @param ddmStorageLink the d d m storage link
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @return the range of matching ddm storage links
+	 */
+	@Override
+	public List<DDMStorageLink> findByStructureVersionId(
+		long structureVersionId, int start, int end) {
+		return findByStructureVersionId(structureVersionId, start, end, null);
+	}
+
+	/**
+	 * Returns an ordered range of all the ddm storage links where structureVersionId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching ddm storage links
+	 */
+	@Override
+	public List<DDMStorageLink> findByStructureVersionId(
+		long structureVersionId, int start, int end,
+		OrderByComparator<DDMStorageLink> orderByComparator) {
+		return findByStructureVersionId(structureVersionId, start, end,
+			orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the ddm storage links where structureVersionId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching ddm storage links
+	 */
+	@Override
+	public List<DDMStorageLink> findByStructureVersionId(
+		long structureVersionId, int start, int end,
+		OrderByComparator<DDMStorageLink> orderByComparator,
+		boolean retrieveFromCache) {
+		boolean pagination = true;
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
+
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			pagination = false;
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_STRUCTUREVERSIONID;
+			finderArgs = new Object[] { structureVersionId };
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_STRUCTUREVERSIONID;
+			finderArgs = new Object[] {
+					structureVersionId,
+					
+					start, end, orderByComparator
+				};
+		}
+
+		List<DDMStorageLink> list = null;
+
+		if (retrieveFromCache) {
+			list = (List<DDMStorageLink>)finderCache.getResult(finderPath,
+					finderArgs, this);
+
+			if ((list != null) && !list.isEmpty()) {
+				for (DDMStorageLink ddmStorageLink : list) {
+					if ((structureVersionId != ddmStorageLink.getStructureVersionId())) {
+						list = null;
+
+						break;
+					}
+				}
+			}
+		}
+
+		if (list == null) {
+			StringBundler query = null;
+
+			if (orderByComparator != null) {
+				query = new StringBundler(3 +
+						(orderByComparator.getOrderByFields().length * 2));
+			}
+			else {
+				query = new StringBundler(3);
+			}
+
+			query.append(_SQL_SELECT_DDMSTORAGELINK_WHERE);
+
+			query.append(_FINDER_COLUMN_STRUCTUREVERSIONID_STRUCTUREVERSIONID_2);
+
+			if (orderByComparator != null) {
+				appendOrderByComparator(query, _ORDER_BY_ENTITY_ALIAS,
+					orderByComparator);
+			}
+			else
+			 if (pagination) {
+				query.append(DDMStorageLinkModelImpl.ORDER_BY_JPQL);
+			}
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				qPos.add(structureVersionId);
+
+				if (!pagination) {
+					list = (List<DDMStorageLink>)QueryUtil.list(q,
+							getDialect(), start, end, false);
+
+					Collections.sort(list);
+
+					list = Collections.unmodifiableList(list);
+				}
+				else {
+					list = (List<DDMStorageLink>)QueryUtil.list(q,
+							getDialect(), start, end);
+				}
+
+				cacheResult(list);
+
+				finderCache.putResult(finderPath, finderArgs, list);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * Returns the first ddm storage link in the ordered set where structureVersionId = &#63;.
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
+	 */
+	@Override
+	public DDMStorageLink findByStructureVersionId_First(
+		long structureVersionId,
+		OrderByComparator<DDMStorageLink> orderByComparator)
+		throws NoSuchStorageLinkException {
+		DDMStorageLink ddmStorageLink = fetchByStructureVersionId_First(structureVersionId,
+				orderByComparator);
+
+		if (ddmStorageLink != null) {
+			return ddmStorageLink;
+		}
+
+		StringBundler msg = new StringBundler(4);
+
+		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		msg.append("structureVersionId=");
+		msg.append(structureVersionId);
+
+		msg.append(StringPool.CLOSE_CURLY_BRACE);
+
+		throw new NoSuchStorageLinkException(msg.toString());
+	}
+
+	/**
+	 * Returns the first ddm storage link in the ordered set where structureVersionId = &#63;.
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
+	 */
+	@Override
+	public DDMStorageLink fetchByStructureVersionId_First(
+		long structureVersionId,
+		OrderByComparator<DDMStorageLink> orderByComparator) {
+		List<DDMStorageLink> list = findByStructureVersionId(structureVersionId,
+				0, 1, orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the last ddm storage link in the ordered set where structureVersionId = &#63;.
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching ddm storage link
+	 * @throws NoSuchStorageLinkException if a matching ddm storage link could not be found
+	 */
+	@Override
+	public DDMStorageLink findByStructureVersionId_Last(
+		long structureVersionId,
+		OrderByComparator<DDMStorageLink> orderByComparator)
+		throws NoSuchStorageLinkException {
+		DDMStorageLink ddmStorageLink = fetchByStructureVersionId_Last(structureVersionId,
+				orderByComparator);
+
+		if (ddmStorageLink != null) {
+			return ddmStorageLink;
+		}
+
+		StringBundler msg = new StringBundler(4);
+
+		msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		msg.append("structureVersionId=");
+		msg.append(structureVersionId);
+
+		msg.append(StringPool.CLOSE_CURLY_BRACE);
+
+		throw new NoSuchStorageLinkException(msg.toString());
+	}
+
+	/**
+	 * Returns the last ddm storage link in the ordered set where structureVersionId = &#63;.
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching ddm storage link, or <code>null</code> if a matching ddm storage link could not be found
+	 */
+	@Override
+	public DDMStorageLink fetchByStructureVersionId_Last(
+		long structureVersionId,
+		OrderByComparator<DDMStorageLink> orderByComparator) {
+		int count = countByStructureVersionId(structureVersionId);
+
+		if (count == 0) {
+			return null;
+		}
+
+		List<DDMStorageLink> list = findByStructureVersionId(structureVersionId,
+				count - 1, count, orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the ddm storage links before and after the current ddm storage link in the ordered set where structureVersionId = &#63;.
+	 *
+	 * @param storageLinkId the primary key of the current ddm storage link
+	 * @param structureVersionId the structure version ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next ddm storage link
+	 * @throws NoSuchStorageLinkException if a ddm storage link with the primary key could not be found
+	 */
+	@Override
+	public DDMStorageLink[] findByStructureVersionId_PrevAndNext(
+		long storageLinkId, long structureVersionId,
+		OrderByComparator<DDMStorageLink> orderByComparator)
+		throws NoSuchStorageLinkException {
+		DDMStorageLink ddmStorageLink = findByPrimaryKey(storageLinkId);
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			DDMStorageLink[] array = new DDMStorageLinkImpl[3];
+
+			array[0] = getByStructureVersionId_PrevAndNext(session,
+					ddmStorageLink, structureVersionId, orderByComparator, true);
+
+			array[1] = ddmStorageLink;
+
+			array[2] = getByStructureVersionId_PrevAndNext(session,
+					ddmStorageLink, structureVersionId, orderByComparator, false);
+
+			return array;
+		}
+		catch (Exception e) {
+			throw processException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
+
+	protected DDMStorageLink getByStructureVersionId_PrevAndNext(
+		Session session, DDMStorageLink ddmStorageLink,
+		long structureVersionId,
+		OrderByComparator<DDMStorageLink> orderByComparator, boolean previous) {
+		StringBundler query = null;
+
+		if (orderByComparator != null) {
+			query = new StringBundler(4 +
+					(orderByComparator.getOrderByConditionFields().length * 3) +
+					(orderByComparator.getOrderByFields().length * 3));
+		}
+		else {
+			query = new StringBundler(3);
+		}
+
+		query.append(_SQL_SELECT_DDMSTORAGELINK_WHERE);
+
+		query.append(_FINDER_COLUMN_STRUCTUREVERSIONID_STRUCTUREVERSIONID_2);
+
+		if (orderByComparator != null) {
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
+
+			if (orderByConditionFields.length > 0) {
+				query.append(WHERE_AND);
+			}
+
+			for (int i = 0; i < orderByConditionFields.length; i++) {
+				query.append(_ORDER_BY_ENTITY_ALIAS);
+				query.append(orderByConditionFields[i]);
+
+				if ((i + 1) < orderByConditionFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(WHERE_GREATER_THAN_HAS_NEXT);
+					}
+					else {
+						query.append(WHERE_LESSER_THAN_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(WHERE_GREATER_THAN);
+					}
+					else {
+						query.append(WHERE_LESSER_THAN);
+					}
+				}
+			}
+
+			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
+
+			for (int i = 0; i < orderByFields.length; i++) {
+				query.append(_ORDER_BY_ENTITY_ALIAS);
+				query.append(orderByFields[i]);
+
+				if ((i + 1) < orderByFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(ORDER_BY_ASC_HAS_NEXT);
+					}
+					else {
+						query.append(ORDER_BY_DESC_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						query.append(ORDER_BY_ASC);
+					}
+					else {
+						query.append(ORDER_BY_DESC);
+					}
+				}
+			}
+		}
+		else {
+			query.append(DDMStorageLinkModelImpl.ORDER_BY_JPQL);
+		}
+
+		String sql = query.toString();
+
+		Query q = session.createQuery(sql);
+
+		q.setFirstResult(0);
+		q.setMaxResults(2);
+
+		QueryPos qPos = QueryPos.getInstance(q);
+
+		qPos.add(structureVersionId);
+
+		if (orderByComparator != null) {
+			Object[] values = orderByComparator.getOrderByConditionValues(ddmStorageLink);
+
+			for (Object value : values) {
+				qPos.add(value);
+			}
+		}
+
+		List<DDMStorageLink> list = q.list();
+
+		if (list.size() == 2) {
+			return list.get(1);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns all the ddm storage links where structureVersionId = any &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param structureVersionIds the structure version IDs
+	 * @return the matching ddm storage links
+	 */
+	@Override
+	public List<DDMStorageLink> findByStructureVersionId(
+		long[] structureVersionIds) {
+		return findByStructureVersionId(structureVersionIds, QueryUtil.ALL_POS,
+			QueryUtil.ALL_POS, null);
+	}
+
+	/**
+	 * Returns a range of all the ddm storage links where structureVersionId = any &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param structureVersionIds the structure version IDs
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @return the range of matching ddm storage links
+	 */
+	@Override
+	public List<DDMStorageLink> findByStructureVersionId(
+		long[] structureVersionIds, int start, int end) {
+		return findByStructureVersionId(structureVersionIds, start, end, null);
+	}
+
+	/**
+	 * Returns an ordered range of all the ddm storage links where structureVersionId = any &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param structureVersionIds the structure version IDs
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching ddm storage links
+	 */
+	@Override
+	public List<DDMStorageLink> findByStructureVersionId(
+		long[] structureVersionIds, int start, int end,
+		OrderByComparator<DDMStorageLink> orderByComparator) {
+		return findByStructureVersionId(structureVersionIds, start, end,
+			orderByComparator, true);
+	}
+
+	/**
+	 * Returns an ordered range of all the ddm storage links where structureVersionId = &#63;, optionally using the finder cache.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching ddm storage links
+	 */
+	@Override
+	public List<DDMStorageLink> findByStructureVersionId(
+		long[] structureVersionIds, int start, int end,
+		OrderByComparator<DDMStorageLink> orderByComparator,
+		boolean retrieveFromCache) {
+		if (structureVersionIds == null) {
+			structureVersionIds = new long[0];
+		}
+		else if (structureVersionIds.length > 1) {
+			structureVersionIds = ArrayUtil.unique(structureVersionIds);
+
+			Arrays.sort(structureVersionIds);
+		}
+
+		if (structureVersionIds.length == 1) {
+			return findByStructureVersionId(structureVersionIds[0], start, end,
+				orderByComparator);
+		}
+
+		boolean pagination = true;
+		Object[] finderArgs = null;
+
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			pagination = false;
+			finderArgs = new Object[] { StringUtil.merge(structureVersionIds) };
+		}
+		else {
+			finderArgs = new Object[] {
+					StringUtil.merge(structureVersionIds),
+					
+					start, end, orderByComparator
+				};
+		}
+
+		List<DDMStorageLink> list = null;
+
+		if (retrieveFromCache) {
+			list = (List<DDMStorageLink>)finderCache.getResult(FINDER_PATH_WITH_PAGINATION_FIND_BY_STRUCTUREVERSIONID,
+					finderArgs, this);
+
+			if ((list != null) && !list.isEmpty()) {
+				for (DDMStorageLink ddmStorageLink : list) {
+					if (!ArrayUtil.contains(structureVersionIds,
+								ddmStorageLink.getStructureVersionId())) {
+						list = null;
+
+						break;
+					}
+				}
+			}
+		}
+
+		if (list == null) {
+			StringBundler query = new StringBundler();
+
+			query.append(_SQL_SELECT_DDMSTORAGELINK_WHERE);
+
+			if (structureVersionIds.length > 0) {
+				query.append(StringPool.OPEN_PARENTHESIS);
+
+				query.append(_FINDER_COLUMN_STRUCTUREVERSIONID_STRUCTUREVERSIONID_7);
+
+				query.append(StringUtil.merge(structureVersionIds));
+
+				query.append(StringPool.CLOSE_PARENTHESIS);
+
+				query.append(StringPool.CLOSE_PARENTHESIS);
+			}
+
+			query.setStringAt(removeConjunction(query.stringAt(query.index() -
+						1)), query.index() - 1);
+
+			if (orderByComparator != null) {
+				appendOrderByComparator(query, _ORDER_BY_ENTITY_ALIAS,
+					orderByComparator);
+			}
+			else
+			 if (pagination) {
+				query.append(DDMStorageLinkModelImpl.ORDER_BY_JPQL);
+			}
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				if (!pagination) {
+					list = (List<DDMStorageLink>)QueryUtil.list(q,
+							getDialect(), start, end, false);
+
+					Collections.sort(list);
+
+					list = Collections.unmodifiableList(list);
+				}
+				else {
+					list = (List<DDMStorageLink>)QueryUtil.list(q,
+							getDialect(), start, end);
+				}
+
+				cacheResult(list);
+
+				finderCache.putResult(FINDER_PATH_WITH_PAGINATION_FIND_BY_STRUCTUREVERSIONID,
+					finderArgs, list);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(FINDER_PATH_WITH_PAGINATION_FIND_BY_STRUCTUREVERSIONID,
+					finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * Removes all the ddm storage links where structureVersionId = &#63; from the database.
+	 *
+	 * @param structureVersionId the structure version ID
+	 */
+	@Override
+	public void removeByStructureVersionId(long structureVersionId) {
+		for (DDMStorageLink ddmStorageLink : findByStructureVersionId(
+				structureVersionId, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
+			remove(ddmStorageLink);
+		}
+	}
+
+	/**
+	 * Returns the number of ddm storage links where structureVersionId = &#63;.
+	 *
+	 * @param structureVersionId the structure version ID
+	 * @return the number of matching ddm storage links
+	 */
+	@Override
+	public int countByStructureVersionId(long structureVersionId) {
+		FinderPath finderPath = FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID;
+
+		Object[] finderArgs = new Object[] { structureVersionId };
+
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
+
+		if (count == null) {
+			StringBundler query = new StringBundler(2);
+
+			query.append(_SQL_COUNT_DDMSTORAGELINK_WHERE);
+
+			query.append(_FINDER_COLUMN_STRUCTUREVERSIONID_STRUCTUREVERSIONID_2);
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				qPos.add(structureVersionId);
+
+				count = (Long)q.uniqueResult();
+
+				finderCache.putResult(finderPath, finderArgs, count);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	/**
+	 * Returns the number of ddm storage links where structureVersionId = any &#63;.
+	 *
+	 * @param structureVersionIds the structure version IDs
+	 * @return the number of matching ddm storage links
+	 */
+	@Override
+	public int countByStructureVersionId(long[] structureVersionIds) {
+		if (structureVersionIds == null) {
+			structureVersionIds = new long[0];
+		}
+		else if (structureVersionIds.length > 1) {
+			structureVersionIds = ArrayUtil.unique(structureVersionIds);
+
+			Arrays.sort(structureVersionIds);
+		}
+
+		Object[] finderArgs = new Object[] { StringUtil.merge(structureVersionIds) };
+
+		Long count = (Long)finderCache.getResult(FINDER_PATH_WITH_PAGINATION_COUNT_BY_STRUCTUREVERSIONID,
+				finderArgs, this);
+
+		if (count == null) {
+			StringBundler query = new StringBundler();
+
+			query.append(_SQL_COUNT_DDMSTORAGELINK_WHERE);
+
+			if (structureVersionIds.length > 0) {
+				query.append(StringPool.OPEN_PARENTHESIS);
+
+				query.append(_FINDER_COLUMN_STRUCTUREVERSIONID_STRUCTUREVERSIONID_7);
+
+				query.append(StringUtil.merge(structureVersionIds));
+
+				query.append(StringPool.CLOSE_PARENTHESIS);
+
+				query.append(StringPool.CLOSE_PARENTHESIS);
+			}
+
+			query.setStringAt(removeConjunction(query.stringAt(query.index() -
+						1)), query.index() - 1);
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				count = (Long)q.uniqueResult();
+
+				finderCache.putResult(FINDER_PATH_WITH_PAGINATION_COUNT_BY_STRUCTUREVERSIONID,
+					finderArgs, count);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(FINDER_PATH_WITH_PAGINATION_COUNT_BY_STRUCTUREVERSIONID,
+					finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	private static final String _FINDER_COLUMN_STRUCTUREVERSIONID_STRUCTUREVERSIONID_2 =
+		"ddmStorageLink.structureVersionId = ?";
+	private static final String _FINDER_COLUMN_STRUCTUREVERSIONID_STRUCTUREVERSIONID_7 =
+		"ddmStorageLink.structureVersionId IN (";
+
+	public DDMStorageLinkPersistenceImpl() {
+		setModelClass(DDMStorageLink.class);
+
+		try {
+			Field field = ReflectionUtil.getDeclaredField(BasePersistenceImpl.class,
+					"_dbColumnNames");
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
+	}
+
+	/**
+	 * Caches the ddm storage link in the entity cache if it is enabled.
+	 *
+	 * @param ddmStorageLink the ddm storage link
 	 */
 	@Override
 	public void cacheResult(DDMStorageLink ddmStorageLink) {
@@ -1959,9 +2774,9 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Caches the d d m storage links in the entity cache if it is enabled.
+	 * Caches the ddm storage links in the entity cache if it is enabled.
 	 *
-	 * @param ddmStorageLinks the d d m storage links
+	 * @param ddmStorageLinks the ddm storage links
 	 */
 	@Override
 	public void cacheResult(List<DDMStorageLink> ddmStorageLinks) {
@@ -1978,7 +2793,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Clears the cache for all d d m storage links.
+	 * Clears the cache for all ddm storage links.
 	 *
 	 * <p>
 	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
@@ -1994,7 +2809,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Clears the cache for the d d m storage link.
+	 * Clears the cache for the ddm storage link.
 	 *
 	 * <p>
 	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
@@ -2008,7 +2823,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((DDMStorageLinkModelImpl)ddmStorageLink);
+		clearUniqueFindersCache((DDMStorageLinkModelImpl)ddmStorageLink, true);
 	}
 
 	@Override
@@ -2020,45 +2835,35 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 			entityCache.removeResult(DDMStorageLinkModelImpl.ENTITY_CACHE_ENABLED,
 				DDMStorageLinkImpl.class, ddmStorageLink.getPrimaryKey());
 
-			clearUniqueFindersCache((DDMStorageLinkModelImpl)ddmStorageLink);
+			clearUniqueFindersCache((DDMStorageLinkModelImpl)ddmStorageLink,
+				true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		DDMStorageLinkModelImpl ddmStorageLinkModelImpl, boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] { ddmStorageLinkModelImpl.getClassPK() };
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_CLASSPK, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_CLASSPK, args,
-				ddmStorageLinkModelImpl);
-		}
-		else {
-			if ((ddmStorageLinkModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_CLASSPK.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						ddmStorageLinkModelImpl.getClassPK()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_CLASSPK, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_CLASSPK, args,
-					ddmStorageLinkModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(
 		DDMStorageLinkModelImpl ddmStorageLinkModelImpl) {
 		Object[] args = new Object[] { ddmStorageLinkModelImpl.getClassPK() };
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_CLASSPK, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_CLASSPK, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_CLASSPK, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_CLASSPK, args,
+			ddmStorageLinkModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		DDMStorageLinkModelImpl ddmStorageLinkModelImpl, boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] { ddmStorageLinkModelImpl.getClassPK() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_CLASSPK, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_CLASSPK, args);
+		}
 
 		if ((ddmStorageLinkModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_CLASSPK.getColumnBitmask()) != 0) {
-			args = new Object[] { ddmStorageLinkModelImpl.getOriginalClassPK() };
+			Object[] args = new Object[] {
+					ddmStorageLinkModelImpl.getOriginalClassPK()
+				};
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_CLASSPK, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_CLASSPK, args);
@@ -2066,10 +2871,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Creates a new d d m storage link with the primary key. Does not add the d d m storage link to the database.
+	 * Creates a new ddm storage link with the primary key. Does not add the ddm storage link to the database.
 	 *
-	 * @param storageLinkId the primary key for the new d d m storage link
-	 * @return the new d d m storage link
+	 * @param storageLinkId the primary key for the new ddm storage link
+	 * @return the new ddm storage link
 	 */
 	@Override
 	public DDMStorageLink create(long storageLinkId) {
@@ -2088,11 +2893,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Removes the d d m storage link with the primary key from the database. Also notifies the appropriate model listeners.
+	 * Removes the ddm storage link with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
-	 * @param storageLinkId the primary key of the d d m storage link
-	 * @return the d d m storage link that was removed
-	 * @throws NoSuchStorageLinkException if a d d m storage link with the primary key could not be found
+	 * @param storageLinkId the primary key of the ddm storage link
+	 * @return the ddm storage link that was removed
+	 * @throws NoSuchStorageLinkException if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink remove(long storageLinkId)
@@ -2101,11 +2906,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Removes the d d m storage link with the primary key from the database. Also notifies the appropriate model listeners.
+	 * Removes the ddm storage link with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
-	 * @param primaryKey the primary key of the d d m storage link
-	 * @return the d d m storage link that was removed
-	 * @throws NoSuchStorageLinkException if a d d m storage link with the primary key could not be found
+	 * @param primaryKey the primary key of the ddm storage link
+	 * @return the ddm storage link that was removed
+	 * @throws NoSuchStorageLinkException if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink remove(Serializable primaryKey)
@@ -2209,8 +3014,42 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !DDMStorageLinkModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!DDMStorageLinkModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { ddmStorageLinkModelImpl.getUuid() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				args);
+
+			args = new Object[] {
+					ddmStorageLinkModelImpl.getUuid(),
+					ddmStorageLinkModelImpl.getCompanyId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				args);
+
+			args = new Object[] { ddmStorageLinkModelImpl.getStructureId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_STRUCTUREID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_STRUCTUREID,
+				args);
+
+			args = new Object[] { ddmStorageLinkModelImpl.getStructureVersionId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID,
+				args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_STRUCTUREVERSIONID,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -2268,14 +3107,35 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_STRUCTUREID,
 					args);
 			}
+
+			if ((ddmStorageLinkModelImpl.getColumnBitmask() &
+					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_STRUCTUREVERSIONID.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						ddmStorageLinkModelImpl.getOriginalStructureVersionId()
+					};
+
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID,
+					args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_STRUCTUREVERSIONID,
+					args);
+
+				args = new Object[] {
+						ddmStorageLinkModelImpl.getStructureVersionId()
+					};
+
+				finderCache.removeResult(FINDER_PATH_COUNT_BY_STRUCTUREVERSIONID,
+					args);
+				finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_STRUCTUREVERSIONID,
+					args);
+			}
 		}
 
 		entityCache.putResult(DDMStorageLinkModelImpl.ENTITY_CACHE_ENABLED,
 			DDMStorageLinkImpl.class, ddmStorageLink.getPrimaryKey(),
 			ddmStorageLink, false);
 
-		clearUniqueFindersCache(ddmStorageLinkModelImpl);
-		cacheUniqueFindersCache(ddmStorageLinkModelImpl, isNew);
+		clearUniqueFindersCache(ddmStorageLinkModelImpl, false);
+		cacheUniqueFindersCache(ddmStorageLinkModelImpl);
 
 		ddmStorageLink.resetOriginalValues();
 
@@ -2298,16 +3158,17 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 		ddmStorageLinkImpl.setClassNameId(ddmStorageLink.getClassNameId());
 		ddmStorageLinkImpl.setClassPK(ddmStorageLink.getClassPK());
 		ddmStorageLinkImpl.setStructureId(ddmStorageLink.getStructureId());
+		ddmStorageLinkImpl.setStructureVersionId(ddmStorageLink.getStructureVersionId());
 
 		return ddmStorageLinkImpl;
 	}
 
 	/**
-	 * Returns the d d m storage link with the primary key or throws a {@link com.liferay.portal.kernel.exception.NoSuchModelException} if it could not be found.
+	 * Returns the ddm storage link with the primary key or throws a {@link com.liferay.portal.kernel.exception.NoSuchModelException} if it could not be found.
 	 *
-	 * @param primaryKey the primary key of the d d m storage link
-	 * @return the d d m storage link
-	 * @throws NoSuchStorageLinkException if a d d m storage link with the primary key could not be found
+	 * @param primaryKey the primary key of the ddm storage link
+	 * @return the ddm storage link
+	 * @throws NoSuchStorageLinkException if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink findByPrimaryKey(Serializable primaryKey)
@@ -2327,11 +3188,11 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the d d m storage link with the primary key or throws a {@link NoSuchStorageLinkException} if it could not be found.
+	 * Returns the ddm storage link with the primary key or throws a {@link NoSuchStorageLinkException} if it could not be found.
 	 *
-	 * @param storageLinkId the primary key of the d d m storage link
-	 * @return the d d m storage link
-	 * @throws NoSuchStorageLinkException if a d d m storage link with the primary key could not be found
+	 * @param storageLinkId the primary key of the ddm storage link
+	 * @return the ddm storage link
+	 * @throws NoSuchStorageLinkException if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink findByPrimaryKey(long storageLinkId)
@@ -2340,10 +3201,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the d d m storage link with the primary key or returns <code>null</code> if it could not be found.
+	 * Returns the ddm storage link with the primary key or returns <code>null</code> if it could not be found.
 	 *
-	 * @param primaryKey the primary key of the d d m storage link
-	 * @return the d d m storage link, or <code>null</code> if a d d m storage link with the primary key could not be found
+	 * @param primaryKey the primary key of the ddm storage link
+	 * @return the ddm storage link, or <code>null</code> if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByPrimaryKey(Serializable primaryKey) {
@@ -2388,10 +3249,10 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the d d m storage link with the primary key or returns <code>null</code> if it could not be found.
+	 * Returns the ddm storage link with the primary key or returns <code>null</code> if it could not be found.
 	 *
-	 * @param storageLinkId the primary key of the d d m storage link
-	 * @return the d d m storage link, or <code>null</code> if a d d m storage link with the primary key could not be found
+	 * @param storageLinkId the primary key of the ddm storage link
+	 * @return the ddm storage link, or <code>null</code> if a ddm storage link with the primary key could not be found
 	 */
 	@Override
 	public DDMStorageLink fetchByPrimaryKey(long storageLinkId) {
@@ -2451,7 +3312,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 		query.append(_SQL_SELECT_DDMSTORAGELINK_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
 			query.append(StringPool.COMMA);
 		}
@@ -2493,9 +3354,9 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns all the d d m storage links.
+	 * Returns all the ddm storage links.
 	 *
-	 * @return the d d m storage links
+	 * @return the ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findAll() {
@@ -2503,15 +3364,15 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns a range of all the d d m storage links.
+	 * Returns a range of all the ddm storage links.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
-	 * @return the range of d d m storage links
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
+	 * @return the range of ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findAll(int start, int end) {
@@ -2519,16 +3380,16 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m storage links.
+	 * Returns an ordered range of all the ddm storage links.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of d d m storage links
+	 * @return the ordered range of ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findAll(int start, int end,
@@ -2537,17 +3398,17 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m storage links.
+	 * Returns an ordered range of all the ddm storage links.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMStorageLinkModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param start the lower bound of the range of d d m storage links
-	 * @param end the upper bound of the range of d d m storage links (not inclusive)
+	 * @param start the lower bound of the range of ddm storage links
+	 * @param end the upper bound of the range of ddm storage links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of d d m storage links
+	 * @return the ordered range of ddm storage links
 	 */
 	@Override
 	public List<DDMStorageLink> findAll(int start, int end,
@@ -2636,7 +3497,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Removes all the d d m storage links from the database.
+	 * Removes all the ddm storage links from the database.
 	 *
 	 */
 	@Override
@@ -2647,9 +3508,9 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Returns the number of d d m storage links.
+	 * Returns the number of ddm storage links.
 	 *
-	 * @return the number of d d m storage links
+	 * @return the number of ddm storage links
 	 */
 	@Override
 	public int countAll() {
@@ -2694,7 +3555,7 @@ public class DDMStorageLinkPersistenceImpl extends BasePersistenceImpl<DDMStorag
 	}
 
 	/**
-	 * Initializes the d d m storage link persistence.
+	 * Initializes the ddm storage link persistence.
 	 */
 	public void afterPropertiesSet() {
 	}

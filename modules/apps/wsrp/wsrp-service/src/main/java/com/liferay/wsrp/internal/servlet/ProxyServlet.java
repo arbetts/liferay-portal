@@ -18,14 +18,14 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
-import com.liferay.portal.kernel.util.CharPool;
-import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.wsrp.configuration.WSRPGroupServiceConfiguration;
 import com.liferay.wsrp.util.WSRPConfigurationUtil;
+import com.liferay.wsrp.util.WSRPURLUtil;
 import com.liferay.wsrp.util.WebKeys;
 
 import java.io.IOException;
@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 
 /**
@@ -70,10 +71,10 @@ public class ProxyServlet extends HttpServlet {
 		throws IOException {
 
 		try {
-			String url = ParamUtil.getString(request, "url");
+			URL url = getAllowedURL(request);
 
-			if (isAllowedURL(url)) {
-				proxyURL(request, response, new URL(url));
+			if (url != null) {
+				proxyURL(request, response, url);
 			}
 		}
 		catch (Exception e) {
@@ -84,30 +85,44 @@ public class ProxyServlet extends HttpServlet {
 		}
 	}
 
-	protected boolean isAllowedURL(String url) throws Exception {
+	protected URL getAllowedURL(HttpServletRequest request) throws Exception {
+		long companyId = _portal.getCompanyId(request);
+		String urlString = ParamUtil.getString(request, "url");
+
+		String expectedWSRPAuth = _wsrpUrlUtil.encodeWSRPAuth(
+			companyId, urlString);
+
+		String actualWSRPAuth = ParamUtil.getString(request, WebKeys.WSRP_AUTH);
+
+		if (!expectedWSRPAuth.equals(actualWSRPAuth)) {
+			return null;
+		}
+
+		URL url = new URL(urlString);
+
+		String protocol = url.getProtocol();
+
+		if (!protocol.equals(Http.HTTP) && !protocol.equals(Http.HTTPS)) {
+			return null;
+		}
+
 		WSRPGroupServiceConfiguration wsrpGroupServiceConfiguration =
-			WSRPConfigurationUtil.getWSRPConfiguration();
+			_wsrpConfigurationUtil.getWSRPConfiguration();
 
 		String[] allowedIps =
 			wsrpGroupServiceConfiguration.proxyUrlIpsAllowed();
 
 		if (allowedIps.length == 0) {
-			return true;
+			return url;
 		}
 
-		String domain = HttpUtil.getDomain(url);
-
-		int pos = domain.indexOf(CharPool.COLON);
-
-		if (pos != -1) {
-			domain = domain.substring(0, pos);
-		}
+		String domain = url.getHost();
 
 		InetAddress inetAddress = InetAddress.getByName(domain);
 
 		String hostAddress = inetAddress.getHostAddress();
 
-		Set<String> computerAddresses = PortalUtil.getComputerAddresses();
+		Set<String> computerAddresses = _portal.getComputerAddresses();
 
 		boolean serverIpIsHostAddress = computerAddresses.contains(hostAddress);
 
@@ -115,11 +130,11 @@ public class ProxyServlet extends HttpServlet {
 			if ((serverIpIsHostAddress && ip.equals("SERVER_IP")) ||
 				ip.equals(hostAddress)) {
 
-				return true;
+				return url;
 			}
 		}
 
-		return false;
+		return null;
 	}
 
 	protected void proxyURL(
@@ -199,5 +214,17 @@ public class ProxyServlet extends HttpServlet {
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(ProxyServlet.class);
+
+	@Reference
+	private Http _http;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private WSRPConfigurationUtil _wsrpConfigurationUtil;
+
+	@Reference
+	private WSRPURLUtil _wsrpUrlUtil;
 
 }

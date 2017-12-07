@@ -15,10 +15,12 @@
 package com.liferay.document.library.verify.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryMetadata;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
 import com.liferay.document.library.kernel.model.DLFileVersion;
+import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
@@ -42,9 +44,6 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileShortcut;
 import com.liferay.portal.kernel.repository.model.Folder;
-import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
-import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
@@ -58,15 +57,13 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.security.permission.SimplePermissionChecker;
 import com.liferay.portal.test.randomizerbumpers.TikaSafeRandomizerBumper;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerTestRule;
 import com.liferay.portal.verify.VerifyProcess;
 import com.liferay.portal.verify.test.BaseVerifyProcessTestCase;
-import com.liferay.registry.Filter;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
-import com.liferay.registry.ServiceTracker;
+import com.liferay.portlet.documentlibrary.util.test.DLTestUtil;
 
 import java.io.ByteArrayInputStream;
 
@@ -76,10 +73,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -99,41 +94,15 @@ public class DLServiceVerifyProcessTest extends BaseVerifyProcessTestCase {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
+			PermissionCheckerTestRule.INSTANCE,
 			SynchronousDestinationTestRule.INSTANCE);
-
-	@BeforeClass
-	public static void setUpClass() {
-		Registry registry = RegistryUtil.getRegistry();
-
-		Filter filter = registry.getFilter(
-			"(&(objectClass=" + VerifyProcess.class.getName() +
-				")(verify.process.name=com.liferay.document.library.service))");
-
-		_serviceTracker = registry.trackServices(filter);
-
-		_serviceTracker.open();
-	}
 
 	@Before
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 
-		setUpDDMFormXSDDeserializer();
-		setUpPermissionThreadLocal();
-		setUpPrincipalThreadLocal();
-
 		_group = GroupTestUtil.addGroup();
-	}
-
-	@After
-	@Override
-	public void tearDown() throws Exception {
-		super.tearDown();
-
-		PermissionThreadLocal.setPermissionChecker(_originalPermissionChecker);
-
-		PrincipalThreadLocal.setName(_originalName);
 	}
 
 	@Test
@@ -263,6 +232,32 @@ public class DLServiceVerifyProcessTest extends BaseVerifyProcessTestCase {
 	}
 
 	@Test
+	public void testDLFileEntryWithNoAssetEntryGetsAssetEntryAdded()
+		throws Exception {
+
+		DLFileEntry dlFileEntry = addDLFileEntry();
+
+		long fileEntryId = dlFileEntry.getFileEntryId();
+
+		AssetEntryLocalServiceUtil.deleteEntry(
+			DLFileEntry.class.getName(), fileEntryId);
+
+		Assert.assertNotNull(
+			DLFileEntryLocalServiceUtil.fetchDLFileEntry(fileEntryId));
+		Assert.assertNull(
+			AssetEntryLocalServiceUtil.fetchEntry(
+				DLFileEntry.class.getName(), fileEntryId));
+
+		doVerify();
+
+		Assert.assertNotNull(
+			DLFileEntryLocalServiceUtil.fetchDLFileEntry(fileEntryId));
+		Assert.assertNotNull(
+			AssetEntryLocalServiceUtil.fetchEntry(
+				DLFileEntry.class.getName(), fileEntryId));
+	}
+
+	@Test
 	public void testDLFileShortcutTreePathWithDLFileShortcutInTrash()
 		throws Exception {
 
@@ -374,6 +369,30 @@ public class DLServiceVerifyProcessTest extends BaseVerifyProcessTestCase {
 		doVerify();
 	}
 
+	@Test
+	public void testDLFolderWithNoAssetEntryGetsAssetEntryAdded()
+		throws Exception {
+
+		DLFolder dlFolder = DLTestUtil.addDLFolder(_group.getGroupId());
+
+		long folderId = dlFolder.getFolderId();
+
+		AssetEntryLocalServiceUtil.deleteEntry(
+			DLFolder.class.getName(), folderId);
+
+		Assert.assertNotNull(DLFolderLocalServiceUtil.fetchDLFolder(folderId));
+		Assert.assertNull(
+			AssetEntryLocalServiceUtil.fetchEntry(
+				DLFolder.class.getName(), folderId));
+
+		doVerify();
+
+		Assert.assertNotNull(DLFolderLocalServiceUtil.fetchDLFolder(folderId));
+		Assert.assertNotNull(
+			AssetEntryLocalServiceUtil.fetchEntry(
+				DLFolder.class.getName(), folderId));
+	}
+
 	protected DLFileEntry addDLFileEntry() throws Exception {
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
@@ -471,60 +490,19 @@ public class DLServiceVerifyProcessTest extends BaseVerifyProcessTestCase {
 
 	@Override
 	protected VerifyProcess getVerifyProcess() {
-		return _serviceTracker.getService();
+		return _verifyProcess;
 	}
 
-	protected void setUpDDMFormXSDDeserializer() {
-		Registry registry = RegistryUtil.getRegistry();
+	@Inject
+	private static DDMFormXSDDeserializer _ddmFormXSDDeserializer;
 
-		_ddmFormXSDDeserializer = registry.getService(
-			DDMFormXSDDeserializer.class);
-	}
-
-	protected void setUpPermissionThreadLocal() throws Exception {
-		_originalPermissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
-		PermissionThreadLocal.setPermissionChecker(
-			new SimplePermissionChecker() {
-
-				{
-					init(TestPropsValues.getUser());
-				}
-
-				@Override
-				public boolean hasOwnerPermission(
-					long companyId, String name, String primKey, long ownerId,
-					String actionId) {
-
-					return true;
-				}
-
-				@Override
-				public boolean hasPermission(
-					long groupId, String name, String primKey,
-					String actionId) {
-
-					return true;
-				}
-
-			});
-	}
-
-	protected void setUpPrincipalThreadLocal() throws Exception {
-		_originalName = PrincipalThreadLocal.getName();
-
-		PrincipalThreadLocal.setName(TestPropsValues.getUserId());
-	}
-
-	private static ServiceTracker<VerifyProcess, VerifyProcess> _serviceTracker;
-
-	private DDMFormXSDDeserializer _ddmFormXSDDeserializer;
+	@Inject(
+		filter = "verify.process.name=com.liferay.document.library.service",
+		type = VerifyProcess.class
+	)
+	private static VerifyProcess _verifyProcess;
 
 	@DeleteAfterTestRun
 	private Group _group;
-
-	private String _originalName;
-	private PermissionChecker _originalPermissionChecker;
 
 }

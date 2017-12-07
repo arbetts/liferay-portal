@@ -19,11 +19,13 @@ import com.liferay.dynamic.data.mapping.form.renderer.DDMFormRenderer;
 import com.liferay.dynamic.data.mapping.form.renderer.DDMFormRenderingContext;
 import com.liferay.dynamic.data.mapping.form.renderer.DDMFormRenderingException;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
+import com.liferay.dynamic.data.mapping.model.DDMFormLayout;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
+import com.liferay.dynamic.data.mapping.util.DDMFormLayoutFactory;
+import com.liferay.dynamic.data.mapping.util.DDMUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -57,7 +59,8 @@ public class DDMFormRendererHelper {
 			DDMForm ddmForm = getDDMForm();
 
 			return _ddmFormRenderer.render(
-				ddmForm, createDDMFormRenderingContext(ddmForm));
+				ddmForm, getDDMFormLayout(ddmForm),
+				createDDMFormRenderingContext(ddmForm));
 		}
 		catch (DDMFormRenderingException ddmfre) {
 			_log.error("Unable to render DDM Form ", ddmfre);
@@ -91,15 +94,33 @@ public class DDMFormRendererHelper {
 			_resourceBundleLoaderProvider.getResourceBundleLoader(
 				bundleSymbolicName);
 
+		Locale locale = getLocale();
+
 		ResourceBundle resourceBundle = resourceBundleLoader.loadResourceBundle(
-			LocaleUtil.toLanguageId(getLocale()));
+			locale);
 
 		ConfigurationModelToDDMFormConverter
 			configurationModelToDDMFormConverter =
 				new ConfigurationModelToDDMFormConverter(
-					_configurationModel, getLocale(), resourceBundle);
+					_configurationModel, locale, resourceBundle);
 
 		return configurationModelToDDMFormConverter.getDDMForm();
+	}
+
+	protected DDMFormLayout getDDMFormLayout(DDMForm ddmForm) {
+		Class<?> formClass =
+			ConfigurationDDMFormDeclarationUtil.getConfigurationDDMFormClass(
+				_configurationModel);
+
+		if (formClass != null) {
+			try {
+				return DDMFormLayoutFactory.create(formClass);
+			}
+			catch (IllegalArgumentException iae) {
+			}
+		}
+
+		return DDMUtil.getDefaultDDMFormLayout(ddmForm);
 	}
 
 	protected DDMFormValues getDDMFormValues(DDMForm ddmForm) {
@@ -109,13 +130,15 @@ public class DDMFormRendererHelper {
 			_resourceBundleLoaderProvider.getResourceBundleLoader(
 				bundleSymbolicName);
 
+		Locale locale = getLocale();
+
 		ResourceBundle resourceBundle = resourceBundleLoader.loadResourceBundle(
-			LocaleUtil.toLanguageId(getLocale()));
+			locale);
 
 		ConfigurationModelToDDMFormValuesConverter
 			configurationModelToDDMFormValuesConverter =
 				new ConfigurationModelToDDMFormValuesConverter(
-					_configurationModel, ddmForm, getLocale(), resourceBundle);
+					_configurationModel, ddmForm, locale, resourceBundle);
 
 		return configurationModelToDDMFormValuesConverter.getDDMFormValues();
 	}

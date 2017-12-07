@@ -28,9 +28,9 @@ String ticketKey = ParamUtil.getString(request, "ticketKey");
 if (referer.startsWith(themeDisplay.getPathMain() + "/portal/update_password") && Validator.isNotNull(ticketKey)) {
 	referer = themeDisplay.getPathMain();
 }
-
-PasswordPolicy passwordPolicy = user.getPasswordPolicy();
 %>
+
+<%@ include file="/html/portal/select_language.jspf" %>
 
 <c:choose>
 	<c:when test="<%= !themeDisplay.isSignedIn() && (ticket == null) %>">
@@ -44,7 +44,7 @@ PasswordPolicy passwordPolicy = user.getPasswordPolicy();
 			portletURL.setWindowState(WindowState.MAXIMIZED);
 			%>
 
-			<div>
+			<div class="reset-link-contaner">
 				<aui:a href="<%= portletURL.toString() %>" label="request-a-new-password-reset-link"></aui:a>
 			</div>
 		</div>

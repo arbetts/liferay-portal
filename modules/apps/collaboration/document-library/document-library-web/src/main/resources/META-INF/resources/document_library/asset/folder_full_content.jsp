@@ -37,7 +37,7 @@ Folder folder = (Folder)request.getAttribute(WebKeys.DOCUMENT_LIBRARY_FOLDER);
 		<aui:col cssClass="lfr-asset-column lfr-asset-column-details" width="<%= 100 %>">
 			<c:if test="<%= Validator.isNotNull(folder.getDescription()) %>">
 				<div class="lfr-asset-description">
-					<%= HtmlUtil.escape(folder.getDescription()) %>
+					<%= HtmlUtil.replaceNewLine(HtmlUtil.escape(folder.getDescription())) %>
 				</div>
 			</c:if>
 
@@ -67,14 +67,14 @@ Folder folder = (Folder)request.getAttribute(WebKeys.DOCUMENT_LIBRARY_FOLDER);
 				</div>
 			</div>
 
-			<liferay-ui:custom-attributes-available className="<%= DLFolderConstants.getClassName() %>">
-				<liferay-ui:custom-attribute-list
+			<liferay-expando:custom-attributes-available className="<%= DLFolderConstants.getClassName() %>">
+				<liferay-expando:custom-attribute-list
 					className="<%= DLFolderConstants.getClassName() %>"
 					classPK="<%= (folder != null) ? folder.getFolderId() : 0 %>"
 					editable="<%= false %>"
 					label="<%= true %>"
 				/>
-			</liferay-ui:custom-attributes-available>
+			</liferay-expando:custom-attributes-available>
 		</aui:col>
 	</aui:row>
 </c:if>

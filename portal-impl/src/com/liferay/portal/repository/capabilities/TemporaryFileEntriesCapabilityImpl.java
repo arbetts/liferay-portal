@@ -48,8 +48,11 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author Iván Zaera
+ * @author     Iván Zaera
+ * @deprecated As of 7.0.0, replaced by {@link
+ *             com.liferay.document.library.internal.capabilities.TemporaryFileEntriesCapabilityImpl}
  */
+@Deprecated
 public class TemporaryFileEntriesCapabilityImpl
 	implements TemporaryFileEntriesCapability {
 

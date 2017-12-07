@@ -34,11 +34,10 @@ import com.liferay.portal.kernel.model.Team;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.roles.admin.constants.RolesAdminPortletKeys;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +68,11 @@ public class RolesAdminPortletDataHandler extends BasePortletDataHandler {
 		return SCHEMA_VERSION;
 	}
 
+	@Override
+	public boolean isSupportsDataStrategyCopyAsNew() {
+		return false;
+	}
+
 	@Activate
 	protected void activate() {
 		setDataLevel(DataLevel.PORTAL);
@@ -81,7 +85,6 @@ public class RolesAdminPortletDataHandler extends BasePortletDataHandler {
 						NAMESPACE, "system-roles", true, false)
 				},
 				Role.class.getName(), StagedModelType.REFERRER_CLASS_NAME_ALL));
-		setSupportsDataStrategyCopyAsNew(false);
 	}
 
 	@Override
@@ -177,7 +180,7 @@ public class RolesAdminPortletDataHandler extends BasePortletDataHandler {
 					portletDataContext.addDateRangeCriteria(
 						dynamicQuery, "modifiedDate");
 
-					long classNameId = PortalUtil.getClassNameId(Team.class);
+					long classNameId = _portal.getClassNameId(Team.class);
 
 					Property classNameIdProperty = PropertyFactoryUtil.forName(
 						"classNameId");
@@ -227,13 +230,16 @@ public class RolesAdminPortletDataHandler extends BasePortletDataHandler {
 
 	@Reference(unbind = "-")
 	protected void setPortal(Portal portal) {
-		_allSystemRoleNames.addAll(
-			Arrays.asList(portal.getSystemOrganizationRoles()));
-		_allSystemRoleNames.addAll(Arrays.asList(portal.getSystemRoles()));
-		_allSystemRoleNames.addAll(Arrays.asList(portal.getSystemSiteRoles()));
+		Collections.addAll(
+			_allSystemRoleNames, portal.getSystemOrganizationRoles());
+		Collections.addAll(_allSystemRoleNames, portal.getSystemRoles());
+		Collections.addAll(_allSystemRoleNames, portal.getSystemSiteRoles());
 	}
 
 	private final Set<String> _allSystemRoleNames = new HashSet<>();
+
+	@Reference
+	private Portal _portal;
 
 	@Reference
 	private RoleLocalService _roleLocalService;

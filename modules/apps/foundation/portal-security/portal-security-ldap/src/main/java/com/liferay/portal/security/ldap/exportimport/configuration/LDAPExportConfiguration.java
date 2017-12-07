@@ -29,22 +29,23 @@ import com.liferay.portal.security.ldap.configuration.CompanyScopedConfiguration
 @Meta.OCD(
 	factory = true,
 	id = "com.liferay.portal.security.ldap.exportimport.configuration.LDAPExportConfiguration",
-	localization = "content/Language", name = "ldap.export.configuration.name"
+	localization = "content/Language", name = "ldap-export-configuration-name"
 )
 public interface LDAPExportConfiguration extends CompanyScopedConfiguration {
 
-	@Meta.AD(deflt = "0", required = false)
+	@Meta.AD(deflt = "0", name = "company-id", required = false)
 	@Override
 	public long companyId();
 
 	@Meta.AD(
-		deflt = "false", description = "export-enabled-help", required = false
+		deflt = "false", description = "export-enabled-help",
+		name = "export-enabled", required = false
 	)
 	public boolean exportEnabled();
 
 	@Meta.AD(
 		deflt = "true", description = "export-group-enabled-help",
-		required = false
+		name = "export-group-enabled", required = false
 	)
 	public boolean exportGroupEnabled();
 

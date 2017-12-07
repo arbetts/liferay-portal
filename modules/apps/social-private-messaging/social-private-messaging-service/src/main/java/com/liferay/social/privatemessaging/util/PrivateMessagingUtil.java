@@ -17,6 +17,7 @@ package com.liferay.social.privatemessaging.util;
 import com.liferay.message.boards.kernel.model.MBMessage;
 import com.liferay.message.boards.kernel.service.MBMessageLocalServiceUtil;
 import com.liferay.message.boards.kernel.util.comparator.MessageCreateDateComparator;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchRoleException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -39,7 +40,6 @@ import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
@@ -125,7 +125,9 @@ public class PrivateMessagingUtil {
 
 		Indexer<?> indexer = IndexerRegistryUtil.nullSafeGetIndexer(User.class);
 
-		if (indexer.isIndexerEnabled() && _USERS_SEARCH_WITH_INDEX) {
+		if (indexer.isIndexerEnabled() && _USERS_SEARCH_WITH_INDEX &&
+			type.equals("all")) {
+
 			Sort sort = SortFactoryUtil.getSort(User.class, "firstName", "asc");
 
 			BaseModelSearchResult<User> baseModelSearchResult =

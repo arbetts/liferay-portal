@@ -21,6 +21,8 @@ import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.PortalCacheListener;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Serializable;
 
@@ -50,6 +52,10 @@ public class PortalCacheCacheEventListener<K extends Serializable, V>
 		}
 
 		_requireSerialization = requireSerialization;
+
+		_log = LogFactoryUtil.getLog(
+			PortalCacheCacheEventListener.class.getName() + StringPool.PERIOD +
+				portalCache.getPortalCacheName());
 	}
 
 	@Override
@@ -77,6 +83,13 @@ public class PortalCacheCacheEventListener<K extends Serializable, V>
 
 	@Override
 	public void notifyElementEvicted(Ehcache ehcache, Element element) {
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				StringBundler.concat(
+					"Evicted ", String.valueOf(getKey(element)), " from ",
+					ehcache.getName()));
+		}
+
 		if (_aggregatedPortalCacheListener.isEmpty()) {
 			return;
 		}
@@ -87,14 +100,17 @@ public class PortalCacheCacheEventListener<K extends Serializable, V>
 
 		_aggregatedPortalCacheListener.notifyEntryEvicted(
 			_portalCache, key, value, timeToLive);
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Evicted " + key + " from " + ehcache.getName());
-		}
 	}
 
 	@Override
 	public void notifyElementExpired(Ehcache ehcache, Element element) {
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				StringBundler.concat(
+					"Expired ", String.valueOf(getKey(element)), " from ",
+					ehcache.getName()));
+		}
+
 		if (_aggregatedPortalCacheListener.isEmpty()) {
 			return;
 		}
@@ -105,15 +121,18 @@ public class PortalCacheCacheEventListener<K extends Serializable, V>
 
 		_aggregatedPortalCacheListener.notifyEntryExpired(
 			_portalCache, key, value, timeToLive);
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Expired " + key + " from " + ehcache.getName());
-		}
 	}
 
 	@Override
 	public void notifyElementPut(Ehcache ehcache, Element element)
 		throws CacheException {
+
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				StringBundler.concat(
+					"Put ", String.valueOf(getKey(element)), " into ",
+					ehcache.getName()));
+		}
 
 		if (_aggregatedPortalCacheListener.isEmpty()) {
 			return;
@@ -125,15 +144,18 @@ public class PortalCacheCacheEventListener<K extends Serializable, V>
 
 		_aggregatedPortalCacheListener.notifyEntryPut(
 			_portalCache, key, value, timeToLive);
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Inserted " + key + " into " + ehcache.getName());
-		}
 	}
 
 	@Override
 	public void notifyElementRemoved(Ehcache ehcache, Element element)
 		throws CacheException {
+
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				StringBundler.concat(
+					"Removed ", String.valueOf(getKey(element)), " from ",
+					ehcache.getName()));
+		}
 
 		if (_aggregatedPortalCacheListener.isEmpty()) {
 			return;
@@ -145,15 +167,18 @@ public class PortalCacheCacheEventListener<K extends Serializable, V>
 
 		_aggregatedPortalCacheListener.notifyEntryRemoved(
 			_portalCache, key, value, timeToLive);
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Removed " + key + " from " + ehcache.getName());
-		}
 	}
 
 	@Override
 	public void notifyElementUpdated(Ehcache ehcache, Element element)
 		throws CacheException {
+
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				StringBundler.concat(
+					"Updated ", String.valueOf(getKey(element)), " in ",
+					ehcache.getName()));
+		}
 
 		if (_aggregatedPortalCacheListener.isEmpty()) {
 			return;
@@ -165,23 +190,19 @@ public class PortalCacheCacheEventListener<K extends Serializable, V>
 
 		_aggregatedPortalCacheListener.notifyEntryUpdated(
 			_portalCache, key, value, timeToLive);
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Updated " + key + " in " + ehcache.getName());
-		}
 	}
 
 	@Override
 	public void notifyRemoveAll(Ehcache ehcache) {
+		if (_log.isDebugEnabled()) {
+			_log.debug("Cleared " + ehcache.getName());
+		}
+
 		if (_aggregatedPortalCacheListener.isEmpty()) {
 			return;
 		}
 
 		_aggregatedPortalCacheListener.notifyRemoveAll(_portalCache);
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Cleared " + ehcache.getName());
-		}
 	}
 
 	protected K getKey(Element element) {
@@ -200,11 +221,9 @@ public class PortalCacheCacheEventListener<K extends Serializable, V>
 		return (V)element.getObjectValue();
 	}
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		PortalCacheCacheEventListener.class);
-
 	private final AggregatedPortalCacheListener<K, V>
 		_aggregatedPortalCacheListener;
+	private final Log _log;
 	private final PortalCache<K, V> _portalCache;
 	private final boolean _requireSerialization;
 

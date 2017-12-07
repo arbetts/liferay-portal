@@ -14,7 +14,9 @@
 
 package com.liferay.frontend.theme.contributor.extender.internal;
 
+import com.liferay.osgi.felix.util.AbstractExtender;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.IOException;
@@ -28,7 +30,6 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.felix.utils.log.Logger;
 
@@ -49,22 +50,21 @@ public class ThemeContributorExtender extends AbstractExtender {
 
 	@Activate
 	protected void activate(BundleContext bundleContext) throws Exception {
-		_bundleContext = bundleContext;
 		_logger = new Logger(bundleContext);
 
 		start(bundleContext);
 	}
 
 	@Deactivate
-	protected void deactivate() throws Exception {
-		stop(_bundleContext);
-
-		_bundleContext = null;
+	protected void deactivate(BundleContext bundleContext) throws Exception {
+		stop(bundleContext);
 	}
 
 	@Override
 	protected void debug(Bundle bundle, String s) {
-		_logger.log(Logger.LOG_DEBUG, "[" + bundle + "] " + s);
+		_logger.log(
+			Logger.LOG_DEBUG,
+			StringBundler.concat("[", String.valueOf(bundle), "] ", s));
 	}
 
 	@Override
@@ -98,7 +98,9 @@ public class ThemeContributorExtender extends AbstractExtender {
 
 	@Override
 	protected void warn(Bundle bundle, String s, Throwable t) {
-		_logger.log(Logger.LOG_WARNING, "[" + bundle + "] " + s, t);
+		_logger.log(
+			Logger.LOG_WARNING,
+			StringBundler.concat("[", String.valueOf(bundle), "] ", s), t);
 	}
 
 	private String _getProperty(
@@ -117,10 +119,10 @@ public class ThemeContributorExtender extends AbstractExtender {
 
 					JSONTokener jsonTokener = new JSONTokener(reader);
 
-					JSONObject packageJsonObject = new JSONObject(jsonTokener);
+					JSONObject packageJSONObject = new JSONObject(jsonTokener);
 
 					JSONObject liferayThemeJSONObject =
-						packageJsonObject.optJSONObject("liferayTheme");
+						packageJSONObject.optJSONObject("liferayTheme");
 
 					if (liferayThemeJSONObject != null) {
 						type = liferayThemeJSONObject.getString(jsonName);
@@ -181,7 +183,6 @@ public class ThemeContributorExtender extends AbstractExtender {
 		}
 	}
 
-	private BundleContext _bundleContext;
 	private Logger _logger;
 
 }

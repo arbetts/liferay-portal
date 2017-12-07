@@ -24,13 +24,12 @@ import com.liferay.exportimport.kernel.exception.LARFileNameException;
 import com.liferay.exportimport.kernel.exception.LARFileSizeException;
 import com.liferay.exportimport.kernel.exception.LARTypeException;
 import com.liferay.exportimport.kernel.lar.ExportImportHelper;
-import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
 import com.liferay.exportimport.kernel.lar.MissingReference;
 import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.kernel.service.ExportImportService;
-import com.liferay.exportimport.kernel.staging.StagingUtil;
+import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.portal.kernel.exception.LocaleException;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.PortletIdException;
@@ -49,8 +48,7 @@ import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -103,7 +101,7 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 		if (Validator.isNull(cmd)) {
 			SessionMessages.add(
 				actionRequest,
-				PortalUtil.getPortletId(actionRequest) +
+				_portal.getPortletId(actionRequest) +
 					SessionMessages.KEY_SUFFIX_FORCE_SEND_REDIRECT);
 
 			hideDefaultSuccessMessage(actionRequest);
@@ -150,7 +148,7 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 
 				SessionMessages.add(
 					actionRequest,
-					PortalUtil.getPortletId(actionRequest) +
+					_portal.getPortletId(actionRequest) +
 						SessionMessages.KEY_SUFFIX_CLOSE_REFRESH_PORTLET,
 					portlet.getPortletId());
 
@@ -170,15 +168,15 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 					e);
 			}
 			else {
-				if ((e instanceof LARFileException) ||
-					(e instanceof LARFileNameException) ||
-					(e instanceof LARFileSizeException) ||
-					(e instanceof LARTypeException) ||
-					(e instanceof LocaleException) ||
-					(e instanceof NoSuchLayoutException) ||
-					(e instanceof PortletIdException) ||
-					(e instanceof PrincipalException) ||
-					(e instanceof StructureDuplicateStructureKeyException)) {
+				if (e instanceof LARFileException ||
+					e instanceof LARFileNameException ||
+					e instanceof LARFileSizeException ||
+					e instanceof LARTypeException ||
+					e instanceof LocaleException ||
+					e instanceof NoSuchLayoutException ||
+					e instanceof PortletIdException ||
+					e instanceof PrincipalException ||
+					e instanceof StructureDuplicateStructureKeyException) {
 
 					SessionErrors.add(actionRequest, e.getClass());
 				}
@@ -274,22 +272,16 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
 
-		FileEntry fileEntry = ExportImportHelperUtil.getTempFileEntry(
+		FileEntry fileEntry = _exportImportHelper.getTempFileEntry(
 			groupId, themeDisplay.getUserId(), folderName);
 
-		InputStream inputStream = null;
-
-		try {
-			inputStream = _dlFileEntryLocalService.getFileAsStream(
-				fileEntry.getFileEntryId(), fileEntry.getVersion(), false);
+		try (InputStream inputStream = _dlFileEntryLocalService.getFileAsStream(
+				fileEntry.getFileEntryId(), fileEntry.getVersion(), false)) {
 
 			importData(actionRequest, inputStream);
 
 			_importLayoutsMVCActionCommand.deleteTempFileEntry(
 				groupId, folderName);
-		}
-		finally {
-			StreamUtil.cleanUp(inputStream);
 		}
 	}
 
@@ -333,14 +325,11 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
 
-		FileEntry fileEntry = ExportImportHelperUtil.getTempFileEntry(
+		FileEntry fileEntry = _exportImportHelper.getTempFileEntry(
 			groupId, themeDisplay.getUserId(), folderName);
 
-		InputStream inputStream = null;
-
-		try {
-			inputStream = _dlFileEntryLocalService.getFileAsStream(
-				fileEntry.getFileEntryId(), fileEntry.getVersion(), false);
+		try (InputStream inputStream = _dlFileEntryLocalService.getFileAsStream(
+				fileEntry.getFileEntryId(), fileEntry.getVersion(), false)) {
 
 			MissingReferences missingReferences = validateFile(
 				actionRequest, inputStream);
@@ -359,15 +348,12 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 
 				jsonObject.put(
 					"warningMessages",
-					StagingUtil.getWarningMessagesJSONArray(
+					_staging.getWarningMessagesJSONArray(
 						themeDisplay.getLocale(), weakMissingReferences));
 			}
 
 			JSONPortletResponseUtil.writeJSON(
 				actionRequest, actionResponse, jsonObject);
-		}
-		finally {
-			StreamUtil.cleanUp(inputStream);
 		}
 	}
 
@@ -407,7 +393,17 @@ public class ExportImportMVCActionCommand extends BaseMVCActionCommand {
 	private DLFileEntryLocalService _dlFileEntryLocalService;
 	private ExportImportConfigurationLocalService
 		_exportImportConfigurationLocalService;
+
+	@Reference
+	private ExportImportHelper _exportImportHelper;
+
 	private ExportImportService _exportImportService;
 	private ImportLayoutsMVCActionCommand _importLayoutsMVCActionCommand;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private Staging _staging;
 
 }

@@ -44,8 +44,7 @@ String viewCalendarBookingURL = ParamUtil.getString(request, "viewCalendarBookin
 
 	var showMoreStrings = {
 		close: '<liferay-ui:message key="close" />',
-		more: '<%= StringUtil.toLowerCase(LanguageUtil.get(request, "more")) %>',
-		show: '<liferay-ui:message key="show" />'
+		showMore: '<liferay-ui:message key="show-x-more" />'
 	};
 
 	<c:if test="<%= !hideDayView %>">
@@ -161,6 +160,19 @@ String viewCalendarBookingURL = ParamUtil.getString(request, "viewCalendarBookin
 			calendarContainer: calendarContainer,
 
 			<%
+			java.util.Calendar nowJCalendar = CalendarFactoryUtil.getCalendar(userTimeZone);
+
+			int nowYear = nowJCalendar.get(java.util.Calendar.YEAR);
+			int nowMonth = nowJCalendar.get(java.util.Calendar.MONTH);
+			int nowDay = nowJCalendar.get(java.util.Calendar.DAY_OF_MONTH);
+			int nowHour = nowJCalendar.get(java.util.Calendar.HOUR_OF_DAY);
+			int nowMinute = nowJCalendar.get(java.util.Calendar.MINUTE);
+			%>
+
+			currentTime: new Date(<%= nowYear %>, <%= nowMonth %>, <%= nowDay %>, <%= nowHour %>, <%= nowMinute %>),
+			currentTimeFn: A.bind(remoteServices.getCurrentTime, remoteServices),
+
+			<%
 			java.util.Calendar dateJCalendar = CalendarFactoryUtil.getCalendar(userTimeZone);
 
 			dateJCalendar.setTimeInMillis(date);
@@ -170,17 +182,18 @@ String viewCalendarBookingURL = ParamUtil.getString(request, "viewCalendarBookin
 			int dateDay = dateJCalendar.get(java.util.Calendar.DAY_OF_MONTH);
 			%>
 
-			currentTimeFn: A.bind(remoteServices.getCurrentTime, remoteServices),
 			date: new Date(<%= dateYear %>, <%= dateMonth %>, <%= dateDay %>),
 
-			<c:if test="<%= !themeDisplay.isSignedIn() %>">
+			<c:if test="<%= !themeDisplay.isSignedIn() || ((defaultCalendar != null) && !CalendarPermission.contains(themeDisplay.getPermissionChecker(), defaultCalendar, CalendarActionKeys.MANAGE_BOOKINGS)) %>">
 				disabled: true,
 			</c:if>
 
 			eventRecorder: window.<portlet:namespace />eventRecorder,
+			eventsPerPage: <%= eventsPerPage %>,
 			filterCalendarBookings: window['<%= HtmlUtil.escapeJS(filterCalendarBookings) %>'],
 			firstDayOfWeek: <%= weekStartsOn %>,
 			items: A.Object.values(calendarContainer.get('availableCalendars')),
+			maxDaysDisplayed: <%= maxDaysDisplayed %>,
 			portletNamespace: '<portlet:namespace />',
 			preventPersistence: <%= preventPersistence %>,
 			remoteServices: remoteServices,

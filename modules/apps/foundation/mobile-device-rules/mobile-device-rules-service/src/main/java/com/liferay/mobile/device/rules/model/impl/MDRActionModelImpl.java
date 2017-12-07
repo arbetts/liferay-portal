@@ -40,7 +40,6 @@ import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
@@ -76,7 +75,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a m d r action model instance should use the {@link MDRAction} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a mdr action model instance should use the {@link MDRAction} interface instead.
 	 */
 	public static final String TABLE_NAME = "MDRAction";
 	public static final Object[][] TABLE_COLUMNS = {
@@ -359,7 +358,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 	@Override
 	public String getUuid() {
 		if (_uuid == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _uuid;
@@ -455,7 +454,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 			return user.getUuid();
 		}
 		catch (PortalException pe) {
-			return StringPool.BLANK;
+			return "";
 		}
 	}
 
@@ -467,7 +466,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 	@Override
 	public String getUserName() {
 		if (_userName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _userName;
@@ -510,7 +509,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 	@Override
 	public String getClassName() {
 		if (getClassNameId() <= 0) {
-			return StringPool.BLANK;
+			return "";
 		}
 
 		return PortalUtil.getClassName(getClassNameId());
@@ -576,7 +575,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 	@Override
 	public String getName() {
 		if (_name == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _name;
@@ -675,7 +674,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 	@Override
 	public String getDescription() {
 		if (_description == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _description;
@@ -778,7 +777,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 	@Override
 	public String getType() {
 		if (_type == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _type;
@@ -794,7 +793,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 	@Override
 	public String getTypeSettings() {
 		if (_typeSettings == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _typeSettings;
@@ -874,7 +873,7 @@ public class MDRActionModelImpl extends BaseModelImpl<MDRAction>
 		String xml = getName();
 
 		if (xml == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 
 		Locale defaultLocale = LocaleUtil.getSiteDefault();

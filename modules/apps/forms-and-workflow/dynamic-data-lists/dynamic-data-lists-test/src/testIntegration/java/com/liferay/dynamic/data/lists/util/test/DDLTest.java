@@ -21,6 +21,7 @@ import com.liferay.dynamic.data.lists.model.DDLRecord;
 import com.liferay.dynamic.data.lists.model.DDLRecordSet;
 import com.liferay.dynamic.data.lists.util.DDL;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
+import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.storage.DDMFormFieldValue;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
@@ -31,12 +32,10 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.registry.Registry;
-import com.liferay.registry.RegistryUtil;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,13 +51,6 @@ public class DDLTest {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
 		new LiferayIntegrationTestRule();
-
-	@Before
-	public void setUp() {
-		Registry registry = RegistryUtil.getRegistry();
-
-		_ddl = registry.getService(DDL.class);
-	}
 
 	@Test
 	public void testGetDDLRecordAsJSONObject() throws Exception {
@@ -93,6 +85,52 @@ public class DDLTest {
 			StringPool.BLANK, jsonObject.getString("TextField1"));
 	}
 
-	private DDL _ddl;
+	@Test
+	public void testGetDDLRecordAsJSONObjectWithRepeatableField()
+		throws Exception {
+
+		DDMForm ddmForm = DDMFormTestUtil.createDDMForm();
+
+		DDMFormField ddmFormField = DDMFormTestUtil.createTextDDMFormField(
+			"TextField1", false, true, false);
+
+		ddmForm.addDDMFormField(ddmFormField);
+
+		DDMFormValues ddmFormValues = DDMFormValuesTestUtil.createDDMFormValues(
+			ddmForm);
+
+		DDMFormFieldValue ddmFormFieldValue0 =
+			DDMFormValuesTestUtil.createUnlocalizedDDMFormFieldValue(
+				"TextField1", "Text0");
+
+		ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue0);
+
+		DDMFormFieldValue ddmFormFieldValue1 =
+			DDMFormValuesTestUtil.createUnlocalizedDDMFormFieldValue(
+				"TextField1", "Text1");
+
+		ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue1);
+
+		Group group = GroupTestUtil.addGroup();
+
+		DDLRecordSetTestHelper recordSetTestHelper = new DDLRecordSetTestHelper(
+			group);
+
+		DDLRecordSet recordSet = recordSetTestHelper.addRecordSet(ddmForm);
+
+		DDLRecordTestHelper recordTestHelper = new DDLRecordTestHelper(
+			group, recordSet);
+
+		DDLRecord record = recordTestHelper.addRecord(
+			ddmFormValues, WorkflowConstants.ACTION_PUBLISH);
+
+		JSONObject jsonObject = _ddl.getRecordJSONObject(
+			record, false, ddmForm.getDefaultLocale());
+
+		Assert.assertEquals("Text0, Text1", jsonObject.getString("TextField1"));
+	}
+
+	@Inject
+	private static DDL _ddl;
 
 }

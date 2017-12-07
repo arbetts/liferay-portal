@@ -105,7 +105,7 @@ public class ${entity.name}Util {
 	}
 
 	<#list methods as method>
-		<#if !method.isConstructor() && method.isPublic() && serviceBuilder.isCustomMethod(method) && !serviceBuilder.isBasePersistenceMethod(method)>
+		<#if method.isPublic() && serviceBuilder.isCustomMethod(method) && !serviceBuilder.isBasePersistenceMethod(method)>
 			${serviceBuilder.getJavadocComment(method)}
 
 			<#if serviceBuilder.hasAnnotation(method, "Deprecated")>
@@ -129,7 +129,7 @@ public class ${entity.name}Util {
 					throws
 				</#if>
 
-				${exception.value}
+				${exception.fullyQualifiedName}
 
 				<#if exception_has_next>
 					,
@@ -137,7 +137,7 @@ public class ${entity.name}Util {
 			</#list>
 
 			{
-				<#if method.returns.value != "void">
+				<#if !stringUtil.equals(method.returns.value, "void")>
 					return
 				</#if>
 
@@ -161,8 +161,8 @@ public class ${entity.name}Util {
 			return _serviceTracker.getService();
 		<#else>
 			if (_persistence == null) {
-				<#if pluginName != "">
-					_persistence = (${entity.name}Persistence)PortletBeanLocatorUtil.locate(${apiPackagePath}.service.ClpSerializer.getServletContextName(), ${entity.name}Persistence.class.getName());
+				<#if validator.isNotNull(pluginName)>
+					_persistence = (${entity.name}Persistence)PortletBeanLocatorUtil.locate(${apiPackagePath}.service.ServletContextUtil.getServletContextName(), ${entity.name}Persistence.class.getName());
 				<#else>
 					_persistence = (${entity.name}Persistence)PortalBeanLocatorUtil.locate(${entity.name}Persistence.class.getName());
 				</#if>

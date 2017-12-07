@@ -25,13 +25,13 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.recent.documents.web.configuration.RecentDocumentsConfiguration",
 	localization = "content/Language",
-	name = "recent.documents.configuration.name"
+	name = "recent-documents-configuration-name"
 )
 public interface RecentDocumentsConfiguration {
 
 	@Meta.AD(
 		deflt = "1", description = "check-file-ranks-interval-help",
-		required = false
+		name = "check-file-ranks-interval", required = false
 	)
 	public int checkFileRanksInterval();
 

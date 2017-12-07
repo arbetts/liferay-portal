@@ -140,7 +140,7 @@ public class ReplicasClusterListenerTest {
 
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
 
-			Assert.assertEquals(1, logRecords.size());
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
 
 			LogRecord logRecord = logRecords.get(0);
 
@@ -194,9 +194,8 @@ public class ReplicasClusterListenerTest {
 		);
 	}
 
-	private static final String[] _INDICES = new String[] {
-		RandomTestUtil.randomString(), RandomTestUtil.randomString()
-	};
+	private static final String[] _INDICES =
+		{RandomTestUtil.randomString(), RandomTestUtil.randomString()};
 
 	private static final int _REPLICAS = RandomTestUtil.randomInt() - 1;
 

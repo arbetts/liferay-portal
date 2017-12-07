@@ -19,7 +19,7 @@ import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.model.DLFileVersion;
 import com.liferay.document.library.kernel.model.DLFolder;
-import com.liferay.document.library.kernel.service.DLFileVersionLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileVersionLocalService;
 import com.liferay.petra.io.delta.ByteChannelReader;
 import com.liferay.petra.io.delta.ByteChannelWriter;
 import com.liferay.petra.io.delta.DeltaUtil;
@@ -36,7 +36,7 @@ import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.security.SecureRandom;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
-import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.ClassUtil;
@@ -46,7 +46,6 @@ import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PwdGenerator;
-import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -60,7 +59,7 @@ import com.liferay.sync.constants.SyncPermissionsConstants;
 import com.liferay.sync.model.SyncDLObject;
 import com.liferay.sync.model.SyncDevice;
 import com.liferay.sync.model.impl.SyncDLObjectImpl;
-import com.liferay.sync.service.SyncDLObjectLocalServiceUtil;
+import com.liferay.sync.service.SyncDLObjectLocalService;
 import com.liferay.sync.service.configuration.SyncServiceConfigurationKeys;
 import com.liferay.sync.service.configuration.SyncServiceConfigurationValues;
 
@@ -98,10 +97,22 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Dennis Ju
  */
+@Component(immediate = true, service = SyncUtil.class)
 public class SyncUtil {
+
+	public static void addChecksum(
+		long modifiedTime, long typePK, String checksum) {
+
+		String id = modifiedTime + StringPool.PERIOD + typePK;
+
+		_checksums.put(id, checksum);
+	}
 
 	public static void addSyncDLObject(SyncDLObject syncDLObject)
 		throws PortalException {
@@ -111,7 +122,7 @@ public class SyncUtil {
 		if (event.equals(SyncDLObjectConstants.EVENT_DELETE) ||
 			event.equals(SyncDLObjectConstants.EVENT_TRASH)) {
 
-			SyncDLObjectLocalServiceUtil.addSyncDLObject(
+			_syncDLObjectLocalService.addSyncDLObject(
 				0, syncDLObject.getUserId(), syncDLObject.getUserName(),
 				syncDLObject.getModifiedTime(), 0, 0,
 				syncDLObject.getTreePath(), StringPool.BLANK, StringPool.BLANK,
@@ -122,7 +133,7 @@ public class SyncUtil {
 				StringPool.BLANK);
 		}
 		else {
-			SyncDLObjectLocalServiceUtil.addSyncDLObject(
+			_syncDLObjectLocalService.addSyncDLObject(
 				syncDLObject.getCompanyId(), syncDLObject.getUserId(),
 				syncDLObject.getUserName(), syncDLObject.getModifiedTime(),
 				syncDLObject.getRepositoryId(),
@@ -216,7 +227,7 @@ public class SyncUtil {
 			return;
 		}
 
-		Group group = GroupLocalServiceUtil.fetchGroup(groupId);
+		Group group = _groupLocalService.fetchGroup(groupId);
 
 		if ((group == null) || !isSyncEnabled(group)) {
 			throw new SyncSiteUnavailableException();
@@ -279,9 +290,7 @@ public class SyncUtil {
 		portletPreferences.store();
 	}
 
-	public static String getChecksum(DLFileVersion dlFileVersion)
-		throws PortalException {
-
+	public static String getChecksum(DLFileVersion dlFileVersion) {
 		if (dlFileVersion.getSize() >
 				SyncServiceConfigurationValues.
 					SYNC_FILE_CHECKSUM_THRESHOLD_SIZE) {
@@ -289,11 +298,16 @@ public class SyncUtil {
 			return StringPool.BLANK;
 		}
 
-		return DigesterUtil.digestBase64(
-			Digester.SHA_1, dlFileVersion.getContentStream(false));
+		try {
+			return DigesterUtil.digestBase64(
+				Digester.SHA_1, dlFileVersion.getContentStream(false));
+		}
+		catch (Exception e) {
+			return StringPool.BLANK;
+		}
 	}
 
-	public static String getChecksum(File file) throws PortalException {
+	public static String getChecksum(File file) {
 		if (file.length() >
 				SyncServiceConfigurationValues.
 					SYNC_FILE_CHECKSUM_THRESHOLD_SIZE) {
@@ -301,19 +315,18 @@ public class SyncUtil {
 			return StringPool.BLANK;
 		}
 
-		FileInputStream fileInputStream = null;
-
-		try {
-			fileInputStream = new FileInputStream(file);
-
+		try (FileInputStream fileInputStream = new FileInputStream(file)) {
 			return DigesterUtil.digestBase64(Digester.SHA_1, fileInputStream);
 		}
 		catch (Exception e) {
-			throw new PortalException(e);
+			return StringPool.BLANK;
 		}
-		finally {
-			StreamUtil.cleanUp(fileInputStream);
-		}
+	}
+
+	public static String getChecksum(long modifiedTime, long typePK) {
+		String id = modifiedTime + StringPool.PERIOD + typePK;
+
+		return _checksums.remove(id);
 	}
 
 	public static File getFileDelta(File sourceFile, File targetFile)
@@ -321,21 +334,15 @@ public class SyncUtil {
 
 		File deltaFile = null;
 
-		FileInputStream sourceFileInputStream = null;
-		FileChannel sourceFileChannel = null;
 		File checksumsFile = FileUtil.createTempFile();
-		OutputStream checksumsOutputStream = null;
-		WritableByteChannel checksumsWritableByteChannel = null;
 
-		try {
-			sourceFileInputStream = new FileInputStream(sourceFile);
-
-			sourceFileChannel = sourceFileInputStream.getChannel();
-
-			checksumsOutputStream = new FileOutputStream(checksumsFile);
-
-			checksumsWritableByteChannel = Channels.newChannel(
-				checksumsOutputStream);
+		try (FileInputStream sourceFileInputStream = new FileInputStream(
+				sourceFile);
+			FileChannel sourceFileChannel = sourceFileInputStream.getChannel();
+			OutputStream checksumsOutputStream = new FileOutputStream(
+				checksumsFile);
+			WritableByteChannel checksumsWritableByteChannel =
+				Channels.newChannel(checksumsOutputStream)) {
 
 			ByteChannelWriter checksumsByteChannelWriter =
 				new ByteChannelWriter(checksumsWritableByteChannel);
@@ -347,39 +354,23 @@ public class SyncUtil {
 		catch (Exception e) {
 			throw new PortalException(e);
 		}
-		finally {
-			StreamUtil.cleanUp(sourceFileInputStream);
-			StreamUtil.cleanUp(sourceFileChannel);
-			StreamUtil.cleanUp(checksumsOutputStream);
-			StreamUtil.cleanUp(checksumsWritableByteChannel);
-		}
 
-		FileInputStream targetFileInputStream = null;
-		ReadableByteChannel targetReadableByteChannel = null;
-		InputStream checksumsInputStream = null;
-		ReadableByteChannel checksumsReadableByteChannel = null;
-		OutputStream deltaOutputStream = null;
-		WritableByteChannel deltaOutputStreamWritableByteChannel = null;
+		deltaFile = FileUtil.createTempFile();
 
-		try {
-			targetFileInputStream = new FileInputStream(targetFile);
-
-			targetReadableByteChannel = targetFileInputStream.getChannel();
-
-			checksumsInputStream = new FileInputStream(checksumsFile);
-
-			checksumsReadableByteChannel = Channels.newChannel(
-				checksumsInputStream);
+		try (FileInputStream targetFileInputStream = new FileInputStream(
+				targetFile);
+			ReadableByteChannel targetReadableByteChannel =
+				targetFileInputStream.getChannel();
+			InputStream checksumsInputStream = new FileInputStream(
+				checksumsFile);
+			ReadableByteChannel checksumsReadableByteChannel =
+				Channels.newChannel(checksumsInputStream);
+			OutputStream deltaOutputStream = new FileOutputStream(deltaFile);
+			WritableByteChannel deltaOutputStreamWritableByteChannel =
+				Channels.newChannel(deltaOutputStream);) {
 
 			ByteChannelReader checksumsByteChannelReader =
 				new ByteChannelReader(checksumsReadableByteChannel);
-
-			deltaFile = FileUtil.createTempFile();
-
-			deltaOutputStream = new FileOutputStream(deltaFile);
-
-			deltaOutputStreamWritableByteChannel = Channels.newChannel(
-				deltaOutputStream);
 
 			ByteChannelWriter deltaByteChannelWriter = new ByteChannelWriter(
 				deltaOutputStreamWritableByteChannel);
@@ -394,13 +385,6 @@ public class SyncUtil {
 			throw new PortalException(e);
 		}
 		finally {
-			StreamUtil.cleanUp(targetFileInputStream);
-			StreamUtil.cleanUp(targetReadableByteChannel);
-			StreamUtil.cleanUp(checksumsInputStream);
-			StreamUtil.cleanUp(checksumsReadableByteChannel);
-			StreamUtil.cleanUp(deltaOutputStream);
-			StreamUtil.cleanUp(deltaOutputStreamWritableByteChannel);
-
 			FileUtil.delete(checksumsFile);
 		}
 
@@ -464,25 +448,17 @@ public class SyncUtil {
 			File originalFile, File deltaFile, File patchedFile)
 		throws PortalException {
 
-		FileInputStream originalFileInputStream = null;
-		FileChannel originalFileChannel = null;
-		FileOutputStream patchedFileOutputStream = null;
-		WritableByteChannel patchedWritableByteChannel = null;
-		ReadableByteChannel deltaReadableByteChannel = null;
-
-		try {
-			originalFileInputStream = new FileInputStream(originalFile);
-
-			originalFileChannel = originalFileInputStream.getChannel();
-
-			patchedFileOutputStream = new FileOutputStream(patchedFile);
-
-			patchedWritableByteChannel = Channels.newChannel(
-				patchedFileOutputStream);
-
+		try (FileInputStream originalFileInputStream = new FileInputStream(
+				originalFile);
+			FileChannel originalFileChannel =
+				originalFileInputStream.getChannel();
+			FileOutputStream patchedFileOutputStream = new FileOutputStream(
+				patchedFile);
+			WritableByteChannel patchedWritableByteChannel =
+				Channels.newChannel(patchedFileOutputStream);
 			FileInputStream deltaInputStream = new FileInputStream(deltaFile);
-
-			deltaReadableByteChannel = Channels.newChannel(deltaInputStream);
+			ReadableByteChannel deltaReadableByteChannel =
+				Channels.newChannel(deltaInputStream)) {
 
 			ByteChannelReader deltaByteChannelReader = new ByteChannelReader(
 				deltaReadableByteChannel);
@@ -493,13 +469,6 @@ public class SyncUtil {
 		}
 		catch (Exception e) {
 			throw new PortalException(e);
-		}
-		finally {
-			StreamUtil.cleanUp(originalFileInputStream);
-			StreamUtil.cleanUp(originalFileChannel);
-			StreamUtil.cleanUp(patchedFileOutputStream);
-			StreamUtil.cleanUp(patchedWritableByteChannel);
-			StreamUtil.cleanUp(deltaReadableByteChannel);
 		}
 	}
 
@@ -553,14 +522,14 @@ public class SyncUtil {
 		Lock lock = dlFileEntry.getLock();
 
 		if ((lock == null) || excludeWorkingCopy) {
-			dlFileVersion = DLFileVersionLocalServiceUtil.getFileVersion(
+			dlFileVersion = _dlFileVersionLocalService.getFileVersion(
 				dlFileEntry.getFileEntryId(), dlFileEntry.getVersion());
 
 			type = SyncDLObjectConstants.TYPE_FILE;
 		}
 		else {
 			try {
-				dlFileVersion = DLFileVersionLocalServiceUtil.getFileVersion(
+				dlFileVersion = _dlFileVersionLocalService.getFileVersion(
 					dlFileEntry.getFileEntryId(),
 					DLFileEntryConstants.PRIVATE_WORKING_COPY_VERSION);
 
@@ -581,7 +550,7 @@ public class SyncUtil {
 				// get the staged file entry's lock even though the live
 				// file entry is not checked out
 
-				dlFileVersion = DLFileVersionLocalServiceUtil.getFileVersion(
+				dlFileVersion = _dlFileVersionLocalService.getFileVersion(
 					dlFileEntry.getFileEntryId(), dlFileEntry.getVersion());
 
 				type = SyncDLObjectConstants.TYPE_FILE;
@@ -696,10 +665,34 @@ public class SyncUtil {
 		throw new PortalException("Folder must be an instance of DLFolder");
 	}
 
+	@Reference(unbind = "-")
+	protected void setDLFileVersionLocalService(
+		DLFileVersionLocalService dlFileVersionLocalService) {
+
+		_dlFileVersionLocalService = dlFileVersionLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setGroupLocalService(GroupLocalService groupLocalService) {
+		_groupLocalService = groupLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setSyncDLObjectLocalService(
+		SyncDLObjectLocalService syncDLObjectLocalService) {
+
+		_syncDLObjectLocalService = syncDLObjectLocalService;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(SyncUtil.class);
 
+	private static final Map<String, String> _checksums =
+		new ConcurrentHashMap<>();
+	private static DLFileVersionLocalService _dlFileVersionLocalService;
+	private static GroupLocalService _groupLocalService;
 	private static final Map<String, String> _lanTokenKeys =
 		new ConcurrentHashMap<>();
 	private static final Provider _provider = new BouncyCastleProvider();
+	private static SyncDLObjectLocalService _syncDLObjectLocalService;
 
 }

@@ -28,7 +28,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.site.navigation.breadcrumb.web.configuration.SiteNavigationBreadcrumbPortletInstanceConfiguration",
 	localization = "content/Language",
-	name = "site.navigation.breadcrumb.portlet.instance.configuration.name"
+	name = "site-navigation-breadcrumb-portlet-instance-configuration-name"
 )
 public interface SiteNavigationBreadcrumbPortletInstanceConfiguration {
 
@@ -36,25 +36,25 @@ public interface SiteNavigationBreadcrumbPortletInstanceConfiguration {
 	 * Set a DDM template ID that starts with the prefix "ddmTemplate_" (i.e.
 	 * ddmTemplate_BREADCRUMB-HORIZONTAL-FTL) to use as the display style.
 	 */
-	@Meta.AD(required = false)
+	@Meta.AD(name = "display-style", required = false)
 	public String displayStyle();
 
-	@Meta.AD(deflt = "0", required = false)
+	@Meta.AD(deflt = "0", name = "display-style-group-id", required = false)
 	public long displayStyleGroupId();
 
-	@Meta.AD(deflt = "true", required = false)
+	@Meta.AD(deflt = "true", name = "show-current-group", required = false)
 	public boolean showCurrentGroup();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "false", name = "show-guest-group", required = false)
 	public boolean showGuestGroup();
 
-	@Meta.AD(deflt = "true", required = false)
+	@Meta.AD(deflt = "true", name = "show-layout", required = false)
 	public boolean showLayout();
 
-	@Meta.AD(deflt = "true", required = false)
+	@Meta.AD(deflt = "true", name = "show-parent-groups", required = false)
 	public boolean showParentGroups();
 
-	@Meta.AD(deflt = "true", required = false)
+	@Meta.AD(deflt = "true", name = "show-portlet-breadcrumb", required = false)
 	public boolean showPortletBreadcrumb();
 
 }

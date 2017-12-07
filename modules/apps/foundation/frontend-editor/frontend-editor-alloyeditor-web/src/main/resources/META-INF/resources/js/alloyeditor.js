@@ -5,6 +5,7 @@ AUI.add(
 	function(A) {
 		var Do = A.Do;
 		var Lang = A.Lang;
+		var UA = A.UA;
 
 		var contentFilter = new CKEDITOR.filter(
 			{
@@ -91,7 +92,8 @@ AUI.add(
 						var instance = this;
 
 						instance._eventHandles = [
-							Do.after('_afterGet', instance._srcNode, 'get', instance)
+							Do.after('_afterGet', instance._srcNode, 'get', instance),
+							Do.after('_afterVal', instance._srcNode, 'val', instance)
 						];
 
 						var nativeEditor = instance.getNativeEditor();
@@ -223,10 +225,35 @@ AUI.add(
 								parentForm
 							);
 						}
+						else if (attrName === 'name') {
+							return new Do.AlterReturn(
+								'Return editor namespace',
+								instance.get('namespace')
+							);
+						}
+						else if (attrName === 'type') {
+							return new Do.AlterReturn(
+								'Return editor node name',
+								instance._srcNode.get('nodeName')
+							);
+						}
+					},
+
+					_afterVal: function(value) {
+						var instance = this;
+
+						if (value) {
+							instance.setHTML(value);
+						}
+
+						return new Do.AlterReturn(
+							'Return editor content',
+							instance.getHTML()
+						);
 					},
 
 					_getEditorMethod: function(method) {
-						return Lang.isFunction(method) ? method : window[method];
+						return Lang.isFunction(method) ? method : (window[method] || method);
 					},
 
 					_initializeData: function() {
@@ -240,7 +267,7 @@ AUI.add(
 
 						var onInitFn = instance.get('onInitMethod');
 
-						if (onInitFn) {
+						if (Lang.isFunction(onInitFn)) {
 							onInitFn();
 						}
 
@@ -256,7 +283,7 @@ AUI.add(
 
 						var blurFn = instance.get('onBlurMethod');
 
-						if (blurFn) {
+						if (Lang.isFunction(blurFn)) {
 							blurFn(event.editor);
 						}
 					},
@@ -266,7 +293,7 @@ AUI.add(
 
 						var changeFn = instance.get('onChangeMethod');
 
-						if (changeFn) {
+						if (Lang.isFunction(changeFn)) {
 							changeFn(instance.getText());
 						}
 					},
@@ -286,9 +313,23 @@ AUI.add(
 
 						var focusFn = instance.get('onFocusMethod');
 
-						if (focusFn) {
+						if (Lang.isFunction(focusFn)) {
 							focusFn(event.editor);
 						}
+					},
+
+					_onFocusFix: function(activeElement, nativeEditor) {
+						var instance = this;
+
+						setTimeout(
+							function() {
+								if (activeElement) {
+									nativeEditor.focusManager.blur(true);
+									activeElement.focus();
+								}
+							},
+							100
+						);
 					},
 
 					_onInstanceReady: function() {
@@ -300,6 +341,40 @@ AUI.add(
 
 						if (instance.customDataProcessorLoaded || !instance.get('useCustomDataProcessor')) {
 							instance._initializeData();
+						}
+
+						// LPS-73775
+
+						instance.getNativeEditor().editable().$.addEventListener('compositionend', A.bind('_onChange', instance));
+
+						// LPS-71967
+
+						if (UA.edge && parseInt(UA.edge, 10) >= 14) {
+							A.soon(
+								function() {
+									var nativeEditor = instance.getNativeEditor();
+
+									nativeEditor.once('focus', A.bind('_onFocusFix', instance, document.activeElement, nativeEditor));
+									nativeEditor.focus();
+								}
+							);
+						}
+
+						// LPS-72963
+
+						var editorConfig = instance.getNativeEditor().config;
+
+						var removeResizePlugin = editorConfig.removePlugins && editorConfig.removePlugins.indexOf('ae_dragresize') > -1;
+
+						if (CKEDITOR.env.gecko && removeResizePlugin) {
+							var doc = instance.getNativeEditor().document.$;
+
+							doc.designMode = 'on';
+
+							doc.execCommand('enableObjectResizing', false, false);
+							doc.execCommand('enableInlineTableEditing', false, false);
+
+							doc.designMode = 'off';
 						}
 					},
 
@@ -332,6 +407,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-component', 'liferay-portlet-base']
+		requires: ['aui-component', 'liferay-portlet-base', 'timers']
 	}
 );

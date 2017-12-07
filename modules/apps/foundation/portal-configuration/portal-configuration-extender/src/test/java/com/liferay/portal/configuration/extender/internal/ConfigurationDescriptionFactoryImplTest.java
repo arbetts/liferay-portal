@@ -14,12 +14,6 @@
 
 package com.liferay.portal.configuration.extender.internal;
 
-import com.liferay.portal.configuration.extender.ConfigurationDescription;
-import com.liferay.portal.configuration.extender.ConfigurationDescriptionFactory;
-import com.liferay.portal.configuration.extender.FactoryConfigurationDescription;
-import com.liferay.portal.configuration.extender.NamedConfigurationContent;
-import com.liferay.portal.configuration.extender.PropertiesFileNamedConfigurationContent;
-import com.liferay.portal.configuration.extender.SingleConfigurationDescription;
 import com.liferay.portal.kernel.util.Supplier;
 
 import java.io.ByteArrayInputStream;
@@ -74,9 +68,7 @@ public class ConfigurationDescriptionFactoryImplTest {
 	}
 
 	@Test
-	public void
-		testCreateReturnsNullWhenNotPropertiesFileNamedConfigurationContent() {
-
+	public void testCreateReturnsNullWhenNotPropertiesFileNamedConfigurationContent() {
 		ConfigurationDescriptionFactory configurationDescriptionFactory =
 			new ConfigurationDescriptionFactoryImpl();
 

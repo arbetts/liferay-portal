@@ -29,7 +29,7 @@ ResourceBundleLoaderProvider resourceBundleLoaderProvider = (ResourceBundleLoade
 
 ResourceBundleLoader resourceBundleLoader = resourceBundleLoaderProvider.getResourceBundleLoader(configurationModel.getBundleSymbolicName());
 
-ResourceBundle componentResourceBundle = resourceBundleLoader.loadResourceBundle(LanguageUtil.getLanguageId(request));
+ResourceBundle componentResourceBundle = resourceBundleLoader.loadResourceBundle(PortalUtil.getLocale(request));
 
 String configurationModelName = (componentResourceBundle != null) ? LanguageUtil.get(componentResourceBundle, configurationModel.getName()) : configurationModel.getName();
 
@@ -62,6 +62,16 @@ renderResponse.setTitle(configurationModelName);
 					</aui:alert>
 				</c:if>
 
+				<%
+				String configurationModelDescription = (componentResourceBundle != null) ? LanguageUtil.get(componentResourceBundle, configurationModel.getDescription()) : configurationModel.getDescription();
+				%>
+
+				<c:if test="<%= !Validator.isBlank(configurationModelDescription) %>">
+					<p class="text-default">
+						<strong><%= configurationModelDescription %></strong>
+					</p>
+				</c:if>
+
 				<%= ddmFormHTML %>
 			</aui:fieldset-group>
 		</div>
@@ -69,14 +79,14 @@ renderResponse.setTitle(configurationModelName);
 		<aui:button-row>
 			<c:choose>
 				<c:when test="<%= configurationModel.hasConfiguration() %>">
-					<aui:button cssClass="btn-lg" type="submit" value="update" />
+					<aui:button cssClass="btn-lg" name="update" type="submit" value="update" />
 				</c:when>
 				<c:otherwise>
-					<aui:button cssClass="btn-lg" type="submit" value="save" />
+					<aui:button cssClass="btn-lg" name="save" type="submit" value="save" />
 				</c:otherwise>
 			</c:choose>
 
-			<aui:button cssClass="btn-lg" href="<%= redirect %>" type="cancel" />
+			<aui:button cssClass="btn-lg" href="<%= redirect %>" name="cancel" type="cancel" />
 		</aui:button-row>
 	</aui:form>
 </div>

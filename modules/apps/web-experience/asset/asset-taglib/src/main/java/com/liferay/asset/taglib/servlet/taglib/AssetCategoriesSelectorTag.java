@@ -20,6 +20,8 @@ import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetCategoryServiceUtil;
 import com.liferay.asset.kernel.service.AssetVocabularyServiceUtil;
 import com.liferay.asset.taglib.internal.servlet.ServletContextUtil;
+import com.liferay.asset.taglib.internal.util.AssetCategoryUtil;
+import com.liferay.asset.taglib.internal.util.AssetVocabularyUtil;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
@@ -31,8 +33,6 @@ import com.liferay.portal.kernel.util.PredicateFilter;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portlet.asset.util.AssetUtil;
-import com.liferay.taglib.util.AssetCategoryUtil;
 import com.liferay.taglib.util.IncludeTag;
 
 import java.util.ArrayList;
@@ -87,6 +87,10 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 		_showRequiredLabel = showRequiredLabel;
 	}
 
+	public void setSingleSelect(boolean singleSelect) {
+		_singleSelect = singleSelect;
+	}
+
 	@Override
 	protected void cleanUp() {
 		_categoryIds = null;
@@ -97,6 +101,7 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 		_hiddenInput = "assetCategoryIds";
 		_ignoreRequestValue = false;
 		_showRequiredLabel = true;
+		_singleSelect = false;
 	}
 
 	protected List<String[]> getCategoryIdsTitles() {
@@ -228,7 +233,7 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 			AssetVocabularyServiceUtil.getGroupVocabularies(getGroupIds());
 
 		if (Validator.isNotNull(_className)) {
-			vocabularies = AssetUtil.filterVocabularies(
+			vocabularies = AssetVocabularyUtil.filterVocabularies(
 				vocabularies, _className, _classTypePK);
 		}
 
@@ -275,6 +280,9 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 			"liferay-asset:asset-categories-selector:showRequiredLabel",
 			String.valueOf(_showRequiredLabel));
 		request.setAttribute(
+			"liferay-asset:asset-categories-selector:singleSelect",
+			String.valueOf(_singleSelect));
+		request.setAttribute(
 			"liferay-asset:asset-categories-selector:vocabularies",
 			getVocabularies());
 	}
@@ -289,5 +297,6 @@ public class AssetCategoriesSelectorTag extends IncludeTag {
 	private String _hiddenInput = "assetCategoryIds";
 	private boolean _ignoreRequestValue;
 	private boolean _showRequiredLabel = true;
+	private boolean _singleSelect;
 
 }

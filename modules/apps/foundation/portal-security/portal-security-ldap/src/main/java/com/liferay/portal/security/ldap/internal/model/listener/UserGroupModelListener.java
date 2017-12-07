@@ -20,12 +20,14 @@ import com.liferay.portal.kernel.model.BaseModelListener;
 import com.liferay.portal.kernel.model.ModelListener;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserGroup;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.security.exportimport.UserExporter;
 import com.liferay.portal.security.exportimport.UserOperation;
 import com.liferay.portal.security.ldap.internal.UserImportTransactionThreadLocal;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Marcellus Tavares
@@ -87,9 +89,10 @@ public class UserGroupModelListener extends BaseModelListener<UserGroup> {
 		if (_log.isDebugEnabled()) {
 			if (_log.isDebugEnabled()) {
 				_log.debug(
-					"Exporting user " + userId + " to user group " +
-						userGroupId + " with user operation " +
-							userOperation.name());
+					StringBundler.concat(
+						"Exporting user ", String.valueOf(userId),
+						" to user group ", String.valueOf(userGroupId),
+						" with user operation ", userOperation.name()));
 			}
 		}
 	}
@@ -97,7 +100,7 @@ public class UserGroupModelListener extends BaseModelListener<UserGroup> {
 	private static final Log _log = LogFactoryUtil.getLog(
 		UserGroupModelListener.class);
 
-	@Reference
+	@Reference(policyOption = ReferencePolicyOption.GREEDY)
 	private UserExporter _userExporter;
 
 }

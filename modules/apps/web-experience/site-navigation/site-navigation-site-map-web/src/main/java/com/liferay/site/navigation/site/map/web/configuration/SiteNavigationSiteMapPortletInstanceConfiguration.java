@@ -28,32 +28,32 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.site.navigation.site.map.web.configuration.SiteNavigationSiteMapPortletInstanceConfiguration",
 	localization = "content/Language",
-	name = "site.navigation.site.map.portlet.instance.configuration.name"
+	name = "site-navigation-site-map-portlet-instance-configuration-name"
 )
 public interface SiteNavigationSiteMapPortletInstanceConfiguration {
 
-	@Meta.AD(deflt = "0", required = false)
+	@Meta.AD(deflt = "0", name = "display-depth", required = false)
 	public int displayDepth();
 
-	@Meta.AD(required = false)
+	@Meta.AD(name = "display-style", required = false)
 	public String displayStyle();
 
-	@Meta.AD(deflt = "0", required = false)
+	@Meta.AD(deflt = "0", name = "display-style-group-id", required = false)
 	public long displayStyleGroupId();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "false", name = "include-root-in-tree", required = false)
 	public boolean includeRootInTree();
 
-	@Meta.AD(required = false)
+	@Meta.AD(name = "root-layout-uuid", required = false)
 	public String rootLayoutUuid();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "false", name = "show-current-page", required = false)
 	public boolean showCurrentPage();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "false", name = "show-hidden-pages", required = false)
 	public boolean showHiddenPages();
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "false", name = "use-html-title", required = false)
 	public boolean useHtmlTitle();
 
 }

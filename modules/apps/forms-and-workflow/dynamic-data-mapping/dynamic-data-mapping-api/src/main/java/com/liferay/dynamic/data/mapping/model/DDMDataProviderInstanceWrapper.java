@@ -154,13 +154,313 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	@Override
-	public DDMDataProviderInstance toEscapedModel() {
-		return new DDMDataProviderInstanceWrapper(_ddmDataProviderInstance.toEscapedModel());
+	public java.lang.Object clone() {
+		return new DDMDataProviderInstanceWrapper((DDMDataProviderInstance)_ddmDataProviderInstance.clone());
 	}
 
 	@Override
-	public DDMDataProviderInstance toUnescapedModel() {
-		return new DDMDataProviderInstanceWrapper(_ddmDataProviderInstance.toUnescapedModel());
+	public int compareTo(DDMDataProviderInstance ddmDataProviderInstance) {
+		return _ddmDataProviderInstance.compareTo(ddmDataProviderInstance);
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _ddmDataProviderInstance.getAvailableLanguageIds();
+	}
+
+	/**
+	* Returns the company ID of this ddm data provider instance.
+	*
+	* @return the company ID of this ddm data provider instance
+	*/
+	@Override
+	public long getCompanyId() {
+		return _ddmDataProviderInstance.getCompanyId();
+	}
+
+	/**
+	* Returns the create date of this ddm data provider instance.
+	*
+	* @return the create date of this ddm data provider instance
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _ddmDataProviderInstance.getCreateDate();
+	}
+
+	/**
+	* Returns the data provider instance ID of this ddm data provider instance.
+	*
+	* @return the data provider instance ID of this ddm data provider instance
+	*/
+	@Override
+	public long getDataProviderInstanceId() {
+		return _ddmDataProviderInstance.getDataProviderInstanceId();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _ddmDataProviderInstance.getDefaultLanguageId();
+	}
+
+	/**
+	* Returns the definition of this ddm data provider instance.
+	*
+	* @return the definition of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getDefinition() {
+		return _ddmDataProviderInstance.getDefinition();
+	}
+
+	/**
+	* Returns the description of this ddm data provider instance.
+	*
+	* @return the description of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getDescription() {
+		return _ddmDataProviderInstance.getDescription();
+	}
+
+	/**
+	* Returns the localized description of this ddm data provider instance in the language. Uses the default language if no localization exists for the requested language.
+	*
+	* @param locale the locale of the language
+	* @return the localized description of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getDescription(java.util.Locale locale) {
+		return _ddmDataProviderInstance.getDescription(locale);
+	}
+
+	/**
+	* Returns the localized description of this ddm data provider instance in the language, optionally using the default language if no localization exists for the requested language.
+	*
+	* @param locale the local of the language
+	* @param useDefault whether to use the default language if no localization exists for the requested language
+	* @return the localized description of this ddm data provider instance. If <code>useDefault</code> is <code>false</code> and no localization exists for the requested language, an empty string will be returned.
+	*/
+	@Override
+	public java.lang.String getDescription(java.util.Locale locale,
+		boolean useDefault) {
+		return _ddmDataProviderInstance.getDescription(locale, useDefault);
+	}
+
+	/**
+	* Returns the localized description of this ddm data provider instance in the language. Uses the default language if no localization exists for the requested language.
+	*
+	* @param languageId the ID of the language
+	* @return the localized description of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getDescription(java.lang.String languageId) {
+		return _ddmDataProviderInstance.getDescription(languageId);
+	}
+
+	/**
+	* Returns the localized description of this ddm data provider instance in the language, optionally using the default language if no localization exists for the requested language.
+	*
+	* @param languageId the ID of the language
+	* @param useDefault whether to use the default language if no localization exists for the requested language
+	* @return the localized description of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getDescription(java.lang.String languageId,
+		boolean useDefault) {
+		return _ddmDataProviderInstance.getDescription(languageId, useDefault);
+	}
+
+	@Override
+	public java.lang.String getDescriptionCurrentLanguageId() {
+		return _ddmDataProviderInstance.getDescriptionCurrentLanguageId();
+	}
+
+	@Override
+	public java.lang.String getDescriptionCurrentValue() {
+		return _ddmDataProviderInstance.getDescriptionCurrentValue();
+	}
+
+	/**
+	* Returns a map of the locales and localized descriptions of this ddm data provider instance.
+	*
+	* @return the locales and localized descriptions of this ddm data provider instance
+	*/
+	@Override
+	public Map<java.util.Locale, java.lang.String> getDescriptionMap() {
+		return _ddmDataProviderInstance.getDescriptionMap();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _ddmDataProviderInstance.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this ddm data provider instance.
+	*
+	* @return the group ID of this ddm data provider instance
+	*/
+	@Override
+	public long getGroupId() {
+		return _ddmDataProviderInstance.getGroupId();
+	}
+
+	/**
+	* Returns the modified date of this ddm data provider instance.
+	*
+	* @return the modified date of this ddm data provider instance
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _ddmDataProviderInstance.getModifiedDate();
+	}
+
+	/**
+	* Returns the name of this ddm data provider instance.
+	*
+	* @return the name of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getName() {
+		return _ddmDataProviderInstance.getName();
+	}
+
+	/**
+	* Returns the localized name of this ddm data provider instance in the language. Uses the default language if no localization exists for the requested language.
+	*
+	* @param locale the locale of the language
+	* @return the localized name of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getName(java.util.Locale locale) {
+		return _ddmDataProviderInstance.getName(locale);
+	}
+
+	/**
+	* Returns the localized name of this ddm data provider instance in the language, optionally using the default language if no localization exists for the requested language.
+	*
+	* @param locale the local of the language
+	* @param useDefault whether to use the default language if no localization exists for the requested language
+	* @return the localized name of this ddm data provider instance. If <code>useDefault</code> is <code>false</code> and no localization exists for the requested language, an empty string will be returned.
+	*/
+	@Override
+	public java.lang.String getName(java.util.Locale locale, boolean useDefault) {
+		return _ddmDataProviderInstance.getName(locale, useDefault);
+	}
+
+	/**
+	* Returns the localized name of this ddm data provider instance in the language. Uses the default language if no localization exists for the requested language.
+	*
+	* @param languageId the ID of the language
+	* @return the localized name of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getName(java.lang.String languageId) {
+		return _ddmDataProviderInstance.getName(languageId);
+	}
+
+	/**
+	* Returns the localized name of this ddm data provider instance in the language, optionally using the default language if no localization exists for the requested language.
+	*
+	* @param languageId the ID of the language
+	* @param useDefault whether to use the default language if no localization exists for the requested language
+	* @return the localized name of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getName(java.lang.String languageId,
+		boolean useDefault) {
+		return _ddmDataProviderInstance.getName(languageId, useDefault);
+	}
+
+	@Override
+	public java.lang.String getNameCurrentLanguageId() {
+		return _ddmDataProviderInstance.getNameCurrentLanguageId();
+	}
+
+	@Override
+	public java.lang.String getNameCurrentValue() {
+		return _ddmDataProviderInstance.getNameCurrentValue();
+	}
+
+	/**
+	* Returns a map of the locales and localized names of this ddm data provider instance.
+	*
+	* @return the locales and localized names of this ddm data provider instance
+	*/
+	@Override
+	public Map<java.util.Locale, java.lang.String> getNameMap() {
+		return _ddmDataProviderInstance.getNameMap();
+	}
+
+	/**
+	* Returns the primary key of this ddm data provider instance.
+	*
+	* @return the primary key of this ddm data provider instance
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _ddmDataProviderInstance.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _ddmDataProviderInstance.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the type of this ddm data provider instance.
+	*
+	* @return the type of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getType() {
+		return _ddmDataProviderInstance.getType();
+	}
+
+	/**
+	* Returns the user ID of this ddm data provider instance.
+	*
+	* @return the user ID of this ddm data provider instance
+	*/
+	@Override
+	public long getUserId() {
+		return _ddmDataProviderInstance.getUserId();
+	}
+
+	/**
+	* Returns the user name of this ddm data provider instance.
+	*
+	* @return the user name of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getUserName() {
+		return _ddmDataProviderInstance.getUserName();
+	}
+
+	/**
+	* Returns the user uuid of this ddm data provider instance.
+	*
+	* @return the user uuid of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getUserUuid() {
+		return _ddmDataProviderInstance.getUserUuid();
+	}
+
+	/**
+	* Returns the uuid of this ddm data provider instance.
+	*
+	* @return the uuid of this ddm data provider instance
+	*/
+	@Override
+	public java.lang.String getUuid() {
+		return _ddmDataProviderInstance.getUuid();
+	}
+
+	@Override
+	public int hashCode() {
+		return _ddmDataProviderInstance.hashCode();
 	}
 
 	@Override
@@ -176,331 +476,6 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	@Override
 	public boolean isNew() {
 		return _ddmDataProviderInstance.isNew();
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _ddmDataProviderInstance.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<DDMDataProviderInstance> toCacheModel() {
-		return _ddmDataProviderInstance.toCacheModel();
-	}
-
-	@Override
-	public int compareTo(DDMDataProviderInstance ddmDataProviderInstance) {
-		return _ddmDataProviderInstance.compareTo(ddmDataProviderInstance);
-	}
-
-	@Override
-	public int hashCode() {
-		return _ddmDataProviderInstance.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _ddmDataProviderInstance.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new DDMDataProviderInstanceWrapper((DDMDataProviderInstance)_ddmDataProviderInstance.clone());
-	}
-
-	@Override
-	public java.lang.String getDefaultLanguageId() {
-		return _ddmDataProviderInstance.getDefaultLanguageId();
-	}
-
-	/**
-	* Returns the definition of this d d m data provider instance.
-	*
-	* @return the definition of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getDefinition() {
-		return _ddmDataProviderInstance.getDefinition();
-	}
-
-	/**
-	* Returns the description of this d d m data provider instance.
-	*
-	* @return the description of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getDescription() {
-		return _ddmDataProviderInstance.getDescription();
-	}
-
-	/**
-	* Returns the localized description of this d d m data provider instance in the language. Uses the default language if no localization exists for the requested language.
-	*
-	* @param languageId the ID of the language
-	* @return the localized description of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getDescription(java.lang.String languageId) {
-		return _ddmDataProviderInstance.getDescription(languageId);
-	}
-
-	/**
-	* Returns the localized description of this d d m data provider instance in the language, optionally using the default language if no localization exists for the requested language.
-	*
-	* @param languageId the ID of the language
-	* @param useDefault whether to use the default language if no localization exists for the requested language
-	* @return the localized description of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getDescription(java.lang.String languageId,
-		boolean useDefault) {
-		return _ddmDataProviderInstance.getDescription(languageId, useDefault);
-	}
-
-	/**
-	* Returns the localized description of this d d m data provider instance in the language. Uses the default language if no localization exists for the requested language.
-	*
-	* @param locale the locale of the language
-	* @return the localized description of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getDescription(java.util.Locale locale) {
-		return _ddmDataProviderInstance.getDescription(locale);
-	}
-
-	/**
-	* Returns the localized description of this d d m data provider instance in the language, optionally using the default language if no localization exists for the requested language.
-	*
-	* @param locale the local of the language
-	* @param useDefault whether to use the default language if no localization exists for the requested language
-	* @return the localized description of this d d m data provider instance. If <code>useDefault</code> is <code>false</code> and no localization exists for the requested language, an empty string will be returned.
-	*/
-	@Override
-	public java.lang.String getDescription(java.util.Locale locale,
-		boolean useDefault) {
-		return _ddmDataProviderInstance.getDescription(locale, useDefault);
-	}
-
-	@Override
-	public java.lang.String getDescriptionCurrentLanguageId() {
-		return _ddmDataProviderInstance.getDescriptionCurrentLanguageId();
-	}
-
-	@Override
-	public java.lang.String getDescriptionCurrentValue() {
-		return _ddmDataProviderInstance.getDescriptionCurrentValue();
-	}
-
-	/**
-	* Returns the name of this d d m data provider instance.
-	*
-	* @return the name of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getName() {
-		return _ddmDataProviderInstance.getName();
-	}
-
-	/**
-	* Returns the localized name of this d d m data provider instance in the language. Uses the default language if no localization exists for the requested language.
-	*
-	* @param languageId the ID of the language
-	* @return the localized name of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getName(java.lang.String languageId) {
-		return _ddmDataProviderInstance.getName(languageId);
-	}
-
-	/**
-	* Returns the localized name of this d d m data provider instance in the language, optionally using the default language if no localization exists for the requested language.
-	*
-	* @param languageId the ID of the language
-	* @param useDefault whether to use the default language if no localization exists for the requested language
-	* @return the localized name of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getName(java.lang.String languageId,
-		boolean useDefault) {
-		return _ddmDataProviderInstance.getName(languageId, useDefault);
-	}
-
-	/**
-	* Returns the localized name of this d d m data provider instance in the language. Uses the default language if no localization exists for the requested language.
-	*
-	* @param locale the locale of the language
-	* @return the localized name of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getName(java.util.Locale locale) {
-		return _ddmDataProviderInstance.getName(locale);
-	}
-
-	/**
-	* Returns the localized name of this d d m data provider instance in the language, optionally using the default language if no localization exists for the requested language.
-	*
-	* @param locale the local of the language
-	* @param useDefault whether to use the default language if no localization exists for the requested language
-	* @return the localized name of this d d m data provider instance. If <code>useDefault</code> is <code>false</code> and no localization exists for the requested language, an empty string will be returned.
-	*/
-	@Override
-	public java.lang.String getName(java.util.Locale locale, boolean useDefault) {
-		return _ddmDataProviderInstance.getName(locale, useDefault);
-	}
-
-	@Override
-	public java.lang.String getNameCurrentLanguageId() {
-		return _ddmDataProviderInstance.getNameCurrentLanguageId();
-	}
-
-	@Override
-	public java.lang.String getNameCurrentValue() {
-		return _ddmDataProviderInstance.getNameCurrentValue();
-	}
-
-	/**
-	* Returns the type of this d d m data provider instance.
-	*
-	* @return the type of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getType() {
-		return _ddmDataProviderInstance.getType();
-	}
-
-	/**
-	* Returns the user name of this d d m data provider instance.
-	*
-	* @return the user name of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getUserName() {
-		return _ddmDataProviderInstance.getUserName();
-	}
-
-	/**
-	* Returns the user uuid of this d d m data provider instance.
-	*
-	* @return the user uuid of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getUserUuid() {
-		return _ddmDataProviderInstance.getUserUuid();
-	}
-
-	/**
-	* Returns the uuid of this d d m data provider instance.
-	*
-	* @return the uuid of this d d m data provider instance
-	*/
-	@Override
-	public java.lang.String getUuid() {
-		return _ddmDataProviderInstance.getUuid();
-	}
-
-	@Override
-	public java.lang.String toString() {
-		return _ddmDataProviderInstance.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _ddmDataProviderInstance.toXmlString();
-	}
-
-	@Override
-	public java.lang.String[] getAvailableLanguageIds() {
-		return _ddmDataProviderInstance.getAvailableLanguageIds();
-	}
-
-	/**
-	* Returns the create date of this d d m data provider instance.
-	*
-	* @return the create date of this d d m data provider instance
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _ddmDataProviderInstance.getCreateDate();
-	}
-
-	/**
-	* Returns the modified date of this d d m data provider instance.
-	*
-	* @return the modified date of this d d m data provider instance
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _ddmDataProviderInstance.getModifiedDate();
-	}
-
-	/**
-	* Returns a map of the locales and localized descriptions of this d d m data provider instance.
-	*
-	* @return the locales and localized descriptions of this d d m data provider instance
-	*/
-	@Override
-	public Map<java.util.Locale, java.lang.String> getDescriptionMap() {
-		return _ddmDataProviderInstance.getDescriptionMap();
-	}
-
-	/**
-	* Returns a map of the locales and localized names of this d d m data provider instance.
-	*
-	* @return the locales and localized names of this d d m data provider instance
-	*/
-	@Override
-	public Map<java.util.Locale, java.lang.String> getNameMap() {
-		return _ddmDataProviderInstance.getNameMap();
-	}
-
-	/**
-	* Returns the company ID of this d d m data provider instance.
-	*
-	* @return the company ID of this d d m data provider instance
-	*/
-	@Override
-	public long getCompanyId() {
-		return _ddmDataProviderInstance.getCompanyId();
-	}
-
-	/**
-	* Returns the data provider instance ID of this d d m data provider instance.
-	*
-	* @return the data provider instance ID of this d d m data provider instance
-	*/
-	@Override
-	public long getDataProviderInstanceId() {
-		return _ddmDataProviderInstance.getDataProviderInstanceId();
-	}
-
-	/**
-	* Returns the group ID of this d d m data provider instance.
-	*
-	* @return the group ID of this d d m data provider instance
-	*/
-	@Override
-	public long getGroupId() {
-		return _ddmDataProviderInstance.getGroupId();
-	}
-
-	/**
-	* Returns the primary key of this d d m data provider instance.
-	*
-	* @return the primary key of this d d m data provider instance
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _ddmDataProviderInstance.getPrimaryKey();
-	}
-
-	/**
-	* Returns the user ID of this d d m data provider instance.
-	*
-	* @return the user ID of this d d m data provider instance
-	*/
-	@Override
-	public long getUserId() {
-		return _ddmDataProviderInstance.getUserId();
 	}
 
 	@Override
@@ -527,9 +502,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the company ID of this d d m data provider instance.
+	* Sets the company ID of this ddm data provider instance.
 	*
-	* @param companyId the company ID of this d d m data provider instance
+	* @param companyId the company ID of this ddm data provider instance
 	*/
 	@Override
 	public void setCompanyId(long companyId) {
@@ -537,9 +512,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the create date of this d d m data provider instance.
+	* Sets the create date of this ddm data provider instance.
 	*
-	* @param createDate the create date of this d d m data provider instance
+	* @param createDate the create date of this ddm data provider instance
 	*/
 	@Override
 	public void setCreateDate(Date createDate) {
@@ -547,9 +522,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the data provider instance ID of this d d m data provider instance.
+	* Sets the data provider instance ID of this ddm data provider instance.
 	*
-	* @param dataProviderInstanceId the data provider instance ID of this d d m data provider instance
+	* @param dataProviderInstanceId the data provider instance ID of this ddm data provider instance
 	*/
 	@Override
 	public void setDataProviderInstanceId(long dataProviderInstanceId) {
@@ -557,9 +532,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the definition of this d d m data provider instance.
+	* Sets the definition of this ddm data provider instance.
 	*
-	* @param definition the definition of this d d m data provider instance
+	* @param definition the definition of this ddm data provider instance
 	*/
 	@Override
 	public void setDefinition(java.lang.String definition) {
@@ -567,9 +542,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the description of this d d m data provider instance.
+	* Sets the description of this ddm data provider instance.
 	*
-	* @param description the description of this d d m data provider instance
+	* @param description the description of this ddm data provider instance
 	*/
 	@Override
 	public void setDescription(java.lang.String description) {
@@ -577,9 +552,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the localized description of this d d m data provider instance in the language.
+	* Sets the localized description of this ddm data provider instance in the language.
 	*
-	* @param description the localized description of this d d m data provider instance
+	* @param description the localized description of this ddm data provider instance
 	* @param locale the locale of the language
 	*/
 	@Override
@@ -589,9 +564,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the localized description of this d d m data provider instance in the language, and sets the default locale.
+	* Sets the localized description of this ddm data provider instance in the language, and sets the default locale.
 	*
-	* @param description the localized description of this d d m data provider instance
+	* @param description the localized description of this ddm data provider instance
 	* @param locale the locale of the language
 	* @param defaultLocale the default locale
 	*/
@@ -608,9 +583,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the localized descriptions of this d d m data provider instance from the map of locales and localized descriptions.
+	* Sets the localized descriptions of this ddm data provider instance from the map of locales and localized descriptions.
 	*
-	* @param descriptionMap the locales and localized descriptions of this d d m data provider instance
+	* @param descriptionMap the locales and localized descriptions of this ddm data provider instance
 	*/
 	@Override
 	public void setDescriptionMap(
@@ -619,9 +594,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the localized descriptions of this d d m data provider instance from the map of locales and localized descriptions, and sets the default locale.
+	* Sets the localized descriptions of this ddm data provider instance from the map of locales and localized descriptions, and sets the default locale.
 	*
-	* @param descriptionMap the locales and localized descriptions of this d d m data provider instance
+	* @param descriptionMap the locales and localized descriptions of this ddm data provider instance
 	* @param defaultLocale the default locale
 	*/
 	@Override
@@ -632,14 +607,14 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_ddmDataProviderInstance.setExpandoBridgeAttributes(expandoBridge);
-	}
-
-	@Override
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.kernel.model.BaseModel<?> baseModel) {
 		_ddmDataProviderInstance.setExpandoBridgeAttributes(baseModel);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_ddmDataProviderInstance.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -648,9 +623,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the group ID of this d d m data provider instance.
+	* Sets the group ID of this ddm data provider instance.
 	*
-	* @param groupId the group ID of this d d m data provider instance
+	* @param groupId the group ID of this ddm data provider instance
 	*/
 	@Override
 	public void setGroupId(long groupId) {
@@ -658,9 +633,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the modified date of this d d m data provider instance.
+	* Sets the modified date of this ddm data provider instance.
 	*
-	* @param modifiedDate the modified date of this d d m data provider instance
+	* @param modifiedDate the modified date of this ddm data provider instance
 	*/
 	@Override
 	public void setModifiedDate(Date modifiedDate) {
@@ -668,9 +643,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the name of this d d m data provider instance.
+	* Sets the name of this ddm data provider instance.
 	*
-	* @param name the name of this d d m data provider instance
+	* @param name the name of this ddm data provider instance
 	*/
 	@Override
 	public void setName(java.lang.String name) {
@@ -678,9 +653,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the localized name of this d d m data provider instance in the language.
+	* Sets the localized name of this ddm data provider instance in the language.
 	*
-	* @param name the localized name of this d d m data provider instance
+	* @param name the localized name of this ddm data provider instance
 	* @param locale the locale of the language
 	*/
 	@Override
@@ -689,9 +664,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the localized name of this d d m data provider instance in the language, and sets the default locale.
+	* Sets the localized name of this ddm data provider instance in the language, and sets the default locale.
 	*
-	* @param name the localized name of this d d m data provider instance
+	* @param name the localized name of this ddm data provider instance
 	* @param locale the locale of the language
 	* @param defaultLocale the default locale
 	*/
@@ -707,9 +682,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the localized names of this d d m data provider instance from the map of locales and localized names.
+	* Sets the localized names of this ddm data provider instance from the map of locales and localized names.
 	*
-	* @param nameMap the locales and localized names of this d d m data provider instance
+	* @param nameMap the locales and localized names of this ddm data provider instance
 	*/
 	@Override
 	public void setNameMap(Map<java.util.Locale, java.lang.String> nameMap) {
@@ -717,9 +692,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the localized names of this d d m data provider instance from the map of locales and localized names, and sets the default locale.
+	* Sets the localized names of this ddm data provider instance from the map of locales and localized names, and sets the default locale.
 	*
-	* @param nameMap the locales and localized names of this d d m data provider instance
+	* @param nameMap the locales and localized names of this ddm data provider instance
 	* @param defaultLocale the default locale
 	*/
 	@Override
@@ -734,9 +709,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the primary key of this d d m data provider instance.
+	* Sets the primary key of this ddm data provider instance.
 	*
-	* @param primaryKey the primary key of this d d m data provider instance
+	* @param primaryKey the primary key of this ddm data provider instance
 	*/
 	@Override
 	public void setPrimaryKey(long primaryKey) {
@@ -749,9 +724,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the type of this d d m data provider instance.
+	* Sets the type of this ddm data provider instance.
 	*
-	* @param type the type of this d d m data provider instance
+	* @param type the type of this ddm data provider instance
 	*/
 	@Override
 	public void setType(java.lang.String type) {
@@ -759,9 +734,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the user ID of this d d m data provider instance.
+	* Sets the user ID of this ddm data provider instance.
 	*
-	* @param userId the user ID of this d d m data provider instance
+	* @param userId the user ID of this ddm data provider instance
 	*/
 	@Override
 	public void setUserId(long userId) {
@@ -769,9 +744,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the user name of this d d m data provider instance.
+	* Sets the user name of this ddm data provider instance.
 	*
-	* @param userName the user name of this d d m data provider instance
+	* @param userName the user name of this ddm data provider instance
 	*/
 	@Override
 	public void setUserName(java.lang.String userName) {
@@ -779,9 +754,9 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the user uuid of this d d m data provider instance.
+	* Sets the user uuid of this ddm data provider instance.
 	*
-	* @param userUuid the user uuid of this d d m data provider instance
+	* @param userUuid the user uuid of this ddm data provider instance
 	*/
 	@Override
 	public void setUserUuid(java.lang.String userUuid) {
@@ -789,13 +764,38 @@ public class DDMDataProviderInstanceWrapper implements DDMDataProviderInstance,
 	}
 
 	/**
-	* Sets the uuid of this d d m data provider instance.
+	* Sets the uuid of this ddm data provider instance.
 	*
-	* @param uuid the uuid of this d d m data provider instance
+	* @param uuid the uuid of this ddm data provider instance
 	*/
 	@Override
 	public void setUuid(java.lang.String uuid) {
 		_ddmDataProviderInstance.setUuid(uuid);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<DDMDataProviderInstance> toCacheModel() {
+		return _ddmDataProviderInstance.toCacheModel();
+	}
+
+	@Override
+	public DDMDataProviderInstance toEscapedModel() {
+		return new DDMDataProviderInstanceWrapper(_ddmDataProviderInstance.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _ddmDataProviderInstance.toString();
+	}
+
+	@Override
+	public DDMDataProviderInstance toUnescapedModel() {
+		return new DDMDataProviderInstanceWrapper(_ddmDataProviderInstance.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _ddmDataProviderInstance.toXmlString();
 	}
 
 	@Override

@@ -1,12 +1,21 @@
 <definition>
 	<command name="gotoAddPage">
-		<execute macro="ProductMenuHelper#expandPanelSites" />
+		<execute macro="ProductMenuHelper#expandPanel">
+			<var name="panel" value="Site Administration" />
+		</execute>
 
 		<execute macro="ProductMenuHelper#expandCategory">
 			<var name="category" value="Navigation" />
 		</execute>
 
 		<execute macro="ProductMenuHelper#expandPageTree" />
+
+		<if>
+			<contains string="${sitePagePrivacy}" substring="{sitePagePrivacy}" />
+			<then>
+				<var name="sitePagePrivacy" value="Public" />
+			</then>
+		</if>
 
 		<if>
 			<and>
@@ -18,30 +27,36 @@
 					<var name="sitePagePrivacy" value="${sitePagePrivacy}" />
 				</execute>
 			</then>
+			<elseif>
+				<isset var="siteTemplateName" />
+				<then>
+					<execute function="Click" locator1="ProductMenu#PAGES_ICON" />
+
+					<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Add Page">
+						<var name="key_menuItem" value="Add Page" />
+					</execute>
+				</then>
+			</elseif>
 			<else>
 				<if>
-					<equals arg1="${sitePagePrivacy}" arg2="Private" />
+					<condition function="IsElementNotPresent" locator1="ProductMenu#LAYOUT_SET_2" />
 					<then>
-						<if>
-							<condition function="IsElementNotPresent" locator1="ProductMenu#PRIVATE_PAGES" />
-							<then>
-								<execute function="Click" locator1="SitePages#PUBLIC_PAGE_ELLIPSIS" />
-							</then>
-							<else>
-								<execute macro="ProductMenu#gotoPrivatePages" />
+						<execute function="Click" locator1="ProductMenu#PAGES_ICON" />
 
-								<execute function="Click" locator1="SitePages#PRIVATE_PAGE_ELLIPSIS" />
-							</else>
-						</if>
-
-						<execute function="Click" locator1="SitePages#ADD_PRIVATE_PAGE_MENUITEM" />
+						<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Add ${sitePagePrivacy} Page">
+							<var name="key_menuItem" value="Add ${sitePagePrivacy} Page" />
+						</execute>
 					</then>
 					<else>
-						<execute macro="ProductMenu#gotoPublicPages" />
+						<var method="StringUtil#toUpperCase('${sitePagePrivacy}')" name="sitePagePrivacyUpperCase" />
 
-						<execute function="Click" locator1="SitePages#PUBLIC_PAGE_ELLIPSIS" />
+						<execute function="Click" locator1="ProductMenu#${sitePagePrivacyUpperCase}_PAGES" />
 
-						<execute function="Click" locator1="SitePages#ADD_PUBLIC_PAGE_MENUITEM" />
+						<execute function="Click" locator1="ProductMenu#PAGES_ICON" />
+
+						<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Add Page">
+							<var name="key_menuItem" value="Add Page" />
+						</execute>
 					</else>
 				</if>
 			</else>
@@ -51,7 +66,9 @@
 	<command name="gotoEditPage" summary="Navigate to Product Menu > Sites > Navigation > Public Pages > ${page}">
 		<execute macro="ProductMenuHelper#openProductMenu" />
 
-		<execute macro="ProductMenuHelper#expandPanelSites" />
+		<execute macro="ProductMenuHelper#expandPanel">
+			<var name="panel" value="Site Administration" />
+		</execute>
 
 		<execute macro="ProductMenuHelper#expandCategory">
 			<var name="category" value="Navigation" />
@@ -73,20 +90,26 @@
 			<then>
 				<execute function="Click" locator1="SitePages#PUBLIC_PAGE_ELLIPSIS" />
 
-				<execute function="Click" locator1="SitePages#EDIT_PUBLIC_PAGE_MENUITEM" />
+				<execute function="AssertClick#assertPartialTextClickAt" locator1="MenuItem#ANY_MENU_ITEM" value1="Configure">
+					<var name="key_menuItem" value="Configure" />
+				</execute>
 			</then>
 			<elseif>
 				<equals arg1="${page}" arg2="Private Pages" />
 				<then>
 					<execute function="Click" locator1="SitePages#PRIVATE_PAGE_ELLIPSIS" />
 
-					<execute function="Click" locator1="SitePages#EDIT_PRIVATE_PAGE_MENUITEM" />
+					<execute function="AssertClick#assertPartialTextClickAt" locator1="MenuItem#ANY_MENU_ITEM" value1="Configure">
+						<var name="key_menuItem" value="Configure" />
+					</execute>
 				</then>
 			</elseif>
 			<else>
 				<execute function="Click#mouseOverClick" locator1="SitePages#SPECIFIC_PAGE_ELLIPSIS" />
 
-				<execute function="Click" locator1="SitePages#EDIT_SPECIFIC_PAGE" />
+				<execute function="AssertClick#assertPartialTextClickAt" locator1="MenuItem#ANY_MENU_ITEM" value1="Configure Page">
+					<var name="key_menuItem" value="Configure Page" />
+				</execute>
 			</else>
 		</if>
 	</command>
@@ -94,7 +117,9 @@
 	<command name="gotoPages">
 		<execute macro="ProductMenuHelper#openProductMenu" />
 
-		<execute macro="ProductMenuHelper#expandPanelSites" />
+		<execute macro="ProductMenuHelper#expandPanel">
+			<var name="panel" value="Site Administration" />
+		</execute>
 
 		<execute macro="ProductMenuHelper#expandCategory">
 			<var name="category" value="Navigation" />

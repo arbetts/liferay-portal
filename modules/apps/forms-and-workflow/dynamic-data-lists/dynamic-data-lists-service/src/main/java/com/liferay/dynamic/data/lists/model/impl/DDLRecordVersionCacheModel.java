@@ -21,7 +21,6 @@ import com.liferay.dynamic.data.lists.model.DDLRecordVersion;
 import com.liferay.portal.kernel.model.CacheModel;
 import com.liferay.portal.kernel.util.HashUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -66,7 +65,7 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(31);
+		StringBundler sb = new StringBundler(33);
 
 		sb.append("{recordVersionId=");
 		sb.append(recordVersionId);
@@ -84,6 +83,8 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 		sb.append(DDMStorageId);
 		sb.append(", recordSetId=");
 		sb.append(recordSetId);
+		sb.append(", recordSetVersion=");
+		sb.append(recordSetVersion);
 		sb.append(", recordId=");
 		sb.append(recordId);
 		sb.append(", version=");
@@ -113,7 +114,7 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 		ddlRecordVersionImpl.setUserId(userId);
 
 		if (userName == null) {
-			ddlRecordVersionImpl.setUserName(StringPool.BLANK);
+			ddlRecordVersionImpl.setUserName("");
 		}
 		else {
 			ddlRecordVersionImpl.setUserName(userName);
@@ -128,10 +129,18 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 
 		ddlRecordVersionImpl.setDDMStorageId(DDMStorageId);
 		ddlRecordVersionImpl.setRecordSetId(recordSetId);
+
+		if (recordSetVersion == null) {
+			ddlRecordVersionImpl.setRecordSetVersion("");
+		}
+		else {
+			ddlRecordVersionImpl.setRecordSetVersion(recordSetVersion);
+		}
+
 		ddlRecordVersionImpl.setRecordId(recordId);
 
 		if (version == null) {
-			ddlRecordVersionImpl.setVersion(StringPool.BLANK);
+			ddlRecordVersionImpl.setVersion("");
 		}
 		else {
 			ddlRecordVersionImpl.setVersion(version);
@@ -142,7 +151,7 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 		ddlRecordVersionImpl.setStatusByUserId(statusByUserId);
 
 		if (statusByUserName == null) {
-			ddlRecordVersionImpl.setStatusByUserName(StringPool.BLANK);
+			ddlRecordVersionImpl.setStatusByUserName("");
 		}
 		else {
 			ddlRecordVersionImpl.setStatusByUserName(statusByUserName);
@@ -175,6 +184,7 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 		DDMStorageId = objectInput.readLong();
 
 		recordSetId = objectInput.readLong();
+		recordSetVersion = objectInput.readUTF();
 
 		recordId = objectInput.readLong();
 		version = objectInput.readUTF();
@@ -200,7 +210,7 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 		objectOutput.writeLong(userId);
 
 		if (userName == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
+			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(userName);
@@ -212,10 +222,17 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 
 		objectOutput.writeLong(recordSetId);
 
+		if (recordSetVersion == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(recordSetVersion);
+		}
+
 		objectOutput.writeLong(recordId);
 
 		if (version == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
+			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(version);
@@ -228,7 +245,7 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 		objectOutput.writeLong(statusByUserId);
 
 		if (statusByUserName == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
+			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(statusByUserName);
@@ -245,6 +262,7 @@ public class DDLRecordVersionCacheModel implements CacheModel<DDLRecordVersion>,
 	public long createDate;
 	public long DDMStorageId;
 	public long recordSetId;
+	public String recordSetVersion;
 	public long recordId;
 	public String version;
 	public int displayIndex;

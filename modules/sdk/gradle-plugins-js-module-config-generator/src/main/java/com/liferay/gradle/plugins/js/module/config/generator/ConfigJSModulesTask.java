@@ -17,6 +17,7 @@ package com.liferay.gradle.plugins.js.module.config.generator;
 import com.liferay.gradle.plugins.node.tasks.ExecuteNodeScriptTask;
 import com.liferay.gradle.util.FileUtil;
 import com.liferay.gradle.util.GradleUtil;
+import com.liferay.gradle.util.Validator;
 
 import groovy.lang.Closure;
 
@@ -119,6 +120,12 @@ public class ConfigJSModulesTask
 		return GradleUtil.toString(_configVariable);
 	}
 
+	@Input
+	@Optional
+	public String getCustomDefine() {
+		return GradleUtil.toString(_customDefine);
+	}
+
 	@Override
 	public Set<String> getExcludes() {
 		return _patternFilterable.getExcludes();
@@ -155,6 +162,7 @@ public class ConfigJSModulesTask
 		return GradleUtil.toFile(getProject(), _outputFile);
 	}
 
+	@Input
 	public File getSourceDir() {
 		return GradleUtil.toFile(getProject(), _sourceDir);
 	}
@@ -164,11 +172,13 @@ public class ConfigJSModulesTask
 	public FileCollection getSourceFiles() {
 		Project project = getProject();
 
-		if (_sourceDir == null) {
+		File sourceDir = getSourceDir();
+
+		if (sourceDir == null) {
 			return project.files();
 		}
 
-		FileTree fileTree = project.fileTree(_sourceDir);
+		FileTree fileTree = project.fileTree(sourceDir);
 
 		return fileTree.matching(_patternFilterable);
 	}
@@ -220,6 +230,10 @@ public class ConfigJSModulesTask
 
 	public void setConfigVariable(Object configVariable) {
 		_configVariable = configVariable;
+	}
+
+	public void setCustomDefine(Object customDefine) {
+		_customDefine = customDefine;
 	}
 
 	@Override
@@ -317,6 +331,13 @@ public class ConfigJSModulesTask
 		completeArgs.add("--moduleConfig");
 		completeArgs.add(FileUtil.getAbsolutePath(getModuleConfigFile()));
 
+		String customDefine = getCustomDefine();
+
+		if (Validator.isNotNull(customDefine)) {
+			completeArgs.add("--namespace");
+			completeArgs.add(customDefine);
+		}
+
 		completeArgs.add("--output");
 		completeArgs.add(FileUtil.getAbsolutePath(getOutputFile()));
 
@@ -331,6 +352,7 @@ public class ConfigJSModulesTask
 	}
 
 	private Object _configVariable;
+	private Object _customDefine = "Liferay.Loader";
 	private boolean _ignorePath;
 	private boolean _keepFileExtension;
 	private boolean _lowerCase;

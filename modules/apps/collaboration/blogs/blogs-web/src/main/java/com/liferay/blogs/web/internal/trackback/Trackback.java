@@ -16,15 +16,14 @@ package com.liferay.blogs.web.internal.trackback;
 
 import com.liferay.blogs.linkback.LinkbackConsumer;
 import com.liferay.blogs.model.BlogsEntry;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.comment.CommentManager;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Function;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.util.PropsValues;
@@ -97,7 +96,7 @@ public class Trackback {
 
 		StringBundler sb = new StringBundler(4);
 
-		sb.append(PortalUtil.getLayoutFullURL(themeDisplay));
+		sb.append(_portal.getLayoutFullURL(themeDisplay));
 		sb.append(Portal.FRIENDLY_URL_SEPARATOR);
 		sb.append("blogs/");
 		sb.append(entry.getUrlTitle());
@@ -126,6 +125,9 @@ public class Trackback {
 
 	@Reference
 	private LinkbackConsumer _linkbackConsumer;
+
+	@Reference
+	private Portal _portal;
 
 	@Reference
 	private UserLocalService _userLocalService;

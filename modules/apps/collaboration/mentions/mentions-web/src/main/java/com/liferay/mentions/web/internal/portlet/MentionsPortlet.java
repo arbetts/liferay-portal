@@ -29,7 +29,8 @@ import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.social.kernel.util.SocialInteractionsConfiguration;
@@ -83,12 +84,12 @@ public class MentionsPortlet extends MVCPortlet {
 				return;
 			}
 
-			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+			HttpServletRequest request = _portal.getHttpServletRequest(
 				resourceRequest);
 
 			JSONArray jsonArray = getJSONArray(request);
 
-			HttpServletResponse response = PortalUtil.getHttpServletResponse(
+			HttpServletResponse response = _portal.getHttpServletResponse(
 				resourceResponse);
 
 			response.setContentType(ContentTypes.APPLICATION_JSON);
@@ -135,9 +136,9 @@ public class MentionsPortlet extends MVCPortlet {
 			String profileURL = user.getDisplayURL(themeDisplay);
 
 			if (Validator.isNotNull(profileURL)) {
-				mention =
-					"<a href=\"" + profileURL + "\">@" + user.getScreenName() +
-						"</a>";
+				mention = StringBundler.concat(
+					"<a href=\"", profileURL, "\">@", user.getScreenName(),
+					"</a>");
 			}
 
 			jsonObject.put("mention", mention);
@@ -162,5 +163,8 @@ public class MentionsPortlet extends MVCPortlet {
 		MentionsPortlet.class);
 
 	private MentionsUserFinder _mentionsUserFinder;
+
+	@Reference
+	private Portal _portal;
 
 }

@@ -51,8 +51,8 @@ public class WorkspacePlugin implements Plugin<Settings> {
 				workspaceExtension.getProjectConfigurators()) {
 
 			for (File rootDir : projectConfigurator.getDefaultRootDirs()) {
-				for (File projectDir : projectConfigurator.getProjectDirs(
-						rootDir)) {
+				for (File projectDir :
+						projectConfigurator.getProjectDirs(rootDir)) {
 
 					String projectPath = GradleUtil.getProjectPath(
 						projectDir, settings.getRootDir());
@@ -73,6 +73,13 @@ public class WorkspacePlugin implements Plugin<Settings> {
 					Plugin<Project> plugin = null;
 
 					if (project.getParent() == null) {
+						for (ProjectConfigurator projectConfigurator :
+								workspaceExtension.getProjectConfigurators()) {
+
+							projectConfigurator.configureRootProject(
+								project, workspaceExtension);
+						}
+
 						plugin =
 							workspaceExtension.getRootProjectConfigurator();
 					}

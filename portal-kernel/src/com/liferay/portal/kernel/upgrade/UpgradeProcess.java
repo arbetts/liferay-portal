@@ -16,6 +16,7 @@ package com.liferay.portal.kernel.upgrade;
 
 import com.liferay.portal.kernel.dao.db.BaseDBProcess;
 import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBInspector;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.db.DBProcessContext;
 import com.liferay.portal.kernel.dao.db.IndexMetadata;
@@ -96,9 +97,11 @@ public abstract class UpgradeProcess
 
 			if (_log.isInfoEnabled()) {
 				_log.info(
-					"Completed upgrade process " +
-						ClassUtil.getClassName(this) + " in " +
-							(System.currentTimeMillis() - start) + "ms");
+					StringBundler.concat(
+						"Completed upgrade process ",
+						ClassUtil.getClassName(this), " in ",
+						String.valueOf(System.currentTimeMillis() - start),
+						"ms"));
 			}
 		}
 	}
@@ -160,6 +163,16 @@ public abstract class UpgradeProcess
 		public AlterColumnName(String oldColumnName, String newColumn) {
 			_oldColumnName = oldColumnName;
 			_newColumn = newColumn;
+
+			String newColumnName = StringUtil.extractFirst(
+				newColumn, StringPool.SPACE);
+
+			if (newColumnName != null) {
+				_newColumnName = newColumnName;
+			}
+			else {
+				_newColumnName = _newColumn;
+			}
 		}
 
 		/**
@@ -187,7 +200,7 @@ public abstract class UpgradeProcess
 
 		@Override
 		public boolean shouldAddIndex(Collection<String> columnNames) {
-			return Alterable.containsIgnoreCase(columnNames, _newColumn);
+			return Alterable.containsIgnoreCase(columnNames, _newColumnName);
 		}
 
 		@Override
@@ -196,6 +209,7 @@ public abstract class UpgradeProcess
 		}
 
 		private final String _newColumn;
+		private final String _newColumnName;
 		private final String _oldColumnName;
 
 	}
@@ -336,12 +350,14 @@ public abstract class UpgradeProcess
 			String tableName = (String)tableNameField.get(null);
 
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
+			DBInspector dbInspector = new DBInspector(connection);
 
 			try (ResultSet rs1 = databaseMetaData.getPrimaryKeys(
-					null, null, tableName);
+					dbInspector.getCatalog(), dbInspector.getSchema(),
+					tableName);
 				ResultSet rs2 = databaseMetaData.getIndexInfo(
-					null, null, normalizeName(tableName, databaseMetaData),
-					false, false)) {
+					dbInspector.getCatalog(), dbInspector.getSchema(),
+					dbInspector.normalizeName(tableName), false, false)) {
 
 				Set<String> primaryKeyNames = new HashSet<>();
 
@@ -384,8 +400,9 @@ public abstract class UpgradeProcess
 
 						if (alterable.shouldDropIndex(entry.getValue())) {
 							runSQL(
-								"drop index " + entry.getKey() + " on " +
-									tableName);
+								StringBundler.concat(
+									"drop index ", entry.getKey(), " on ",
+									tableName));
 						}
 					}
 
@@ -554,19 +571,19 @@ public abstract class UpgradeProcess
 		return db.isSupportsUpdateWithInnerJoin();
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             DBInspector#normalizeName(java.lang.String,
+	 *             DatabaseMetaData)}
+	 */
+	@Deprecated
 	protected String normalizeName(
 			String name, DatabaseMetaData databaseMetaData)
 		throws SQLException {
 
-		if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			return StringUtil.toLowerCase(name);
-		}
+		DBInspector dbInspector = new DBInspector(connection);
 
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			return StringUtil.toUpperCase(name);
-		}
-
-		return name;
+		return dbInspector.normalizeName(name, databaseMetaData);
 	}
 
 	protected void upgradeTable(String tableName, Object[][] tableColumns)

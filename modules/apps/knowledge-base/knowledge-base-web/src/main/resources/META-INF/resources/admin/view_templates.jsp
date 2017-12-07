@@ -53,9 +53,7 @@ renderResponse.setTitle(LanguageUtil.get(request, "templates"));
 		<aui:form action="<%= searchURL %>" method="get" name="fm2">
 			<liferay-portlet:renderURLParams varImpl="searchURL" />
 
-			<aui:nav-bar-search>
-				<liferay-ui:input-search markupView="lexicon" />
-			</aui:nav-bar-search>
+			<liferay-ui:input-search markupView="lexicon" />
 		</aui:form>
 	</aui:nav-bar-search>
 </aui:nav-bar>
@@ -135,7 +133,6 @@ String keywords = ParamUtil.getString(request, "keywords");
 
 				<liferay-ui:search-container-row
 					className="com.liferay.knowledge.base.model.KBTemplate"
-					escapedModel="<%= true %>"
 					keyProperty="kbTemplateId"
 					modelVar="kbTemplate"
 				>
@@ -154,7 +151,7 @@ String keywords = ParamUtil.getString(request, "keywords");
 						%>
 
 						<h5 class="text-default">
-							<liferay-ui:message arguments="<%= new String[] {kbTemplate.getUserName(), modifiedDateDescription} %>" key="x-modified-x-ago" />
+							<liferay-ui:message arguments="<%= new String[] {HtmlUtil.escape(kbTemplate.getUserName()), modifiedDateDescription} %>" key="x-modified-x-ago" />
 						</h5>
 
 						<liferay-portlet:renderURL var="editURL">
@@ -165,7 +162,7 @@ String keywords = ParamUtil.getString(request, "keywords");
 
 						<h4>
 							<aui:a href="<%= editURL.toString() %>">
-								<%= kbTemplate.getTitle() %>
+								<%= HtmlUtil.escape(kbTemplate.getTitle()) %>
 							</aui:a>
 						</h4>
 					</liferay-ui:search-container-column-text>

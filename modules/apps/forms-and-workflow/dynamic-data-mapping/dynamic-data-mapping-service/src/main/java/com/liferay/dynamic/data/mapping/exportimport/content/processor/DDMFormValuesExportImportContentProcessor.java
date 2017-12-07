@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
@@ -50,14 +51,18 @@ import org.osgi.service.component.annotations.Reference;
  * @author Daniel Kocsis
  */
 @Component(
-	immediate = true, service = DDMFormValuesExportImportContentProcessor.class
+	property = {"model.class.name=com.liferay.dynamic.data.mapping.storage.DDMFormValues"},
+	service = {
+		DDMFormValuesExportImportContentProcessor.class,
+		ExportImportContentProcessor.class
+	}
 )
-public class DDMFormValuesExportImportContentProcessor<S extends StagedModel>
-	implements ExportImportContentProcessor<S, DDMFormValues> {
+public class DDMFormValuesExportImportContentProcessor
+	implements ExportImportContentProcessor<DDMFormValues> {
 
 	@Override
 	public DDMFormValues replaceExportContentReferences(
-			PortletDataContext portletDataContext, S stagedModel,
+			PortletDataContext portletDataContext, StagedModel stagedModel,
 			DDMFormValues ddmFormValues, boolean exportReferencedContent,
 			boolean escapeContent)
 		throws Exception {
@@ -79,7 +84,7 @@ public class DDMFormValuesExportImportContentProcessor<S extends StagedModel>
 
 	@Override
 	public DDMFormValues replaceImportContentReferences(
-			PortletDataContext portletDataContext, S stagedModel,
+			PortletDataContext portletDataContext, StagedModel stagedModel,
 			DDMFormValues ddmFormValues)
 		throws Exception {
 
@@ -98,10 +103,8 @@ public class DDMFormValuesExportImportContentProcessor<S extends StagedModel>
 	}
 
 	@Override
-	public boolean validateContentReferences(
+	public void validateContentReferences(
 		long groupId, DDMFormValues ddmFormValues) {
-
-		return true;
 	}
 
 	@Reference(unbind = "-")
@@ -314,8 +317,9 @@ public class DDMFormValuesExportImportContentProcessor<S extends StagedModel>
 				catch (NoSuchFileEntryException nsfee) {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
-							"Unable to find file entry with uuid " + uuid +
-								" and groupId " + groupId,
+							StringBundler.concat(
+								"Unable to find file entry with uuid ", uuid,
+								" and groupId ", String.valueOf(groupId)),
 							nsfee);
 					}
 				}

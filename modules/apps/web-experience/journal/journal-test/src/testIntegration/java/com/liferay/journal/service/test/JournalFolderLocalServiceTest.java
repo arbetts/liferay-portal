@@ -75,8 +75,8 @@ public class JournalFolderLocalServiceTest {
 		List<JournalFolder> folders =
 			JournalFolderLocalServiceUtil.getNoAssetFolders();
 
-		Assert.assertEquals(1, folders.size());
-		Assert.assertEquals(folder, folders.get(0));
+		Assert.assertEquals(folders.toString(), 1, folders.size());
+		Assert.assertEquals(folders.toString(), folder, folders.get(0));
 	}
 
 	@DeleteAfterTestRun

@@ -14,7 +14,10 @@
 
 package com.liferay.wiki.engine.mediawiki.internal;
 
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
@@ -23,8 +26,8 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SystemProperties;
 import com.liferay.portal.language.LanguageResources;
 import com.liferay.wiki.configuration.WikiGroupServiceConfiguration;
+import com.liferay.wiki.engine.BaseWikiEngine;
 import com.liferay.wiki.engine.WikiEngine;
-import com.liferay.wiki.engine.input.editor.common.BaseInputEditorWikiEngine;
 import com.liferay.wiki.engine.mediawiki.internal.matchers.DirectTagMatcher;
 import com.liferay.wiki.engine.mediawiki.internal.matchers.DirectURLMatcher;
 import com.liferay.wiki.engine.mediawiki.internal.matchers.EditURLMatcher;
@@ -35,8 +38,24 @@ import com.liferay.wiki.exception.PageContentException;
 import com.liferay.wiki.model.WikiPage;
 import com.liferay.wiki.service.WikiPageLocalService;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.net.URI;
+import java.net.URL;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.portlet.PortletURL;
 
@@ -58,7 +77,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Jonathan Potter
  */
 @Component(service = WikiEngine.class)
-public class MediaWikiEngine extends BaseInputEditorWikiEngine {
+public class MediaWikiEngine extends BaseWikiEngine {
 
 	@Override
 	public String convert(
@@ -134,16 +153,34 @@ public class MediaWikiEngine extends BaseInputEditorWikiEngine {
 	}
 
 	@Activate
-	protected void activate() {
-		Environment.setValue(
-			Environment.PROP_BASE_FILE_DIR,
-			SystemProperties.get(SystemProperties.TMP_DIR));
+	protected void activate() throws IOException {
+		Thread currentThread = Thread.currentThread();
+
+		ClassLoader classLoader = currentThread.getContextClassLoader();
+
+		try (RootDetectionClassLoader rootDetectionClassLoader =
+				new RootDetectionClassLoader(classLoader)) {
+
+			currentThread.setContextClassLoader(rootDetectionClassLoader);
+
+			Environment.setValue(
+				Environment.PROP_BASE_FILE_DIR,
+				SystemProperties.get(SystemProperties.TMP_DIR));
+		}
+		finally {
+			currentThread.setContextClassLoader(classLoader);
+		}
 	}
 
 	protected ClassLoader getClassLoader() {
 		Class<?> clazz = getClass();
 
 		return clazz.getClassLoader();
+	}
+
+	@Override
+	protected ServletContext getEditPageServletContext() {
+		return _wikiEngineInputEditorServletContext;
 	}
 
 	@Override
@@ -314,9 +351,77 @@ public class MediaWikiEngine extends BaseInputEditorWikiEngine {
 		_wikiGroupServiceConfiguration = null;
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		MediaWikiEngine.class);
+
 	private ResourceBundleLoader _resourceBundleLoader;
 	private ServletContext _servletContext;
+
+	@Reference(
+		target = "(osgi.web.symbolicname=com.liferay.wiki.engine.input.editor.common)"
+	)
+	private ServletContext _wikiEngineInputEditorServletContext;
+
 	private WikiGroupServiceConfiguration _wikiGroupServiceConfiguration;
 	private WikiPageLocalService _wikiPageLocalService;
+
+	private static class RootDetectionClassLoader
+		extends ClassLoader implements Closeable {
+
+		@Override
+		public void close() throws IOException {
+			UnsafeConsumer.accept(_tempPaths, Files::delete, IOException.class);
+		}
+
+		@Override
+		public URL getResource(String name) {
+			if (!_rootDetectionFileNames.contains(name)) {
+				return super.getResource(name);
+			}
+
+			Path tempPath = _tempDirPath.resolve(name);
+
+			try {
+				if (Files.notExists(tempPath)) {
+					_tempPaths.add(tempPath);
+
+					ClassLoader parentClassLoader = getParent();
+
+					try (InputStream in =
+							parentClassLoader.getResourceAsStream(name)) {
+
+						Files.copy(in, tempPath);
+					}
+				}
+
+				URI uri = tempPath.toUri();
+
+				return uri.toURL();
+			}
+			catch (IOException ioe) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(
+						"Unable to create class loader root detection temp " +
+							"file " + tempPath,
+						ioe);
+				}
+			}
+
+			return super.getResource(name);
+		}
+
+		private RootDetectionClassLoader(ClassLoader parentClassLoader) {
+			super(parentClassLoader);
+		}
+
+		private static final Set<String> _rootDetectionFileNames =
+			new HashSet<>(
+				Arrays.asList("jamwiki.properties", "sql.ansi.properties"));
+		private static final Path _tempDirPath = Paths.get(
+			SystemProperties.get(SystemProperties.TMP_DIR));
+
+		private final List<Path> _tempPaths = new ArrayList<>();
+
+	}
 
 }

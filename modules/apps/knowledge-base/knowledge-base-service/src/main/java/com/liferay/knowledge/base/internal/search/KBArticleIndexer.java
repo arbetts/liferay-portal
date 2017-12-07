@@ -14,6 +14,7 @@
 
 package com.liferay.knowledge.base.internal.search;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.knowledge.base.constants.KBFolderConstants;
 import com.liferay.knowledge.base.model.KBArticle;
 import com.liferay.knowledge.base.model.KBFolder;
@@ -29,13 +30,15 @@ import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.BaseIndexer;
 import com.liferay.portal.kernel.search.BooleanQuery;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Hits;
-import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
+import com.liferay.portal.kernel.search.IndexWriterHelper;
 import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.search.Summary;
@@ -45,7 +48,7 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
@@ -109,12 +112,9 @@ public class KBArticleIndexer extends BaseIndexer<KBArticle> {
 	public Hits search(SearchContext searchContext) throws SearchException {
 		Hits hits = super.search(searchContext);
 
-		String[] queryTerms = hits.getQueryTerms();
-
-		String keywords = searchContext.getKeywords();
-
-		queryTerms = ArrayUtil.append(
-			queryTerms, KnowledgeBaseUtil.splitKeywords(keywords));
+		String[] queryTerms = ArrayUtil.append(
+			GetterUtil.getStringValues(hits.getQueryTerms()),
+			KnowledgeBaseUtil.splitKeywords(searchContext.getKeywords()));
 
 		hits.setQueryTerms(queryTerms);
 
@@ -147,31 +147,40 @@ public class KBArticleIndexer extends BaseIndexer<KBArticle> {
 		Document document, Locale locale, String snippet,
 		PortletRequest portletRequest, PortletResponse portletResponse) {
 
-		String title = document.get(Field.TITLE);
+		String prefix = Field.SNIPPET + StringPool.UNDERLINE;
+
+		String title = document.get(prefix + Field.TITLE, Field.TITLE);
 
 		String content = snippet;
 
 		if (Validator.isNull(snippet)) {
-			content = document.get(Field.DESCRIPTION);
+			content = document.get(
+				prefix + Field.DESCRIPTION, Field.DESCRIPTION);
 
 			if (Validator.isNull(content)) {
-				content = StringUtil.shorten(document.get(Field.CONTENT), 200);
+				content = document.get(prefix + Field.CONTENT, Field.CONTENT);
 			}
 		}
 
-		return new Summary(title, content);
+		Summary summary = new Summary(title, content);
+
+		summary.setMaxContentLength(200);
+
+		return summary;
 	}
 
 	@Override
 	protected void doReindex(KBArticle kbArticle) throws Exception {
-		IndexWriterHelperUtil.updateDocument(
+		indexWriterHelper.updateDocument(
 			getSearchEngineId(), kbArticle.getCompanyId(),
 			getDocument(kbArticle), isCommitImmediately());
+
+		reindexAttachments(kbArticle);
 	}
 
 	@Override
 	protected void doReindex(String className, long classPK) throws Exception {
-		KBArticle kbArticle = _kbArticleLocalService.getLatestKBArticle(
+		KBArticle kbArticle = kbArticleLocalService.getLatestKBArticle(
 			classPK, WorkflowConstants.STATUS_ANY);
 
 		reindexKBArticles(kbArticle);
@@ -192,7 +201,7 @@ public class KBArticleIndexer extends BaseIndexer<KBArticle> {
 		Collection<String> kbFolderNames = new ArrayList<>();
 
 		while (kbFolderId != KBFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			KBFolder kbFolder = _kbFolderLocalService.getKBFolder(kbFolderId);
+			KBFolder kbFolder = kbFolderLocalService.getKBFolder(kbFolderId);
 
 			kbFolderNames.add(kbFolder.getName());
 
@@ -202,12 +211,25 @@ public class KBArticleIndexer extends BaseIndexer<KBArticle> {
 		return kbFolderNames.toArray(new String[kbFolderNames.size()]);
 	}
 
+	protected void reindexAttachments(KBArticle kbArticle)
+		throws PortalException {
+
+		Indexer<DLFileEntry> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
+			DLFileEntry.class);
+
+		for (FileEntry attachmentsFileEntry :
+				kbArticle.getAttachmentsFileEntries()) {
+
+			indexer.reindex((DLFileEntry)attachmentsFileEntry.getModel());
+		}
+	}
+
 	protected void reindexKBArticles(KBArticle kbArticle) throws Exception {
 
 		// See KBArticlePermission#contains
 
 		List<KBArticle> kbArticles =
-			_kbArticleLocalService.getKBArticleAndAllDescendantKBArticles(
+			kbArticleLocalService.getKBArticleAndAllDescendantKBArticles(
 				kbArticle.getResourcePrimKey(),
 				WorkflowConstants.STATUS_APPROVED, null);
 
@@ -217,14 +239,14 @@ public class KBArticleIndexer extends BaseIndexer<KBArticle> {
 			documents.add(getDocument(curKBArticle));
 		}
 
-		IndexWriterHelperUtil.updateDocuments(
+		indexWriterHelper.updateDocuments(
 			getSearchEngineId(), kbArticle.getCompanyId(), documents,
 			isCommitImmediately());
 	}
 
 	protected void reindexKBArticles(long companyId) throws Exception {
 		final IndexableActionableDynamicQuery indexableActionableDynamicQuery =
-			_kbArticleLocalService.getIndexableActionableDynamicQuery();
+			kbArticleLocalService.getIndexableActionableDynamicQuery();
 
 		indexableActionableDynamicQuery.setAddCriteriaMethod(
 			new ActionableDynamicQuery.AddCriteriaMethod() {
@@ -265,24 +287,16 @@ public class KBArticleIndexer extends BaseIndexer<KBArticle> {
 		indexableActionableDynamicQuery.performActions();
 	}
 
-	@Reference(unbind = "-")
-	protected void setKBArticleLocalService(
-		KBArticleLocalService kbArticleLocalService) {
+	@Reference
+	protected IndexWriterHelper indexWriterHelper;
 
-		_kbArticleLocalService = kbArticleLocalService;
-	}
+	@Reference
+	protected KBArticleLocalService kbArticleLocalService;
 
-	@Reference(unbind = "-")
-	protected void setKBFolderLocalService(
-		KBFolderLocalService kbFolderLocalService) {
-
-		_kbFolderLocalService = kbFolderLocalService;
-	}
+	@Reference
+	protected KBFolderLocalService kbFolderLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		KBArticleIndexer.class);
-
-	private KBArticleLocalService _kbArticleLocalService;
-	private KBFolderLocalService _kbFolderLocalService;
 
 }

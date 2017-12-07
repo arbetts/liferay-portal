@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceReference;
@@ -44,124 +45,12 @@ public class AssetRendererFactoryRegistryUtil {
 	public static List<AssetRendererFactory<?>> getAssetRendererFactories(
 		long companyId) {
 
-		return _instance._getAssetRendererFactories(companyId);
-	}
-
-	public static List<AssetRendererFactory<?>> getAssetRendererFactories(
-		long companyId, boolean filterSelectable) {
-
-		return _instance._getAssetRendererFactories(
-			companyId, filterSelectable);
-	}
-
-	public static <T> AssetRendererFactory<T> getAssetRendererFactoryByClass(
-		Class<T> clazz) {
-
-		return _instance._getAssetRendererFactoryByClass(clazz);
-	}
-
-	public static AssetRendererFactory<?> getAssetRendererFactoryByClassName(
-		String className) {
-
-		return _instance._getAssetRendererFactoryByClassName(className);
-	}
-
-	public static AssetRendererFactory<?> getAssetRendererFactoryByClassNameId(
-		long classNameId) {
-
-		return _instance._getAssetRendererFactoryByClassNameId(classNameId);
-	}
-
-	public static AssetRendererFactory<?> getAssetRendererFactoryByType(
-		String type) {
-
-		return _instance._getAssetRendererFactoryByType(type);
-	}
-
-	public static long[] getClassNameIds(long companyId) {
-		return _instance._getClassNameIds(companyId, false);
-	}
-
-	public static long[] getClassNameIds(
-		long companyId, boolean filterSelectable) {
-
-		return _instance._getClassNameIds(companyId, filterSelectable);
-	}
-
-	public static void register(AssetRendererFactory<?> assetRendererFactory) {
-		_instance._register(assetRendererFactory);
-	}
-
-	public static void register(
-		List<AssetRendererFactory<?>> assetRendererFactories) {
-
-		for (AssetRendererFactory<?> assetRendererFactory :
-				assetRendererFactories) {
-
-			register(assetRendererFactory);
-		}
-	}
-
-	public static void unregister(
-		AssetRendererFactory<?> assetRendererFactory) {
-
-		_instance._unregister(assetRendererFactory);
-	}
-
-	public static void unregister(
-		List<AssetRendererFactory<?>> assetRendererFactories) {
-
-		for (AssetRendererFactory<?> assetRendererFactory :
-				assetRendererFactories) {
-
-			unregister(assetRendererFactory);
-		}
-	}
-
-	private AssetRendererFactoryRegistryUtil() {
-		Registry registry = RegistryUtil.getRegistry();
-
-		_serviceTracker = registry.trackServices(
-			(Class<AssetRendererFactory<?>>)(Class<?>)
-				AssetRendererFactory.class,
-			new AssetRendererFactoryServiceTrackerCustomizer());
-
-		_serviceTracker.open();
-	}
-
-	private Map<String, AssetRendererFactory<?>> _filterAssetRendererFactories(
-		long companyId,
-		Map<String, AssetRendererFactory<?>> assetRendererFactories,
-		boolean filterSelectable) {
-
-		Map<String, AssetRendererFactory<?>> filteredAssetRendererFactories =
-			new ConcurrentHashMap<>();
-
-		for (Map.Entry<String, AssetRendererFactory<?>> entry :
-				assetRendererFactories.entrySet()) {
-
-			AssetRendererFactory<?> assetRendererFactory = entry.getValue();
-
-			if (assetRendererFactory.isActive(companyId) &&
-				(!filterSelectable || assetRendererFactory.isSelectable())) {
-
-				filteredAssetRendererFactories.put(
-					entry.getKey(), assetRendererFactory);
-			}
-		}
-
-		return filteredAssetRendererFactories;
-	}
-
-	private List<AssetRendererFactory<?>> _getAssetRendererFactories(
-		long companyId) {
-
 		return ListUtil.fromMapValues(
 			_filterAssetRendererFactories(
 				companyId, _assetRenderFactoriesMapByClassName, false));
 	}
 
-	private List<AssetRendererFactory<?>> _getAssetRendererFactories(
+	public static List<AssetRendererFactory<?>> getAssetRendererFactories(
 		long companyId, boolean filterSelectable) {
 
 		return ListUtil.fromMapValues(
@@ -170,33 +59,39 @@ public class AssetRendererFactoryRegistryUtil {
 				filterSelectable));
 	}
 
-	private <T> AssetRendererFactory<T> _getAssetRendererFactoryByClass(
+	public static <T> AssetRendererFactory<T> getAssetRendererFactoryByClass(
 		Class<T> clazz) {
 
 		return (AssetRendererFactory<T>)_assetRenderFactoriesMapByClassName.get(
 			clazz.getName());
 	}
 
-	private AssetRendererFactory<?> _getAssetRendererFactoryByClassName(
+	public static AssetRendererFactory<?> getAssetRendererFactoryByClassName(
 		String className) {
 
 		return _assetRenderFactoriesMapByClassName.get(className);
 	}
 
-	private AssetRendererFactory<?> _getAssetRendererFactoryByClassNameId(
+	public static AssetRendererFactory<?> getAssetRendererFactoryByClassNameId(
 		long classNameId) {
 
-		return _getAssetRendererFactoryByClassName(
+		return _assetRenderFactoriesMapByClassName.get(
 			PortalUtil.getClassName(classNameId));
 	}
 
-	private AssetRendererFactory<?> _getAssetRendererFactoryByType(
+	public static AssetRendererFactory<?> getAssetRendererFactoryByType(
 		String type) {
 
 		return _assetRenderFactoriesMapByClassType.get(type);
 	}
 
-	private long[] _getClassNameIds(long companyId, boolean filterSelectable) {
+	public static long[] getClassNameIds(long companyId) {
+		return getClassNameIds(companyId, false);
+	}
+
+	public static long[] getClassNameIds(
+		long companyId, boolean filterSelectable) {
+
 		Map<String, AssetRendererFactory<?>> assetRenderFactories =
 			_assetRenderFactoriesMapByClassName;
 
@@ -221,7 +116,7 @@ public class AssetRendererFactoryRegistryUtil {
 		return classNameIds;
 	}
 
-	private void _register(AssetRendererFactory<?> assetRendererFactory) {
+	public static void register(AssetRendererFactory<?> assetRendererFactory) {
 		Registry registry = RegistryUtil.getRegistry();
 
 		ServiceRegistration<AssetRendererFactory<?>> serviceRegistration =
@@ -232,7 +127,19 @@ public class AssetRendererFactoryRegistryUtil {
 		_serviceRegistrations.put(assetRendererFactory, serviceRegistration);
 	}
 
-	private void _unregister(AssetRendererFactory<?> assetRendererFactory) {
+	public static void register(
+		List<AssetRendererFactory<?>> assetRendererFactories) {
+
+		for (AssetRendererFactory<?> assetRendererFactory :
+				assetRendererFactories) {
+
+			register(assetRendererFactory);
+		}
+	}
+
+	public static void unregister(
+		AssetRendererFactory<?> assetRendererFactory) {
+
 		ServiceRegistration<AssetRendererFactory<?>> serviceRegistration =
 			_serviceRegistrations.remove(assetRendererFactory);
 
@@ -241,23 +148,58 @@ public class AssetRendererFactoryRegistryUtil {
 		}
 	}
 
+	public static void unregister(
+		List<AssetRendererFactory<?>> assetRendererFactories) {
+
+		for (AssetRendererFactory<?> assetRendererFactory :
+				assetRendererFactories) {
+
+			unregister(assetRendererFactory);
+		}
+	}
+
+	private static Map<String, AssetRendererFactory<?>>
+		_filterAssetRendererFactories(
+			long companyId,
+			Map<String, AssetRendererFactory<?>> assetRendererFactories,
+			boolean filterSelectable) {
+
+		Map<String, AssetRendererFactory<?>> filteredAssetRendererFactories =
+			new ConcurrentHashMap<>();
+
+		for (Map.Entry<String, AssetRendererFactory<?>> entry :
+				assetRendererFactories.entrySet()) {
+
+			AssetRendererFactory<?> assetRendererFactory = entry.getValue();
+
+			if (assetRendererFactory.isActive(companyId) &&
+				(!filterSelectable || assetRendererFactory.isSelectable())) {
+
+				filteredAssetRendererFactories.put(
+					entry.getKey(), assetRendererFactory);
+			}
+		}
+
+		return filteredAssetRendererFactories;
+	}
+
+	private AssetRendererFactoryRegistryUtil() {
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		AssetRendererFactoryRegistryUtil.class);
 
-	private static final AssetRendererFactoryRegistryUtil _instance =
-		new AssetRendererFactoryRegistryUtil();
-
-	private final Map<String, AssetRendererFactory<?>>
+	private static final Map<String, AssetRendererFactory<?>>
 		_assetRenderFactoriesMapByClassName = new ConcurrentHashMap<>();
-	private final Map<String, AssetRendererFactory<?>>
+	private static final Map<String, AssetRendererFactory<?>>
 		_assetRenderFactoriesMapByClassType = new ConcurrentHashMap<>();
-	private final ServiceRegistrationMap<AssetRendererFactory<?>>
+	private static final ServiceRegistrationMap<AssetRendererFactory<?>>
 		_serviceRegistrations = new ServiceRegistrationMapImpl<>();
-	private final
+	private static final
 		ServiceTracker<AssetRendererFactory<?>, AssetRendererFactory<?>>
 			_serviceTracker;
 
-	private class AssetRendererFactoryServiceTrackerCustomizer
+	private static class AssetRendererFactoryServiceTrackerCustomizer
 		implements ServiceTrackerCustomizer
 			<AssetRendererFactory<?>, AssetRendererFactory<?>> {
 
@@ -280,9 +222,11 @@ public class AssetRendererFactoryRegistryUtil {
 				(classNameAssetRendererFactory != null)) {
 
 				_log.warn(
-					"Replacing " + classNameAssetRendererFactory +
-						" for class name " + className + " with " +
-							assetRendererFactory);
+					StringBundler.concat(
+						"Replacing ",
+						String.valueOf(classNameAssetRendererFactory),
+						" for class name ", className, " with ",
+						String.valueOf(assetRendererFactory)));
 			}
 
 			String type = assetRendererFactory.getType();
@@ -293,8 +237,10 @@ public class AssetRendererFactoryRegistryUtil {
 
 			if (_log.isWarnEnabled() && (typeAssetRendererFactory != null)) {
 				_log.warn(
-					"Replacing " + typeAssetRendererFactory + " for type " +
-						type + " with " + assetRendererFactory);
+					StringBundler.concat(
+						"Replacing ", String.valueOf(typeAssetRendererFactory),
+						" for type ", type, " with ",
+						String.valueOf(assetRendererFactory)));
 			}
 
 			return assetRendererFactory;
@@ -321,6 +267,17 @@ public class AssetRendererFactoryRegistryUtil {
 				assetRendererFactory.getType());
 		}
 
+	}
+
+	static {
+		Registry registry = RegistryUtil.getRegistry();
+
+		_serviceTracker = registry.trackServices(
+			(Class<AssetRendererFactory<?>>)(Class<?>)
+				AssetRendererFactory.class,
+			new AssetRendererFactoryServiceTrackerCustomizer());
+
+		_serviceTracker.open();
 	}
 
 }

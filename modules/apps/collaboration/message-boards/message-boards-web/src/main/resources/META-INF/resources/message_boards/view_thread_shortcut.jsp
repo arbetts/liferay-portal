@@ -17,8 +17,6 @@
 <%@ include file="/message_boards/init.jsp" %>
 
 <%
-boolean editable = true;
-
 MBTreeWalker treeWalker = (MBTreeWalker)request.getAttribute(WebKeys.MESSAGE_BOARDS_TREE_WALKER);
 MBMessage selMessage = (MBMessage)request.getAttribute(WebKeys.MESSAGE_BOARDS_TREE_WALKER_SEL_MESSAGE);
 MBMessage message = (MBMessage)request.getAttribute(WebKeys.MESSAGE_BOARDS_TREE_WALKER_CUR_MESSAGE);
@@ -74,9 +72,7 @@ if (threadFlag != null) {
 
 			String rowHREF = "#" + renderResponse.getNamespace() + "message_" + message.getMessageId();
 
-			if (!themeDisplay.isFacebook()) {
-				rowHREF = messageURL + rowHREF;
-			}
+			rowHREF = messageURL + rowHREF;
 
 			boolean readThread = true;
 

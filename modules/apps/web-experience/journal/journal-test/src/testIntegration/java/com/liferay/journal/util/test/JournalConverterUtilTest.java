@@ -27,9 +27,8 @@ import com.liferay.dynamic.data.mapping.storage.Field;
 import com.liferay.dynamic.data.mapping.storage.Fields;
 import com.liferay.dynamic.data.mapping.storage.StorageType;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestHelper;
+import com.liferay.dynamic.data.mapping.util.DDM;
 import com.liferay.dynamic.data.mapping.util.DDMXML;
-import com.liferay.dynamic.data.mapping.util.impl.DDMImpl;
-import com.liferay.dynamic.data.mapping.util.impl.DDMXMLImpl;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.journal.util.JournalConverter;
@@ -47,7 +46,6 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.xml.Document;
@@ -55,7 +53,6 @@ import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.test.LayoutTestUtil;
-import com.liferay.portal.xml.XMLSchemaImpl;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 
@@ -72,7 +69,6 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -93,17 +89,14 @@ public class JournalConverterUtilTest {
 			new LiferayIntegrationTestRule(),
 			SynchronousDestinationTestRule.INSTANCE);
 
-	@BeforeClass
-	public static void setUpClass() {
-		_enLocale = LocaleUtil.fromLanguageId("en_US");
-		_ptLocale = LocaleUtil.fromLanguageId("pt_BR");
-	}
-
 	@Before
 	public void setUp() throws Exception {
 		setUpDDMFormJSONDeserializer();
 		setUpDDMFormXSDDeserializer();
 		setUpDDMXML();
+
+		_enLocale = LocaleUtil.fromLanguageId("en_US");
+		_ptLocale = LocaleUtil.fromLanguageId("pt_BR");
 
 		_group = GroupTestUtil.addGroup();
 
@@ -623,7 +616,7 @@ public class JournalConverterUtilTest {
 		Field fieldsDisplayField = new Field();
 
 		fieldsDisplayField.setDDMStructureId(ddmStructureId);
-		fieldsDisplayField.setName(DDMImpl.FIELDS_DISPLAY_NAME);
+		fieldsDisplayField.setName(DDM.FIELDS_DISPLAY_NAME);
 		fieldsDisplayField.setValue(value);
 
 		return fieldsDisplayField;
@@ -672,13 +665,14 @@ public class JournalConverterUtilTest {
 		Field field = new Field();
 
 		field.setDDMStructureId(ddmStructureId);
+		field.setDefaultLocale(_enLocale);
 		field.setName("link_to_layout");
 
 		List<Serializable> enValues = new ArrayList<>();
 
 		for (Layout layout : layoutsMap.values()) {
-			enValues.add(getLinkToLayoutFieldValue(layout, false));
-			enValues.add(getLinkToLayoutFieldValue(layout, true));
+			enValues.add(getLinkToLayoutFieldValue(layout, _enLocale, false));
+			enValues.add(getLinkToLayoutFieldValue(layout, _enLocale, true));
 		}
 
 		field.addValues(_enLocale, enValues);
@@ -687,12 +681,13 @@ public class JournalConverterUtilTest {
 	}
 
 	protected String getLinkToLayoutFieldValue(
-		Layout layout, boolean includeGroupId) {
+		Layout layout, Locale locale, boolean includeGroupId) {
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 		if (includeGroupId) {
 			jsonObject.put("groupId", layout.getGroupId());
+			jsonObject.put("label", layout.getName(locale));
 		}
 
 		jsonObject.put("layoutId", layout.getLayoutId());
@@ -795,7 +790,7 @@ public class JournalConverterUtilTest {
 		sb.append("ext_INSTANCE_HDrK2Um5");
 
 		Field fieldsDisplayField = new Field(
-			ddmStructureId, DDMImpl.FIELDS_DISPLAY_NAME, sb.toString());
+			ddmStructureId, DDM.FIELDS_DISPLAY_NAME, sb.toString());
 
 		fields.put(fieldsDisplayField);
 
@@ -919,17 +914,6 @@ public class JournalConverterUtilTest {
 		Registry registry = RegistryUtil.getRegistry();
 
 		_ddmXML = registry.getService(DDMXML.class);
-
-		XMLSchemaImpl xmlSchema = new XMLSchemaImpl();
-
-		xmlSchema.setSchemaLanguage("http://www.w3.org/2001/XMLSchema");
-		xmlSchema.setSystemId(
-			"http://www.liferay.com/dtd/liferay-ddm-structure_6_2_0.xsd");
-
-		java.lang.reflect.Field field = ReflectionUtil.getDeclaredField(
-			DDMXMLImpl.class, "_xmlSchema");
-
-		field.set(_ddmXML, xmlSchema);
 	}
 
 	protected void udpateFieldsMap(
@@ -990,19 +974,18 @@ public class JournalConverterUtilTest {
 
 	private static final String _PUBLIC_USER_LAYOUT = "publicUserLayout";
 
-	private static Locale _enLocale;
-	private static Locale _ptLocale;
-
 	private long _classNameId;
 	private DDMFormJSONDeserializer _ddmFormJSONDeserializer;
 	private DDMFormXSDDeserializer _ddmFormXSDDeserializer;
 	private DDMStructure _ddmStructure;
 	private DDMStructureTestHelper _ddmStructureTestHelper;
 	private DDMXML _ddmXML;
+	private Locale _enLocale;
 
 	@DeleteAfterTestRun
 	private Group _group;
 
 	private JournalConverter _journalConverter;
+	private Locale _ptLocale;
 
 }

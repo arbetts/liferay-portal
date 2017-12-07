@@ -24,6 +24,9 @@ import com.liferay.portal.service.util.test.PortletPreferencesTestUtil;
 import com.liferay.portal.tools.ToolDependencies;
 import com.liferay.portal.util.HtmlImpl;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -84,15 +87,20 @@ public class PortletPreferencesFactoryImplUnitTest {
 		Map<String, Preference> preferencesMap =
 			portletPreferencesImpl.getPreferences();
 
-		Assert.assertEquals(1, preferencesMap.size());
+		Assert.assertEquals(
+			preferencesMap.toString(), 1, preferencesMap.size());
 
-		Preference preference = preferencesMap.values().iterator().next();
+		Collection<Preference> preferencesCollection = preferencesMap.values();
+
+		Iterator<Preference> iterator = preferencesCollection.iterator();
+
+		Preference preference = iterator.next();
 
 		Assert.assertEquals("name", preference.getName());
 
 		String[] values = preference.getValues();
 
-		Assert.assertEquals(1, values.length);
+		Assert.assertEquals(Arrays.toString(values), 1, values.length);
 		Assert.assertEquals("", values[0]);
 	}
 
@@ -131,7 +139,8 @@ public class PortletPreferencesFactoryImplUnitTest {
 
 		preferencesMap = portletPreferencesImpl.getPreferences();
 
-		Assert.assertEquals(4, preferencesMap.size());
+		Assert.assertEquals(
+			preferencesMap.toString(), 4, preferencesMap.size());
 
 		// Blank
 
@@ -142,7 +151,7 @@ public class PortletPreferencesFactoryImplUnitTest {
 
 		String[] values = preference.getValues();
 
-		Assert.assertEquals(1, values.length);
+		Assert.assertEquals(Arrays.toString(values), 1, values.length);
 		Assert.assertEquals("", values[0]);
 
 		Assert.assertFalse(preference.isReadOnly());
@@ -156,7 +165,7 @@ public class PortletPreferencesFactoryImplUnitTest {
 
 		values = preference.getValues();
 
-		Assert.assertEquals(0, values.length);
+		Assert.assertEquals(Arrays.toString(values), 0, values.length);
 
 		Assert.assertFalse(preference.isReadOnly());
 
@@ -169,7 +178,7 @@ public class PortletPreferencesFactoryImplUnitTest {
 
 		values = preference.getValues();
 
-		Assert.assertEquals(2, values.length);
+		Assert.assertEquals(Arrays.toString(values), 2, values.length);
 		Assert.assertEquals("", values[0]);
 		Assert.assertEquals("value1", values[1]);
 
@@ -184,7 +193,7 @@ public class PortletPreferencesFactoryImplUnitTest {
 
 		values = preference.getValues();
 
-		Assert.assertEquals(2, values.length);
+		Assert.assertEquals(Arrays.toString(values), 2, values.length);
 		Assert.assertEquals("value2", values[0]);
 		Assert.assertEquals("value3", values[1]);
 
@@ -211,7 +220,8 @@ public class PortletPreferencesFactoryImplUnitTest {
 		Map<String, Preference> preferencesMap =
 			portletPreferencesImpl.getPreferences();
 
-		Assert.assertEquals(0, preferencesMap.size());
+		Assert.assertEquals(
+			preferencesMap.toString(), 0, preferencesMap.size());
 	}
 
 	@Test
@@ -237,9 +247,14 @@ public class PortletPreferencesFactoryImplUnitTest {
 		Map<String, Preference> preferencesMap =
 			portletPreferencesImpl.getPreferences();
 
-		Assert.assertEquals(1, preferencesMap.size());
+		Assert.assertEquals(
+			preferencesMap.toString(), 1, preferencesMap.size());
 
-		Preference preference = preferencesMap.values().iterator().next();
+		Collection<Preference> preferencesCollection = preferencesMap.values();
+
+		Iterator<Preference> iterator = preferencesCollection.iterator();
+
+		Preference preference = iterator.next();
 
 		Assert.assertEquals("name", preference.getName());
 		Assert.assertEquals(0, preference.getValues().length);
@@ -270,15 +285,20 @@ public class PortletPreferencesFactoryImplUnitTest {
 		Map<String, Preference> preferencesMap =
 			portletPreferencesImpl.getPreferences();
 
-		Assert.assertEquals(1, preferencesMap.size());
+		Assert.assertEquals(
+			preferencesMap.toString(), 1, preferencesMap.size());
 
-		Preference preference = preferencesMap.values().iterator().next();
+		Collection<Preference> preferencesCollection = preferencesMap.values();
+
+		Iterator<Preference> iterator = preferencesCollection.iterator();
+
+		Preference preference = iterator.next();
 
 		Assert.assertEquals("name", preference.getName());
 
 		values = preference.getValues();
 
-		Assert.assertEquals(2, values.length);
+		Assert.assertEquals(Arrays.toString(values), 2, values.length);
 		Assert.assertEquals("value1", values[0]);
 		Assert.assertEquals("value2", values[1]);
 	}
@@ -306,15 +326,20 @@ public class PortletPreferencesFactoryImplUnitTest {
 		Map<String, Preference> preferencesMap =
 			portletPreferencesImpl.getPreferences();
 
-		Assert.assertEquals(1, preferencesMap.size());
+		Assert.assertEquals(
+			preferencesMap.toString(), 1, preferencesMap.size());
 
-		Preference preference = preferencesMap.values().iterator().next();
+		Collection<Preference> preferencesCollection = preferencesMap.values();
+
+		Iterator<Preference> iterator = preferencesCollection.iterator();
+
+		Preference preference = iterator.next();
 
 		Assert.assertEquals("name", preference.getName());
 
 		String[] values = preference.getValues();
 
-		Assert.assertEquals(1, values.length);
+		Assert.assertEquals(Arrays.toString(values), 1, values.length);
 		Assert.assertEquals("value", values[0]);
 	}
 

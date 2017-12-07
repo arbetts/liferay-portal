@@ -14,13 +14,14 @@
 
 package com.liferay.portlet;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletQName;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.Namespace;
 import com.liferay.portal.kernel.xml.QName;
@@ -160,10 +161,21 @@ public class PortletQNameImpl implements PortletQName {
 		StringBundler sb = new StringBundler(6);
 
 		sb.append(prefix);
-		sb.append(qName.getNamespacePrefix());
-		sb.append(StringPool.UNDERLINE);
-		sb.append(qName.getNamespaceURI());
-		sb.append(StringPool.UNDERLINE);
+
+		String namespacePrefix = qName.getNamespacePrefix();
+
+		if (!Validator.isBlank(namespacePrefix)) {
+			sb.append(namespacePrefix);
+			sb.append(StringPool.UNDERLINE);
+		}
+
+		String namespaceURI = qName.getNamespaceURI();
+
+		if (!Validator.isBlank(namespaceURI)) {
+			sb.append(qName.getNamespaceURI());
+			sb.append(StringPool.UNDERLINE);
+		}
+
 		sb.append(qName.getLocalPart());
 
 		return sb.toString();

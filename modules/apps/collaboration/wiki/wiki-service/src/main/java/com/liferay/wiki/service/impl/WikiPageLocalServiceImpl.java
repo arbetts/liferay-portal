@@ -22,6 +22,7 @@ import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeUtil;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.comment.CommentManagerUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.diff.DiffHtmlUtil;
@@ -54,7 +55,6 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.MathUtil;
@@ -69,6 +69,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SubscriptionSender;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
+import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -78,11 +79,14 @@ import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.portal.util.LayoutURLUtil;
 import com.liferay.social.kernel.model.SocialActivityConstants;
-import com.liferay.trash.kernel.exception.RestoreEntryException;
-import com.liferay.trash.kernel.exception.TrashEntryException;
-import com.liferay.trash.kernel.model.TrashEntry;
-import com.liferay.trash.kernel.model.TrashVersion;
-import com.liferay.trash.kernel.util.TrashUtil;
+import com.liferay.subscription.service.SubscriptionLocalService;
+import com.liferay.trash.TrashHelper;
+import com.liferay.trash.exception.RestoreEntryException;
+import com.liferay.trash.exception.TrashEntryException;
+import com.liferay.trash.model.TrashEntry;
+import com.liferay.trash.model.TrashVersion;
+import com.liferay.trash.service.TrashEntryLocalService;
+import com.liferay.trash.service.TrashVersionLocalService;
 import com.liferay.wiki.configuration.WikiGroupServiceOverriddenConfiguration;
 import com.liferay.wiki.constants.WikiConstants;
 import com.liferay.wiki.constants.WikiPortletKeys;
@@ -127,6 +131,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
@@ -174,6 +179,9 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		content = SanitizerUtil.sanitize(
 			user.getCompanyId(), node.getGroupId(), userId,
 			WikiPage.class.getName(), pageId, "text/" + format, content);
+
+		title = StringUtil.replace(
+			title, CharPool.NO_BREAK_SPACE, CharPool.SPACE);
 
 		validate(title, nodeId, content, format);
 
@@ -591,12 +599,11 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		// Resource
 
-		WikiPageResource pageResource =
-			wikiPageResourceLocalService.fetchPageResource(
-				page.getNodeId(), page.getTitle());
+		WikiPageResource pageResource = wikiPageResourcePersistence.fetchByN_T(
+			page.getNodeId(), page.getTitle());
 
 		if (pageResource != null) {
-			wikiPageResourceLocalService.deleteWikiPageResource(pageResource);
+			wikiPageResourcePersistence.remove(pageResource);
 		}
 
 		// Attachments
@@ -650,7 +657,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		if (page.isInTrash()) {
 			if (page.isInTrashExplicitly()) {
-				page.setTitle(TrashUtil.getOriginalTitle(page.getTitle()));
+				page.setTitle(trashHelper.getOriginalTitle(page.getTitle()));
 
 				trashEntryLocalService.deleteEntry(
 					WikiPage.class.getName(), page.getResourcePrimKey());
@@ -873,7 +880,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 	@Override
 	public WikiPage fetchPage(long resourcePrimKey) {
 		WikiPageResource pageResource =
-			wikiPageResourceLocalService.fetchWikiPageResource(resourcePrimKey);
+			wikiPageResourcePersistence.fetchByPrimaryKey(resourcePrimKey);
 
 		if (pageResource == null) {
 			return null;
@@ -972,30 +979,15 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 	public WikiPage getDraftPage(long nodeId, String title)
 		throws PortalException {
 
-		List<WikiPage> pages = wikiPagePersistence.findByN_T_S(
-			nodeId, title, WorkflowConstants.STATUS_DRAFT, 0, 1);
+		WikiPage page = wikiPagePersistence.fetchByN_T_S_First(
+			nodeId, title, WorkflowConstants.STATUS_DRAFT, null);
 
-		if (!pages.isEmpty()) {
-			return pages.get(0);
+		if (page != null) {
+			return page;
 		}
 
-		pages = wikiPagePersistence.findByN_T_S(
-			nodeId, title, WorkflowConstants.STATUS_PENDING, 0, 1);
-
-		if (!pages.isEmpty()) {
-			return pages.get(0);
-		}
-		else {
-			StringBundler sb = new StringBundler(5);
-
-			sb.append("{nodeId=");
-			sb.append(nodeId);
-			sb.append(", title=");
-			sb.append(title);
-			sb.append("}");
-
-			throw new NoSuchPageException(sb.toString());
-		}
+		return wikiPagePersistence.findByN_T_S_First(
+			nodeId, title, WorkflowConstants.STATUS_PENDING, null);
 	}
 
 	@Override
@@ -1159,60 +1151,25 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		throws PortalException {
 
 		WikiPageResource pageResource =
-			wikiPageResourceLocalService.getPageResource(resourcePrimKey);
+			wikiPageResourcePersistence.findByPrimaryKey(resourcePrimKey);
 
 		return getPage(pageResource.getNodeId(), pageResource.getTitle(), head);
 	}
 
 	@Override
 	public WikiPage getPage(long nodeId, String title) throws PortalException {
-		WikiPage page = fetchPage(nodeId, title);
-
-		if (page != null) {
-			return page;
-		}
-		else {
-			StringBundler sb = new StringBundler(5);
-
-			sb.append("{nodeId=");
-			sb.append(nodeId);
-			sb.append(", title=");
-			sb.append(title);
-			sb.append("}");
-
-			throw new NoSuchPageException(sb.toString());
-		}
+		return wikiPagePersistence.findByN_T_H_First(nodeId, title, true, null);
 	}
 
 	@Override
 	public WikiPage getPage(long nodeId, String title, Boolean head)
 		throws PortalException {
 
-		List<WikiPage> pages;
-
 		if (head == null) {
-			pages = wikiPagePersistence.findByN_T(nodeId, title, 0, 1);
-		}
-		else {
-			pages = wikiPagePersistence.findByN_T_H(nodeId, title, head, 0, 1);
+			return wikiPagePersistence.findByN_T_First(nodeId, title, null);
 		}
 
-		if (!pages.isEmpty()) {
-			return pages.get(0);
-		}
-		else {
-			StringBundler sb = new StringBundler(7);
-
-			sb.append("{nodeId=");
-			sb.append(nodeId);
-			sb.append(", title=");
-			sb.append(title);
-			sb.append(", head=");
-			sb.append(head);
-			sb.append("}");
-
-			throw new NoSuchPageException(sb.toString());
-		}
+		return wikiPagePersistence.findByN_T_H_First(nodeId, title, head, null);
 	}
 
 	@Override
@@ -1269,6 +1226,18 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 			String attachmentURLPrefix, ServiceContext serviceContext)
 		throws PortalException {
 
+		return getPageDisplay(
+			page, viewPageURL, () -> editPageURL, attachmentURLPrefix,
+			serviceContext);
+	}
+
+	@Override
+	public WikiPageDisplay getPageDisplay(
+			WikiPage page, PortletURL viewPageURL,
+			Supplier<PortletURL> editPageURLSupplier,
+			String attachmentURLPrefix, ServiceContext serviceContext)
+		throws PortalException {
+
 		HttpServletRequest request = serviceContext.getRequest();
 
 		boolean workflowAssetPreview = false;
@@ -1280,12 +1249,12 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		if (!workflowAssetPreview && page.isApproved()) {
 			return wikiCacheHelper.getDisplay(
-				page.getNodeId(), page.getTitle(), viewPageURL, editPageURL,
-				attachmentURLPrefix);
+				page.getNodeId(), page.getTitle(), viewPageURL,
+				editPageURLSupplier, attachmentURLPrefix);
 		}
 
 		return getPageDisplay(
-			page, viewPageURL, editPageURL, attachmentURLPrefix);
+			page, viewPageURL, editPageURLSupplier.get(), attachmentURLPrefix);
 	}
 
 	@Override
@@ -1555,7 +1524,8 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		extraDataJSONObject.put("fileEntryId", fileEntry.getFileEntryId());
 		extraDataJSONObject.put(
-			"fileEntryTitle", TrashUtil.getOriginalTitle(fileEntry.getTitle()));
+			"fileEntryTitle",
+			trashHelper.getOriginalTitle(fileEntry.getTitle()));
 		extraDataJSONObject.put("title", page.getTitle());
 		extraDataJSONObject.put("version", page.getVersion());
 
@@ -1607,11 +1577,11 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 	public WikiPage movePageToTrash(long userId, long nodeId, String title)
 		throws PortalException {
 
-		List<WikiPage> wikiPages = wikiPagePersistence.findByN_T_H(
-			nodeId, title, true, 0, 1);
+		WikiPage page = wikiPagePersistence.fetchByN_T_H_First(
+			nodeId, title, true, null);
 
-		if (!wikiPages.isEmpty()) {
-			return movePageToTrash(userId, wikiPages.get(0));
+		if (page != null) {
+			return movePageToTrash(userId, page);
 		}
 
 		return null;
@@ -1677,7 +1647,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 			page.getResourcePrimKey(), page.getUuid(), null, oldStatus,
 			pageVersionStatusOVPs, typeSettingsProperties);
 
-		String trashTitle = TrashUtil.getTrashTitle(trashEntry.getEntryId());
+		String trashTitle = trashHelper.getTrashTitle(trashEntry.getEntryId());
 
 		for (WikiPage pageVersion : pageVersions) {
 			pageVersion.setTitle(trashTitle);
@@ -1728,7 +1698,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		JSONObject extraDataJSONObject = JSONFactoryUtil.createJSONObject();
 
 		extraDataJSONObject.put(
-			"title", TrashUtil.getOriginalTitle(page.getTitle()));
+			"title", trashHelper.getOriginalTitle(page.getTitle()));
 		extraDataJSONObject.put("version", page.getVersion());
 
 		SocialActivityManagerUtil.addActivity(
@@ -1765,6 +1735,9 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		if ((latestWikiPage != null) && !latestWikiPage.isApproved()) {
 			throw new PageVersionException();
 		}
+
+		newTitle = StringUtil.replace(
+			newTitle, CharPool.NO_BREAK_SPACE, CharPool.SPACE);
 
 		wikiPageTitleValidator.validate(newTitle);
 
@@ -1853,7 +1826,8 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		extraDataJSONObject.put("fileEntryId", fileEntry.getFileEntryId());
 		extraDataJSONObject.put(
-			"fileEntryTitle", TrashUtil.getOriginalTitle(fileEntry.getTitle()));
+			"fileEntryTitle",
+			trashHelper.getOriginalTitle(fileEntry.getTitle()));
 		extraDataJSONObject.put("title", page.getTitle());
 		extraDataJSONObject.put("version", page.getVersion());
 
@@ -1951,7 +1925,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 			assetEntry = assetEntryLocalService.updateEntry(
 				userId, page.getGroupId(), page.getCreateDate(),
 				page.getModifiedDate(), WikiPage.class.getName(),
-				page.getPrimaryKey(), page.getUuid(), 0, assetCategoryIds,
+				page.getResourcePrimKey(), page.getUuid(), 0, assetCategoryIds,
 				assetTagNames, true, false, null, null, publishDate, null,
 				ContentTypes.TEXT_HTML, page.getTitle(), null, null, null, null,
 				0, 0, priority);
@@ -2013,21 +1987,11 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		throws PortalException {
 
 		WikiPageResource pageResource =
-			wikiPageResourceLocalService.getPageResource(resourcePrimKey);
+			wikiPageResourcePersistence.findByPrimaryKey(resourcePrimKey);
 
-		List<WikiPage> pages = wikiPagePersistence.findByN_T(
-			pageResource.getNodeId(), pageResource.getTitle(), 0, 1,
+		WikiPage page = wikiPagePersistence.findByN_T_First(
+			pageResource.getNodeId(), pageResource.getTitle(),
 			new PageVersionComparator());
-
-		WikiPage page = null;
-
-		if (!pages.isEmpty()) {
-			page = pages.get(0);
-		}
-		else {
-			throw new NoSuchPageException(
-				"{resourcePrimKey=" + resourcePrimKey + "}");
-		}
 
 		return updateStatus(
 			userId, page, status, serviceContext,
@@ -2387,7 +2351,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		}
 		else {
 			portletURL = PortletURLFactoryUtil.create(
-				request, WikiConstants.SERVICE_NAME, plid,
+				request, WikiPortletKeys.WIKI, plid,
 				PortletRequest.RENDER_PHASE);
 		}
 
@@ -2417,10 +2381,10 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 			page.getGroupId(), WikiPortletKeys.WIKI, serviceContext);
 
 		if (Validator.isNotNull(layoutFullURL)) {
-			return layoutFullURL + Portal.FRIENDLY_URL_SEPARATOR + "wiki/" +
-				page.getNodeId() + StringPool.SLASH +
-					HttpUtil.encodeURL(
-						WikiEscapeUtil.escapeName(page.getTitle()));
+			return StringBundler.concat(
+				layoutFullURL, Portal.FRIENDLY_URL_SEPARATOR, "wiki/",
+				String.valueOf(page.getNodeId()), StringPool.SLASH,
+				URLCodec.encodeURL(WikiEscapeUtil.escapeName(page.getTitle())));
 		}
 		else {
 			PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
@@ -2570,7 +2534,8 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		pageResource.setNodeId(newNodeId);
 
 		if (trashVersion != null) {
-			String originalTitle = TrashUtil.getOriginalTitle(page.getTitle());
+			String originalTitle = trashHelper.getOriginalTitle(
+				page.getTitle());
 
 			pageResource.setTitle(originalTitle);
 
@@ -2721,7 +2686,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 					trashEntryId, WikiPage.class.getName(), page.getPageId(),
 					page.getStatus(), typeSettingsProperties);
 
-			trashTitle = TrashUtil.getTrashTitle(trashVersion.getVersionId());
+			trashTitle = trashHelper.getTrashTitle(trashVersion.getVersionId());
 
 			WikiPageResource pageResource =
 				wikiPageResourcePersistence.findByPrimaryKey(
@@ -2832,7 +2797,7 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		String trashTitle = page.getTitle();
 
-		String originalTitle = TrashUtil.getOriginalTitle(trashTitle);
+		String originalTitle = trashHelper.getOriginalTitle(trashTitle);
 
 		long oldNodeId = page.getNodeId();
 
@@ -3288,6 +3253,18 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 	@ServiceReference(type = ConfigurationProvider.class)
 	protected ConfigurationProvider configurationProvider;
+
+	@ServiceReference(type = SubscriptionLocalService.class)
+	protected SubscriptionLocalService subscriptionLocalService;
+
+	@ServiceReference(type = TrashEntryLocalService.class)
+	protected TrashEntryLocalService trashEntryLocalService;
+
+	@ServiceReference(type = TrashHelper.class)
+	protected TrashHelper trashHelper;
+
+	@ServiceReference(type = TrashVersionLocalService.class)
+	protected TrashVersionLocalService trashVersionLocalService;
 
 	@ServiceReference(type = WikiCacheHelper.class)
 	protected WikiCacheHelper wikiCacheHelper;

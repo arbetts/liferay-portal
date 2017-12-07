@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.verify.VerifyProcess;
 import com.liferay.portal.verify.VerifyResourcePermissions;
 import com.liferay.portal.verify.VerifyUUID;
@@ -34,18 +35,15 @@ import com.liferay.wiki.util.comparator.PageVersionComparator;
 import java.util.Date;
 import java.util.List;
 
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Brian Wing Shun Chan
- * @author Iván Zaera
+ * @author     Brian Wing Shun Chan
+ * @author     Iván Zaera
+ * @deprecated As of 1.4.0, replaced by {@link
+ *             com.liferay.wiki.internal.verify.WikiServiceVerifyProcess}
  */
-@Component(
-	immediate = true,
-	property = {"verify.process.name=com.liferay.wiki.service"},
-	service = VerifyProcess.class
-)
+@Deprecated
 public class WikiServiceVerifyProcess extends VerifyProcess {
 
 	@Override
@@ -134,8 +132,10 @@ public class WikiServiceVerifyProcess extends VerifyProcess {
 				catch (Exception e) {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
-							"Unable to update asset for page " +
-								page.getPageId() + ": " + e.getMessage());
+							StringBundler.concat(
+								"Unable to update asset for page ",
+								String.valueOf(page.getPageId()), ": ",
+								e.getMessage()));
 					}
 				}
 			}

@@ -173,143 +173,147 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	public int countByCompanyId(long companyId);
 
 	/**
-	* Returns all the kaleo actions where kaleoDefinitionId = &#63;.
+	* Returns all the kaleo actions where kaleoDefinitionVersionId = &#63;.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @return the matching kaleo actions
 	*/
-	public java.util.List<KaleoAction> findByKaleoDefinitionId(
-		long kaleoDefinitionId);
+	public java.util.List<KaleoAction> findByKaleoDefinitionVersionId(
+		long kaleoDefinitionVersionId);
 
 	/**
-	* Returns a range of all the kaleo actions where kaleoDefinitionId = &#63;.
+	* Returns a range of all the kaleo actions where kaleoDefinitionVersionId = &#63;.
 	*
 	* <p>
 	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link KaleoActionModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
 	* @return the range of matching kaleo actions
 	*/
-	public java.util.List<KaleoAction> findByKaleoDefinitionId(
-		long kaleoDefinitionId, int start, int end);
+	public java.util.List<KaleoAction> findByKaleoDefinitionVersionId(
+		long kaleoDefinitionVersionId, int start, int end);
 
 	/**
-	* Returns an ordered range of all the kaleo actions where kaleoDefinitionId = &#63;.
+	* Returns an ordered range of all the kaleo actions where kaleoDefinitionVersionId = &#63;.
 	*
 	* <p>
 	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link KaleoActionModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching kaleo actions
 	*/
-	public java.util.List<KaleoAction> findByKaleoDefinitionId(
-		long kaleoDefinitionId, int start, int end,
+	public java.util.List<KaleoAction> findByKaleoDefinitionVersionId(
+		long kaleoDefinitionVersionId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<KaleoAction> orderByComparator);
 
 	/**
-	* Returns an ordered range of all the kaleo actions where kaleoDefinitionId = &#63;.
+	* Returns an ordered range of all the kaleo actions where kaleoDefinitionVersionId = &#63;.
 	*
 	* <p>
 	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link KaleoActionModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	* </p>
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the ordered range of matching kaleo actions
 	*/
-	public java.util.List<KaleoAction> findByKaleoDefinitionId(
-		long kaleoDefinitionId, int start, int end,
+	public java.util.List<KaleoAction> findByKaleoDefinitionVersionId(
+		long kaleoDefinitionVersionId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<KaleoAction> orderByComparator,
 		boolean retrieveFromCache);
 
 	/**
-	* Returns the first kaleo action in the ordered set where kaleoDefinitionId = &#63;.
+	* Returns the first kaleo action in the ordered set where kaleoDefinitionVersionId = &#63;.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching kaleo action
 	* @throws NoSuchActionException if a matching kaleo action could not be found
 	*/
-	public KaleoAction findByKaleoDefinitionId_First(long kaleoDefinitionId,
+	public KaleoAction findByKaleoDefinitionVersionId_First(
+		long kaleoDefinitionVersionId,
 		com.liferay.portal.kernel.util.OrderByComparator<KaleoAction> orderByComparator)
 		throws NoSuchActionException;
 
 	/**
-	* Returns the first kaleo action in the ordered set where kaleoDefinitionId = &#63;.
+	* Returns the first kaleo action in the ordered set where kaleoDefinitionVersionId = &#63;.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching kaleo action, or <code>null</code> if a matching kaleo action could not be found
 	*/
-	public KaleoAction fetchByKaleoDefinitionId_First(long kaleoDefinitionId,
+	public KaleoAction fetchByKaleoDefinitionVersionId_First(
+		long kaleoDefinitionVersionId,
 		com.liferay.portal.kernel.util.OrderByComparator<KaleoAction> orderByComparator);
 
 	/**
-	* Returns the last kaleo action in the ordered set where kaleoDefinitionId = &#63;.
+	* Returns the last kaleo action in the ordered set where kaleoDefinitionVersionId = &#63;.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching kaleo action
 	* @throws NoSuchActionException if a matching kaleo action could not be found
 	*/
-	public KaleoAction findByKaleoDefinitionId_Last(long kaleoDefinitionId,
+	public KaleoAction findByKaleoDefinitionVersionId_Last(
+		long kaleoDefinitionVersionId,
 		com.liferay.portal.kernel.util.OrderByComparator<KaleoAction> orderByComparator)
 		throws NoSuchActionException;
 
 	/**
-	* Returns the last kaleo action in the ordered set where kaleoDefinitionId = &#63;.
+	* Returns the last kaleo action in the ordered set where kaleoDefinitionVersionId = &#63;.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching kaleo action, or <code>null</code> if a matching kaleo action could not be found
 	*/
-	public KaleoAction fetchByKaleoDefinitionId_Last(long kaleoDefinitionId,
+	public KaleoAction fetchByKaleoDefinitionVersionId_Last(
+		long kaleoDefinitionVersionId,
 		com.liferay.portal.kernel.util.OrderByComparator<KaleoAction> orderByComparator);
 
 	/**
-	* Returns the kaleo actions before and after the current kaleo action in the ordered set where kaleoDefinitionId = &#63;.
+	* Returns the kaleo actions before and after the current kaleo action in the ordered set where kaleoDefinitionVersionId = &#63;.
 	*
 	* @param kaleoActionId the primary key of the current kaleo action
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next kaleo action
 	* @throws NoSuchActionException if a kaleo action with the primary key could not be found
 	*/
-	public KaleoAction[] findByKaleoDefinitionId_PrevAndNext(
-		long kaleoActionId, long kaleoDefinitionId,
+	public KaleoAction[] findByKaleoDefinitionVersionId_PrevAndNext(
+		long kaleoActionId, long kaleoDefinitionVersionId,
 		com.liferay.portal.kernel.util.OrderByComparator<KaleoAction> orderByComparator)
 		throws NoSuchActionException;
 
 	/**
-	* Removes all the kaleo actions where kaleoDefinitionId = &#63; from the database.
+	* Removes all the kaleo actions where kaleoDefinitionVersionId = &#63; from the database.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	*/
-	public void removeByKaleoDefinitionId(long kaleoDefinitionId);
+	public void removeByKaleoDefinitionVersionId(long kaleoDefinitionVersionId);
 
 	/**
-	* Returns the number of kaleo actions where kaleoDefinitionId = &#63;.
+	* Returns the number of kaleo actions where kaleoDefinitionVersionId = &#63;.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID
+	* @param kaleoDefinitionVersionId the kaleo definition version ID
 	* @return the number of matching kaleo actions
 	*/
-	public int countByKaleoDefinitionId(long kaleoDefinitionId);
+	public int countByKaleoDefinitionVersionId(long kaleoDefinitionVersionId);
 
 	/**
 	* Returns all the kaleo actions where kaleoClassName = &#63; and kaleoClassPK = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @return the matching kaleo actions
 	*/
 	public java.util.List<KaleoAction> findByKCN_KCPK(
@@ -323,7 +327,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* </p>
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
 	* @return the range of matching kaleo actions
@@ -339,7 +343,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* </p>
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -357,7 +361,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* </p>
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -373,7 +377,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the first kaleo action in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching kaleo action
 	* @throws NoSuchActionException if a matching kaleo action could not be found
@@ -387,7 +391,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the first kaleo action in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching kaleo action, or <code>null</code> if a matching kaleo action could not be found
 	*/
@@ -399,7 +403,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the last kaleo action in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching kaleo action
 	* @throws NoSuchActionException if a matching kaleo action could not be found
@@ -413,7 +417,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the last kaleo action in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching kaleo action, or <code>null</code> if a matching kaleo action could not be found
 	*/
@@ -426,7 +430,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	*
 	* @param kaleoActionId the primary key of the current kaleo action
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next kaleo action
 	* @throws NoSuchActionException if a kaleo action with the primary key could not be found
@@ -440,7 +444,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Removes all the kaleo actions where kaleoClassName = &#63; and kaleoClassPK = &#63; from the database.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	*/
 	public void removeByKCN_KCPK(java.lang.String kaleoClassName,
 		long kaleoClassPK);
@@ -449,7 +453,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the number of kaleo actions where kaleoClassName = &#63; and kaleoClassPK = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @return the number of matching kaleo actions
 	*/
 	public int countByKCN_KCPK(java.lang.String kaleoClassName,
@@ -459,7 +463,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns all the kaleo actions where kaleoClassName = &#63; and kaleoClassPK = &#63; and executionType = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @return the matching kaleo actions
 	*/
@@ -475,7 +479,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* </p>
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
@@ -493,7 +497,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* </p>
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
@@ -513,7 +517,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* </p>
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @param start the lower bound of the range of kaleo actions
 	* @param end the upper bound of the range of kaleo actions (not inclusive)
@@ -531,7 +535,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the first kaleo action in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63; and executionType = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching kaleo action
@@ -547,7 +551,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the first kaleo action in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63; and executionType = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching kaleo action, or <code>null</code> if a matching kaleo action could not be found
@@ -561,7 +565,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the last kaleo action in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63; and executionType = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching kaleo action
@@ -576,7 +580,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the last kaleo action in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63; and executionType = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching kaleo action, or <code>null</code> if a matching kaleo action could not be found
@@ -591,7 +595,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	*
 	* @param kaleoActionId the primary key of the current kaleo action
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next kaleo action
@@ -607,7 +611,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Removes all the kaleo actions where kaleoClassName = &#63; and kaleoClassPK = &#63; and executionType = &#63; from the database.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	*/
 	public void removeByKCN_KCPK_ET(java.lang.String kaleoClassName,
@@ -617,7 +621,7 @@ public interface KaleoActionPersistence extends BasePersistence<KaleoAction> {
 	* Returns the number of kaleo actions where kaleoClassName = &#63; and kaleoClassPK = &#63; and executionType = &#63;.
 	*
 	* @param kaleoClassName the kaleo class name
-	* @param kaleoClassPK the kaleo class p k
+	* @param kaleoClassPK the kaleo class pk
 	* @param executionType the execution type
 	* @return the number of matching kaleo actions
 	*/

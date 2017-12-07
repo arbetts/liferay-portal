@@ -55,7 +55,7 @@ public interface MDRRuleGroupService extends BaseService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this interface directly. Always use {@link MDRRuleGroupServiceUtil} to access the m d r rule group remote service. Add custom service methods to {@link com.liferay.mobile.device.rules.service.impl.MDRRuleGroupServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify or reference this interface directly. Always use {@link MDRRuleGroupServiceUtil} to access the mdr rule group remote service. Add custom service methods to {@link com.liferay.mobile.device.rules.service.impl.MDRRuleGroupServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public MDRRuleGroup addRuleGroup(long groupId,
 		Map<Locale, java.lang.String> nameMap,
@@ -65,21 +65,11 @@ public interface MDRRuleGroupService extends BaseService {
 	public MDRRuleGroup copyRuleGroup(long ruleGroupId, long groupId,
 		ServiceContext serviceContext) throws PortalException;
 
+	public void deleteRuleGroup(long ruleGroupId) throws PortalException;
+
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public MDRRuleGroup fetchRuleGroup(long ruleGroupId)
 		throws PortalException;
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public MDRRuleGroup getRuleGroup(long ruleGroupId)
-		throws PortalException;
-
-	public MDRRuleGroup updateRuleGroup(long ruleGroupId,
-		Map<Locale, java.lang.String> nameMap,
-		Map<Locale, java.lang.String> descriptionMap,
-		ServiceContext serviceContext) throws PortalException;
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getRuleGroupsCount(long[] groupIds);
 
 	/**
 	* Returns the OSGi service identifier.
@@ -89,7 +79,17 @@ public interface MDRRuleGroupService extends BaseService {
 	public java.lang.String getOSGiServiceIdentifier();
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public MDRRuleGroup getRuleGroup(long ruleGroupId)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<MDRRuleGroup> getRuleGroups(long[] groupIds, int start, int end);
 
-	public void deleteRuleGroup(long ruleGroupId) throws PortalException;
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getRuleGroupsCount(long[] groupIds);
+
+	public MDRRuleGroup updateRuleGroup(long ruleGroupId,
+		Map<Locale, java.lang.String> nameMap,
+		Map<Locale, java.lang.String> descriptionMap,
+		ServiceContext serviceContext) throws PortalException;
 }

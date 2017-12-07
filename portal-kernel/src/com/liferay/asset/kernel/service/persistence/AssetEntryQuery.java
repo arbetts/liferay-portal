@@ -49,7 +49,7 @@ import javax.portlet.PortletRequest;
  */
 public class AssetEntryQuery {
 
-	public static final String[] ORDER_BY_COLUMNS = new String[] {
+	public static final String[] ORDER_BY_COLUMNS = {
 		"title", "createDate", "modifiedDate", "publishDate", "expirationDate",
 		"priority", "viewCount", "ratings"
 	};
@@ -150,7 +150,8 @@ public class AssetEntryQuery {
 
 		if (Validator.isNotNull(tagName)) {
 			_allTagIds = AssetTagLocalServiceUtil.getTagIds(
-				themeDisplay.getScopeGroupId(), new String[] {tagName});
+				PortalUtil.getSiteGroupId(themeDisplay.getScopeGroupId()),
+				new String[] {tagName});
 
 			if (_allTagIds.length == 0) {
 				_allTagIds = new long[] {0};

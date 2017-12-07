@@ -32,8 +32,10 @@ import org.osgi.util.tracker.ServiceTracker;
  * @see KaleoDefinitionService
  * @see com.liferay.portal.workflow.kaleo.service.base.KaleoDefinitionServiceBaseImpl
  * @see com.liferay.portal.workflow.kaleo.service.impl.KaleoDefinitionServiceImpl
+ * @deprecated As of 2.0.0, with no direct replacement
  * @generated
  */
+@Deprecated
 @ProviderType
 public class KaleoDefinitionServiceUtil {
 	/*
@@ -43,22 +45,30 @@ public class KaleoDefinitionServiceUtil {
 	 */
 
 	/**
+	* @deprecated As of 2.0.0, with no direct replacement
+	*/
+	@Deprecated
+	public static java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoDefinition> getKaleoDefinitions(
+		int start, int end) {
+		return getService().getKaleoDefinitions(start, end);
+	}
+
+	/**
+	* @deprecated As of 2.0.0, with no direct replacement
+	*/
+	@Deprecated
+	public static java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoDefinition> getKaleoDefinitions(
+		long companyId, int start, int end) {
+		return getService().getKaleoDefinitions(companyId, start, end);
+	}
+
+	/**
 	* Returns the OSGi service identifier.
 	*
 	* @return the OSGi service identifier
 	*/
 	public static java.lang.String getOSGiServiceIdentifier() {
 		return getService().getOSGiServiceIdentifier();
-	}
-
-	public static java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoDefinition> getKaleoDefinitions(
-		int start, int end) {
-		return getService().getKaleoDefinitions(start, end);
-	}
-
-	public static java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoDefinition> getKaleoDefinitions(
-		long companyId, int start, int end) {
-		return getService().getKaleoDefinitions(companyId, start, end);
 	}
 
 	public static KaleoDefinitionService getService() {

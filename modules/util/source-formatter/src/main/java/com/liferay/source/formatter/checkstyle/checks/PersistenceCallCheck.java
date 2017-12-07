@@ -14,27 +14,22 @@
 
 package com.liferay.source.formatter.checkstyle.checks;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
+import com.liferay.source.formatter.checks.util.JavaSourceUtil;
 import com.liferay.source.formatter.checkstyle.util.DetailASTUtil;
-import com.liferay.source.formatter.util.ThreadSafeClassLibrary;
+import com.liferay.source.formatter.parser.JavaClass;
+import com.liferay.source.formatter.parser.JavaClassParser;
+import com.liferay.source.formatter.parser.JavaTerm;
+import com.liferay.source.formatter.parser.JavaVariable;
+import com.liferay.source.formatter.util.FileUtil;
 
-import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FileContents;
 import com.puppycrawl.tools.checkstyle.api.FileText;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
-import com.thoughtworks.qdox.JavaDocBuilder;
-import com.thoughtworks.qdox.model.DefaultDocletTagFactory;
-import com.thoughtworks.qdox.model.JavaClass;
-import com.thoughtworks.qdox.model.JavaField;
-import com.thoughtworks.qdox.model.JavaPackage;
-import com.thoughtworks.qdox.model.Type;
-
 import java.io.File;
-import java.io.IOException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,10 +40,7 @@ import java.util.regex.Pattern;
 /**
  * @author Hugo Huijser
  */
-public class PersistenceCallCheck extends AbstractCheck {
-
-	public static final String MSG_ILLEGAL_PERSISTENCE_CALL =
-		"persistence.call.illegal";
+public class PersistenceCallCheck extends BaseCheck {
 
 	@Override
 	public int[] getDefaultTokens() {
@@ -56,15 +48,19 @@ public class PersistenceCallCheck extends AbstractCheck {
 	}
 
 	@Override
-	public void visitToken(DetailAST detailAST) {
+	protected void doVisitToken(DetailAST detailAST) {
+		DetailAST parent = detailAST.getParent();
+
+		if (parent != null) {
+			return;
+		}
+
 		FileContents fileContents = getFileContents();
 
 		String fileName = StringUtil.replace(
-			fileContents.getFileName(), CharPool.BACK_SLASH, CharPool.SLASH);
+			fileContents.getFileName(), '\\', '/');
 
-		Matcher matcher = _fileNamePattern.matcher(fileName);
-
-		if (!matcher.find()) {
+		if (!fileName.contains("/modules/")) {
 			return;
 		}
 
@@ -72,37 +68,54 @@ public class PersistenceCallCheck extends AbstractCheck {
 
 		String content = (String)fileText.getFullText();
 
-		String baseClassName = matcher.replaceAll("$2Base$3");
+		JavaClass javaClass = null;
 
-		if (!content.contains("extends " + baseClassName)) {
+		try {
+			javaClass = JavaClassParser.parseJavaClass(fileName, content);
+		}
+		catch (Exception e) {
 			return;
 		}
 
-		String baseFileName = matcher.replaceAll("$1base/$2Base$3$4");
+		Map<String, String> variablesMap = _getVariablesMap(javaClass);
 
-		JavaDocBuilder javaDocBuilder = _getJavaDocBuilder(baseFileName);
-
-		if (javaDocBuilder == null) {
-			return;
-		}
-
-		String moduleServicePackagePath = _getModuleServicePackagePath(
-			javaDocBuilder);
-		Map<String, String> persistenceFields = _getAvailablePersistenceFields(
-			javaDocBuilder);
+		variablesMap.putAll(
+			_getVariablesMap(_getExtendedJavaClass(fileName, content)));
 
 		List<DetailAST> methodCallASTList = DetailASTUtil.getAllChildTokens(
 			detailAST, true, TokenTypes.METHOD_CALL);
 
 		for (DetailAST methodCallAST : methodCallASTList) {
 			_checkMethodCall(
-				methodCallAST, moduleServicePackagePath, persistenceFields);
+				methodCallAST, javaClass.getImports(), variablesMap,
+				javaClass.getPackageName());
+		}
+	}
+
+	private void _checkClass(
+		String className, List<String> importNames, String packageName,
+		int lineNo) {
+
+		for (String importName : importNames) {
+			if (!importName.endsWith("." + className)) {
+				continue;
+			}
+
+			int pos = importName.indexOf(".service.persistence.");
+
+			if (pos == -1) {
+				return;
+			}
+
+			if (!packageName.startsWith(importName.substring(0, pos))) {
+				log(lineNo, _MSG_ILLEGAL_PERSISTENCE_CALL, importName);
+			}
 		}
 	}
 
 	private void _checkMethodCall(
-		DetailAST methodCallAST, String moduleServicePackagePath,
-		Map<String, String> persistenceFields) {
+		DetailAST methodCallAST, List<String> importNames,
+		Map<String, String> variablesMap, String packageName) {
 
 		DetailAST childAST = methodCallAST.getFirstChild();
 
@@ -116,68 +129,146 @@ public class PersistenceCallCheck extends AbstractCheck {
 			return;
 		}
 
+		DetailAST siblingAST = childAST.getNextSibling();
+
+		if (siblingAST.getType() == TokenTypes.IDENT) {
+			String methodName = siblingAST.getText();
+
+			if (methodName.equals("clearCache") ||
+				methodName.startsWith("create")) {
+
+				return;
+			}
+		}
+
 		String fieldName = childAST.getText();
 
-		String fullyQualifiedTypeName = persistenceFields.get(fieldName);
-
-		if (Validator.isNotNull(fullyQualifiedTypeName) &&
-			!fullyQualifiedTypeName.startsWith(moduleServicePackagePath)) {
-
-			log(
-				methodCallAST.getLineNo(), MSG_ILLEGAL_PERSISTENCE_CALL,
-				fullyQualifiedTypeName);
+		if (fieldName.matches("[A-Z].*")) {
+			_checkClass(
+				fieldName, importNames, packageName, methodCallAST.getLineNo());
+		}
+		else {
+			_checkVariable(
+				fieldName, variablesMap, packageName,
+				methodCallAST.getLineNo());
 		}
 	}
 
-	private Map<String, String> _getAvailablePersistenceFields(
-		JavaDocBuilder javaDocBuilder) {
+	private void _checkVariable(
+		String variableName, Map<String, String> variablesMap,
+		String packageName, int lineNo) {
 
-		Map<String, String> persistenceFields = new HashMap<>();
+		String fullyQualifiedTypeName = variablesMap.get(variableName);
 
-		JavaClass javaClass = javaDocBuilder.getClasses()[0];
-
-		for (JavaField javaField : javaClass.getFields()) {
-			String fieldName = javaField.getName();
-
-			if (!fieldName.endsWith("Persistence")) {
-				continue;
-			}
-
-			Type fieldType = javaField.getType();
-
-			String fullyQualifiedTypeName = fieldType.getFullyQualifiedName();
-
-			persistenceFields.put(fieldName, fullyQualifiedTypeName);
+		if (fullyQualifiedTypeName == null) {
+			return;
 		}
 
-		return persistenceFields;
+		int pos = fullyQualifiedTypeName.indexOf(".service.persistence.");
+
+		if (pos == -1) {
+			return;
+		}
+
+		if (!packageName.startsWith(fullyQualifiedTypeName.substring(0, pos))) {
+			log(lineNo, _MSG_ILLEGAL_PERSISTENCE_CALL, fullyQualifiedTypeName);
+		}
 	}
 
-	private JavaDocBuilder _getJavaDocBuilder(String fileName) {
-		JavaDocBuilder javaDocBuilder = new JavaDocBuilder(
-			new DefaultDocletTagFactory(), new ThreadSafeClassLibrary());
+	private JavaClass _getExtendedJavaClass(String fileName, String content) {
+		Matcher matcher = _extendedClassPattern.matcher(content);
 
-		try {
-			javaDocBuilder.addSource(new File(fileName));
-		}
-		catch (IOException ioe) {
+		if (!matcher.find()) {
 			return null;
 		}
 
-		return javaDocBuilder;
+		String extendedClassName = matcher.group(1);
+
+		Pattern pattern = Pattern.compile(
+			"\nimport (.*\\." + extendedClassName + ");");
+
+		matcher = pattern.matcher(content);
+
+		if (matcher.find()) {
+			extendedClassName = matcher.group(1);
+
+			if (!extendedClassName.startsWith("com.liferay.")) {
+				return null;
+			}
+		}
+
+		if (!extendedClassName.contains(StringPool.PERIOD)) {
+			extendedClassName =
+				JavaSourceUtil.getPackageName(content) + StringPool.PERIOD +
+					extendedClassName;
+		}
+
+		int pos = fileName.lastIndexOf("/com/liferay/");
+
+		String extendedClassFileName =
+			fileName.substring(0, pos + 1) +
+				StringUtil.replace(extendedClassName, '.', '/') + ".java";
+
+		try {
+			return JavaClassParser.parseJavaClass(
+				extendedClassFileName,
+				FileUtil.read(new File(extendedClassFileName)));
+		}
+		catch (Exception e) {
+			return null;
+		}
 	}
 
-	private String _getModuleServicePackagePath(JavaDocBuilder javaDocBuilder) {
-		JavaPackage javaPackage = javaDocBuilder.getPackages()[0];
+	private String _getFullyQualifiedName(
+		String className, JavaClass javaClass) {
 
-		String packageName = javaPackage.getName();
+		for (String importName : javaClass.getImports()) {
+			if (importName.endsWith(StringPool.PERIOD + className)) {
+				return importName;
+			}
+		}
 
-		int pos = packageName.indexOf(".service.");
-
-		return packageName.substring(0, pos + 8);
+		return javaClass.getPackageName() + StringPool.PERIOD + className;
 	}
 
-	private final Pattern _fileNamePattern = Pattern.compile(
-		"(.*/modules/.*/service/)impl/(.*Service)(Impl)(\\.java)");
+	private Map<String, String> _getVariablesMap(JavaClass javaClass) {
+		Map<String, String> variablesMap = new HashMap<>();
+
+		if (javaClass == null) {
+			return variablesMap;
+		}
+
+		for (JavaTerm javaTerm : javaClass.getChildJavaTerms()) {
+			if (!(javaTerm instanceof JavaVariable)) {
+				continue;
+			}
+
+			Pattern pattern = Pattern.compile(
+				"\\s(\\S+)\\s+(\\S+\\.)?" + javaTerm.getName());
+
+			Matcher matcher = pattern.matcher(javaTerm.getContent());
+
+			if (!matcher.find()) {
+				continue;
+			}
+
+			String fieldTypeClassName = matcher.group(1);
+
+			if (!fieldTypeClassName.contains(StringPool.PERIOD)) {
+				fieldTypeClassName = _getFullyQualifiedName(
+					fieldTypeClassName, javaClass);
+			}
+
+			variablesMap.put(javaTerm.getName(), fieldTypeClassName);
+		}
+
+		return variablesMap;
+	}
+
+	private static final String _MSG_ILLEGAL_PERSISTENCE_CALL =
+		"persistence.call.illegal";
+
+	private final Pattern _extendedClassPattern = Pattern.compile(
+		"\\sextends\\s+(\\w+)\\W");
 
 }

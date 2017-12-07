@@ -31,8 +31,8 @@ import com.liferay.portal.kernel.util.DefaultLayoutPrototypesUtil;
 import com.liferay.portal.kernel.util.DefaultLayoutSetPrototypesUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.rss.web.constants.RSSPortletKeys;
-import com.liferay.site.navigation.language.web.constants.SiteNavigationLanguagePortletKeys;
-import com.liferay.social.activities.web.constants.SocialActivitiesPortletKeys;
+import com.liferay.site.navigation.language.constants.SiteNavigationLanguagePortletKeys;
+import com.liferay.social.activities.constants.SocialActivitiesPortletKeys;
 
 import java.util.HashMap;
 import java.util.List;
@@ -149,11 +149,11 @@ public class AddLayoutSetPrototypePortalInstanceLifecycleListener
 		preferences.put(
 			"portletSetupTitle_" + LocaleUtil.getDefault(), "Liferay news");
 		preferences.put("portletSetupUseCustomTitle", Boolean.TRUE.toString());
+		preferences.put("titles", "Liferay Press Releases");
 		preferences.put(
 			"urls",
 			"https://www.liferay.com/about-us/newsroom/press-releases/-" +
 				"/asset_publisher/2oZC/rss");
-		preferences.put("titles", "Liferay Press Releases");
 
 		DefaultLayoutPrototypesUtil.updatePortletSetup(
 			newsLayout, portletId, preferences);

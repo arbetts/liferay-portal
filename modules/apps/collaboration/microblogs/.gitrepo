@@ -2,8 +2,10 @@
 ; Do not manually edit this file.
 ;
 [subrepo]
+	autopull = false
 	cmdver = liferay
-	commit = 576da5bbc6a40a0580e824b07f8f0ea4219df255
+	commit = d6f1ef6059a744580baf7ad2d12d924c81423a41
+	mergebuttonmergecommits = false
 	mode = push
-	parent = f284517f26a538cf470a2c62fa7fe703fd281279
+	parent = dc6ee22ecdecb53a497543f1580e6ea697c1d2a7
 	remote = git@github.com:liferay/com-liferay-microblogs.git

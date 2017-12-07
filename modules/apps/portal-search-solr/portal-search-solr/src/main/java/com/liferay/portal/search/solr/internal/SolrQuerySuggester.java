@@ -16,11 +16,11 @@ package com.liferay.portal.search.solr.internal;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.search.DocumentImpl;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
-import com.liferay.portal.kernel.search.analysis.TokenizerUtil;
+import com.liferay.portal.kernel.search.analysis.SimpleTokenizer;
+import com.liferay.portal.kernel.search.analysis.Tokenizer;
 import com.liferay.portal.kernel.search.suggest.BaseQuerySuggester;
 import com.liferay.portal.kernel.search.suggest.QuerySuggester;
 import com.liferay.portal.kernel.search.suggest.SuggestionConstants;
@@ -77,10 +77,13 @@ public class SolrQuerySuggester extends BaseQuerySuggester {
 
 		Map<String, List<String>> suggestions = new HashMap<>();
 
-		String localizedFieldName = DocumentImpl.getLocalizedName(
-			searchContext.getLanguageId(), Field.SPELL_CHECK_WORD);
+		Tokenizer tokenizer = getTokenizer();
 
-		List<String> keywords = TokenizerUtil.tokenize(
+		String localizedFieldName =
+			Field.SPELL_CHECK_WORD + StringPool.UNDERLINE +
+				searchContext.getLanguageId();
+
+		List<String> keywords = tokenizer.tokenize(
 			localizedFieldName, searchContext.getKeywords(),
 			searchContext.getLanguageId());
 
@@ -140,18 +143,18 @@ public class SolrQuerySuggester extends BaseQuerySuggester {
 			return querySuggestions;
 		}
 		catch (Exception e) {
-			if (_log.isDebugEnabled()) {
-				_log.debug("Unable to execute Solr query", e);
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to execute Solr query", e);
 			}
 
-			throw new SearchException(e.getMessage());
+			return new String[0];
 		}
 	}
 
 	@Activate
 	protected void activate(Map<String, Object> properties) {
 		_distanceThreshold = MapUtil.getDouble(
-			properties, "distance.threshold", 0.6d);
+			properties, "distance.threshold", 0.6D);
 	}
 
 	protected String[] getFilterQueries(
@@ -227,6 +230,14 @@ public class SolrQuerySuggester extends BaseQuerySuggester {
 		}
 
 		return ArrayUtil.append(groupIds, _GLOBAL_GROUP_ID);
+	}
+
+	protected Tokenizer getTokenizer() {
+		if (tokenizer != null) {
+			return tokenizer;
+		}
+
+		return _defaultTokenizer;
 	}
 
 	@Reference(unbind = "-")
@@ -364,14 +375,23 @@ public class SolrQuerySuggester extends BaseQuerySuggester {
 		_stringDistance = new LevensteinDistance();
 	}
 
+	@Reference(
+		cardinality = ReferenceCardinality.OPTIONAL,
+		policy = ReferencePolicy.DYNAMIC,
+		policyOption = ReferencePolicyOption.GREEDY
+	)
+	protected Tokenizer tokenizer;
+
 	private static final long _GLOBAL_GROUP_ID = 0;
 
-	private static final float _INFINITE_WEIGHT = 100f;
+	private static final float _INFINITE_WEIGHT = 100F;
 
 	private static final int _MAX_QUERY_RESULTS = 500;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		SolrQuerySuggester.class);
+
+	private static final Tokenizer _defaultTokenizer = new SimpleTokenizer();
 
 	private double _distanceThreshold;
 	private NGramQueryBuilder _nGramQueryBuilder;

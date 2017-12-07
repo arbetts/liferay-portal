@@ -111,7 +111,6 @@ renderResponse.setTitle(title);
 											className="com.liferay.portal.kernel.model.Role"
 											keyProperty="name"
 											modelVar="role"
-
 										>
 											<liferay-ui:search-container-column-text
 												name="role"
@@ -217,7 +216,7 @@ private List<Role> _filterRoles(List<Role> roles, String portletId, String actio
 	List<Role> filteredRoles = new ArrayList<Role>(0);
 
 	for (Role role : roles) {
-		if ((role.getType() == RoleConstants.TYPE_REGULAR) && _hasPermission(role, actionId, portletId, ResourceConstants.SCOPE_COMPANY) || _hasPermission(role, actionId, portletId, ResourceConstants.SCOPE_GROUP)) {
+		if ((role.getType() == RoleConstants.TYPE_REGULAR) && (_hasPermission(role, actionId, portletId, ResourceConstants.SCOPE_COMPANY) || _hasPermission(role, actionId, portletId, ResourceConstants.SCOPE_GROUP))) {
 			filteredRoles.add(role);
 		}
 		else if (_hasPermission(role, actionId, portletId, ResourceConstants.SCOPE_GROUP_TEMPLATE)) {

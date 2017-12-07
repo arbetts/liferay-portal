@@ -50,8 +50,8 @@
 	<td></td>
 </tr>
 <tr>
-	<td>ACTIONS_MENULIST_EXPIRE</td>
-	<td>//ul[contains(@class,'dropdown-menu lfr-menu-list')]/li/a[contains(.,'Expire')]</td>
+	<td>VIEW_COMPARE_VERSIONS_CONTENT</td>
+	<td>//div[contains(@id,'diffContainerHtmlResults')]//p</td>
 	<td></td>
 </tr>
 </tbody>

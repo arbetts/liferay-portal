@@ -46,7 +46,10 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.Props;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.SetUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -65,6 +68,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang.time.StopWatch;
@@ -114,23 +118,41 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		stopWatch.start();
 
 		try {
-			int total = (int)searchCount(searchContext, query);
-
 			int start = searchContext.getStart();
 			int end = searchContext.getEnd();
 
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS)) {
+			if (start == QueryUtil.ALL_POS) {
 				start = 0;
-				end = total;
+			}
+			else if (start < 0) {
+				throw new IllegalArgumentException("Invalid start " + start);
 			}
 
-			int[] startAndEnd = SearchPaginationUtil.calculateStartAndEnd(
-				start, end, total);
+			if (end == QueryUtil.ALL_POS) {
+				end = GetterUtil.getInteger(
+					props.get(PropsKeys.INDEX_SEARCH_LIMIT));
+			}
+			else if (end < 0) {
+				throw new IllegalArgumentException("Invalid end " + end);
+			}
 
-			start = startAndEnd[0];
-			end = startAndEnd[1];
+			Hits hits = null;
 
-			Hits hits = doSearchHits(searchContext, query, start, end);
+			while (true) {
+				hits = doSearchHits(searchContext, query, start, end);
+
+				Document[] documents = hits.getDocs();
+
+				if ((documents.length != 0) || (start == 0)) {
+					break;
+				}
+
+				int[] startAndEnd = SearchPaginationUtil.calculateStartAndEnd(
+					start, end, hits.getLength());
+
+				start = startAndEnd[0];
+				end = startAndEnd[1];
+			}
 
 			hits.setStart(stopWatch.getStartTime());
 
@@ -152,8 +174,9 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 				stopWatch.stop();
 
 				_log.info(
-					"Searching " + query.toString() + " took " +
-						stopWatch.getTime() + " ms");
+					StringBundler.concat(
+						"Searching ", query.toString(), " took ",
+						String.valueOf(stopWatch.getTime()), " ms"));
 			}
 		}
 	}
@@ -185,8 +208,9 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 				stopWatch.stop();
 
 				_log.info(
-					"Searching " + query.toString() + " took " +
-						stopWatch.getTime() + " ms");
+					StringBundler.concat(
+						"Searching ", query.toString(), " took ",
+						String.valueOf(stopWatch.getTime()), " ms"));
 			}
 		}
 	}
@@ -258,7 +282,10 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		solrQuery.addHighlightField(localizedFieldName);
 	}
 
-	protected void addHighlights(SolrQuery solrQuery, QueryConfig queryConfig) {
+	protected void addHighlights(
+		SolrQuery solrQuery, SearchContext searchContext,
+		QueryConfig queryConfig) {
+
 		if (!queryConfig.isHighlightEnabled()) {
 			return;
 		}
@@ -273,8 +300,13 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 			addHighlightedField(solrQuery, queryConfig, highlightFieldName);
 		}
 
-		solrQuery.setHighlightRequireFieldMatch(
-			queryConfig.isHighlightRequireFieldMatch());
+		boolean luceneSyntax = GetterUtil.getBoolean(
+			searchContext.getAttribute("luceneSyntax"));
+
+		if (!luceneSyntax) {
+			solrQuery.setHighlightRequireFieldMatch(
+				queryConfig.isHighlightRequireFieldMatch());
+		}
 	}
 
 	protected void addPagination(
@@ -309,8 +341,32 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 	}
 
 	protected void addSnippets(
+		Document document, Map<String, List<String>> highlights,
+		String fieldName, Locale locale) {
+
+		String snippetFieldName = DocumentImpl.getLocalizedName(
+			locale, fieldName);
+
+		List<String> list = highlights.get(snippetFieldName);
+
+		if (list == null) {
+			list = highlights.get(fieldName);
+
+			snippetFieldName = fieldName;
+		}
+
+		if (ListUtil.isEmpty(list)) {
+			return;
+		}
+
+		document.addText(
+			Field.SNIPPET.concat(StringPool.UNDERLINE).concat(snippetFieldName),
+			StringUtil.merge(list, StringPool.TRIPLE_PERIOD));
+	}
+
+	protected void addSnippets(
 		SolrDocument solrDocument, Document document, QueryConfig queryConfig,
-		Set<String> queryTerms, QueryResponse queryResponse) {
+		QueryResponse queryResponse) {
 
 		Map<String, Map<String, List<String>>> highlights =
 			queryResponse.getHighlighting();
@@ -319,51 +375,17 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 			return;
 		}
 
-		for (String highlightFieldName : queryConfig.getHighlightFieldNames()) {
-			addSnippets(
-				solrDocument, document, queryTerms, highlights,
-				highlightFieldName, queryConfig.getLocale());
-		}
-	}
-
-	protected void addSnippets(
-		SolrDocument solrDocument, Document document, Set<String> queryTerms,
-		Map<String, Map<String, List<String>>> highlights, String fieldName,
-		Locale locale) {
-
 		if (MapUtil.isEmpty(highlights)) {
 			return;
 		}
 
-		String key = (String)solrDocument.getFieldValue(Field.UID);
+		String uid = (String)solrDocument.getFieldValue(Field.UID);
 
-		Map<String, List<String>> uidHighlights = highlights.get(key);
-
-		String localizedFieldName = DocumentImpl.getLocalizedName(
-			locale, fieldName);
-
-		String snippetFieldName = localizedFieldName;
-
-		List<String> snippets = uidHighlights.get(localizedFieldName);
-
-		if (snippets == null) {
-			snippets = uidHighlights.get(fieldName);
-
-			snippetFieldName = fieldName;
+		for (String highlightFieldName : queryConfig.getHighlightFieldNames()) {
+			addSnippets(
+				document, highlights.get(uid), highlightFieldName,
+				queryConfig.getLocale());
 		}
-
-		String snippet = StringPool.BLANK;
-
-		if (ListUtil.isNotEmpty(snippets)) {
-			snippet = StringUtil.merge(snippets, StringPool.TRIPLE_PERIOD);
-
-			if (Validator.isNotNull(snippet)) {
-				snippet = snippet.concat(StringPool.TRIPLE_PERIOD);
-			}
-		}
-
-		HighlightUtil.addSnippet(
-			document, queryTerms, snippet, snippetFieldName);
 	}
 
 	protected void addSort(SolrQuery solrQuery, Sort[] sorts) {
@@ -378,7 +400,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 				continue;
 			}
 
-			String sortFieldName = DocumentImpl.getSortFieldName(sort, "score");
+			String sortFieldName = getSortFieldName(sort, "score");
 
 			if (sortFieldNames.contains(sortFieldName)) {
 				continue;
@@ -418,7 +440,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		if (!count) {
 			addFacets(solrQuery, searchContext);
 			addGroupBy(solrQuery, searchContext, start, end);
-			addHighlights(solrQuery, queryConfig);
+			addHighlights(solrQuery, searchContext, queryConfig);
 			addPagination(solrQuery, searchContext, start, end);
 			addSelectedFields(solrQuery, queryConfig);
 			addSort(solrQuery, searchContext.getSorts());
@@ -444,7 +466,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 
 		if (query.getPostFilter() != null) {
 			String filterQuery = _filterTranslator.translate(
-				query.getPreBooleanFilter(), searchContext);
+				query.getPostFilter(), searchContext);
 
 			filterQueries.add(filterQuery);
 		}
@@ -452,14 +474,27 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		if (!filterQueries.isEmpty()) {
 			solrQuery.setFilterQueries(
 				filterQueries.toArray(new String[filterQueries.size()]));
+
+			if (Validator.isBlank(solrQuery.getQuery())) {
+				solrQuery.setQuery("*:*");
+			}
+		}
+
+		String solrQueryString = solrQuery.toString();
+
+		searchContext.setAttribute("queryString", solrQueryString);
+
+		if (_log.isDebugEnabled()) {
+			_log.debug("Search query " + solrQueryString);
 		}
 
 		QueryResponse queryResponse = executeSearchRequest(solrQuery);
 
 		if (_log.isInfoEnabled()) {
 			_log.info(
-				"The search engine processed " + solrQuery.getQuery() + " in " +
-					queryResponse.getElapsedTime() + " ms");
+				StringBundler.concat(
+					"The search engine processed ", solrQueryString, " in ",
+					String.valueOf(queryResponse.getElapsedTime()), " ms"));
 		}
 
 		return queryResponse;
@@ -497,6 +532,16 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		return solrClient.query(solrQuery, METHOD.POST);
 	}
 
+	protected String getSortFieldName(Sort sort, String scoreFieldName) {
+		String sortFieldName = sort.getFieldName();
+
+		if (Objects.equals(sortFieldName, Field.PRIORITY)) {
+			return sortFieldName;
+		}
+
+		return DocumentImpl.getSortFieldName(sort, scoreFieldName);
+	}
+
 	protected Hits processResponse(
 		QueryResponse queryResponse, SearchContext searchContext, Query query) {
 
@@ -520,15 +565,13 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 		Query query, Hits hits) {
 
 		List<Document> documents = new ArrayList<>();
-		Set<String> queryTerms = new HashSet<>();
 		List<Float> scores = new ArrayList<>();
 
 		processSolrDocumentList(
-			queryResponse, solrDocumentList, query, hits, documents, queryTerms,
-			scores);
+			queryResponse, solrDocumentList, query, hits, documents, scores);
 
 		hits.setDocs(documents.toArray(new Document[documents.size()]));
-		hits.setQueryTerms(queryTerms.toArray(new String[queryTerms.size()]));
+		hits.setQueryTerms(new String[0]);
 		hits.setScores(ArrayUtil.toFloatArray(scores));
 	}
 
@@ -562,8 +605,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 
 	protected void processSolrDocumentList(
 		QueryResponse queryResponse, SolrDocumentList solrDocumentList,
-		Query query, Hits hits, List<Document> documents,
-		Set<String> queryTerms, List<Float> scores) {
+		Query query, Hits hits, List<Document> documents, List<Float> scores) {
 
 		if (solrDocumentList == null) {
 			return;
@@ -578,8 +620,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 
 			documents.add(document);
 
-			addSnippets(
-				solrDocument, document, queryConfig, queryTerms, queryResponse);
+			addSnippets(solrDocument, document, queryConfig, queryResponse);
 
 			float score = GetterUtil.getFloat(
 				String.valueOf(solrDocument.getFieldValue("score")));
@@ -708,6 +749,9 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 			hits.addStatsResults(statsResults);
 		}
 	}
+
+	@Reference
+	protected Props props;
 
 	private static final String _VERSION_FIELD = "_version_";
 

@@ -43,7 +43,9 @@ catch (NoSuchFolderException nsfe) {
 
 boolean rootFolder = ParamUtil.getBoolean(request, "rootFolder");
 
-boolean workflowEnabled = WorkflowEngineManagerUtil.isDeployed() && (WorkflowHandlerRegistryUtil.getWorkflowHandler(DLFileEntry.class.getName()) != null) && DLFolderPermission.contains(permissionChecker, themeDisplay.getScopeGroupId(), folderId, ActionKeys.UPDATE);
+Group scopeGroup = GroupLocalServiceUtil.getGroup(scopeGroupId);
+
+boolean workflowEnabled = WorkflowEngineManagerUtil.isDeployed() && (WorkflowHandlerRegistryUtil.getWorkflowHandler(DLFileEntry.class.getName()) != null) && DLFolderPermission.contains(permissionChecker, themeDisplay.getScopeGroupId(), folderId, ActionKeys.UPDATE) && !scopeGroup.isLayoutSetPrototype();
 
 List<WorkflowDefinition> workflowDefinitions = null;
 
@@ -287,16 +289,16 @@ if (portletTitleBasedNavigation) {
 			</c:if>
 
 			<c:if test="<%= (parentFolder == null) || parentFolder.isSupportsMetadata() %>">
-				<liferay-ui:custom-attributes-available className="<%= DLFolderConstants.getClassName() %>">
+				<liferay-expando:custom-attributes-available className="<%= DLFolderConstants.getClassName() %>">
 					<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="custom-fields">
-						<liferay-ui:custom-attribute-list
+						<liferay-expando:custom-attribute-list
 							className="<%= DLFolderConstants.getClassName() %>"
 							classPK="<%= (folder != null) ? folder.getFolderId() : 0 %>"
 							editable="<%= true %>"
 							label="<%= true %>"
 						/>
 					</aui:fieldset>
-				</liferay-ui:custom-attributes-available>
+				</liferay-expando:custom-attributes-available>
 			</c:if>
 
 			<c:if test="<%= !rootFolder && (folder == null) %>">
@@ -339,6 +341,17 @@ if (portletTitleBasedNavigation) {
 	var <portlet:namespace />documentTypesChanged = false;
 
 	function <portlet:namespace />openFileEntryTypeSelector() {
+		var searchContainer = Liferay.SearchContainer.get('<portlet:namespace />dlFileEntryTypesSearchContainer');
+
+		var searchContainerData = searchContainer.getData();
+
+		if (!searchContainerData.length) {
+			searchContainerData = [];
+		}
+		else {
+			searchContainerData = searchContainerData.split(',');
+		}
+
 		Liferay.Util.selectEntity(
 			{
 				dialog: {
@@ -349,11 +362,12 @@ if (portletTitleBasedNavigation) {
 				},
 				eventName: '<portlet:namespace />selectFileEntryType',
 				id: '<portlet:namespace />fileEntryTypeSelector',
+				selectedData: searchContainerData,
 				title: '<%= UnicodeLanguageUtil.get(request, "document-types") %>',
 				uri: '<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="mvcPath" value="/document_library/select_restricted_file_entry_type.jsp" /><portlet:param name="includeBasicFileEntryType" value="<%= Boolean.TRUE.toString() %>" /></portlet:renderURL>'
 			},
 			function(event) {
-				<portlet:namespace />selectFileEntryType(event.fileentrytypeid, event.fileentrytypename);
+				<portlet:namespace />selectFileEntryType(event.entityid, event.entityname);
 			}
 		);
 	}

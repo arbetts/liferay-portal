@@ -14,7 +14,7 @@
 
 package com.liferay.gradle.plugins.test.integration.tasks;
 
-import com.liferay.gradle.plugins.test.integration.util.GradleUtil;
+import com.liferay.gradle.plugins.test.integration.internal.util.GradleUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -188,7 +188,7 @@ public abstract class BaseAppServerTask extends DefaultTask {
 	private Object _binDir;
 	private long _checkInterval = 500;
 	private Object _checkPath;
-	private long _checkTimeout = 5 * 60 * 1000;
+	private long _checkTimeout = 10 * 60 * 1000;
 	private Object _executable;
 	private final List<Object> _executableArgs = new ArrayList<>();
 	private Object _portNumber;

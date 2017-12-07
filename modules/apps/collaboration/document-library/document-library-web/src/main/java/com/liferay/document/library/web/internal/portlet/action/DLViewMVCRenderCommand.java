@@ -18,10 +18,15 @@ import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppService;
 import com.liferay.document.library.kernel.service.DLFolderLocalService;
+import com.liferay.document.library.repository.authorization.capability.AuthorizationCapability;
 import com.liferay.document.library.web.constants.DLPortletKeys;
 import com.liferay.document.library.web.constants.DLWebKeys;
 import com.liferay.document.library.web.internal.portlet.toolbar.contributor.DLPortletToolbarContributor;
+import com.liferay.document.library.web.internal.util.DLTrashUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderConstants;
+import com.liferay.portal.kernel.repository.Repository;
+import com.liferay.portal.kernel.repository.RepositoryProviderUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.ParamUtil;
 
@@ -56,7 +61,9 @@ public class DLViewMVCRenderCommand extends GetFolderMVCRenderCommand {
 			_dlPortletToolbarContributor);
 
 		try {
-			pingFolderRepository(renderRequest);
+			if (pingFolderRepository(renderRequest, renderResponse)) {
+				return MVCRenderConstants.MVC_PATH_VALUE_SKIP_DISPATCH;
+			}
 		}
 		catch (Exception e) {
 			SessionErrors.add(renderRequest, "repositoryPingFailed", e);
@@ -67,16 +74,9 @@ public class DLViewMVCRenderCommand extends GetFolderMVCRenderCommand {
 		return super.render(renderRequest, renderResponse);
 	}
 
-	@Reference(unbind = "-")
-	public void setDLAppService(DLAppService dlAppService) {
-		_dlAppService = dlAppService;
-	}
-
-	@Reference(unbind = "-")
-	public void setDLFolderLocalService(
-		DLFolderLocalService dlFolderLocalService) {
-
-		_dlFolderLocalService = dlFolderLocalService;
+	@Override
+	protected DLTrashUtil getDLTrashUtil() {
+		return _dlTrashUtil;
 	}
 
 	@Override
@@ -84,41 +84,59 @@ public class DLViewMVCRenderCommand extends GetFolderMVCRenderCommand {
 		return "/document_library/view.jsp";
 	}
 
-	protected void pingFolderRepository(RenderRequest renderRequest)
+	protected boolean pingFolderRepository(
+			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws Exception {
 
 		String mvcRenderCommandName = ParamUtil.getString(
 			renderRequest, "mvcRenderCommandName");
 
 		if (!mvcRenderCommandName.equals("/document_library/view_folder")) {
-			return;
+			return false;
 		}
 
 		long folderId = ParamUtil.getLong(renderRequest, "folderId");
 
 		if (folderId == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			return;
+			return false;
 		}
 
 		DLFolder dlFolder = _dlFolderLocalService.fetchDLFolder(folderId);
 
 		if ((dlFolder == null) || !dlFolder.isMountPoint()) {
-			return;
+			return false;
 		}
 
-		_dlAppService.getFileEntriesCount(
-			dlFolder.getRepositoryId(), dlFolder.getFolderId());
+		Repository repository = RepositoryProviderUtil.getRepository(
+			dlFolder.getRepositoryId());
+
+		if (repository.isCapabilityProvided(AuthorizationCapability.class)) {
+			AuthorizationCapability authorizationCapability =
+				repository.getCapability(AuthorizationCapability.class);
+
+			authorizationCapability.authorize(renderRequest, renderResponse);
+
+			return authorizationCapability.hasCustomRedirectFlow(
+				renderRequest, renderResponse);
+		}
+		else {
+			_dlAppService.getFileEntriesCount(
+				dlFolder.getRepositoryId(), dlFolder.getFolderId());
+
+			return false;
+		}
 	}
 
-	@Reference(unbind = "-")
-	protected void setDLPortletToolbarContributor(
-		DLPortletToolbarContributor dlPortletToolbarContributor) {
-
-		_dlPortletToolbarContributor = dlPortletToolbarContributor;
-	}
-
+	@Reference
 	private DLAppService _dlAppService;
+
+	@Reference
 	private DLFolderLocalService _dlFolderLocalService;
+
+	@Reference
 	private DLPortletToolbarContributor _dlPortletToolbarContributor;
+
+	@Reference
+	private DLTrashUtil _dlTrashUtil;
 
 }

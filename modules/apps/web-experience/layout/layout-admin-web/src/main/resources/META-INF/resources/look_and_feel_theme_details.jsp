@@ -89,7 +89,7 @@ List<ColorScheme> colorSchemes = selTheme.getColorSchemes();
 <c:if test="<%= !colorSchemes.isEmpty() %>">
 	<h4><liferay-ui:message key="color-schemes" /></h4>
 
-	<div class="row" id="<portlet:namespace />colorSchemesContainer">
+	<div class="clearfix" id="<portlet:namespace />colorSchemesContainer">
 
 		<%
 		String selColorSchemeId = selColorScheme.getColorSchemeId();
@@ -97,8 +97,8 @@ List<ColorScheme> colorSchemes = selTheme.getColorSchemes();
 		for (ColorScheme curColorScheme : colorSchemes) {
 		%>
 
-			<div class="col-md-2">
-				<div class="color-scheme-selector img-thumbnail <%= selColorSchemeId.equals(curColorScheme.getColorSchemeId()) ? "selected" : StringPool.BLANK %>" data-color-scheme-id="<%= curColorScheme.getColorSchemeId() %>">
+			<div class="color-scheme-selector img-thumbnail <%= selColorSchemeId.equals(curColorScheme.getColorSchemeId()) ? "selected" : StringPool.BLANK %>" data-color-scheme-id="<%= curColorScheme.getColorSchemeId() %>">
+				<div class="aspect-ratio aspect-ratio-4-to-3 aspect-ratio-middle">
 					<img alt="" src="<%= themeDisplay.getCDNBaseURL() %><%= HtmlUtil.escapeAttribute(selTheme.getStaticResourcePath()) %><%= HtmlUtil.escapeAttribute(curColorScheme.getColorSchemeThumbnailPath()) %>/thumbnail.png" title="<%= HtmlUtil.escapeAttribute(curColorScheme.getName()) %>" />
 				</div>
 			</div>
@@ -118,26 +118,36 @@ Map<String, ThemeSetting> configurableSettings = selTheme.getConfigurableSetting
 	<h4><liferay-ui:message key="settings" /></h4>
 
 	<%
+	ServletContext servletContext = ServletContextPool.get(selTheme.getServletContextName());
+
+	ResourceBundle selThemeResourceBundle = resourceBundle;
+
+	try {
+		selThemeResourceBundle = ResourceBundleUtil.getBundle("content.Language", servletContext.getClassLoader());
+	}
+	catch (Exception e) {
+	}
+
 	for (Map.Entry<String, ThemeSetting> entry : configurableSettings.entrySet()) {
-		String name = entry.getKey();
+		String name = LanguageUtil.get(selThemeResourceBundle, entry.getKey());
 		ThemeSetting themeSetting = entry.getValue();
 
 		String type = GetterUtil.getString(themeSetting.getType(), "text");
 		String value = StringPool.BLANK;
 
 		if (useDefaultThemeSettings) {
-			value = selTheme.getSetting(name);
+			value = selTheme.getSetting(entry.getKey());
 		}
 		else {
 			if (selLayout != null) {
-				value = selLayout.getThemeSetting(name, "regular");
+				value = selLayout.getThemeSetting(entry.getKey(), "regular");
 			}
 			else {
-				value = selLayoutSet.getThemeSetting(name, "regular");
+				value = selLayoutSet.getThemeSetting(entry.getKey(), "regular");
 			}
 		}
 
-		String propertyName = HtmlUtil.escapeAttribute("regularThemeSettingsProperties--" + name + StringPool.DOUBLE_DASH);
+		String propertyName = HtmlUtil.escapeAttribute("regularThemeSettingsProperties--" + entry.getKey() + StringPool.DOUBLE_DASH);
 	%>
 
 		<c:choose>

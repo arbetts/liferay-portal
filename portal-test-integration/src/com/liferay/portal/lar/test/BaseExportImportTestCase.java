@@ -56,7 +56,7 @@ import org.junit.Before;
 /**
  * @author Eduardo Garcia
  */
-public class BaseExportImportTestCase {
+public abstract class BaseExportImportTestCase {
 
 	public void importLayouts(Map<String, String[]> parameterMap)
 		throws Exception {
@@ -236,14 +236,12 @@ public class BaseExportImportTestCase {
 		return parameterMap;
 	}
 
-	@SuppressWarnings("unused")
 	protected StagedModel getStagedModel(String uuid, long groupId)
 		throws PortalException {
 
 		return null;
 	}
 
-	@SuppressWarnings("unused")
 	protected String getStagedModelUuid(StagedModel stagedModel)
 		throws PortalException {
 

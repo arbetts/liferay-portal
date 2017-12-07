@@ -18,8 +18,15 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMStructurePersistence;
 
 import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 
+import java.lang.reflect.Field;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,24 +34,45 @@ import java.util.Set;
  * @generated
  */
 public class DDMStructureFinderBaseImpl extends BasePersistenceImpl<DDMStructure> {
+	public DDMStructureFinderBaseImpl() {
+		setModelClass(DDMStructure.class);
+
+		try {
+			Field field = ReflectionUtil.getDeclaredField(BasePersistenceImpl.class,
+					"_dbColumnNames");
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+			dbColumnNames.put("type", "type_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
+	}
+
 	@Override
 	public Set<String> getBadColumnNames() {
 		return getDDMStructurePersistence().getBadColumnNames();
 	}
 
 	/**
-	 * Returns the d d m structure persistence.
+	 * Returns the ddm structure persistence.
 	 *
-	 * @return the d d m structure persistence
+	 * @return the ddm structure persistence
 	 */
 	public DDMStructurePersistence getDDMStructurePersistence() {
 		return ddmStructurePersistence;
 	}
 
 	/**
-	 * Sets the d d m structure persistence.
+	 * Sets the ddm structure persistence.
 	 *
-	 * @param ddmStructurePersistence the d d m structure persistence
+	 * @param ddmStructurePersistence the ddm structure persistence
 	 */
 	public void setDDMStructurePersistence(
 		DDMStructurePersistence ddmStructurePersistence) {
@@ -53,4 +81,5 @@ public class DDMStructureFinderBaseImpl extends BasePersistenceImpl<DDMStructure
 
 	@BeanReference(type = DDMStructurePersistence.class)
 	protected DDMStructurePersistence ddmStructurePersistence;
+	private static final Log _log = LogFactoryUtil.getLog(DDMStructureFinderBaseImpl.class);
 }

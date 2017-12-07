@@ -10,6 +10,48 @@
 		</and>
 	</condition>
 
+	<target name="check-stale-release">
+		<if>
+			<and>
+				<isfalse value="${publish.portal.release.force}" />
+				<available file="${project.dir}/modules/.releng/${ant.project.name}.properties" />
+			</and>
+			<then>
+				<loadproperties prefix="latest" srcFile="${project.dir}/modules/.releng/${ant.project.name}.properties">
+					<filterchain>
+						<linecontains>
+							<contains value="artifact.git.id" />
+						</linecontains>
+					</filterchain>
+				</loadproperties>
+
+				<exec executable="git" failonerror="true" outputproperty="artifact.git.log">
+					<arg value="log" />
+					<arg value="--format=%s" />
+					<arg value="${latest.artifact.git.id}..HEAD" />
+					<arg value="." />
+				</exec>
+
+				<loadresource property="artifact.git.log.changes" quiet="true" unless:blank="${artifact.git.log}">
+					<propertyresource name="artifact.git.log" />
+					<filterchain>
+						<linecontains negate="true">
+							<contains value="artifact:ignore" />
+						</linecontains>
+					</filterchain>
+				</loadresource>
+
+				<fail message="${ant.project.name} is not stale and does not need to be published." status="0">
+					<condition>
+						<not>
+							<isset property="artifact.git.log.changes" />
+						</not>
+					</condition>
+				</fail>
+			</then>
+		</if>
+	</target>
+
 	<target name="clean">
 		<delete dir="classes" />
 		<delete dir="test-classes" />
@@ -32,13 +74,6 @@
 			<fileset dir="${javac.srcdir}" excludes="**/*.java" />
 		</copy>
 
-		<if>
-			<equals arg1="${javac.deprecation}" arg2="on" />
-			<then>
-				<record action="start" name="${project.dir}/${ant.project.name}/javac.output.txt" />
-			</then>
-		</if>
-
 		<javac
 			classpathref="${javac.classpathref}"
 			compiler="${javac.compiler}"
@@ -50,28 +85,6 @@
 			nowarn="${javac.nowarn}"
 			srcdir="${javac.srcdir}"
 		/>
-
-		<if>
-			<equals arg1="${javac.deprecation}" arg2="on" />
-			<then>
-				<record action="stop" name="${project.dir}/${ant.project.name}/javac.output.txt" />
-
-				<loadfile property="javac.output.txt.content" srcfile="${project.dir}/${ant.project.name}/javac.output.txt" />
-
-				<delete file="${project.dir}/${ant.project.name}/javac.output.txt" />
-
-				<if>
-					<or>
-						<contains string="${javac.output.txt.content}" substring="a deprecated API" />
-						<contains string="${javac.output.txt.content}" substring="[deprecation]" />
-					</or>
-					<then>
-						<echo append="true" file="${project.dir}/javac.output.txt" message="${line.separator}${ant.project.name}${line.separator}" />
-						<echo append="true" file="${project.dir}/javac.output.txt" message="${javac.output.txt.content}" />
-					</then>
-				</if>
-			</then>
-		</if>
 
 		<echo file="${javac.destdir}/.touch"></echo>
 	</target>
@@ -218,11 +231,26 @@
 					</then>
 				</if>
 
-				<baseline-jar
-					bndFile="bnd.bnd"
-					bndRootFile="${project.dir}/common.bnd"
-					newJarFile="${jar.file}.jar"
-				/>
+				<taskdef classname="com.liferay.ant.bnd.BaselineJarTask" classpathref="lib.classpath" name="baseline-jar" />
+
+				<if>
+					<isset property="jar.compat.file" />
+					<then>
+						<baseline-jar
+							bndFile="bnd.bnd"
+							bndRootFile="${project.dir}/common.bnd"
+							newCompatJarFile="${jar.compat.file}"
+							newJarFile="${jar.file}.jar"
+						/>
+					</then>
+					<else>
+						<baseline-jar
+							bndFile="bnd.bnd"
+							bndRootFile="${project.dir}/common.bnd"
+							newJarFile="${jar.file}.jar"
+						/>
+					</else>
+				</if>
 			</then>
 			<else>
 				<antcall target="manifest" />
@@ -332,8 +360,8 @@
 		</if>
 	</target>
 
-	<target depends="jar,jar-javadoc,jar-sources" name="publish-portal-release">
-		<publish-portal-artifact >
+	<target depends="check-stale-release,jar,jar-javadoc,jar-sources" name="publish-portal-release">
+		<publish-portal-artifact>
 			<attach classifier="javadoc" file="${artifact.name}-javadoc.jar" />
 			<attach classifier="sources" file="${artifact.name}-sources.jar" />
 		</publish-portal-artifact>
@@ -351,6 +379,8 @@
 			<available file="bnd.bnd" />
 			<then>
 				<bndexpand propertyfile="${project.dir}/common.bnd" />
+
+				<taskdef classname="com.liferay.ant.bnd.ReleaseToRepoTask" classpathref="lib.classpath" name="release-to-repo" />
 
 				<release-to-repo
 					bndRootFile="${project.dir}/common.bnd"

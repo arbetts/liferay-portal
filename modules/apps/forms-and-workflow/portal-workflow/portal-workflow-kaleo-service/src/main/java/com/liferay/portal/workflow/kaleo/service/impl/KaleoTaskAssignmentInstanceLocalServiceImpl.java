@@ -17,6 +17,7 @@ package com.liferay.portal.workflow.kaleo.service.impl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.workflow.WorkflowException;
 import com.liferay.portal.workflow.kaleo.model.KaleoInstance;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignment;
@@ -61,10 +62,12 @@ public class KaleoTaskAssignmentInstanceLocalServiceImpl
 		kaleoTaskAssignmentInstance.setUserName(user.getFullName());
 		kaleoTaskAssignmentInstance.setCreateDate(now);
 		kaleoTaskAssignmentInstance.setModifiedDate(now);
-		kaleoTaskAssignmentInstance.setKaleoDefinitionId(
-			kaleoTaskInstanceToken.getKaleoDefinitionId());
+		kaleoTaskAssignmentInstance.setKaleoDefinitionVersionId(
+			kaleoTaskInstanceToken.getKaleoDefinitionVersionId());
 		kaleoTaskAssignmentInstance.setKaleoInstanceId(
 			kaleoTaskInstanceToken.getKaleoInstanceId());
+		kaleoTaskAssignmentInstance.setKaleoInstanceTokenId(
+			kaleoTaskInstanceToken.getKaleoInstanceTokenId());
 		kaleoTaskAssignmentInstance.setKaleoTaskInstanceTokenId(
 			kaleoTaskInstanceToken.getKaleoTaskInstanceTokenId());
 		kaleoTaskAssignmentInstance.setKaleoTaskId(
@@ -175,10 +178,10 @@ public class KaleoTaskAssignmentInstanceLocalServiceImpl
 	}
 
 	@Override
-	public void deleteKaleoDefinitionKaleoTaskAssignmentInstances(
+	public void deleteKaleoDefinitionVersionKaleoTaskAssignmentInstances(
 		long kaleoDefintionId) {
 
-		kaleoTaskAssignmentInstancePersistence.removeByKaleoDefinitionId(
+		kaleoTaskAssignmentInstancePersistence.removeByKaleoDefinitionVersionId(
 			kaleoDefintionId);
 	}
 
@@ -208,11 +211,29 @@ public class KaleoTaskAssignmentInstanceLocalServiceImpl
 	}
 
 	@Override
+	public KaleoTaskAssignmentInstance fetchFirstKaleoTaskAssignmentInstance(
+		long kaleoTaskInstanceTokenId,
+		OrderByComparator<KaleoTaskAssignmentInstance> orderByComparator) {
+
+		return kaleoTaskAssignmentInstancePersistence.
+			fetchBykaleoTaskInstanceTokenId_First(
+				kaleoTaskInstanceTokenId, orderByComparator);
+	}
+
+	@Override
 	public List<KaleoTaskAssignmentInstance> getKaleoTaskAssignmentInstances(
 		long kaleoTaskInstanceTokenId) {
 
 		return kaleoTaskAssignmentInstancePersistence.
 			findBykaleoTaskInstanceTokenId(kaleoTaskInstanceTokenId);
+	}
+
+	@Override
+	public int getKaleoTaskAssignmentInstancesCount(
+		long kaleoTaskInstanceTokenId) {
+
+		return kaleoTaskAssignmentInstancePersistence.
+			countBykaleoTaskInstanceTokenId(kaleoTaskInstanceTokenId);
 	}
 
 }

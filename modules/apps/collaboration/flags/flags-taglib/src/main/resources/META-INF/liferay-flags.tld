@@ -12,8 +12,8 @@
 	<tag>
 		<description>Creates a flag icon that lets users report inappropriate content.</description>
 		<name>flags</name>
-		<tag-class>com.liferay.flags.taglib.servlet.taglib.FlagsTag</tag-class>
-		<body-content>JSP</body-content>
+		<tag-class>com.liferay.flags.taglib.servlet.taglib.soy.FlagsTag</tag-class>
+		<body-content>empty</body-content>
 		<attribute>
 			<description>The flagged asset's Java class name.</description>
 			<name>className</name>
@@ -33,6 +33,17 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<description>The CSS classes to be applied to the element.</description>
+			<name>elementClasses</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>enabled</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<description>Whether to show message text as a label next to the flag icon or as a tooltip. The default value is <![CDATA[<code>true</code>]]>.</description>
 			<name>label</name>
 			<required>false</required>
@@ -40,7 +51,7 @@
 			<type>boolean</type>
 		</attribute>
 		<attribute>
-			<description>Text to display next to the flag icon. The default text is <![CDATA[<code>Flag</code>]]>.</description>
+			<description>The text to display next to the flag icon. The default text is <![CDATA[<code>Flag</code>]]>.</description>
 			<name>message</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>

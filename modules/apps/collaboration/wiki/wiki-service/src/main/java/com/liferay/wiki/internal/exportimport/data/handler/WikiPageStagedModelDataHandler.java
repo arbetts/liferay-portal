@@ -16,7 +16,6 @@ package com.liferay.wiki.internal.exportimport.data.handler;
 
 import com.liferay.document.library.kernel.exception.NoSuchFileException;
 import com.liferay.document.library.kernel.model.DLFileEntry;
-import com.liferay.exportimport.content.processor.ExportImportContentProcessorController;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
@@ -27,12 +26,13 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Element;
@@ -66,6 +66,14 @@ public class WikiPageStagedModelDataHandler
 	public void deleteStagedModel(
 			String uuid, long groupId, String className, String extraData)
 		throws PortalException {
+
+		WikiPage wikiPage = fetchStagedModelByUuidAndGroupId(uuid, groupId);
+
+		if (wikiPage != null) {
+			deleteStagedModel(wikiPage);
+
+			return;
+		}
 
 		WikiPageResource pageResource =
 			_wikiPageResourceLocalService.fetchWikiPageResourceByUuidAndGroupId(
@@ -121,7 +129,7 @@ public class WikiPageStagedModelDataHandler
 			PortletDataContext.REFERENCE_TYPE_PARENT);
 
 		String content =
-			_exportImportContentProcessorController.
+			_wikiPageExportImportContentProcessor.
 				replaceExportContentReferences(
 					portletDataContext, page, page.getContent(),
 					portletDataContext.getBooleanParameter(
@@ -178,7 +186,7 @@ public class WikiPageStagedModelDataHandler
 			portletDataContext.getImportDataStagedModelElement(page);
 
 		String content =
-			_exportImportContentProcessorController.
+			_wikiPageExportImportContentProcessor.
 				replaceImportContentReferences(
 					portletDataContext, page, page.getContent());
 
@@ -202,26 +210,46 @@ public class WikiPageStagedModelDataHandler
 			nodeId, page.getTitle());
 
 		if (existingPage == null) {
-			importedPage = _wikiPageLocalService.addPage(
-				userId, nodeId, page.getTitle(), page.getVersion(),
-				page.getContent(), page.getSummary(), page.isMinorEdit(),
-				page.getFormat(), page.getHead(), page.getParentTitle(),
-				page.getRedirectTitle(), serviceContext);
+			existingPage = fetchStagedModelByUuidAndGroupId(
+				page.getUuid(), portletDataContext.getScopeGroupId());
 
-			WikiPageResource pageResource =
-				_wikiPageResourceLocalService.getPageResource(
-					importedPage.getResourcePrimKey());
+			WikiPageResource importedPageResource = null;
 
-			String pageResourceUuid = GetterUtil.getString(
-				pageElement.attributeValue("page-resource-uuid"));
+			if (existingPage == null) {
+				importedPage = _wikiPageLocalService.addPage(
+					userId, nodeId, page.getTitle(), page.getVersion(),
+					page.getContent(), page.getSummary(), page.isMinorEdit(),
+					page.getFormat(), page.getHead(), page.getParentTitle(),
+					page.getRedirectTitle(), serviceContext);
 
-			if (Validator.isNotNull(pageResourceUuid)) {
-				pageResource.setUuid(
+				importedPageResource =
+					_wikiPageResourceLocalService.getPageResource(
+						importedPage.getResourcePrimKey());
+
+				String pageResourceUuid = GetterUtil.getString(
 					pageElement.attributeValue("page-resource-uuid"));
 
-				_wikiPageResourceLocalService.updateWikiPageResource(
-					pageResource);
+				if (Validator.isNotNull(pageResourceUuid)) {
+					importedPageResource.setUuid(
+						pageElement.attributeValue("page-resource-uuid"));
+				}
 			}
+			else {
+				existingPage.setModifiedDate(page.getModifiedDate());
+				existingPage.setTitle(page.getTitle());
+
+				importedPage = _wikiPageLocalService.updateWikiPage(
+					existingPage);
+
+				importedPageResource =
+					_wikiPageResourceLocalService.getPageResource(
+						importedPage.getResourcePrimKey());
+
+				importedPageResource.setTitle(page.getTitle());
+			}
+
+			_wikiPageResourceLocalService.updateWikiPageResource(
+				importedPageResource);
 		}
 		else {
 			existingPage = fetchStagedModelByUuidAndGroupId(
@@ -240,7 +268,22 @@ public class WikiPageStagedModelDataHandler
 					serviceContext);
 			}
 			else {
+				_wikiPageLocalService.updateAsset(
+					userId, existingPage, serviceContext.getAssetCategoryIds(),
+					serviceContext.getAssetTagNames(),
+					serviceContext.getAssetLinkEntryIds(),
+					serviceContext.getAssetPriority());
+
 				importedPage = existingPage;
+			}
+		}
+
+		if (existingPage != null) {
+			for (FileEntry fileEntry :
+					existingPage.getAttachmentsFileEntries()) {
+
+				PortletFileRepositoryUtil.deletePortletFileEntry(
+					fileEntry.getFileEntryId());
 			}
 		}
 
@@ -256,33 +299,10 @@ public class WikiPageStagedModelDataHandler
 				FileEntry fileEntry =
 					(FileEntry)portletDataContext.getZipEntryAsObject(path);
 
-				InputStream inputStream = null;
+				String binPath = attachmentElement.attributeValue("bin-path");
 
-				try {
-					String binPath = attachmentElement.attributeValue(
-						"bin-path");
-
-					if (Validator.isNull(binPath) &&
-						portletDataContext.isPerformDirectBinaryImport()) {
-
-						try {
-							inputStream = FileEntryUtil.getContentStream(
-								fileEntry);
-						}
-						catch (NoSuchFileException nsfe) {
-
-							// LPS-52675
-
-							if (_log.isDebugEnabled()) {
-								_log.debug(nsfe, nsfe);
-							}
-						}
-					}
-					else {
-						inputStream =
-							portletDataContext.getZipEntryAsInputStream(
-								binPath);
-					}
+				try (InputStream inputStream = _getPageAttachmentInputStream(
+						binPath, portletDataContext, fileEntry)) {
 
 					if (inputStream == null) {
 						if (_log.isWarnEnabled()) {
@@ -298,9 +318,6 @@ public class WikiPageStagedModelDataHandler
 						userId, importedPage.getNodeId(),
 						importedPage.getTitle(), fileEntry.getTitle(),
 						inputStream, null);
-				}
-				finally {
-					StreamUtil.cleanUp(inputStream);
 				}
 			}
 		}
@@ -328,7 +345,8 @@ public class WikiPageStagedModelDataHandler
 			return;
 		}
 
-		TrashHandler trashHandler = existingPage.getTrashHandler();
+		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
+			WikiPage.class.getName());
 
 		if (trashHandler.isRestorable(existingPage.getResourcePrimKey())) {
 			trashHandler.restoreTrashEntry(
@@ -336,13 +354,13 @@ public class WikiPageStagedModelDataHandler
 		}
 	}
 
-	/**
-	 * @deprecated As of 1.2.0
-	 */
-	@Deprecated
+	@Reference(unbind = "-")
 	protected void setWikiPageExportImportContentProcessor(
 		WikiPageExportImportContentProcessor
 			wikiPageExportImportContentProcessor) {
+
+		_wikiPageExportImportContentProcessor =
+			wikiPageExportImportContentProcessor;
 	}
 
 	@Reference(unbind = "-")
@@ -359,13 +377,37 @@ public class WikiPageStagedModelDataHandler
 		_wikiPageResourceLocalService = wikiPageResourceLocalService;
 	}
 
+	private InputStream _getPageAttachmentInputStream(
+			String binPath, PortletDataContext portletDataContext,
+			FileEntry fileEntry)
+		throws Exception {
+
+		if (Validator.isNull(binPath) &&
+			portletDataContext.isPerformDirectBinaryImport()) {
+
+			try {
+				return FileEntryUtil.getContentStream(fileEntry);
+			}
+			catch (NoSuchFileException nsfe) {
+
+				// LPS-52675
+
+				if (_log.isDebugEnabled()) {
+					_log.debug(nsfe, nsfe);
+				}
+
+				return null;
+			}
+		}
+
+		return portletDataContext.getZipEntryAsInputStream(binPath);
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		WikiPageStagedModelDataHandler.class);
 
-	@Reference
-	private ExportImportContentProcessorController
-		_exportImportContentProcessorController;
-
+	private WikiPageExportImportContentProcessor
+		_wikiPageExportImportContentProcessor;
 	private WikiPageLocalService _wikiPageLocalService;
 	private WikiPageResourceLocalService _wikiPageResourceLocalService;
 

@@ -87,6 +87,7 @@ public class DDMExpressionImpl<T> implements DDMExpression<T> {
 		}
 	}
 
+	@Override
 	public Expression getModel() {
 		return _expressionModel;
 	}
@@ -173,6 +174,21 @@ public class DDMExpressionImpl<T> implements DDMExpression<T> {
 		String variableName, Number variableValue) {
 
 		setVariableValue(variableName, variableValue.doubleValue());
+	}
+
+	@Override
+	public void setObjectVariableValue(
+		String variableName, Object variableValue) {
+
+		Variable variable = _variables.get(variableName);
+
+		if (variable == null) {
+			return;
+		}
+
+		variable.setValue(variableValue);
+
+		_variableValues.put(variableName, variableValue);
 	}
 
 	@Override

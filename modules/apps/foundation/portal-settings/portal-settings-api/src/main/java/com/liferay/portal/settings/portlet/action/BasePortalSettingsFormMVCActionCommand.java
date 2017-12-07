@@ -14,6 +14,8 @@
 
 package com.liferay.portal.settings.portlet.action;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseFormMVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
@@ -37,9 +39,14 @@ import javax.portlet.ActionResponse;
 import javax.portlet.ValidatorException;
 
 /**
- * @author Tomas Polesovsky
- * @author Philip Jones
+ * @author     Tomas Polesovsky
+ * @author     Philip Jones
+ * @deprecated As of 2.0.0, since 2.1.0 replaced by {@link
+ *             com.liferay.portal.settings.web.portlet.action.
+ *             PortalSettingsContributor}
  */
+@Deprecated
+@ProviderType
 public abstract class BasePortalSettingsFormMVCActionCommand
 	extends BaseFormMVCActionCommand {
 

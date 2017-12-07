@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.nio.intraband.messaging;
 
+import com.liferay.petra.lang.ClassLoaderPool;
 import com.liferay.portal.kernel.messaging.BaseDestination;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBus;
@@ -121,6 +122,8 @@ public class IntrabandBridgeDestinationTest {
 
 		_mockRegistrationReference = new MockRegistrationReference(
 			_mockIntraband);
+
+		ClassLoaderPool.unregister(ClassLoaderPool.class.getClassLoader());
 	}
 
 	@Test

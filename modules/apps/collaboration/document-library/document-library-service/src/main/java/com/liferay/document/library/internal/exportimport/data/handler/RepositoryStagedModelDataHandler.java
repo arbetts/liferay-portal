@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.service.RepositoryEntryLocalService;
 import com.liferay.portal.kernel.service.RepositoryLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.xml.Element;
 
 import java.util.List;
@@ -148,19 +149,15 @@ public class RepositoryStagedModelDataHandler
 			boolean hidden = GetterUtil.getBoolean(
 				repositoryElement.attributeValue("hidden"));
 
+			Repository existingRepository = fetchStagedModelByUuidAndGroupId(
+				repository.getUuid(), portletDataContext.getScopeGroupId());
+
+			if (existingRepository == null) {
+				existingRepository = _repositoryLocalService.fetchRepository(
+					portletDataContext.getScopeGroupId(), repository.getName());
+			}
+
 			if (portletDataContext.isDataStrategyMirror()) {
-				Repository existingRepository =
-					fetchStagedModelByUuidAndGroupId(
-						repository.getUuid(),
-						portletDataContext.getScopeGroupId());
-
-				if (existingRepository == null) {
-					existingRepository =
-						_repositoryLocalService.fetchRepository(
-							portletDataContext.getScopeGroupId(),
-							repository.getName());
-				}
-
 				if (existingRepository == null) {
 					serviceContext.setUuid(repository.getUuid());
 
@@ -181,7 +178,7 @@ public class RepositoryStagedModelDataHandler
 					importedRepository = existingRepository;
 				}
 			}
-			else {
+			else if (existingRepository == null) {
 				importedRepository = _repositoryLocalService.addRepository(
 					userId, portletDataContext.getScopeGroupId(),
 					repository.getClassNameId(),
@@ -191,13 +188,18 @@ public class RepositoryStagedModelDataHandler
 					repository.getTypeSettingsProperties(), hidden,
 					serviceContext);
 			}
+			else {
+				importedRepository = existingRepository;
+			}
 		}
 		catch (Exception e) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
-					"Unable to connect to repository {name=" +
-						repository.getName() + ", typeSettings=" +
-							repository.getTypeSettingsProperties() + "}",
+					StringBundler.concat(
+						"Unable to connect to repository {name=",
+						repository.getName(), ", typeSettings=",
+						String.valueOf(repository.getTypeSettingsProperties()),
+						"}"),
 					e);
 			}
 		}

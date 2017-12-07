@@ -14,7 +14,9 @@
 
 package com.liferay.portal.search.buffer;
 
-import com.liferay.portal.kernel.util.AutoResetThreadLocal;
+import aQute.bnd.annotation.ProviderType;
+
+import com.liferay.petra.lang.CentralizedThreadLocal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +26,7 @@ import java.util.List;
 /**
  * @author Michael C. Han
  */
+@ProviderType
 public class IndexerRequestBuffer {
 
 	public static IndexerRequestBuffer create() {
@@ -59,8 +62,25 @@ public class IndexerRequestBuffer {
 		return indexerRequestBuffers.remove(indexerRequestBuffers.size() - 1);
 	}
 
+	/**
+	 * @param      indexerRequest
+	 * @deprecated As of 2.1.0, replaced by {@link #add(IndexerRequest,
+	 *             IndexerRequestBufferOverflowHandler, int)}
+	 */
+	@Deprecated
 	public void add(IndexerRequest indexerRequest) {
 		_indexerRequests.put(indexerRequest, indexerRequest);
+	}
+
+	public void add(
+		IndexerRequest indexerRequest,
+		IndexerRequestBufferOverflowHandler indexerRequestBufferOverflowHandler,
+		int maxBufferSize) {
+
+		_indexerRequests.put(indexerRequest, indexerRequest);
+
+		indexerRequestBufferOverflowHandler.bufferOverflowed(
+			this, maxBufferSize);
 	}
 
 	public void clear() {
@@ -84,17 +104,9 @@ public class IndexerRequestBuffer {
 	}
 
 	private static final ThreadLocal<List<IndexerRequestBuffer>>
-		_indexerRequestBuffersThreadLocal =
-			new AutoResetThreadLocal<List<IndexerRequestBuffer>>(
-				IndexerRequestBuffer.class +
-					"._indexerRequestBuffersThreadLocal") {
-
-				@Override
-				protected List<IndexerRequestBuffer> initialValue() {
-					return new ArrayList<>();
-				}
-
-			};
+		_indexerRequestBuffersThreadLocal = new CentralizedThreadLocal<>(
+			IndexerRequestBuffer.class + "._indexerRequestBuffersThreadLocal",
+			ArrayList::new);
 
 	private final LinkedHashMap<IndexerRequest, IndexerRequest>
 		_indexerRequests = new LinkedHashMap<>();

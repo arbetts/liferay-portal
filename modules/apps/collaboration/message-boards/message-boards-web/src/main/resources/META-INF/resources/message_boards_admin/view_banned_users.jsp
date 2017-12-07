@@ -22,11 +22,9 @@ PortletURL portletURL = renderResponse.createRenderURL();
 portletURL.setParameter("mvcRenderCommandName", "/message_boards/view_banned_users");
 %>
 
-<aui:nav-bar markupView="lexicon">
-	<liferay-util:include page="/message_boards_admin/nav.jsp" servletContext="<%= application %>">
-		<liferay-util:param name="navItemSelected" value="banned-users" />
-	</liferay-util:include>
-</aui:nav-bar>
+<liferay-util:include page="/message_boards_admin/nav.jsp" servletContext="<%= application %>">
+	<liferay-util:param name="navItemSelected" value="banned-users" />
+</liferay-util:include>
 
 <%
 String displayStyle = ParamUtil.getString(request, "displayStyle");
@@ -86,7 +84,7 @@ int totalBannedUsers = MBBanLocalServiceUtil.getBansCount(scopeGroupId);
 			/>
 
 			<liferay-ui:search-container-row
-				className="com.liferay.message.boards.kernel.model.MBBan"
+				className="com.liferay.message.boards.model.MBBan"
 				keyProperty="banUserId"
 				modelVar="ban"
 			>
@@ -115,7 +113,7 @@ int totalBannedUsers = MBBanLocalServiceUtil.getBansCount(scopeGroupId);
 					<h5 class="text-default">
 						<liferay-ui:message key="unban-date" />
 
-						<%= dateFormatDateTime.format(MBUtil.getUnbanDate(ban, PropsValues.MESSAGE_BOARDS_EXPIRE_BAN_INTERVAL)) %>
+						<%= dateFormatDateTime.format(com.liferay.message.boards.util.MBUtil.getUnbanDate(ban, PropsValues.MESSAGE_BOARDS_EXPIRE_BAN_INTERVAL)) %>
 					</h5>
 				</liferay-ui:search-container-column-text>
 

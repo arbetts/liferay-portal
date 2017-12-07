@@ -1,6 +1,6 @@
 <#include "../init.ftl">
 
-<#if !(fields?? && fields.get(fieldName)??) && fieldRawValue == "">
+<#if !(fields?? && fields.get(fieldName)??) && validator.isNull(fieldRawValue)>
 	<#assign fieldRawValue = predefinedValue />
 </#if>
 
@@ -10,14 +10,14 @@
 	assetTitle = ""
 />
 
-<#if fieldRawValue != "">
+<#if validator.isNotNull(fieldRawValue)>
 	<#assign
 		fieldJournalJSONObject = jsonFactoryUtil.createJSONObject(fieldRawValue)
 
 		journalArticle = fetchLatestArticle(fieldJournalJSONObject)
 	/>
 
-	<#if journalArticle != "">
+	<#if validator.isNotNull(journalArticle)>
 		<#assign selectedAssetTitle = journalArticle.getTitle(requestedLocale) />
 	</#if>
 </#if>
@@ -28,15 +28,21 @@
 	"assetBrowserAuthToken": assetBrowserAuthToken
 }>
 
-<@liferay_aui["field-wrapper"] cssClass="form-builder-field" data=data required=required>
+<@liferay_aui["field-wrapper"]
+	cssClass="form-builder-field"
+	data=data
+	required=required
+>
 	<div class="form-group">
 		<div class="hide" id="${portletNamespace}${namespacedFieldName}SelectContainer"></div>
 
 		<@liferay_aui.input
 			helpMessage=escape(fieldStructure.tip)
-			inlineField=true label=escape(label)
+			inlineField=true
+			label=escape(label)
 			name="${namespacedFieldName}Title"
-			readonly="readonly" type="text"
+			readonly="readonly"
+			type="text"
 			value=selectedAssetTitle
 		/>
 
@@ -46,7 +52,11 @@
 			value=fieldRawValue
 		/>
 
-		<@liferay_aui.input name=namespacedFieldName type="hidden" value=fieldRawValue>
+		<@liferay_aui.input
+			name=namespacedFieldName
+			type="hidden"
+			value=fieldRawValue
+		>
 			<#if required>
 				<@liferay_aui.validator name="required" />
 			</#if>

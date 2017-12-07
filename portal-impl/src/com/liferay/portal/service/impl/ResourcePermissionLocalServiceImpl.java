@@ -14,6 +14,8 @@
 
 package com.liferay.portal.service.impl;
 
+import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
+import com.liferay.exportimport.kernel.staging.MergeLayoutPrototypesThreadLocal;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.SQLQuery;
 import com.liferay.portal.kernel.dao.orm.Session;
@@ -30,6 +32,7 @@ import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.PermissionUpdateHandler;
 import com.liferay.portal.kernel.security.permission.PermissionUpdateHandlerRegistryUtil;
@@ -37,7 +40,6 @@ import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.ExceptionRetryAcceptor;
 import com.liferay.portal.kernel.spring.aop.Property;
 import com.liferay.portal.kernel.spring.aop.Retry;
-import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -57,7 +59,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 /**
  * Provides the local service for accessing, adding, checking, deleting,
@@ -1299,9 +1300,13 @@ public class ResourcePermissionLocalServiceImpl
 			resourcePermission.setViewActionId(actionIdsLong % 2 == 1);
 
 			resourcePermissionPersistence.update(resourcePermission);
-		}
 
-		IndexWriterHelperUtil.updatePermissionFields(name, primKey);
+			if (ArrayUtil.contains(actionIds, ActionKeys.MANAGE_SUBGROUPS)) {
+				PermissionCacheUtil.clearPrimaryKeyRoleCache();
+			}
+
+			IndexWriterHelperUtil.updatePermissionFields(name, primKey);
+		}
 	}
 
 	protected boolean isGuestRoleId(long companyId, long roleId)
@@ -1434,8 +1439,17 @@ public class ResourcePermissionLocalServiceImpl
 					ResourcePermissionConstants.OPERATOR_SET, false);
 			}
 
-			TransactionCommitCallbackUtil.registerCallback(
-				new UpdateResourcePermissionCallable(name, primKey));
+			if (!MergeLayoutPrototypesThreadLocal.isInProgress() &&
+				!ExportImportThreadLocal.isImportInProcess()) {
+
+				PermissionUpdateHandler permissionUpdateHandler =
+					PermissionUpdateHandlerRegistryUtil.
+						getPermissionUpdateHandler(name);
+
+				if (permissionUpdateHandler != null) {
+					permissionUpdateHandler.updatedPermission(primKey);
+				}
+			}
 		}
 		finally {
 			PermissionThreadLocal.setFlushResourcePermissionEnabled(
@@ -1454,33 +1468,5 @@ public class ResourcePermissionLocalServiceImpl
 
 	private static final String _UPDATE_ACTION_IDS =
 		ResourcePermissionLocalServiceImpl.class.getName() + ".updateActionIds";
-
-	private static class UpdateResourcePermissionCallable
-		implements Callable<Void> {
-
-		public UpdateResourcePermissionCallable(String name, String primKey) {
-			_name = name;
-			_primKey = primKey;
-		}
-
-		@Override
-		public Void call() {
-			PermissionUpdateHandler permissionUpdateHandler =
-				PermissionUpdateHandlerRegistryUtil.getPermissionUpdateHandler(
-					_name);
-
-			if (permissionUpdateHandler == null) {
-				return null;
-			}
-
-			permissionUpdateHandler.updatedPermission(_primKey);
-
-			return null;
-		}
-
-		private final String _name;
-		private final String _primKey;
-
-	}
 
 }

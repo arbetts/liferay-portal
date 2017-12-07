@@ -14,11 +14,20 @@
 
 package com.liferay.message.boards.web.internal.portlet;
 
-import com.liferay.message.boards.web.constants.MBPortletKeys;
+import com.liferay.asset.constants.AssetWebKeys;
+import com.liferay.asset.util.AssetHelper;
+import com.liferay.message.boards.constants.MBPortletKeys;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
+import com.liferay.trash.TrashHelper;
+import com.liferay.trash.util.TrashWebKeys;
+
+import java.io.IOException;
 
 import javax.portlet.Portlet;
+import javax.portlet.PortletException;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -56,11 +65,29 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class MBAdminPortlet extends MVCPortlet {
 
+	@Override
+	public void render(
+			RenderRequest renderRequest, RenderResponse renderResponse)
+		throws IOException, PortletException {
+
+		renderRequest.setAttribute(AssetWebKeys.ASSET_HELPER, _assetHelper);
+
+		renderRequest.setAttribute(TrashWebKeys.TRASH_HELPER, _trashHelper);
+
+		super.render(renderRequest, renderResponse);
+	}
+
 	@Reference(
 		target = "(&(release.bundle.symbolic.name=com.liferay.message.boards.web)(release.schema.version=1.0.0))",
 		unbind = "-"
 	)
 	protected void setRelease(Release release) {
 	}
+
+	@Reference
+	private AssetHelper _assetHelper;
+
+	@Reference
+	private TrashHelper _trashHelper;
 
 }

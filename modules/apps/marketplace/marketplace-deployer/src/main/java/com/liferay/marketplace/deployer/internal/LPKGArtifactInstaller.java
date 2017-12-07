@@ -14,9 +14,11 @@
 
 package com.liferay.marketplace.deployer.internal;
 
+import com.liferay.portal.kernel.concurrent.DefaultNoticeableFuture;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.lpkg.deployer.LPKGDeployer;
 
@@ -24,7 +26,11 @@ import java.io.File;
 import java.io.InputStream;
 
 import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -34,10 +40,15 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.Version;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.url.URLConstants;
+import org.osgi.service.url.URLStreamHandlerService;
 
 /**
  * @author Shuyang Zhou
@@ -59,10 +70,21 @@ public class LPKGArtifactInstaller implements ArtifactInstaller {
 
 	@Override
 	public void install(File file) throws Exception {
+		Bundle existingBundle = _bundleContext.getBundle(
+			file.getCanonicalPath());
+
+		if (existingBundle != null) {
+			update(file);
+		}
+
 		Properties properties = _readMarketplaceProperties(file);
 
 		if (GetterUtil.getBoolean(
 				properties.getProperty("restart-required"), true)) {
+
+			if (existingBundle == null) {
+				_logRestartRequired(file.getCanonicalPath());
+			}
 
 			return;
 		}
@@ -80,7 +102,11 @@ public class LPKGArtifactInstaller implements ArtifactInstaller {
 				bundle.start();
 			}
 			catch (BundleException be) {
-				_log.error("Unable to start " + bundle + " for " + file, be);
+				_log.error(
+					StringBundler.concat(
+						"Unable to start ", String.valueOf(bundle), " for ",
+						String.valueOf(file)),
+					be);
 			}
 		}
 	}
@@ -98,21 +124,72 @@ public class LPKGArtifactInstaller implements ArtifactInstaller {
 	public void update(File file) throws Exception {
 		Properties properties = _readMarketplaceProperties(file);
 
-		if (GetterUtil.getBoolean(
-				properties.getProperty("restart-required"), true)) {
+		String canonicalPath = file.getCanonicalPath();
 
-			return;
-		}
-
-		Bundle bundle = _bundleContext.getBundle(file.getCanonicalPath());
+		Bundle bundle = _bundleContext.getBundle(canonicalPath);
 
 		if (bundle != null) {
 			Version currentVersion = bundle.getVersion();
 			Version newVersion = new Version(properties.getProperty("version"));
 
 			if (newVersion.compareTo(currentVersion) > 0) {
+				if (GetterUtil.getBoolean(
+						properties.getProperty("restart-required"), true)) {
+
+					_logRestartRequired(canonicalPath);
+
+					return;
+				}
+
+				Map<Bundle, List<Bundle>> deployedLPKGBundles =
+					_lpkgDeployer.getDeployedLPKGBundles();
+
+				List<Bundle> installedBundles = deployedLPKGBundles.get(bundle);
+
+				Set<Bundle> wrapperBundles = new HashSet<>();
+
+				for (Bundle installedBundle : installedBundles) {
+					Dictionary<String, String> headers = bundle.getHeaders();
+
+					if (Boolean.getBoolean(headers.get("Wrapper-Bundle"))) {
+						wrapperBundles.add(installedBundle);
+					}
+				}
+
+				if (!wrapperBundles.isEmpty()) {
+					if (_log.isInfoEnabled()) {
+						_log.info(
+							StringBundler.concat(
+								"Refreshing ", String.valueOf(wrapperBundles),
+								" to update ", String.valueOf(bundle)));
+					}
+
+					FrameworkEvent frameworkEvent = _refreshBundles(
+						wrapperBundles);
+
+					if (frameworkEvent.getType() !=
+							FrameworkEvent.PACKAGES_REFRESHED) {
+
+						_log.error(
+							StringBundler.concat(
+								"Unable to refresh ",
+								String.valueOf(wrapperBundles),
+								" because of framework event ",
+								String.valueOf(frameworkEvent)),
+							frameworkEvent.getThrowable());
+					}
+				}
+
 				bundle.update(_lpkgDeployer.toBundle(file));
 			}
+		}
+	}
+
+	private void _logRestartRequired(String canonicalPath) {
+		if (_log.isInfoEnabled()) {
+			_log.info(
+				"The portal instance needs to be restarted to complete the " +
+					"installation of " + canonicalPath);
 		}
 	}
 
@@ -145,6 +222,31 @@ public class LPKGArtifactInstaller implements ArtifactInstaller {
 		return null;
 	}
 
+	private FrameworkEvent _refreshBundles(Set<Bundle> bundles)
+		throws Exception {
+
+		Bundle systemBundle = _bundleContext.getBundle(0);
+
+		FrameworkWiring frameworkWiring = systemBundle.adapt(
+			FrameworkWiring.class);
+
+		final DefaultNoticeableFuture<FrameworkEvent> defaultNoticeableFuture =
+			new DefaultNoticeableFuture<>();
+
+		frameworkWiring.refreshBundles(
+			bundles,
+			new FrameworkListener() {
+
+				@Override
+				public void frameworkEvent(FrameworkEvent frameworkEvent) {
+					defaultNoticeableFuture.set(frameworkEvent);
+				}
+
+			});
+
+		return defaultNoticeableFuture.get();
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		LPKGArtifactInstaller.class);
 
@@ -152,5 +254,8 @@ public class LPKGArtifactInstaller implements ArtifactInstaller {
 
 	@Reference
 	private LPKGDeployer _lpkgDeployer;
+
+	@Reference(target = "(" + URLConstants.URL_HANDLER_PROTOCOL + "=webbundle)")
+	private URLStreamHandlerService _urlStreamHandlerService;
 
 }

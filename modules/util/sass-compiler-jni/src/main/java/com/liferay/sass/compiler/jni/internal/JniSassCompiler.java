@@ -27,7 +27,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
+import java.lang.reflect.Field;
+
 import java.nio.file.Files;
+
+import java.util.Iterator;
+import java.util.Set;
 
 import org.bridj.Platform;
 import org.bridj.Pointer;
@@ -51,6 +56,57 @@ public class JniSassCompiler implements SassCompiler {
 
 		_precision = precision;
 		_tmpDirName = tmpDirName;
+
+		_cleanTempDir = Boolean.getBoolean("sass.compiler.jni.clean.temp.dir");
+	}
+
+	@Override
+	public void close() throws IOException {
+		if (!_cleanTempDir) {
+			return;
+		}
+
+		try {
+			Field field = Platform.class.getDeclaredField(
+				"temporaryExtractedLibraryCanonicalFiles");
+
+			field.setAccessible(true);
+
+			Set<File> temporaryExtractedLibraryCanonicalFiles =
+				(Set<File>)field.get(null);
+
+			Iterator<File> iterator =
+				temporaryExtractedLibraryCanonicalFiles.iterator();
+
+			while (iterator.hasNext()) {
+				File file = iterator.next();
+
+				if (file.isFile() && file.delete()) {
+					iterator.remove();
+				}
+			}
+
+			field = Platform.class.getDeclaredField(
+				"extractedLibrariesTempDir");
+
+			field.setAccessible(true);
+
+			File extractedLibrariesTempDir = (File)field.get(null);
+
+			iterator = temporaryExtractedLibraryCanonicalFiles.iterator();
+
+			while (iterator.hasNext()) {
+				File file = iterator.next();
+
+				if (!file.equals(extractedLibrariesTempDir) && file.delete()) {
+					iterator.remove();
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new IOException(
+				"Unable to clean up BridJ's temporary directory", e);
+		}
 	}
 
 	@Override
@@ -296,6 +352,7 @@ public class JniSassCompiler implements SassCompiler {
 
 	private static final int _PRECISION_DEFAULT = 5;
 
+	private final boolean _cleanTempDir;
 	private final int _precision;
 	private final String _tmpDirName;
 

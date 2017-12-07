@@ -40,6 +40,7 @@ import com.liferay.portal.kernel.service.persistence.CompanyProviderWrapper;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -49,6 +50,8 @@ import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Field;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,7 +65,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * The persistence implementation for the d d m template service.
+ * The persistence implementation for the ddm template service.
  *
  * <p>
  * Caching information and settings can be found in <code>portal.properties</code>
@@ -79,7 +82,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link DDMTemplateUtil} to access the d d m template persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
+	 * Never modify or reference this class directly. Always use {@link DDMTemplateUtil} to access the ddm template persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static final String FINDER_CLASS_NAME_ENTITY = DDMTemplateImpl.class.getName();
 	public static final String FINDER_CLASS_NAME_LIST_WITH_PAGINATION = FINDER_CLASS_NAME_ENTITY +
@@ -115,10 +118,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { String.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where uuid = &#63;.
+	 * Returns all the ddm templates where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByUuid(String uuid) {
@@ -126,16 +129,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where uuid = &#63;.
+	 * Returns a range of all the ddm templates where uuid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param uuid the uuid
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByUuid(String uuid, int start, int end) {
@@ -143,17 +146,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where uuid = &#63;.
+	 * Returns an ordered range of all the ddm templates where uuid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param uuid the uuid
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByUuid(String uuid, int start, int end,
@@ -162,18 +165,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where uuid = &#63;.
+	 * Returns an ordered range of all the ddm templates where uuid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param uuid the uuid
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByUuid(String uuid, int start, int end,
@@ -293,12 +296,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where uuid = &#63;.
+	 * Returns the first ddm template in the ordered set where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByUuid_First(String uuid,
@@ -323,11 +326,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where uuid = &#63;.
+	 * Returns the first ddm template in the ordered set where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByUuid_First(String uuid,
@@ -342,12 +345,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where uuid = &#63;.
+	 * Returns the last ddm template in the ordered set where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByUuid_Last(String uuid,
@@ -372,11 +375,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where uuid = &#63;.
+	 * Returns the last ddm template in the ordered set where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByUuid_Last(String uuid,
@@ -398,13 +401,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where uuid = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where uuid = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param uuid the uuid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByUuid_PrevAndNext(long templateId, String uuid,
@@ -558,7 +561,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where uuid = &#63; from the database.
+	 * Removes all the ddm templates where uuid = &#63; from the database.
 	 *
 	 * @param uuid the uuid
 	 */
@@ -571,10 +574,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where uuid = &#63;.
+	 * Returns the number of ddm templates where uuid = &#63;.
 	 *
 	 * @param uuid the uuid
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByUuid(String uuid) {
@@ -650,12 +653,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { String.class.getName(), Long.class.getName() });
 
 	/**
-	 * Returns the d d m template where uuid = &#63; and groupId = &#63; or throws a {@link NoSuchTemplateException} if it could not be found.
+	 * Returns the ddm template where uuid = &#63; and groupId = &#63; or throws a {@link NoSuchTemplateException} if it could not be found.
 	 *
 	 * @param uuid the uuid
 	 * @param groupId the group ID
-	 * @return the matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByUUID_G(String uuid, long groupId)
@@ -686,11 +689,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 * Returns the ddm template where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
 	 * @param uuid the uuid
 	 * @param groupId the group ID
-	 * @return the matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByUUID_G(String uuid, long groupId) {
@@ -698,12 +701,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 * Returns the ddm template where uuid = &#63; and groupId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param uuid the uuid
 	 * @param groupId the group ID
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByUUID_G(String uuid, long groupId,
@@ -804,11 +807,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes the d d m template where uuid = &#63; and groupId = &#63; from the database.
+	 * Removes the ddm template where uuid = &#63; and groupId = &#63; from the database.
 	 *
 	 * @param uuid the uuid
 	 * @param groupId the group ID
-	 * @return the d d m template that was removed
+	 * @return the ddm template that was removed
 	 */
 	@Override
 	public DDMTemplate removeByUUID_G(String uuid, long groupId)
@@ -819,11 +822,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where uuid = &#63; and groupId = &#63;.
+	 * Returns the number of ddm templates where uuid = &#63; and groupId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param groupId the group ID
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByUUID_G(String uuid, long groupId) {
@@ -914,11 +917,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { String.class.getName(), Long.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where uuid = &#63; and companyId = &#63;.
+	 * Returns all the ddm templates where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByUuid_C(String uuid, long companyId) {
@@ -927,7 +930,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where uuid = &#63; and companyId = &#63;.
+	 * Returns a range of all the ddm templates where uuid = &#63; and companyId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -935,9 +938,9 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByUuid_C(String uuid, long companyId,
@@ -946,7 +949,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where uuid = &#63; and companyId = &#63;.
+	 * Returns an ordered range of all the ddm templates where uuid = &#63; and companyId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -954,10 +957,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByUuid_C(String uuid, long companyId,
@@ -966,7 +969,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where uuid = &#63; and companyId = &#63;.
+	 * Returns an ordered range of all the ddm templates where uuid = &#63; and companyId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -974,11 +977,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByUuid_C(String uuid, long companyId,
@@ -1107,13 +1110,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the first ddm template in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByUuid_C_First(String uuid, long companyId,
@@ -1142,12 +1145,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the first ddm template in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByUuid_C_First(String uuid, long companyId,
@@ -1163,13 +1166,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the last ddm template in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByUuid_C_Last(String uuid, long companyId,
@@ -1198,12 +1201,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the last ddm template in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByUuid_C_Last(String uuid, long companyId,
@@ -1225,14 +1228,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where uuid = &#63; and companyId = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where uuid = &#63; and companyId = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param uuid the uuid
 	 * @param companyId the company ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByUuid_C_PrevAndNext(long templateId, String uuid,
@@ -1390,7 +1393,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where uuid = &#63; and companyId = &#63; from the database.
+	 * Removes all the ddm templates where uuid = &#63; and companyId = &#63; from the database.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
@@ -1404,11 +1407,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where uuid = &#63; and companyId = &#63;.
+	 * Returns the number of ddm templates where uuid = &#63; and companyId = &#63;.
 	 *
 	 * @param uuid the uuid
 	 * @param companyId the company ID
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByUuid_C(String uuid, long companyId) {
@@ -1498,10 +1501,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { Long.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where groupId = &#63;.
+	 * Returns all the ddm templates where groupId = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByGroupId(long groupId) {
@@ -1509,16 +1512,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where groupId = &#63;.
+	 * Returns a range of all the ddm templates where groupId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByGroupId(long groupId, int start, int end) {
@@ -1526,17 +1529,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByGroupId(long groupId, int start, int end,
@@ -1545,18 +1548,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByGroupId(long groupId, int start, int end,
@@ -1662,12 +1665,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByGroupId_First(long groupId,
@@ -1693,11 +1696,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByGroupId_First(long groupId,
@@ -1712,12 +1715,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByGroupId_Last(long groupId,
@@ -1742,11 +1745,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByGroupId_Last(long groupId,
@@ -1768,13 +1771,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where groupId = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where groupId = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByGroupId_PrevAndNext(long templateId,
@@ -1914,10 +1917,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates that the user has permission to view where groupId = &#63;.
+	 * Returns all the ddm templates that the user has permission to view where groupId = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @return the matching d d m templates that the user has permission to view
+	 * @return the matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByGroupId(long groupId) {
@@ -1926,16 +1929,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates that the user has permission to view where groupId = &#63;.
+	 * Returns a range of all the ddm templates that the user has permission to view where groupId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates that the user has permission to view
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByGroupId(long groupId, int start,
@@ -1944,17 +1947,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates that the user has permissions to view where groupId = &#63;.
+	 * Returns an ordered range of all the ddm templates that the user has permissions to view where groupId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates that the user has permission to view
+	 * @return the ordered range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByGroupId(long groupId, int start,
@@ -2038,13 +2041,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set of d d m templates that the user has permission to view where groupId = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set of ddm templates that the user has permission to view where groupId = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] filterFindByGroupId_PrevAndNext(long templateId,
@@ -2224,7 +2227,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where groupId = &#63; from the database.
+	 * Removes all the ddm templates where groupId = &#63; from the database.
 	 *
 	 * @param groupId the group ID
 	 */
@@ -2237,10 +2240,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = &#63;.
+	 * Returns the number of ddm templates where groupId = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByGroupId(long groupId) {
@@ -2288,10 +2291,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates that the user has permission to view where groupId = &#63;.
+	 * Returns the number of ddm templates that the user has permission to view where groupId = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @return the number of matching d d m templates that the user has permission to view
+	 * @return the number of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public int filterCountByGroupId(long groupId) {
@@ -2357,10 +2360,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { Long.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where classPK = &#63;.
+	 * Returns all the ddm templates where classPK = &#63;.
 	 *
-	 * @param classPK the class p k
-	 * @return the matching d d m templates
+	 * @param classPK the class pk
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByClassPK(long classPK) {
@@ -2368,16 +2371,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where classPK = &#63;.
+	 * Returns a range of all the ddm templates where classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByClassPK(long classPK, int start, int end) {
@@ -2385,17 +2388,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates where classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByClassPK(long classPK, int start, int end,
@@ -2404,18 +2407,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates where classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByClassPK(long classPK, int start, int end,
@@ -2521,12 +2524,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where classPK = &#63;.
+	 * Returns the first ddm template in the ordered set where classPK = &#63;.
 	 *
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByClassPK_First(long classPK,
@@ -2552,11 +2555,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where classPK = &#63;.
+	 * Returns the first ddm template in the ordered set where classPK = &#63;.
 	 *
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByClassPK_First(long classPK,
@@ -2571,12 +2574,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where classPK = &#63;.
+	 * Returns the last ddm template in the ordered set where classPK = &#63;.
 	 *
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByClassPK_Last(long classPK,
@@ -2601,11 +2604,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where classPK = &#63;.
+	 * Returns the last ddm template in the ordered set where classPK = &#63;.
 	 *
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByClassPK_Last(long classPK,
@@ -2627,13 +2630,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where classPK = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where classPK = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
-	 * @param classPK the class p k
+	 * @param templateId the primary key of the current ddm template
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByClassPK_PrevAndNext(long templateId,
@@ -2773,9 +2776,9 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where classPK = &#63; from the database.
+	 * Removes all the ddm templates where classPK = &#63; from the database.
 	 *
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 */
 	@Override
 	public void removeByClassPK(long classPK) {
@@ -2786,10 +2789,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where classPK = &#63;.
+	 * Returns the number of ddm templates where classPK = &#63;.
 	 *
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByClassPK(long classPK) {
@@ -2859,10 +2862,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { String.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where templateKey = &#63;.
+	 * Returns all the ddm templates where templateKey = &#63;.
 	 *
 	 * @param templateKey the template key
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByTemplateKey(String templateKey) {
@@ -2871,16 +2874,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where templateKey = &#63;.
+	 * Returns a range of all the ddm templates where templateKey = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param templateKey the template key
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByTemplateKey(String templateKey, int start,
@@ -2889,17 +2892,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where templateKey = &#63;.
+	 * Returns an ordered range of all the ddm templates where templateKey = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param templateKey the template key
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByTemplateKey(String templateKey, int start,
@@ -2909,18 +2912,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where templateKey = &#63;.
+	 * Returns an ordered range of all the ddm templates where templateKey = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param templateKey the template key
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByTemplateKey(String templateKey, int start,
@@ -3041,12 +3044,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where templateKey = &#63;.
+	 * Returns the first ddm template in the ordered set where templateKey = &#63;.
 	 *
 	 * @param templateKey the template key
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByTemplateKey_First(String templateKey,
@@ -3072,11 +3075,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where templateKey = &#63;.
+	 * Returns the first ddm template in the ordered set where templateKey = &#63;.
 	 *
 	 * @param templateKey the template key
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByTemplateKey_First(String templateKey,
@@ -3092,12 +3095,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where templateKey = &#63;.
+	 * Returns the last ddm template in the ordered set where templateKey = &#63;.
 	 *
 	 * @param templateKey the template key
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByTemplateKey_Last(String templateKey,
@@ -3123,11 +3126,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where templateKey = &#63;.
+	 * Returns the last ddm template in the ordered set where templateKey = &#63;.
 	 *
 	 * @param templateKey the template key
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByTemplateKey_Last(String templateKey,
@@ -3149,13 +3152,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where templateKey = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where templateKey = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param templateKey the template key
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByTemplateKey_PrevAndNext(long templateId,
@@ -3309,7 +3312,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where templateKey = &#63; from the database.
+	 * Removes all the ddm templates where templateKey = &#63; from the database.
 	 *
 	 * @param templateKey the template key
 	 */
@@ -3322,10 +3325,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where templateKey = &#63;.
+	 * Returns the number of ddm templates where templateKey = &#63;.
 	 *
 	 * @param templateKey the template key
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByTemplateKey(String templateKey) {
@@ -3409,10 +3412,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { String.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where type = &#63;.
+	 * Returns all the ddm templates where type = &#63;.
 	 *
 	 * @param type the type
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByType(String type) {
@@ -3420,16 +3423,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where type = &#63;.
+	 * Returns a range of all the ddm templates where type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByType(String type, int start, int end) {
@@ -3437,17 +3440,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where type = &#63;.
+	 * Returns an ordered range of all the ddm templates where type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByType(String type, int start, int end,
@@ -3456,18 +3459,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where type = &#63;.
+	 * Returns an ordered range of all the ddm templates where type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByType(String type, int start, int end,
@@ -3587,12 +3590,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where type = &#63;.
+	 * Returns the first ddm template in the ordered set where type = &#63;.
 	 *
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByType_First(String type,
@@ -3617,11 +3620,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where type = &#63;.
+	 * Returns the first ddm template in the ordered set where type = &#63;.
 	 *
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByType_First(String type,
@@ -3636,12 +3639,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where type = &#63;.
+	 * Returns the last ddm template in the ordered set where type = &#63;.
 	 *
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByType_Last(String type,
@@ -3666,11 +3669,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where type = &#63;.
+	 * Returns the last ddm template in the ordered set where type = &#63;.
 	 *
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByType_Last(String type,
@@ -3692,13 +3695,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where type = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where type = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByType_PrevAndNext(long templateId, String type,
@@ -3852,7 +3855,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where type = &#63; from the database.
+	 * Removes all the ddm templates where type = &#63; from the database.
 	 *
 	 * @param type the type
 	 */
@@ -3865,10 +3868,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where type = &#63;.
+	 * Returns the number of ddm templates where type = &#63;.
 	 *
 	 * @param type the type
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByType(String type) {
@@ -3953,10 +3956,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { String.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where language = &#63;.
+	 * Returns all the ddm templates where language = &#63;.
 	 *
 	 * @param language the language
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByLanguage(String language) {
@@ -3965,16 +3968,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where language = &#63;.
+	 * Returns a range of all the ddm templates where language = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param language the language
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByLanguage(String language, int start, int end) {
@@ -3982,17 +3985,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where language = &#63;.
+	 * Returns an ordered range of all the ddm templates where language = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param language the language
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByLanguage(String language, int start,
@@ -4001,18 +4004,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where language = &#63;.
+	 * Returns an ordered range of all the ddm templates where language = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param language the language
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByLanguage(String language, int start,
@@ -4132,12 +4135,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where language = &#63;.
+	 * Returns the first ddm template in the ordered set where language = &#63;.
 	 *
 	 * @param language the language
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByLanguage_First(String language,
@@ -4163,11 +4166,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where language = &#63;.
+	 * Returns the first ddm template in the ordered set where language = &#63;.
 	 *
 	 * @param language the language
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByLanguage_First(String language,
@@ -4183,12 +4186,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where language = &#63;.
+	 * Returns the last ddm template in the ordered set where language = &#63;.
 	 *
 	 * @param language the language
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByLanguage_Last(String language,
@@ -4214,11 +4217,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where language = &#63;.
+	 * Returns the last ddm template in the ordered set where language = &#63;.
 	 *
 	 * @param language the language
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByLanguage_Last(String language,
@@ -4240,13 +4243,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where language = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where language = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param language the language
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByLanguage_PrevAndNext(long templateId,
@@ -4400,7 +4403,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where language = &#63; from the database.
+	 * Removes all the ddm templates where language = &#63; from the database.
 	 *
 	 * @param language the language
 	 */
@@ -4413,10 +4416,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where language = &#63;.
+	 * Returns the number of ddm templates where language = &#63;.
 	 *
 	 * @param language the language
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByLanguage(String language) {
@@ -4491,11 +4494,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { Long.class.getName() });
 
 	/**
-	 * Returns the d d m template where smallImageId = &#63; or throws a {@link NoSuchTemplateException} if it could not be found.
+	 * Returns the ddm template where smallImageId = &#63; or throws a {@link NoSuchTemplateException} if it could not be found.
 	 *
 	 * @param smallImageId the small image ID
-	 * @return the matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findBySmallImageId(long smallImageId)
@@ -4523,10 +4526,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template where smallImageId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 * Returns the ddm template where smallImageId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
 	 * @param smallImageId the small image ID
-	 * @return the matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchBySmallImageId(long smallImageId) {
@@ -4534,11 +4537,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template where smallImageId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 * Returns the ddm template where smallImageId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param smallImageId the small image ID
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchBySmallImageId(long smallImageId,
@@ -4630,10 +4633,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes the d d m template where smallImageId = &#63; from the database.
+	 * Removes the ddm template where smallImageId = &#63; from the database.
 	 *
 	 * @param smallImageId the small image ID
-	 * @return the d d m template that was removed
+	 * @return the ddm template that was removed
 	 */
 	@Override
 	public DDMTemplate removeBySmallImageId(long smallImageId)
@@ -4644,10 +4647,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where smallImageId = &#63;.
+	 * Returns the number of ddm templates where smallImageId = &#63;.
 	 *
 	 * @param smallImageId the small image ID
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countBySmallImageId(long smallImageId) {
@@ -4716,11 +4719,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { Long.class.getName(), Long.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where groupId = &#63; and classNameId = &#63;.
+	 * Returns all the ddm templates where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C(long groupId, long classNameId) {
@@ -4729,7 +4732,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where groupId = &#63; and classNameId = &#63;.
+	 * Returns a range of all the ddm templates where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -4737,9 +4740,9 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C(long groupId, long classNameId,
@@ -4748,7 +4751,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -4756,10 +4759,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C(long groupId, long classNameId,
@@ -4769,7 +4772,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -4777,11 +4780,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C(long groupId, long classNameId,
@@ -4896,13 +4899,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classNameId = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_First(long groupId, long classNameId,
@@ -4931,12 +4934,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classNameId = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_First(long groupId, long classNameId,
@@ -4952,13 +4955,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classNameId = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_Last(long groupId, long classNameId,
@@ -4987,12 +4990,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classNameId = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_Last(long groupId, long classNameId,
@@ -5014,14 +5017,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where groupId = &#63; and classNameId = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where groupId = &#63; and classNameId = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByG_C_PrevAndNext(long templateId, long groupId,
@@ -5165,11 +5168,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63;.
+	 * Returns all the ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @return the matching d d m templates that the user has permission to view
+	 * @return the matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C(long groupId, long classNameId) {
@@ -5178,7 +5181,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63;.
+	 * Returns a range of all the ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -5186,9 +5189,9 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates that the user has permission to view
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C(long groupId, long classNameId,
@@ -5197,7 +5200,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates that the user has permissions to view where groupId = &#63; and classNameId = &#63;.
+	 * Returns an ordered range of all the ddm templates that the user has permissions to view where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -5205,10 +5208,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates that the user has permission to view
+	 * @return the ordered range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C(long groupId, long classNameId,
@@ -5296,14 +5299,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set of d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set of ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] filterFindByG_C_PrevAndNext(long templateId,
@@ -5488,7 +5491,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where groupId = &#63; and classNameId = &#63; from the database.
+	 * Removes all the ddm templates where groupId = &#63; and classNameId = &#63; from the database.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
@@ -5502,11 +5505,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = &#63; and classNameId = &#63;.
+	 * Returns the number of ddm templates where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByG_C(long groupId, long classNameId) {
@@ -5558,11 +5561,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63;.
+	 * Returns the number of ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @return the number of matching d d m templates that the user has permission to view
+	 * @return the number of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public int filterCountByG_C(long groupId, long classNameId) {
@@ -5637,11 +5640,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			new String[] { Long.class.getName(), Long.class.getName() });
 
 	/**
-	 * Returns all the d d m templates where groupId = &#63; and classPK = &#63;.
+	 * Returns all the ddm templates where groupId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @return the matching d d m templates
+	 * @param classPK the class pk
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_CPK(long groupId, long classPK) {
@@ -5650,17 +5653,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where groupId = &#63; and classPK = &#63;.
+	 * Returns a range of all the ddm templates where groupId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_CPK(long groupId, long classPK, int start,
@@ -5669,18 +5672,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_CPK(long groupId, long classPK, int start,
@@ -5689,19 +5692,19 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_CPK(long groupId, long classPK, int start,
@@ -5816,13 +5819,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classPK = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_CPK_First(long groupId, long classPK,
@@ -5851,12 +5854,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classPK = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_CPK_First(long groupId, long classPK,
@@ -5872,13 +5875,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classPK = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_CPK_Last(long groupId, long classPK,
@@ -5907,12 +5910,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classPK = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_CPK_Last(long groupId, long classPK,
@@ -5934,14 +5937,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where groupId = &#63; and classPK = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where groupId = &#63; and classPK = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByG_CPK_PrevAndNext(long templateId, long groupId,
@@ -6085,11 +6088,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates that the user has permission to view where groupId = &#63; and classPK = &#63;.
+	 * Returns all the ddm templates that the user has permission to view where groupId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @return the matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @return the matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_CPK(long groupId, long classPK) {
@@ -6098,17 +6101,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates that the user has permission to view where groupId = &#63; and classPK = &#63;.
+	 * Returns a range of all the ddm templates that the user has permission to view where groupId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_CPK(long groupId, long classPK,
@@ -6117,18 +6120,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates that the user has permissions to view where groupId = &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates that the user has permissions to view where groupId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates that the user has permission to view
+	 * @return the ordered range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_CPK(long groupId, long classPK,
@@ -6216,14 +6219,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set of d d m templates that the user has permission to view where groupId = &#63; and classPK = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set of ddm templates that the user has permission to view where groupId = &#63; and classPK = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] filterFindByG_CPK_PrevAndNext(long templateId,
@@ -6408,11 +6411,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates that the user has permission to view where groupId = any &#63; and classPK = &#63;.
+	 * Returns all the ddm templates that the user has permission to view where groupId = any &#63; and classPK = &#63;.
 	 *
 	 * @param groupIds the group IDs
-	 * @param classPK the class p k
-	 * @return the matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @return the matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_CPK(long[] groupIds, long classPK) {
@@ -6421,17 +6424,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates that the user has permission to view where groupId = any &#63; and classPK = &#63;.
+	 * Returns a range of all the ddm templates that the user has permission to view where groupId = any &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupIds the group IDs
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_CPK(long[] groupIds, long classPK,
@@ -6440,18 +6443,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates that the user has permission to view where groupId = any &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates that the user has permission to view where groupId = any &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupIds the group IDs
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates that the user has permission to view
+	 * @return the ordered range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_CPK(long[] groupIds, long classPK,
@@ -6553,15 +6556,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates where groupId = any &#63; and classPK = &#63;.
+	 * Returns all the ddm templates where groupId = any &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupIds the group IDs
-	 * @param classPK the class p k
-	 * @return the matching d d m templates
+	 * @param classPK the class pk
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_CPK(long[] groupIds, long classPK) {
@@ -6570,17 +6573,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where groupId = any &#63; and classPK = &#63;.
+	 * Returns a range of all the ddm templates where groupId = any &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupIds the group IDs
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_CPK(long[] groupIds, long classPK,
@@ -6589,18 +6592,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = any &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = any &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupIds the group IDs
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_CPK(long[] groupIds, long classPK,
@@ -6610,19 +6613,19 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classPK = &#63;, optionally using the finder cache.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classPK = &#63;, optionally using the finder cache.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_CPK(long[] groupIds, long classPK,
@@ -6755,10 +6758,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where groupId = &#63; and classPK = &#63; from the database.
+	 * Removes all the ddm templates where groupId = &#63; and classPK = &#63; from the database.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 */
 	@Override
 	public void removeByG_CPK(long groupId, long classPK) {
@@ -6769,11 +6772,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = &#63; and classPK = &#63;.
+	 * Returns the number of ddm templates where groupId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByG_CPK(long groupId, long classPK) {
@@ -6825,11 +6828,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = any &#63; and classPK = &#63;.
+	 * Returns the number of ddm templates where groupId = any &#63; and classPK = &#63;.
 	 *
 	 * @param groupIds the group IDs
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByG_CPK(long[] groupIds, long classPK) {
@@ -6904,11 +6907,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates that the user has permission to view where groupId = &#63; and classPK = &#63;.
+	 * Returns the number of ddm templates that the user has permission to view where groupId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public int filterCountByG_CPK(long groupId, long classPK) {
@@ -6957,11 +6960,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates that the user has permission to view where groupId = any &#63; and classPK = &#63;.
+	 * Returns the number of ddm templates that the user has permission to view where groupId = any &#63; and classPK = &#63;.
 	 *
 	 * @param groupIds the group IDs
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public int filterCountByG_CPK(long[] groupIds, long classPK) {
@@ -7066,12 +7069,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			});
 
 	/**
-	 * Returns all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @return the matching d d m templates
+	 * @param classPK the class pk
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C(long groupId, long classNameId,
@@ -7081,7 +7084,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns a range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -7089,10 +7092,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C(long groupId, long classNameId,
@@ -7101,7 +7104,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -7109,11 +7112,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C(long groupId, long classNameId,
@@ -7124,7 +7127,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -7132,12 +7135,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C(long groupId, long classNameId,
@@ -7258,14 +7261,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_C_First(long groupId, long classNameId,
@@ -7297,13 +7300,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_C_First(long groupId, long classNameId,
@@ -7319,14 +7322,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_C_Last(long groupId, long classNameId,
@@ -7358,13 +7361,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_C_Last(long groupId, long classNameId,
@@ -7386,15 +7389,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByG_C_C_PrevAndNext(long templateId, long groupId,
@@ -7543,12 +7546,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns all the ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @return the matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @return the matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C(long groupId, long classNameId,
@@ -7558,7 +7561,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns a range of all the ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -7566,10 +7569,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C(long groupId, long classNameId,
@@ -7578,7 +7581,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates that the user has permissions to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates that the user has permissions to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -7586,11 +7589,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates that the user has permission to view
+	 * @return the ordered range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C(long groupId, long classNameId,
@@ -7684,15 +7687,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set of d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set of ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] filterFindByG_C_C_PrevAndNext(long templateId,
@@ -7881,12 +7884,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates that the user has permission to view where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns all the ddm templates that the user has permission to view where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupIds the group IDs
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @return the matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @return the matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C(long[] groupIds,
@@ -7896,7 +7899,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates that the user has permission to view where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns a range of all the ddm templates that the user has permission to view where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -7904,10 +7907,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupIds the group IDs
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C(long[] groupIds,
@@ -7917,7 +7920,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates that the user has permission to view where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates that the user has permission to view where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -7925,11 +7928,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupIds the group IDs
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates that the user has permission to view
+	 * @return the ordered range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C(long[] groupIds,
@@ -8037,7 +8040,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns all the ddm templates where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -8045,8 +8048,8 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupIds the group IDs
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @return the matching d d m templates
+	 * @param classPK the class pk
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C(long[] groupIds, long classNameId,
@@ -8056,7 +8059,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns a range of all the ddm templates where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -8064,10 +8067,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupIds the group IDs
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C(long[] groupIds, long classNameId,
@@ -8076,7 +8079,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -8084,11 +8087,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupIds the group IDs
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C(long[] groupIds, long classNameId,
@@ -8099,7 +8102,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;, optionally using the finder cache.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;, optionally using the finder cache.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -8107,12 +8110,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param classPK the class pk
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C(long[] groupIds, long classNameId,
@@ -8253,11 +8256,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; from the database.
+	 * Removes all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; from the database.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 */
 	@Override
 	public void removeByG_C_C(long groupId, long classNameId, long classPK) {
@@ -8268,12 +8271,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the number of ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByG_C_C(long groupId, long classNameId, long classPK) {
@@ -8329,12 +8332,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the number of ddm templates where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupIds the group IDs
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByG_C_C(long[] groupIds, long classNameId, long classPK) {
@@ -8415,12 +8418,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the number of ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public int filterCountByG_C_C(long groupId, long classNameId, long classPK) {
@@ -8473,12 +8476,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates that the user has permission to view where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
+	 * Returns the number of ddm templates that the user has permission to view where groupId = any &#63; and classNameId = &#63; and classPK = &#63;.
 	 *
 	 * @param groupIds the group IDs
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
-	 * @return the number of matching d d m templates that the user has permission to view
+	 * @param classPK the class pk
+	 * @return the number of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public int filterCountByG_C_C(long[] groupIds, long classNameId,
@@ -8576,13 +8579,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			});
 
 	/**
-	 * Returns the d d m template where groupId = &#63; and classNameId = &#63; and templateKey = &#63; or throws a {@link NoSuchTemplateException} if it could not be found.
+	 * Returns the ddm template where groupId = &#63; and classNameId = &#63; and templateKey = &#63; or throws a {@link NoSuchTemplateException} if it could not be found.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param templateKey the template key
-	 * @return the matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_T(long groupId, long classNameId,
@@ -8616,12 +8619,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template where groupId = &#63; and classNameId = &#63; and templateKey = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 * Returns the ddm template where groupId = &#63; and classNameId = &#63; and templateKey = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param templateKey the template key
-	 * @return the matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_T(long groupId, long classNameId,
@@ -8630,13 +8633,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template where groupId = &#63; and classNameId = &#63; and templateKey = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 * Returns the ddm template where groupId = &#63; and classNameId = &#63; and templateKey = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param templateKey the template key
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_T(long groupId, long classNameId,
@@ -8743,12 +8746,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes the d d m template where groupId = &#63; and classNameId = &#63; and templateKey = &#63; from the database.
+	 * Removes the ddm template where groupId = &#63; and classNameId = &#63; and templateKey = &#63; from the database.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param templateKey the template key
-	 * @return the d d m template that was removed
+	 * @return the ddm template that was removed
 	 */
 	@Override
 	public DDMTemplate removeByG_C_T(long groupId, long classNameId,
@@ -8759,12 +8762,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = &#63; and classNameId = &#63; and templateKey = &#63;.
+	 * Returns the number of ddm templates where groupId = &#63; and classNameId = &#63; and templateKey = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
 	 * @param templateKey the template key
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByG_C_T(long groupId, long classNameId, String templateKey) {
@@ -8867,12 +8870,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			});
 
 	/**
-	 * Returns all the d d m templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns all the ddm templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByC_C_T(long classNameId, long classPK,
@@ -8882,18 +8885,18 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns a range of all the ddm templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByC_C_T(long classNameId, long classPK,
@@ -8902,19 +8905,19 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns an ordered range of all the ddm templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByC_C_T(long classNameId, long classPK,
@@ -8925,20 +8928,20 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns an ordered range of all the ddm templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByC_C_T(long classNameId, long classPK,
@@ -9073,14 +9076,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the first ddm template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByC_C_T_First(long classNameId, long classPK,
@@ -9112,13 +9115,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the first ddm template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByC_C_T_First(long classNameId, long classPK,
@@ -9134,14 +9137,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the last ddm template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByC_C_T_Last(long classNameId, long classPK,
@@ -9173,13 +9176,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the last ddm template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByC_C_T_Last(long classNameId, long classPK,
@@ -9201,15 +9204,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByC_C_T_PrevAndNext(long templateId,
@@ -9372,10 +9375,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where classNameId = &#63; and classPK = &#63; and type = &#63; from the database.
+	 * Removes all the ddm templates where classNameId = &#63; and classPK = &#63; and type = &#63; from the database.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 */
 	@Override
@@ -9387,12 +9390,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the number of ddm templates where classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByC_C_T(long classNameId, long classPK, String type) {
@@ -9497,13 +9500,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			});
 
 	/**
-	 * Returns all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C_T(long groupId, long classNameId,
@@ -9513,7 +9516,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns a range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -9521,11 +9524,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C_T(long groupId, long classNameId,
@@ -9535,7 +9538,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -9543,12 +9546,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C_T(long groupId, long classNameId,
@@ -9559,7 +9562,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -9567,13 +9570,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C_T(long groupId, long classNameId,
@@ -9713,15 +9716,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_C_T_First(long groupId, long classNameId,
@@ -9757,14 +9760,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_C_T_First(long groupId, long classNameId,
@@ -9781,15 +9784,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_C_T_Last(long groupId, long classNameId,
@@ -9825,14 +9828,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_C_T_Last(long groupId, long classNameId,
@@ -9855,16 +9858,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByG_C_C_T_PrevAndNext(long templateId,
@@ -10032,13 +10035,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns all the ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @return the matching d d m templates that the user has permission to view
+	 * @return the matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C_T(long groupId,
@@ -10048,7 +10051,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns a range of all the ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -10056,11 +10059,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates that the user has permission to view
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C_T(long groupId,
@@ -10070,7 +10073,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates that the user has permissions to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns an ordered range of all the ddm templates that the user has permissions to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -10078,12 +10081,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates that the user has permission to view
+	 * @return the ordered range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C_T(long groupId,
@@ -10195,16 +10198,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set of d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set of ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] filterFindByG_C_C_T_PrevAndNext(long templateId,
@@ -10413,11 +10416,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; from the database.
+	 * Removes all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; from the database.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 */
 	@Override
@@ -10430,13 +10433,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the number of ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByG_C_C_T(long groupId, long classNameId, long classPK,
@@ -10511,13 +10514,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
+	 * Returns the number of ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
-	 * @return the number of matching d d m templates that the user has permission to view
+	 * @return the number of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public int filterCountByG_C_C_T(long groupId, long classNameId,
@@ -10630,14 +10633,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			});
 
 	/**
-	 * Returns all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @return the matching d d m templates
+	 * @return the matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C_T_M(long groupId, long classNameId,
@@ -10647,7 +10650,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns a range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -10655,12 +10658,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C_T_M(long groupId, long classNameId,
@@ -10670,7 +10673,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -10678,13 +10681,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C_T_M(long groupId, long classNameId,
@@ -10695,7 +10698,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns an ordered range of all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -10703,14 +10706,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching d d m templates
+	 * @return the ordered range of matching ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findByG_C_C_T_M(long groupId, long classNameId,
@@ -10869,16 +10872,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the first matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_C_T_M_First(long groupId, long classNameId,
@@ -10917,15 +10920,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the first d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns the first ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the first matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_C_T_M_First(long groupId, long classNameId,
@@ -10942,16 +10945,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template
-	 * @throws NoSuchTemplateException if a matching d d m template could not be found
+	 * @return the last matching ddm template
+	 * @throws NoSuchTemplateException if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate findByG_C_C_T_M_Last(long groupId, long classNameId,
@@ -10990,15 +10993,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the last d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns the last ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching d d m template, or <code>null</code> if a matching d d m template could not be found
+	 * @return the last matching ddm template, or <code>null</code> if a matching ddm template could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByG_C_C_T_M_Last(long groupId, long classNameId,
@@ -11021,17 +11024,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] findByG_C_C_T_M_PrevAndNext(long templateId,
@@ -11219,14 +11222,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns all the ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @return the matching d d m templates that the user has permission to view
+	 * @return the matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C_T_M(long groupId,
@@ -11236,7 +11239,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns a range of all the ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -11244,12 +11247,12 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of matching d d m templates that the user has permission to view
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C_T_M(long groupId,
@@ -11260,7 +11263,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates that the user has permissions to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns an ordered range of all the ddm templates that the user has permissions to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
@@ -11268,13 +11271,13 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching d d m templates that the user has permission to view
+	 * @return the ordered range of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public List<DDMTemplate> filterFindByG_C_C_T_M(long groupId,
@@ -11404,17 +11407,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m templates before and after the current d d m template in the ordered set of d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns the ddm templates before and after the current ddm template in the ordered set of ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
-	 * @param templateId the primary key of the current d d m template
+	 * @param templateId the primary key of the current ddm template
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @return the previous, current, and next ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate[] filterFindByG_C_C_T_M_PrevAndNext(long templateId,
@@ -11642,11 +11645,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63; from the database.
+	 * Removes all the ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63; from the database.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
 	 */
@@ -11660,14 +11663,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns the number of ddm templates where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @return the number of matching d d m templates
+	 * @return the number of matching ddm templates
 	 */
 	@Override
 	public int countByG_C_C_T_M(long groupId, long classNameId, long classPK,
@@ -11762,14 +11765,14 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
+	 * Returns the number of ddm templates that the user has permission to view where groupId = &#63; and classNameId = &#63; and classPK = &#63; and type = &#63; and mode = &#63;.
 	 *
 	 * @param groupId the group ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class p k
+	 * @param classPK the class pk
 	 * @param type the type
 	 * @param mode the mode
-	 * @return the number of matching d d m templates that the user has permission to view
+	 * @return the number of matching ddm templates that the user has permission to view
 	 */
 	@Override
 	public int filterCountByG_C_C_T_M(long groupId, long classNameId,
@@ -11876,12 +11879,30 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 
 	public DDMTemplatePersistenceImpl() {
 		setModelClass(DDMTemplate.class);
+
+		try {
+			Field field = ReflectionUtil.getDeclaredField(BasePersistenceImpl.class,
+					"_dbColumnNames");
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+			dbColumnNames.put("type", "type_");
+			dbColumnNames.put("mode", "mode_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
 	}
 
 	/**
-	 * Caches the d d m template in the entity cache if it is enabled.
+	 * Caches the ddm template in the entity cache if it is enabled.
 	 *
-	 * @param ddmTemplate the d d m template
+	 * @param ddmTemplate the ddm template
 	 */
 	@Override
 	public void cacheResult(DDMTemplate ddmTemplate) {
@@ -11905,9 +11926,9 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Caches the d d m templates in the entity cache if it is enabled.
+	 * Caches the ddm templates in the entity cache if it is enabled.
 	 *
-	 * @param ddmTemplates the d d m templates
+	 * @param ddmTemplates the ddm templates
 	 */
 	@Override
 	public void cacheResult(List<DDMTemplate> ddmTemplates) {
@@ -11924,7 +11945,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Clears the cache for all d d m templates.
+	 * Clears the cache for all ddm templates.
 	 *
 	 * <p>
 	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
@@ -11940,7 +11961,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Clears the cache for the d d m template.
+	 * Clears the cache for the ddm template.
 	 *
 	 * <p>
 	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
@@ -11954,7 +11975,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((DDMTemplateModelImpl)ddmTemplate);
+		clearUniqueFindersCache((DDMTemplateModelImpl)ddmTemplate, true);
 	}
 
 	@Override
@@ -11966,96 +11987,56 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			entityCache.removeResult(DDMTemplateModelImpl.ENTITY_CACHE_ENABLED,
 				DDMTemplateImpl.class, ddmTemplate.getPrimaryKey());
 
-			clearUniqueFindersCache((DDMTemplateModelImpl)ddmTemplate);
+			clearUniqueFindersCache((DDMTemplateModelImpl)ddmTemplate, true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		DDMTemplateModelImpl ddmTemplateModelImpl, boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] {
-					ddmTemplateModelImpl.getUuid(),
-					ddmTemplateModelImpl.getGroupId()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-				ddmTemplateModelImpl);
-
-			args = new Object[] { ddmTemplateModelImpl.getSmallImageId() };
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_SMALLIMAGEID, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_SMALLIMAGEID, args,
-				ddmTemplateModelImpl);
-
-			args = new Object[] {
-					ddmTemplateModelImpl.getGroupId(),
-					ddmTemplateModelImpl.getClassNameId(),
-					ddmTemplateModelImpl.getTemplateKey()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_G_C_T, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_G_C_T, args,
-				ddmTemplateModelImpl);
-		}
-		else {
-			if ((ddmTemplateModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						ddmTemplateModelImpl.getUuid(),
-						ddmTemplateModelImpl.getGroupId()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
-					ddmTemplateModelImpl);
-			}
-
-			if ((ddmTemplateModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_SMALLIMAGEID.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						ddmTemplateModelImpl.getSmallImageId()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_SMALLIMAGEID, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_SMALLIMAGEID, args,
-					ddmTemplateModelImpl);
-			}
-
-			if ((ddmTemplateModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_G_C_T.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						ddmTemplateModelImpl.getGroupId(),
-						ddmTemplateModelImpl.getClassNameId(),
-						ddmTemplateModelImpl.getTemplateKey()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_G_C_T, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_G_C_T, args,
-					ddmTemplateModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(
 		DDMTemplateModelImpl ddmTemplateModelImpl) {
 		Object[] args = new Object[] {
 				ddmTemplateModelImpl.getUuid(),
 				ddmTemplateModelImpl.getGroupId()
 			};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_UUID_G, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_UUID_G, args,
+			ddmTemplateModelImpl, false);
+
+		args = new Object[] { ddmTemplateModelImpl.getSmallImageId() };
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_SMALLIMAGEID, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_SMALLIMAGEID, args,
+			ddmTemplateModelImpl, false);
+
+		args = new Object[] {
+				ddmTemplateModelImpl.getGroupId(),
+				ddmTemplateModelImpl.getClassNameId(),
+				ddmTemplateModelImpl.getTemplateKey()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_G_C_T, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_G_C_T, args,
+			ddmTemplateModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		DDMTemplateModelImpl ddmTemplateModelImpl, boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					ddmTemplateModelImpl.getUuid(),
+					ddmTemplateModelImpl.getGroupId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_G, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
+		}
 
 		if ((ddmTemplateModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_UUID_G.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					ddmTemplateModelImpl.getOriginalUuid(),
 					ddmTemplateModelImpl.getOriginalGroupId()
 				};
@@ -12064,31 +12045,37 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_UUID_G, args);
 		}
 
-		args = new Object[] { ddmTemplateModelImpl.getSmallImageId() };
-
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_SMALLIMAGEID, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_SMALLIMAGEID, args);
-
-		if ((ddmTemplateModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_SMALLIMAGEID.getColumnBitmask()) != 0) {
-			args = new Object[] { ddmTemplateModelImpl.getOriginalSmallImageId() };
+		if (clearCurrent) {
+			Object[] args = new Object[] { ddmTemplateModelImpl.getSmallImageId() };
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_SMALLIMAGEID, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_SMALLIMAGEID, args);
 		}
 
-		args = new Object[] {
-				ddmTemplateModelImpl.getGroupId(),
-				ddmTemplateModelImpl.getClassNameId(),
-				ddmTemplateModelImpl.getTemplateKey()
-			};
+		if ((ddmTemplateModelImpl.getColumnBitmask() &
+				FINDER_PATH_FETCH_BY_SMALLIMAGEID.getColumnBitmask()) != 0) {
+			Object[] args = new Object[] {
+					ddmTemplateModelImpl.getOriginalSmallImageId()
+				};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_G_C_T, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_G_C_T, args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_SMALLIMAGEID, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_SMALLIMAGEID, args);
+		}
+
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					ddmTemplateModelImpl.getGroupId(),
+					ddmTemplateModelImpl.getClassNameId(),
+					ddmTemplateModelImpl.getTemplateKey()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_C_T, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_G_C_T, args);
+		}
 
 		if ((ddmTemplateModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_G_C_T.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					ddmTemplateModelImpl.getOriginalGroupId(),
 					ddmTemplateModelImpl.getOriginalClassNameId(),
 					ddmTemplateModelImpl.getOriginalTemplateKey()
@@ -12100,10 +12087,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Creates a new d d m template with the primary key. Does not add the d d m template to the database.
+	 * Creates a new ddm template with the primary key. Does not add the ddm template to the database.
 	 *
-	 * @param templateId the primary key for the new d d m template
-	 * @return the new d d m template
+	 * @param templateId the primary key for the new ddm template
+	 * @return the new ddm template
 	 */
 	@Override
 	public DDMTemplate create(long templateId) {
@@ -12122,11 +12109,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes the d d m template with the primary key from the database. Also notifies the appropriate model listeners.
+	 * Removes the ddm template with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
-	 * @param templateId the primary key of the d d m template
-	 * @return the d d m template that was removed
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @param templateId the primary key of the ddm template
+	 * @return the ddm template that was removed
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate remove(long templateId) throws NoSuchTemplateException {
@@ -12134,11 +12121,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes the d d m template with the primary key from the database. Also notifies the appropriate model listeners.
+	 * Removes the ddm template with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
-	 * @param primaryKey the primary key of the d d m template
-	 * @return the d d m template that was removed
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @param primaryKey the primary key of the ddm template
+	 * @return the ddm template that was removed
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate remove(Serializable primaryKey)
@@ -12264,8 +12251,120 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !DDMTemplateModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!DDMTemplateModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { ddmTemplateModelImpl.getUuid() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				args);
+
+			args = new Object[] {
+					ddmTemplateModelImpl.getUuid(),
+					ddmTemplateModelImpl.getCompanyId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				args);
+
+			args = new Object[] { ddmTemplateModelImpl.getGroupId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_GROUPID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_GROUPID,
+				args);
+
+			args = new Object[] { ddmTemplateModelImpl.getClassPK() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_CLASSPK, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_CLASSPK,
+				args);
+
+			args = new Object[] { ddmTemplateModelImpl.getTemplateKey() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_TEMPLATEKEY, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TEMPLATEKEY,
+				args);
+
+			args = new Object[] { ddmTemplateModelImpl.getType() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_TYPE, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TYPE,
+				args);
+
+			args = new Object[] { ddmTemplateModelImpl.getLanguage() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_LANGUAGE, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_LANGUAGE,
+				args);
+
+			args = new Object[] {
+					ddmTemplateModelImpl.getGroupId(),
+					ddmTemplateModelImpl.getClassNameId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_C, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_G_C,
+				args);
+
+			args = new Object[] {
+					ddmTemplateModelImpl.getGroupId(),
+					ddmTemplateModelImpl.getClassPK()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_CPK, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_G_CPK,
+				args);
+
+			args = new Object[] {
+					ddmTemplateModelImpl.getGroupId(),
+					ddmTemplateModelImpl.getClassNameId(),
+					ddmTemplateModelImpl.getClassPK()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_C_C, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_G_C_C,
+				args);
+
+			args = new Object[] {
+					ddmTemplateModelImpl.getClassNameId(),
+					ddmTemplateModelImpl.getClassPK(),
+					ddmTemplateModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_C_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_C_T,
+				args);
+
+			args = new Object[] {
+					ddmTemplateModelImpl.getGroupId(),
+					ddmTemplateModelImpl.getClassNameId(),
+					ddmTemplateModelImpl.getClassPK(),
+					ddmTemplateModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_C_C_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_G_C_C_T,
+				args);
+
+			args = new Object[] {
+					ddmTemplateModelImpl.getGroupId(),
+					ddmTemplateModelImpl.getClassNameId(),
+					ddmTemplateModelImpl.getClassPK(),
+					ddmTemplateModelImpl.getType(),
+					ddmTemplateModelImpl.getMode()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_G_C_C_T_M, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_G_C_C_T_M,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -12537,8 +12636,8 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 			DDMTemplateImpl.class, ddmTemplate.getPrimaryKey(), ddmTemplate,
 			false);
 
-		clearUniqueFindersCache(ddmTemplateModelImpl);
-		cacheUniqueFindersCache(ddmTemplateModelImpl, isNew);
+		clearUniqueFindersCache(ddmTemplateModelImpl, false);
+		cacheUniqueFindersCache(ddmTemplateModelImpl);
 
 		ddmTemplate.resetOriginalValues();
 
@@ -12586,11 +12685,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template with the primary key or throws a {@link com.liferay.portal.kernel.exception.NoSuchModelException} if it could not be found.
+	 * Returns the ddm template with the primary key or throws a {@link com.liferay.portal.kernel.exception.NoSuchModelException} if it could not be found.
 	 *
-	 * @param primaryKey the primary key of the d d m template
-	 * @return the d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @param primaryKey the primary key of the ddm template
+	 * @return the ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate findByPrimaryKey(Serializable primaryKey)
@@ -12610,11 +12709,11 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template with the primary key or throws a {@link NoSuchTemplateException} if it could not be found.
+	 * Returns the ddm template with the primary key or throws a {@link NoSuchTemplateException} if it could not be found.
 	 *
-	 * @param templateId the primary key of the d d m template
-	 * @return the d d m template
-	 * @throws NoSuchTemplateException if a d d m template with the primary key could not be found
+	 * @param templateId the primary key of the ddm template
+	 * @return the ddm template
+	 * @throws NoSuchTemplateException if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate findByPrimaryKey(long templateId)
@@ -12623,10 +12722,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template with the primary key or returns <code>null</code> if it could not be found.
+	 * Returns the ddm template with the primary key or returns <code>null</code> if it could not be found.
 	 *
-	 * @param primaryKey the primary key of the d d m template
-	 * @return the d d m template, or <code>null</code> if a d d m template with the primary key could not be found
+	 * @param primaryKey the primary key of the ddm template
+	 * @return the ddm template, or <code>null</code> if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByPrimaryKey(Serializable primaryKey) {
@@ -12671,10 +12770,10 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the d d m template with the primary key or returns <code>null</code> if it could not be found.
+	 * Returns the ddm template with the primary key or returns <code>null</code> if it could not be found.
 	 *
-	 * @param templateId the primary key of the d d m template
-	 * @return the d d m template, or <code>null</code> if a d d m template with the primary key could not be found
+	 * @param templateId the primary key of the ddm template
+	 * @return the ddm template, or <code>null</code> if a ddm template with the primary key could not be found
 	 */
 	@Override
 	public DDMTemplate fetchByPrimaryKey(long templateId) {
@@ -12734,7 +12833,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 		query.append(_SQL_SELECT_DDMTEMPLATE_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
 			query.append(StringPool.COMMA);
 		}
@@ -12776,9 +12875,9 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns all the d d m templates.
+	 * Returns all the ddm templates.
 	 *
-	 * @return the d d m templates
+	 * @return the ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findAll() {
@@ -12786,15 +12885,15 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns a range of all the d d m templates.
+	 * Returns a range of all the ddm templates.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
-	 * @return the range of d d m templates
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
+	 * @return the range of ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findAll(int start, int end) {
@@ -12802,16 +12901,16 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates.
+	 * Returns an ordered range of all the ddm templates.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of d d m templates
+	 * @return the ordered range of ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findAll(int start, int end,
@@ -12820,17 +12919,17 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns an ordered range of all the d d m templates.
+	 * Returns an ordered range of all the ddm templates.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link DDMTemplateModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param start the lower bound of the range of d d m templates
-	 * @param end the upper bound of the range of d d m templates (not inclusive)
+	 * @param start the lower bound of the range of ddm templates
+	 * @param end the upper bound of the range of ddm templates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of d d m templates
+	 * @return the ordered range of ddm templates
 	 */
 	@Override
 	public List<DDMTemplate> findAll(int start, int end,
@@ -12919,7 +13018,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Removes all the d d m templates from the database.
+	 * Removes all the ddm templates from the database.
 	 *
 	 */
 	@Override
@@ -12930,9 +13029,9 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Returns the number of d d m templates.
+	 * Returns the number of ddm templates.
 	 *
-	 * @return the number of d d m templates
+	 * @return the number of ddm templates
 	 */
 	@Override
 	public int countAll() {
@@ -12977,7 +13076,7 @@ public class DDMTemplatePersistenceImpl extends BasePersistenceImpl<DDMTemplate>
 	}
 
 	/**
-	 * Initializes the d d m template persistence.
+	 * Initializes the ddm template persistence.
 	 */
 	public void afterPropertiesSet() {
 	}

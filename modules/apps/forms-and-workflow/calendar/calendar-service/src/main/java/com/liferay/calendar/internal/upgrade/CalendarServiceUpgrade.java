@@ -14,14 +14,21 @@
 
 package com.liferay.calendar.internal.upgrade;
 
+import com.liferay.calendar.internal.upgrade.v1_0_2.UpgradeCalendar;
 import com.liferay.calendar.internal.upgrade.v1_0_4.UpgradeClassNames;
 import com.liferay.calendar.internal.upgrade.v1_0_5.UpgradeCalendarResource;
 import com.liferay.calendar.internal.upgrade.v1_0_5.UpgradeCompanyId;
 import com.liferay.calendar.internal.upgrade.v1_0_5.UpgradeLastPublishDate;
-import com.liferay.calendar.upgrade.v1_0_2.UpgradeCalendar;
-import com.liferay.calendar.upgrade.v1_0_6.UpgradeSchema;
+import com.liferay.calendar.internal.upgrade.v1_0_6.UpgradeResourcePermission;
+import com.liferay.calendar.internal.upgrade.v2_0_0.UpgradeSchema;
+import com.liferay.calendar.internal.upgrade.v3_0_0.UpgradeCalendarBookingResourceBlock;
+import com.liferay.calendar.internal.upgrade.v3_0_0.UpgradeCalendarResourceBlock;
+import com.liferay.calendar.internal.upgrade.v3_0_0.UpgradeCalendarResourceResourceBlock;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourceActionLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.upgrade.DummyUpgradeStep;
 import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
@@ -33,7 +40,10 @@ import org.osgi.service.component.annotations.Reference;
  * @author Iván Zaera
  * @author Manuel de la Peña
  */
-@Component(immediate = true, service = UpgradeStepRegistrator.class)
+@Component(
+	immediate = true,
+	service = {CalendarServiceUpgrade.class, UpgradeStepRegistrator.class}
+)
 public class CalendarServiceUpgrade implements UpgradeStepRegistrator {
 
 	@Override
@@ -69,7 +79,19 @@ public class CalendarServiceUpgrade implements UpgradeStepRegistrator {
 
 		registry.register(
 			"com.liferay.calendar.service", "1.0.5", "1.0.6",
+			new UpgradeResourcePermission(
+				_resourceActionLocalService, _resourcePermissionLocalService,
+				_roleLocalService));
+
+		registry.register(
+			"com.liferay.calendar.service", "1.0.6", "2.0.0",
 			new UpgradeSchema());
+
+		registry.register(
+			"com.liferay.calendar.service", "2.0.0", "3.0.0",
+			new UpgradeCalendarBookingResourceBlock(),
+			new UpgradeCalendarResourceBlock(),
+			new UpgradeCalendarResourceResourceBlock());
 	}
 
 	@Reference(unbind = "-")
@@ -87,12 +109,34 @@ public class CalendarServiceUpgrade implements UpgradeStepRegistrator {
 	}
 
 	@Reference(unbind = "-")
+	protected void setResourceActionLocalService(
+		ResourceActionLocalService resourceActionLocalService) {
+
+		_resourceActionLocalService = resourceActionLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setResourcePermissionLocalService(
+		ResourcePermissionLocalService resourcePermissionLocalService) {
+
+		_resourcePermissionLocalService = resourcePermissionLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setRoleLocalService(RoleLocalService roleLocalService) {
+		_roleLocalService = roleLocalService;
+	}
+
+	@Reference(unbind = "-")
 	protected void setUserLocalService(UserLocalService userLocalService) {
 		_userLocalService = userLocalService;
 	}
 
 	private ClassNameLocalService _classNameLocalService;
 	private CompanyLocalService _companyLocalService;
+	private ResourceActionLocalService _resourceActionLocalService;
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+	private RoleLocalService _roleLocalService;
 	private UserLocalService _userLocalService;
 
 }

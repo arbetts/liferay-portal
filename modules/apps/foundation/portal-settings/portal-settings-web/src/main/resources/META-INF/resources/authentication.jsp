@@ -19,7 +19,7 @@
 <%
 Collection<DynamicInclude> dynamicIncludes = (Collection)request.getAttribute(PortalSettingsWebKeys.AUTHENTICATION_DYNAMIC_INCLUDES);
 
-String[] tabsNames = new String[] {"general"};
+String[] tabsNames = {"general"};
 
 tabsNames = ArrayUtil.append(tabsNames, PropsValues.COMPANY_SETTINGS_FORM_AUTHENTICATION);
 
@@ -55,7 +55,7 @@ tabsNames = ArrayUtil.append(tabsNames, (String)request.getAttribute(PortalSetti
 		<liferay-ui:section>
 
 			<%
-			dynamicInclude.include(request, new PipingServletResponse(response, pageContext.getOut()), null);
+			dynamicInclude.include(request, PipingServletResponse.createPipingServletResponse(pageContext), null);
 			%>
 
 		</liferay-ui:section>

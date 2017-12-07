@@ -32,6 +32,25 @@ long recordSetId = ddlFormDisplayContext.getRecordSetId();
 	</c:when>
 	<c:otherwise>
 		<c:choose>
+			<c:when test="<%= ddlFormDisplayContext.isShowSuccessPage() %>">
+
+				<%
+				DDMFormSuccessPageSettings ddmFormSuccessPageSettings = ddlFormDisplayContext.getDDMFormSuccessPageSettings();
+
+				LocalizedValue title = ddmFormSuccessPageSettings.getTitle();
+				LocalizedValue body = ddmFormSuccessPageSettings.getBody();
+				%>
+
+				<div class="portlet-forms">
+					<div class="ddl-form-basic-info">
+						<div class="container-fluid-1280">
+							<h1 class="ddl-form-name"><%= GetterUtil.getString(title.getString(locale), title.getString(title.getDefaultLocale())) %></h1>
+
+							<h5 class="ddl-form-description"><%= GetterUtil.getString(body.getString(locale), body.getString(body.getDefaultLocale())) %></h5>
+						</div>
+					</div>
+				</div>
+			</c:when>
 			<c:when test="<%= ddlFormDisplayContext.isFormAvailable() %>">
 				<portlet:actionURL name="addRecord" var="addRecordActionURL" />
 
@@ -52,36 +71,19 @@ long recordSetId = ddlFormDisplayContext.getRecordSetId();
 
 						<aui:input name="groupId" type="hidden" value="<%= recordSet.getGroupId() %>" />
 						<aui:input name="recordSetId" type="hidden" value="<%= recordSet.getRecordSetId() %>" />
-						<aui:input name="availableLanguageId" type="hidden" value="<%= themeDisplay.getLanguageId() %>" />
-						<aui:input name="defaultLanguageId" type="hidden" value="<%= themeDisplay.getLanguageId() %>" />
 						<aui:input name="workflowAction" type="hidden" value="<%= WorkflowConstants.ACTION_PUBLISH %>" />
 
 						<liferay-ui:error exception="<%= CaptchaTextException.class %>" message="text-verification-failed" />
 						<liferay-ui:error exception="<%= DDMFormRenderingException.class %>" message="unable-to-render-the-selected-form" />
 						<liferay-ui:error exception="<%= DDMFormValuesValidationException.class %>" message="field-validation-failed" />
 
-						<liferay-ui:error exception="<%= DDMFormValuesValidationException.MustSetValidValues.class %>">
+						<liferay-ui:error exception="<%= DDMFormValuesValidationException.MustSetValidValue.class %>">
 
 							<%
-							DDMFormValuesValidationException.MustSetValidValues msvv = (DDMFormValuesValidationException.MustSetValidValues)errorException;
-
-							List<DDMFormFieldEvaluationResult> ddmFormFieldEvaluationResults = msvv.getDDMFormFieldEvaluationResults();
-
-							for (DDMFormFieldEvaluationResult ddmFormFieldEvaluationResult : ddmFormFieldEvaluationResults) {
+							DDMFormValuesValidationException.MustSetValidValue msvv = (DDMFormValuesValidationException.MustSetValidValue)errorException;
 							%>
 
-								<liferay-ui:message
-									arguments="<%= new Object[] {ddmFormFieldEvaluationResult.getName(), ddmFormFieldEvaluationResult.getErrorMessage()} %>"
-									key="validation-failed-for-field-x"
-									translateArguments="<%= false %>"
-								/>
-
-								<br />
-
-							<%
-							}
-							%>
-
+							<liferay-ui:message arguments="<%= msvv.getFieldName() %>" key="validation-failed-for-field-x" translateArguments="<%= false %>" />
 						</liferay-ui:error>
 
 						<liferay-ui:error exception="<%= DDMFormValuesValidationException.RequiredValue.class %>">
@@ -115,9 +117,93 @@ long recordSetId = ddlFormDisplayContext.getRecordSetId();
 
 						<div class="container-fluid-1280 ddl-form-builder-app">
 							<%= ddlFormDisplayContext.getDDMFormHTML() %>
+
+							<aui:input name="empty" type="hidden" value="" />
 						</div>
 					</aui:form>
 				</div>
+
+				<aui:script use="aui-base">
+					var <portlet:namespace />intervalId;
+
+					function <portlet:namespace />clearPortletHandlers(event) {
+						if (<portlet:namespace />intervalId) {
+							clearInterval(<portlet:namespace />intervalId);
+						}
+
+						Liferay.detach('destroyPortlet', <portlet:namespace />clearPortletHandlers);
+					};
+
+					Liferay.on('destroyPortlet', <portlet:namespace />clearPortletHandlers);
+
+					<c:choose>
+						<c:when test="<%= ddlFormDisplayContext.isAutosaveEnabled() %>">
+							var <portlet:namespace />form;
+
+							<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="addRecord" var="autoSaveRecordURL">
+								<portlet:param name="autoSave" value="<%= Boolean.TRUE.toString() %>" />
+							</liferay-portlet:resourceURL>
+
+							function <portlet:namespace />autoSave() {
+								A.io.request(
+									'<%= autoSaveRecordURL.toString() %>',
+									{
+										data: {
+											<portlet:namespace />recordSetId: <%= recordSetId %>,
+											<portlet:namespace />serializedDDMFormValues: JSON.stringify(<portlet:namespace />form.toJSON())
+										},
+										method: 'POST'
+									}
+								);
+							}
+
+							function <portlet:namespace />startAutoSave() {
+								if (<portlet:namespace />intervalId) {
+									clearInterval(<portlet:namespace />intervalId);
+								}
+
+								<portlet:namespace />intervalId = setInterval(<portlet:namespace />autoSave, 60000);
+							}
+
+							<portlet:namespace />form = Liferay.component('<%= ddlFormDisplayContext.getContainerId() %>DDMForm');
+
+							if (<portlet:namespace />form) {
+								<portlet:namespace />startAutoSave();
+							}
+							else {
+								Liferay.after(
+									'<%= ddlFormDisplayContext.getContainerId() %>DDMForm:render',
+									function(event) {
+										<portlet:namespace />form = Liferay.component('<%= ddlFormDisplayContext.getContainerId() %>DDMForm');
+
+										if (<portlet:namespace />form) {
+											<portlet:namespace />startAutoSave();
+										}
+									}
+								);
+							}
+						</c:when>
+						<c:otherwise>
+							function <portlet:namespace />startAutoExtendSession() {
+								if (<portlet:namespace />intervalId) {
+									clearInterval(<portlet:namespace />intervalId);
+								}
+
+								var tenSeconds = 10000;
+
+								var time = Liferay.Session.get('sessionLength') || tenSeconds;
+
+								<portlet:namespace />intervalId = setInterval(<portlet:namespace />extendSession, (time/2));
+							}
+
+							function <portlet:namespace />extendSession() {
+								Liferay.Session.extend();
+							}
+
+							<portlet:namespace />startAutoExtendSession();
+						</c:otherwise>
+					</c:choose>
+				</aui:script>
 			</c:when>
 			<c:otherwise>
 				<div class="alert alert-warning">

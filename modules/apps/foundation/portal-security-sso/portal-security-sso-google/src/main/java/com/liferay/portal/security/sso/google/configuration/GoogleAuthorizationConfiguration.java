@@ -25,17 +25,26 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.security.sso.google.configuration.GoogleAuthorizationConfiguration",
 	localization = "content/Language",
-	name = "google.authorization.configuration.name"
+	name = "google-authorization-configuration-name"
 )
 public interface GoogleAuthorizationConfiguration {
 
-	@Meta.AD(deflt = "false", description = "enabled-help", required = false)
+	@Meta.AD(
+		deflt = "false", description = "enabled-help", name = "enabled",
+		required = false
+	)
 	public boolean enabled();
 
-	@Meta.AD(deflt = "", description = "client-id-help", required = false)
+	@Meta.AD(
+		deflt = "", description = "client-id-help", name = "client-id",
+		required = false
+	)
 	public String clientId();
 
-	@Meta.AD(deflt = "", description = "client-secret-help", required = false)
+	@Meta.AD(
+		deflt = "", description = "client-secret-help", name = "client-secret",
+		required = false
+	)
 	public String clientSecret();
 
 }

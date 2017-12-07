@@ -35,7 +35,6 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
@@ -139,8 +138,6 @@ public class BookmarksEntryPersistenceTest {
 
 		newBookmarksEntry.setModifiedDate(RandomTestUtil.nextDate());
 
-		newBookmarksEntry.setResourceBlockId(RandomTestUtil.nextLong());
-
 		newBookmarksEntry.setFolderId(RandomTestUtil.nextLong());
 
 		newBookmarksEntry.setTreePath(RandomTestUtil.randomString());
@@ -187,8 +184,6 @@ public class BookmarksEntryPersistenceTest {
 		Assert.assertEquals(Time.getShortTimestamp(
 				existingBookmarksEntry.getModifiedDate()),
 			Time.getShortTimestamp(newBookmarksEntry.getModifiedDate()));
-		Assert.assertEquals(existingBookmarksEntry.getResourceBlockId(),
-			newBookmarksEntry.getResourceBlockId());
 		Assert.assertEquals(existingBookmarksEntry.getFolderId(),
 			newBookmarksEntry.getFolderId());
 		Assert.assertEquals(existingBookmarksEntry.getTreePath(),
@@ -218,35 +213,28 @@ public class BookmarksEntryPersistenceTest {
 	}
 
 	@Test
-	public void testCountByResourceBlockId() throws Exception {
-		_persistence.countByResourceBlockId(RandomTestUtil.nextLong());
-
-		_persistence.countByResourceBlockId(0L);
-	}
-
-	@Test
 	public void testCountByUuid() throws Exception {
-		_persistence.countByUuid(StringPool.BLANK);
+		_persistence.countByUuid("");
 
-		_persistence.countByUuid(StringPool.NULL);
+		_persistence.countByUuid("null");
 
 		_persistence.countByUuid((String)null);
 	}
 
 	@Test
 	public void testCountByUUID_G() throws Exception {
-		_persistence.countByUUID_G(StringPool.BLANK, RandomTestUtil.nextLong());
+		_persistence.countByUUID_G("", RandomTestUtil.nextLong());
 
-		_persistence.countByUUID_G(StringPool.NULL, 0L);
+		_persistence.countByUUID_G("null", 0L);
 
 		_persistence.countByUUID_G((String)null, 0L);
 	}
 
 	@Test
 	public void testCountByUuid_C() throws Exception {
-		_persistence.countByUuid_C(StringPool.BLANK, RandomTestUtil.nextLong());
+		_persistence.countByUuid_C("", RandomTestUtil.nextLong());
 
-		_persistence.countByUuid_C(StringPool.NULL, 0L);
+		_persistence.countByUuid_C("null", 0L);
 
 		_persistence.countByUuid_C((String)null, 0L);
 	}
@@ -385,11 +373,10 @@ public class BookmarksEntryPersistenceTest {
 		return OrderByComparatorFactoryUtil.create("BookmarksEntry", "uuid",
 			true, "entryId", true, "groupId", true, "companyId", true,
 			"userId", true, "userName", true, "createDate", true,
-			"modifiedDate", true, "resourceBlockId", true, "folderId", true,
-			"treePath", true, "name", true, "url", true, "description", true,
-			"visits", true, "priority", true, "lastPublishDate", true,
-			"status", true, "statusByUserId", true, "statusByUserName", true,
-			"statusDate", true);
+			"modifiedDate", true, "folderId", true, "treePath", true, "name",
+			true, "url", true, "description", true, "visits", true, "priority",
+			true, "lastPublishDate", true, "status", true, "statusByUserId",
+			true, "statusByUserName", true, "statusDate", true);
 	}
 
 	@Test
@@ -618,8 +605,6 @@ public class BookmarksEntryPersistenceTest {
 		bookmarksEntry.setCreateDate(RandomTestUtil.nextDate());
 
 		bookmarksEntry.setModifiedDate(RandomTestUtil.nextDate());
-
-		bookmarksEntry.setResourceBlockId(RandomTestUtil.nextLong());
 
 		bookmarksEntry.setFolderId(RandomTestUtil.nextLong());
 

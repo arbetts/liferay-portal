@@ -81,7 +81,7 @@ public class ModuleFrameworkUtilAdapter {
 		_moduleFramework = moduleFramework;
 
 		_moduleFrameworkAdapterHelper.exec(
-			"setModuleFramework", new Class[] {ModuleFramework.class},
+			"setModuleFramework", new Class<?>[] {ModuleFramework.class},
 			_moduleFramework);
 	}
 
@@ -145,9 +145,8 @@ public class ModuleFrameworkUtilAdapter {
 			"com.liferay.portal.bootstrap.ModuleFrameworkUtil");
 
 	static {
-		_moduleFramework =
-			(ModuleFramework)_moduleFrameworkAdapterHelper.execute(
-				"getModuleFramework");
+		_moduleFramework = (ModuleFramework)_moduleFrameworkAdapterHelper.exec(
+			"getModuleFramework", new Class<?>[0]);
 	}
 
 }

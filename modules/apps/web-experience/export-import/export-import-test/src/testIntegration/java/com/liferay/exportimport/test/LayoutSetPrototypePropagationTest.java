@@ -17,7 +17,7 @@ package com.liferay.exportimport.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
 import com.liferay.exportimport.kernel.staging.MergeLayoutPrototypesThreadLocal;
-import com.liferay.journal.content.web.constants.JournalContentPortletKeys;
+import com.liferay.journal.constants.JournalContentPortletKeys;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleLocalServiceUtil;
 import com.liferay.journal.test.util.JournalTestUtil;
@@ -32,8 +32,14 @@ import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutServiceUtil;
 import com.liferay.portal.kernel.service.LayoutSetLocalServiceUtil;
@@ -47,8 +53,10 @@ import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.RoleTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
@@ -68,6 +76,7 @@ import javax.portlet.PortletPreferences;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -126,6 +135,7 @@ public class LayoutSetPrototypePropagationTest
 		doTestIsLayoutUpdateable();
 	}
 
+	@Ignore
 	@Test
 	public void testLayoutPermissionPropagationWithLinkEnabled()
 		throws Exception {
@@ -202,6 +212,7 @@ public class LayoutSetPrototypePropagationTest
 			SitesUtil.getMergeFailFriendlyURLLayouts(layoutSet);
 
 		Assert.assertEquals(
+			mergeFailFriendlyURLLayouts.toString(),
 			initialMergeFailFriendlyURLLayouts.size() + 1,
 			mergeFailFriendlyURLLayouts.size());
 	}
@@ -225,6 +236,7 @@ public class LayoutSetPrototypePropagationTest
 		doTestLayoutPropagation(false);
 	}
 
+	@Ignore
 	@Test
 	public void testLayoutPropagationWithLinkEnabled() throws Exception {
 		doTestLayoutPropagation(true);
@@ -247,6 +259,7 @@ public class LayoutSetPrototypePropagationTest
 		doTestPortletPreferencesPropagation(false, true);
 	}
 
+	@Ignore
 	@Test
 	public void testPortletPreferencesPropagationWithGlobalScopeLinkEnabled()
 		throws Exception {
@@ -414,6 +427,72 @@ public class LayoutSetPrototypePropagationTest
 				"showAvailableLocales", StringPool.BLANK));
 	}
 
+	@Test
+	public void testResetPrototypeWithoutPermissions() throws Exception {
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(_user1);
+
+		PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+		Group userGroup = GroupLocalServiceUtil.getUserGroup(
+			_user2.getCompanyId(), _user2.getUserId());
+
+		LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
+			userGroup.getGroupId(), true);
+
+		try {
+			SitesUtil.resetPrototype(layoutSet);
+
+			Assert.fail(
+				"The user should not be able to reset another user's " +
+					"dashboard");
+		}
+		catch (PrincipalException pe) {
+		}
+	}
+
+	@Test
+	public void testResetPrototypeWithPermissions() throws Exception {
+		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
+
+		RoleLocalServiceUtil.addUserRole(_user1.getUserId(), role);
+
+		ResourcePermissionLocalServiceUtil.addResourcePermission(
+			_user1.getCompanyId(), Group.class.getName(),
+			ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(_user1.getCompanyId()), role.getRoleId(),
+			ActionKeys.UPDATE);
+
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(_user1);
+
+		PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+		Group userGroup = GroupLocalServiceUtil.getUserGroup(
+			_user2.getCompanyId(), _user2.getUserId());
+
+		LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
+			userGroup.getGroupId(), true);
+
+		SitesUtil.resetPrototype(layoutSet);
+	}
+
+	@Test
+	public void testResetUserPrototypeWithoutPermissions() throws Exception {
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(_user1);
+
+		PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+		Group userGroup = GroupLocalServiceUtil.getUserGroup(
+			_user1.getCompanyId(), _user1.getUserId());
+
+		LayoutSet layoutSet = LayoutSetLocalServiceUtil.getLayoutSet(
+			userGroup.getGroupId(), true);
+
+		SitesUtil.resetPrototype(layoutSet);
+	}
+
 	@Override
 	protected void doSetUp() throws Exception {
 
@@ -466,6 +545,11 @@ public class LayoutSetPrototypePropagationTest
 		journalArticle = JournalArticleLocalServiceUtil.getArticleByUrlTitle(
 			group.getGroupId(),
 			_layoutSetPrototypeJournalArticle.getUrlTitle());
+
+		// Users
+
+		_user1 = UserTestUtil.addUser();
+		_user2 = UserTestUtil.addUser();
 	}
 
 	protected void doTestIsLayoutUpdateable() throws Exception {
@@ -721,5 +805,11 @@ public class LayoutSetPrototypePropagationTest
 
 	private String _portletId;
 	private Layout _prototypeLayout;
+
+	@DeleteAfterTestRun
+	private User _user1;
+
+	@DeleteAfterTestRun
+	private User _user2;
 
 }

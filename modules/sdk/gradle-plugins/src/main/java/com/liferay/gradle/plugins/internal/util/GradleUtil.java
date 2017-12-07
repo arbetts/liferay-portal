@@ -27,6 +27,7 @@ import org.gradle.api.Project;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.BasePluginConvention;
 import org.gradle.api.plugins.PluginContainer;
+import org.gradle.api.tasks.TaskContainer;
 
 /**
  * @author Andrea Di Giorgi
@@ -34,7 +35,7 @@ import org.gradle.api.plugins.PluginContainer;
 public class GradleUtil extends com.liferay.gradle.util.GradleUtil {
 
 	public static String getArchivesBaseName(Project project) {
-		BasePluginConvention basePluginConvention = GradleUtil.getConvention(
+		BasePluginConvention basePluginConvention = getConvention(
 			project, BasePluginConvention.class);
 
 		return basePluginConvention.getArchivesBaseName();
@@ -89,6 +90,16 @@ public class GradleUtil extends com.liferay.gradle.util.GradleUtil {
 		PluginContainer pluginContainer = project.getPlugins();
 
 		return pluginContainer.hasPlugin(pluginId);
+	}
+
+	public static boolean hasTask(Project project, String name) {
+		TaskContainer taskContainer = project.getTasks();
+
+		if (taskContainer.findByName(name) != null) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public static boolean isRunningInsideDaemon() {

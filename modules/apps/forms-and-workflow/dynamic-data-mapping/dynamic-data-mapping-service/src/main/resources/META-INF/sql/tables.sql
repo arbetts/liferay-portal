@@ -7,7 +7,7 @@ create table DDMContent (
 	userName VARCHAR(75) null,
 	createDate DATE null,
 	modifiedDate DATE null,
-	name TEXT null,
+	name STRING null,
 	description STRING null,
 	data_ TEXT null
 );
@@ -21,7 +21,7 @@ create table DDMDataProviderInstance (
 	userName VARCHAR(75) null,
 	createDate DATE null,
 	modifiedDate DATE null,
-	name TEXT null,
+	name STRING null,
 	description TEXT null,
 	definition TEXT null,
 	type_ VARCHAR(75) null
@@ -40,7 +40,8 @@ create table DDMStorageLink (
 	companyId LONG,
 	classNameId LONG,
 	classPK LONG,
-	structureId LONG
+	structureId LONG,
+	structureVersionId LONG
 );
 
 create table DDMStructure (
@@ -58,7 +59,7 @@ create table DDMStructure (
 	classNameId LONG,
 	structureKey VARCHAR(75) null,
 	version VARCHAR(75) null,
-	name TEXT null,
+	name STRING null,
 	description TEXT null,
 	definition TEXT null,
 	storageType VARCHAR(75) null,
@@ -97,7 +98,7 @@ create table DDMStructureVersion (
 	structureId LONG,
 	version VARCHAR(75) null,
 	parentStructureId LONG,
-	name TEXT null,
+	name STRING null,
 	description TEXT null,
 	definition TEXT null,
 	storageType VARCHAR(75) null,
@@ -133,7 +134,7 @@ create table DDMTemplate (
 	cacheable BOOLEAN,
 	smallImage BOOLEAN,
 	smallImageId LONG,
-	smallImageURL VARCHAR(75) null,
+	smallImageURL STRING null,
 	lastPublishDate DATE null
 );
 

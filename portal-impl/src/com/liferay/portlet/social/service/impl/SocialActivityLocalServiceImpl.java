@@ -139,8 +139,8 @@ public class SocialActivityLocalServiceImpl
 		activity.setExtraData(extraData);
 		activity.setReceiverUserId(receiverUserId);
 
-		AssetEntry assetEntry = assetEntryPersistence.fetchByC_C(
-			classNameId, classPK);
+		AssetEntry assetEntry = assetEntryLocalService.fetchEntry(
+			className, classPK);
 
 		activity.setAssetEntry(assetEntry);
 
@@ -204,30 +204,8 @@ public class SocialActivityLocalServiceImpl
 			String extraData, long receiverUserId)
 		throws PortalException {
 
-		if (ExportImportThreadLocal.isImportInProcess()) {
-			return;
-		}
-
-		Date createDate = new Date();
-
-		long classNameId = classNameLocalService.getClassNameId(className);
-
-		while (true) {
-			SocialActivity socialActivity =
-				socialActivityPersistence.fetchByG_U_CD_C_C_T_R(
-					groupId, userId, createDate.getTime(), classNameId, classPK,
-					type, receiverUserId);
-
-			if (socialActivity != null) {
-				createDate = new Date(createDate.getTime() + 1);
-			}
-			else {
-				break;
-			}
-		}
-
 		addActivity(
-			userId, groupId, createDate, className, classPK, type, extraData,
+			userId, groupId, new Date(), className, classPK, type, extraData,
 			receiverUserId);
 	}
 
@@ -597,6 +575,18 @@ public class SocialActivityLocalServiceImpl
 	@Override
 	public int getActivitiesCount(long classNameId) {
 		return socialActivityPersistence.countByClassNameId(classNameId);
+	}
+
+	@Override
+	public int getActivitiesCount(
+		long userId, long groupId, Date createDate, String className,
+		long classPK, int type, long receiverUserId) {
+
+		long classNameId = classNameLocalService.getClassNameId(className);
+
+		return socialActivityPersistence.countByG_U_CD_C_C_T_R(
+			groupId, userId, createDate.getTime(), classNameId, classPK, type,
+			receiverUserId);
 	}
 
 	/**

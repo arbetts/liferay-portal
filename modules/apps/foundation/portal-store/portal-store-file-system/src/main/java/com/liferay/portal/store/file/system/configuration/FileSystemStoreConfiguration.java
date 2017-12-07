@@ -25,14 +25,14 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.store.file.system.configuration.FileSystemStoreConfiguration",
 	localization = "content/Language",
-	name = "file.system.store.configuration.name"
+	name = "file-system-store-configuration-name"
 )
 public interface FileSystemStoreConfiguration {
 
 	@Meta.AD(
 		deflt = "data/document_library",
-		description = "file.system.store.configuration.root.dir.description",
-		required = false
+		description = "file-system-store-configuration-root-dir-description",
+		name = "root-dir", required = false
 	)
 	public String rootDir();
 

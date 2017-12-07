@@ -49,7 +49,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
@@ -129,6 +129,11 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 		return true;
 	}
 
+	@Override
+	public boolean isSupportsDataStrategyMirrorWithOverwriting() {
+		return false;
+	}
+
 	@Activate
 	protected void activate() {
 		setDataLocalized(true);
@@ -147,7 +152,7 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 						NAMESPACE, "referenced-content"),
 					new PortletDataHandlerBoolean(
 						NAMESPACE, "version-history",
-						isPublishToLiveByDefault())
+						_isVersionHistoryByDefaultEnabled())
 				},
 				JournalArticle.class.getName()),
 			new PortletDataHandlerBoolean(
@@ -184,11 +189,11 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 
 		_ddmTemplateLocalService.deleteTemplates(
 			portletDataContext.getScopeGroupId(),
-			PortalUtil.getClassNameId(DDMStructure.class));
+			_portal.getClassNameId(DDMStructure.class));
 
 		_ddmStructureLocalService.deleteStructures(
 			portletDataContext.getScopeGroupId(),
-			PortalUtil.getClassNameId(JournalArticle.class));
+			_portal.getClassNameId(JournalArticle.class));
 
 		return portletPreferences;
 	}
@@ -467,7 +472,7 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 					Property classNameIdProperty = PropertyFactoryUtil.forName(
 						"classNameId");
 
-					long classNameId = PortalUtil.getClassNameId(
+					long classNameId = _portal.getClassNameId(
 						JournalArticle.class);
 
 					dynamicQuery.add(classNameIdProperty.eq(classNameId));
@@ -528,13 +533,13 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 					Property classNameIdProperty = PropertyFactoryUtil.forName(
 						"classNameId");
 
-					long ddmStructureClassNameId = PortalUtil.getClassNameId(
+					long ddmStructureClassNameId = _portal.getClassNameId(
 						DDMStructure.class);
 
 					dynamicQuery.add(
 						classNameIdProperty.eq(ddmStructureClassNameId));
 
-					long articleClassNameId = PortalUtil.getClassNameId(
+					long articleClassNameId = _portal.getClassNameId(
 						JournalArticle.class);
 
 					ddmStructureDynamicQuery.add(
@@ -612,6 +617,22 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 		ModuleServiceLifecycle moduleServiceLifecycle) {
 	}
 
+	private boolean _isVersionHistoryByDefaultEnabled() {
+		try {
+			JournalServiceConfiguration journalServiceConfiguration =
+				ConfigurationProviderUtil.getCompanyConfiguration(
+					JournalServiceConfiguration.class,
+					CompanyThreadLocal.getCompanyId());
+
+			return journalServiceConfiguration.versionHistoryByDefaultEnabled();
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+		}
+
+		return true;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		JournalPortletDataHandler.class);
 
@@ -623,5 +644,8 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 	private JournalContent _journalContent;
 	private JournalFeedLocalService _journalFeedLocalService;
 	private JournalFolderLocalService _journalFolderLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

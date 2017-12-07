@@ -20,4 +20,37 @@ the WAR file.
 ### Removed
 - [LPS-66396]: Remove the `outputThemeDirs` property of the `BuildThemeTask`.
 
+## 2.0.1 - 2017-01-07
+
+### Changed
+- [LPS-69223]: Update the [Liferay Gradle Plugins CSS Builder] dependency to
+version 2.0.0.
+
+## 2.0.2 - 2017-05-09
+
+### Added
+- [LPS-72367]: Automatically add the latest release of the
+[Liferay Frontend Theme Classic] artifact to the `parentThemes` configuration.
+- [LPS-72367]: Change the sensible default of the `buildTheme` task's
+`parentFile` property so it's possible to use WAR parent themes from the
+`parentThemes` configuration.
+
+## 2.0.3 - 2017-07-10
+
+### Changed
+- [LPS-73495]: Update the [Liferay Gradle Plugins CSS Builder] dependency to
+version 2.0.1.
+
+## 2.0.4 - *(Unreleased)*
+
+### Changed
+- [LPS-74315]: Update the [Liferay Gradle Plugins CSS Builder] dependency to
+version 2.1.2.
+
+[Liferay Frontend Theme Classic]: https://github.com/liferay/liferay-portal/tree/master/modules/apps/frontend-theme-classic
+[Liferay Gradle Plugins CSS Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-css-builder
 [LPS-66396]: https://issues.liferay.com/browse/LPS-66396
+[LPS-69223]: https://issues.liferay.com/browse/LPS-69223
+[LPS-72367]: https://issues.liferay.com/browse/LPS-72367
+[LPS-73495]: https://issues.liferay.com/browse/LPS-73495
+[LPS-74315]: https://issues.liferay.com/browse/LPS-74315

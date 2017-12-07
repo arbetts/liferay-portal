@@ -20,6 +20,7 @@ import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.service.BookmarksFolderLocalServiceUtil;
 import com.liferay.bookmarks.service.BookmarksFolderServiceUtil;
 import com.liferay.bookmarks.util.test.BookmarksTestUtil;
+import com.liferay.exportimport.kernel.lar.DataLevel;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -89,7 +90,7 @@ public class BookmarksPortletDataHandlerTest
 		List<BookmarksFolder> folders =
 			BookmarksFolderLocalServiceUtil.getFolders(group.getGroupId());
 
-		Assert.assertEquals(0, folders.size());
+		Assert.assertEquals(folders.toString(), 0, folders.size());
 	}
 
 	@Override
@@ -104,8 +105,33 @@ public class BookmarksPortletDataHandlerTest
 	}
 
 	@Override
+	protected DataLevel getDataLevel() {
+		return DataLevel.SITE;
+	}
+
+	@Override
+	protected String[] getDataPortletPreferences() {
+		return new String[] {"rootFolderId"};
+	}
+
+	@Override
 	protected String getPortletId() {
 		return BookmarksPortletKeys.BOOKMARKS;
+	}
+
+	@Override
+	protected boolean isDataPortalLevel() {
+		return false;
+	}
+
+	@Override
+	protected boolean isDataPortletInstanceLevel() {
+		return false;
+	}
+
+	@Override
+	protected boolean isDataSiteLevel() {
+		return true;
 	}
 
 }

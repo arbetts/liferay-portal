@@ -16,12 +16,13 @@ package com.liferay.portal.kernel.theme;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.PortletInstance;
 import com.liferay.portal.kernel.module.configuration.ConfigurationException;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.portlet.configuration.icon.PortletConfigurationIconMenu;
 import com.liferay.portal.kernel.portlet.toolbar.PortletToolbar;
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -259,14 +260,13 @@ public class PortletDisplay implements Cloneable, Serializable {
 	public <T> T getPortletInstanceConfiguration(Class<T> clazz)
 		throws ConfigurationException {
 
-		String portletId = Validator.isNull(
-			_portletResource) ? _id : _portletResource;
-
-		PortletInstance portletInstance =
-			PortletInstance.fromPortletInstanceKey(portletId);
+		if (Validator.isNull(_portletResource)) {
+			return ConfigurationProviderUtil.getPortletInstanceConfiguration(
+				clazz, _themeDisplay.getLayout(), _id);
+		}
 
 		return ConfigurationProviderUtil.getPortletInstanceConfiguration(
-			clazz, _themeDisplay.getLayout(), portletInstance);
+			clazz, _themeDisplay.getLayout(), _portletResource);
 	}
 
 	public String getPortletName() {
@@ -803,6 +803,13 @@ public class PortletDisplay implements Cloneable, Serializable {
 
 		if (_urlBack == null) {
 			_urlBack = StringPool.BLANK;
+		}
+		else if (_urlBack.length() > Http.URL_MAXIMUM_LENGTH) {
+			_urlBack = HttpUtil.shortenURL(_urlBack);
+
+			if (_urlBack.length() > Http.URL_MAXIMUM_LENGTH) {
+				_urlBack = StringPool.BLANK;
+			}
 		}
 	}
 

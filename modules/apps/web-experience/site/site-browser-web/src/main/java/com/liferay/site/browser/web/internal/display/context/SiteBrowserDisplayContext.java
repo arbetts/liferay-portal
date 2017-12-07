@@ -14,6 +14,7 @@
 
 package com.liferay.site.browser.web.internal.display.context;
 
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
@@ -32,7 +33,6 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portlet.usersadmin.search.GroupSearch;
@@ -228,14 +228,12 @@ public class SiteBrowserDisplayContext {
 			start = groupSearch.getStart() - additionalSites;
 		}
 
-		int end = groupSearch.getEnd() - additionalSites;
-
 		List<Group> groups = null;
 
 		if (type.equals("layoutScopes")) {
 			groups = GroupLocalServiceUtil.getGroups(
 				company.getCompanyId(), Layout.class.getName(), getGroupId(),
-				start, end);
+				start, groupSearch.getResultEnd() - additionalSites);
 
 			groups = _filterLayoutGroups(groups, isPrivateLayout());
 		}
@@ -259,8 +257,20 @@ public class SiteBrowserDisplayContext {
 		else {
 			groups = GroupLocalServiceUtil.search(
 				company.getCompanyId(), classNameIds,
-				groupSearchTerms.getKeywords(), getGroupParams(), start, end,
+				groupSearchTerms.getKeywords(), getGroupParams(),
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 				groupSearch.getOrderByComparator());
+
+			groups = _filterGroups(groups, themeDisplay.getPermissionChecker());
+
+			total = groups.size();
+
+			total += additionalSites;
+
+			groupSearch.setTotal(total);
+
+			groups = groups.subList(
+				start, groupSearch.getResultEnd() - additionalSites);
 		}
 
 		results.addAll(groups);
@@ -280,8 +290,6 @@ public class SiteBrowserDisplayContext {
 				"p_u_i_d", String.valueOf(selUser.getUserId()));
 		}
 
-		long[] selectedGroupIds = StringUtil.split(
-			ParamUtil.getString(_request, "selectedGroupIds"), 0L);
 		boolean includeCompany = ParamUtil.getBoolean(
 			_request, "includeCompany");
 		boolean includeCurrentGroup = ParamUtil.getBoolean(
@@ -294,8 +302,6 @@ public class SiteBrowserDisplayContext {
 		String target = ParamUtil.getString(_request, "target");
 
 		portletURL.setParameter("groupId", String.valueOf(getGroupId()));
-		portletURL.setParameter(
-			"selectedGroupIds", StringUtil.merge(selectedGroupIds));
 		portletURL.setParameter("type", getType());
 		portletURL.setParameter("types", getTypes());
 		portletURL.setParameter("displayStyle", getDisplayStyle());
@@ -364,6 +370,21 @@ public class SiteBrowserDisplayContext {
 		return _privateLayout;
 	}
 
+	private List<Group> _filterGroups(
+			List<Group> groups, PermissionChecker permissionChecker)
+		throws Exception {
+
+		List<Group> filteredGroups = new ArrayList();
+
+		for (Group group : groups) {
+			if (permissionChecker.isGroupAdmin(group.getGroupId())) {
+				filteredGroups.add(group);
+			}
+		}
+
+		return filteredGroups;
+	}
+
 	private List<Group> _filterGroups(List<Group> groups, String filter)
 		throws Exception {
 
@@ -406,7 +427,7 @@ public class SiteBrowserDisplayContext {
 		return filteredGroups;
 	}
 
-	private static final long[] _CLASS_NAME_IDS = new long[] {
+	private static final long[] _CLASS_NAME_IDS = {
 		PortalUtil.getClassNameId(Group.class),
 		PortalUtil.getClassNameId(Organization.class)
 	};

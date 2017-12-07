@@ -19,6 +19,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PANEL_HEADING</td>
+	<td>//div[contains(@class,'panel') and contains(@role,'tablist')]//a[normalize-space(text())='${key_panelHeading}']"</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PANEL_HEADING_COLLAPSED</td>
 	<td>//div[contains(@class,'panel') and contains(@class,'collapsed')]/span[normalize-space(text())='${key_panelHeading}'] | //div[contains(@class,'panel') and contains(@role,'tablist')]//a[contains(@class,'collapsed') and normalize-space(text())='${key_panelHeading}'] | //div[contains(@class,'panel-heading') and @role='tab']//a[contains(@class,'collapsed') and normalize-space(text())='${key_panelHeading}']</td>
 	<td></td>
@@ -42,7 +47,7 @@
 <!--ENTRY-->
 <tr>
 	<td>ENTRY_ATTACHMENTS</td>
-	<td>//div[@id='attachmentsHeader']//a</td>
+	<td>//div[contains(@id,'attachmentsHeader')]//a</td>
 	<td></td>
 </tr>
 <tr>
@@ -58,6 +63,11 @@
 <tr>
 	<td>ENTRY_CONFIGURATION</td>
 	<td>//div[@id='configurationHeader']//a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ENTRY_REPORT_PARAMETERS</td>
+	<td>//div[contains(@id,'report-parametersHeader')]//a</td>
 	<td></td>
 </tr>
 <tr>

@@ -22,9 +22,7 @@ long assetCategoryId = ParamUtil.getLong(request, "categoryId");
 if (assetCategoryId > 0) {
 	AssetCategory assetCategory = AssetCategoryLocalServiceUtil.getCategory(assetCategoryId);
 
-	assetCategory = assetCategory.toEscapedModel();
-
-	PortalUtil.setPageKeywords(assetCategory.getTitle(locale), request);
+	PortalUtil.setPageKeywords(HtmlUtil.escape(assetCategory.getTitle(locale)), request);
 }
 
 String assetTagName = ParamUtil.getString(request, "tag");
@@ -39,9 +37,9 @@ if (assetPublisherDisplayContext.isEnableTagBasedNavigation() && assetPublisherD
 %>
 
 <div class="subscribe-action">
-	<c:if test="<%= !portletName.equals(AssetPublisherPortletKeys.HIGHEST_RATED_ASSETS) && !portletName.equals(AssetPublisherPortletKeys.MOST_VIEWED_ASSETS) && !portletName.equals(AssetPublisherPortletKeys.RECENT_CONTENT) && !portletName.equals(AssetPublisherPortletKeys.RELATED_ASSETS) && PortletPermissionUtil.contains(permissionChecker, 0, layout, portletDisplay.getId(), ActionKeys.SUBSCRIBE, false, false) && AssetPublisherUtil.getEmailAssetEntryAddedEnabled(portletPreferences) %>">
+	<c:if test="<%= !portletName.equals(AssetPublisherPortletKeys.HIGHEST_RATED_ASSETS) && !portletName.equals(AssetPublisherPortletKeys.MOST_VIEWED_ASSETS) && !portletName.equals(AssetPublisherPortletKeys.RECENT_CONTENT) && !portletName.equals(AssetPublisherPortletKeys.RELATED_ASSETS) && PortletPermissionUtil.contains(permissionChecker, 0, layout, portletDisplay.getId(), ActionKeys.SUBSCRIBE, false, false) && assetPublisherWebUtil.getEmailAssetEntryAddedEnabled(portletPreferences) %>">
 		<c:choose>
-			<c:when test="<%= AssetPublisherUtil.isSubscribed(themeDisplay.getCompanyId(), user.getUserId(), themeDisplay.getPlid(), portletDisplay.getId()) %>">
+			<c:when test="<%= assetPublisherWebUtil.isSubscribed(themeDisplay.getCompanyId(), user.getUserId(), themeDisplay.getPlid(), portletDisplay.getId()) %>">
 				<portlet:actionURL name="unsubscribe" var="unsubscribeURL">
 					<portlet:param name="redirect" value="<%= currentURL %>" />
 				</portlet:actionURL>
@@ -93,7 +91,7 @@ if (!assetPublisherDisplayContext.isPaginationTypeNone()) {
 %>
 
 <c:if test="<%= assetPublisherDisplayContext.isShowMetadataDescriptions() %>">
-	<liferay-ui:categorization-filter
+	<liferay-asset:categorization-filter
 		assetType="content"
 		portletURL="<%= portletURL %>"
 	/>
@@ -115,6 +113,18 @@ request.setAttribute("view.jsp-viewInContext", assetPublisherDisplayContext.isAs
 <c:if test="<%= !assetPublisherDisplayContext.isPaginationTypeNone() && (searchContainer.getTotal() > searchContainer.getResults().size()) %>">
 	<liferay-ui:search-paginator searchContainer="<%= searchContainer %>" type="<%= assetPublisherDisplayContext.getPaginationType() %>" />
 </c:if>
+
+<aui:script use="querystring-parse">
+	var queryString = window.location.search.substring(1);
+
+	var queryParamObj = new A.QueryString.parse(queryString);
+
+	var assetEntryId = queryParamObj['<portlet:namespace />assetEntryId'];
+
+	if (assetEntryId) {
+		window.location.hash = assetEntryId;
+	}
+</aui:script>
 
 <%!
 private static Log _log = LogFactoryUtil.getLog("com_liferay_asset_publisher_web.view_jsp");

@@ -43,7 +43,6 @@ import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.permission.ModelPermissions;
-import com.liferay.portal.kernel.service.persistence.ImageUtil;
 import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.template.TemplateConstants;
@@ -53,6 +52,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -281,7 +281,7 @@ public class DDMTemplateLocalServiceImpl
 
 		String resourceName =
 			DDMTemplatePermission.getTemplateModelResourceName(
-				template.getResourceClassNameId());
+				template.getResourceClassName());
 
 		resourceLocalService.addResources(
 			template.getCompanyId(), template.getGroupId(),
@@ -303,7 +303,7 @@ public class DDMTemplateLocalServiceImpl
 
 		String resourceName =
 			DDMTemplatePermission.getTemplateModelResourceName(
-				template.getResourceClassNameId());
+				template.getResourceClassName());
 
 		resourceLocalService.addModelResources(
 			template.getCompanyId(), template.getGroupId(),
@@ -421,7 +421,7 @@ public class DDMTemplateLocalServiceImpl
 
 		String resourceName =
 			DDMTemplatePermission.getTemplateModelResourceName(
-				template.getResourceClassNameId());
+				template.getResourceClassName());
 
 		resourceLocalService.deleteResource(
 			template.getCompanyId(), resourceName,
@@ -496,7 +496,7 @@ public class DDMTemplateLocalServiceImpl
 	public DDMTemplate fetchTemplate(
 		long groupId, long classNameId, String templateKey) {
 
-		templateKey = StringUtil.toUpperCase(templateKey.trim());
+		templateKey = StringUtil.toUpperCase(StringUtil.trim(templateKey));
 
 		return ddmTemplatePersistence.fetchByG_C_T(
 			groupId, classNameId, templateKey);
@@ -523,15 +523,13 @@ public class DDMTemplateLocalServiceImpl
 	 *         search in the search
 	 * @return the matching template, or <code>null</code> if a matching
 	 *         template could not be found
-	 * @throws PortalException if a portal exception occurred
 	 */
 	@Override
 	public DDMTemplate fetchTemplate(
-			long groupId, long classNameId, String templateKey,
-			boolean includeAncestorTemplates)
-		throws PortalException {
+		long groupId, long classNameId, String templateKey,
+		boolean includeAncestorTemplates) {
 
-		templateKey = StringUtil.toUpperCase(templateKey.trim());
+		templateKey = StringUtil.toUpperCase(StringUtil.trim(templateKey));
 
 		DDMTemplate template = ddmTemplatePersistence.fetchByG_C_T(
 			groupId, classNameId, templateKey);
@@ -585,7 +583,7 @@ public class DDMTemplateLocalServiceImpl
 			long groupId, long classNameId, String templateKey)
 		throws PortalException {
 
-		templateKey = StringUtil.toUpperCase(templateKey.trim());
+		templateKey = StringUtil.toUpperCase(StringUtil.trim(templateKey));
 
 		return ddmTemplatePersistence.findByG_C_T(
 			groupId, classNameId, templateKey);
@@ -619,7 +617,7 @@ public class DDMTemplateLocalServiceImpl
 			boolean includeAncestorTemplates)
 		throws PortalException {
 
-		templateKey = StringUtil.toUpperCase(templateKey.trim());
+		templateKey = StringUtil.toUpperCase(StringUtil.trim(templateKey));
 
 		DDMTemplate template = ddmTemplatePersistence.fetchByG_C_T(
 			groupId, classNameId, templateKey);
@@ -898,6 +896,24 @@ public class DDMTemplateLocalServiceImpl
 	public int getTemplatesCount(long groupId, long classNameId, long classPK) {
 		return ddmTemplatePersistence.countByG_C_C(
 			groupId, classNameId, classPK);
+	}
+
+	/**
+	 * Returns the number of templates matching the group IDs, class name ID,
+	 * and class PK.
+	 *
+	 * @param  groupIds the primary keys of the groups
+	 * @param  classNameId the primary key of the class name for the template's
+	 *         related model
+	 * @param  classPK the primary key of the template's related entity
+	 * @return the number of matching templates
+	 */
+	@Override
+	public int getTemplatesCount(
+		long[] groupIds, long classNameId, long classPK) {
+
+		return ddmTemplatePersistence.countByG_C_C(
+			groupIds, classNameId, classPK);
 	}
 
 	@Override
@@ -1336,11 +1352,11 @@ public class DDMTemplateLocalServiceImpl
 	 */
 	@Override
 	public DDMTemplate updateTemplate(
-			long userId, long templateId, long classPK, Map<Locale,
-			String> nameMap, Map<Locale, String> descriptionMap, String type,
-			String mode, String language, String script, boolean cacheable,
-			boolean smallImage, String smallImageURL, File smallImageFile,
-			ServiceContext serviceContext)
+			long userId, long templateId, long classPK,
+			Map<Locale, String> nameMap, Map<Locale, String> descriptionMap,
+			String type, String mode, String language, String script,
+			boolean cacheable, boolean smallImage, String smallImageURL,
+			File smallImageFile, ServiceContext serviceContext)
 		throws PortalException {
 
 		User user = userLocalService.getUser(userId);
@@ -1556,7 +1572,7 @@ public class DDMTemplateLocalServiceImpl
 		if (template.isSmallImage() &&
 			Validator.isNull(template.getSmallImageURL())) {
 
-			Image smallImage = ImageUtil.fetchByPrimaryKey(
+			Image smallImage = imageLocalService.fetchImage(
 				template.getSmallImageId());
 
 			if (smallImage != null) {
@@ -1595,7 +1611,7 @@ public class DDMTemplateLocalServiceImpl
 			String smallImageURL, File smallImageFile, byte[] smallImageBytes)
 		throws PortalException {
 
-		templateKey = StringUtil.toUpperCase(templateKey.trim());
+		templateKey = StringUtil.toUpperCase(StringUtil.trim(templateKey));
 
 		DDMTemplate template = ddmTemplatePersistence.fetchByG_C_T(
 			groupId, classNameId, templateKey);
@@ -1635,8 +1651,7 @@ public class DDMTemplateLocalServiceImpl
 				ddmGroupServiceConfiguration.smallImageExtensions()) {
 
 			if (StringPool.STAR.equals(smallImageExtension) ||
-				StringUtil.endsWith(
-					smallImageName, smallImageExtension)) {
+				StringUtil.endsWith(smallImageName, smallImageExtension)) {
 
 				validSmallImageExtension = true;
 
@@ -1655,9 +1670,11 @@ public class DDMTemplateLocalServiceImpl
 			(smallImageBytes.length > smallImageMaxSize)) {
 
 			throw new TemplateSmallImageSizeException(
-				"Image " + smallImageName + " has " + smallImageBytes.length +
-					" bytes and exceeds the maximum size of " +
-						smallImageMaxSize);
+				StringBundler.concat(
+					"Image ", smallImageName, " has ",
+					String.valueOf(smallImageBytes.length),
+					" bytes and exceeds the maximum size of ",
+					String.valueOf(smallImageMaxSize)));
 		}
 	}
 

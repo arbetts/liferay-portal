@@ -25,11 +25,11 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.upgrade.internal.configuration.ReleaseManagerConfiguration",
 	localization = "content/Language",
-	name = "release.manager.configuration.name"
+	name = "release-manager-configuration-name"
 )
 public interface ReleaseManagerConfiguration {
 
-	@Meta.AD(deflt = "true", required = false)
+	@Meta.AD(deflt = "true", name = "auto-upgrade", required = false)
 	public boolean autoUpgrade();
 
 }

@@ -1,8 +1,7 @@
-import Component from 'metal-component/src/Component';
-import Soy from 'metal-soy/src/Soy';
-
-import core from 'metal/src/core';
-import { CancellablePromise } from 'metal-promise/src/promise/Promise';
+import Component from 'metal-component';
+import Soy from 'metal-soy';
+import { CancellablePromise } from 'metal-promise';
+import { core } from 'metal';
 
 import componentTemplates from './ResizeComponent.soy';
 import controlsTemplates from './ResizeControls.soy';
@@ -22,8 +21,8 @@ class ResizeComponent extends Component {
 
 				this.imageRatio_ = this.imageWidth / this.imageHeight;
 
-				this.imageHeightInput_ = this.element.querySelector('#' + this.key + 'Height');
-				this.imageWidthInput_ = this.element.querySelector('#' + this.key + 'Width');
+				this.imageHeightInput_ = this.element.querySelector('#' + this.ref + 'Height');
+				this.imageWidthInput_ = this.element.querySelector('#' + this.ref + 'Width');
 
 				this.lockProportions = true;
 			});

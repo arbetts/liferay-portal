@@ -24,14 +24,14 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @ExtendedObjectClassDefinition(category = "foundation")
 @Meta.OCD(
 	id = "com.liferay.portal.remote.soap.extender.configuration.JaxWsApiConfiguration",
-	localization = "content/Language", name = "jax.ws.api.configuration.name"
+	localization = "content/Language", name = "jax-ws-api-configuration-name"
 )
 public interface JaxWsApiConfiguration {
 
-	@Meta.AD(required = true)
+	@Meta.AD(name = "context-path", required = true)
 	public String contextPath();
 
-	@Meta.AD(deflt = "10000", required = true)
+	@Meta.AD(deflt = "10000", name = "timeout", required = true)
 	public long timeout();
 
 }

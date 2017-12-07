@@ -16,14 +16,17 @@ package com.liferay.portal.language.servlet.filter.internal;
 
 import com.liferay.osgi.util.ServiceTrackerFactory;
 import com.liferay.portal.kernel.util.AggregateResourceBundle;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -76,7 +79,7 @@ public class LanguageFilterTracker {
 		}
 
 		@Override
-		public ResourceBundle loadResourceBundle(String languageId) {
+		public ResourceBundle loadResourceBundle(Locale locale) {
 			ResourceBundleLoader resourceBundleLoader =
 				_serviceTracker.getService();
 
@@ -85,17 +88,25 @@ public class LanguageFilterTracker {
 
 			if (resourceBundleLoader != null) {
 				ResourceBundle resourceBundle =
-					resourceBundleLoader.loadResourceBundle(languageId);
+					resourceBundleLoader.loadResourceBundle(locale);
 
 				if (resourceBundle != null) {
 					return new AggregateResourceBundle(
 						resourceBundle,
-						portalResourceBundleLoader.loadResourceBundle(
-							languageId));
+						portalResourceBundleLoader.loadResourceBundle(locale));
 				}
 			}
 
-			return portalResourceBundleLoader.loadResourceBundle(languageId);
+			return portalResourceBundleLoader.loadResourceBundle(locale);
+		}
+
+		/**
+		 * @deprecated As of 2.0.0, replaced by {@link
+		 *             #loadResourceBundle(Locale)}
+		 */
+		@Deprecated
+		public ResourceBundle loadResourceBundle(String languageId) {
+			return loadResourceBundle(LocaleUtil.fromLanguageId(languageId));
 		}
 
 		private final ServiceTracker<ResourceBundleLoader, ResourceBundleLoader>
@@ -120,24 +131,52 @@ public class LanguageFilterTracker {
 
 			Bundle bundle = serviceReference.getBundle();
 
-			String filterString =
-				"(&(bundle.symbolic.name=" + bundle.getSymbolicName() +
-					")(objectClass=" + ResourceBundleLoader.class.getName() +
-						")(resource.bundle.base.name=*))";
+			StringBundler filterSB = new StringBundler();
+
+			Object contextName = serviceReference.getProperty(
+				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+
+			if (contextName == null) {
+				filterSB.append("(&");
+				filterSB.append("(bundle.symbolic.name=");
+				filterSB.append(bundle.getSymbolicName());
+				filterSB.append(")");
+				filterSB.append("(objectClass=");
+				filterSB.append(ResourceBundleLoader.class.getName());
+				filterSB.append(")");
+				filterSB.append("(resource.bundle.base.name=*)");
+				filterSB.append(")");
+			}
+			else {
+				filterSB.append("(&");
+				filterSB.append("(|");
+				filterSB.append("(bundle.symbolic.name=");
+				filterSB.append(bundle.getSymbolicName());
+				filterSB.append(")");
+				filterSB.append("(&");
+				filterSB.append("(servlet.context.name=");
+				filterSB.append(contextName);
+				filterSB.append(")");
+				filterSB.append("(service.bundleid=0)");
+				filterSB.append(")");
+				filterSB.append(")");
+				filterSB.append("(objectClass=");
+				filterSB.append(ResourceBundleLoader.class.getName());
+				filterSB.append(")");
+				filterSB.append("(resource.bundle.base.name=*)");
+				filterSB.append(")");
+			}
 
 			Map<String, Object> properties = new HashMap<>();
 
 			properties.put("service.ranking", Integer.MIN_VALUE);
 
-			Object contextName = serviceReference.getProperty(
-				HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
-
 			properties.put("servlet.context.name", contextName);
 
 			return ServiceTrackerFactory.open(
-				bundle.getBundleContext(), filterString,
+				bundle.getBundleContext(), filterSB.toString(),
 				new ResourceBundleLoaderServiceTrackerCustomizer(
-					properties, filterString, contextName));
+					properties, filterSB.toString(), contextName));
 		}
 
 		@Override

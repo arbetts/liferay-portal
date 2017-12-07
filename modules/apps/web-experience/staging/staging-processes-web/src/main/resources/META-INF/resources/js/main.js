@@ -1,5 +1,5 @@
 AUI.add(
-	'liferay-export-import',
+	'liferay-staging-processes-export-import',
 	function(A) {
 		var $ = AUI.$;
 
@@ -18,6 +18,8 @@ AUI.add(
 		var STR_CLICK = 'click';
 
 		var STR_EMPTY = '';
+
+		var STR_HIDE = 'hide';
 
 		var defaultConfig = {
 			setter: '_setNode'
@@ -58,6 +60,8 @@ AUI.add(
 
 						instance._exportLAR = config.exportLAR;
 						instance._layoutsExportTreeOutput = instance.byId(config.pageTreeId + 'Output');
+
+						instance._nodeInputStates = [];
 
 						instance._initLabels();
 
@@ -111,7 +115,7 @@ AUI.add(
 						};
 
 						if (instance._isChecked('rangeDateRangeNode')) {
-							dateRangeChecker.validRange = instance._rangeEndsLater() && instance._rangeEndsInPast(today) && instance._rangeStartsInPast(today);
+							dateRangeChecker.validRange = instance._rangeEndsLater() && instance._rangeEndsInPast(adjustedDate) && instance._rangeStartsInPast(adjustedDate);
 						}
 
 						return dateRangeChecker;
@@ -197,7 +201,13 @@ AUI.add(
 												}
 											);
 
-											instance._setContentLabels(id.replace(instance.ns('PORTLET_DATA') + '_', ''));
+											var portletId = id.replace(instance.ns('PORTLET_DATA') + '_', '');
+
+											instance._setContentLabels(portletId);
+
+											var contentNode = instance.byId('content_' + portletId);
+
+											instance._storeNodeInputStates(contentNode);
 										}
 									}
 								);
@@ -269,6 +279,8 @@ AUI.add(
 							rangeLink.on(
 								STR_CLICK,
 								function(event) {
+									instance._preventNameRequiredChecking();
+
 									instance._updateDateRange();
 								}
 							);
@@ -294,6 +306,8 @@ AUI.add(
 						var privateLayoutNode = instance.byId('privateLayout');
 
 						privateLayoutNode.val(privateLayout);
+
+						instance._preventNameRequiredChecking();
 
 						instance._reloadForm();
 					},
@@ -325,6 +339,8 @@ AUI.add(
 
 															instance._setContentLabels(portletId);
 
+															instance._storeNodeInputStates(contentNode);
+
 															contentDialog.hide();
 														}
 													},
@@ -335,6 +351,8 @@ AUI.add(
 													on: {
 														click: function(event) {
 															event.domEvent.preventDefault();
+
+															instance._restoreNodeInputStates(contentNode);
 
 															contentDialog.hide();
 														}
@@ -348,6 +366,8 @@ AUI.add(
 								}
 							);
 
+							instance._storeNodeInputStates(contentNode);
+
 							contentNode.setData('contentDialog', contentDialog);
 						}
 
@@ -359,9 +379,9 @@ AUI.add(
 
 						var contentOptionsDialog = instance._contentOptionsDialog;
 
-						if (!contentOptionsDialog) {
-							var contentOptionsNode = instance.byId('contentOptions');
+						var contentOptionsNode = instance.byId('contentOptions');
 
+						if (!contentOptionsDialog) {
 							contentOptionsNode.show();
 
 							contentOptionsDialog = Liferay.Util.Window.getWindow(
@@ -382,6 +402,8 @@ AUI.add(
 
 															instance._setContentOptionsLabels();
 
+															instance._storeNodeInputStates(contentOptionsNode);
+
 															contentOptionsDialog.hide();
 														}
 													},
@@ -392,6 +414,8 @@ AUI.add(
 													on: {
 														click: function(event) {
 															event.domEvent.preventDefault();
+
+															instance._restoreNodeInputStates(contentOptionsNode);
 
 															contentOptionsDialog.hide();
 														}
@@ -404,6 +428,8 @@ AUI.add(
 									title: Liferay.Language.get('comments-and-ratings')
 								}
 							);
+
+							instance._storeNodeInputStates(contentOptionsNode);
 
 							instance._contentOptionsDialog = contentOptionsDialog;
 						}
@@ -631,6 +657,16 @@ AUI.add(
 						);
 					},
 
+					_preventNameRequiredChecking: function() {
+						var instance = this;
+
+						var nameRequiredNode = instance.byId('nameRequired');
+
+						if (nameRequiredNode) {
+							nameRequiredNode.val("0");
+						}
+					},
+
 					_rangeEndsInPast: function(today) {
 						var instance = this;
 
@@ -782,6 +818,59 @@ AUI.add(
 						}
 					},
 
+					_restoreNodeCheckedState: function(node, state) {
+						var val = state.value;
+
+						if (val !== undefined) {
+							node.set('checked', val);
+						}
+					},
+
+					_restoreNodeHiddenState: function(node, state) {
+						var hiddenList = node.ancestorsByClassName(STR_HIDE);
+
+						hiddenList.each(
+							function(hiddenNode) {
+								hiddenNode.removeClass(STR_HIDE);
+							}
+						);
+
+						hiddenList = state.hiddenList;
+
+						if (hiddenList !== null) {
+							hiddenList.each(
+								function(node) {
+									node.addClass(STR_HIDE);
+								}
+							);
+						}
+					},
+
+					_restoreNodeInputStates: function(node) {
+						var instance = this;
+
+						var inputNodes = [];
+
+						var inputStates = instance._nodeInputStates;
+
+						if (node && node.getElementsByTagName) {
+							inputNodes = node.getElementsByTagName('input');
+						}
+
+						inputNodes.each(
+							function(node) {
+								var id = node.get('id');
+
+								var state = inputStates[id];
+
+								if (state !== undefined) {
+									instance._restoreNodeCheckedState(node, state);
+									instance._restoreNodeHiddenState(node, state);
+								}
+							}
+						);
+					},
+
 					_scheduleRenderProcess: function() {
 						var instance = this;
 
@@ -801,11 +890,22 @@ AUI.add(
 
 						var inputs = contentNode.all('.field');
 
+						var portletDataNode = instance.byId('PORTLET_DATA_' + portletId);
+
+						var portletChecked = portletDataNode.attr('checked');
+
 						var selectedContent = [];
 
 						inputs.each(
 							function(item, index, collection) {
-								var checked = item.attr(STR_CHECKED);
+								var checked = false;
+
+								if (portletChecked) {
+									checked = item.attr(STR_CHECKED);
+								}
+								else {
+									item.attr(STR_CHECKED, false);
+								}
 
 								if (checked) {
 									selectedContent.push(item.attr('data-name'));
@@ -814,7 +914,7 @@ AUI.add(
 						);
 
 						if (selectedContent.length === 0) {
-							instance.byId('PORTLET_DATA_' + portletId).attr('checked', false);
+							portletDataNode.attr('checked', false);
 
 							instance.byId('showChangeContent_' + portletId).hide();
 						}
@@ -895,6 +995,37 @@ AUI.add(
 						return val;
 					},
 
+					_storeNodeInputStates: function(node) {
+						var instance = this;
+
+						var inputNodes = [];
+
+						var inputStates = instance._nodeInputStates;
+
+						if (node && node.getElementsByTagName) {
+							inputNodes = node.getElementsByTagName('input');
+						}
+
+						inputNodes.each(
+							function(node) {
+								var hiddenList = node.ancestorsByClassName(STR_HIDE);
+
+								var id = node.get('id');
+
+								var val = node.get('checked');
+
+								if (hiddenList.size() === 0) {
+									hiddenList = null;
+								}
+
+								inputStates[id] = {
+									hiddenList: hiddenList,
+									value: val
+								};
+							}
+						);
+					},
+
 					_updateDateRange: function(event) {
 						var instance = this;
 
@@ -937,6 +1068,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['aui-dialog-iframe-deprecated', 'aui-io-request', 'aui-modal', 'aui-parse-content', 'aui-toggler', 'aui-tree-view', 'liferay-notice', 'liferay-portlet-base', 'liferay-portlet-url', 'liferay-store', 'liferay-util-window']
+		requires: ['aui-datatype', 'aui-dialog-iframe-deprecated', 'aui-io-request', 'aui-modal', 'aui-parse-content', 'aui-toggler', 'aui-tree-view', 'liferay-notice', 'liferay-portlet-base', 'liferay-portlet-url', 'liferay-store', 'liferay-util-window']
 	}
 );

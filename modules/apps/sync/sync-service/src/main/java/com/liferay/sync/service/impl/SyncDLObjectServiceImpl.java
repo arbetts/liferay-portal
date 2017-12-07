@@ -22,7 +22,8 @@ import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.model.DLFileVersion;
 import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
-import com.liferay.document.library.kernel.model.DLSyncEvent;
+import com.liferay.document.library.sync.model.DLSyncEvent;
+import com.liferay.document.library.sync.service.DLSyncEventLocalService;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
@@ -60,9 +61,11 @@ import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.comparator.GroupNameComparator;
 import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipReaderFactoryUtil;
+import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.sync.constants.SyncConstants;
 import com.liferay.sync.constants.SyncDLObjectConstants;
 import com.liferay.sync.constants.SyncDeviceConstants;
@@ -130,7 +133,8 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 				repositoryId, folderId, sourceFileName, mimeType, title,
 				description, changeLog, file, serviceContext);
 
-			return toSyncDLObject(fileEntry, SyncDLObjectConstants.EVENT_ADD);
+			return toSyncDLObject(
+				fileEntry, SyncDLObjectConstants.EVENT_ADD, checksum);
 		}
 		catch (PortalException pe) {
 			if (pe instanceof DuplicateFileEntryException) {
@@ -307,6 +311,10 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 			FileEntry sourceFileEntry = dlAppLocalService.getFileEntry(
 				sourceFileEntryId);
 
+			SyncDLObject sourceSyncDLObject =
+				syncDLObjectLocalService.fetchSyncDLObject(
+					SyncDLObjectConstants.TYPE_FILE, sourceFileEntryId);
+
 			FileVersion fileVersion = sourceFileEntry.getLatestFileVersion();
 
 			if (!group.isUser() &&
@@ -323,7 +331,9 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 				fileVersion.getContentStream(false), sourceFileEntry.getSize(),
 				serviceContext);
 
-			return toSyncDLObject(fileEntry, SyncDLObjectConstants.EVENT_ADD);
+			return toSyncDLObject(
+				fileEntry, SyncDLObjectConstants.EVENT_ADD,
+				sourceSyncDLObject.getChecksum());
 		}
 		catch (PortalException pe) {
 			throw new PortalException(SyncUtil.buildExceptionMessage(pe), pe);
@@ -533,7 +543,7 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 
 			syncContext.setPortletPreferencesMap(getPortletPreferencesMap());
 
-			Bundle bundle = FrameworkUtil.getBundle(this.getClass());
+			Bundle bundle = FrameworkUtil.getBundle(getClass());
 
 			syncContext.setPluginVersion(String.valueOf(bundle.getVersion()));
 
@@ -774,9 +784,8 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 
 			return ListUtil.unique(groups);
 		}
-
 		catch (PortalException pe) {
-			Class clazz = pe.getClass();
+			Class<?> clazz = pe.getClass();
 
 			throw new PortalException(clazz.getName(), pe);
 		}
@@ -1052,7 +1061,7 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 				changeLog, majorVersion, file, serviceContext);
 
 			return toSyncDLObject(
-				fileEntry, SyncDLObjectConstants.EVENT_UPDATE);
+				fileEntry, SyncDLObjectConstants.EVENT_UPDATE, checksum);
 		}
 		catch (PortalException pe) {
 			throw new PortalException(SyncUtil.buildExceptionMessage(pe), pe);
@@ -1151,13 +1160,13 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 	}
 
 	protected SyncDLObject checkModifiedTime(
-		SyncDLObject syncDLObject, long typePk) {
+		SyncDLObject syncDLObject, long typePK) {
 
-		DynamicQuery dynamicQuery = dlSyncEventLocalService.dynamicQuery();
+		DynamicQuery dynamicQuery = _dlSyncEventLocalService.dynamicQuery();
 
-		dynamicQuery.add(RestrictionsFactoryUtil.eq("typePK", typePk));
+		dynamicQuery.add(RestrictionsFactoryUtil.eq("typePK", typePK));
 
-		List<DLSyncEvent> dlSyncEvents = dlSyncEventLocalService.dynamicQuery(
+		List<DLSyncEvent> dlSyncEvents = _dlSyncEventLocalService.dynamicQuery(
 			dynamicQuery);
 
 		if (dlSyncEvents.isEmpty()) {
@@ -1410,9 +1419,22 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 	protected SyncDLObject toSyncDLObject(FileEntry fileEntry, String event)
 		throws PortalException {
 
+		return toSyncDLObject(fileEntry, event, null);
+	}
+
+	protected SyncDLObject toSyncDLObject(
+			FileEntry fileEntry, String event, String checksum)
+		throws PortalException {
+
 		SyncDLObject syncDLObject = SyncUtil.toSyncDLObject(fileEntry, event);
 
 		checkModifiedTime(syncDLObject, fileEntry.getFileEntryId());
+
+		if (Validator.isNotNull(checksum)) {
+			SyncUtil.addChecksum(
+				syncDLObject.getModifiedTime(), fileEntry.getFileEntryId(),
+				checksum);
+		}
 
 		String lanTokenKey = SyncUtil.getLanTokenKey(
 			syncDLObject.getModifiedTime(), fileEntry.getFileEntryId(), true);
@@ -1656,5 +1678,8 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		SyncDLObjectServiceImpl.class);
+
+	@ServiceReference(type = DLSyncEventLocalService.class)
+	private DLSyncEventLocalService _dlSyncEventLocalService;
 
 }

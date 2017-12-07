@@ -4,8 +4,14 @@ import ${apiPackagePath}.model.${entity.name};
 import ${apiPackagePath}.service.persistence.${entity.name}Persistence;
 
 import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 
+import java.lang.reflect.Field;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -23,6 +29,31 @@ import java.util.Set;
 public class ${entity.name}FinderBaseImpl
 	extends BasePersistenceImpl<${entity.name}> {
 
+	public ${entity.name}FinderBaseImpl() {
+		setModelClass(${entity.name}.class);
+
+		<#if entity.badNamedColumnsList?size != 0>
+			try {
+				Field field = BasePersistenceImpl.class.getDeclaredField("_dbColumnNames");
+
+				field.setAccessible(true);
+
+				Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+				<#list entity.badNamedColumnsList as column>
+					dbColumnNames.put("${column.name}", "${column.DBName}");
+				</#list>
+
+				field.set(this, dbColumnNames);
+			}
+			catch (Exception e) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(e, e);
+				}
+			}
+		</#if>
+	}
+
 	<#if entity.badNamedColumnsList?size != 0>
 		@Override
 		public Set<String> getBadColumnNames() {
@@ -30,7 +61,7 @@ public class ${entity.name}FinderBaseImpl
 		}
 	</#if>
 
-	<#if entity.hasColumns() && (entity.name != "Counter")>
+	<#if entity.hasColumns() && !stringUtil.equals(entity.name, "Counter")>
 		/**
 		 * Returns the ${entity.humanName} persistence.
 		 *
@@ -50,9 +81,13 @@ public class ${entity.name}FinderBaseImpl
 		}
 	</#if>
 
-	<#if entity.hasColumns() && (entity.name != "Counter")>
+	<#if entity.hasColumns() && !stringUtil.equals(entity.name, "Counter")>
 		@BeanReference(type = ${entity.name}Persistence.class)
 		protected ${entity.name}Persistence ${entity.varName}Persistence;
+	</#if>
+
+	<#if entity.badNamedColumnsList?size != 0>
+		private static final Log _log = LogFactoryUtil.getLog(${entity.name}FinderBaseImpl.class);
 	</#if>
 
 }

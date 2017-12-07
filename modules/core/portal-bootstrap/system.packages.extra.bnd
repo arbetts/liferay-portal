@@ -271,9 +271,11 @@ Export-Package:\
 	sun.net.util,\
 	\
 	sun.security.provider,\
+	\
 	*
 Import-Package: !*
 -includeresource:\
+	-@lib/com.liferay.portal.app.license.api.jar,\
 	@../../../lib/development/jms.jar,\
 	@../../../lib/development/mail.jar,\
 	@../../../lib/development/persistence.jar,\
@@ -302,7 +304,13 @@ Import-Package: !*
 	@../../../lib/portal/jaxen.jar,\
 	@../../../lib/portal/jaxrpc.jar,\
 	@../../../lib/portal/jdom.jar!/org/**,\
-	@../../../lib/portal/jodd.jar,\
+	@../../../lib/portal/jodd-bean.jar,\
+	@../../../lib/portal/jodd-core.jar,\
+	@../../../lib/portal/jodd-http.jar,\
+	@../../../lib/portal/jodd-json.jar,\
+	@../../../lib/portal/jodd-proxetta.jar,\
+	@../../../lib/portal/jodd-servlet.jar,\
+	@../../../lib/portal/jodd-upload.jar,\
 	@../../../lib/portal/json-java.jar,\
 	@../../../lib/portal/liferay-icu4j.jar,\
 	@../../../lib/portal/log4j-extras.jar,\
@@ -328,6 +336,8 @@ Import-Package: !*
 	@../../../lib/portal/struts-extras.jar,\
 	@../../../lib/portal/struts-taglib.jar,\
 	@../../../lib/portal/struts-tiles.jar,\
+	@../../../lib/portal/tika-core.jar,\
+	@../../../lib/portal/tika-parsers.jar,\
 	@../../../lib/portal/xalan.jar,\
 	@../../../lib/portal/xercesImpl.jar,\
 	@../../../lib/portal/xml-apis.jar,\
@@ -335,7 +345,23 @@ Import-Package: !*
 	@../../../lib/portal/xstream.jar,\
 	@../../../portal-impl/portal-impl.jar,\
 	@../../../portal-kernel/portal-kernel.jar,\
+	@lib/com.liferay.osgi.felix.util.jar,\
 	@lib/com.liferay.osgi.service.tracker.collections.jar,\
-	@lib/com.liferay.portal.app.license.api.jar,\
+	@lib/com.liferay.petra.concurrent.jar,\
+	@lib/com.liferay.petra.content.jar,\
+	@lib/com.liferay.petra.encryptor.jar,\
+	@lib/com.liferay.petra.executor.jar,\
+	@lib/com.liferay.petra.function.jar,\
+	@lib/com.liferay.petra.io.jar,\
+	@lib/com.liferay.petra.lang.jar,\
+	@lib/com.liferay.petra.log4j.jar,\
+	@lib/com.liferay.petra.mail.jar,\
+	@lib/com.liferay.petra.memory.jar,\
+	@lib/com.liferay.petra.nio.jar,\
+	@lib/com.liferay.petra.process.jar,\
+	@lib/com.liferay.petra.reflect.jar,\
+	@lib/com.liferay.petra.string.jar,\
 	@lib/com.liferay.registry.api.jar
--removeheaders: Private-Package, Service-Component
+-removeheaders:\
+	Private-Package,\
+	Service-Component

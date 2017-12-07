@@ -25,10 +25,10 @@ import com.liferay.portal.kernel.struts.BaseStrutsAction;
 import com.liferay.portal.kernel.struts.StrutsAction;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.trash.kernel.util.TrashUtil;
+import com.liferay.trash.TrashHelper;
 import com.liferay.wiki.exception.NoSuchPageException;
 import com.liferay.wiki.importer.impl.mediawiki.MediaWikiImporter;
 import com.liferay.wiki.model.WikiPage;
@@ -79,15 +79,15 @@ public class GetPageAttachmentAction extends BaseStrutsAction {
 			return null;
 		}
 		catch (Exception e) {
-			if ((e instanceof NoSuchPageException) ||
-				(e instanceof NoSuchFileException)) {
+			if (e instanceof NoSuchFileException ||
+				e instanceof NoSuchPageException) {
 
 				if (_log.isWarnEnabled()) {
 					_log.warn(e);
 				}
 			}
 			else {
-				PortalUtil.sendError(e, request, response);
+				_portal.sendError(e, request, response);
 			}
 
 			return null;
@@ -111,7 +111,7 @@ public class GetPageAttachmentAction extends BaseStrutsAction {
 		}
 
 		if (fileEntry.isInTrash()) {
-			fileName = TrashUtil.getOriginalTitle(fileEntry.getTitle());
+			fileName = _trashHelper.getOriginalTitle(fileEntry.getTitle());
 		}
 
 		InputStream is = fileEntry.getContentStream();
@@ -137,6 +137,12 @@ public class GetPageAttachmentAction extends BaseStrutsAction {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		GetPageAttachmentAction.class);
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private TrashHelper _trashHelper;
 
 	private WikiPageService _wikiPageService;
 

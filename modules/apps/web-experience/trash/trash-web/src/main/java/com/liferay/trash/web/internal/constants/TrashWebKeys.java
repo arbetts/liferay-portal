@@ -15,9 +15,12 @@
 package com.liferay.trash.web.internal.constants;
 
 /**
+ * Provides attribute names for the implementation of the {@link
+ * com.liferay.trash.web.internal.portlet.TrashPortlet}.
+ *
  * @author Jürgen Kappler
  */
-public class TrashWebKeys {
+public class TrashWebKeys extends com.liferay.trash.util.TrashWebKeys {
 
 	public static final String TRASH_CONTAINER_MODEL = "TRASH_CONTAINER_MODEL";
 
@@ -26,5 +29,7 @@ public class TrashWebKeys {
 	public static final String TRASH_ENTRY = "TRASH_ENTRY";
 
 	public static final String TRASH_RENDERER = "TRASH_RENDERER";
+
+	public static final String TRASH_UTIL = "TRASH_UTIL";
 
 }

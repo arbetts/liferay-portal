@@ -24,7 +24,7 @@ import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Serializable;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class QueryConfig implements Serializable {
 		Set<String> highlightFieldNamesSet = SetUtil.fromArray(
 			(String[])_attributes.get(_HIGHLIGHT_FIELD_NAMES));
 
-		highlightFieldNamesSet.addAll(Arrays.asList(highlightFieldNames));
+		Collections.addAll(highlightFieldNamesSet, highlightFieldNames);
 
 		_attributes.put(
 			_HIGHLIGHT_FIELD_NAMES,
@@ -55,7 +55,7 @@ public class QueryConfig implements Serializable {
 		Set<String> selectedFieldNamesSet = SetUtil.fromArray(
 			(String[])_attributes.get(_SELECTED_FIELD_NAMES));
 
-		selectedFieldNamesSet.addAll(Arrays.asList(selectedFieldNames));
+		Collections.addAll(selectedFieldNamesSet, selectedFieldNames);
 
 		_attributes.put(
 			_SELECTED_FIELD_NAMES,
@@ -192,8 +192,7 @@ public class QueryConfig implements Serializable {
 
 	public boolean isHighlightEnabled() {
 		return GetterUtil.getBoolean(
-			_attributes.get(PropsKeys.INDEX_SEARCH_HIGHLIGHT_ENABLED),
-			_INDEX_SEARCH_HIGHLIGHT_ENABLED);
+			_attributes.get(_INDEX_SEARCH_HIGHLIGHT_ENABLED));
 	}
 
 	public boolean isHighlightRequireFieldMatch() {
@@ -259,13 +258,7 @@ public class QueryConfig implements Serializable {
 	}
 
 	public void setHighlightEnabled(boolean highlightEnabled) {
-		if (_INDEX_SEARCH_HIGHLIGHT_ENABLED) {
-			_attributes.put(
-				PropsKeys.INDEX_SEARCH_HIGHLIGHT_ENABLED, highlightEnabled);
-		}
-		else {
-			_attributes.put(PropsKeys.INDEX_SEARCH_HIGHLIGHT_ENABLED, false);
-		}
+		_attributes.put(_INDEX_SEARCH_HIGHLIGHT_ENABLED, highlightEnabled);
 	}
 
 	public void setHighlightFieldNames(String... highlightFieldNames) {
@@ -378,9 +371,8 @@ public class QueryConfig implements Serializable {
 						INDEX_SEARCH_COLLATED_SPELL_CHECK_RESULT_SCORES_THRESHOLD),
 				50);
 
-	private static final boolean _INDEX_SEARCH_HIGHLIGHT_ENABLED =
-		GetterUtil.getBoolean(
-			PropsUtil.get(PropsKeys.INDEX_SEARCH_HIGHLIGHT_ENABLED));
+	private static final String _INDEX_SEARCH_HIGHLIGHT_ENABLED =
+		"indexSearchHighlightEnabled";
 
 	private static final int _INDEX_SEARCH_HIGHLIGHT_FRAGMENT_SIZE =
 		GetterUtil.getInteger(

@@ -14,7 +14,6 @@
 
 package com.liferay.wsrp.internal.bind;
 
-import com.liferay.petra.encryptor.Encryptor;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -31,6 +30,7 @@ import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.configuration.kernel.util.PortletConfigurationApplicationType;
 import com.liferay.util.axis.ServletUtil;
@@ -92,6 +93,7 @@ import org.apache.axis.message.MessageElement;
 public class V2MarkupServiceImpl
 	extends BaseServiceImpl implements WSRP_v2_Markup_PortType {
 
+	@Override
 	public MarkupResponse getMarkup(GetMarkup getMarkup)
 		throws RemoteException {
 
@@ -110,6 +112,7 @@ public class V2MarkupServiceImpl
 		}
 	}
 
+	@Override
 	public ResourceResponse getResource(GetResource getResource)
 		throws RemoteException {
 
@@ -128,6 +131,7 @@ public class V2MarkupServiceImpl
 		}
 	}
 
+	@Override
 	public HandleEventsResponse handleEvents(HandleEvents handleEvents)
 		throws RemoteException {
 
@@ -146,6 +150,7 @@ public class V2MarkupServiceImpl
 		}
 	}
 
+	@Override
 	public Extension[] initCookie(InitCookie initCookie)
 		throws RemoteException {
 
@@ -164,6 +169,7 @@ public class V2MarkupServiceImpl
 		}
 	}
 
+	@Override
 	public BlockingInteractionResponse performBlockingInteraction(
 			PerformBlockingInteraction performBlockingInteraction)
 		throws RemoteException {
@@ -183,6 +189,7 @@ public class V2MarkupServiceImpl
 		}
 	}
 
+	@Override
 	public Extension[] releaseSessions(ReleaseSessions releaseSessions)
 		throws RemoteException {
 
@@ -584,8 +591,7 @@ public class V2MarkupServiceImpl
 
 		if (Validator.isNotNull(opaqueValue)) {
 			opaqueValue = new String(
-				Base64.decode(Base64.fromURLSafe(opaqueValue)),
-				StringPool.UTF8);
+				Base64.decodeFromURL(opaqueValue), StringPool.UTF8);
 		}
 
 		Map<String, String[]> parameterMap = HttpUtil.parameterMapFromString(
@@ -715,11 +721,11 @@ public class V2MarkupServiceImpl
 
 		sb.append(StringPool.QUESTION);
 
-		String propertiesAuthenticatonTokenSharedSecret = Encryptor.digest(
+		String propertiesAuthenticatonTokenSharedSecret = DigesterUtil.digest(
 			PropsUtil.get(PropsKeys.AUTH_TOKEN_SHARED_SECRET));
 
 		sb.append("p_auth_secret=");
-		sb.append(HttpUtil.encodeURL(propertiesAuthenticatonTokenSharedSecret));
+		sb.append(URLCodec.encodeURL(propertiesAuthenticatonTokenSharedSecret));
 
 		Layout layout = getLayout(portletContext, wsrpProducer);
 
@@ -732,7 +738,7 @@ public class V2MarkupServiceImpl
 		String portletId = getPortletId(portletContext, navigationalContext);
 
 		sb.append("&p_p_id=");
-		sb.append(HttpUtil.encodeURL(portletId));
+		sb.append(URLCodec.encodeURL(portletId));
 
 		sb.append("&p_p_lifecycle=");
 		sb.append(lifecycle);
@@ -740,12 +746,12 @@ public class V2MarkupServiceImpl
 		String windowState = getWindowState(mimeRequest);
 
 		sb.append("&p_p_state=");
-		sb.append(HttpUtil.encodeURL(windowState));
+		sb.append(URLCodec.encodeURL(windowState));
 
 		String portletMode = getPortletMode(mimeRequest);
 
 		sb.append("&p_p_mode=");
-		sb.append(HttpUtil.encodeURL(portletMode));
+		sb.append(URLCodec.encodeURL(portletMode));
 
 		if (lifecycle.equals("2") && Validator.isNotNull(resourceID)) {
 			sb.append("&p_p_resource_id=");
@@ -764,8 +770,7 @@ public class V2MarkupServiceImpl
 			sb.append(StringPool.AMPERSAND);
 
 			opaqueValue = new String(
-				Base64.decode(Base64.fromURLSafe(opaqueValue)),
-				StringPool.UTF8);
+				Base64.decodeFromURL(opaqueValue), StringPool.UTF8);
 
 			sb.append(opaqueValue);
 		}
@@ -787,7 +792,7 @@ public class V2MarkupServiceImpl
 					sb.append(name);
 
 					sb.append(StringPool.EQUAL);
-					sb.append(HttpUtil.encodeURL(formParameter.getValue()));
+					sb.append(URLCodec.encodeURL(formParameter.getValue()));
 				}
 			}
 		}

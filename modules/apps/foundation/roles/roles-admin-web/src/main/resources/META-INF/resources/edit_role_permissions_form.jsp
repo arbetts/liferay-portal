@@ -17,7 +17,6 @@
 <%@ include file="/init.jsp" %>
 
 <%
-String tabs2 = "roles";
 String tabs3 = ParamUtil.getString(request, "tabs3", "current");
 
 String redirect = ParamUtil.getString(request, "redirect");
@@ -206,9 +205,9 @@ if (Validator.isNotNull(portletResource)) {
 		</div>
 	</c:if>
 
-	<aui:button-row>
+	<div class="form-group">
 		<aui:button cssClass="btn-lg" onClick='<%= liferayPortletResponse.getNamespace() + "updateActions();" %>' value="save" />
-	</aui:button-row>
+	</div>
 </aui:form>
 
 <%

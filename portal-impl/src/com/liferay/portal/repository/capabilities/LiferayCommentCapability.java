@@ -25,8 +25,11 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.registry.RepositoryEventRegistry;
 
 /**
- * @author Adolfo Pérez
+ * @author     Adolfo Pérez
+ * @deprecated As of 7.0.0, replaced by {@link
+ *             com.liferay.document.library.internal.capabilities.LiferayCommentCapability}
  */
+@Deprecated
 public class LiferayCommentCapability
 	implements CommentCapability, RepositoryEventAware {
 

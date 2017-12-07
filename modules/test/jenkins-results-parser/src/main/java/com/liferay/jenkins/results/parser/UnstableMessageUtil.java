@@ -14,6 +14,8 @@
 
 package com.liferay.jenkins.results.parser;
 
+import com.liferay.jenkins.results.parser.failure.message.generator.GenericFailureMessageGenerator;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -284,8 +286,7 @@ public class UnstableMessageUtil {
 							"/jenkins-console.txt.gz\">Console Output</a>");
 
 						if (Boolean.parseBoolean(
-								project.getProperty(
-									"record.liferay.log"))) {
+								project.getProperty("record.liferay.log"))) {
 
 							sb.append(" - ");
 							sb.append("<a href=\"");

@@ -23,8 +23,8 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  */
 @ExtendedObjectClassDefinition(category = "foundation")
 @Meta.OCD(
-	id = "com.liferay.frontend.js.loader.modules.extender.LoaderModulesServlet",
-	localization = "content/Language", name = "details.configuration.name"
+	id = "com.liferay.frontend.js.loader.modules.extender.internal.Details",
+	localization = "content/Language", name = "details-configuration-name"
 )
 public @interface Details {
 
@@ -36,10 +36,10 @@ public @interface Details {
 
 	public static final String OSGI_WEBRESOURCE = "osgi.webresource";
 
-	@Meta.AD(deflt = "true")
-	public boolean applyVersioning() default true;
+	@Meta.AD(deflt = "true", name = "apply-versioning", required = false)
+	public boolean applyVersioning();
 
-	@Meta.AD(deflt = "Liferay")
-	public String globalJSVariable() default "Liferay";
+	@Meta.AD(deflt = "false", name = "expose-global", required = false)
+	public boolean exposeGlobal();
 
 }

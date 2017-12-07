@@ -14,12 +14,16 @@
 
 package com.liferay.portal.util;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -91,26 +95,26 @@ public class HtmlImplTest {
 		Assert.assertEquals(
 			StringPool.BLANK, _htmlImpl.escapeHREF(StringPool.BLANK));
 		Assert.assertEquals(
-			"javascript&#x25;3aalert&#x28;&#x27;hello&#x27;&#x29;&#x3b;",
+			"javascript%3aalert(&#39;hello&#39;);",
 			_htmlImpl.escapeHREF("javascript:alert('hello');"));
 		Assert.assertEquals(
-			"data&#x25;3atext&#x2f;html&#x3b;base64&#x2c;PHNjcmlwdD5hbGVydCgn" +
-				"dGVzdDMnKTwvc2NyaXB0Pg",
+			"data%3atext/html;base64,PHNjcmlwdD5hbGVydCgndGVzdDMnKTwvc2NyaX" +
+				"B0Pg",
 			_htmlImpl.escapeHREF(
 				"data:text/html;base64,PHNjcmlwdD5hbGVydCgndGVzdDMnKTwvc2NyaX" +
 					"B0Pg"));
-		assertUnchangedEscape("http://localhost:8080");
-	}
-
-	@Test
-	public void testEscapeHtmlAttributeMultiline() {
-		String original = "\tThis is\na multi-line\ntitle\r";
-
-		String escaped = _htmlImpl.escapeAttribute(original);
-
-		String extracted = _htmlImpl.extractText(escaped);
-
-		Assert.assertEquals(original, extracted);
+		Assert.assertEquals(
+			"http://localhost:8080",
+			_htmlImpl.escapeHREF("http://localhost:8080"));
+		Assert.assertEquals(
+			"javascript\t%3aalert(1)",
+			_htmlImpl.escapeHREF("javascript\t:alert(1)"));
+		Assert.assertEquals(
+			"java script%3aalert(1)",
+			_htmlImpl.escapeHREF("java script:alert(1)"));
+		Assert.assertEquals(
+			"java\nscript %3aalert(1)",
+			_htmlImpl.escapeHREF("java\nscript :alert(1)"));
 	}
 
 	@Test
@@ -153,6 +157,25 @@ public class HtmlImplTest {
 	}
 
 	@Test
+	public void testEscapeJS() throws ScriptException {
+		ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+
+		ScriptEngine scriptEngine = scriptEngineManager.getEngineByName(
+			"JavaScript");
+
+		String[] stringLiterals =
+			{"'", "\"", "\\", "\n", "\r", "\u2028", "\u2029"};
+
+		for (String stringLiteral : stringLiterals) {
+			String escaped = _htmlImpl.escapeJS(stringLiteral);
+
+			scriptEngine.eval(String.format("var result = '%1$s';", escaped));
+
+			Assert.assertEquals(stringLiteral, scriptEngine.get("result"));
+		}
+	}
+
+	@Test
 	public void testEscapeJSLink() {
 		Assert.assertEquals(
 			"javascript%3aalert('hello');",
@@ -170,6 +193,12 @@ public class HtmlImplTest {
 	@Test
 	public void testEscapeNull() {
 		Assert.assertNull(_htmlImpl.escape(null));
+	}
+
+	@Test
+	public void testEscapeNullChar() {
+		Assert.assertEquals(
+			StringPool.SPACE, _htmlImpl.escape(StringPool.NULL_CHAR));
 	}
 
 	@Test

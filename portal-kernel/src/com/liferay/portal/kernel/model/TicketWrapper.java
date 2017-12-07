@@ -134,73 +134,13 @@ public class TicketWrapper implements Ticket, ModelWrapper<Ticket> {
 	}
 
 	@Override
-	public CacheModel<Ticket> toCacheModel() {
-		return _ticket.toCacheModel();
-	}
-
-	@Override
-	public Ticket toEscapedModel() {
-		return new TicketWrapper(_ticket.toEscapedModel());
-	}
-
-	@Override
-	public Ticket toUnescapedModel() {
-		return new TicketWrapper(_ticket.toUnescapedModel());
-	}
-
-	@Override
-	public boolean isCachedModel() {
-		return _ticket.isCachedModel();
-	}
-
-	@Override
-	public boolean isEscapedModel() {
-		return _ticket.isEscapedModel();
-	}
-
-	@Override
-	public boolean isExpired() {
-		return _ticket.isExpired();
-	}
-
-	@Override
-	public boolean isNew() {
-		return _ticket.isNew();
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _ticket.getExpandoBridge();
+	public java.lang.Object clone() {
+		return new TicketWrapper((Ticket)_ticket.clone());
 	}
 
 	@Override
 	public int compareTo(Ticket ticket) {
 		return _ticket.compareTo(ticket);
-	}
-
-	/**
-	* Returns the type of this ticket.
-	*
-	* @return the type of this ticket
-	*/
-	@Override
-	public int getType() {
-		return _ticket.getType();
-	}
-
-	@Override
-	public int hashCode() {
-		return _ticket.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _ticket.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new TicketWrapper((Ticket)_ticket.clone());
 	}
 
 	/**
@@ -211,6 +151,61 @@ public class TicketWrapper implements Ticket, ModelWrapper<Ticket> {
 	@Override
 	public java.lang.String getClassName() {
 		return _ticket.getClassName();
+	}
+
+	/**
+	* Returns the class name ID of this ticket.
+	*
+	* @return the class name ID of this ticket
+	*/
+	@Override
+	public long getClassNameId() {
+		return _ticket.getClassNameId();
+	}
+
+	/**
+	* Returns the class pk of this ticket.
+	*
+	* @return the class pk of this ticket
+	*/
+	@Override
+	public long getClassPK() {
+		return _ticket.getClassPK();
+	}
+
+	/**
+	* Returns the company ID of this ticket.
+	*
+	* @return the company ID of this ticket
+	*/
+	@Override
+	public long getCompanyId() {
+		return _ticket.getCompanyId();
+	}
+
+	/**
+	* Returns the create date of this ticket.
+	*
+	* @return the create date of this ticket
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _ticket.getCreateDate();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _ticket.getExpandoBridge();
+	}
+
+	/**
+	* Returns the expiration date of this ticket.
+	*
+	* @return the expiration date of this ticket
+	*/
+	@Override
+	public Date getExpirationDate() {
+		return _ticket.getExpirationDate();
 	}
 
 	/**
@@ -233,66 +228,6 @@ public class TicketWrapper implements Ticket, ModelWrapper<Ticket> {
 		return _ticket.getKey();
 	}
 
-	@Override
-	public java.lang.String toString() {
-		return _ticket.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _ticket.toXmlString();
-	}
-
-	/**
-	* Returns the create date of this ticket.
-	*
-	* @return the create date of this ticket
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _ticket.getCreateDate();
-	}
-
-	/**
-	* Returns the expiration date of this ticket.
-	*
-	* @return the expiration date of this ticket
-	*/
-	@Override
-	public Date getExpirationDate() {
-		return _ticket.getExpirationDate();
-	}
-
-	/**
-	* Returns the class name ID of this ticket.
-	*
-	* @return the class name ID of this ticket
-	*/
-	@Override
-	public long getClassNameId() {
-		return _ticket.getClassNameId();
-	}
-
-	/**
-	* Returns the class p k of this ticket.
-	*
-	* @return the class p k of this ticket
-	*/
-	@Override
-	public long getClassPK() {
-		return _ticket.getClassPK();
-	}
-
-	/**
-	* Returns the company ID of this ticket.
-	*
-	* @return the company ID of this ticket
-	*/
-	@Override
-	public long getCompanyId() {
-		return _ticket.getCompanyId();
-	}
-
 	/**
 	* Returns the mvcc version of this ticket.
 	*
@@ -313,6 +248,11 @@ public class TicketWrapper implements Ticket, ModelWrapper<Ticket> {
 		return _ticket.getPrimaryKey();
 	}
 
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _ticket.getPrimaryKeyObj();
+	}
+
 	/**
 	* Returns the ticket ID of this ticket.
 	*
@@ -321,6 +261,41 @@ public class TicketWrapper implements Ticket, ModelWrapper<Ticket> {
 	@Override
 	public long getTicketId() {
 		return _ticket.getTicketId();
+	}
+
+	/**
+	* Returns the type of this ticket.
+	*
+	* @return the type of this ticket
+	*/
+	@Override
+	public int getType() {
+		return _ticket.getType();
+	}
+
+	@Override
+	public int hashCode() {
+		return _ticket.hashCode();
+	}
+
+	@Override
+	public boolean isCachedModel() {
+		return _ticket.isCachedModel();
+	}
+
+	@Override
+	public boolean isEscapedModel() {
+		return _ticket.isEscapedModel();
+	}
+
+	@Override
+	public boolean isExpired() {
+		return _ticket.isExpired();
+	}
+
+	@Override
+	public boolean isNew() {
+		return _ticket.isNew();
 	}
 
 	@Override
@@ -349,9 +324,9 @@ public class TicketWrapper implements Ticket, ModelWrapper<Ticket> {
 	}
 
 	/**
-	* Sets the class p k of this ticket.
+	* Sets the class pk of this ticket.
 	*
-	* @param classPK the class p k of this ticket
+	* @param classPK the class pk of this ticket
 	*/
 	@Override
 	public void setClassPK(long classPK) {
@@ -471,6 +446,31 @@ public class TicketWrapper implements Ticket, ModelWrapper<Ticket> {
 	@Override
 	public void setType(int type) {
 		_ticket.setType(type);
+	}
+
+	@Override
+	public CacheModel<Ticket> toCacheModel() {
+		return _ticket.toCacheModel();
+	}
+
+	@Override
+	public Ticket toEscapedModel() {
+		return new TicketWrapper(_ticket.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _ticket.toString();
+	}
+
+	@Override
+	public Ticket toUnescapedModel() {
+		return new TicketWrapper(_ticket.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _ticket.toXmlString();
 	}
 
 	@Override

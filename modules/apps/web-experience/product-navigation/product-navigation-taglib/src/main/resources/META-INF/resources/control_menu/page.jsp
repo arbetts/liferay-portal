@@ -17,16 +17,20 @@
 <%@ include file="/control_menu/init.jsp" %>
 
 <%
-List<ProductNavigationControlMenuCategory> productNavigationControlMenuCategories = (List<ProductNavigationControlMenuCategory>)request.getAttribute("liferay-product-navigation:control-menu:control-menu-categories");
-ProductNavigationControlMenuEntryRegistry productNavigationControlMenuEntryRegistry = (ProductNavigationControlMenuEntryRegistry)request.getAttribute("liferay-product-navigation:control-menu:control-menu-entry-registry");
+ProductNavigationControlMenuCategoryRegistry productNavigationControlMenuCategoryRegistry = ServletContextUtil.getProductNavigationControlMenuCategoryRegistry();
+
+List<ProductNavigationControlMenuCategory> productNavigationControlMenuCategories = productNavigationControlMenuCategoryRegistry.getProductNavigationControlMenuCategories(ProductNavigationControlMenuCategoryKeys.ROOT);
+ProductNavigationControlMenuEntryRegistry productNavigationControlMenuEntryRegistry = ServletContextUtil.getProductNavigationControlMenuEntryRegistry();
 %>
 
 <c:if test="<%= !productNavigationControlMenuCategories.isEmpty() %>">
-	<div class="control-menu control-menu-level-1 hidden-print" data-qa-id="controlMenu" id="<portlet:namespace/>ControlMenu">
+	<div class="control-menu control-menu-level-1 hidden-print" data-qa-id="controlMenu" id="<portlet:namespace />ControlMenu">
 		<div class="container-fluid-1280">
 			<ul class="control-menu-level-1-nav control-menu-nav" data-namespace="<portlet:namespace />" data-qa-id="header" id="<portlet:namespace />controlMenu">
 
 				<%
+				Map<ProductNavigationControlMenuCategory, List<ProductNavigationControlMenuEntry>> productNavigationControlMenuEntriesMap = new LinkedHashMap<>();
+
 				for (ProductNavigationControlMenuCategory productNavigationControlMenuCategory : productNavigationControlMenuCategories) {
 				%>
 
@@ -36,8 +40,10 @@ ProductNavigationControlMenuEntryRegistry productNavigationControlMenuEntryRegis
 							<%
 							List<ProductNavigationControlMenuEntry> productNavigationControlMenuEntries = productNavigationControlMenuEntryRegistry.getProductNavigationControlMenuEntries(productNavigationControlMenuCategory, request);
 
+							productNavigationControlMenuEntriesMap.put(productNavigationControlMenuCategory, productNavigationControlMenuEntries);
+
 							for (ProductNavigationControlMenuEntry productNavigationControlMenuEntry : productNavigationControlMenuEntries) {
-								if (productNavigationControlMenuEntry.includeIcon(request, new PipingServletResponse(pageContext))) {
+								if (productNavigationControlMenuEntry.includeIcon(request, PipingServletResponse.createPipingServletResponse(pageContext))) {
 									continue;
 								}
 							%>
@@ -73,10 +79,10 @@ ProductNavigationControlMenuEntryRegistry productNavigationControlMenuEntryRegis
 
 			<%
 			for (ProductNavigationControlMenuCategory productNavigationControlMenuCategory : productNavigationControlMenuCategories) {
-				List<ProductNavigationControlMenuEntry> productNavigationControlMenuEntries = productNavigationControlMenuEntryRegistry.getProductNavigationControlMenuEntries(productNavigationControlMenuCategory, request);
+				List<ProductNavigationControlMenuEntry> productNavigationControlMenuEntries = productNavigationControlMenuEntriesMap.get(productNavigationControlMenuCategory);
 
 				for (ProductNavigationControlMenuEntry productNavigationControlMenuEntry : productNavigationControlMenuEntries) {
-					productNavigationControlMenuEntry.includeBody(request, new PipingServletResponse(pageContext));
+					productNavigationControlMenuEntry.includeBody(request, PipingServletResponse.createPipingServletResponse(pageContext));
 				}
 			}
 			%>
@@ -89,7 +95,7 @@ ProductNavigationControlMenuEntryRegistry productNavigationControlMenuEntryRegis
 	<aui:script use="liferay-product-navigation-control-menu">
 		Liferay.ControlMenu.init('#<portlet:namespace />controlMenu');
 
-		var panelEntryBodies = $('#<portlet:namespace/>ControlMenu [data-toggle="sidenav"]').toArray().map(
+		var panelEntryBodies = $('#<portlet:namespace />ControlMenu [data-toggle="sidenav"]').toArray().map(
 			function(item) {
 				return $(item.getAttribute('data-target').split(',')[0]);
 			}
@@ -107,7 +113,7 @@ ProductNavigationControlMenuEntryRegistry productNavigationControlMenuEntryRegis
 								var panelId = item.attr('id');
 
 								if (panelId !== itemId) {
-									$('#<portlet:namespace/>ControlMenu [data-toggle="sidenav"][data-target*="' + panelId + '"]').sideNavigation('hide');
+									$('#<portlet:namespace />ControlMenu [data-toggle="sidenav"][data-target*="' + panelId + '"]').sideNavigation('hide');
 								}
 							}
 						);

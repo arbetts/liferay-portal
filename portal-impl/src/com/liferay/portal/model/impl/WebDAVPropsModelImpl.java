@@ -29,7 +29,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
@@ -59,7 +58,7 @@ public class WebDAVPropsModelImpl extends BaseModelImpl<WebDAVProps>
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a web d a v props model instance should use the {@link WebDAVProps} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a web dav props model instance should use the {@link WebDAVProps} interface instead.
 	 */
 	public static final String TABLE_NAME = "WebDAVProps";
 	public static final Object[][] TABLE_COLUMNS = {
@@ -269,7 +268,7 @@ public class WebDAVPropsModelImpl extends BaseModelImpl<WebDAVProps>
 	@Override
 	public String getClassName() {
 		if (getClassNameId() <= 0) {
-			return StringPool.BLANK;
+			return "";
 		}
 
 		return PortalUtil.getClassName(getClassNameId());
@@ -333,7 +332,7 @@ public class WebDAVPropsModelImpl extends BaseModelImpl<WebDAVProps>
 	@Override
 	public String getProps() {
 		if (_props == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _props;

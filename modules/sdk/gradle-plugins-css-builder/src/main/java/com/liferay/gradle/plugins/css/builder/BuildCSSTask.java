@@ -55,6 +55,7 @@ public class BuildCSSTask extends JavaExec {
 		setDefaultCharacterEncoding(StandardCharsets.UTF_8.toString());
 		setDirNames("/");
 		setMain("com.liferay.css.builder.CSSBuilder");
+		systemProperty("sass.compiler.jni.clean.temp.dir", true);
 	}
 
 	public BuildCSSTask dirNames(Iterable<Object> dirNames) {
@@ -69,7 +70,7 @@ public class BuildCSSTask extends JavaExec {
 
 	@Override
 	public void exec() {
-		setArgs(getCompleteArgs());
+		setArgs(_getCompleteArgs());
 
 		super.exec();
 	}
@@ -206,6 +207,11 @@ public class BuildCSSTask extends JavaExec {
 	}
 
 	@Input
+	public boolean isAppendCssImportTimestamps() {
+		return _appendCssImportTimestamps;
+	}
+
+	@Input
 	public boolean isGenerateSourceMap() {
 		return _generateSourceMap;
 	}
@@ -222,6 +228,12 @@ public class BuildCSSTask extends JavaExec {
 		Object... rtlExcludedPathRegexps) {
 
 		return rtlExcludedPathRegexps(Arrays.asList(rtlExcludedPathRegexps));
+	}
+
+	public void setAppendCssImportTimestamps(
+		boolean appendCssImportTimestamps) {
+
+		_appendCssImportTimestamps = appendCssImportTimestamps;
 	}
 
 	public void setDirNames(Iterable<Object> dirNames) {
@@ -274,8 +286,26 @@ public class BuildCSSTask extends JavaExec {
 		_sassCompilerClassName = sassCompilerClassName;
 	}
 
-	protected List<String> getCompleteArgs() {
+	private String _addTrailingSlash(String path) {
+		if (Validator.isNull(path)) {
+			return path;
+		}
+
+		path = path.replace('\\', '/');
+
+		if (path.charAt(path.length() - 1) != '/') {
+			path += '/';
+		}
+
+		return path;
+	}
+
+	private List<String> _getCompleteArgs() {
 		List<String> args = new ArrayList<>(getArgs());
+
+		args.add(
+			"sass.append.css.import.timestamps=" +
+				isAppendCssImportTimestamps());
 
 		List<String> dirNames = getDirNames();
 
@@ -319,20 +349,6 @@ public class BuildCSSTask extends JavaExec {
 		return args;
 	}
 
-	private String _addTrailingSlash(String path) {
-		if (Validator.isNull(path)) {
-			return path;
-		}
-
-		path = path.replace('\\', '/');
-
-		if (path.charAt(path.length() - 1) != '/') {
-			path += '/';
-		}
-
-		return path;
-	}
-
 	private String _removeLeadingSlash(String path) {
 		if (Validator.isNull(path)) {
 			return path;
@@ -361,6 +377,8 @@ public class BuildCSSTask extends JavaExec {
 		return path;
 	}
 
+	private boolean _appendCssImportTimestamps =
+		CSSBuilderArgs.APPEND_CSS_IMPORT_TIMESTAMPS;
 	private final Set<Object> _dirNames = new LinkedHashSet<>();
 	private Object _docrootDir;
 	private boolean _generateSourceMap;

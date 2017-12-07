@@ -28,7 +28,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * Formats Liferay sources.
  *
  * @author Raymond Augé
- * @goal format-source
+ * @goal format
  */
 public class FormatSourceMojo extends AbstractMojo {
 
@@ -67,13 +67,6 @@ public class FormatSourceMojo extends AbstractMojo {
 	 */
 	public void setBaseDir(String baseDir) {
 		_sourceFormatterArgs.setBaseDirName(baseDir);
-	}
-
-	/**
-	 * @parameter
-	 */
-	public void setCopyright(String copyright) {
-		_sourceFormatterArgs.setCopyrightFileName(copyright);
 	}
 
 	/**
@@ -142,15 +135,29 @@ public class FormatSourceMojo extends AbstractMojo {
 	/**
 	 * @parameter
 	 */
-	public void setThrowException(boolean throwException) {
-		_sourceFormatterArgs.setThrowException(throwException);
+	public void setShowDebugInformation(boolean showDebugInformation) {
+		_sourceFormatterArgs.setShowDebugInformation(showDebugInformation);
 	}
 
 	/**
 	 * @parameter
 	 */
-	public void setUseProperties(boolean useProperties) {
-		_sourceFormatterArgs.setUseProperties(useProperties);
+	public void setShowDocumentation(boolean showDocumentation) {
+		_sourceFormatterArgs.setShowDocumentation(showDocumentation);
+	}
+
+	/**
+	 * @parameter
+	 */
+	public void setShowStatusUpdates(boolean showStatusUpdates) {
+		_sourceFormatterArgs.setShowStatusUpdates(showStatusUpdates);
+	}
+
+	/**
+	 * @parameter
+	 */
+	public void setThrowException(boolean throwException) {
+		_sourceFormatterArgs.setThrowException(throwException);
 	}
 
 	private final SourceFormatterArgs _sourceFormatterArgs =

@@ -12,6 +12,8 @@ AUI.add(
 			return Lang.toInt(value, 10, 0);
 		};
 
+		var REGEX_UNFILLED_PARAMETER = /\{\s*([^|}]+?)\s*(?:\|([^}]*))?\s*\}/g;
+
 		var STR_DASH = '-';
 
 		var STR_SPACE = ' ';
@@ -56,31 +58,6 @@ AUI.add(
 		var CalendarUtil = {
 			NOTIFICATION_DEFAULT_TYPE: 'email',
 
-			adjustSchedulerEventDisplayTime: function(schedulerEvent) {
-				var instance = this;
-
-				var allDay = schedulerEvent.get('allDay');
-
-				var timeAdjuster = instance.toLocalTime;
-
-				if (allDay) {
-					timeAdjuster = instance.toLocalTimeWithoutUserTimeZone;
-				}
-
-				var endDate = schedulerEvent.get('endDate');
-				var startDate = schedulerEvent.get('startDate');
-
-				schedulerEvent.setAttrs(
-					{
-						endDate: timeAdjuster.call(instance, endDate),
-						startDate: timeAdjuster.call(instance, startDate)
-					},
-					{
-						silent: true
-					}
-				);
-			},
-
 			createSchedulerEvent: function(calendarBooking) {
 				var instance = this;
 
@@ -122,6 +99,14 @@ AUI.add(
 				scheduler.removeEvents(schedulerEvent);
 
 				scheduler.syncEventsUI();
+			},
+
+			fillURLParameters: function(url, data) {
+				var instance = this;
+
+				url = Lang.sub(url, data);
+
+				return url.replace(REGEX_UNFILLED_PARAMETER, '');
 			},
 
 			getCalendarName: function(name, calendarResourceName) {

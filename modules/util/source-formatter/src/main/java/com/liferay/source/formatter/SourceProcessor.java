@@ -14,9 +14,14 @@
 
 package com.liferay.source.formatter;
 
+import com.liferay.source.formatter.checks.configuration.SourceChecksSuppressions;
+import com.liferay.source.formatter.checks.configuration.SourceFormatterConfiguration;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * @author Hugo Huijser
@@ -33,12 +38,31 @@ public interface SourceProcessor {
 
 	public Set<SourceFormatterMessage> getSourceFormatterMessages();
 
-	public void processMessage(String fileName, String message);
+	public void setAllFileNames(List<String> allFileNames);
 
-	public void processMessage(String fileName, String message, int lineCount);
+	public void setPluginsInsideModulesDirectoryNames(
+		List<String> pluginsInsideModulesDirectoryNames);
 
-	public void setProperties(Properties properties);
+	public void setPortalSource(boolean portalSource);
+
+	public void setProgressStatusQueue(
+		BlockingQueue<ProgressStatusUpdate> progressStatusQueue);
+
+	public void setProjectPathPrefix(String projectPathPrefix);
+
+	public void setPropertiesMap(Map<String, Properties> propertiesMap);
+
+	public void setSourceChecksSuppressions(
+		SourceChecksSuppressions sourceChecksSuppressions);
 
 	public void setSourceFormatterArgs(SourceFormatterArgs sourceFormatterArgs);
+
+	public void setSourceFormatterConfiguration(
+		SourceFormatterConfiguration sourceFormatterConfiguration);
+
+	public void setSourceFormatterExcludes(
+		SourceFormatterExcludes sourceFormatterExcludes);
+
+	public void setSubrepository(boolean subrepository);
 
 }

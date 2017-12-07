@@ -16,12 +16,12 @@ package com.liferay.mail.reader.model.impl;
 
 import com.liferay.mail.reader.model.Attachment;
 import com.liferay.mail.reader.service.AttachmentLocalServiceUtil;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -45,6 +45,7 @@ public class MessageImpl extends MessageBaseImpl {
 		return normalizeAddress(super.getCc());
 	}
 
+	@Override
 	public long getGroupId() throws PortalException {
 		User user = UserLocalServiceUtil.getUser(getUserId());
 
@@ -58,6 +59,7 @@ public class MessageImpl extends MessageBaseImpl {
 		return normalizeAddress(super.getTo());
 	}
 
+	@Override
 	public boolean hasAttachments() {
 		String contentType = getContentType();
 
@@ -71,6 +73,7 @@ public class MessageImpl extends MessageBaseImpl {
 		return !attachments.isEmpty();
 	}
 
+	@Override
 	public boolean hasFlag(int flag) {
 		int[] flags = StringUtil.split(getFlags(), 0);
 

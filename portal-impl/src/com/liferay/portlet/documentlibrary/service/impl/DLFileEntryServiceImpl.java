@@ -99,10 +99,10 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		boolean isLocked = LockManagerUtil.isLocked(
+		boolean locked = LockManagerUtil.isLocked(
 			DLFileEntry.class.getName(), fileEntryId);
 
-		if (isLocked && !hasFileEntryLock(fileEntryId)) {
+		if (locked && !hasFileEntryLock(fileEntryId)) {
 			throw new FileEntryLockException.MustOwnLock();
 		}
 
@@ -277,6 +277,26 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 
 	@Override
 	public List<DLFileEntry> getFileEntries(
+			long groupId, long folderId, String[] mimeTypes, int status,
+			int start, int end, OrderByComparator<DLFileEntry> obc)
+		throws PortalException {
+
+		DLFolderPermission.check(
+			getPermissionChecker(), groupId, folderId, ActionKeys.VIEW);
+
+		List<Long> folderIds = new ArrayList<>();
+
+		folderIds.add(folderId);
+
+		QueryDefinition<DLFileEntry> queryDefinition = new QueryDefinition<>(
+			status, start, end, obc);
+
+		return dlFileEntryFinder.filterFindByG_U_F_M(
+			groupId, 0, folderIds, mimeTypes, queryDefinition);
+	}
+
+	@Override
+	public List<DLFileEntry> getFileEntries(
 			long groupId, long folderId, String[] mimeTypes, int start, int end,
 			OrderByComparator<DLFileEntry> obc)
 		throws PortalException {
@@ -323,13 +343,21 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 	public int getFileEntriesCount(
 		long groupId, long folderId, String[] mimeTypes) {
 
+		return getFileEntriesCount(
+			groupId, folderId, mimeTypes, WorkflowConstants.STATUS_ANY);
+	}
+
+	@Override
+	public int getFileEntriesCount(
+		long groupId, long folderId, String[] mimeTypes, int status) {
+
 		List<Long> folderIds = new ArrayList<>();
 
 		folderIds.add(folderId);
 
 		return dlFileEntryFinder.filterCountByG_U_F_M(
 			groupId, 0, folderIds, mimeTypes,
-			new QueryDefinition<DLFileEntry>(WorkflowConstants.STATUS_ANY));
+			new QueryDefinition<DLFileEntry>(status));
 	}
 
 	@Override
@@ -538,18 +566,7 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 		DLFileEntry dlFileEntry = dlFileEntryLocalService.getFileEntry(
 			fileEntryId);
 
-		long folderId = dlFileEntry.getFolderId();
-
-		boolean hasLock = LockManagerUtil.hasLock(
-			getUserId(), DLFileEntry.class.getName(), fileEntryId);
-
-		if (!hasLock &&
-			(folderId != DLFolderConstants.DEFAULT_PARENT_FOLDER_ID)) {
-
-			hasLock = dlFolderLocalService.hasInheritableLock(folderId);
-		}
-
-		return hasLock;
+		return dlFileEntry.hasLock();
 	}
 
 	@Override
@@ -576,7 +593,7 @@ public class DLFileEntryServiceImpl extends DLFileEntryServiceBaseImpl {
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link #isKeepFileVersionLabel(long,
-	 * boolean, ServiceContext)}
+	 *             boolean, ServiceContext)}
 	 */
 	@Deprecated
 	@Override

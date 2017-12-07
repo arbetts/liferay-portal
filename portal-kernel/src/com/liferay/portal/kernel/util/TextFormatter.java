@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.util;
 
+import com.liferay.petra.string.CharPool;
+
 import java.text.NumberFormat;
 
 import java.util.Locale;
@@ -47,23 +49,23 @@ public class TextFormatter {
 
 	public static final int F = 5;
 
-	// formatId --> FormatId
+	// formatId --> FormatId, FriendlyURLMapper --> FriendlyURLMapper
 
 	public static final int G = 6;
 
-	// formatId --> format id
+	// formatId --> format id, FriendlyURLMapper --> friendly url mapper
 
 	public static final int H = 7;
 
-	// FormatId --> formatId
+	// FormatId --> formatId, FriendlyURLMapper --> friendlyURLMapper
 
 	public static final int I = 8;
 
-	// format-id --> Format Id
+	// format-id --> Format Id, friendly-url-mapper --> Friendly Url Mapper
 
 	public static final int J = 9;
 
-	// formatId --> format-id, formatID --> format-i-d
+	// formatId --> format-id, FriendlyURLMapper --> friendly-url-mapper
 
 	public static final int K = 10;
 
@@ -71,20 +73,22 @@ public class TextFormatter {
 
 	public static final int L = 11;
 
-	// format-id --> formatId
+	// format-id --> formatId, friendly-url-mapper --> friendlyUrlMapper
 
 	public static final int M = 12;
 
-	// format-id --> format_id
+	// format-id --> format_id, friendly-url-mapper --> friendly_url_mapper
 
 	public static final int N = 13;
 
-	// format_id --> format-id
+	// format_id --> format-id, friendly_url_mapper --> friendly-url-mapper
 
 	public static final int O = 14;
 
-	// FormatID --> format-id
-
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #K}
+	 */
+	@Deprecated
 	public static final int P = 15;
 
 	// FORMATId --> format-id
@@ -144,7 +148,7 @@ public class TextFormatter {
 			return _formatO(s);
 		}
 		else if (style == P) {
-			return _formatP(s);
+			return _formatK(s);
 		}
 		else if (style == Q) {
 			return _formatQ(s);
@@ -235,7 +239,7 @@ public class TextFormatter {
 	}
 
 	private static String _formatB(String s) {
-		return StringUtil.strip(StringUtil.toLowerCase(s), CharPool.SPACE);
+		return StringUtil.removeChar(StringUtil.toLowerCase(s), CharPool.SPACE);
 	}
 
 	private static String _formatC(String s) {
@@ -244,7 +248,7 @@ public class TextFormatter {
 	}
 
 	private static String _formatD(String s) {
-		return StringUtil.strip(s, CharPool.SPACE);
+		return StringUtil.removeChar(s, CharPool.SPACE);
 	}
 
 	private static String _formatE(String s) {
@@ -252,7 +256,7 @@ public class TextFormatter {
 	}
 
 	private static String _formatF(String s) {
-		s = StringUtil.strip(s, CharPool.SPACE);
+		s = StringUtil.removeChar(s, CharPool.SPACE);
 
 		if (Character.isUpperCase(s.charAt(0))) {
 			s = StringUtil.toLowerCase(s.substring(0, 1)).concat(
@@ -277,16 +281,24 @@ public class TextFormatter {
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
 
-			if (Character.isUpperCase(c)) {
-				sb.append(CharPool.SPACE);
-				sb.append(Character.toLowerCase(c));
-			}
-			else {
+			if (!Character.isUpperCase(c)) {
 				sb.append(c);
+
+				continue;
 			}
+
+			if ((i > 0) &&
+				(Character.isLowerCase(s.charAt(i - 1)) ||
+				 ((i < (s.length() - 1)) &&
+				  Character.isLowerCase(s.charAt(i + 1))))) {
+
+				sb.append(CharPool.SPACE);
+			}
+
+			sb.append(Character.toLowerCase(c));
 		}
 
-		return sb.toString().trim();
+		return sb.toString();
 	}
 
 	private static String _formatI(String s) {
@@ -386,29 +398,6 @@ public class TextFormatter {
 
 	private static String _formatO(String s) {
 		return StringUtil.replace(s, CharPool.UNDERLINE, CharPool.DASH);
-	}
-
-	private static String _formatP(String s) {
-		StringBuilder sb = new StringBuilder(s.length() + s.length() / 2);
-
-		for (int i = 0; i < s.length() - 1; i++) {
-			char c = s.charAt(i);
-
-			if (Character.isUpperCase(c)) {
-				sb.append(Character.toLowerCase(c));
-			}
-			else {
-				sb.append(c);
-
-				if (Character.isUpperCase(s.charAt(i + 1))) {
-					sb.append(CharPool.DASH);
-				}
-			}
-		}
-
-		sb.append(Character.toLowerCase(s.charAt(s.length() - 1)));
-
-		return sb.toString();
 	}
 
 	private static String _formatQ(String s) {

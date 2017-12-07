@@ -4,6 +4,8 @@ The JS Transpiler Gradle plugin lets you run [`metal-cli`](https://github.com/me
 in order to build [Metal.js](http://metaljs.com/) code, compile Soy files, and
 transpile ES6 to ES5.
 
+The plugin has been successfully tested with Gradle 2.5 up to 3.3.
+
 ## Usage
 
 To use the plugin, include it in your build script:
@@ -11,7 +13,7 @@ To use the plugin, include it in your build script:
 ```gradle
 buildscript {
 	dependencies {
-		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.js.transpiler", version: "2.2.1"
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.js.transpiler", version: "2.4.1"
 	}
 
 	repositories {
@@ -20,21 +22,36 @@ buildscript {
 		}
 	}
 }
-
-apply plugin: "com.liferay.js.transpiler"
 ```
 
-The JS Transpiler plugin automatically applies the [`com.liferay.node`](https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-node)
-plugin.
+There are two JS Transpiler Gradle plugins you can apply to your project:
 
-## Tasks
+- [*JS Transpiler Plugin*](#js-transpiler-plugin): builds Metal.js code,
+compiles Soy files, and transpiles ES6 to ES5:
+
+	```gradle
+	apply plugin: "com.liferay.js.transpiler"
+	```
+
+- [*JS Transpiler Base Plugin*](#js-transpiler-base-plugin): provides a way to
+use Gradle dependencies (such as [external modules](https://docs.gradle.org/current/userguide/dependency_management.html#sub:module_dependencies)
+or [project dependencies](https://docs.gradle.org/current/userguide/dependency_management.html#sub:project_dependencies))
+in Node.js scripts:
+
+	```gradle
+	apply plugin: "com.liferay.js.transpiler.base"
+	```
+
+## JS Transpiler Plugin
+
+The JS Transpiler plugin automatically applies the [*JS Transpiler Base Plugin*](#js-transpiler-base-plugin).
 
 The plugin adds two tasks to your project:
 
 Name | Depends On | Type | Description
 ---- | ---------- | ---- | -----------
 `downloadMetalCli` | `downloadNode` | `DownloadNodeModuleTask` | Downloads `metal-cli` in the project's `node_modules` directory.
-`transpileJS` | `downloadMetalCli`, `npmInstall`, `processResources` | [`TranspileJSTask`](#transpilejstask) | Builds Metal.js code.
+`transpileJS` | `downloadMetalCli`, `expandJSCompileDependencies`, `npmInstall`, `processResources` | [`TranspileJSTask`](#transpilejstask) | Builds Metal.js code.
 
 By default, the `downloadMetalCli` task downloads the version 1.3.1 of
 `metal-cli`. If the project's `package.json` file, however, already lists the
@@ -61,6 +78,30 @@ The plugin adds a new configuration to the project called `soyCompile`. If one
 or more dependencies are added to this configuration, they will be expanded into
 temporary directories and passed to the `transpileJS` task as additional
 [`soyDependencies`](#soydependencies) values.
+
+## JS Transpiler Base Plugin
+
+The JS Transpiler Base plugin automatically applies the [`com.liferay.node`](https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-node)
+plugin.
+
+The plugin adds a new configuration to the project called `jsCompile`. If one or
+more dependencies are added to this configuration, they will be expanded into
+sub-directories of the `node_modules` directory, with names equal to the names
+of the dependencies.
+
+The plugin also adds one task to your project:
+
+Name | Depends On | Type | Description
+---- | ---------- | ---- | -----------
+`expandJSCompileDependencies` | \- | [`DefaultTask`](https://docs.gradle.org/current/javadoc/org/gradle/api/DefaultTask.html) | Expands the additional configured JavaScript dependencies. The task itself does not do any work, but depends on a series of [Copy](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.Copy.html) tasks called `expandJSCompileDependency${file}`, which expand each dependency declared in the `jsCompile` configuration into the `node_modules` directory.
+
+All the tasks of type `ExecuteNpmTask` whose name starts with `"npmRun"` are
+configured to depend on `expandJSCompileDependencies`. This means that, before
+running any [script](https://docs.npmjs.com/misc/scripts) declared in the
+`package.json` file of the project, all the `jsCompile` dependencies will be
+expanded into the `node_modules` directory.
+
+## Tasks
 
 ### TranspileJSTask
 

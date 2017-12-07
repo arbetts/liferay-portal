@@ -2,8 +2,10 @@
 ; Do not manually edit this file.
 ;
 [subrepo]
+	autopull = false
 	cmdver = liferay
-	commit = 56341105cb03121cefd6384d59f25d51046a7ad3
+	commit = 49786a02af5e4dbf7a90dfcfe3c84fbb56173e49
+	mergebuttonmergecommits = false
 	mode = push
-	parent = 2d6fcb8b1b0c6829b9a545d2cf2f69f54d2f5ce6
+	parent = 2050f16d06f56d90b2140a3964491c993e451f81
 	remote = git@github.com:liferay/com-liferay-polls.git

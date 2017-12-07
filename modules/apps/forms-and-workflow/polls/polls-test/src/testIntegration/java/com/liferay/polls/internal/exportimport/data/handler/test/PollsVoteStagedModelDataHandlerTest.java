@@ -15,6 +15,7 @@
 package com.liferay.polls.internal.exportimport.data.handler.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.polls.model.PollsChoice;
 import com.liferay.polls.model.PollsQuestion;
 import com.liferay.polls.model.PollsVote;
@@ -27,7 +28,6 @@ import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
-import com.liferay.portal.lar.test.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.util.HashMap;
@@ -123,7 +123,9 @@ public class PollsVoteStagedModelDataHandlerTest
 		List<StagedModel> choiceDependentStagedModels =
 			dependentStagedModelsMap.get(PollsChoice.class.getSimpleName());
 
-		Assert.assertEquals(1, choiceDependentStagedModels.size());
+		Assert.assertEquals(
+			choiceDependentStagedModels.toString(), 1,
+			choiceDependentStagedModels.size());
 
 		PollsChoice choice = (PollsChoice)choiceDependentStagedModels.get(0);
 
@@ -133,7 +135,9 @@ public class PollsVoteStagedModelDataHandlerTest
 		List<StagedModel> questionDependentStagedModels =
 			dependentStagedModelsMap.get(PollsQuestion.class.getSimpleName());
 
-		Assert.assertEquals(1, questionDependentStagedModels.size());
+		Assert.assertEquals(
+			questionDependentStagedModels.toString(), 1,
+			questionDependentStagedModels.size());
 
 		PollsQuestion question =
 			(PollsQuestion)questionDependentStagedModels.get(0);

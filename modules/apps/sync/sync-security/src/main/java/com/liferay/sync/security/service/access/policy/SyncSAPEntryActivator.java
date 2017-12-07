@@ -44,7 +44,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true)
 public class SyncSAPEntryActivator {
 
-	public static final Object[][] SAP_ENTRY_OBJECT_ARRAYS = new Object[][] {
+	public static final Object[][] SAP_ENTRY_OBJECT_ARRAYS = {
 		{
 			"SYNC_DEFAULT",
 			"com.liferay.sync.service.SyncDLObjectService#getSyncContext", true
@@ -113,7 +113,7 @@ public class SyncSAPEntryActivator {
 			}
 			catch (PortalException pe) {
 				_log.error(
-					"Unable to add SAP entry for company " +
+					"Unable to add service access policy entry for company " +
 						company.getCompanyId(),
 					pe);
 			}

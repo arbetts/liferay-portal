@@ -28,33 +28,33 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	factory = true,
 	id = "com.liferay.portal.security.service.access.quota.configuration.SAQConfiguration",
-	localization = "content/Language", name = "saq.configuration.name"
+	localization = "content/Language", name = "saq-configuration-name"
 )
 @ProviderType
 public interface SAQConfiguration {
 
 	@Meta.AD(
-		deflt = "", description = "saq.configuration.service.signature",
-		required = false
+		deflt = "", description = "saq-configuration-service-signature",
+		name = "service-signature", required = false
 	)
 	public String serviceSignature();
 
 	@Meta.AD(
-		deflt = "60", description = "saq.configuration.service.max", min = "1",
-		required = true
+		deflt = "60", description = "saq-configuration-service-max", min = "1",
+		name = "max", required = true
 	)
 	public int max();
 
 	@Meta.AD(
 		deflt = "60000",
-		description = "saq.configuration.service.interval.millis",
-		required = true
+		description = "saq-configuration-service-interval-millis",
+		name = "interval-millis", required = true
 	)
 	public long intervalMillis();
 
 	@Meta.AD(
-		deflt = "", description = "saq.configuration.service.metric",
-		required = false
+		deflt = "", description = "saq-configuration-service-metric",
+		name = "metrics", required = false
 	)
 	public String[] metrics();
 

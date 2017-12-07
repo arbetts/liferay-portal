@@ -19,12 +19,22 @@ import com.liferay.knowledge.base.model.KBFolder;
 import com.liferay.knowledge.base.service.KBFolderLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.BaseModelPermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.util.PropsValues;
+
+import org.osgi.service.component.annotations.Component;
 
 /**
  * @author Adolfo Pérez
+ * @author Roberto Díaz
  */
-public class KBFolderPermission {
+@Component(
+	property = {"model.class.name=com.liferay.knowledge.base.model.KBFolder"},
+	service = BaseModelPermissionChecker.class
+)
+public class KBFolderPermission implements BaseModelPermissionChecker {
 
 	public static void check(
 			PermissionChecker permissionChecker, KBFolder kbFolder,
@@ -57,8 +67,20 @@ public class KBFolderPermission {
 	}
 
 	public static boolean contains(
-		PermissionChecker permissionChecker, KBFolder kbFolder,
-		String actionId) {
+			PermissionChecker permissionChecker, KBFolder kbFolder,
+			String actionId)
+		throws PortalException {
+
+		if (actionId.equals(ActionKeys.VIEW) &&
+			PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
+
+			if (!contains(
+					permissionChecker, kbFolder.getGroupId(),
+					kbFolder.getParentKBFolderId(), actionId)) {
+
+				return false;
+			}
+		}
 
 		if (permissionChecker.hasOwnerPermission(
 				kbFolder.getCompanyId(), KBFolder.class.getName(),
@@ -78,6 +100,10 @@ public class KBFolderPermission {
 		throws PortalException {
 
 		if (kbFolderId == KBFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+			if (actionId.equals(ActionKeys.VIEW)) {
+				return true;
+			}
+
 			return AdminPermission.contains(
 				permissionChecker, groupId, actionId);
 		}
@@ -85,6 +111,15 @@ public class KBFolderPermission {
 		KBFolder kbFolder = KBFolderLocalServiceUtil.getKBFolder(kbFolderId);
 
 		return contains(permissionChecker, kbFolder, actionId);
+	}
+
+	@Override
+	public void checkBaseModel(
+			PermissionChecker permissionChecker, long groupId, long primaryKey,
+			String actionId)
+		throws PortalException {
+
+		check(permissionChecker, groupId, primaryKey, actionId);
 	}
 
 }

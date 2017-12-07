@@ -83,7 +83,7 @@ public interface ${entity.name} extends
 
 	<#list entity.columnList as column>
 		<#if column.isAccessor() || column.isPrimary()>
-			public static final Accessor<${entity.name}, ${serviceBuilder.getPrimitiveObj(column.type)}> ${textFormatter.format(textFormatter.format(column.name, 7), 0)}_ACCESSOR = new Accessor<${entity.name}, ${serviceBuilder.getPrimitiveObj(column.type)}>() {
+			public static final Accessor<${entity.name}, ${serviceBuilder.getPrimitiveObj(column.type)}> ${column.getAccessorName(apiPackagePath + ".model." + entity.name)} = new Accessor<${entity.name}, ${serviceBuilder.getPrimitiveObj(column.type)}>() {
 
 				@Override
 				public ${serviceBuilder.getPrimitiveObj(column.type)} get(${entity.name} ${entity.varName}) {
@@ -105,7 +105,7 @@ public interface ${entity.name} extends
 	</#list>
 
 	<#list methods as method>
-		<#if !method.isConstructor() && !method.isStatic() && method.isPublic()>
+		<#if !method.isStatic() && method.isPublic()>
 			${serviceBuilder.getJavadocComment(method)}
 
 			<#assign
@@ -115,10 +115,10 @@ public interface ${entity.name} extends
 			/>
 
 			<#list annotations as annotation>
-				<#if annotation.type.javaClass.name != "Override">
+				<#if !stringUtil.equals(annotation.type.name, "Override")>
 					${annotation.toString()}
 				<#else>
-					<#if (method.name == "equals") && (parameters?size == 1)>
+					<#if stringUtil.equals(method.name, "equals") && (parameters?size == 1)>
 						<#assign firstParameter = parameters?first />
 
 						<#if serviceBuilder.getTypeGenericsName(firstParameter.type) == "java.lang.Object">
@@ -149,7 +149,7 @@ public interface ${entity.name} extends
 					throws
 				</#if>
 
-				${exception.value}
+				${exception.fullyQualifiedName}
 
 				<#if exception_has_next>
 					,

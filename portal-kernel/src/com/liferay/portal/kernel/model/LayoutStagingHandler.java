@@ -28,7 +28,6 @@ import com.liferay.portal.kernel.util.LayoutTypePortletFactoryUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.io.Serializable;
@@ -101,8 +100,7 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 					Class<?> layoutRevisionClass = _layoutRevision.getClass();
 
 					method = layoutRevisionClass.getMethod(
-						methodName,
-						ReflectionUtil.getParameterTypes(arguments));
+						methodName, method.getParameterTypes());
 
 					bean = _layoutRevision;
 				}
@@ -137,7 +135,8 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 
 	private Object _clone() {
 		return ProxyUtil.newProxyInstance(
-			PortalClassLoaderUtil.getClassLoader(), new Class[] {Layout.class},
+			PortalClassLoaderUtil.getClassLoader(),
+			new Class<?>[] {Layout.class},
 			new LayoutStagingHandler(_layout, _layoutRevision));
 	}
 
@@ -221,16 +220,27 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 			LayoutBranchLocalServiceUtil.getMasterLayoutBranch(
 				layoutSetBranchId, layout.getPlid(), serviceContext);
 
-		layoutRevision = LayoutRevisionLocalServiceUtil.addLayoutRevision(
-			serviceContext.getUserId(), layoutSetBranchId,
-			layoutBranch.getLayoutBranchId(),
-			LayoutRevisionConstants.DEFAULT_PARENT_LAYOUT_REVISION_ID, false,
-			layout.getPlid(), LayoutConstants.DEFAULT_PLID,
-			layout.isPrivateLayout(), layout.getName(), layout.getTitle(),
-			layout.getDescription(), layout.getKeywords(), layout.getRobots(),
-			layout.getTypeSettings(), layout.getIconImage(),
-			layout.getIconImageId(), layout.getThemeId(),
-			layout.getColorSchemeId(), layout.getCss(), serviceContext);
+		int workflowAction = serviceContext.getWorkflowAction();
+
+		try {
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+
+			layoutRevision = LayoutRevisionLocalServiceUtil.addLayoutRevision(
+				serviceContext.getUserId(), layoutSetBranchId,
+				layoutBranch.getLayoutBranchId(),
+				LayoutRevisionConstants.DEFAULT_PARENT_LAYOUT_REVISION_ID,
+				false, layout.getPlid(), LayoutConstants.DEFAULT_PLID,
+				layout.isPrivateLayout(), layout.getName(), layout.getTitle(),
+				layout.getDescription(), layout.getKeywords(),
+				layout.getRobots(), layout.getTypeSettings(),
+				layout.getIconImage(), layout.getIconImageId(),
+				layout.getThemeId(), layout.getColorSchemeId(), layout.getCss(),
+				serviceContext);
+		}
+		finally {
+			serviceContext.setWorkflowAction(workflowAction);
+		}
 
 		boolean explicitCreation = ParamUtil.getBoolean(
 			serviceContext, "explicitCreation");
@@ -249,7 +259,7 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 		return LayoutTypePortletFactoryUtil.create(
 			(Layout)ProxyUtil.newProxyInstance(
 				PortalClassLoaderUtil.getClassLoader(),
-				new Class[] {Layout.class},
+				new Class<?>[] {Layout.class},
 				new LayoutStagingHandler(_layout, _layoutRevision)));
 	}
 
@@ -269,7 +279,8 @@ public class LayoutStagingHandler implements InvocationHandler, Serializable {
 
 	private Object _toEscapedModel() {
 		return ProxyUtil.newProxyInstance(
-			PortalClassLoaderUtil.getClassLoader(), new Class[] {Layout.class},
+			PortalClassLoaderUtil.getClassLoader(),
+			new Class<?>[] {Layout.class},
 			new LayoutStagingHandler(
 				_layout.toEscapedModel(), _layoutRevision.toEscapedModel()));
 	}

@@ -32,7 +32,6 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
@@ -163,9 +162,9 @@ public class TicketPersistenceTest {
 
 	@Test
 	public void testCountByKey() throws Exception {
-		_persistence.countByKey(StringPool.BLANK);
+		_persistence.countByKey("");
 
-		_persistence.countByKey(StringPool.NULL);
+		_persistence.countByKey("null");
 
 		_persistence.countByKey((String)null);
 	}
@@ -176,6 +175,15 @@ public class TicketPersistenceTest {
 			RandomTestUtil.nextLong(), RandomTestUtil.nextInt());
 
 		_persistence.countByC_C_T(0L, 0L, 0);
+	}
+
+	@Test
+	public void testCountByC_C_C_T() throws Exception {
+		_persistence.countByC_C_C_T(RandomTestUtil.nextLong(),
+			RandomTestUtil.nextLong(), RandomTestUtil.nextLong(),
+			RandomTestUtil.nextInt());
+
+		_persistence.countByC_C_C_T(0L, 0L, 0L, 0);
 	}
 
 	@Test

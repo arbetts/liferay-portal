@@ -14,11 +14,10 @@
 
 package com.liferay.knowledge.base.service.impl;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.knowledge.base.constants.KBActionKeys;
 import com.liferay.knowledge.base.constants.KBFolderConstants;
 import com.liferay.knowledge.base.constants.KBPortletKeys;
+import com.liferay.knowledge.base.internal.util.KBArticleSiblingNavigationHelper;
 import com.liferay.knowledge.base.model.KBArticle;
 import com.liferay.knowledge.base.model.KBArticleSearchDisplay;
 import com.liferay.knowledge.base.model.KBFolder;
@@ -76,7 +75,6 @@ import java.util.Map;
  * @author Peter Shin
  * @author Brian Wing Shun Chan
  */
-@ProviderType
 public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 	@Override
@@ -113,7 +111,7 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 		throws PortalException {
 
 		AdminPermission.check(
-			getPermissionChecker(), groupId, KBActionKeys.ADD_KB_ARTICLE);
+			getPermissionChecker(), groupId, KBActionKeys.IMPORT_KB_ARTICLES);
 
 		return kbArticleLocalService.addKBArticlesMarkdown(
 			getUserId(), groupId, parentKBFolderId, fileName,
@@ -190,11 +188,8 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 		KBArticle kbArticle = kbArticleLocalService.fetchKBArticleByUrlTitle(
 			groupId, kbFolderId, urlTitle);
 
-		if (kbArticle == null) {
-			return null;
-		}
-
-		if (KBArticlePermission.contains(
+		if ((kbArticle != null) &&
+			KBArticlePermission.contains(
 				getPermissionChecker(), kbArticle, ActionKeys.VIEW)) {
 
 			return kbArticle;
@@ -210,19 +205,39 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 		KBArticle kbArticle = kbArticleLocalService.fetchLatestKBArticle(
 			resourcePrimKey, status);
 
-		if (kbArticle == null) {
-			return null;
+		if ((kbArticle != null) &&
+			KBArticlePermission.contains(
+				getPermissionChecker(), kbArticle, ActionKeys.VIEW)) {
+
+			return kbArticle;
 		}
 
-		KBArticlePermission.check(
-			getPermissionChecker(), kbArticle, KBActionKeys.VIEW);
+		return null;
+	}
 
-		return kbArticle;
+	@Override
+	public KBArticle fetchLatestKBArticleByUrlTitle(
+			long groupId, long kbFolderId, String urlTitle, int status)
+		throws PortalException {
+
+		KBArticle kbArticle =
+			kbArticleLocalService.fetchLatestKBArticleByUrlTitle(
+				groupId, kbFolderId, urlTitle, status);
+
+		if ((kbArticle != null) &&
+			KBArticlePermission.contains(
+				getPermissionChecker(), kbArticle, ActionKeys.VIEW)) {
+
+			return kbArticle;
+		}
+
+		return null;
 	}
 
 	/**
-	 * @deprecated As of 1.1.0, replaced by {@link #getAllDescendantKBArticles(
-	 *             long, long, int, OrderByComparator)}
+	 * @deprecated As of 1.1.0, replaced by {@link
+	 *             #getAllDescendantKBArticles(long, long, int,
+	 *             OrderByComparator)}
 	 */
 	@Deprecated
 	@Override
@@ -402,7 +417,7 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 		List<KBArticle> kbArticles = new ArrayList<>();
 
-		Long[][] params = new Long[][] {ArrayUtil.toArray(resourcePrimKeys)};
+		Long[][] params = {ArrayUtil.toArray(resourcePrimKeys)};
 
 		while ((params = KnowledgeBaseUtil.getParams(params[0])) != null) {
 			List<KBArticle> curKBArticles = null;
@@ -466,7 +481,7 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 		int count = 0;
 
-		Long[][] params = new Long[][] {ArrayUtil.toArray(resourcePrimKeys)};
+		Long[][] params = {ArrayUtil.toArray(resourcePrimKeys)};
 
 		while ((params = KnowledgeBaseUtil.getParams(params[0])) != null) {
 			if (status == WorkflowConstants.STATUS_ANY) {
@@ -600,6 +615,23 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 	}
 
 	@Override
+	public KBArticle[] getPreviousAndNextKBArticles(long kbArticleId)
+		throws PortalException {
+
+		KBArticle kbArticle = kbArticlePersistence.findByPrimaryKey(
+			kbArticleId);
+
+		KBArticlePermission.check(
+			getPermissionChecker(), kbArticle, KBActionKeys.VIEW);
+
+		KBArticleSiblingNavigationHelper kbArticleSiblingNavigationHelper =
+			new KBArticleSiblingNavigationHelper(kbArticlePersistence);
+
+		return kbArticleSiblingNavigationHelper.getPreviousAndNextKBArticles(
+			kbArticleId);
+	}
+
+	@Override
 	public List<KBArticle> getSectionsKBArticles(
 		long groupId, String[] sections, int status, int start, int end,
 		OrderByComparator<KBArticle> orderByComparator) {
@@ -647,8 +679,7 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 	/**
 	 * @deprecated As of 1.1.0, replaced by {@link #getKBArticles(long, long,
-	 *             int, int, int,
-	 *             OrderByComparator)}
+	 *             int, int, int, OrderByComparator)}
 	 */
 	@Deprecated
 	@Override
@@ -935,8 +966,9 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 	}
 
 	/**
-	 * @deprecated As of 1.1.0, replaced by {@link #getAllDescendantKBArticles(
-	 *             long, long, int, OrderByComparator, boolean)}
+	 * @deprecated As of 1.1.0, replaced by {@link
+	 *             #getAllDescendantKBArticles(long, long, int,
+	 *             OrderByComparator, boolean)}
 	 */
 	@Deprecated
 	protected List<KBArticle> getAllDescendantKBArticles(

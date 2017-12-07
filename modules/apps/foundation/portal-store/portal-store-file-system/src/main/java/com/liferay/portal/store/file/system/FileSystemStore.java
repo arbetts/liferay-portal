@@ -27,9 +27,9 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.store.file.system.configuration.AdvancedFileSystemStoreConfiguration;
 import com.liferay.portal.store.file.system.configuration.FileSystemStoreConfiguration;
 
 import java.io.File;
@@ -42,13 +42,10 @@ import java.nio.file.Files;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -387,8 +384,9 @@ public class FileSystemStore extends BaseStore {
 
 		if (!renamed) {
 			throw new SystemException(
-				"File name directory was not renamed from " +
-					fileNameDir.getPath() + " to " + newFileNameDir.getPath());
+				StringBundler.concat(
+					"File name directory was not renamed from ",
+					fileNameDir.getPath(), " to ", newFileNameDir.getPath()));
 		}
 
 		deleteEmptyAncestors(companyId, repositoryId, parentFile);
@@ -425,8 +423,9 @@ public class FileSystemStore extends BaseStore {
 
 		if (!renamed) {
 			throw new SystemException(
-				"File name directory was not renamed from " +
-					fileNameDir.getPath() + " to " + newFileNameDir.getPath());
+				StringBundler.concat(
+					"File name directory was not renamed from ",
+					fileNameDir.getPath(), " to ", newFileNameDir.getPath()));
 		}
 
 		deleteEmptyAncestors(companyId, repositoryId, parentFile);
@@ -481,9 +480,10 @@ public class FileSystemStore extends BaseStore {
 
 		if (!renamed) {
 			throw new SystemException(
-				"File name version file was not renamed from " +
-					fromFileNameVersionFile.getPath() + " to " +
-						toFileNameVersionFile.getPath());
+				StringBundler.concat(
+					"File name version file was not renamed from ",
+					fromFileNameVersionFile.getPath(), " to ",
+					toFileNameVersionFile.getPath()));
 		}
 	}
 
@@ -497,8 +497,6 @@ public class FileSystemStore extends BaseStore {
 				"File system root directory is not set",
 				new FileSystemStoreRootDirException());
 		}
-
-		validate();
 
 		initializeRootDir();
 	}
@@ -541,40 +539,6 @@ public class FileSystemStore extends BaseStore {
 		}
 
 		return companyDir;
-	}
-
-	protected Dictionary<String, Object> getConfigurationDictionary(
-			Class<?> configurationClass)
-		throws IOException {
-
-		Configuration configuration = configurationAdmin.getConfiguration(
-			configurationClass.getName());
-
-		boolean allowDeleted = false;
-
-		if ((getClass() == FileSystemStore.class) &&
-			(configurationClass != FileSystemStoreConfiguration.class)) {
-
-			allowDeleted = true;
-		}
-
-		if ((getClass() == AdvancedFileSystemStore.class) &&
-			(configurationClass !=
-				AdvancedFileSystemStoreConfiguration.class)) {
-
-			allowDeleted = true;
-		}
-
-		try {
-			return configuration.getProperties();
-		}
-		catch (IllegalStateException ise) {
-			if (allowDeleted) {
-				return null;
-			}
-
-			throw ise;
-		}
 	}
 
 	protected File getDirNameDir(
@@ -704,39 +668,6 @@ public class FileSystemStore extends BaseStore {
 		ConfigurationAdmin configurationAdmin) {
 
 		this.configurationAdmin = configurationAdmin;
-	}
-
-	protected void validate() {
-		try {
-			Dictionary<String, Object> fileSystemDictionary =
-				getConfigurationDictionary(FileSystemStoreConfiguration.class);
-
-			Dictionary<String, Object> advancedFileSystemDictionary =
-				getConfigurationDictionary(
-					AdvancedFileSystemStoreConfiguration.class);
-
-			if ((fileSystemDictionary != null) &&
-				(advancedFileSystemDictionary != null)) {
-
-				String fileSystemRootDir = (String)fileSystemDictionary.get(
-					"rootdir");
-
-				String advancedFileSystemRootDir =
-					(String)advancedFileSystemDictionary.get("rootdir");
-
-				if (Objects.equals(
-						fileSystemRootDir, advancedFileSystemRootDir)) {
-
-					throw new IllegalArgumentException(
-						"File system root directory and advanced file system " +
-							"root directory are identical",
-						new FileSystemStoreRootDirException());
-				}
-			}
-		}
-		catch (IOException ioe) {
-			throw new IllegalArgumentException(ioe);
-		}
 	}
 
 	protected ConfigurationAdmin configurationAdmin;

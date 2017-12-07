@@ -119,7 +119,7 @@ if (portletTitleBasedNavigation) {
 						constrain: true,
 						destroyOnHide: true,
 						modal: true,
-						width: 600
+						width: 680
 					},
 					id: '<portlet:namespace />selectKBObject',
 					title: '<liferay-ui:message key="select-parent" />',
@@ -136,7 +136,7 @@ if (portletTitleBasedNavigation) {
 						<portlet:param name="targetStatus" value="<%= String.valueOf(targetStatus) %>" />
 					</liferay-portlet:renderURL>
 
-					uri: '<%= selectKBObjectURL %>'
+					uri: '<%= HtmlUtil.escapeJS(selectKBObjectURL) %>'
 				},
 				function(event) {
 					document.<portlet:namespace />fm.<portlet:namespace />parentPriority.value = event.priority;

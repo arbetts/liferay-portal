@@ -14,6 +14,7 @@
 
 package com.liferay.product.navigation.control.menu.web.internal;
 
+import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutTypeController;
@@ -72,6 +73,10 @@ public class AddContentProductNavigationControlMenuEntry
 			return false;
 		}
 
+		if (_staging.isIncomplete(layout)) {
+			return false;
+		}
+
 		LayoutTypePortlet layoutTypePortlet =
 			themeDisplay.getLayoutTypePortlet();
 
@@ -86,8 +91,8 @@ public class AddContentProductNavigationControlMenuEntry
 			return false;
 		}
 
-		if (!(hasCustomizePermission(themeDisplay) ||
-			  hasUpdateLayoutPermission(themeDisplay))) {
+		if (!(hasUpdateLayoutPermission(themeDisplay) ||
+			hasCustomizePermission(themeDisplay))) {
 
 			return false;
 		}
@@ -150,5 +155,8 @@ public class AddContentProductNavigationControlMenuEntry
 			themeDisplay.getPermissionChecker(), themeDisplay.getLayout(),
 			ActionKeys.UPDATE);
 	}
+
+	@Reference
+	private Staging _staging;
 
 }

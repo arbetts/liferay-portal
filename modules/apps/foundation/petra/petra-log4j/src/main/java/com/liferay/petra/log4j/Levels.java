@@ -18,11 +18,11 @@ import org.apache.log4j.Level;
 
 /**
  * @author Brian Wing Shun Chan
- * @see com.liferay.util.log4j.Levels
+ * @see    com.liferay.util.log4j.Levels
  */
 public class Levels {
 
-	public static final Level[] ALL_LEVELS = new Level[] {
+	public static final Level[] ALL_LEVELS = {
 		Level.OFF, Level.FATAL, Level.ERROR, Level.WARN, Level.INFO,
 		Level.DEBUG, Level.TRACE, Level.ALL
 	};

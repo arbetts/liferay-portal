@@ -65,7 +65,7 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
-		attributes.put("kaleoDefinitionId", getKaleoDefinitionId());
+		attributes.put("kaleoDefinitionVersionId", getKaleoDefinitionVersionId());
 		attributes.put("kaleoInstanceId", getKaleoInstanceId());
 		attributes.put("parentKaleoInstanceTokenId",
 			getParentKaleoInstanceTokenId());
@@ -123,10 +123,11 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 			setModifiedDate(modifiedDate);
 		}
 
-		Long kaleoDefinitionId = (Long)attributes.get("kaleoDefinitionId");
+		Long kaleoDefinitionVersionId = (Long)attributes.get(
+				"kaleoDefinitionVersionId");
 
-		if (kaleoDefinitionId != null) {
-			setKaleoDefinitionId(kaleoDefinitionId);
+		if (kaleoDefinitionVersionId != null) {
+			setKaleoDefinitionVersionId(kaleoDefinitionVersionId);
 		}
 
 		Long kaleoInstanceId = (Long)attributes.get("kaleoInstanceId");
@@ -181,25 +182,48 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 	}
 
 	@Override
-	public KaleoInstance getKaleoInstance()
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _kaleoInstanceToken.getKaleoInstance();
+	public java.lang.Object clone() {
+		return new KaleoInstanceTokenWrapper((KaleoInstanceToken)_kaleoInstanceToken.clone());
 	}
 
 	@Override
-	public KaleoInstanceToken toEscapedModel() {
-		return new KaleoInstanceTokenWrapper(_kaleoInstanceToken.toEscapedModel());
+	public int compareTo(KaleoInstanceToken kaleoInstanceToken) {
+		return _kaleoInstanceToken.compareTo(kaleoInstanceToken);
 	}
 
 	@Override
-	public KaleoInstanceToken toUnescapedModel() {
-		return new KaleoInstanceTokenWrapper(_kaleoInstanceToken.toUnescapedModel());
+	public java.util.List<KaleoInstanceToken> getChildrenKaleoInstanceTokens() {
+		return _kaleoInstanceToken.getChildrenKaleoInstanceTokens();
 	}
 
+	/**
+	* Returns the class name of this kaleo instance token.
+	*
+	* @return the class name of this kaleo instance token
+	*/
 	@Override
-	public KaleoNode getCurrentKaleoNode()
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _kaleoInstanceToken.getCurrentKaleoNode();
+	public java.lang.String getClassName() {
+		return _kaleoInstanceToken.getClassName();
+	}
+
+	/**
+	* Returns the class pk of this kaleo instance token.
+	*
+	* @return the class pk of this kaleo instance token
+	*/
+	@Override
+	public long getClassPK() {
+		return _kaleoInstanceToken.getClassPK();
+	}
+
+	/**
+	* Returns the company ID of this kaleo instance token.
+	*
+	* @return the company ID of this kaleo instance token
+	*/
+	@Override
+	public long getCompanyId() {
+		return _kaleoInstanceToken.getCompanyId();
 	}
 
 	/**
@@ -210,6 +234,184 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 	@Override
 	public boolean getCompleted() {
 		return _kaleoInstanceToken.getCompleted();
+	}
+
+	/**
+	* Returns the completion date of this kaleo instance token.
+	*
+	* @return the completion date of this kaleo instance token
+	*/
+	@Override
+	public Date getCompletionDate() {
+		return _kaleoInstanceToken.getCompletionDate();
+	}
+
+	/**
+	* Returns the create date of this kaleo instance token.
+	*
+	* @return the create date of this kaleo instance token
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _kaleoInstanceToken.getCreateDate();
+	}
+
+	@Override
+	public KaleoNode getCurrentKaleoNode()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _kaleoInstanceToken.getCurrentKaleoNode();
+	}
+
+	/**
+	* Returns the current kaleo node ID of this kaleo instance token.
+	*
+	* @return the current kaleo node ID of this kaleo instance token
+	*/
+	@Override
+	public long getCurrentKaleoNodeId() {
+		return _kaleoInstanceToken.getCurrentKaleoNodeId();
+	}
+
+	/**
+	* Returns the current kaleo node name of this kaleo instance token.
+	*
+	* @return the current kaleo node name of this kaleo instance token
+	*/
+	@Override
+	public java.lang.String getCurrentKaleoNodeName() {
+		return _kaleoInstanceToken.getCurrentKaleoNodeName();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _kaleoInstanceToken.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this kaleo instance token.
+	*
+	* @return the group ID of this kaleo instance token
+	*/
+	@Override
+	public long getGroupId() {
+		return _kaleoInstanceToken.getGroupId();
+	}
+
+	@Override
+	public java.util.List<KaleoInstanceToken> getIncompleteChildrenKaleoInstanceTokens() {
+		return _kaleoInstanceToken.getIncompleteChildrenKaleoInstanceTokens();
+	}
+
+	/**
+	* Returns the kaleo definition version ID of this kaleo instance token.
+	*
+	* @return the kaleo definition version ID of this kaleo instance token
+	*/
+	@Override
+	public long getKaleoDefinitionVersionId() {
+		return _kaleoInstanceToken.getKaleoDefinitionVersionId();
+	}
+
+	@Override
+	public KaleoInstance getKaleoInstance()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _kaleoInstanceToken.getKaleoInstance();
+	}
+
+	/**
+	* Returns the kaleo instance ID of this kaleo instance token.
+	*
+	* @return the kaleo instance ID of this kaleo instance token
+	*/
+	@Override
+	public long getKaleoInstanceId() {
+		return _kaleoInstanceToken.getKaleoInstanceId();
+	}
+
+	/**
+	* Returns the kaleo instance token ID of this kaleo instance token.
+	*
+	* @return the kaleo instance token ID of this kaleo instance token
+	*/
+	@Override
+	public long getKaleoInstanceTokenId() {
+		return _kaleoInstanceToken.getKaleoInstanceTokenId();
+	}
+
+	/**
+	* Returns the modified date of this kaleo instance token.
+	*
+	* @return the modified date of this kaleo instance token
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _kaleoInstanceToken.getModifiedDate();
+	}
+
+	@Override
+	public KaleoInstanceToken getParentKaleoInstanceToken()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _kaleoInstanceToken.getParentKaleoInstanceToken();
+	}
+
+	/**
+	* Returns the parent kaleo instance token ID of this kaleo instance token.
+	*
+	* @return the parent kaleo instance token ID of this kaleo instance token
+	*/
+	@Override
+	public long getParentKaleoInstanceTokenId() {
+		return _kaleoInstanceToken.getParentKaleoInstanceTokenId();
+	}
+
+	/**
+	* Returns the primary key of this kaleo instance token.
+	*
+	* @return the primary key of this kaleo instance token
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _kaleoInstanceToken.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _kaleoInstanceToken.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the user ID of this kaleo instance token.
+	*
+	* @return the user ID of this kaleo instance token
+	*/
+	@Override
+	public long getUserId() {
+		return _kaleoInstanceToken.getUserId();
+	}
+
+	/**
+	* Returns the user name of this kaleo instance token.
+	*
+	* @return the user name of this kaleo instance token
+	*/
+	@Override
+	public java.lang.String getUserName() {
+		return _kaleoInstanceToken.getUserName();
+	}
+
+	/**
+	* Returns the user uuid of this kaleo instance token.
+	*
+	* @return the user uuid of this kaleo instance token
+	*/
+	@Override
+	public java.lang.String getUserUuid() {
+		return _kaleoInstanceToken.getUserUuid();
+	}
+
+	@Override
+	public int hashCode() {
+		return _kaleoInstanceToken.hashCode();
 	}
 
 	@Override
@@ -243,232 +445,6 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 	}
 
 	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _kaleoInstanceToken.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<KaleoInstanceToken> toCacheModel() {
-		return _kaleoInstanceToken.toCacheModel();
-	}
-
-	@Override
-	public KaleoInstanceToken getParentKaleoInstanceToken()
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _kaleoInstanceToken.getParentKaleoInstanceToken();
-	}
-
-	@Override
-	public int compareTo(KaleoInstanceToken kaleoInstanceToken) {
-		return _kaleoInstanceToken.compareTo(kaleoInstanceToken);
-	}
-
-	@Override
-	public int hashCode() {
-		return _kaleoInstanceToken.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _kaleoInstanceToken.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new KaleoInstanceTokenWrapper((KaleoInstanceToken)_kaleoInstanceToken.clone());
-	}
-
-	/**
-	* Returns the class name of this kaleo instance token.
-	*
-	* @return the class name of this kaleo instance token
-	*/
-	@Override
-	public java.lang.String getClassName() {
-		return _kaleoInstanceToken.getClassName();
-	}
-
-	/**
-	* Returns the current kaleo node name of this kaleo instance token.
-	*
-	* @return the current kaleo node name of this kaleo instance token
-	*/
-	@Override
-	public java.lang.String getCurrentKaleoNodeName() {
-		return _kaleoInstanceToken.getCurrentKaleoNodeName();
-	}
-
-	/**
-	* Returns the user name of this kaleo instance token.
-	*
-	* @return the user name of this kaleo instance token
-	*/
-	@Override
-	public java.lang.String getUserName() {
-		return _kaleoInstanceToken.getUserName();
-	}
-
-	/**
-	* Returns the user uuid of this kaleo instance token.
-	*
-	* @return the user uuid of this kaleo instance token
-	*/
-	@Override
-	public java.lang.String getUserUuid() {
-		return _kaleoInstanceToken.getUserUuid();
-	}
-
-	@Override
-	public java.lang.String toString() {
-		return _kaleoInstanceToken.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _kaleoInstanceToken.toXmlString();
-	}
-
-	/**
-	* Returns the completion date of this kaleo instance token.
-	*
-	* @return the completion date of this kaleo instance token
-	*/
-	@Override
-	public Date getCompletionDate() {
-		return _kaleoInstanceToken.getCompletionDate();
-	}
-
-	/**
-	* Returns the create date of this kaleo instance token.
-	*
-	* @return the create date of this kaleo instance token
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _kaleoInstanceToken.getCreateDate();
-	}
-
-	/**
-	* Returns the modified date of this kaleo instance token.
-	*
-	* @return the modified date of this kaleo instance token
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _kaleoInstanceToken.getModifiedDate();
-	}
-
-	@Override
-	public java.util.List<KaleoInstanceToken> getChildrenKaleoInstanceTokens() {
-		return _kaleoInstanceToken.getChildrenKaleoInstanceTokens();
-	}
-
-	@Override
-	public java.util.List<KaleoInstanceToken> getIncompleteChildrenKaleoInstanceTokens() {
-		return _kaleoInstanceToken.getIncompleteChildrenKaleoInstanceTokens();
-	}
-
-	/**
-	* Returns the class p k of this kaleo instance token.
-	*
-	* @return the class p k of this kaleo instance token
-	*/
-	@Override
-	public long getClassPK() {
-		return _kaleoInstanceToken.getClassPK();
-	}
-
-	/**
-	* Returns the company ID of this kaleo instance token.
-	*
-	* @return the company ID of this kaleo instance token
-	*/
-	@Override
-	public long getCompanyId() {
-		return _kaleoInstanceToken.getCompanyId();
-	}
-
-	/**
-	* Returns the current kaleo node ID of this kaleo instance token.
-	*
-	* @return the current kaleo node ID of this kaleo instance token
-	*/
-	@Override
-	public long getCurrentKaleoNodeId() {
-		return _kaleoInstanceToken.getCurrentKaleoNodeId();
-	}
-
-	/**
-	* Returns the group ID of this kaleo instance token.
-	*
-	* @return the group ID of this kaleo instance token
-	*/
-	@Override
-	public long getGroupId() {
-		return _kaleoInstanceToken.getGroupId();
-	}
-
-	/**
-	* Returns the kaleo definition ID of this kaleo instance token.
-	*
-	* @return the kaleo definition ID of this kaleo instance token
-	*/
-	@Override
-	public long getKaleoDefinitionId() {
-		return _kaleoInstanceToken.getKaleoDefinitionId();
-	}
-
-	/**
-	* Returns the kaleo instance ID of this kaleo instance token.
-	*
-	* @return the kaleo instance ID of this kaleo instance token
-	*/
-	@Override
-	public long getKaleoInstanceId() {
-		return _kaleoInstanceToken.getKaleoInstanceId();
-	}
-
-	/**
-	* Returns the kaleo instance token ID of this kaleo instance token.
-	*
-	* @return the kaleo instance token ID of this kaleo instance token
-	*/
-	@Override
-	public long getKaleoInstanceTokenId() {
-		return _kaleoInstanceToken.getKaleoInstanceTokenId();
-	}
-
-	/**
-	* Returns the parent kaleo instance token ID of this kaleo instance token.
-	*
-	* @return the parent kaleo instance token ID of this kaleo instance token
-	*/
-	@Override
-	public long getParentKaleoInstanceTokenId() {
-		return _kaleoInstanceToken.getParentKaleoInstanceTokenId();
-	}
-
-	/**
-	* Returns the primary key of this kaleo instance token.
-	*
-	* @return the primary key of this kaleo instance token
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _kaleoInstanceToken.getPrimaryKey();
-	}
-
-	/**
-	* Returns the user ID of this kaleo instance token.
-	*
-	* @return the user ID of this kaleo instance token
-	*/
-	@Override
-	public long getUserId() {
-		return _kaleoInstanceToken.getUserId();
-	}
-
-	@Override
 	public void persist() {
 		_kaleoInstanceToken.persist();
 	}
@@ -489,9 +465,9 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 	}
 
 	/**
-	* Sets the class p k of this kaleo instance token.
+	* Sets the class pk of this kaleo instance token.
 	*
-	* @param classPK the class p k of this kaleo instance token
+	* @param classPK the class pk of this kaleo instance token
 	*/
 	@Override
 	public void setClassPK(long classPK) {
@@ -565,14 +541,14 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 	}
 
 	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_kaleoInstanceToken.setExpandoBridgeAttributes(expandoBridge);
-	}
-
-	@Override
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.kernel.model.BaseModel<?> baseModel) {
 		_kaleoInstanceToken.setExpandoBridgeAttributes(baseModel);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_kaleoInstanceToken.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -591,13 +567,13 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 	}
 
 	/**
-	* Sets the kaleo definition ID of this kaleo instance token.
+	* Sets the kaleo definition version ID of this kaleo instance token.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID of this kaleo instance token
+	* @param kaleoDefinitionVersionId the kaleo definition version ID of this kaleo instance token
 	*/
 	@Override
-	public void setKaleoDefinitionId(long kaleoDefinitionId) {
-		_kaleoInstanceToken.setKaleoDefinitionId(kaleoDefinitionId);
+	public void setKaleoDefinitionVersionId(long kaleoDefinitionVersionId) {
+		_kaleoInstanceToken.setKaleoDefinitionVersionId(kaleoDefinitionVersionId);
 	}
 
 	/**
@@ -688,6 +664,31 @@ public class KaleoInstanceTokenWrapper implements KaleoInstanceToken,
 	@Override
 	public void setUserUuid(java.lang.String userUuid) {
 		_kaleoInstanceToken.setUserUuid(userUuid);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<KaleoInstanceToken> toCacheModel() {
+		return _kaleoInstanceToken.toCacheModel();
+	}
+
+	@Override
+	public KaleoInstanceToken toEscapedModel() {
+		return new KaleoInstanceTokenWrapper(_kaleoInstanceToken.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _kaleoInstanceToken.toString();
+	}
+
+	@Override
+	public KaleoInstanceToken toUnescapedModel() {
+		return new KaleoInstanceTokenWrapper(_kaleoInstanceToken.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _kaleoInstanceToken.toXmlString();
 	}
 
 	@Override

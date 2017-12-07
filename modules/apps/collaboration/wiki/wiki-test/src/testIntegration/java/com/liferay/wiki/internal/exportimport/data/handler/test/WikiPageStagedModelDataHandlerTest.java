@@ -22,27 +22,28 @@ import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.exportimport.kernel.lar.ExportImportClassedModelUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerRegistryUtil;
+import com.liferay.exportimport.test.util.lar.BaseWorkflowedStagedModelDataHandlerTestCase;
 import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Repository;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.service.RepositoryLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.service.persistence.RepositoryUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
-import com.liferay.portal.lar.test.BaseWorkflowedStagedModelDataHandlerTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.wiki.attachments.test.WikiAttachmentsTest;
 import com.liferay.wiki.model.WikiNode;
 import com.liferay.wiki.model.WikiPage;
 import com.liferay.wiki.service.WikiNodeLocalServiceUtil;
 import com.liferay.wiki.service.WikiPageLocalServiceUtil;
+import com.liferay.wiki.service.WikiPageServiceUtil;
 import com.liferay.wiki.util.test.WikiTestUtil;
 
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -69,6 +71,64 @@ public class WikiPageStagedModelDataHandlerTest
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
 			SynchronousDestinationTestRule.INSTANCE);
+
+	@Test
+	public void testDeletesAttachments() throws Exception {
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			addDependentStagedModelsMap(stagingGroup);
+
+		WikiPage wikiPage = (WikiPage)addStagedModel(
+			stagingGroup, dependentStagedModelsMap);
+
+		exportImportStagedModel(wikiPage);
+
+		WikiPage importedWikiPage = (WikiPage)getStagedModel(
+			wikiPage.getUuid(), liveGroup);
+
+		Assert.assertEquals(
+			1, importedWikiPage.getAttachmentsFileEntriesCount());
+
+		List<FileEntry> attachmentsFileEntries =
+			wikiPage.getAttachmentsFileEntries();
+
+		FileEntry attachment = attachmentsFileEntries.get(0);
+
+		WikiPageServiceUtil.movePageAttachmentToTrash(
+			wikiPage.getNodeId(), wikiPage.getTitle(),
+			attachment.getFileName());
+
+		exportImportStagedModel(wikiPage);
+
+		importedWikiPage = (WikiPage)getStagedModel(
+			wikiPage.getUuid(), liveGroup);
+
+		Assert.assertEquals(
+			0, importedWikiPage.getAttachmentsFileEntriesCount());
+	}
+
+	@Override
+	protected Map<String, List<StagedModel>> addDefaultDependentStagedModelsMap(
+			Group group)
+		throws Exception {
+
+		Map<String, List<StagedModel>> dependentStagedModelsMap =
+			new HashMap<>();
+
+		WikiNode node = WikiTestUtil.addDefaultNode(group.getGroupId());
+
+		addDependentStagedModel(dependentStagedModelsMap, WikiNode.class, node);
+
+		return dependentStagedModelsMap;
+	}
+
+	@Override
+	protected StagedModel addDefaultStagedModel(
+			Group group,
+			Map<String, List<StagedModel>> dependentStagedModelsMap)
+		throws Exception {
+
+		return addStagedModel(group, dependentStagedModelsMap, "Front Page");
+	}
 
 	@Override
 	protected Map<String, List<StagedModel>> addDependentStagedModelsMap(
@@ -91,6 +151,16 @@ public class WikiPageStagedModelDataHandlerTest
 			Map<String, List<StagedModel>> dependentStagedModelsMap)
 		throws Exception {
 
+		return addStagedModel(
+			group, dependentStagedModelsMap, RandomTestUtil.randomString());
+	}
+
+	protected StagedModel addStagedModel(
+			Group group,
+			Map<String, List<StagedModel>> dependentStagedModelsMap,
+			String name)
+		throws Exception {
+
 		List<StagedModel> dependentStagedModels = dependentStagedModelsMap.get(
 			WikiNode.class.getSimpleName());
 
@@ -100,9 +170,8 @@ public class WikiPageStagedModelDataHandlerTest
 			ServiceContextTestUtil.getServiceContext(group.getGroupId());
 
 		WikiPage page = WikiTestUtil.addPage(
-			TestPropsValues.getUserId(), node.getNodeId(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(), true,
-			serviceContext);
+			TestPropsValues.getUserId(), node.getNodeId(), name,
+			RandomTestUtil.randomString(), true, serviceContext);
 
 		WikiTestUtil.addWikiAttachment(
 			TestPropsValues.getUserId(), node.getNodeId(), page.getTitle(),
@@ -126,7 +195,7 @@ public class WikiPageStagedModelDataHandlerTest
 			dependentStagedModelsMap, DLFileEntry.class,
 			attachmentsFileEntries.get(0));
 
-		Repository repository = RepositoryUtil.fetchByPrimaryKey(
+		Repository repository = RepositoryLocalServiceUtil.getRepository(
 			fileEntry.getRepositoryId());
 
 		addDependentStagedModel(
@@ -224,7 +293,8 @@ public class WikiPageStagedModelDataHandlerTest
 		List<StagedModel> dependentStagedModels = dependentStagedModelsMap.get(
 			WikiNode.class.getSimpleName());
 
-		Assert.assertEquals(1, dependentStagedModels.size());
+		Assert.assertEquals(
+			dependentStagedModels.toString(), 1, dependentStagedModels.size());
 
 		WikiNode node = (WikiNode)dependentStagedModels.get(0);
 
@@ -247,7 +317,8 @@ public class WikiPageStagedModelDataHandlerTest
 		List<FileEntry> attachmentFileEntries =
 			page.getAttachmentsFileEntries();
 
-		Assert.assertEquals(1, attachmentFileEntries.size());
+		Assert.assertEquals(
+			attachmentFileEntries.toString(), 1, attachmentFileEntries.size());
 
 		validateImport(dependentStagedModelsMap, group);
 	}

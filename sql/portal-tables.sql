@@ -99,18 +99,6 @@ create table AssetCategory (
 	lastPublishDate DATE null
 );
 
-create table AssetCategoryProperty (
-	categoryPropertyId LONG not null primary key,
-	companyId LONG,
-	userId LONG,
-	userName VARCHAR(75) null,
-	createDate DATE null,
-	modifiedDate DATE null,
-	categoryId LONG,
-	key_ VARCHAR(75) null,
-	value VARCHAR(75) null
-);
-
 create table AssetEntries_AssetCategories (
 	companyId LONG not null,
 	categoryId LONG not null,
@@ -181,14 +169,6 @@ create table AssetTag (
 	lastPublishDate DATE null
 );
 
-create table AssetTagStats (
-	tagStatsId LONG not null primary key,
-	companyId LONG,
-	tagId LONG,
-	classNameId LONG,
-	assetCount INTEGER
-);
-
 create table AssetVocabulary (
 	uuid_ VARCHAR(75) null,
 	vocabularyId LONG not null primary key,
@@ -233,7 +213,7 @@ create table Company (
 	accountId LONG,
 	webId VARCHAR(75) null,
 	key_ TEXT null,
-	mx VARCHAR(75) null,
+	mx VARCHAR(200) null,
 	homeURL STRING null,
 	logoId LONG,
 	system BOOLEAN,
@@ -253,7 +233,7 @@ create table Contact_ (
 	classPK LONG,
 	accountId LONG,
 	parentContactId LONG,
-	emailAddress VARCHAR(75) null,
+	emailAddress VARCHAR(254) null,
 	firstName VARCHAR(75) null,
 	middleName VARCHAR(75) null,
 	lastName VARCHAR(75) null,
@@ -288,17 +268,6 @@ create table Country (
 	idd_ VARCHAR(75) null,
 	zipRequired BOOLEAN,
 	active_ BOOLEAN
-);
-
-create table DLContent (
-	contentId LONG not null primary key,
-	groupId LONG,
-	companyId LONG,
-	repositoryId LONG,
-	path_ VARCHAR(255) null,
-	version VARCHAR(75) null,
-	data_ BLOB,
-	size_ LONG
 );
 
 create table DLFileEntry (
@@ -364,16 +333,6 @@ create table DLFileEntryTypes_DLFolders (
 	fileEntryTypeId LONG not null,
 	folderId LONG not null,
 	primary key (fileEntryTypeId, folderId)
-);
-
-create table DLFileRank (
-	fileRankId LONG not null primary key,
-	groupId LONG,
-	companyId LONG,
-	userId LONG,
-	createDate DATE null,
-	fileEntryId LONG,
-	active_ BOOLEAN
 );
 
 create table DLFileShortcut (
@@ -454,15 +413,6 @@ create table DLFolder (
 	statusDate DATE null
 );
 
-create table DLSyncEvent (
-	syncEventId LONG not null primary key,
-	companyId LONG,
-	modifiedTime LONG,
-	event VARCHAR(75) null,
-	type_ VARCHAR(75) null,
-	typePK LONG
-);
-
 create table EmailAddress (
 	mvccVersion LONG default 0 not null,
 	uuid_ VARCHAR(75) null,
@@ -474,7 +424,7 @@ create table EmailAddress (
 	modifiedDate DATE null,
 	classNameId LONG,
 	classPK LONG,
-	address VARCHAR(75) null,
+	address VARCHAR(254) null,
 	typeId LONG,
 	primary_ BOOLEAN
 );
@@ -764,19 +714,6 @@ create table ListType (
 	type_ VARCHAR(75) null
 );
 
-create table MBBan (
-	uuid_ VARCHAR(75) null,
-	banId LONG not null primary key,
-	groupId LONG,
-	companyId LONG,
-	userId LONG,
-	userName VARCHAR(75) null,
-	createDate DATE null,
-	modifiedDate DATE null,
-	banUserId LONG,
-	lastPublishDate DATE null
-);
-
 create table MBCategory (
 	uuid_ VARCHAR(75) null,
 	categoryId LONG not null primary key,
@@ -815,35 +752,6 @@ create table MBDiscussion (
 	lastPublishDate DATE null
 );
 
-create table MBMailingList (
-	uuid_ VARCHAR(75) null,
-	mailingListId LONG not null primary key,
-	groupId LONG,
-	companyId LONG,
-	userId LONG,
-	userName VARCHAR(75) null,
-	createDate DATE null,
-	modifiedDate DATE null,
-	categoryId LONG,
-	emailAddress VARCHAR(75) null,
-	inProtocol VARCHAR(75) null,
-	inServerName VARCHAR(75) null,
-	inServerPort INTEGER,
-	inUseSSL BOOLEAN,
-	inUserName VARCHAR(75) null,
-	inPassword VARCHAR(75) null,
-	inReadInterval INTEGER,
-	outEmailAddress VARCHAR(75) null,
-	outCustom BOOLEAN,
-	outServerName VARCHAR(75) null,
-	outServerPort INTEGER,
-	outUseSSL BOOLEAN,
-	outUserName VARCHAR(75) null,
-	outPassword VARCHAR(75) null,
-	allowAnonymous BOOLEAN,
-	active_ BOOLEAN
-);
-
 create table MBMessage (
 	uuid_ VARCHAR(75) null,
 	messageId LONG not null primary key,
@@ -873,15 +781,6 @@ create table MBMessage (
 	statusDate DATE null
 );
 
-create table MBStatsUser (
-	statsUserId LONG not null primary key,
-	groupId LONG,
-	companyId LONG,
-	userId LONG,
-	messageCount INTEGER,
-	lastPostDate DATE null
-);
-
 create table MBThread (
 	uuid_ VARCHAR(75) null,
 	threadId LONG not null primary key,
@@ -905,19 +804,6 @@ create table MBThread (
 	statusByUserId LONG,
 	statusByUserName VARCHAR(75) null,
 	statusDate DATE null
-);
-
-create table MBThreadFlag (
-	uuid_ VARCHAR(75) null,
-	threadFlagId LONG not null primary key,
-	groupId LONG,
-	companyId LONG,
-	userId LONG,
-	userName VARCHAR(75) null,
-	createDate DATE null,
-	modifiedDate DATE null,
-	threadId LONG,
-	lastPublishDate DATE null
 );
 
 create table MembershipRequest (
@@ -1407,20 +1293,6 @@ create table SocialRequest (
 	status INTEGER
 );
 
-create table Subscription (
-	mvccVersion LONG default 0 not null,
-	subscriptionId LONG not null primary key,
-	groupId LONG,
-	companyId LONG,
-	userId LONG,
-	userName VARCHAR(75) null,
-	createDate DATE null,
-	modifiedDate DATE null,
-	classNameId LONG,
-	classPK LONG,
-	frequency VARCHAR(75) null
-);
-
 create table SystemEvent (
 	mvccVersion LONG default 0 not null,
 	systemEventId LONG not null primary key,
@@ -1467,30 +1339,6 @@ create table Ticket (
 	expirationDate DATE null
 );
 
-create table TrashEntry (
-	entryId LONG not null primary key,
-	groupId LONG,
-	companyId LONG,
-	userId LONG,
-	userName VARCHAR(75) null,
-	createDate DATE null,
-	classNameId LONG,
-	classPK LONG,
-	systemEventSetKey LONG,
-	typeSettings TEXT null,
-	status INTEGER
-);
-
-create table TrashVersion (
-	versionId LONG not null primary key,
-	companyId LONG,
-	entryId LONG,
-	classNameId LONG,
-	classPK LONG,
-	typeSettings TEXT null,
-	status INTEGER
-);
-
 create table UserNotificationDelivery (
 	mvccVersion LONG default 0 not null,
 	userNotificationDeliveryId LONG not null primary key,
@@ -1521,7 +1369,7 @@ create table User_ (
 	reminderQueryAnswer VARCHAR(75) null,
 	graceLoginCount INTEGER,
 	screenName VARCHAR(75) null,
-	emailAddress VARCHAR(75) null,
+	emailAddress VARCHAR(254) null,
 	facebookId LONG,
 	googleUserId VARCHAR(75) null,
 	ldapServerId LONG,
@@ -1675,7 +1523,7 @@ create table VirtualHost (
 	virtualHostId LONG not null primary key,
 	companyId LONG,
 	layoutSetId LONG,
-	hostname VARCHAR(75) null
+	hostname VARCHAR(200) null
 );
 
 create table WebDAVProps (

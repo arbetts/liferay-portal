@@ -22,19 +22,25 @@ import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLFolderLocalServiceUtil;
 import com.liferay.document.library.kernel.util.DLUtil;
+import com.liferay.document.library.web.constants.DLPortletKeys;
 import com.liferay.dynamic.data.mapping.kernel.DDMStructureManagerUtil;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
+import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Repository;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
+import com.liferay.portal.kernel.service.RepositoryLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -46,8 +52,10 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.lar.test.BaseStagedModelDataHandlerTestCase;
+import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.repository.portletrepository.PortletRepository;
 import com.liferay.portal.test.randomizerbumpers.TikaSafeRandomizerBumper;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portlet.documentlibrary.util.test.DLAppTestUtil;
@@ -127,6 +135,101 @@ public class FileEntryStagedModelDataHandlerTest
 			fileEntry.getUuid(), liveGroup.getGroupId());
 
 		Assert.assertEquals("pdf", importedFileEntry.getExtension());
+	}
+
+	@Test
+	public void testExportsTheVersionAfterDeletingOnStaging() throws Exception {
+		ExportImportThreadLocal.setPortletStagingInProcess(true);
+
+		try {
+			FileEntry fileEntry = addStagedModel(
+				stagingGroup, addCompanyDependencies());
+
+			exportImportStagedModel(fileEntry = addVersion(fileEntry));
+			exportImportStagedModel(fileEntry = addVersion(fileEntry));
+			exportImportStagedModel(fileEntry = _deleteLastVersion(fileEntry));
+
+			FileEntry importedFileEntry = getStagedModel(
+				fileEntry.getUuid(), liveGroup);
+
+			Assert.assertEquals(
+				fileEntry.getVersion(), importedFileEntry.getVersion());
+		}
+		finally {
+			ExportImportThreadLocal.setPortletStagingInProcess(false);
+		}
+	}
+
+	@Test
+	public void testExportsTheVersionOnStaging() throws Exception {
+		ExportImportThreadLocal.setPortletStagingInProcess(true);
+
+		try {
+			FileEntry fileEntry = addStagedModel(
+				stagingGroup, addCompanyDependencies());
+
+			fileEntry = addVersion(fileEntry);
+			fileEntry = addVersion(fileEntry);
+			fileEntry = addVersion(fileEntry);
+
+			exportImportStagedModel(fileEntry);
+
+			FileEntry importedFileEntry = getStagedModel(
+				fileEntry.getUuid(), liveGroup);
+
+			Assert.assertEquals(
+				fileEntry.getVersion(), importedFileEntry.getVersion());
+		}
+		finally {
+			ExportImportThreadLocal.setPortletStagingInProcess(false);
+		}
+	}
+
+	@Test
+	public void testsExportImportNondefaultRepository() throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				stagingGroup.getGroupId(), TestPropsValues.getUserId());
+
+		Repository repository = RepositoryLocalServiceUtil.addRepository(
+			TestPropsValues.getUserId(), stagingGroup.getGroupId(),
+			PortalUtil.getClassNameId(PortletRepository.class.getName()),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, "com.liferay.blogs",
+			"test repository", DLPortletKeys.DOCUMENT_LIBRARY,
+			new UnicodeProperties(), true, serviceContext);
+
+		Folder folder = DLAppLocalServiceUtil.addFolder(
+			TestPropsValues.getUserId(), repository.getRepositoryId(),
+			repository.getDlFolderId(), "testFolder", "test folder",
+			serviceContext);
+
+		FileEntry fileEntry = DLAppLocalServiceUtil.addFileEntry(
+			TestPropsValues.getUserId(), repository.getRepositoryId(),
+			folder.getFolderId(), "test.txt", "text/plain", new byte[] {0, 1},
+			serviceContext);
+
+		exportImportStagedModel(fileEntry);
+
+		FileEntry importedFileEntry =
+			DLAppLocalServiceUtil.getFileEntryByUuidAndGroupId(
+				fileEntry.getUuid(), liveGroup.getGroupId());
+
+		Folder importedFolder = DLAppLocalServiceUtil.getFolder(
+			importedFileEntry.getFolderId());
+
+		Repository importedRepository =
+			RepositoryLocalServiceUtil.getRepository(
+				importedFileEntry.getRepositoryId());
+
+		Folder repositoryFolder = DLAppLocalServiceUtil.getFolder(
+			importedRepository.getDlFolderId());
+
+		Assert.assertEquals(
+			importedRepository.getDlFolderId(),
+			importedFolder.getParentFolderId());
+		Assert.assertEquals(
+			repositoryFolder.getRepositoryId(),
+			importedRepository.getRepositoryId());
 	}
 
 	protected Map<String, List<StagedModel>> addCompanyDependencies()
@@ -225,7 +328,7 @@ public class FileEntryStagedModelDataHandlerTest
 	}
 
 	@Override
-	protected StagedModel addStagedModel(
+	protected FileEntry addStagedModel(
 			Group group,
 			Map<String, List<StagedModel>> dependentStagedModelsMap)
 		throws Exception {
@@ -257,7 +360,7 @@ public class FileEntryStagedModelDataHandlerTest
 	}
 
 	@Override
-	protected StagedModel addVersion(StagedModel stagedModel) throws Exception {
+	protected FileEntry addVersion(StagedModel stagedModel) throws Exception {
 		FileEntry fileEntry = (FileEntry)stagedModel;
 
 		return DLAppServiceUtil.updateFileEntry(
@@ -268,7 +371,7 @@ public class FileEntryStagedModelDataHandlerTest
 	}
 
 	@Override
-	protected StagedModel getStagedModel(String uuid, Group group) {
+	protected FileEntry getStagedModel(String uuid, Group group) {
 		try {
 			return DLAppLocalServiceUtil.getFileEntryByUuidAndGroupId(
 				uuid, group.getGroupId());
@@ -304,7 +407,9 @@ public class FileEntryStagedModelDataHandlerTest
 		List<StagedModel> ddmStructureDependentStagedModels =
 			dependentStagedModelsMap.get(ddmStructureClass.getSimpleName());
 
-		Assert.assertEquals(1, ddmStructureDependentStagedModels.size());
+		Assert.assertEquals(
+			ddmStructureDependentStagedModels.toString(), 1,
+			ddmStructureDependentStagedModels.size());
 
 		DDMStructure ddmStructure =
 			(DDMStructure)ddmStructureDependentStagedModels.get(0);
@@ -317,7 +422,9 @@ public class FileEntryStagedModelDataHandlerTest
 		List<StagedModel> dlFileEntryTypesDependentStagedModels =
 			dependentStagedModelsMap.get(DLFileEntryType.class.getSimpleName());
 
-		Assert.assertEquals(1, dlFileEntryTypesDependentStagedModels.size());
+		Assert.assertEquals(
+			dlFileEntryTypesDependentStagedModels.toString(), 1,
+			dlFileEntryTypesDependentStagedModels.size());
 
 		DLFileEntryType dlFileEntryType =
 			(DLFileEntryType)dlFileEntryTypesDependentStagedModels.get(0);
@@ -341,7 +448,9 @@ public class FileEntryStagedModelDataHandlerTest
 		List<StagedModel> ddmStructureDependentStagedModels =
 			dependentStagedModelsMap.get(ddmStructureClass.getSimpleName());
 
-		Assert.assertEquals(1, ddmStructureDependentStagedModels.size());
+		Assert.assertEquals(
+			ddmStructureDependentStagedModels.toString(), 1,
+			ddmStructureDependentStagedModels.size());
 
 		DDMStructure ddmStructure =
 			(DDMStructure)ddmStructureDependentStagedModels.get(0);
@@ -352,7 +461,9 @@ public class FileEntryStagedModelDataHandlerTest
 		List<StagedModel> dlFileEntryTypesDependentStagedModels =
 			dependentStagedModelsMap.get(DLFileEntryType.class.getSimpleName());
 
-		Assert.assertEquals(1, dlFileEntryTypesDependentStagedModels.size());
+		Assert.assertEquals(
+			dlFileEntryTypesDependentStagedModels.toString(), 1,
+			dlFileEntryTypesDependentStagedModels.size());
 
 		DLFileEntryType dlFileEntryType =
 			(DLFileEntryType)dlFileEntryTypesDependentStagedModels.get(0);
@@ -363,7 +474,9 @@ public class FileEntryStagedModelDataHandlerTest
 		List<StagedModel> foldersDependentStagedModels =
 			dependentStagedModelsMap.get(DLFolder.class.getSimpleName());
 
-		Assert.assertEquals(1, foldersDependentStagedModels.size());
+		Assert.assertEquals(
+			foldersDependentStagedModels.toString(), 1,
+			foldersDependentStagedModels.size());
 
 		Folder folder = (Folder)foldersDependentStagedModels.get(0);
 
@@ -425,6 +538,14 @@ public class FileEntryStagedModelDataHandlerTest
 		Assert.assertEquals(
 			latestFileVersion.getStatus(),
 			importedLatestFileVersion.getStatus());
+	}
+
+	private FileEntry _deleteLastVersion(FileEntry fileEntry) throws Exception {
+		DLFileEntryLocalServiceUtil.deleteFileVersion(
+			TestPropsValues.getUserId(), fileEntry.getFileEntryId(),
+			fileEntry.getVersion());
+
+		return DLAppLocalServiceUtil.getFileEntry(fileEntry.getFileEntryId());
 	}
 
 }

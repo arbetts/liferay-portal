@@ -18,6 +18,7 @@ import com.liferay.marketplace.util.ContextUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.io.IOException;
 
@@ -37,6 +38,17 @@ public class UpgradeModule extends UpgradeProcess {
 	}
 
 	protected void updateModules() throws Exception {
+		if (!hasColumn("Marketplace_Module", "bundleSymbolicName")) {
+			runSQL(
+				"alter table Marketplace_Module add bundleSymbolicName " +
+					"VARCHAR(500)");
+		}
+
+		if (!hasColumn("Marketplace_Module", "bundleVersion")) {
+			runSQL(
+				"alter table Marketplace_Module add bundleVersion VARCHAR(75)");
+		}
+
 		try (PreparedStatement ps = connection.prepareStatement(
 				"select moduleId, contextName from Marketplace_Module");
 			ResultSet rs = ps.executeQuery()) {
@@ -51,13 +63,17 @@ public class UpgradeModule extends UpgradeProcess {
 					newContextName = ContextUtil.getContextName(contextName);
 
 					runSQL(
-						"update Marketplace_Module set contextName = '" +
-							newContextName + "' where moduleId = " + moduleId);
+						StringBundler.concat(
+							"update Marketplace_Module set contextName = '",
+							newContextName, "' where moduleId = ",
+							String.valueOf(moduleId)));
 				}
 				catch (IOException ioe) {
 					_log.error(
-						"Unable to update module + " + moduleId +
-							" with the new context name " + newContextName,
+						StringBundler.concat(
+							"Unable to update module + ",
+							String.valueOf(moduleId),
+							" with the new context name ", newContextName),
 						ioe);
 				}
 			}

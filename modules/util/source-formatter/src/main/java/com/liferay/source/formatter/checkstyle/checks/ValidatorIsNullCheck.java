@@ -14,9 +14,9 @@
 
 package com.liferay.source.formatter.checkstyle.checks;
 
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.source.formatter.checkstyle.util.DetailASTUtil;
 
-import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
@@ -25,9 +25,7 @@ import java.util.List;
 /**
  * @author Hugo Huijser
  */
-public class ValidatorIsNullCheck extends AbstractCheck {
-
-	public static final String MSG_METHOD_INVALID_NAME = "method.invalidName";
+public class ValidatorIsNullCheck extends BaseCheck {
 
 	@Override
 	public int[] getDefaultTokens() {
@@ -35,7 +33,7 @@ public class ValidatorIsNullCheck extends AbstractCheck {
 	}
 
 	@Override
-	public void visitToken(DetailAST detailAST) {
+	protected void doVisitToken(DetailAST detailAST) {
 		_checkMethod(detailAST, "Validator", "isNotNull");
 		_checkMethod(detailAST, "Validator", "isNull");
 	}
@@ -55,8 +53,8 @@ public class ValidatorIsNullCheck extends AbstractCheck {
 
 			if (child.getType() == TokenTypes.NUM_INT) {
 				log(
-					methodCallAST.getLineNo(), MSG_METHOD_INVALID_NAME,
-					className + "." + methodName + "(long)");
+					methodCallAST.getLineNo(), _MSG_METHOD_INVALID_NAME,
+					StringBundler.concat(className, ".", methodName, "(long)"));
 
 				continue;
 			}
@@ -78,10 +76,12 @@ public class ValidatorIsNullCheck extends AbstractCheck {
 				(child.getType() == TokenTypes.LITERAL_LONG)) {
 
 				log(
-					methodCallAST.getLineNo(), MSG_METHOD_INVALID_NAME,
-					className + "." + methodName + "(long)");
+					methodCallAST.getLineNo(), _MSG_METHOD_INVALID_NAME,
+					StringBundler.concat(className, ".", methodName, "(long)"));
 			}
 		}
 	}
+
+	private static final String _MSG_METHOD_INVALID_NAME = "method.invalidName";
 
 }

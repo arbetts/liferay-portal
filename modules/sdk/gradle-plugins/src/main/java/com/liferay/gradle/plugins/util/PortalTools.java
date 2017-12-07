@@ -15,13 +15,16 @@
 package com.liferay.gradle.plugins.util;
 
 import com.liferay.gradle.plugins.internal.util.GradleUtil;
+import com.liferay.gradle.util.Validator;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.Properties;
 
 import org.gradle.api.Project;
+import org.gradle.util.GUtil;
 
 /**
  * @author Andrea Di Giorgi
@@ -31,10 +34,38 @@ public class PortalTools {
 	public static final String GROUP = "com.liferay";
 
 	public static String getVersion(Project project, String name) {
-		String version = _versions.getProperty(name);
+		String key = name + ".version";
 
-		return GradleUtil.getProperty(project, name + ".version", version);
+		String version = GradleUtil.getProperty(project, key, (String)null);
+
+		if (Validator.isNotNull(version)) {
+			return version;
+		}
+
+		File dir = project.getProjectDir();
+
+		while ((dir != null) && Validator.isNull(version)) {
+			File gradlePropertiesFile = new File(dir, "gradle.properties");
+
+			if (gradlePropertiesFile.exists()) {
+				Properties gradleProperties = GUtil.loadProperties(
+					gradlePropertiesFile);
+
+				version = gradleProperties.getProperty(key);
+			}
+
+			dir = dir.getParentFile();
+		}
+
+		if (Validator.isNotNull(version)) {
+			return version;
+		}
+
+		return _versions.getProperty(name);
 	}
+
+	protected static final String PORTAL_TOOLS_FILE_NAME =
+		"com/liferay/gradle/plugins/dependencies/portal-tools.properties";
 
 	private static final Properties _versions = new Properties();
 
@@ -42,8 +73,7 @@ public class PortalTools {
 		ClassLoader classLoader = PortalTools.class.getClassLoader();
 
 		try (InputStream inputStream = classLoader.getResourceAsStream(
-				"com/liferay/gradle/plugins/dependencies" +
-					"/portal-tools.properties")) {
+				PORTAL_TOOLS_FILE_NAME)) {
 
 			_versions.load(inputStream);
 		}

@@ -19,8 +19,6 @@
 <%
 UserGroupSearch searchContainer = (UserGroupSearch)request.getAttribute("liferay-ui:search:searchContainer");
 
-String redirect = searchContainer.getIteratorURL().toString();
-
 ResultRow row = (ResultRow)request.getAttribute(WebKeys.SEARCH_CONTAINER_RESULT_ROW);
 
 UserGroup userGroup = (UserGroup)row.getObject();
@@ -34,7 +32,8 @@ UserGroup userGroup = (UserGroup)row.getObject();
 </portlet:renderURL>
 
 <liferay-ui:icon
-	iconCssClass="icon-search"
+	icon="users"
+	markupView="lexicon"
 	message="view-users"
 	method="get"
 	url="<%= viewUsersURL %>"

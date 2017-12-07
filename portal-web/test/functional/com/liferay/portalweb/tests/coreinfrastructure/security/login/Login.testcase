@@ -1,9 +1,17 @@
 <definition component-name="portal-security">
 	<property name="portal.release" value="true" />
+	<property name="portal.upstream" value="true" />
 	<property name="testray.main.component.name" value="Security" />
 
+	<set-up>
+		<execute macro="TestCase#setUpPortalInstance" />
+	</set-up>
+
 	<command name="CASSmoke" priority="4">
+		<property name="test.name.skip.portal.instance" value="Login#CASSmoke" />
 		<property name="web.plugins.includes" value="cas-web" />
+
+		<var method="TestPropsUtil#get('portal.url')" name="portalURL" />
 
 		<var name="userEmailAddress" value="userea@liferay.com" />
 		<var name="userFirstName" value="userfn" />
@@ -12,7 +20,9 @@
 
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="ProductMenu#gotoControlPanelUsers">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Users" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
@@ -23,7 +33,9 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelUsers">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Users" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
 
@@ -32,7 +44,9 @@
 			<var name="userScreenName" value="${userScreenName}" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Configuration" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Instance Settings" />
 		</execute>
 
@@ -41,10 +55,10 @@
 		</execute>
 
 		<execute macro="PortalSettings#editConfigurationAuthenticationCAS">
-			<var name="casLoginURL" value="http://localhost:8080/cas-web/login" />
-			<var name="casLogoutURL" value="http://localhost:8080/cas-web/logout" />
-			<var name="casServerURL" value="http://localhost:8080/cas-web" />
-			<var name="casServiceURL" value="http://localhost:8080/c/portal/login" />
+			<var name="casLoginURL" value="${portalURL}/cas-web/login" />
+			<var name="casLogoutURL" value="${portalURL}/cas-web/logout" />
+			<var name="casServerURL" value="${portalURL}/cas-web" />
+			<var name="casServiceURL" value="${portalURL}/c/portal/login" />
 		</execute>
 
 		<execute macro="User#logoutPG" />
@@ -63,10 +77,12 @@
 	</command>
 
 	<command name="FacebookSSOSmoke" priority="4">
-		<var name="facebookApplicationID" property-value="facebook.application.id" />
-		<var name="facebookApplicationSecret" property-value="facebook.application.secret" />
-		<var name="facebookEmail" property-value="facebook.email" />
-		<var name="facebookPassword" property-value="facebook.password" />
+		<property name="test.name.skip.portal.instance" value="Login#FacebookSSOSmoke" />
+
+		<var method="TestPropsUtil#get('facebook.application.id')" name="facebookApplicationID" />
+		<var method="TestPropsUtil#get('facebook.application.secret')" name="facebookApplicationSecret" />
+		<var method="TestPropsUtil#get('facebook.email')" name="facebookEmail" />
+		<var method="TestPropsUtil#get('facebook.password')" name="facebookPassword" />
 
 		<execute macro="User#firstLoginPG" />
 
@@ -75,7 +91,9 @@
 			<var name="siteName" value="${siteName}" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Configuration" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Instance Settings" />
 		</execute>
 
@@ -108,10 +126,12 @@
 	</command>
 
 	<command name="GoogleSSOSmoke" priority="4">
-		<var name="googleClientID" property-value="google.client.id" />
-		<var name="googleClientSecret" property-value="google.client.secret" />
-		<var name="userEmailAddress" property-value="email.address.1" />
-		<var name="userPassword" property-value="email.password.1" />
+		<property name="test.name.skip.portal.instance" value="Login#GoogleSSOSmoke" />
+
+		<var method="TestPropsUtil#get('google.client.id')" name="googleClientID" />
+		<var method="TestPropsUtil#get('google.client.secret')" name="googleClientSecret" />
+		<var method="TestPropsUtil#get('email.address.1')" name="userEmailAddress" />
+		<var method="TestPropsUtil#get('email.password.1')" name="userPassword" />
 
 		<execute macro="User#firstLoginPG" />
 
@@ -120,7 +140,9 @@
 			<var name="siteName" value="${siteName}" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Configuration" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Instance Settings" />
 		</execute>
 
@@ -152,6 +174,8 @@
 	</command>
 
 	<command name="Login" priority="4">
+		<property name="test.name.skip.portal.instance" value="Login#Login" />
+
 		<execute macro="User#firstLoginPG" />
 
 		<execute macro="User#logoutPG" />
@@ -170,12 +194,16 @@
 	</command>
 
 	<command name="OpenIDSmoke" priority="4">
+		<property name="test.name.skip.portal.instance" value="Login#OpenIDSmoke" />
+
 		<var method="TestPropsUtil#get('openid.password')" name="openIDPassword" />
 		<var method="TestPropsUtil#get('openid.username')" name="openIDUsername" />
 
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Configuration" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Instance Settings" />
 		</execute>
 
@@ -192,6 +220,9 @@
 		<execute macro="User#loginUserWithOpenIDEnabledPG">
 			<var name="openIDPassword" value="${openIDPassword}" />
 			<var name="openIDUsername" value="${openIDUsername}" />
+			<var name="password" value="test" />
+			<var name="userEmailAddress" value="userea2@liferay.com" />
+			<var name="userName" value="userfn2" />
 		</execute>
 
 		<execute macro="User#logoutPG" />
@@ -204,12 +235,50 @@
 
 	<command name="OpenSSOSmoke" priority="5">
 		<property name="openam.enabled" value="true" />
+		<property name="test.name.skip.portal.instance" value="Login#OpenSSOSmoke" />
+
+		<execute macro="Navigator#openSpecificURL">
+			<var name="url" value="http://test.able.com:8080/openam" />
+		</execute>
+
+		<execute function="AntCommand" locator1="build-test-authentication.xml" value1="run-openam-tools" />
+
+		<var name="pauseCount" value="0" />
+
+		<while>
+			<and>
+				<condition function="IsElementNotPresent" locator1="OpenAM#USER_NAME" />
+				<not>
+					<equals arg1="${pauseCount}" arg2="20" />
+				</not>
+			</and>
+			<then>
+				<execute function="Refresh" />
+
+				<execute function="Pause" locator1="30000" />
+
+				<var method="MathUtil#sum('${pauseCount}', '1')" name="pauseCount" />
+
+				<echo>Pause count: ${pauseCount}</echo>
+			</then>
+		</while>
+
+		<if>
+			<equals arg1="${pauseCount}" arg2="20" />
+			<then>
+				<fail message="OpenAM setup timed out after 10 minutes." />
+			</then>
+		</if>
 
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Configuration" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Instance Settings" />
 		</execute>
+
+		<execute function="Pause" locator1="30000" />
 
 		<execute macro="Panel#expandPanel">
 			<var name="panelHeading" value="Authentication" />
@@ -223,18 +292,27 @@
 			<var name="OpenSSOServiceURL" value="http://test.able.com:8080/openam" />
 		</execute>
 
+		<execute macro="PortalSettingsNavigator#gotoAuthenticationOpenSSO" />
+
+		<execute macro="PortalSettings#testOpenSSOConnection" />
+
 		<execute macro="User#logoutPG" />
 
 		<execute macro="User#loginUserWithOpenSSOEnabledPG">
+			<var name="hostsURL" value="http://www.able.com:8080" />
 			<var name="password" value="password" />
 			<var name="userScreenName" value="test" />
 		</execute>
 	</command>
 
 	<command name="TokenBasedSSOSmoke" priority="5">
+		<property name="test.name.skip.portal.instance" value="Login#TokenBasedSSOSmoke" />
+
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Configuration" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="System Settings" />
 		</execute>
 

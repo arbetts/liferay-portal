@@ -14,6 +14,7 @@
 
 package com.liferay.portal.security.sso.openid.internal;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -24,13 +25,11 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -94,10 +93,10 @@ public class OpenIdServiceHandlerImpl implements OpenIdServiceHandler {
 			ThemeDisplay themeDisplay, ActionRequest actionRequest)
 		throws PortalException {
 
-		HttpServletRequest request = PortalUtil.getHttpServletRequest(
+		HttpServletRequest request = _portal.getHttpServletRequest(
 			actionRequest);
 
-		request = PortalUtil.getOriginalServletRequest(request);
+		request = _portal.getOriginalServletRequest(request);
 
 		String receivingURL = ParamUtil.getString(request, "openid.return_to");
 		ParameterList parameterList = new ParameterList(
@@ -255,16 +254,16 @@ public class OpenIdServiceHandlerImpl implements OpenIdServiceHandler {
 							"attributes to create an account");
 				}
 
-				String createAccountURL = PortalUtil.getCreateAccountURL(
+				String createAccountURL = _portal.getCreateAccountURL(
 					request, themeDisplay);
 
-				String portletId = HttpUtil.getParameter(
+				String portletId = _http.getParameter(
 					createAccountURL, "p_p_id", false);
 
-				String portletNamespace = PortalUtil.getPortletNamespace(
+				String portletNamespace = _portal.getPortletNamespace(
 					portletId);
 
-				createAccountURL = HttpUtil.setParameter(
+				createAccountURL = _http.setParameter(
 					createAccountURL, portletNamespace + "openId", openId);
 
 				session.setAttribute(
@@ -323,18 +322,18 @@ public class OpenIdServiceHandlerImpl implements OpenIdServiceHandler {
 			ActionResponse actionResponse)
 		throws PortalException {
 
-		HttpServletRequest request = PortalUtil.getHttpServletRequest(
+		HttpServletRequest request = _portal.getHttpServletRequest(
 			actionRequest);
 
-		request = PortalUtil.getOriginalServletRequest(request);
+		request = _portal.getOriginalServletRequest(request);
 
-		HttpServletResponse response = PortalUtil.getHttpServletResponse(
+		HttpServletResponse response = _portal.getHttpServletResponse(
 			actionResponse);
 
 		HttpSession session = request.getSession();
 
 		LiferayPortletResponse liferayPortletResponse =
-			PortalUtil.getLiferayPortletResponse(actionResponse);
+			_portal.getLiferayPortletResponse(actionResponse);
 
 		String openId = ParamUtil.getString(actionRequest, "openId");
 
@@ -519,7 +518,15 @@ public class OpenIdServiceHandlerImpl implements OpenIdServiceHandler {
 		OpenIdServiceHandlerImpl.class);
 
 	private ConsumerManager _consumerManager;
+
+	@Reference
+	private Http _http;
+
 	private OpenIdProviderRegistry _openIdProviderRegistry;
+
+	@Reference
+	private Portal _portal;
+
 	private UserLocalService _userLocalService;
 
 }

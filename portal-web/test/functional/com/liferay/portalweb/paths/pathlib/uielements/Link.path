@@ -20,7 +20,7 @@
 </tr>
 <tr>
 	<td>ATTACHMENTS</td>
-	<td>//div[@class='article-actions']//span/a[contains(.,'Attachments')]</td>
+	<td>//a[contains(.,'Attachments')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -29,8 +29,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>CONFIGURE_TWITTER</td>
+	<td>//a[contains(.,'Please configure your Twitter screen name.')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>CHANGE_EMAIL_ADDRESS</td>
 	<td>//div/a[contains(.,'Change Email Address')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CONFIRM</td>
+	<td>//a[contains(.,'Confirm')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -54,13 +64,8 @@
 	<td></td>
 </tr>
 <tr>
-	<td>FACEBOOK_LOGIN</td>
-	<td>//span[contains(.,'Facebook')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>GOOGLE_LOGIN</td>
-	<td>//span[contains(.,'Google')]</td>
+	<td>FACEBOOK</td>
+	<td>//a/span[contains(@class,'taglib-text') and contains(.,'Facebook')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -100,7 +105,7 @@
 </tr>
 <tr>
 	<td>OPENID</td>
-	<td>//span[contains(.,'OpenID')]</td>
+	<td>//a[contains(.,'OpenID')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -134,6 +139,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>REFRESH_COUNTS</td>
+	<td>//a[contains(@id,'rangeLink')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SEND_NEW_VERIFICATION_CODE</td>
 	<td>//div/a[contains(.,'Send New Verification Code')]</td>
 	<td></td>
@@ -149,8 +159,8 @@
 	<td></td>
 </tr>
 <tr>
-	<td>VIEW_IN_CONTEXT</td>
-	<td>//a[contains(.,'View in Context')]</td>
+	<td>UNDO</td>
+	<td>//a[text()='Undo']</td>
 	<td></td>
 </tr>
 <tr>
@@ -161,6 +171,11 @@
 <tr>
 	<td>URL</td>
 	<td>//a[contains(@class,'show-url-file')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VIEW_IN_CONTEXT</td>
+	<td>//a[contains(.,'View in Context')]</td>
 	<td></td>
 </tr>
 <tr>

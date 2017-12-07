@@ -38,12 +38,13 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import com.liferay.portlet.asset.model.impl.AssetLinkImpl;
 import com.liferay.portlet.asset.model.impl.AssetLinkModelImpl;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Field;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -296,7 +297,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append("entryId1=");
 		msg.append(entryId1);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -345,7 +346,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append("entryId1=");
 		msg.append(entryId1);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -796,7 +797,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append("entryId2=");
 		msg.append(entryId2);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -845,7 +846,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append("entryId2=");
 		msg.append(entryId2);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -1317,7 +1318,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append(", entryId2=");
 		msg.append(entryId2);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -1373,7 +1374,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append(", entryId2=");
 		msg.append(entryId2);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -1858,7 +1859,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -1913,7 +1914,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -2398,7 +2399,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -2453,7 +2454,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLinkException(msg.toString());
 	}
@@ -2754,7 +2755,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 			msg.append(", type=");
 			msg.append(type);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -2960,6 +2961,24 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 
 	public AssetLinkPersistenceImpl() {
 		setModelClass(AssetLink.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("type", "type_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
 	}
 
 	/**
@@ -3030,7 +3049,7 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((AssetLinkModelImpl)assetLink);
+		clearUniqueFindersCache((AssetLinkModelImpl)assetLink, true);
 	}
 
 	@Override
@@ -3042,54 +3061,39 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 			entityCache.removeResult(AssetLinkModelImpl.ENTITY_CACHE_ENABLED,
 				AssetLinkImpl.class, assetLink.getPrimaryKey());
 
-			clearUniqueFindersCache((AssetLinkModelImpl)assetLink);
+			clearUniqueFindersCache((AssetLinkModelImpl)assetLink, true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		AssetLinkModelImpl assetLinkModelImpl, boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] {
-					assetLinkModelImpl.getEntryId1(),
-					assetLinkModelImpl.getEntryId2(),
-					assetLinkModelImpl.getType()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_E_E_T, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_E_E_T, args,
-				assetLinkModelImpl);
-		}
-		else {
-			if ((assetLinkModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_E_E_T.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						assetLinkModelImpl.getEntryId1(),
-						assetLinkModelImpl.getEntryId2(),
-						assetLinkModelImpl.getType()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_E_E_T, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_E_E_T, args,
-					assetLinkModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(
 		AssetLinkModelImpl assetLinkModelImpl) {
 		Object[] args = new Object[] {
 				assetLinkModelImpl.getEntryId1(),
 				assetLinkModelImpl.getEntryId2(), assetLinkModelImpl.getType()
 			};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_E_E_T, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_E_E_T, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_E_E_T, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_E_E_T, args,
+			assetLinkModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		AssetLinkModelImpl assetLinkModelImpl, boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					assetLinkModelImpl.getEntryId1(),
+					assetLinkModelImpl.getEntryId2(),
+					assetLinkModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_E_E_T, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_E_E_T, args);
+		}
 
 		if ((assetLinkModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_E_E_T.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					assetLinkModelImpl.getOriginalEntryId1(),
 					assetLinkModelImpl.getOriginalEntryId2(),
 					assetLinkModelImpl.getOriginalType()
@@ -3232,8 +3236,53 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !AssetLinkModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!AssetLinkModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { assetLinkModelImpl.getEntryId1() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_E1, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_E1,
+				args);
+
+			args = new Object[] { assetLinkModelImpl.getEntryId2() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_E2, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_E2,
+				args);
+
+			args = new Object[] {
+					assetLinkModelImpl.getEntryId1(),
+					assetLinkModelImpl.getEntryId2()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_E_E, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_E_E,
+				args);
+
+			args = new Object[] {
+					assetLinkModelImpl.getEntryId1(),
+					assetLinkModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_E1_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_E1_T,
+				args);
+
+			args = new Object[] {
+					assetLinkModelImpl.getEntryId2(),
+					assetLinkModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_E2_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_E2_T,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -3338,8 +3387,8 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		entityCache.putResult(AssetLinkModelImpl.ENTITY_CACHE_ENABLED,
 			AssetLinkImpl.class, assetLink.getPrimaryKey(), assetLink, false);
 
-		clearUniqueFindersCache(assetLinkModelImpl);
-		cacheUniqueFindersCache(assetLinkModelImpl, isNew);
+		clearUniqueFindersCache(assetLinkModelImpl, false);
+		cacheUniqueFindersCache(assetLinkModelImpl);
 
 		assetLink.resetOriginalValues();
 
@@ -3517,14 +3566,14 @@ public class AssetLinkPersistenceImpl extends BasePersistenceImpl<AssetLink>
 		query.append(_SQL_SELECT_ASSETLINK_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

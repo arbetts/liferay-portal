@@ -30,10 +30,11 @@ import com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PwdGenerator;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -122,7 +123,7 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 			HttpServletRequest request, HttpServletResponse response)
 		throws Exception {
 
-		long companyId = PortalUtil.getCompanyId(request);
+		long companyId = _portal.getCompanyId(request);
 
 		OpenSSOConfiguration openSSOConfiguration = getOpenSSOConfiguration(
 			companyId);
@@ -149,9 +150,10 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 
 		if (_log.isDebugEnabled()) {
 			_log.debug(
-				"Validating user information for " + firstName + " " +
-					lastName + " with screen name " + screenName +
-						" and email address " + emailAddress);
+				StringBundler.concat(
+					"Validating user information for ", firstName, " ",
+					lastName, " with screen name ", screenName,
+					" and email address ", emailAddress));
 		}
 
 		User user = null;
@@ -227,16 +229,16 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 				locale);
 		}
 
-		String currentURL = PortalUtil.getCurrentURL(request);
+		String currentURL = _portal.getCurrentURL(request);
 
 		if (currentURL.contains("/portal/login")) {
 			String redirect = ParamUtil.getString(request, "redirect");
 
 			if (Validator.isNotNull(redirect)) {
-				redirect = PortalUtil.escapeRedirect(redirect);
+				redirect = _portal.escapeRedirect(redirect);
 			}
 			else {
-				redirect = PortalUtil.getPathMain();
+				redirect = _portal.getPathMain();
 			}
 
 			request.setAttribute(AutoLogin.AUTO_LOGIN_REDIRECT, redirect);
@@ -294,6 +296,10 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 
 	private ConfigurationProvider _configurationProvider;
 	private OpenSSO _openSSO;
+
+	@Reference
+	private Portal _portal;
+
 	private ScreenNameGenerator _screenNameGenerator;
 	private UserImporter _userImporter;
 	private UserLocalService _userLocalService;

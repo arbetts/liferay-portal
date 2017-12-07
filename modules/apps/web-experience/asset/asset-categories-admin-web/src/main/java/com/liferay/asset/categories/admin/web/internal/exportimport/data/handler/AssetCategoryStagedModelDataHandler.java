@@ -14,12 +14,12 @@
 
 package com.liferay.asset.categories.admin.web.internal.exportimport.data.handler;
 
+import com.liferay.asset.category.property.model.AssetCategoryProperty;
+import com.liferay.asset.category.property.service.AssetCategoryPropertyLocalService;
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetCategoryConstants;
-import com.liferay.asset.kernel.model.AssetCategoryProperty;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetCategoryLocalService;
-import com.liferay.asset.kernel.service.AssetCategoryPropertyLocalService;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
 import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
@@ -31,15 +31,15 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -309,11 +309,13 @@ public class AssetCategoryStagedModelDataHandler
 
 		Map<Locale, String> titleMap = category.getTitleMap();
 
-		if (titleMap == null) {
-			titleMap = new HashMap<>();
-		}
+		Locale locale = _portal.getSiteDefaultLocale(groupId);
 
-		titleMap.put(PortalUtil.getSiteDefaultLocale(groupId), name);
+		if (titleMap.isEmpty() || !Objects.equals(category.getName(), name) ||
+			!titleMap.containsKey(locale)) {
+
+			titleMap.put(locale, name);
+		}
 
 		return titleMap;
 	}
@@ -343,5 +345,8 @@ public class AssetCategoryStagedModelDataHandler
 	private AssetCategoryPropertyLocalService
 		_assetCategoryPropertyLocalService;
 	private AssetVocabularyLocalService _assetVocabularyLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

@@ -25,11 +25,11 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.currency.converter.web.configuration.CurrencyConverterConfiguration",
 	localization = "content/Language",
-	name = "currency.converter.configuration.name"
+	name = "currency-converter-configuration-name"
 )
 public interface CurrencyConverterConfiguration {
 
-	@Meta.AD(deflt = "GBP|CNY|EUR|JPY|USD", required = false)
+	@Meta.AD(deflt = "GBP|CNY|EUR|JPY|USD", name = "symbols", required = false)
 	public String[] symbols();
 
 }

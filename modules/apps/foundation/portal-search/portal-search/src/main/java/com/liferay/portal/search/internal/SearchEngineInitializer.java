@@ -14,17 +14,25 @@
 
 package com.liferay.portal.search.internal;
 
+import com.liferay.petra.executor.PortalExecutorManager;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskThreadLocal;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.IndexWriterHelperUtil;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.SearchEngineHelperUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.util.PropsValues;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
 
 import org.apache.commons.lang.time.StopWatch;
 
@@ -33,9 +41,11 @@ import org.apache.commons.lang.time.StopWatch;
  */
 public class SearchEngineInitializer implements Runnable {
 
-	public SearchEngineInitializer(long companyId) {
+	public SearchEngineInitializer(
+		long companyId, PortalExecutorManager portalExecutorManager) {
+
 		_companyId = companyId;
-		_usedSearchEngineIds = new HashSet<>();
+		_portalExecutorManager = portalExecutorManager;
 	}
 
 	public Set<String> getUsedSearchEngineIds() {
@@ -83,6 +93,10 @@ public class SearchEngineInitializer implements Runnable {
 		catch (InterruptedException ie) {
 		}
 
+		ExecutorService executorService =
+			_portalExecutorManager.getPortalExecutor(
+				SearchEngineInitializer.class.getName());
+
 		StopWatch stopWatch = new StopWatch();
 
 		stopWatch.start();
@@ -92,7 +106,11 @@ public class SearchEngineInitializer implements Runnable {
 
 			SearchEngineHelperUtil.initialize(_companyId);
 
+			List<FutureTask<Void>> futureTasks = new ArrayList<>();
 			Set<String> searchEngineIds = new HashSet<>();
+
+			long backgroundTaskId =
+				BackgroundTaskThreadLocal.getBackgroundTaskId();
 
 			for (Indexer<?> indexer : IndexerRegistryUtil.getIndexers()) {
 				String searchEngineId = indexer.getSearchEngineId();
@@ -103,7 +121,28 @@ public class SearchEngineInitializer implements Runnable {
 						true);
 				}
 
-				reindex(indexer);
+				FutureTask<Void> futureTask = new FutureTask<>(
+					new Callable<Void>() {
+
+						@Override
+						public Void call() throws Exception {
+							BackgroundTaskThreadLocal.setBackgroundTaskId(
+								backgroundTaskId);
+
+							reindex(indexer);
+
+							return null;
+						}
+
+					});
+
+				executorService.submit(futureTask);
+
+				futureTasks.add(futureTask);
+			}
+
+			for (FutureTask<Void> futureTask : futureTasks) {
+				futureTask.get();
 			}
 
 			if (_log.isInfoEnabled()) {
@@ -138,8 +177,11 @@ public class SearchEngineInitializer implements Runnable {
 
 		if (_log.isInfoEnabled()) {
 			_log.info(
-				"Reindexing with " + indexer.getClass() + " completed in " +
-					(stopWatch.getTime() / Time.SECOND) + " seconds");
+				StringBundler.concat(
+					"Reindexing with ", String.valueOf(indexer.getClass()),
+					" completed in ",
+					String.valueOf(stopWatch.getTime() / Time.SECOND),
+					" seconds"));
 		}
 	}
 
@@ -148,6 +190,7 @@ public class SearchEngineInitializer implements Runnable {
 
 	private final long _companyId;
 	private boolean _finished;
-	private final Set<String> _usedSearchEngineIds;
+	private final PortalExecutorManager _portalExecutorManager;
+	private final Set<String> _usedSearchEngineIds = new HashSet<>();
 
 }

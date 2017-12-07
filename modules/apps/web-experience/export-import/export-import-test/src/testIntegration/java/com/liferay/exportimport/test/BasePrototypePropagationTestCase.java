@@ -16,16 +16,16 @@ package com.liferay.exportimport.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.exportimport.kernel.staging.MergeLayoutPrototypesThreadLocal;
-import com.liferay.journal.content.web.constants.JournalContentPortletKeys;
+import com.liferay.journal.constants.JournalContentPortletKeys;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutPrototype;
+import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
-import com.liferay.portal.kernel.service.persistence.CompanyUtil;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -44,6 +44,7 @@ import javax.portlet.PortletPreferences;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -66,7 +67,8 @@ public abstract class BasePrototypePropagationTestCase {
 
 		// Global scope article
 
-		Company company = CompanyUtil.fetchByPrimaryKey(group.getCompanyId());
+		Company company = CompanyLocalServiceUtil.fetchCompany(
+			group.getCompanyId());
 
 		globalGroupId = company.getGroupId();
 
@@ -91,6 +93,7 @@ public abstract class BasePrototypePropagationTestCase {
 		doTestLayoutTypePropagation(false);
 	}
 
+	@Ignore
 	@Test
 	public void testLayoutTypePropagationWithLinkEnabled() throws Exception {
 		doTestLayoutTypePropagation(true);
@@ -103,6 +106,7 @@ public abstract class BasePrototypePropagationTestCase {
 		doTestPortletPreferencesPropagation(false);
 	}
 
+	@Ignore
 	@Test
 	public void testPortletPreferencesPropagationWithLinkEnabled()
 		throws Exception {

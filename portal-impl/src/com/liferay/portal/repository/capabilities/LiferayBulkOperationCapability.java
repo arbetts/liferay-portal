@@ -34,8 +34,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Adolfo Pérez
+ * @author     Adolfo Pérez
+ * @deprecated As of 7.0.0, @deprecated As of 7.0.0, replaced by {@link
+ *             com.liferay.document.library.internal.capabilities.LiferayBulkOperationCapability}
  */
+@Deprecated
 public class LiferayBulkOperationCapability implements BulkOperationCapability {
 
 	public LiferayBulkOperationCapability(

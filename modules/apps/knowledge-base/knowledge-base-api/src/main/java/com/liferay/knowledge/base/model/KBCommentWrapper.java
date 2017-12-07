@@ -165,13 +165,198 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	@Override
-	public KBComment toEscapedModel() {
-		return new KBCommentWrapper(_kbComment.toEscapedModel());
+	public java.lang.Object clone() {
+		return new KBCommentWrapper((KBComment)_kbComment.clone());
 	}
 
 	@Override
-	public KBComment toUnescapedModel() {
-		return new KBCommentWrapper(_kbComment.toUnescapedModel());
+	public int compareTo(KBComment kbComment) {
+		return _kbComment.compareTo(kbComment);
+	}
+
+	/**
+	* Returns the fully qualified class name of this kb comment.
+	*
+	* @return the fully qualified class name of this kb comment
+	*/
+	@Override
+	public java.lang.String getClassName() {
+		return _kbComment.getClassName();
+	}
+
+	/**
+	* Returns the class name ID of this kb comment.
+	*
+	* @return the class name ID of this kb comment
+	*/
+	@Override
+	public long getClassNameId() {
+		return _kbComment.getClassNameId();
+	}
+
+	/**
+	* Returns the class pk of this kb comment.
+	*
+	* @return the class pk of this kb comment
+	*/
+	@Override
+	public long getClassPK() {
+		return _kbComment.getClassPK();
+	}
+
+	/**
+	* Returns the company ID of this kb comment.
+	*
+	* @return the company ID of this kb comment
+	*/
+	@Override
+	public long getCompanyId() {
+		return _kbComment.getCompanyId();
+	}
+
+	/**
+	* Returns the content of this kb comment.
+	*
+	* @return the content of this kb comment
+	*/
+	@Override
+	public java.lang.String getContent() {
+		return _kbComment.getContent();
+	}
+
+	/**
+	* Returns the create date of this kb comment.
+	*
+	* @return the create date of this kb comment
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _kbComment.getCreateDate();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _kbComment.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this kb comment.
+	*
+	* @return the group ID of this kb comment
+	*/
+	@Override
+	public long getGroupId() {
+		return _kbComment.getGroupId();
+	}
+
+	/**
+	* Returns the kb comment ID of this kb comment.
+	*
+	* @return the kb comment ID of this kb comment
+	*/
+	@Override
+	public long getKbCommentId() {
+		return _kbComment.getKbCommentId();
+	}
+
+	/**
+	* Returns the last publish date of this kb comment.
+	*
+	* @return the last publish date of this kb comment
+	*/
+	@Override
+	public Date getLastPublishDate() {
+		return _kbComment.getLastPublishDate();
+	}
+
+	/**
+	* Returns the modified date of this kb comment.
+	*
+	* @return the modified date of this kb comment
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _kbComment.getModifiedDate();
+	}
+
+	/**
+	* Returns the primary key of this kb comment.
+	*
+	* @return the primary key of this kb comment
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _kbComment.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _kbComment.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the status of this kb comment.
+	*
+	* @return the status of this kb comment
+	*/
+	@Override
+	public int getStatus() {
+		return _kbComment.getStatus();
+	}
+
+	/**
+	* Returns the user ID of this kb comment.
+	*
+	* @return the user ID of this kb comment
+	*/
+	@Override
+	public long getUserId() {
+		return _kbComment.getUserId();
+	}
+
+	/**
+	* Returns the user name of this kb comment.
+	*
+	* @return the user name of this kb comment
+	*/
+	@Override
+	public java.lang.String getUserName() {
+		return _kbComment.getUserName();
+	}
+
+	/**
+	* Returns the user rating of this kb comment.
+	*
+	* @return the user rating of this kb comment
+	*/
+	@Override
+	public int getUserRating() {
+		return _kbComment.getUserRating();
+	}
+
+	/**
+	* Returns the user uuid of this kb comment.
+	*
+	* @return the user uuid of this kb comment
+	*/
+	@Override
+	public java.lang.String getUserUuid() {
+		return _kbComment.getUserUuid();
+	}
+
+	/**
+	* Returns the uuid of this kb comment.
+	*
+	* @return the uuid of this kb comment
+	*/
+	@Override
+	public java.lang.String getUuid() {
+		return _kbComment.getUuid();
+	}
+
+	@Override
+	public int hashCode() {
+		return _kbComment.hashCode();
 	}
 
 	@Override
@@ -190,216 +375,6 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _kbComment.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<KBComment> toCacheModel() {
-		return _kbComment.toCacheModel();
-	}
-
-	@Override
-	public int compareTo(KBComment kbComment) {
-		return _kbComment.compareTo(kbComment);
-	}
-
-	/**
-	* Returns the status of this k b comment.
-	*
-	* @return the status of this k b comment
-	*/
-	@Override
-	public int getStatus() {
-		return _kbComment.getStatus();
-	}
-
-	/**
-	* Returns the user rating of this k b comment.
-	*
-	* @return the user rating of this k b comment
-	*/
-	@Override
-	public int getUserRating() {
-		return _kbComment.getUserRating();
-	}
-
-	@Override
-	public int hashCode() {
-		return _kbComment.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _kbComment.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new KBCommentWrapper((KBComment)_kbComment.clone());
-	}
-
-	/**
-	* Returns the fully qualified class name of this k b comment.
-	*
-	* @return the fully qualified class name of this k b comment
-	*/
-	@Override
-	public java.lang.String getClassName() {
-		return _kbComment.getClassName();
-	}
-
-	/**
-	* Returns the content of this k b comment.
-	*
-	* @return the content of this k b comment
-	*/
-	@Override
-	public java.lang.String getContent() {
-		return _kbComment.getContent();
-	}
-
-	/**
-	* Returns the user name of this k b comment.
-	*
-	* @return the user name of this k b comment
-	*/
-	@Override
-	public java.lang.String getUserName() {
-		return _kbComment.getUserName();
-	}
-
-	/**
-	* Returns the user uuid of this k b comment.
-	*
-	* @return the user uuid of this k b comment
-	*/
-	@Override
-	public java.lang.String getUserUuid() {
-		return _kbComment.getUserUuid();
-	}
-
-	/**
-	* Returns the uuid of this k b comment.
-	*
-	* @return the uuid of this k b comment
-	*/
-	@Override
-	public java.lang.String getUuid() {
-		return _kbComment.getUuid();
-	}
-
-	@Override
-	public java.lang.String toString() {
-		return _kbComment.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _kbComment.toXmlString();
-	}
-
-	/**
-	* Returns the create date of this k b comment.
-	*
-	* @return the create date of this k b comment
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _kbComment.getCreateDate();
-	}
-
-	/**
-	* Returns the last publish date of this k b comment.
-	*
-	* @return the last publish date of this k b comment
-	*/
-	@Override
-	public Date getLastPublishDate() {
-		return _kbComment.getLastPublishDate();
-	}
-
-	/**
-	* Returns the modified date of this k b comment.
-	*
-	* @return the modified date of this k b comment
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _kbComment.getModifiedDate();
-	}
-
-	/**
-	* Returns the class name ID of this k b comment.
-	*
-	* @return the class name ID of this k b comment
-	*/
-	@Override
-	public long getClassNameId() {
-		return _kbComment.getClassNameId();
-	}
-
-	/**
-	* Returns the class p k of this k b comment.
-	*
-	* @return the class p k of this k b comment
-	*/
-	@Override
-	public long getClassPK() {
-		return _kbComment.getClassPK();
-	}
-
-	/**
-	* Returns the company ID of this k b comment.
-	*
-	* @return the company ID of this k b comment
-	*/
-	@Override
-	public long getCompanyId() {
-		return _kbComment.getCompanyId();
-	}
-
-	/**
-	* Returns the group ID of this k b comment.
-	*
-	* @return the group ID of this k b comment
-	*/
-	@Override
-	public long getGroupId() {
-		return _kbComment.getGroupId();
-	}
-
-	/**
-	* Returns the kb comment ID of this k b comment.
-	*
-	* @return the kb comment ID of this k b comment
-	*/
-	@Override
-	public long getKbCommentId() {
-		return _kbComment.getKbCommentId();
-	}
-
-	/**
-	* Returns the primary key of this k b comment.
-	*
-	* @return the primary key of this k b comment
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _kbComment.getPrimaryKey();
-	}
-
-	/**
-	* Returns the user ID of this k b comment.
-	*
-	* @return the user ID of this k b comment
-	*/
-	@Override
-	public long getUserId() {
-		return _kbComment.getUserId();
-	}
-
-	@Override
 	public void persist() {
 		_kbComment.persist();
 	}
@@ -415,9 +390,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the class name ID of this k b comment.
+	* Sets the class name ID of this kb comment.
 	*
-	* @param classNameId the class name ID of this k b comment
+	* @param classNameId the class name ID of this kb comment
 	*/
 	@Override
 	public void setClassNameId(long classNameId) {
@@ -425,9 +400,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the class p k of this k b comment.
+	* Sets the class pk of this kb comment.
 	*
-	* @param classPK the class p k of this k b comment
+	* @param classPK the class pk of this kb comment
 	*/
 	@Override
 	public void setClassPK(long classPK) {
@@ -435,9 +410,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the company ID of this k b comment.
+	* Sets the company ID of this kb comment.
 	*
-	* @param companyId the company ID of this k b comment
+	* @param companyId the company ID of this kb comment
 	*/
 	@Override
 	public void setCompanyId(long companyId) {
@@ -445,9 +420,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the content of this k b comment.
+	* Sets the content of this kb comment.
 	*
-	* @param content the content of this k b comment
+	* @param content the content of this kb comment
 	*/
 	@Override
 	public void setContent(java.lang.String content) {
@@ -455,18 +430,13 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the create date of this k b comment.
+	* Sets the create date of this kb comment.
 	*
-	* @param createDate the create date of this k b comment
+	* @param createDate the create date of this kb comment
 	*/
 	@Override
 	public void setCreateDate(Date createDate) {
 		_kbComment.setCreateDate(createDate);
-	}
-
-	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_kbComment.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -476,14 +446,19 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_kbComment.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext) {
 		_kbComment.setExpandoBridgeAttributes(serviceContext);
 	}
 
 	/**
-	* Sets the group ID of this k b comment.
+	* Sets the group ID of this kb comment.
 	*
-	* @param groupId the group ID of this k b comment
+	* @param groupId the group ID of this kb comment
 	*/
 	@Override
 	public void setGroupId(long groupId) {
@@ -491,9 +466,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the kb comment ID of this k b comment.
+	* Sets the kb comment ID of this kb comment.
 	*
-	* @param kbCommentId the kb comment ID of this k b comment
+	* @param kbCommentId the kb comment ID of this kb comment
 	*/
 	@Override
 	public void setKbCommentId(long kbCommentId) {
@@ -501,9 +476,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the last publish date of this k b comment.
+	* Sets the last publish date of this kb comment.
 	*
-	* @param lastPublishDate the last publish date of this k b comment
+	* @param lastPublishDate the last publish date of this kb comment
 	*/
 	@Override
 	public void setLastPublishDate(Date lastPublishDate) {
@@ -511,9 +486,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the modified date of this k b comment.
+	* Sets the modified date of this kb comment.
 	*
-	* @param modifiedDate the modified date of this k b comment
+	* @param modifiedDate the modified date of this kb comment
 	*/
 	@Override
 	public void setModifiedDate(Date modifiedDate) {
@@ -526,9 +501,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the primary key of this k b comment.
+	* Sets the primary key of this kb comment.
 	*
-	* @param primaryKey the primary key of this k b comment
+	* @param primaryKey the primary key of this kb comment
 	*/
 	@Override
 	public void setPrimaryKey(long primaryKey) {
@@ -541,9 +516,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the status of this k b comment.
+	* Sets the status of this kb comment.
 	*
-	* @param status the status of this k b comment
+	* @param status the status of this kb comment
 	*/
 	@Override
 	public void setStatus(int status) {
@@ -551,9 +526,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the user ID of this k b comment.
+	* Sets the user ID of this kb comment.
 	*
-	* @param userId the user ID of this k b comment
+	* @param userId the user ID of this kb comment
 	*/
 	@Override
 	public void setUserId(long userId) {
@@ -561,9 +536,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the user name of this k b comment.
+	* Sets the user name of this kb comment.
 	*
-	* @param userName the user name of this k b comment
+	* @param userName the user name of this kb comment
 	*/
 	@Override
 	public void setUserName(java.lang.String userName) {
@@ -571,9 +546,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the user rating of this k b comment.
+	* Sets the user rating of this kb comment.
 	*
-	* @param userRating the user rating of this k b comment
+	* @param userRating the user rating of this kb comment
 	*/
 	@Override
 	public void setUserRating(int userRating) {
@@ -581,9 +556,9 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the user uuid of this k b comment.
+	* Sets the user uuid of this kb comment.
 	*
-	* @param userUuid the user uuid of this k b comment
+	* @param userUuid the user uuid of this kb comment
 	*/
 	@Override
 	public void setUserUuid(java.lang.String userUuid) {
@@ -591,13 +566,38 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	}
 
 	/**
-	* Sets the uuid of this k b comment.
+	* Sets the uuid of this kb comment.
 	*
-	* @param uuid the uuid of this k b comment
+	* @param uuid the uuid of this kb comment
 	*/
 	@Override
 	public void setUuid(java.lang.String uuid) {
 		_kbComment.setUuid(uuid);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<KBComment> toCacheModel() {
+		return _kbComment.toCacheModel();
+	}
+
+	@Override
+	public KBComment toEscapedModel() {
+		return new KBCommentWrapper(_kbComment.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _kbComment.toString();
+	}
+
+	@Override
+	public KBComment toUnescapedModel() {
+		return new KBCommentWrapper(_kbComment.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _kbComment.toXmlString();
 	}
 
 	@Override

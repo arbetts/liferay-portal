@@ -40,7 +40,7 @@ PortletURL editPortletURL = assetRenderer.getURLEdit(liferayPortletRequest, life
 
 boolean viewInContext = ((Boolean)request.getAttribute("view.jsp-viewInContext")).booleanValue();
 
-String viewURL = AssetPublisherHelper.getAssetViewURL(liferayPortletRequest, liferayPortletResponse, assetEntry, viewInContext);
+String viewURL = AssetPublisherHelper.getAssetViewURL(liferayPortletRequest, liferayPortletResponse, assetRenderer, assetEntry, viewInContext);
 
 request.setAttribute("view.jsp-showIconLabel", false);
 %>
@@ -78,6 +78,8 @@ request.setAttribute("view.jsp-showIconLabel", false);
 
 			<tr>
 				<td class="clamp-horizontal content-column table-cell-content title-column" colspan="1">
+					<span class="asset-anchor lfr-asset-anchor" id="<%= assetEntry.getEntryId() %>"></span>
+
 					<div class="clamp-container">
 						<span class="truncate-text">
 							<c:choose>
@@ -99,14 +101,14 @@ request.setAttribute("view.jsp-showIconLabel", false);
 					<td class="metadata-column scope-column table-cell-field" colspan="1">
 						<c:choose>
 							<c:when test='<%= Objects.equals(metadataField, "categories") %>'>
-								<liferay-ui:asset-categories-summary
+								<liferay-asset:asset-categories-summary
 									className="<%= assetEntry.getClassName() %>"
 									classPK="<%= assetEntry.getClassPK() %>"
 									portletURL="<%= renderResponse.createRenderURL() %>"
 								/>
 							</c:when>
 							<c:when test='<%= Objects.equals(metadataField, "tags") %>'>
-								<liferay-ui:asset-tags-summary
+								<liferay-asset:asset-tags-summary
 									className="<%= assetEntry.getClassName() %>"
 									classPK="<%= assetEntry.getClassPK() %>"
 									portletURL="<%= renderResponse.createRenderURL() %>"

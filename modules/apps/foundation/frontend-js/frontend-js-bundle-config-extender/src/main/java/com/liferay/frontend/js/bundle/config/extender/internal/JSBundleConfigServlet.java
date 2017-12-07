@@ -16,8 +16,9 @@ package com.liferay.frontend.js.bundle.config.extender.internal;
 
 import com.liferay.frontend.js.bundle.config.extender.internal.JSBundleConfigTracker.JSConfig;
 import com.liferay.portal.kernel.util.ContentTypes;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +30,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +61,14 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class JSBundleConfigServlet extends HttpServlet {
 
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+
+		_componentContext.enableComponent(
+			JSBundleConfigPortalWebResources.class.getName());
+	}
+
 	@Activate
 	@Modified
 	protected void activate(
@@ -65,6 +76,8 @@ public class JSBundleConfigServlet extends HttpServlet {
 		throws Exception {
 
 		_logger = new Logger(componentContext.getBundleContext());
+
+		_componentContext = componentContext;
 	}
 
 	protected JSBundleConfigTracker getJSBundleConfigTracker() {
@@ -97,8 +110,9 @@ public class JSBundleConfigServlet extends HttpServlet {
 						jsConfig.getServletContext();
 
 					servletOutputStream.println(
-						"var MODULE_PATH = '" + PortalUtil.getPathProxy() +
-							servletContext.getContextPath() + "';");
+						StringBundler.concat(
+							"var MODULE_PATH = '", _portal.getPathProxy(),
+							servletContext.getContextPath(), "';"));
 
 					StreamUtil.transfer(
 						inputStream, servletOutputStream, false);
@@ -125,7 +139,11 @@ public class JSBundleConfigServlet extends HttpServlet {
 		_jsBundleConfigTracker = jsBundleConfigTracker;
 	}
 
+	private ComponentContext _componentContext;
 	private JSBundleConfigTracker _jsBundleConfigTracker;
 	private Logger _logger;
+
+	@Reference
+	private Portal _portal;
 
 }

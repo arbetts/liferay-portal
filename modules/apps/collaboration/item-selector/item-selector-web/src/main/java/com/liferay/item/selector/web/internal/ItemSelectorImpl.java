@@ -17,20 +17,20 @@ package com.liferay.item.selector.web.internal;
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.ItemSelectorCriterion;
 import com.liferay.item.selector.ItemSelectorCriterionHandler;
+import com.liferay.item.selector.ItemSelectorCriterionSerializer;
 import com.liferay.item.selector.ItemSelectorRendering;
 import com.liferay.item.selector.ItemSelectorReturnType;
 import com.liferay.item.selector.ItemSelectorView;
 import com.liferay.item.selector.ItemSelectorViewRenderer;
 import com.liferay.item.selector.constants.ItemSelectorPortletKeys;
-import com.liferay.item.selector.web.ItemSelectorCriterionSerializer;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -71,10 +71,10 @@ public class ItemSelectorImpl implements ItemSelector {
 
 	@Override
 	public String getItemSelectedEventName(String itemSelectorURL) {
-		String namespace = PortalUtil.getPortletNamespace(
+		String namespace = _portal.getPortletNamespace(
 			ItemSelectorPortletKeys.ITEM_SELECTOR);
 
-		return HttpUtil.getParameter(
+		return _http.getParameter(
 			itemSelectorURL,
 			namespace.concat(PARAMETER_ITEM_SELECTED_EVENT_NAME), false);
 	}
@@ -108,12 +108,12 @@ public class ItemSelectorImpl implements ItemSelector {
 	public List<ItemSelectorCriterion> getItemSelectorCriteria(
 		String itemSelectorURL) {
 
-		Map<String, String[]> parameters = HttpUtil.getParameterMap(
+		Map<String, String[]> parameters = _http.getParameterMap(
 			itemSelectorURL);
 
 		Map<String, String[]> itemSelectorURLParameterMap = new HashMap<>();
 
-		String namespace = PortalUtil.getPortletNamespace(
+		String namespace = _portal.getPortletNamespace(
 			ItemSelectorPortletKeys.ITEM_SELECTOR);
 
 		for (String parameterName : parameters.keySet()) {
@@ -393,9 +393,15 @@ public class ItemSelectorImpl implements ItemSelector {
 			itemSelectorCriterionClass.getName());
 	}
 
+	@Reference
+	private Http _http;
+
 	private final ConcurrentMap
 		<String, ItemSelectorCriterionHandler<ItemSelectorCriterion>>
 			_itemSelectionCriterionHandlers = new ConcurrentHashMap<>();
 	private ItemSelectorCriterionSerializer _itemSelectionCriterionSerializer;
+
+	@Reference
+	private Portal _portal;
 
 }

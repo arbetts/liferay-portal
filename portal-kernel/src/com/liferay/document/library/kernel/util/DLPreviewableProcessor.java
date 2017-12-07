@@ -20,7 +20,6 @@ import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.image.ImageBag;
 import com.liferay.portal.kernel.image.ImageToolUtil;
-import com.liferay.portal.kernel.io.FileFilter;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
@@ -34,7 +33,6 @@ import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
-import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.SystemProperties;
@@ -44,12 +42,14 @@ import com.liferay.portal.kernel.xml.Element;
 import java.awt.image.RenderedImage;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 
 /**
  * @author Alexander Chow
@@ -59,15 +59,11 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 
 	public static final String DECRYPT_PATH = "document_decrypt/";
 
-	public static final String DECRYPT_TMP_PATH =
-		SystemProperties.get(SystemProperties.TMP_DIR) + "/liferay/" +
-			DECRYPT_PATH;
+	public static final String DECRYPT_TMP_PATH;
 
 	public static final String PREVIEW_PATH = "document_preview/";
 
-	public static final String PREVIEW_TMP_PATH =
-		SystemProperties.get(SystemProperties.TMP_DIR) + "/liferay/" +
-			PREVIEW_PATH;
+	public static final String PREVIEW_TMP_PATH;
 
 	public static final long REPOSITORY_ID = CompanyConstants.SYSTEM;
 
@@ -79,9 +75,17 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 
 	public static final String THUMBNAIL_PATH = "document_thumbnail/";
 
-	public static final String THUMBNAIL_TMP_PATH =
-		SystemProperties.get(SystemProperties.TMP_DIR) + "/liferay/" +
-			THUMBNAIL_PATH;
+	public static final String THUMBNAIL_TMP_PATH;
+
+	public static final String TMP_PATH;
+
+	static {
+		TMP_PATH = SystemProperties.get(SystemProperties.TMP_DIR) + "/liferay/";
+
+		DECRYPT_TMP_PATH = TMP_PATH.concat(DECRYPT_PATH);
+		PREVIEW_TMP_PATH = TMP_PATH.concat(PREVIEW_PATH);
+		THUMBNAIL_TMP_PATH = TMP_PATH.concat(THUMBNAIL_PATH);
+	}
 
 	public static void deleteFiles() {
 		long[] companyIds = PortalUtil.getCompanyIds();
@@ -331,6 +335,8 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 
 			DLStoreUtil.deleteDirectory(
 				companyId, REPOSITORY_ID, thumbnailFilePath);
+
+			DLStoreUtil.deleteFile(companyId, REPOSITORY_ID, thumbnailFilePath);
 		}
 		catch (Exception e) {
 		}
@@ -524,23 +530,19 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 
 		fileEntryElement.addAttribute(binPathName, binPath);
 
-		InputStream is = null;
+		if (fileIndex < 0) {
+			fileIndex = 0;
+		}
+		else {
+			fileIndex++;
+		}
 
-		try {
-			if (fileIndex < 0) {
-				is = doGetPreviewAsStream(fileVersion, previewType);
-			}
-			else {
-				is = doGetPreviewAsStream(
-					fileVersion, fileIndex + 1, previewType);
-			}
+		try (InputStream is = doGetPreviewAsStream(
+				fileVersion, fileIndex, previewType)) {
 
 			exportBinary(
 				portletDataContext, fileEntryElement, fileVersion, is, binPath,
 				binPathName);
-		}
-		finally {
-			StreamUtil.cleanUp(is);
 		}
 	}
 
@@ -565,11 +567,7 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 			return;
 		}
 
-		InputStream is = null;
-
-		try {
-			is = doGetThumbnailAsStream(fileVersion, index);
-
+		try (InputStream is = doGetThumbnailAsStream(fileVersion, index)) {
 			String binPath = getBinPath(portletDataContext, fileEntry, index);
 
 			fileEntryElement.addAttribute(binPathName, binPath);
@@ -578,8 +576,10 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 				portletDataContext, fileEntryElement, fileVersion, is, binPath,
 				binPathName);
 		}
-		finally {
-			StreamUtil.cleanUp(is);
+		catch (IOException ioe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(ioe, ioe);
+			}
 		}
 	}
 
@@ -737,24 +737,38 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 		String tempFileId = DLUtil.getTempFileId(
 			fileVersion.getFileEntryId(), fileVersion.getVersion());
 
-		StringBundler sb = new StringBundler(5);
+		String prefix = tempFileId + StringPool.DASH;
 
-		sb.append(tempFileId);
-		sb.append(StringPool.DASH);
-		sb.append("(.*)");
+		Predicate<File> filePredicate = File::isFile;
+
+		filePredicate = filePredicate.and(
+			file -> {
+				String fileName = file.getName();
+
+				return fileName.startsWith(prefix);
+			});
 
 		if (Validator.isNotNull(type)) {
-			sb.append(StringPool.PERIOD);
-			sb.append(type);
+			String suffix = StringPool.PERIOD + type;
+
+			filePredicate = filePredicate.and(
+				file -> {
+					String fileName = file.getName();
+
+					return fileName.endsWith(suffix);
+				});
 		}
 
 		File dir = new File(PREVIEW_TMP_PATH);
 
-		File[] files = dir.listFiles(new FileFilter(sb.toString()));
+		File[] files = dir.listFiles(filePredicate::test);
 
 		if (_log.isDebugEnabled()) {
 			for (File file : files) {
-				_log.debug("Preview page for " + tempFileId + " " + file);
+				_log.debug(
+					StringBundler.concat(
+						"Preview page for ", tempFileId, " ",
+						String.valueOf(file)));
 			}
 		}
 
@@ -988,23 +1002,19 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 				return;
 			}
 
-			InputStream is = null;
+			if (fileIndex < 0) {
+				fileIndex = 0;
+			}
+			else {
+				fileIndex++;
+			}
 
-			try {
-				if (fileIndex < 0) {
-					is = doGetPreviewAsStream(fileVersion, previewType);
-				}
-				else {
-					is = doGetPreviewAsStream(
-						fileVersion, fileIndex, previewType);
-				}
+			try (InputStream is = doGetPreviewAsStream(
+					fileVersion, fileIndex, previewType)) {
 
 				addFileToStore(
 					portletDataContext.getCompanyId(), PREVIEW_PATH,
 					previewFilePath, is);
-			}
-			finally {
-				StreamUtil.cleanUp(is);
 			}
 		}
 	}
@@ -1037,10 +1047,8 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 
 		String binPath = fileEntryElement.attributeValue(binPathName);
 
-		InputStream is = null;
-
-		try {
-			is = portletDataContext.getZipEntryAsInputStream(binPath);
+		try (InputStream is =
+				portletDataContext.getZipEntryAsInputStream(binPath)) {
 
 			if (is == null) {
 				return;
@@ -1059,9 +1067,6 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 			addFileToStore(
 				portletDataContext.getCompanyId(), PREVIEW_PATH,
 				previewFilePath, is);
-		}
-		finally {
-			StreamUtil.cleanUp(is);
 		}
 	}
 
@@ -1087,11 +1092,7 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 				return;
 			}
 
-			InputStream is = null;
-
-			try {
-				is = doGetThumbnailAsStream(fileVersion, index);
-
+			try (InputStream is = doGetThumbnailAsStream(fileVersion, index)) {
 				FileVersion importedFileVersion =
 					importedFileEntry.getFileVersion();
 
@@ -1102,9 +1103,6 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 				addFileToStore(
 					portletDataContext.getCompanyId(), THUMBNAIL_PATH,
 					thumbnailFilePath, is);
-			}
-			finally {
-				StreamUtil.cleanUp(is);
 			}
 		}
 	}
@@ -1118,10 +1116,8 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 
 		String binPath = fileEntryElement.attributeValue(binPathName);
 
-		InputStream is = null;
-
-		try {
-			is = portletDataContext.getZipEntryAsInputStream(binPath);
+		try (InputStream is =
+				portletDataContext.getZipEntryAsInputStream(binPath)) {
 
 			if (is == null) {
 				return;
@@ -1133,9 +1129,6 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 			addFileToStore(
 				portletDataContext.getCompanyId(), THUMBNAIL_PATH,
 				thumbnailFilePath, is);
-		}
-		finally {
-			StreamUtil.cleanUp(is);
 		}
 	}
 

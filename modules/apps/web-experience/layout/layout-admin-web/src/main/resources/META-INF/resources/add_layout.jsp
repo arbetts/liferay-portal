@@ -17,6 +17,12 @@
 <%@ include file="/init.jsp" %>
 
 <%
+String redirect = ParamUtil.getString(request, "redirect");
+
+String backURL = ParamUtil.getString(request, "backURL", redirect);
+
+String portletResource = ParamUtil.getString(request, "portletResource");
+
 Layout selLayout = layoutsAdminDisplayContext.getSelLayout();
 
 Long groupId = layoutsAdminDisplayContext.getGroupId();
@@ -24,28 +30,17 @@ boolean privateLayout = layoutsAdminDisplayContext.isPrivateLayout();
 long parentPlid = LayoutConstants.DEFAULT_PLID;
 long parentLayoutId = LayoutConstants.DEFAULT_PARENT_LAYOUT_ID;
 
-String selThemeId = null;
-
 if (layout.isTypeControlPanel()) {
 	if (layoutsAdminDisplayContext.getSelPlid() != 0) {
 		selLayout = LayoutLocalServiceUtil.getLayout(layoutsAdminDisplayContext.getSelPlid());
-
-		selThemeId = selLayout.getThemeId();
 
 		privateLayout = selLayout.isPrivateLayout();
 		parentPlid = selLayout.getPlid();
 		parentLayoutId = selLayout.getLayoutId();
 	}
-	else {
-		LayoutSet selLayoutSet = layoutsAdminDisplayContext.getSelLayoutSet();
-
-		selThemeId = selLayoutSet.getThemeId();
-	}
 }
 else {
 	selLayout = layout;
-
-	selThemeId = layout.getThemeId();
 
 	privateLayout = layout.isPrivateLayout();
 	parentPlid = layout.getParentPlid();
@@ -54,18 +49,25 @@ else {
 
 String[] types = LayoutTypeControllerTracker.getTypes();
 
+if (Validator.isNotNull(backURL)) {
+	portletDisplay.setShowBackIcon(true);
+	portletDisplay.setURLBack(backURL);
+}
+
 renderResponse.setTitle(LanguageUtil.get(request, "add-new-page"));
 %>
 
-<portlet:actionURL name="addLayout" var="addLayoutURL">
+<portlet:actionURL name="/layout/add_layout" var="addLayoutURL">
 	<portlet:param name="mvcPath" value="/add_layout.jsp" />
 </portlet:actionURL>
 
-<aui:form action="<%= addLayoutURL %>" cssClass="container-fluid-1280" enctype="multipart/form-data" method="post" name="addPageFm">
+<aui:form action="<%= addLayoutURL %>" cssClass="container-fluid-1280" data-senna-off="true" enctype="multipart/form-data" method="post" name="addPageFm">
+	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 	<aui:input name="groupId" type="hidden" value="<%= String.valueOf(groupId) %>" />
 	<aui:input name="privateLayout" type="hidden" value="<%= privateLayout %>" />
 	<aui:input name="parentPlid" type="hidden" value="<%= parentPlid %>" />
 	<aui:input name="parentLayoutId" type="hidden" value="<%= parentLayoutId %>" />
+	<aui:input name="portletResource" type="hidden" value="<%= portletResource %>" />
 	<aui:input name="type" type="hidden" value="portlet" />
 	<aui:input name="layoutPrototypeId" type="hidden" value="" />
 	<aui:input name="explicitCreation" type="hidden" value="<%= true %>" />
@@ -117,8 +119,18 @@ renderResponse.setTitle(LanguageUtil.get(request, "add-new-page"));
 			<aui:input helpMessage="if-enabled-this-page-does-not-show-up-in-the-navigation-menu" label="hide-from-navigation-menu" name="hidden" type="toggle-switch" />
 
 			<aui:select label="type" name="template">
+
+				<%
+				Map<String, Object> data = new HashMap<String, Object>();
+				%>
+
 				<c:if test='<%= ArrayUtil.contains(types, "portlet") %>'>
-					<aui:option label="empty-page" value="blank" />
+
+					<%
+					data.put("type", "portlet");
+					%>
+
+					<aui:option data="<%= data %>" label="empty-page" value="portlet" />
 				</c:if>
 
 				<%
@@ -135,26 +147,35 @@ renderResponse.setTitle(LanguageUtil.get(request, "add-new-page"));
 						continue;
 					}
 
+					data.put("type", type);
+
 					ResourceBundle layoutTypeResourceBundle = ResourceBundleUtil.getBundle("content.Language", locale, layoutTypeController.getClass());
 				%>
 
-					<aui:option disabled="<%= (layoutsCount == 0) && !layoutTypeController.isFirstPageable() %>" label='<%= LanguageUtil.get(request, layoutTypeResourceBundle, "layout.types." + type) %>' value="<%= type %>" />
+					<aui:option data="<%= data %>" disabled="<%= (layoutsCount == 0) && !layoutTypeController.isFirstPageable() %>" label='<%= LanguageUtil.get(request, layoutTypeResourceBundle, "layout.types." + type) %>' value="<%= type %>" />
 
 				<%
 				}
 				%>
 
 				<c:if test='<%= ArrayUtil.contains(types, "portlet") %>'>
-					<aui:option label="copy-of-a-page" value="copy" />
+
+					<%
+					data.put("type", "portlet");
+					%>
+
+					<aui:option data="<%= data %>" label="copy-of-a-page" value="copy" />
 				</c:if>
 
 				<optgroup label="<liferay-ui:message key="templates" />">
 
 					<%
 					for (LayoutPrototype layoutPrototype : layoutPrototypes) {
+						data.put("prototype-id", layoutPrototype.getLayoutPrototypeId());
+						data.put("type", StringPool.BLANK);
 					%>
 
-						<aui:option label="<%= HtmlUtil.escape(layoutPrototype.getName(locale)) %>" value="<%= layoutPrototype.getUuid() %>" />
+						<aui:option data="<%= data %>" label="<%= HtmlUtil.escape(layoutPrototype.getName(locale)) %>" value="layout-prototype" />
 
 					<%
 					}
@@ -164,81 +185,14 @@ renderResponse.setTitle(LanguageUtil.get(request, "add-new-page"));
 			</aui:select>
 
 			<div id="<portlet:namespace />templateList">
-				<c:if test='<%= ArrayUtil.contains(types, "portlet") %>'>
-					<div class="layout-type" data-type="portlet" id="blank">
-						<p class="small text-muted">
-							<liferay-ui:message key="empty-page-description" />
-						</p>
-
-						<liferay-ui:layout-templates-list
-							layoutTemplateId="<%= PropsValues.DEFAULT_LAYOUT_TEMPLATE_ID %>"
-							layoutTemplateIdPrefix="addLayout"
-							layoutTemplates="<%= LayoutTemplateLocalServiceUtil.getLayoutTemplates(selThemeId) %>"
-						/>
-					</div>
-				</c:if>
-
-				<%
-				for (LayoutPrototype layoutPrototype : layoutPrototypes) {
-				%>
-
-					<div class="hide layout-type" data-prototype-id="<%= layoutPrototype.getLayoutPrototypeId() %>" id="<%= layoutPrototype.getUuid() %>">
-						<p class="small text-muted">
-							<%= HtmlUtil.escape(layoutPrototype.getDescription(locale)) %>
-						</p>
-
-						<aui:input helpMessage="if-enabled-this-page-will-inherit-changes-made-to-the-page-template" id='<%= "addLayoutLayoutPrototypeLinkEnabled" + layoutPrototype.getUuid() %>' label="inherit-changes" name='<%= "layoutPrototypeLinkEnabled" + layoutPrototype.getUuid() %>' type="toggle-switch" value="<%= PropsValues.LAYOUT_PROTOTYPE_LINK_ENABLED_DEFAULT %>" />
-					</div>
-
-				<%
-				}
-
-				liferayPortletRequest.setAttribute(WebKeys.LAYOUT_DESCRIPTIONS, layoutsAdminDisplayContext.getLayoutDescriptions());
-
-				for (String type : types) {
-					if (type.equals("portlet")) {
-						continue;
-					}
-
-					LayoutTypeController layoutTypeController = LayoutTypeControllerTracker.getLayoutTypeController(type);
-
-					if (!layoutTypeController.isInstanceable()) {
-						continue;
-					}
-
-					ResourceBundle layoutTypeResourceBundle = ResourceBundleUtil.getBundle("content.Language", locale, layoutTypeController.getClass());
-				%>
-
-					<div class="hide layout-type" data-type="<%= type %>" id="<%= type %>">
-						<p class="small text-muted">
-							<%= LanguageUtil.get(request, layoutTypeResourceBundle, "layout.types." + type + ".description") %>
-						</p>
-
-						<%= layoutTypeController.includeEditContent(request, response, selLayout) %>
-					</div>
-
-				<%
-				}
-				%>
-
-				<c:if test='<%= ArrayUtil.contains(types, "portlet") %>'>
-					<div class="hide layout-type" data-type="portlet" id="copy">
-						<p class="small text-muted">
-							<liferay-ui:message key="copy-of-a-page-description" />
-						</p>
-
-						<liferay-util:include page="/html/portal/layout/edit/portlet_applications.jsp">
-							<liferay-util:param name="copyLayoutIdPrefix" value="addLayout" />
-						</liferay-util:include>
-					</div>
-				</c:if>
+				<liferay-util:include page="/layout_type_resources.jsp" servletContext="<%= application %>" />
 			</div>
 		</aui:fieldset>
 
 		<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="categorization">
-			<liferay-ui:asset-categories-error />
+			<liferay-asset:asset-categories-error />
 
-			<liferay-ui:asset-tags-error />
+			<liferay-asset:asset-tags-error />
 
 			<liferay-asset:asset-categories-selector className="<%= Layout.class.getName() %>" classPK="<%= selLayout != null ? selLayout.getPrimaryKey() : 0 %>" />
 
@@ -248,34 +202,66 @@ renderResponse.setTitle(LanguageUtil.get(request, "add-new-page"));
 
 	<aui:button-row>
 		<aui:button cssClass="btn-lg" type="submit" value="add-page" />
+
+		<c:if test="<%= Validator.isNotNull(backURL) %>">
+			<aui:button cssClass="btn-lg" href="<%= backURL %>" type="cancel" />
+		</c:if>
 	</aui:button-row>
 </aui:form>
 
-<aui:script use="aui-base">
+<aui:script use="aui-io-request,aui-parse-content">
 	var type = A.one('#<portlet:namespace />type');
 
 	var layoutPrototypeId = A.one('#<portlet:namespace />layoutPrototypeId');
 
 	var nodeList = A.one('#<portlet:namespace />templateList');
 
+	nodeList.plug(A.Plugin.ParseContent);
+
 	A.one('#<portlet:namespace />template').on(
 		'change',
 		function(event) {
-			var id = event.currentTarget.val();
+			var currentTarget = event.currentTarget;
 
-			nodeList.all('.layout-type').addClass('hide');
+			var id = currentTarget.val();
 
-			var currentContent = A.one('#' + id);
+			var index = currentTarget.get('selectedIndex');
 
-			currentContent.removeClass('hide');
+			var selectedOption = currentTarget.get('options').item(index);
 
-			var selectedType = currentContent.attr('data-type');
+			var selectedType = selectedOption.attr('data-type');
 
-			var selectedPrototypeId = currentContent.attr('data-prototype-id');
+			var selectedPrototypeId = selectedOption.attr('data-prototype-id');
 
 			type.attr('value', selectedType);
 
 			layoutPrototypeId.attr('value', selectedPrototypeId);
+
+			var data = Liferay.Util.ns(
+				'<portlet:namespace />',
+				{
+					id: id,
+					prototypeId: selectedPrototypeId,
+					type: selectedType
+				}
+			);
+
+			A.io.request(
+				'<liferay-portlet:resourceURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="mvcPath" value="/layout_type_resources.jsp" /></liferay-portlet:resourceURL>',
+				{
+					data: data,
+					on: {
+						failure: function() {
+							nodeList.html('<div class="alert alert-danger"><liferay-ui:message key="an-unexpected-error-occurred" /></div>');
+						},
+						success: function(event, id, obj) {
+							var responseData = this.get('responseData');
+
+							nodeList.setContent(responseData);
+						}
+					}
+				}
+			);
 		}
 	);
 </aui:script>

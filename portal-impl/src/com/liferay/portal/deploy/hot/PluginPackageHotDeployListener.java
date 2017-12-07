@@ -14,6 +14,7 @@
 
 package com.liferay.portal.deploy.hot;
 
+import com.liferay.petra.log4j.Log4JUtil;
 import com.liferay.portal.kernel.cache.PortalCacheManagerNames;
 import com.liferay.portal.kernel.cache.configurator.PortalCacheConfiguratorSettings;
 import com.liferay.portal.kernel.configuration.Configuration;
@@ -35,7 +36,6 @@ import com.liferay.portal.plugin.PluginPackageUtil;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistrar;
-import com.liferay.util.log4j.Log4JUtil;
 import com.liferay.util.portlet.PortletProps;
 
 import java.lang.reflect.Method;
@@ -247,14 +247,11 @@ public class PluginPackageHotDeployListener extends BaseHotDeployListener {
 			serviceBuilderProperties.getProperty("build.number"));
 		long buildDate = GetterUtil.getLong(
 			serviceBuilderProperties.getProperty("build.date"));
-		boolean buildAutoUpgrade = GetterUtil.getBoolean(
-			serviceBuilderProperties.getProperty("build.auto.upgrade"), true);
 
 		if (_log.isDebugEnabled()) {
 			_log.debug("Build namespace " + buildNamespace);
 			_log.debug("Build number " + buildNumber);
 			_log.debug("Build date " + buildDate);
-			_log.debug("Build auto upgrade " + buildAutoUpgrade);
 		}
 
 		if (Validator.isNull(buildNamespace)) {
@@ -263,8 +260,7 @@ public class PluginPackageHotDeployListener extends BaseHotDeployListener {
 
 		ServiceComponentLocalServiceUtil.initServiceComponent(
 			new ServletServiceContextComponentConfiguration(servletContext),
-			classLoader, buildNamespace, buildNumber, buildDate,
-			buildAutoUpgrade);
+			classLoader, buildNamespace, buildNumber, buildDate);
 	}
 
 	protected void reconfigureCaches(

@@ -14,6 +14,8 @@
 
 package com.liferay.portal.template.freemarker.internal;
 
+import com.liferay.petra.concurrent.ConcurrentReferenceKeyHashMap;
+import com.liferay.petra.memory.FinalizeManager;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.cache.SingleVMPool;
 import com.liferay.portal.kernel.log.Log;
@@ -44,6 +46,7 @@ import freemarker.debug.impl.DebuggerService;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.ext.jsp.TaglibFactory;
+import freemarker.ext.jsp.internal.WriterFactoryUtil;
 import freemarker.ext.servlet.HttpRequestHashModel;
 import freemarker.ext.servlet.ServletContextHashModel;
 
@@ -104,10 +107,22 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 public class FreeMarkerManager extends BaseSingleTemplateManager {
 
 	public static BeansWrapper getBeansWrapper() {
-		BeansWrapperBuilder beansWrapperBuilder = new BeansWrapperBuilder(
-			Configuration.getVersion());
+		Thread currentThread = Thread.currentThread();
 
-		return beansWrapperBuilder.build();
+		ClassLoader classLoader = currentThread.getContextClassLoader();
+
+		BeansWrapper beansWrapper = _beansWrappers.get(classLoader);
+
+		if (beansWrapper == null) {
+			BeansWrapperBuilder beansWrapperBuilder = new BeansWrapperBuilder(
+				Configuration.getVersion());
+
+			beansWrapper = beansWrapperBuilder.build();
+
+			_beansWrappers.put(classLoader, beansWrapper);
+		}
+
+		return beansWrapper;
 	}
 
 	@Override
@@ -256,7 +271,7 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 		}
 		catch (Exception e) {
 			throw new TemplateException(
-				"Unable to Initialize FreeMarker manager");
+				"Unable to Initialize FreeMarker manager", e);
 		}
 
 		_configuration.setDefaultEncoding(StringPool.UTF8);
@@ -325,6 +340,8 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 			bundleContext, stateMask, new TaglibBundleTrackerCustomizer());
 
 		_bundleTracker.open();
+
+		WriterFactoryUtil.setWriterFactory(new UnsyncStringWriterFactory());
 	}
 
 	@Deactivate
@@ -387,6 +404,10 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		FreeMarkerManager.class);
+
+	private static final Map<ClassLoader, BeansWrapper> _beansWrappers =
+		new ConcurrentReferenceKeyHashMap<>(
+			FinalizeManager.WEAK_REFERENCE_FACTORY);
 
 	private Bundle _bundle;
 	private BundleTracker<Set<String>> _bundleTracker;

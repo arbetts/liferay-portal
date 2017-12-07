@@ -18,8 +18,14 @@ import com.liferay.microblogs.model.MicroblogsEntry;
 import com.liferay.microblogs.service.persistence.MicroblogsEntryPersistence;
 
 import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 
+import java.lang.reflect.Field;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,6 +33,28 @@ import java.util.Set;
  * @generated
  */
 public class MicroblogsEntryFinderBaseImpl extends BasePersistenceImpl<MicroblogsEntry> {
+	public MicroblogsEntryFinderBaseImpl() {
+		setModelClass(MicroblogsEntry.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("type", "type_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
+	}
+
 	@Override
 	public Set<String> getBadColumnNames() {
 		return getMicroblogsEntryPersistence().getBadColumnNames();
@@ -53,4 +81,5 @@ public class MicroblogsEntryFinderBaseImpl extends BasePersistenceImpl<Microblog
 
 	@BeanReference(type = MicroblogsEntryPersistence.class)
 	protected MicroblogsEntryPersistence microblogsEntryPersistence;
+	private static final Log _log = LogFactoryUtil.getLog(MicroblogsEntryFinderBaseImpl.class);
 }

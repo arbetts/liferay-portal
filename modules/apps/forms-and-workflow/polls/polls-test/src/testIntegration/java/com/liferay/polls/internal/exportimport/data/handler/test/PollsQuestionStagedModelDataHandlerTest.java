@@ -15,6 +15,9 @@
 package com.liferay.polls.internal.exportimport.data.handler.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
+import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
+import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.polls.model.PollsQuestion;
 import com.liferay.polls.service.PollsQuestionLocalServiceUtil;
 import com.liferay.polls.util.test.PollsTestUtil;
@@ -23,15 +26,16 @@ import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
-import com.liferay.portal.lar.test.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -48,6 +52,44 @@ public class PollsQuestionStagedModelDataHandlerTest
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
 			SynchronousDestinationTestRule.INSTANCE);
+
+	@Test
+	public void testImportedWithExpiredDate() throws Exception {
+		initExport();
+
+		PollsQuestion pollsQuestion = PollsTestUtil.addQuestion(
+			stagingGroup.getGroupId());
+
+		pollsQuestion.setExpirationDate(new Date());
+
+		pollsQuestion = PollsQuestionLocalServiceUtil.updatePollsQuestion(
+			pollsQuestion);
+
+		StagedModelDataHandlerUtil.exportStagedModel(
+			portletDataContext, pollsQuestion);
+
+		initImport();
+
+		PollsQuestion exportedQuestion = (PollsQuestion)readExportedStagedModel(
+			pollsQuestion);
+
+		Assert.assertNotNull(exportedQuestion);
+
+		ExportImportThreadLocal.setPortletImportInProcess(true);
+
+		try {
+			StagedModelDataHandlerUtil.importStagedModel(
+				portletDataContext, exportedQuestion);
+		}
+		finally {
+			ExportImportThreadLocal.setPortletImportInProcess(false);
+		}
+
+		PollsQuestion importedQuestion = (PollsQuestion)getStagedModel(
+			pollsQuestion.getUuid(), liveGroup);
+
+		Assert.assertNotNull(importedQuestion);
+	}
 
 	@Override
 	protected StagedModel addStagedModel(

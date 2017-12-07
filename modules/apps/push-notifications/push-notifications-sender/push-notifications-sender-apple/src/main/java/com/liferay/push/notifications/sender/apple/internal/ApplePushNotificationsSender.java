@@ -16,8 +16,10 @@ package com.liferay.push.notifications.sender.apple.internal;
 
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.push.notifications.constants.PushNotificationsConstants;
 import com.liferay.push.notifications.exception.PushNotificationsException;
@@ -31,9 +33,11 @@ import com.notnoop.apns.PayloadBuilder;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -93,18 +97,8 @@ public class ApplePushNotificationsSender implements PushNotificationsSender {
 
 		ApnsServiceBuilder appleServiceBuilder = APNS.newService();
 
-		InputStream inputStream = null;
-
-		try {
-			try {
-				inputStream = new FileInputStream(certificatePath);
-			}
-			catch (FileNotFoundException fnfe) {
-				ClassLoader classLoader =
-					ApplePushNotificationsSender.class.getClassLoader();
-
-				inputStream = classLoader.getResourceAsStream(certificatePath);
-			}
+		try (InputStream inputStream =
+				_getCertificateInputStream(certificatePath)) {
 
 			if (inputStream == null) {
 				throw new IllegalArgumentException(
@@ -113,8 +107,10 @@ public class ApplePushNotificationsSender implements PushNotificationsSender {
 
 			appleServiceBuilder.withCert(inputStream, certificatePassword);
 		}
-		finally {
-			StreamUtil.cleanUp(inputStream);
+		catch (IOException ioe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(ioe, ioe);
+			}
 		}
 
 		appleServiceBuilder.withDelegate(new AppleDelegate());
@@ -180,17 +176,28 @@ public class ApplePushNotificationsSender implements PushNotificationsSender {
 			builder.sound(sound);
 		}
 
-		payloadJSONObject.remove(PushNotificationsConstants.KEY_BADGE);
-		payloadJSONObject.remove(PushNotificationsConstants.KEY_BODY);
-		payloadJSONObject.remove(PushNotificationsConstants.KEY_BODY_LOCALIZED);
-		payloadJSONObject.remove(
-			PushNotificationsConstants.KEY_BODY_LOCALIZED_ARGUMENTS);
-		payloadJSONObject.remove(PushNotificationsConstants.KEY_SILENT);
-		payloadJSONObject.remove(PushNotificationsConstants.KEY_SOUND);
+		JSONObject newPayloadJSONObject = JSONFactoryUtil.createJSONObject();
+
+		Iterator<String> iterator = payloadJSONObject.keys();
+
+		while (iterator.hasNext()) {
+			String key = iterator.next();
+
+			if (!key.equals(PushNotificationsConstants.KEY_BADGE) &&
+				!key.equals(PushNotificationsConstants.KEY_BODY) &&
+				!key.equals(PushNotificationsConstants.KEY_BODY_LOCALIZED) &&
+				!key.equals(
+					PushNotificationsConstants.KEY_BODY_LOCALIZED_ARGUMENTS) &&
+				!key.equals(PushNotificationsConstants.KEY_SOUND) &&
+				!key.equals(PushNotificationsConstants.KEY_SILENT)) {
+
+				newPayloadJSONObject.put(key, payloadJSONObject.get(key));
+			}
+		}
 
 		builder.customField(
 			PushNotificationsConstants.KEY_PAYLOAD,
-			payloadJSONObject.toString());
+			newPayloadJSONObject.toString());
 
 		return builder.build();
 	}
@@ -199,6 +206,21 @@ public class ApplePushNotificationsSender implements PushNotificationsSender {
 	protected void deactivate() {
 		_apnsService = null;
 	}
+
+	private InputStream _getCertificateInputStream(String certificatePath) {
+		try {
+			return new FileInputStream(certificatePath);
+		}
+		catch (FileNotFoundException fnfe) {
+			ClassLoader classLoader =
+				ApplePushNotificationsSender.class.getClassLoader();
+
+			return classLoader.getResourceAsStream(certificatePath);
+		}
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		ApplePushNotificationsSender.class);
 
 	private volatile ApnsService _apnsService;
 

@@ -38,8 +38,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.security.permission.comparator.ActionComparator;
 import com.liferay.portal.kernel.service.GroupService;
-import com.liferay.portal.kernel.service.ResourceBlockLocalService;
-import com.liferay.portal.kernel.service.ResourceBlockService;
+import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionService;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.RoleService;
@@ -50,12 +49,11 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -90,6 +88,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	immediate = true,
 	property = {
+		"com.liferay.portlet.add-default-resource=true",
 		"com.liferay.portlet.css-class-wrapper=portlet-users-admin",
 		"com.liferay.portlet.display-category=category.hidden",
 		"com.liferay.portlet.header-portlet-css=/css/main.css",
@@ -139,29 +138,15 @@ public class RolesAdminPortlet extends MVCPortlet {
 			throw new RolePermissionsException(roleName);
 		}
 
-		if (_resourceBlockLocalService.isSupported(name)) {
-			if (scope == ResourceConstants.SCOPE_GROUP) {
-				_resourceBlockService.removeGroupScopePermission(
-					themeDisplay.getScopeGroupId(), themeDisplay.getCompanyId(),
-					GetterUtil.getLong(primKey), name, roleId, actionId);
-			}
-			else {
-				_resourceBlockService.removeCompanyScopePermission(
-					themeDisplay.getScopeGroupId(), themeDisplay.getCompanyId(),
-					name, roleId, actionId);
-			}
-		}
-		else {
-			_resourcePermissionService.removeResourcePermission(
-				themeDisplay.getScopeGroupId(), themeDisplay.getCompanyId(),
-				name, scope, primKey, roleId, actionId);
-		}
+		_resourcePermissionService.removeResourcePermission(
+			themeDisplay.getScopeGroupId(), themeDisplay.getCompanyId(), name,
+			scope, primKey, roleId, actionId);
 
 		// Send redirect
 
 		SessionMessages.add(actionRequest, "permissionDeleted");
 
-		String redirect = PortalUtil.escapeRedirect(
+		String redirect = _portal.escapeRedirect(
 			ParamUtil.getString(actionRequest, "redirect"));
 
 		if (Validator.isNotNull(redirect)) {
@@ -217,7 +202,7 @@ public class RolesAdminPortlet extends MVCPortlet {
 
 			String redirect = ParamUtil.getString(actionRequest, "redirect");
 
-			redirect = HttpUtil.setParameter(
+			redirect = _http.setParameter(
 				redirect, actionResponse.getNamespace() + "roleId",
 				role.getRoleId());
 
@@ -232,6 +217,20 @@ public class RolesAdminPortlet extends MVCPortlet {
 		else {
 
 			// Update role
+
+			if (name.equals(RoleConstants.SITE_ADMINISTRATOR)) {
+				Role role = _roleLocalService.getRole(roleId);
+				ThemeDisplay themeDisplay =
+					(ThemeDisplay)actionRequest.getAttribute(
+						WebKeys.THEME_DISPLAY);
+				boolean manageSubgroups = ParamUtil.getBoolean(
+					actionRequest, "manageSubgroups");
+
+				updateAction(
+					role, themeDisplay.getScopeGroupId(), Group.class.getName(),
+					ActionKeys.MANAGE_SUBGROUPS, manageSubgroups,
+					ResourceConstants.SCOPE_GROUP_TEMPLATE, new String[0]);
+			}
 
 			return _roleService.updateRole(
 				roleId, name, titleMap, descriptionMap, subtype,
@@ -390,16 +389,9 @@ public class RolesAdminPortlet extends MVCPortlet {
 					}
 				}
 
-				if (_resourceBlockLocalService.isSupported(selResource)) {
-					updateActions_Blocks(
-						role, themeDisplay.getScopeGroupId(), selResource,
-						actionId, selected, scope, groupIds);
-				}
-				else {
-					updateAction(
-						role, themeDisplay.getScopeGroupId(), selResource,
-						actionId, selected, scope, groupIds);
-				}
+				updateAction(
+					role, themeDisplay.getScopeGroupId(), selResource, actionId,
+					selected, scope, groupIds);
 
 				if (selected &&
 					actionId.equals(ActionKeys.ACCESS_IN_CONTROL_PANEL)) {
@@ -426,7 +418,7 @@ public class RolesAdminPortlet extends MVCPortlet {
 
 		SessionMessages.add(actionRequest, "permissionsUpdated");
 
-		String redirect = PortalUtil.escapeRedirect(
+		String redirect = _portal.escapeRedirect(
 			ParamUtil.getString(actionRequest, "redirect"));
 
 		if (Validator.isNotNull(redirect)) {
@@ -523,20 +515,6 @@ public class RolesAdminPortlet extends MVCPortlet {
 	}
 
 	@Reference(unbind = "-")
-	protected void setResourceBlockLocalService(
-		ResourceBlockLocalService resourceBlockLocalService) {
-
-		_resourceBlockLocalService = resourceBlockLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setResourceBlockService(
-		ResourceBlockService resourceBlockService) {
-
-		_resourceBlockService = resourceBlockService;
-	}
-
-	@Reference(unbind = "-")
 	protected void setResourcePermissionService(
 		ResourcePermissionService resourcePermissionService) {
 
@@ -610,42 +588,6 @@ public class RolesAdminPortlet extends MVCPortlet {
 		}
 	}
 
-	protected void updateActions_Blocks(
-			Role role, long scopeGroupId, String selResource, String actionId,
-			boolean selected, int scope, String[] groupIds)
-		throws Exception {
-
-		long companyId = role.getCompanyId();
-		long roleId = role.getRoleId();
-
-		if (selected) {
-			if (scope == ResourceConstants.SCOPE_GROUP) {
-				_resourceBlockService.removeAllGroupScopePermissions(
-					scopeGroupId, companyId, selResource, roleId, actionId);
-				_resourceBlockService.removeCompanyScopePermission(
-					scopeGroupId, companyId, selResource, roleId, actionId);
-
-				for (String groupId : groupIds) {
-					_resourceBlockService.addGroupScopePermission(
-						scopeGroupId, companyId, GetterUtil.getLong(groupId),
-						selResource, roleId, actionId);
-				}
-			}
-			else {
-				_resourceBlockService.removeAllGroupScopePermissions(
-					scopeGroupId, companyId, selResource, roleId, actionId);
-				_resourceBlockService.addCompanyScopePermission(
-					scopeGroupId, companyId, selResource, roleId, actionId);
-			}
-		}
-		else {
-			_resourceBlockService.removeAllGroupScopePermissions(
-				scopeGroupId, companyId, selResource, roleId, actionId);
-			_resourceBlockService.removeCompanyScopePermission(
-				scopeGroupId, companyId, selResource, roleId, actionId);
-		}
-	}
-
 	protected void updateViewControlPanelPermission(
 			Role role, long scopeGroupId, String portletId, int scope,
 			String[] groupIds)
@@ -699,10 +641,19 @@ public class RolesAdminPortlet extends MVCPortlet {
 	}
 
 	private GroupService _groupService;
+
+	@Reference
+	private Http _http;
+
 	private PanelAppRegistry _panelAppRegistry;
 	private PanelCategoryRegistry _panelCategoryRegistry;
-	private ResourceBlockLocalService _resourceBlockLocalService;
-	private ResourceBlockService _resourceBlockService;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private ResourceActionLocalService _resourceActionLocalService;
+
 	private ResourcePermissionService _resourcePermissionService;
 	private RoleLocalService _roleLocalService;
 	private RoleService _roleService;

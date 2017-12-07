@@ -19,6 +19,7 @@ import com.liferay.dynamic.data.lists.model.DDLRecordSet;
 import com.liferay.dynamic.data.lists.model.DDLRecordSetConstants;
 import com.liferay.dynamic.data.lists.model.DDLRecordVersion;
 import com.liferay.dynamic.data.lists.service.DDLRecordLocalService;
+import com.liferay.dynamic.data.lists.service.DDLRecordVersionLocalService;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
@@ -38,13 +39,10 @@ import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.service.ServiceContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -57,9 +55,8 @@ import org.osgi.service.component.annotations.Reference;
 	property = {
 		"model.class.name=com.liferay.dynamic.data.lists.model.DDLRecord"
 	},
-	service = {
-		DDLRecordStagedModelRepository.class, StagedModelRepository.class
-	}
+	service =
+		{DDLRecordStagedModelRepository.class, StagedModelRepository.class}
 )
 public class DDLRecordStagedModelRepository
 	extends BaseStagedModelRepository<DDLRecord> {
@@ -86,9 +83,13 @@ public class DDLRecordStagedModelRepository
 			serviceContext.setUuid(ddlRecord.getUuid());
 		}
 
-		return _ddlRecordLocalService.addRecord(
+		DDLRecord importedRecord = _ddlRecordLocalService.addRecord(
 			userId, ddlRecord.getGroupId(), ddlRecord.getRecordSetId(),
 			ddlRecord.getDisplayIndex(), ddmFormValues, serviceContext);
+
+		updateVersions(importedRecord, ddlRecord.getVersion());
+
+		return importedRecord;
 	}
 
 	@Override
@@ -111,38 +112,6 @@ public class DDLRecordStagedModelRepository
 	@Override
 	public void deleteStagedModels(PortletDataContext portletDataContext)
 		throws PortalException {
-	}
-
-	public List<StagedModel> fetchChildrenStagedModels(
-		PortletDataContext portletDataContext, DDLRecord ddlRecord) {
-
-		return Collections.emptyList();
-	}
-
-	public List<StagedModel> fetchDependencyStagedModels(
-		PortletDataContext portletDataContext, DDLRecord ddlRecord) {
-
-		Optional<DDLRecordSet> ddlRecordSetOptional = null;
-
-		try {
-			ddlRecordSetOptional = Optional.ofNullable(
-				ddlRecord.getRecordSet());
-		}
-		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-		}
-
-		List<StagedModel> dependencyStagedModels = new ArrayList<>();
-
-		ddlRecordSetOptional.ifPresent(
-			(bookmarksFolder) -> dependencyStagedModels.add(bookmarksFolder));
-
-		return dependencyStagedModels;
 	}
 
 	@Override
@@ -236,9 +205,13 @@ public class DDLRecordStagedModelRepository
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
 			ddlRecord);
 
-		return _ddlRecordLocalService.updateRecord(
+		DDLRecord importedRecord = _ddlRecordLocalService.updateRecord(
 			userId, ddlRecord.getRecordId(), false, ddlRecord.getDisplayIndex(),
 			ddmFormValues, serviceContext);
+
+		updateVersions(importedRecord, ddlRecord.getVersion());
+
+		return importedRecord;
 	}
 
 	protected DynamicQuery getRecordSetDynamicQuery(int scope) {
@@ -295,10 +268,33 @@ public class DDLRecordStagedModelRepository
 		return recordVersionDynamicQuery;
 	}
 
+	protected void updateVersions(DDLRecord importedRecord, String version)
+		throws PortalException {
+
+		if (Objects.equals(importedRecord.getVersion(), version)) {
+			return;
+		}
+
+		DDLRecordVersion importedRecordVersion =
+			importedRecord.getRecordVersion();
+
+		importedRecordVersion.setVersion(version);
+
+		_ddlRecordVersionLocalService.updateDDLRecordVersion(
+			importedRecordVersion);
+
+		importedRecord.setVersion(version);
+
+		_ddlRecordLocalService.updateDDLRecord(importedRecord);
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		DDLRecordStagedModelRepository.class);
 
 	@Reference
 	private DDLRecordLocalService _ddlRecordLocalService;
+
+	@Reference
+	private DDLRecordVersionLocalService _ddlRecordVersionLocalService;
 
 }

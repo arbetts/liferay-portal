@@ -19,6 +19,8 @@ import com.liferay.gradle.plugins.internal.util.FileUtil;
 import com.liferay.gradle.plugins.internal.util.GradleUtil;
 import com.liferay.gradle.plugins.jasper.jspc.CompileJSPTask;
 import com.liferay.gradle.plugins.jasper.jspc.JspCPlugin;
+import com.liferay.gradle.plugins.util.PortalTools;
+import com.liferay.gradle.util.Validator;
 
 import java.io.File;
 
@@ -59,6 +61,20 @@ public class JspCDefaultsPlugin
 		GradleUtil.addDependency(
 			project, getPortalToolConfigurationName(), "org.apache.ant", "ant",
 			"1.9.4");
+	}
+
+	@Override
+	protected void addPortalToolDependencies(
+		Project project, String configurationName, String portalToolName) {
+
+		String portalToolVersion = PortalTools.getVersion(
+			project, portalToolName);
+
+		if (Validator.isNotNull(portalToolVersion)) {
+			GradleUtil.addDependency(
+				project, configurationName, PortalTools.GROUP, portalToolName,
+				portalToolVersion);
+		}
 	}
 
 	@Override

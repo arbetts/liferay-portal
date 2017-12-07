@@ -23,6 +23,8 @@ String backURL = ParamUtil.getString(request, "backURL");
 String referringPortletResource = ParamUtil.getString(request, "referringPortletResource");
 
 String displayStyle = ParamUtil.getString(request, "displayStyle", "list");
+String orderByCol = ParamUtil.getString(request, "orderByCol", "version");
+String orderByType = ParamUtil.getString(request, "orderByType", "asc");
 
 JournalArticle article = journalDisplayContext.getArticle();
 %>
@@ -48,6 +50,23 @@ JournalArticle article = journalDisplayContext.getArticle();
 		portletURL.setParameter("referringPortletResource", referringPortletResource);
 		portletURL.setParameter("groupId", String.valueOf(article.getGroupId()));
 		portletURL.setParameter("articleId", article.getArticleId());
+		portletURL.setParameter("displayStyle", displayStyle);
+		portletURL.setParameter("orderByCol", orderByCol);
+		portletURL.setParameter("orderByType", orderByType);
+
+		SearchContainer articleSearchContainer = new SearchContainer(renderRequest, portletURL, null, null);
+
+		articleSearchContainer.setRowChecker(new EmptyOnClickRowChecker(renderResponse));
+
+		int articleVersionsCount = JournalArticleServiceUtil.getArticlesCountByArticleId(article.getGroupId(), article.getArticleId());
+
+		articleSearchContainer.setTotal(articleVersionsCount);
+
+		OrderByComparator<JournalArticle> orderByComparator = JournalPortletUtil.getArticleOrderByComparator(orderByCol, orderByType);
+
+		List<JournalArticle> articleVersions = JournalArticleServiceUtil.getArticlesByArticleId(article.getGroupId(), article.getArticleId(), articleSearchContainer.getStart(), articleSearchContainer.getEnd(), orderByComparator);
+
+		articleSearchContainer.setResults(articleVersions);
 		%>
 
 		<aui:nav-bar markupView="lexicon">
@@ -75,8 +94,8 @@ JournalArticle article = journalDisplayContext.getArticle();
 				/>
 
 				<liferay-frontend:management-bar-sort
-					orderByCol="<%= journalDisplayContext.getOrderByCol() %>"
-					orderByType="<%= journalDisplayContext.getOrderByType() %>"
+					orderByCol="<%= orderByCol %>"
+					orderByType="<%= orderByType %>"
 					orderColumns='<%= new String[] {"version", "display-date", "modified-date"} %>'
 					portletURL="<%= PortletURLUtil.clone(portletURL, renderResponse) %>"
 				/>
@@ -99,14 +118,8 @@ JournalArticle article = journalDisplayContext.getArticle();
 
 			<liferay-ui:search-container
 				id="articleVersions"
-				rowChecker="<%= new EmptyOnClickRowChecker(renderResponse) %>"
-				searchContainer="<%= new ArticleSearch(renderRequest, portletURL) %>"
-				total="<%= JournalArticleServiceUtil.getArticlesCountByArticleId(article.getGroupId(), article.getArticleId()) %>"
+				searchContainer="<%= articleSearchContainer %>"
 			>
-				<liferay-ui:search-container-results
-					results="<%= JournalArticleServiceUtil.getArticlesByArticleId(article.getGroupId(), article.getArticleId(), searchContainer.getStart(), searchContainer.getEnd(), searchContainer.getOrderByComparator()) %>"
-				/>
-
 				<liferay-ui:search-container-row
 					className="com.liferay.journal.model.JournalArticle"
 					modelVar="articleVersion"
@@ -149,7 +162,7 @@ JournalArticle article = journalDisplayContext.getArticle();
 							</liferay-ui:search-container-column-text>
 
 							<liferay-ui:search-container-column-jsp
-								path="/article_version_action.jsp"
+								path="/article_history_action.jsp"
 							/>
 						</c:when>
 						<c:when test='<%= displayStyle.equals("icon") %>'>
@@ -167,7 +180,7 @@ JournalArticle article = journalDisplayContext.getArticle();
 								<c:choose>
 									<c:when test="<%= Validator.isNotNull(articleImageURL) %>">
 										<liferay-frontend:vertical-card
-											actionJsp="/article_version_action.jsp"
+											actionJsp="/article_history_action.jsp"
 											actionJspServletContext="<%= application %>"
 											imageUrl="<%= articleImageURL %>"
 											resultRow="<%= row %>"
@@ -179,7 +192,7 @@ JournalArticle article = journalDisplayContext.getArticle();
 									</c:when>
 									<c:otherwise>
 										<liferay-frontend:icon-vertical-card
-											actionJsp="/article_version_action.jsp"
+											actionJsp="/article_history_action.jsp"
 											actionJspServletContext="<%= application %>"
 											icon="web-content"
 											resultRow="<%= row %>"
@@ -233,7 +246,7 @@ JournalArticle article = journalDisplayContext.getArticle();
 							/>
 
 							<liferay-ui:search-container-column-jsp
-								path="/article_version_action.jsp"
+								path="/article_history_action.jsp"
 							/>
 						</c:when>
 					</c:choose>

@@ -14,11 +14,25 @@
 
 package com.liferay.portal.kernel.util;
 
+import com.liferay.portal.kernel.test.randomizerbumpers.RandomizerBumper;
+import com.liferay.portal.kernel.test.rule.CodeCoverageAssertor;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import java.lang.reflect.Method;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 /**
@@ -27,6 +41,30 @@ import org.junit.Test;
  * @author Hugo Huijser
  */
 public class StringUtilTest {
+
+	@ClassRule
+	public static final CodeCoverageAssertor codeCoverageAssertor =
+		new CodeCoverageAssertor() {
+
+			@Override
+			public void appendAssertClasses(List<Class<?>> assertClasses) {
+				assertClasses.clear();
+			}
+
+			@Override
+			public List<Method> getAssertMethods()
+				throws ReflectiveOperationException {
+
+				return Arrays.asList(
+					StringUtil.class.getDeclaredMethod(
+						"read", InputStream.class),
+					StringUtil.class.getDeclaredMethod(
+						"readLines", InputStream.class, Collection.class),
+					StringUtil.class.getDeclaredMethod(
+						"_read", InputStream.class));
+			}
+
+		};
 
 	@Test
 	public void testAppendParentheticalSuffixInteger() {
@@ -270,6 +308,67 @@ public class StringUtilTest {
 	}
 
 	@Test
+	public void testRead() throws Exception {
+		Assert.assertEquals(
+			StringPool.BLANK,
+			StringUtil.read(new ByteArrayInputStream(new byte[0])));
+
+		Assert.assertEquals(
+			StringPool.BLANK,
+			StringUtil.read(new ByteArrayInputStream(new byte[0])));
+
+		Assert.assertEquals(
+			"A\nB",
+			StringUtil.read(new ByteArrayInputStream("A\rB".getBytes())));
+
+		Assert.assertEquals(
+			"A\nB",
+			StringUtil.read(new ByteArrayInputStream("A\r\nB".getBytes())));
+
+		Assert.assertEquals(
+			"Test",
+			StringUtil.read(new ByteArrayInputStream(" Test ".getBytes())));
+
+		String expected = RandomTestUtil.randomString(
+			8193,
+			(RandomizerBumper<String>)randomValue ->
+				(randomValue.indexOf(CharPool.RETURN) == -1) &&
+				!Character.isWhitespace(randomValue.charAt(0)) &&
+				!Character.isWhitespace(randomValue.charAt(8192)));
+
+		Assert.assertEquals(
+			expected,
+			StringUtil.read(new ByteArrayInputStream(expected.getBytes())));
+	}
+
+	@Test
+	public void testReadLines() throws Exception {
+		List<String> lines = new ArrayList<>();
+
+		StringUtil.readLines(new ByteArrayInputStream(new byte[0]), lines);
+
+		Assert.assertEquals(lines.toString(), 0, lines.size());
+
+		StringUtil.readLines(
+			new ByteArrayInputStream(StringPool.SPACE.getBytes()), lines);
+
+		Assert.assertEquals(lines.toString(), 1, lines.size());
+		Assert.assertEquals(StringPool.SPACE, lines.get(0));
+
+		StringUtil.readLines(
+			new ByteArrayInputStream(StringPool.RETURN.getBytes()), lines);
+
+		Assert.assertEquals(lines.toString(), 2, lines.size());
+		Assert.assertEquals(StringPool.BLANK, lines.get(1));
+
+		StringUtil.readLines(
+			new ByteArrayInputStream(" Test ".getBytes()), lines);
+
+		Assert.assertEquals(lines.toString(), 3, lines.size());
+		Assert.assertEquals(" Test ", lines.get(2));
+	}
+
+	@Test
 	public void testRemoveChar() {
 		Assert.assertEquals("abcd", StringUtil.removeChar("a.b.c.d", '.'));
 		Assert.assertEquals("abcd", StringUtil.removeChar(".a.b.c.d.", '.'));
@@ -507,9 +606,8 @@ public class StringUtilTest {
 	public void testShortenStringWith4ByteChars() {
 		int space = CharPool.SPACE;
 
-		int[] codePoints = new int[] {
-			128515, 128516, space, 128517, 128518, 128519, 128520, 128521
-		};
+		int[] codePoints =
+			{128515, 128516, space, 128517, 128518, 128519, 128520, 128521};
 
 		String string = new String(codePoints, 0, codePoints.length);
 
@@ -541,8 +639,8 @@ public class StringUtilTest {
 			new double[] {1.0, 2.0, 3.0}, StringUtil.split("1.0,2.0,3.0", 1.0),
 			0.0001);
 		Assert.assertArrayEquals(
-			new float[] {1.0f, 2.0f, 3.0f},
-			StringUtil.split("1.0,2.0,3.0", 1.0f), .0001f);
+			new float[] {1.0F, 2.0F, 3.0F},
+			StringUtil.split("1.0,2.0,3.0", 1.0F), .0001F);
 		Assert.assertArrayEquals(
 			new int[] {1, 2, 3}, StringUtil.split("1,2,3", 1));
 		Assert.assertArrayEquals(
@@ -555,14 +653,14 @@ public class StringUtilTest {
 
 		String[] lines = StringUtil.splitLines(singleLine);
 
-		Assert.assertEquals(1, lines.length);
+		Assert.assertEquals(Arrays.toString(lines), 1, lines.length);
 		Assert.assertEquals(singleLine, lines[0]);
 
 		String splitByReturn = "abcd\refg\rhijk\rlmn\r";
 
 		lines = StringUtil.splitLines(splitByReturn);
 
-		Assert.assertEquals(4, lines.length);
+		Assert.assertEquals(Arrays.toString(lines), 4, lines.length);
 		Assert.assertEquals("abcd", lines[0]);
 		Assert.assertEquals("efg", lines[1]);
 		Assert.assertEquals("hijk", lines[2]);
@@ -572,7 +670,7 @@ public class StringUtilTest {
 
 		lines = StringUtil.splitLines(splitByNewLine);
 
-		Assert.assertEquals(4, lines.length);
+		Assert.assertEquals(Arrays.toString(lines), 4, lines.length);
 		Assert.assertEquals("abcd", lines[0]);
 		Assert.assertEquals("efg", lines[1]);
 		Assert.assertEquals("hijk", lines[2]);
@@ -582,7 +680,7 @@ public class StringUtilTest {
 
 		lines = StringUtil.splitLines(splitByBoth);
 
-		Assert.assertEquals(4, lines.length);
+		Assert.assertEquals(Arrays.toString(lines), 4, lines.length);
 		Assert.assertEquals("abcd", lines[0]);
 		Assert.assertEquals("efg", lines[1]);
 		Assert.assertEquals("hijk", lines[2]);
@@ -592,7 +690,7 @@ public class StringUtilTest {
 
 		lines = StringUtil.splitLines(splitByMix);
 
-		Assert.assertEquals(5, lines.length);
+		Assert.assertEquals(Arrays.toString(lines), 5, lines.length);
 		Assert.assertEquals("abcd", lines[0]);
 		Assert.assertEquals("efg", lines[1]);
 		Assert.assertEquals("hijk", lines[2]);
@@ -612,19 +710,6 @@ public class StringUtilTest {
 			StringUtil.stripBetween(
 				"One small step for man, one giant leap for mankind",
 				StringPool.BLANK, StringPool.BLANK));
-	}
-
-	@Test
-	public void testStripChar() {
-		Assert.assertEquals("abcd", StringUtil.strip(" a b  c   d", ' '));
-	}
-
-	@Test
-	public void testStripCharArray() {
-		Assert.assertEquals(
-			"HeoWor",
-			StringUtil.strip(
-				"Hello World", new char[] {CharPool.SPACE, 'l', 'd'}));
 	}
 
 	@Test
@@ -732,6 +817,10 @@ public class StringUtilTest {
 		// Surrounding spaces
 
 		Assert.assertEquals("ab", StringUtil.trim(" \t\r\nab \t\r\n"));
+
+		// UTF-8 spaces
+
+		Assert.assertEquals("ab", StringUtil.trim("\u3000ab\u3000"));
 	}
 
 	@Test

@@ -17,7 +17,7 @@ package com.liferay.layout.item.selector.web;
 import com.liferay.item.selector.ItemSelectorView;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
 import java.util.Locale;
@@ -30,24 +30,29 @@ import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eudaldo Alonso
+ * @deprecated As of 1.1.0, replaced by {@link
+ *             com.liferay.layout.item.selector.web.internal.PrivateLayoutsItemSelectorView}
  */
 @Component(
 	service = {ItemSelectorView.class, PrivateLayoutsItemSelectorView.class}
 )
+@Deprecated
 public class PrivateLayoutsItemSelectorView
 	extends BaseLayoutsItemSelectorView {
 
+	@Override
 	public ServletContext getServletContext() {
 		return _servletContext;
 	}
 
 	@Override
 	public String getTitle(Locale locale) {
-		ResourceBundle resourceBundle = PortalUtil.getResourceBundle(locale);
+		ResourceBundle resourceBundle = _portal.getResourceBundle(locale);
 
 		return ResourceBundleUtil.getString(resourceBundle, "private-pages");
 	}
 
+	@Override
 	public boolean isPrivateLayout() {
 		return true;
 	}
@@ -70,6 +75,9 @@ public class PrivateLayoutsItemSelectorView
 	public void setServletContext(ServletContext servletContext) {
 		_servletContext = servletContext;
 	}
+
+	@Reference
+	private Portal _portal;
 
 	private ServletContext _servletContext;
 

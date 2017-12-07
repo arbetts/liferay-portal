@@ -1,6 +1,6 @@
 <#include "../init.ftl">
 
-<#if !(fields?? && fields.get(fieldName)??) && (fieldRawValue == "")>
+<#if !(fields?? && fields.get(fieldName)??) && validator.isNull(fieldRawValue)>
 	<#assign fieldRawValue = predefinedValue />
 </#if>
 
@@ -22,13 +22,14 @@
 	/>
 </#if>
 
-<#assign itemSelectorAuthToken = authTokenUtil.getToken(request, themeDisplay.getPlid(), "com_liferay_item_selector_web_portlet_ItemSelectorPortlet") />
-
 <#assign data = data + {
 	"itemSelectorAuthToken": itemSelectorAuthToken
 }>
 
-<@liferay_aui["field-wrapper"] cssClass="form-builder-field" data=data>
+<@liferay_aui["field-wrapper"]
+	cssClass="form-builder-field"
+	data=data
+>
 	<div class="form-group">
 		<div class="hide" id="${portletNamespace}${namespacedFieldName}UploadContainer"></div>
 
@@ -40,13 +41,19 @@
 
 		<@liferay_aui.input
 			helpMessage=escape(fieldStructure.tip)
-			inlineField=true label=escape(label)
+			inlineField=true
+			label=escape(label)
 			name="${namespacedFieldName}Title"
-			readonly="readonly" type="text"
+			readonly="readonly"
+			type="text"
 			value=(name?has_content)?string(name, languageUtil.get(locale, "drag-file-here"))
 		/>
 
-		<@liferay_aui.input name=namespacedFieldName type="hidden" value=fieldRawValue>
+		<@liferay_aui.input
+			name=namespacedFieldName
+			type="hidden"
+			value=fieldRawValue
+		>
 			<#if required>
 				<@liferay_aui.validator name="required" />
 			</#if>

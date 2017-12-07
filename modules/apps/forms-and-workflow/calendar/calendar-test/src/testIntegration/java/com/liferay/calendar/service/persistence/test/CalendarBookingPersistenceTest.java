@@ -35,7 +35,6 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
@@ -139,8 +138,6 @@ public class CalendarBookingPersistenceTest {
 
 		newCalendarBooking.setModifiedDate(RandomTestUtil.nextDate());
 
-		newCalendarBooking.setResourceBlockId(RandomTestUtil.nextLong());
-
 		newCalendarBooking.setCalendarId(RandomTestUtil.nextLong());
 
 		newCalendarBooking.setCalendarResourceId(RandomTestUtil.nextLong());
@@ -205,8 +202,6 @@ public class CalendarBookingPersistenceTest {
 		Assert.assertEquals(Time.getShortTimestamp(
 				existingCalendarBooking.getModifiedDate()),
 			Time.getShortTimestamp(newCalendarBooking.getModifiedDate()));
-		Assert.assertEquals(existingCalendarBooking.getResourceBlockId(),
-			newCalendarBooking.getResourceBlockId());
 		Assert.assertEquals(existingCalendarBooking.getCalendarId(),
 			newCalendarBooking.getCalendarId());
 		Assert.assertEquals(existingCalendarBooking.getCalendarResourceId(),
@@ -254,35 +249,28 @@ public class CalendarBookingPersistenceTest {
 	}
 
 	@Test
-	public void testCountByResourceBlockId() throws Exception {
-		_persistence.countByResourceBlockId(RandomTestUtil.nextLong());
-
-		_persistence.countByResourceBlockId(0L);
-	}
-
-	@Test
 	public void testCountByUuid() throws Exception {
-		_persistence.countByUuid(StringPool.BLANK);
+		_persistence.countByUuid("");
 
-		_persistence.countByUuid(StringPool.NULL);
+		_persistence.countByUuid("null");
 
 		_persistence.countByUuid((String)null);
 	}
 
 	@Test
 	public void testCountByUUID_G() throws Exception {
-		_persistence.countByUUID_G(StringPool.BLANK, RandomTestUtil.nextLong());
+		_persistence.countByUUID_G("", RandomTestUtil.nextLong());
 
-		_persistence.countByUUID_G(StringPool.NULL, 0L);
+		_persistence.countByUUID_G("null", 0L);
 
 		_persistence.countByUUID_G((String)null, 0L);
 	}
 
 	@Test
 	public void testCountByUuid_C() throws Exception {
-		_persistence.countByUuid_C(StringPool.BLANK, RandomTestUtil.nextLong());
+		_persistence.countByUuid_C("", RandomTestUtil.nextLong());
 
-		_persistence.countByUuid_C(StringPool.NULL, 0L);
+		_persistence.countByUuid_C("null", 0L);
 
 		_persistence.countByUuid_C((String)null, 0L);
 	}
@@ -326,9 +314,9 @@ public class CalendarBookingPersistenceTest {
 
 	@Test
 	public void testCountByC_V() throws Exception {
-		_persistence.countByC_V(RandomTestUtil.nextLong(), StringPool.BLANK);
+		_persistence.countByC_V(RandomTestUtil.nextLong(), "");
 
-		_persistence.countByC_V(0L, StringPool.NULL);
+		_persistence.countByC_V(0L, "null");
 
 		_persistence.countByC_V(0L, (String)null);
 	}
@@ -381,8 +369,8 @@ public class CalendarBookingPersistenceTest {
 		return OrderByComparatorFactoryUtil.create("CalendarBooking", "uuid",
 			true, "calendarBookingId", true, "groupId", true, "companyId",
 			true, "userId", true, "userName", true, "createDate", true,
-			"modifiedDate", true, "resourceBlockId", true, "calendarId", true,
-			"calendarResourceId", true, "parentCalendarBookingId", true,
+			"modifiedDate", true, "calendarId", true, "calendarResourceId",
+			true, "parentCalendarBookingId", true,
 			"recurringCalendarBookingId", true, "vEventUid", true, "title",
 			true, "location", true, "startTime", true, "endTime", true,
 			"allDay", true, "recurrence", true, "firstReminder", true,
@@ -638,8 +626,6 @@ public class CalendarBookingPersistenceTest {
 		calendarBooking.setCreateDate(RandomTestUtil.nextDate());
 
 		calendarBooking.setModifiedDate(RandomTestUtil.nextDate());
-
-		calendarBooking.setResourceBlockId(RandomTestUtil.nextLong());
 
 		calendarBooking.setCalendarId(RandomTestUtil.nextLong());
 

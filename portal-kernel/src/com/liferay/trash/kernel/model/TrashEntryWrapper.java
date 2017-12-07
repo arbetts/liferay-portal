@@ -35,8 +35,11 @@ import java.util.Objects;
  *
  * @author Brian Wing Shun Chan
  * @see TrashEntry
+ * @deprecated As of 7.0.0, replaced by {@link
+com.liferay.trash.model.impl.TrashEntryImpl}
  * @generated
  */
+@Deprecated
 @ProviderType
 public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	public TrashEntryWrapper(TrashEntry trashEntry) {
@@ -308,9 +311,9 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	}
 
 	/**
-	* Returns the class p k of this trash entry.
+	* Returns the class pk of this trash entry.
 	*
-	* @return the class p k of this trash entry
+	* @return the class pk of this trash entry
 	*/
 	@Override
 	public long getClassPK() {
@@ -403,9 +406,9 @@ public class TrashEntryWrapper implements TrashEntry, ModelWrapper<TrashEntry> {
 	}
 
 	/**
-	* Sets the class p k of this trash entry.
+	* Sets the class pk of this trash entry.
 	*
-	* @param classPK the class p k of this trash entry
+	* @param classPK the class pk of this trash entry
 	*/
 	@Override
 	public void setClassPK(long classPK) {

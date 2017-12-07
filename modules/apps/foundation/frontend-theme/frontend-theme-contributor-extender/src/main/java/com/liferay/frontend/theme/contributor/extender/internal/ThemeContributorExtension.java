@@ -18,6 +18,7 @@ import com.liferay.frontend.theme.contributor.extender.BundleWebResources;
 import com.liferay.osgi.util.ServiceTrackerFactory;
 import com.liferay.portal.kernel.servlet.PortalWebResourceConstants;
 import com.liferay.portal.kernel.servlet.PortalWebResources;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,9 +59,9 @@ public class ThemeContributorExtension implements Extension {
 	public void start() throws Exception {
 		final BundleContext bundleContext = _bundle.getBundleContext();
 
-		String filter =
-			"(&(objectClass=" + ServletContext.class.getName() +
-				")(osgi.web.symbolicname=" + _bundle.getSymbolicName() + "))";
+		String filter = StringBundler.concat(
+			"(&(objectClass=", ServletContext.class.getName(),
+			")(osgi.web.symbolicname=", _bundle.getSymbolicName(), "))");
 
 		final Dictionary<String, Object> properties = new Hashtable<>();
 
@@ -136,12 +137,6 @@ public class ThemeContributorExtension implements Extension {
 	private class ThemeContributorPortalWebResources
 		implements PortalWebResources {
 
-		public ThemeContributorPortalWebResources(
-			ServletContext servletContext) {
-
-			_servletContext = servletContext;
-		}
-
 		@Override
 		public String getContextPath() {
 			return _servletContext.getContextPath();
@@ -162,11 +157,13 @@ public class ThemeContributorExtension implements Extension {
 			return _servletContext;
 		}
 
-		protected void setServletContext(ServletContext servletContext) {
+		private ThemeContributorPortalWebResources(
+			ServletContext servletContext) {
+
 			_servletContext = servletContext;
 		}
 
-		private volatile ServletContext _servletContext;
+		private final ServletContext _servletContext;
 
 	}
 

@@ -12,10 +12,6 @@ AUI.add(
 						valueFn: '_valueKey'
 					},
 
-					keyInputEnabled: {
-						value: true
-					},
-
 					maxKeyInputSize: {
 						value: 50
 					},
@@ -47,10 +43,10 @@ AUI.add(
 
 						instance._eventHandlers.push(
 							instance.after('keyChange', instance._afterKeyChange),
-							instance.after('keyInputEnabledChange', instance._afterKeyInputEnabledChange),
+							instance.after('valueChange', instance._afterValueChangeInput),
+							instance.bindContainerEvent('blur', instance._onBlurKeyInput, '.key-value-input'),
 							instance.bindContainerEvent('keyup', instance._onKeyUpKeyInput, '.key-value-input'),
-							instance.bindContainerEvent('valuechange', instance._onValueChangeKeyInput, '.key-value-input'),
-							instance.bindInputEvent('valuechange', instance._onValueChangeInput)
+							instance.bindContainerEvent('valuechange', instance._onValueChangeKeyInput, '.key-value-input')
 						);
 					},
 
@@ -63,7 +59,6 @@ AUI.add(
 							KeyValueField.superclass.getTemplateContext.apply(instance, arguments),
 							{
 								key: key,
-								keyInputEnabled: instance.get('keyInputEnabled'),
 								keyInputSize: instance._getKeyInputSize(key),
 								strings: instance.get('strings')
 							}
@@ -132,21 +127,28 @@ AUI.add(
 
 						var editorNode = container.one('.key-value-editor');
 
-						editorNode.insert(container.one('.help-block'), 'after');
+						editorNode.insert(container.one('.form-feedback-indicator'), 'after');
 					},
 
 					_afterKeyChange: function(event) {
 						var instance = this;
 
-						instance.set('generationLocked', event.newVal !== instance.normalizeKey(instance.getValue()));
+						if (event.newVal && event.newVal !== instance.normalizeKey(instance.getValue())) {
+							instance.set('generationLocked', true);
+						}
+						else {
+							instance.set('generationLocked', false);
+						}
 
 						instance._uiSetKey(event.newVal);
 					},
 
-					_afterKeyInputEnabledChange: function() {
+					_afterValueChangeInput: function(event) {
 						var instance = this;
 
-						instance._uiSetKey(instance.get('key'));
+						if (!instance.get('generationLocked')) {
+							instance.set('key', instance.normalizeKey(event.newVal));
+						}
 					},
 
 					_getKeyInputSize: function(str) {
@@ -168,6 +170,22 @@ AUI.add(
 						return size + 1;
 					},
 
+					_onBlurKeyInput: function(event) {
+						var instance = this;
+
+						var inputNode = event.target;
+
+						var value = inputNode.val();
+
+						if (!value) {
+							value = instance.getValue();
+						}
+
+						instance._updateInputValue(inputNode, instance.normalizeKey(value));
+
+						instance.fire('blur', instance._getEventPayload(event));
+					},
+
 					_onKeyUpKeyInput: function(event) {
 						var instance = this;
 
@@ -181,16 +199,6 @@ AUI.add(
 
 						if (newValue !== value) {
 							instance._updateInputValue(inputNode, newValue);
-						}
-					},
-
-					_onValueChangeInput: function(event) {
-						var instance = this;
-
-						if (!instance.get('generationLocked')) {
-							var value = instance.getValue();
-
-							instance.set('key', instance.normalizeKey(value));
 						}
 					},
 
@@ -212,13 +220,6 @@ AUI.add(
 						}
 
 						keyInput.attr('size', instance._getKeyInputSize(key));
-
-						if (instance.get('keyInputEnabled')) {
-							keyInput.removeAttribute('readonly');
-						}
-						else {
-							keyInput.attr('readonly', 'true');
-						}
 					},
 
 					_updateInputValue: function(inputNode, newValue) {

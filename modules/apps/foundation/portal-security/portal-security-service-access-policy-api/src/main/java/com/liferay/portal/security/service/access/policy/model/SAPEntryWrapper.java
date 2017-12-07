@@ -152,19 +152,64 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	@Override
-	public SAPEntry toEscapedModel() {
-		return new SAPEntryWrapper(_sapEntry.toEscapedModel());
+	public java.lang.Object clone() {
+		return new SAPEntryWrapper((SAPEntry)_sapEntry.clone());
 	}
 
 	@Override
-	public SAPEntry toUnescapedModel() {
-		return new SAPEntryWrapper(_sapEntry.toUnescapedModel());
+	public int compareTo(SAPEntry sapEntry) {
+		return _sapEntry.compareTo(sapEntry);
 	}
 
 	/**
-	* Returns the default s a p entry of this s a p entry.
+	* Returns the allowed service signatures of this sap entry.
 	*
-	* @return the default s a p entry of this s a p entry
+	* @return the allowed service signatures of this sap entry
+	*/
+	@Override
+	public java.lang.String getAllowedServiceSignatures() {
+		return _sapEntry.getAllowedServiceSignatures();
+	}
+
+	@Override
+	public java.util.List<java.lang.String> getAllowedServiceSignaturesList() {
+		return _sapEntry.getAllowedServiceSignaturesList();
+	}
+
+	@Override
+	public java.lang.String[] getAvailableLanguageIds() {
+		return _sapEntry.getAvailableLanguageIds();
+	}
+
+	/**
+	* Returns the company ID of this sap entry.
+	*
+	* @return the company ID of this sap entry
+	*/
+	@Override
+	public long getCompanyId() {
+		return _sapEntry.getCompanyId();
+	}
+
+	/**
+	* Returns the create date of this sap entry.
+	*
+	* @return the create date of this sap entry
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _sapEntry.getCreateDate();
+	}
+
+	@Override
+	public java.lang.String getDefaultLanguageId() {
+		return _sapEntry.getDefaultLanguageId();
+	}
+
+	/**
+	* Returns the default sap entry of this sap entry.
+	*
+	* @return the default sap entry of this sap entry
 	*/
 	@Override
 	public boolean getDefaultSAPEntry() {
@@ -172,13 +217,185 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Returns the enabled of this s a p entry.
+	* Returns the enabled of this sap entry.
 	*
-	* @return the enabled of this s a p entry
+	* @return the enabled of this sap entry
 	*/
 	@Override
 	public boolean getEnabled() {
 		return _sapEntry.getEnabled();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _sapEntry.getExpandoBridge();
+	}
+
+	/**
+	* Returns the modified date of this sap entry.
+	*
+	* @return the modified date of this sap entry
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _sapEntry.getModifiedDate();
+	}
+
+	/**
+	* Returns the name of this sap entry.
+	*
+	* @return the name of this sap entry
+	*/
+	@Override
+	public java.lang.String getName() {
+		return _sapEntry.getName();
+	}
+
+	/**
+	* Returns the primary key of this sap entry.
+	*
+	* @return the primary key of this sap entry
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _sapEntry.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _sapEntry.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the sap entry ID of this sap entry.
+	*
+	* @return the sap entry ID of this sap entry
+	*/
+	@Override
+	public long getSapEntryId() {
+		return _sapEntry.getSapEntryId();
+	}
+
+	/**
+	* Returns the title of this sap entry.
+	*
+	* @return the title of this sap entry
+	*/
+	@Override
+	public java.lang.String getTitle() {
+		return _sapEntry.getTitle();
+	}
+
+	/**
+	* Returns the localized title of this sap entry in the language. Uses the default language if no localization exists for the requested language.
+	*
+	* @param locale the locale of the language
+	* @return the localized title of this sap entry
+	*/
+	@Override
+	public java.lang.String getTitle(java.util.Locale locale) {
+		return _sapEntry.getTitle(locale);
+	}
+
+	/**
+	* Returns the localized title of this sap entry in the language, optionally using the default language if no localization exists for the requested language.
+	*
+	* @param locale the local of the language
+	* @param useDefault whether to use the default language if no localization exists for the requested language
+	* @return the localized title of this sap entry. If <code>useDefault</code> is <code>false</code> and no localization exists for the requested language, an empty string will be returned.
+	*/
+	@Override
+	public java.lang.String getTitle(java.util.Locale locale, boolean useDefault) {
+		return _sapEntry.getTitle(locale, useDefault);
+	}
+
+	/**
+	* Returns the localized title of this sap entry in the language. Uses the default language if no localization exists for the requested language.
+	*
+	* @param languageId the ID of the language
+	* @return the localized title of this sap entry
+	*/
+	@Override
+	public java.lang.String getTitle(java.lang.String languageId) {
+		return _sapEntry.getTitle(languageId);
+	}
+
+	/**
+	* Returns the localized title of this sap entry in the language, optionally using the default language if no localization exists for the requested language.
+	*
+	* @param languageId the ID of the language
+	* @param useDefault whether to use the default language if no localization exists for the requested language
+	* @return the localized title of this sap entry
+	*/
+	@Override
+	public java.lang.String getTitle(java.lang.String languageId,
+		boolean useDefault) {
+		return _sapEntry.getTitle(languageId, useDefault);
+	}
+
+	@Override
+	public java.lang.String getTitleCurrentLanguageId() {
+		return _sapEntry.getTitleCurrentLanguageId();
+	}
+
+	@Override
+	public java.lang.String getTitleCurrentValue() {
+		return _sapEntry.getTitleCurrentValue();
+	}
+
+	/**
+	* Returns a map of the locales and localized titles of this sap entry.
+	*
+	* @return the locales and localized titles of this sap entry
+	*/
+	@Override
+	public Map<java.util.Locale, java.lang.String> getTitleMap() {
+		return _sapEntry.getTitleMap();
+	}
+
+	/**
+	* Returns the user ID of this sap entry.
+	*
+	* @return the user ID of this sap entry
+	*/
+	@Override
+	public long getUserId() {
+		return _sapEntry.getUserId();
+	}
+
+	/**
+	* Returns the user name of this sap entry.
+	*
+	* @return the user name of this sap entry
+	*/
+	@Override
+	public java.lang.String getUserName() {
+		return _sapEntry.getUserName();
+	}
+
+	/**
+	* Returns the user uuid of this sap entry.
+	*
+	* @return the user uuid of this sap entry
+	*/
+	@Override
+	public java.lang.String getUserUuid() {
+		return _sapEntry.getUserUuid();
+	}
+
+	/**
+	* Returns the uuid of this sap entry.
+	*
+	* @return the uuid of this sap entry
+	*/
+	@Override
+	public java.lang.String getUuid() {
+		return _sapEntry.getUuid();
+	}
+
+	@Override
+	public int hashCode() {
+		return _sapEntry.hashCode();
 	}
 
 	@Override
@@ -187,9 +404,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Returns <code>true</code> if this s a p entry is default s a p entry.
+	* Returns <code>true</code> if this sap entry is default sap entry.
 	*
-	* @return <code>true</code> if this s a p entry is default s a p entry; <code>false</code> otherwise
+	* @return <code>true</code> if this sap entry is default sap entry; <code>false</code> otherwise
 	*/
 	@Override
 	public boolean isDefaultSAPEntry() {
@@ -197,9 +414,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Returns <code>true</code> if this s a p entry is enabled.
+	* Returns <code>true</code> if this sap entry is enabled.
 	*
-	* @return <code>true</code> if this s a p entry is enabled; <code>false</code> otherwise
+	* @return <code>true</code> if this sap entry is enabled; <code>false</code> otherwise
 	*/
 	@Override
 	public boolean isEnabled() {
@@ -223,248 +440,6 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _sapEntry.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<SAPEntry> toCacheModel() {
-		return _sapEntry.toCacheModel();
-	}
-
-	@Override
-	public int compareTo(SAPEntry sapEntry) {
-		return _sapEntry.compareTo(sapEntry);
-	}
-
-	@Override
-	public int hashCode() {
-		return _sapEntry.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _sapEntry.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new SAPEntryWrapper((SAPEntry)_sapEntry.clone());
-	}
-
-	/**
-	* Returns the allowed service signatures of this s a p entry.
-	*
-	* @return the allowed service signatures of this s a p entry
-	*/
-	@Override
-	public java.lang.String getAllowedServiceSignatures() {
-		return _sapEntry.getAllowedServiceSignatures();
-	}
-
-	@Override
-	public java.lang.String getDefaultLanguageId() {
-		return _sapEntry.getDefaultLanguageId();
-	}
-
-	/**
-	* Returns the name of this s a p entry.
-	*
-	* @return the name of this s a p entry
-	*/
-	@Override
-	public java.lang.String getName() {
-		return _sapEntry.getName();
-	}
-
-	/**
-	* Returns the title of this s a p entry.
-	*
-	* @return the title of this s a p entry
-	*/
-	@Override
-	public java.lang.String getTitle() {
-		return _sapEntry.getTitle();
-	}
-
-	/**
-	* Returns the localized title of this s a p entry in the language. Uses the default language if no localization exists for the requested language.
-	*
-	* @param languageId the ID of the language
-	* @return the localized title of this s a p entry
-	*/
-	@Override
-	public java.lang.String getTitle(java.lang.String languageId) {
-		return _sapEntry.getTitle(languageId);
-	}
-
-	/**
-	* Returns the localized title of this s a p entry in the language, optionally using the default language if no localization exists for the requested language.
-	*
-	* @param languageId the ID of the language
-	* @param useDefault whether to use the default language if no localization exists for the requested language
-	* @return the localized title of this s a p entry
-	*/
-	@Override
-	public java.lang.String getTitle(java.lang.String languageId,
-		boolean useDefault) {
-		return _sapEntry.getTitle(languageId, useDefault);
-	}
-
-	/**
-	* Returns the localized title of this s a p entry in the language. Uses the default language if no localization exists for the requested language.
-	*
-	* @param locale the locale of the language
-	* @return the localized title of this s a p entry
-	*/
-	@Override
-	public java.lang.String getTitle(java.util.Locale locale) {
-		return _sapEntry.getTitle(locale);
-	}
-
-	/**
-	* Returns the localized title of this s a p entry in the language, optionally using the default language if no localization exists for the requested language.
-	*
-	* @param locale the local of the language
-	* @param useDefault whether to use the default language if no localization exists for the requested language
-	* @return the localized title of this s a p entry. If <code>useDefault</code> is <code>false</code> and no localization exists for the requested language, an empty string will be returned.
-	*/
-	@Override
-	public java.lang.String getTitle(java.util.Locale locale, boolean useDefault) {
-		return _sapEntry.getTitle(locale, useDefault);
-	}
-
-	@Override
-	public java.lang.String getTitleCurrentLanguageId() {
-		return _sapEntry.getTitleCurrentLanguageId();
-	}
-
-	@Override
-	public java.lang.String getTitleCurrentValue() {
-		return _sapEntry.getTitleCurrentValue();
-	}
-
-	/**
-	* Returns the user name of this s a p entry.
-	*
-	* @return the user name of this s a p entry
-	*/
-	@Override
-	public java.lang.String getUserName() {
-		return _sapEntry.getUserName();
-	}
-
-	/**
-	* Returns the user uuid of this s a p entry.
-	*
-	* @return the user uuid of this s a p entry
-	*/
-	@Override
-	public java.lang.String getUserUuid() {
-		return _sapEntry.getUserUuid();
-	}
-
-	/**
-	* Returns the uuid of this s a p entry.
-	*
-	* @return the uuid of this s a p entry
-	*/
-	@Override
-	public java.lang.String getUuid() {
-		return _sapEntry.getUuid();
-	}
-
-	@Override
-	public java.lang.String toString() {
-		return _sapEntry.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _sapEntry.toXmlString();
-	}
-
-	@Override
-	public java.lang.String[] getAvailableLanguageIds() {
-		return _sapEntry.getAvailableLanguageIds();
-	}
-
-	/**
-	* Returns the create date of this s a p entry.
-	*
-	* @return the create date of this s a p entry
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _sapEntry.getCreateDate();
-	}
-
-	/**
-	* Returns the modified date of this s a p entry.
-	*
-	* @return the modified date of this s a p entry
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _sapEntry.getModifiedDate();
-	}
-
-	@Override
-	public java.util.List<java.lang.String> getAllowedServiceSignaturesList() {
-		return _sapEntry.getAllowedServiceSignaturesList();
-	}
-
-	/**
-	* Returns a map of the locales and localized titles of this s a p entry.
-	*
-	* @return the locales and localized titles of this s a p entry
-	*/
-	@Override
-	public Map<java.util.Locale, java.lang.String> getTitleMap() {
-		return _sapEntry.getTitleMap();
-	}
-
-	/**
-	* Returns the company ID of this s a p entry.
-	*
-	* @return the company ID of this s a p entry
-	*/
-	@Override
-	public long getCompanyId() {
-		return _sapEntry.getCompanyId();
-	}
-
-	/**
-	* Returns the primary key of this s a p entry.
-	*
-	* @return the primary key of this s a p entry
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _sapEntry.getPrimaryKey();
-	}
-
-	/**
-	* Returns the sap entry ID of this s a p entry.
-	*
-	* @return the sap entry ID of this s a p entry
-	*/
-	@Override
-	public long getSapEntryId() {
-		return _sapEntry.getSapEntryId();
-	}
-
-	/**
-	* Returns the user ID of this s a p entry.
-	*
-	* @return the user ID of this s a p entry
-	*/
-	@Override
-	public long getUserId() {
-		return _sapEntry.getUserId();
-	}
-
-	@Override
 	public void persist() {
 		_sapEntry.persist();
 	}
@@ -483,9 +458,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the allowed service signatures of this s a p entry.
+	* Sets the allowed service signatures of this sap entry.
 	*
-	* @param allowedServiceSignatures the allowed service signatures of this s a p entry
+	* @param allowedServiceSignatures the allowed service signatures of this sap entry
 	*/
 	@Override
 	public void setAllowedServiceSignatures(
@@ -499,9 +474,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the company ID of this s a p entry.
+	* Sets the company ID of this sap entry.
 	*
-	* @param companyId the company ID of this s a p entry
+	* @param companyId the company ID of this sap entry
 	*/
 	@Override
 	public void setCompanyId(long companyId) {
@@ -509,9 +484,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the create date of this s a p entry.
+	* Sets the create date of this sap entry.
 	*
-	* @param createDate the create date of this s a p entry
+	* @param createDate the create date of this sap entry
 	*/
 	@Override
 	public void setCreateDate(Date createDate) {
@@ -519,9 +494,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets whether this s a p entry is default s a p entry.
+	* Sets whether this sap entry is default sap entry.
 	*
-	* @param defaultSAPEntry the default s a p entry of this s a p entry
+	* @param defaultSAPEntry the default sap entry of this sap entry
 	*/
 	@Override
 	public void setDefaultSAPEntry(boolean defaultSAPEntry) {
@@ -529,18 +504,13 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets whether this s a p entry is enabled.
+	* Sets whether this sap entry is enabled.
 	*
-	* @param enabled the enabled of this s a p entry
+	* @param enabled the enabled of this sap entry
 	*/
 	@Override
 	public void setEnabled(boolean enabled) {
 		_sapEntry.setEnabled(enabled);
-	}
-
-	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_sapEntry.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -550,14 +520,19 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_sapEntry.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext) {
 		_sapEntry.setExpandoBridgeAttributes(serviceContext);
 	}
 
 	/**
-	* Sets the modified date of this s a p entry.
+	* Sets the modified date of this sap entry.
 	*
-	* @param modifiedDate the modified date of this s a p entry
+	* @param modifiedDate the modified date of this sap entry
 	*/
 	@Override
 	public void setModifiedDate(Date modifiedDate) {
@@ -565,9 +540,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the name of this s a p entry.
+	* Sets the name of this sap entry.
 	*
-	* @param name the name of this s a p entry
+	* @param name the name of this sap entry
 	*/
 	@Override
 	public void setName(java.lang.String name) {
@@ -580,9 +555,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the primary key of this s a p entry.
+	* Sets the primary key of this sap entry.
 	*
-	* @param primaryKey the primary key of this s a p entry
+	* @param primaryKey the primary key of this sap entry
 	*/
 	@Override
 	public void setPrimaryKey(long primaryKey) {
@@ -595,9 +570,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the sap entry ID of this s a p entry.
+	* Sets the sap entry ID of this sap entry.
 	*
-	* @param sapEntryId the sap entry ID of this s a p entry
+	* @param sapEntryId the sap entry ID of this sap entry
 	*/
 	@Override
 	public void setSapEntryId(long sapEntryId) {
@@ -605,9 +580,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the title of this s a p entry.
+	* Sets the title of this sap entry.
 	*
-	* @param title the title of this s a p entry
+	* @param title the title of this sap entry
 	*/
 	@Override
 	public void setTitle(java.lang.String title) {
@@ -615,9 +590,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the localized title of this s a p entry in the language.
+	* Sets the localized title of this sap entry in the language.
 	*
-	* @param title the localized title of this s a p entry
+	* @param title the localized title of this sap entry
 	* @param locale the locale of the language
 	*/
 	@Override
@@ -626,9 +601,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the localized title of this s a p entry in the language, and sets the default locale.
+	* Sets the localized title of this sap entry in the language, and sets the default locale.
 	*
-	* @param title the localized title of this s a p entry
+	* @param title the localized title of this sap entry
 	* @param locale the locale of the language
 	* @param defaultLocale the default locale
 	*/
@@ -644,9 +619,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the localized titles of this s a p entry from the map of locales and localized titles.
+	* Sets the localized titles of this sap entry from the map of locales and localized titles.
 	*
-	* @param titleMap the locales and localized titles of this s a p entry
+	* @param titleMap the locales and localized titles of this sap entry
 	*/
 	@Override
 	public void setTitleMap(Map<java.util.Locale, java.lang.String> titleMap) {
@@ -654,9 +629,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the localized titles of this s a p entry from the map of locales and localized titles, and sets the default locale.
+	* Sets the localized titles of this sap entry from the map of locales and localized titles, and sets the default locale.
 	*
-	* @param titleMap the locales and localized titles of this s a p entry
+	* @param titleMap the locales and localized titles of this sap entry
 	* @param defaultLocale the default locale
 	*/
 	@Override
@@ -666,9 +641,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the user ID of this s a p entry.
+	* Sets the user ID of this sap entry.
 	*
-	* @param userId the user ID of this s a p entry
+	* @param userId the user ID of this sap entry
 	*/
 	@Override
 	public void setUserId(long userId) {
@@ -676,9 +651,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the user name of this s a p entry.
+	* Sets the user name of this sap entry.
 	*
-	* @param userName the user name of this s a p entry
+	* @param userName the user name of this sap entry
 	*/
 	@Override
 	public void setUserName(java.lang.String userName) {
@@ -686,9 +661,9 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the user uuid of this s a p entry.
+	* Sets the user uuid of this sap entry.
 	*
-	* @param userUuid the user uuid of this s a p entry
+	* @param userUuid the user uuid of this sap entry
 	*/
 	@Override
 	public void setUserUuid(java.lang.String userUuid) {
@@ -696,13 +671,38 @@ public class SAPEntryWrapper implements SAPEntry, ModelWrapper<SAPEntry> {
 	}
 
 	/**
-	* Sets the uuid of this s a p entry.
+	* Sets the uuid of this sap entry.
 	*
-	* @param uuid the uuid of this s a p entry
+	* @param uuid the uuid of this sap entry
 	*/
 	@Override
 	public void setUuid(java.lang.String uuid) {
 		_sapEntry.setUuid(uuid);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<SAPEntry> toCacheModel() {
+		return _sapEntry.toCacheModel();
+	}
+
+	@Override
+	public SAPEntry toEscapedModel() {
+		return new SAPEntryWrapper(_sapEntry.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _sapEntry.toString();
+	}
+
+	@Override
+	public SAPEntry toUnescapedModel() {
+		return new SAPEntryWrapper(_sapEntry.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _sapEntry.toXmlString();
 	}
 
 	@Override

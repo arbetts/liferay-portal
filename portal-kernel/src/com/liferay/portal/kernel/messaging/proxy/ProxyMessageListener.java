@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBus;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.messaging.MessageListener;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 
 /**
@@ -42,14 +43,17 @@ public class ProxyMessageListener implements MessageListener {
 			}
 			else if (!(payload instanceof ProxyRequest)) {
 				throw new Exception(
-					"Payload " + payload.getClass() + " is not of type " +
-						ProxyRequest.class.getName());
+					StringBundler.concat(
+						"Payload ", String.valueOf(payload.getClass()),
+						" is not of type ", ProxyRequest.class.getName()));
 			}
 			else {
-				MessageValuesThreadLocal.populateThreadLocalsFromMessage(
-					message);
-
 				ProxyRequest proxyRequest = (ProxyRequest)payload;
+
+				if (!proxyRequest.isSynchronous()) {
+					MessageValuesThreadLocal.populateThreadLocalsFromMessage(
+						message);
+				}
 
 				Object result = proxyRequest.execute(_manager);
 

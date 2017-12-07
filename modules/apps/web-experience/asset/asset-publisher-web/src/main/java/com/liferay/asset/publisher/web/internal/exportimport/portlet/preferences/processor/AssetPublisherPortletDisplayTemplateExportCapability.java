@@ -23,13 +23,18 @@ import javax.portlet.PortletPreferences;
 import org.osgi.service.component.annotations.Component;
 
 /**
+ * Provides the implementation of the export capability {@link
+ * AssetPublisherPortletDisplayTemplateExportCapability} for the Asset Publisher
+ * portlet. This allows the display style and display style group ID to be
+ * provided based on the existence of the template handler.
+ *
  * @author Mate Thurzo
  */
 @Component(
 	immediate = true,
 	service = {
-		Capability.class,
-		AssetPublisherPortletDisplayTemplateExportCapability.class
+		AssetPublisherPortletDisplayTemplateExportCapability.class,
+		Capability.class
 	}
 )
 public class AssetPublisherPortletDisplayTemplateExportCapability

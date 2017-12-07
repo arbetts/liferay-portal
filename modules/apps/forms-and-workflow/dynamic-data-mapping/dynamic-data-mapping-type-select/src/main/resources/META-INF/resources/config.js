@@ -15,16 +15,17 @@
 							},
 							path: 'select_field.js',
 							requires: [
-								'liferay-ddm-form-renderer-field'
+								'aui-tooltip',
+								'liferay-ddm-form-field-select-search-support',
+								'liferay-ddm-form-renderer-field',
+								'liferay-ddm-soy-template-util'
 							]
 						},
-						'liferay-ddm-form-field-select-template': {
-							condition: {
-								trigger: 'liferay-ddm-form-renderer'
-							},
-							path: 'select.soy.js',
+						'liferay-ddm-form-field-select-search-support': {
+							path: 'select_search_support.js',
 							requires: [
-								'soyutils'
+								'highlight',
+								'liferay-ddm-soy-template-util'
 							]
 						}
 					},

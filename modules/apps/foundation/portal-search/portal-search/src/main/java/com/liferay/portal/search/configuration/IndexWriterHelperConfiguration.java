@@ -26,14 +26,14 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.search.configuration.IndexWriterHelperConfiguration",
 	localization = "content/Language",
-	name = "index.writer.helper.configuration.name"
+	name = "index-writer-helper-configuration-name"
 )
 @ProviderType
 public interface IndexWriterHelperConfiguration {
 
 	@Meta.AD(
 		deflt = "true", description = "index-commit-immediately-help",
-		required = false
+		name = "index-commit-immediately", required = false
 	)
 	public boolean indexCommitImmediately();
 
@@ -42,6 +42,7 @@ public interface IndexWriterHelperConfiguration {
 	 *             IndexStatusManagerConfiguration#indexReadOnly}
 	 */
 	@Deprecated
+	@Meta.AD(deflt = "false", name = "index-read-only", required = false)
 	public boolean indexReadOnly();
 
 }

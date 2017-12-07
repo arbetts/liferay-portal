@@ -67,7 +67,7 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("kaleoClassName", getKaleoClassName());
 		attributes.put("kaleoClassPK", getKaleoClassPK());
-		attributes.put("kaleoDefinitionId", getKaleoDefinitionId());
+		attributes.put("kaleoDefinitionVersionId", getKaleoDefinitionVersionId());
 		attributes.put("kaleoNodeName", getKaleoNodeName());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
@@ -135,10 +135,11 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 			setKaleoClassPK(kaleoClassPK);
 		}
 
-		Long kaleoDefinitionId = (Long)attributes.get("kaleoDefinitionId");
+		Long kaleoDefinitionVersionId = (Long)attributes.get(
+				"kaleoDefinitionVersionId");
 
-		if (kaleoDefinitionId != null) {
-			setKaleoDefinitionId(kaleoDefinitionId);
+		if (kaleoDefinitionVersionId != null) {
+			setKaleoDefinitionVersionId(kaleoDefinitionVersionId);
 		}
 
 		String kaleoNodeName = (String)attributes.get("kaleoNodeName");
@@ -185,38 +186,8 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	}
 
 	@Override
-	public KaleoNotification toEscapedModel() {
-		return new KaleoNotificationWrapper(_kaleoNotification.toEscapedModel());
-	}
-
-	@Override
-	public KaleoNotification toUnescapedModel() {
-		return new KaleoNotificationWrapper(_kaleoNotification.toUnescapedModel());
-	}
-
-	@Override
-	public boolean isCachedModel() {
-		return _kaleoNotification.isCachedModel();
-	}
-
-	@Override
-	public boolean isEscapedModel() {
-		return _kaleoNotification.isEscapedModel();
-	}
-
-	@Override
-	public boolean isNew() {
-		return _kaleoNotification.isNew();
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _kaleoNotification.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<KaleoNotification> toCacheModel() {
-		return _kaleoNotification.toCacheModel();
+	public java.lang.Object clone() {
+		return new KaleoNotificationWrapper((KaleoNotification)_kaleoNotification.clone());
 	}
 
 	@Override
@@ -224,19 +195,24 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 		return _kaleoNotification.compareTo(kaleoNotification);
 	}
 
+	/**
+	* Returns the company ID of this kaleo notification.
+	*
+	* @return the company ID of this kaleo notification
+	*/
 	@Override
-	public int hashCode() {
-		return _kaleoNotification.hashCode();
+	public long getCompanyId() {
+		return _kaleoNotification.getCompanyId();
 	}
 
+	/**
+	* Returns the create date of this kaleo notification.
+	*
+	* @return the create date of this kaleo notification
+	*/
 	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _kaleoNotification.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new KaleoNotificationWrapper((KaleoNotification)_kaleoNotification.clone());
+	public Date getCreateDate() {
+		return _kaleoNotification.getCreateDate();
 	}
 
 	/**
@@ -259,6 +235,21 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 		return _kaleoNotification.getExecutionType();
 	}
 
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _kaleoNotification.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this kaleo notification.
+	*
+	* @return the group ID of this kaleo notification
+	*/
+	@Override
+	public long getGroupId() {
+		return _kaleoNotification.getGroupId();
+	}
+
 	/**
 	* Returns the kaleo class name of this kaleo notification.
 	*
@@ -270,6 +261,26 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	}
 
 	/**
+	* Returns the kaleo class pk of this kaleo notification.
+	*
+	* @return the kaleo class pk of this kaleo notification
+	*/
+	@Override
+	public long getKaleoClassPK() {
+		return _kaleoNotification.getKaleoClassPK();
+	}
+
+	/**
+	* Returns the kaleo definition version ID of this kaleo notification.
+	*
+	* @return the kaleo definition version ID of this kaleo notification
+	*/
+	@Override
+	public long getKaleoDefinitionVersionId() {
+		return _kaleoNotification.getKaleoDefinitionVersionId();
+	}
+
+	/**
 	* Returns the kaleo node name of this kaleo notification.
 	*
 	* @return the kaleo node name of this kaleo notification
@@ -277,6 +288,26 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	@Override
 	public java.lang.String getKaleoNodeName() {
 		return _kaleoNotification.getKaleoNodeName();
+	}
+
+	/**
+	* Returns the kaleo notification ID of this kaleo notification.
+	*
+	* @return the kaleo notification ID of this kaleo notification
+	*/
+	@Override
+	public long getKaleoNotificationId() {
+		return _kaleoNotification.getKaleoNotificationId();
+	}
+
+	/**
+	* Returns the modified date of this kaleo notification.
+	*
+	* @return the modified date of this kaleo notification
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _kaleoNotification.getModifiedDate();
 	}
 
 	/**
@@ -300,6 +331,21 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	}
 
 	/**
+	* Returns the primary key of this kaleo notification.
+	*
+	* @return the primary key of this kaleo notification
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _kaleoNotification.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _kaleoNotification.getPrimaryKeyObj();
+	}
+
+	/**
 	* Returns the template of this kaleo notification.
 	*
 	* @return the template of this kaleo notification
@@ -317,6 +363,16 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	@Override
 	public java.lang.String getTemplateLanguage() {
 		return _kaleoNotification.getTemplateLanguage();
+	}
+
+	/**
+	* Returns the user ID of this kaleo notification.
+	*
+	* @return the user ID of this kaleo notification
+	*/
+	@Override
+	public long getUserId() {
+		return _kaleoNotification.getUserId();
 	}
 
 	/**
@@ -340,103 +396,23 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	}
 
 	@Override
-	public java.lang.String toString() {
-		return _kaleoNotification.toString();
+	public int hashCode() {
+		return _kaleoNotification.hashCode();
 	}
 
 	@Override
-	public java.lang.String toXmlString() {
-		return _kaleoNotification.toXmlString();
+	public boolean isCachedModel() {
+		return _kaleoNotification.isCachedModel();
 	}
 
-	/**
-	* Returns the create date of this kaleo notification.
-	*
-	* @return the create date of this kaleo notification
-	*/
 	@Override
-	public Date getCreateDate() {
-		return _kaleoNotification.getCreateDate();
+	public boolean isEscapedModel() {
+		return _kaleoNotification.isEscapedModel();
 	}
 
-	/**
-	* Returns the modified date of this kaleo notification.
-	*
-	* @return the modified date of this kaleo notification
-	*/
 	@Override
-	public Date getModifiedDate() {
-		return _kaleoNotification.getModifiedDate();
-	}
-
-	/**
-	* Returns the company ID of this kaleo notification.
-	*
-	* @return the company ID of this kaleo notification
-	*/
-	@Override
-	public long getCompanyId() {
-		return _kaleoNotification.getCompanyId();
-	}
-
-	/**
-	* Returns the group ID of this kaleo notification.
-	*
-	* @return the group ID of this kaleo notification
-	*/
-	@Override
-	public long getGroupId() {
-		return _kaleoNotification.getGroupId();
-	}
-
-	/**
-	* Returns the kaleo class p k of this kaleo notification.
-	*
-	* @return the kaleo class p k of this kaleo notification
-	*/
-	@Override
-	public long getKaleoClassPK() {
-		return _kaleoNotification.getKaleoClassPK();
-	}
-
-	/**
-	* Returns the kaleo definition ID of this kaleo notification.
-	*
-	* @return the kaleo definition ID of this kaleo notification
-	*/
-	@Override
-	public long getKaleoDefinitionId() {
-		return _kaleoNotification.getKaleoDefinitionId();
-	}
-
-	/**
-	* Returns the kaleo notification ID of this kaleo notification.
-	*
-	* @return the kaleo notification ID of this kaleo notification
-	*/
-	@Override
-	public long getKaleoNotificationId() {
-		return _kaleoNotification.getKaleoNotificationId();
-	}
-
-	/**
-	* Returns the primary key of this kaleo notification.
-	*
-	* @return the primary key of this kaleo notification
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _kaleoNotification.getPrimaryKey();
-	}
-
-	/**
-	* Returns the user ID of this kaleo notification.
-	*
-	* @return the user ID of this kaleo notification
-	*/
-	@Override
-	public long getUserId() {
-		return _kaleoNotification.getUserId();
+	public boolean isNew() {
+		return _kaleoNotification.isNew();
 	}
 
 	@Override
@@ -490,14 +466,14 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	}
 
 	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_kaleoNotification.setExpandoBridgeAttributes(expandoBridge);
-	}
-
-	@Override
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.kernel.model.BaseModel<?> baseModel) {
 		_kaleoNotification.setExpandoBridgeAttributes(baseModel);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_kaleoNotification.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -526,9 +502,9 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	}
 
 	/**
-	* Sets the kaleo class p k of this kaleo notification.
+	* Sets the kaleo class pk of this kaleo notification.
 	*
-	* @param kaleoClassPK the kaleo class p k of this kaleo notification
+	* @param kaleoClassPK the kaleo class pk of this kaleo notification
 	*/
 	@Override
 	public void setKaleoClassPK(long kaleoClassPK) {
@@ -536,13 +512,13 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	}
 
 	/**
-	* Sets the kaleo definition ID of this kaleo notification.
+	* Sets the kaleo definition version ID of this kaleo notification.
 	*
-	* @param kaleoDefinitionId the kaleo definition ID of this kaleo notification
+	* @param kaleoDefinitionVersionId the kaleo definition version ID of this kaleo notification
 	*/
 	@Override
-	public void setKaleoDefinitionId(long kaleoDefinitionId) {
-		_kaleoNotification.setKaleoDefinitionId(kaleoDefinitionId);
+	public void setKaleoDefinitionVersionId(long kaleoDefinitionVersionId) {
+		_kaleoNotification.setKaleoDefinitionVersionId(kaleoDefinitionVersionId);
 	}
 
 	/**
@@ -663,6 +639,31 @@ public class KaleoNotificationWrapper implements KaleoNotification,
 	@Override
 	public void setUserUuid(java.lang.String userUuid) {
 		_kaleoNotification.setUserUuid(userUuid);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<KaleoNotification> toCacheModel() {
+		return _kaleoNotification.toCacheModel();
+	}
+
+	@Override
+	public KaleoNotification toEscapedModel() {
+		return new KaleoNotificationWrapper(_kaleoNotification.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _kaleoNotification.toString();
+	}
+
+	@Override
+	public KaleoNotification toUnescapedModel() {
+		return new KaleoNotificationWrapper(_kaleoNotification.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _kaleoNotification.toXmlString();
 	}
 
 	@Override

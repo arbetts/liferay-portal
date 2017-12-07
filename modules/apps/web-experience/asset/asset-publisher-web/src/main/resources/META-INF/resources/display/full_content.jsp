@@ -46,17 +46,19 @@ String languageId = LanguageUtil.getLanguageId(request);
 String title = assetRenderer.getTitle(LocaleUtil.fromLanguageId(languageId));
 
 boolean print = ((Boolean)request.getAttribute("view.jsp-print")).booleanValue();
+boolean viewInContext = ((Boolean)request.getAttribute("view.jsp-viewInContext")).booleanValue();
+boolean workflowEnabled = WorkflowDefinitionLinkLocalServiceUtil.hasWorkflowDefinitionLink(assetEntry.getCompanyId(), assetEntry.getGroupId(), assetEntry.getClassName());
 
 assetPublisherDisplayContext.setLayoutAssetEntry(assetEntry);
 
 assetEntry = assetPublisherDisplayContext.incrementViewCounter(assetEntry);
 
-request.setAttribute("view.jsp-fullContentRedirect", currentURL);
+request.setAttribute("view.jsp-fullContentRedirect", workflowEnabled ? redirect : currentURL);
 request.setAttribute("view.jsp-showIconLabel", true);
 %>
 
-<c:if test="<%= assetPublisherDisplayContext.isShowAssetTitle() %>">
-	<div class="h2">
+<div class="h2">
+	<c:if test="<%= assetPublisherDisplayContext.isShowAssetTitle() %>">
 		<c:if test="<%= showBackURL && Validator.isNotNull(redirect) %>">
 			<liferay-ui:icon
 				cssClass="header-back-to"
@@ -66,13 +68,13 @@ request.setAttribute("view.jsp-showIconLabel", true);
 			/>
 		</c:if>
 
-		<span><%= HtmlUtil.escape(title) %></span>
+		<span class="header-title"><%= HtmlUtil.escape(title) %></span>
+	</c:if>
 
-		<c:if test="<%= !print %>">
-			<liferay-util:include page="/asset_actions.jsp" servletContext="<%= application %>" />
-		</c:if>
-	</div>
-</c:if>
+	<c:if test="<%= !print %>">
+		<liferay-util:include page="/asset_actions.jsp" servletContext="<%= application %>" />
+	</c:if>
+</div>
 
 <div class="asset-full-content clearfix <%= assetPublisherDisplayContext.isDefaultAssetPublisher() ? "default-asset-publisher" : StringPool.BLANK %> <%= assetPublisherDisplayContext.isShowAssetTitle() ? "show-asset-title" : "no-title" %>">
 	<c:if test="<%= (assetPublisherDisplayContext.isEnableConversions() && assetRenderer.isConvertible()) || (assetPublisherDisplayContext.isEnablePrint() && assetRenderer.isPrintable()) || (assetPublisherDisplayContext.isShowAvailableLocales() && assetRenderer.isLocalizable()) %>">
@@ -125,47 +127,41 @@ request.setAttribute("view.jsp-showIconLabel", true);
 
 		viewFullContentURL.setParameter("urlTitle", assetRenderer.getUrlTitle());
 	}
-
-	String socialBookmarksDisplayPosition = assetPublisherDisplayContext.getSocialBookmarksDisplayPosition();
 	%>
 
 	<div class="asset-content" id="<portlet:namespace /><%= assetEntry.getEntryId() %>">
-		<c:if test='<%= assetPublisherDisplayContext.isEnableSocialBookmarks() && socialBookmarksDisplayPosition.equals("top") && !print %>'>
-			<div class="pull-right">
-				<liferay-ui:social-bookmarks
-					contentId="<%= String.valueOf(assetEntry.getEntryId()) %>"
-					displayStyle="<%= assetPublisherDisplayContext.getSocialBookmarksDisplayStyle() %>"
-					target="_blank"
-					title="<%= title %>"
-					url="<%= PortalUtil.getCanonicalURL(viewFullContentURL.toString(), themeDisplay, layout) %>"
-				/>
-			</div>
-		</c:if>
-
-		<liferay-ui:asset-display
+		<liferay-asset:asset-display
 			assetEntry="<%= assetEntry %>"
 			assetRenderer="<%= assetRenderer %>"
 			assetRendererFactory="<%= assetRendererFactory %>"
 			showExtraInfo="<%= assetPublisherDisplayContext.isShowExtraInfo() %>"
 		/>
 
-		<c:if test='<%= assetPublisherDisplayContext.isEnableSocialBookmarks() && socialBookmarksDisplayPosition.equals("bottom") && !print %>'>
-			<div class="pull-right">
-				<liferay-ui:social-bookmarks
-					displayStyle="<%= assetPublisherDisplayContext.getSocialBookmarksDisplayStyle() %>"
-					target="_blank"
-					title="<%= title %>"
-					url="<%= PortalUtil.getCanonicalURL(viewFullContentURL.toString(), themeDisplay, layout) %>"
-				/>
-			</div>
-		</c:if>
+		<div class="pull-right">
+			<liferay-ui:social-bookmarks
+				displayStyle="<%= assetPublisherDisplayContext.getSocialBookmarksDisplayStyle() %>"
+				target="_blank"
+				title="<%= title %>"
+				types="<%= assetPublisherDisplayContext.getSocialBookmarksTypes() %>"
+				url="<%= PortalUtil.getCanonicalURL(viewFullContentURL.toString(), themeDisplay, layout) %>"
+			/>
+		</div>
 
 		<c:if test="<%= assetPublisherDisplayContext.isEnableFlags() %>">
+
+			<%
+			TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(assetRenderer.getClassName());
+
+			boolean inTrash = trashHandler.isInTrash(assetEntry.getClassPK());
+			%>
+
 			<div class="asset-flag">
 				<liferay-flags:flags
 					className="<%= assetEntry.getClassName() %>"
 					classPK="<%= assetEntry.getClassPK() %>"
 					contentTitle="<%= title %>"
+					enabled="<%= !inTrash %>"
+					message='<%= inTrash ? "flags-are-disabled-because-this-entry-is-in-the-recycle-bin" : StringPool.BLANK %>'
 					reportedUserId="<%= assetRenderer.getUserId() %>"
 				/>
 			</div>
@@ -187,15 +183,27 @@ request.setAttribute("view.jsp-showIconLabel", true);
 		</c:if>
 
 		<c:if test="<%= assetPublisherDisplayContext.isEnableRelatedAssets() %>">
-			<liferay-ui:asset-links
+
+			<%
+			PortletURL assetLingsURL = renderResponse.createRenderURL();
+
+			assetLingsURL.setParameter("mvcPath", "/view_content.jsp");
+
+			if (print) {
+				assetLingsURL.setParameter("viewMode", Constants.PRINT);
+			}
+			%>
+
+			<liferay-asset:asset-links
 				assetEntryId="<%= assetEntry.getEntryId() %>"
-				portletURL="<%= viewFullContentURL %>"
+				portletURL="<%= assetLingsURL %>"
+				viewInContext="<%= viewInContext %>"
 			/>
 		</c:if>
 
 		<c:if test="<%= assetPublisherDisplayContext.isEnableComments() && assetRenderer.isCommentable() %>">
 			<div class="col-md-12">
-				<liferay-ui:discussion
+				<liferay-comment:discussion
 					className="<%= assetEntry.getClassName() %>"
 					classPK="<%= assetEntry.getClassPK() %>"
 					formName='<%= "fm" + assetEntry.getClassPK() %>'
@@ -207,7 +215,7 @@ request.setAttribute("view.jsp-showIconLabel", true);
 		</c:if>
 	</div>
 
-	<liferay-ui:asset-metadata
+	<liferay-asset:asset-metadata
 		className="<%= assetEntry.getClassName() %>"
 		classPK="<%= assetEntry.getClassPK() %>"
 		filterByMetadata="<%= true %>"
@@ -220,5 +228,4 @@ request.setAttribute("view.jsp-showIconLabel", true);
 </c:if>
 
 <%!
-private static Log _log = LogFactoryUtil.getLog("com_liferay_asset_publisher_web.display.full_content_jsp");
 %>

@@ -23,14 +23,13 @@ taglib uri="http://liferay.com/tld/frontend" prefix="liferay-frontend" %><%@
 taglib uri="http://liferay.com/tld/portlet" prefix="liferay-portlet" %><%@
 taglib uri="http://liferay.com/tld/security" prefix="liferay-security" %><%@
 taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %><%@
-taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %><%@
-taglib uri="http://liferay.com/tld/util" prefix="liferay-util" %>
+taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
-<%@ page import="com.liferay.portal.kernel.language.LanguageUtil" %><%@
+<%@ page import="com.liferay.petra.string.CharPool" %><%@
+page import="com.liferay.portal.kernel.language.LanguageUtil" %><%@
 page import="com.liferay.portal.kernel.portlet.LiferayWindowState" %><%@
+page import="com.liferay.portal.kernel.security.auth.PrincipalException" %><%@
 page import="com.liferay.portal.kernel.security.permission.ActionKeys" %><%@
-page import="com.liferay.portal.kernel.service.permission.PortletPermissionUtil" %><%@
-page import="com.liferay.portal.kernel.util.CharPool" %><%@
 page import="com.liferay.portal.kernel.util.GetterUtil" %><%@
 page import="com.liferay.portal.kernel.util.HtmlUtil" %><%@
 page import="com.liferay.portal.kernel.util.OrderByComparator" %><%@
@@ -39,7 +38,6 @@ page import="com.liferay.portal.kernel.util.StringPool" %><%@
 page import="com.liferay.portal.kernel.util.StringUtil" %><%@
 page import="com.liferay.portal.kernel.util.WebKeys" %><%@
 page import="com.liferay.portal.security.service.access.policy.constants.SAPActionKeys" %><%@
-page import="com.liferay.portal.security.service.access.policy.constants.SAPConstants" %><%@
 page import="com.liferay.portal.security.service.access.policy.exception.DuplicateSAPEntryNameException" %><%@
 page import="com.liferay.portal.security.service.access.policy.exception.SAPEntryNameException" %><%@
 page import="com.liferay.portal.security.service.access.policy.exception.SAPEntryTitleException" %><%@
@@ -47,6 +45,7 @@ page import="com.liferay.portal.security.service.access.policy.model.SAPEntry" %
 page import="com.liferay.portal.security.service.access.policy.model.SAPEntryConstants" %><%@
 page import="com.liferay.portal.security.service.access.policy.service.SAPEntryServiceUtil" %><%@
 page import="com.liferay.portal.security.service.access.policy.service.permission.SAPEntryPermission" %><%@
+page import="com.liferay.portal.security.service.access.policy.service.permission.SAPPermission" %><%@
 page import="com.liferay.portal.security.service.access.policy.util.comparator.SAPEntryNameComparator" %><%@
 page import="com.liferay.portal.security.service.access.policy.web.internal.constants.SAPWebKeys" %><%@
 page import="com.liferay.taglib.search.ResultRow" %>

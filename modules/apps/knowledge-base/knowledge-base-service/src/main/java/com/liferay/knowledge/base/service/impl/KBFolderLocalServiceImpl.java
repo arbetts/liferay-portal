@@ -14,8 +14,6 @@
 
 package com.liferay.knowledge.base.service.impl;
 
-import aQute.bnd.annotation.ProviderType;
-
 import com.liferay.knowledge.base.constants.KBFolderConstants;
 import com.liferay.knowledge.base.exception.DuplicateKBFolderNameException;
 import com.liferay.knowledge.base.exception.InvalidKBFolderNameException;
@@ -25,6 +23,7 @@ import com.liferay.knowledge.base.model.KBFolder;
 import com.liferay.knowledge.base.service.base.KBFolderLocalServiceBaseImpl;
 import com.liferay.knowledge.base.util.KnowledgeBaseUtil;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -38,7 +37,6 @@ import java.util.List;
 /**
  * @author Brian Wing Shun Chan
  */
-@ProviderType
 public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 
 	@Override
@@ -73,6 +71,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 			getUniqueUrlTitle(
 				groupId, parentResourcePrimKey, kbFolderId, name));
 		kbFolder.setDescription(description);
+		kbFolder.setExpandoBridgeAttributes(serviceContext);
 
 		kbFolderPersistence.update(kbFolder);
 
@@ -108,19 +107,47 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 			deleteKBFolder(childKBFolder.getKbFolderId());
 		}
 
+		// Expando
+
+		expandoRowLocalService.deleteRows(kbFolder.getKbFolderId());
+
 		return kbFolderPersistence.remove(kbFolder);
+	}
+
+	@Override
+	public void deleteKBFolders(long groupId) throws PortalException {
+		List<KBFolder> kbFolders = getKBFolders(
+			groupId, KBFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+		for (KBFolder kbFolder : kbFolders) {
+			deleteKBFolder(kbFolder.getKbFolderId());
+		}
 	}
 
 	@Override
 	public KBFolder fetchFirstChildKBFolder(long groupId, long kbFolderId)
 		throws PortalException {
 
-		return kbFolderPersistence.fetchByG_P_First(groupId, kbFolderId, null);
+		return fetchFirstChildKBFolder(groupId, kbFolderId, null);
+	}
+
+	@Override
+	public KBFolder fetchFirstChildKBFolder(
+			long groupId, long kbFolderId, OrderByComparator<KBFolder> obc)
+		throws PortalException {
+
+		return kbFolderPersistence.fetchByG_P_First(groupId, kbFolderId, obc);
 	}
 
 	@Override
 	public KBFolder fetchKBFolder(long kbFolderId) {
 		return kbFolderPersistence.fetchByPrimaryKey(kbFolderId);
+	}
+
+	@Override
+	public KBFolder fetchKBFolder(String uuid, long groupId) {
+		return kbFolderPersistence.fetchByUUID_G(uuid, groupId);
 	}
 
 	@Override
@@ -199,10 +226,27 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 		kbFolderPersistence.update(kbFolder);
 	}
 
+	/**
+	 * @deprecated As of 1.1.0, replaced by {@link #updateKBFolder(long, long,
+	 *             long, String, String, ServiceContext)}
+	 */
+	@Deprecated
 	@Override
 	public KBFolder updateKBFolder(
 			long parentResourceClassNameId, long parentResourcePrimKey,
 			long kbFolderId, String name, String description)
+		throws PortalException {
+
+		return updateKBFolder(
+			parentResourceClassNameId, parentResourcePrimKey, kbFolderId, name,
+			description, new ServiceContext());
+	}
+
+	@Override
+	public KBFolder updateKBFolder(
+			long parentResourceClassNameId, long parentResourcePrimKey,
+			long kbFolderId, String name, String description,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		validateParent(parentResourceClassNameId, parentResourcePrimKey);
@@ -213,6 +257,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 		kbFolder.setParentKBFolderId(parentResourcePrimKey);
 		kbFolder.setName(name);
 		kbFolder.setDescription(description);
+		kbFolder.setExpandoBridgeAttributes(serviceContext);
 
 		return kbFolderPersistence.update(kbFolder);
 	}
@@ -247,7 +292,8 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 
 		String uniqueUrlTitle = urlTitle;
 
-		KBFolder kbFolder = null;
+		KBFolder kbFolder = kbFolderPersistence.fetchByG_P_UT(
+			groupId, parentKbFolderId, uniqueUrlTitle);
 
 		for (int i = 1; kbFolder != null; i++) {
 			uniqueUrlTitle = urlTitle + StringPool.DASH + i;

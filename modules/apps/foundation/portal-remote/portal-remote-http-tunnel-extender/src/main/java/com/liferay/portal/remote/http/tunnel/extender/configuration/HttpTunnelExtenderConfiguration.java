@@ -25,11 +25,13 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.remote.http.tunnel.configuration.HttpTunnelExtenderConfiguration",
 	localization = "content/Language",
-	name = "http.tunnel.extender.configuration.name"
+	name = "http-tunnel-extender-configuration-name"
 )
 public interface HttpTunnelExtenderConfiguration {
 
-	@Meta.AD(deflt = "255.255.255.255", required = false)
+	@Meta.AD(
+		deflt = "255.255.255.255", name = "hosts-allowed", required = false
+	)
 	public String[] hostsAllowed();
 
 }

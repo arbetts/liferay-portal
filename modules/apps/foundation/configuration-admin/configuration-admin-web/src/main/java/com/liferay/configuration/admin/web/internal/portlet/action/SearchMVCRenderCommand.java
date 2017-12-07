@@ -14,7 +14,7 @@
 
 package com.liferay.configuration.admin.web.internal.portlet.action;
 
-import com.liferay.configuration.admin.web.internal.constants.ConfigurationAdminPortletKeys;
+import com.liferay.configuration.admin.constants.ConfigurationAdminPortletKeys;
 import com.liferay.configuration.admin.web.internal.constants.ConfigurationAdminWebKeys;
 import com.liferay.configuration.admin.web.internal.model.ConfigurationModel;
 import com.liferay.configuration.admin.web.internal.search.FieldNames;
@@ -98,6 +98,14 @@ public class SearchMVCRenderCommand implements MVCRenderCommand {
 
 				ConfigurationModel configurationModel = configurationModels.get(
 					configurationModelId);
+
+				if (configurationModel == null) {
+					String configurationModelFactoryId = document.get(
+						FieldNames.CONFIGURATION_MODEL_FACTORY_PID);
+
+					configurationModel = configurationModels.get(
+						configurationModelFactoryId);
+				}
 
 				if (configurationModel != null) {
 					searchResults.add(configurationModel);

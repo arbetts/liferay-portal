@@ -16,7 +16,7 @@ package com.liferay.exportimport.kernel.lifecycle;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.kernel.util.ProxyFactory;
+import com.liferay.portal.kernel.util.ServiceProxyFactory;
 
 import java.io.Serializable;
 
@@ -26,6 +26,10 @@ import java.io.Serializable;
 @ProviderType
 public class ExportImportLifecycleEventFactoryUtil {
 
+	/**
+	 * @deprecated As of 7.0.0
+	 */
+	@Deprecated
 	public static ExportImportLifecycleEvent create(
 		int code, int processFlag, Serializable... attributes) {
 
@@ -33,11 +37,19 @@ public class ExportImportLifecycleEventFactoryUtil {
 			code, processFlag, attributes);
 	}
 
+	public static ExportImportLifecycleEvent create(
+		int code, int processFlag, String processId,
+		Serializable... attributes) {
+
+		return _exportImportLifecycleEventFactory.create(
+			code, processFlag, processId, attributes);
+	}
+
 	private static volatile ExportImportLifecycleEventFactory
 		_exportImportLifecycleEventFactory =
-			ProxyFactory.newServiceTrackedInstance(
+			ServiceProxyFactory.newServiceTrackedInstance(
 				ExportImportLifecycleEventFactory.class,
 				ExportImportLifecycleEventFactoryUtil.class,
-				"_exportImportLifecycleEventFactory");
+				"_exportImportLifecycleEventFactory", false);
 
 }

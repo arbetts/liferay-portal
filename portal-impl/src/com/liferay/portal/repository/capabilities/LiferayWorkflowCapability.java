@@ -36,8 +36,11 @@ import com.liferay.portal.repository.liferayrepository.LiferayWorkflowRepository
 import com.liferay.portal.repository.util.RepositoryWrapperAware;
 
 /**
- * @author Adolfo Pérez
+ * @author     Adolfo Pérez
+ * @deprecated As of 7.0.0, replaced by {@link
+ *             com.liferay.document.library.internal.capabilities.LiferayWorkflowCapability}
  */
+@Deprecated
 public class LiferayWorkflowCapability
 	implements RepositoryWrapperAware, WorkflowCapability, WorkflowSupport {
 

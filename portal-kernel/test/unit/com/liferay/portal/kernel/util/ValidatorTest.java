@@ -15,13 +15,16 @@
 package com.liferay.portal.kernel.util;
 
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.rule.CodeCoverageAssertor;
+
+import java.lang.reflect.Method;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Assert;
+import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * @author Shuyang Zhou
@@ -29,8 +32,26 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Igor Beslic
  * @author Manuel de la Peña
  */
-@RunWith(PowerMockRunner.class)
-public class ValidatorTest extends PowerMockito {
+public class ValidatorTest {
+
+	@ClassRule
+	public static final CodeCoverageAssertor codeCoverageAssertor =
+		new CodeCoverageAssertor() {
+
+			@Override
+			public void appendAssertClasses(List<Class<?>> assertClasses) {
+				assertClasses.clear();
+			}
+
+			@Override
+			public List<Method> getAssertMethods()
+				throws ReflectiveOperationException {
+
+				return Collections.singletonList(
+					Validator.class.getDeclaredMethod("isLUHN", String.class));
+			}
+
+		};
 
 	@Test
 	public void testIsContent() throws Exception {
@@ -47,7 +68,7 @@ public class ValidatorTest extends PowerMockito {
 
 		// 来锐.com, живот.рс
 
-		String[] validDomains = new String[] {
+		String[] validDomains = {
 			"localhost", "liferay.com", "\u6765\u9510.com",
 			"\u0436\u0438\u0432\u043E\u0442.\u0440\u0441"
 		};
@@ -106,9 +127,8 @@ public class ValidatorTest extends PowerMockito {
 
 	@Test
 	public void testIsInvalidFileExtension() throws Exception {
-		String[] invalidFileExtensions = {
-			null, "", "\u0000", ".\u0000", "abc\u0000\u0000/", "a/b", "c\\d"
-		};
+		String[] invalidFileExtensions =
+			{null, "", "\u0000", ".\u0000", "abc\u0000\u0000/", "a/b", "c\\d"};
 
 		testValidFileExtensions(invalidFileExtensions, false);
 	}
@@ -126,18 +146,16 @@ public class ValidatorTest extends PowerMockito {
 
 	@Test
 	public void testIsInvalidFilePath() throws Exception {
-		String[] invalidFilePaths = {
-			null, "", "..", "./..", "../a", "/../a", "\u0000", "a\u0000/../a"
-		};
+		String[] invalidFilePaths =
+			{null, "", "..", "./..", "../a", "/../a", "\u0000", "a\u0000/../a"};
 
 		testValidFilePaths(invalidFilePaths, false, false);
 	}
 
 	@Test
 	public void testIsInvalidFilePathWithParentDirectories() throws Exception {
-		String[] invalidFilePathsWithParentDirectories = {
-			null, "", "\u0000", "a\u0000/../a"
-		};
+		String[] invalidFilePathsWithParentDirectories =
+			{null, "", "\u0000", "a\u0000/../a"};
 
 		testValidFilePaths(invalidFilePathsWithParentDirectories, true, false);
 	}
@@ -363,19 +381,48 @@ public class ValidatorTest extends PowerMockito {
 	}
 
 	@Test
-	public void testIsNull() throws Exception {
-		String[] nullStrings = {
-			null, "", "  ", "null", " null", "null ", "  null  "
+	public void testIsInvalidVariableName() throws Exception {
+		String[] invalidVariableNames = {
+			null, "", "false", "hello.world", "hello/world", "hello-world",
+			"HELLO.WORLD", "HELLO-WORLD", "HELLO/WORLD", "import", "static"
 		};
+
+		testValidVariableNames(invalidVariableNames, false);
+	}
+
+	@Test
+	public void testIsLUHN() {
+		Assert.assertTrue(Validator.isLUHN("059"));
+		Assert.assertTrue(Validator.isLUHN("0000"));
+		Assert.assertTrue(Validator.isLUHN("0042"));
+		Assert.assertTrue(Validator.isLUHN("0901"));
+		Assert.assertTrue(Validator.isLUHN("00620"));
+		Assert.assertTrue(Validator.isLUHN("9876543001"));
+
+		Assert.assertFalse(Validator.isLUHN("095"));
+		Assert.assertFalse(Validator.isLUHN("0001"));
+		Assert.assertFalse(Validator.isLUHN("0205"));
+		Assert.assertFalse(Validator.isLUHN("9999"));
+		Assert.assertFalse(Validator.isLUHN("02050"));
+		Assert.assertFalse(Validator.isLUHN("0123456789"));
+
+		Assert.assertFalse(Validator.isLUHN("ABC"));
+		Assert.assertFalse(Validator.isLUHN("\n"));
+		Assert.assertFalse(Validator.isLUHN(null));
+	}
+
+	@Test
+	public void testIsNull() throws Exception {
+		String[] nullStrings =
+			{null, "", "  ", "null", " null", "null ", "  null  "};
 
 		testIsNull(nullStrings, true);
 	}
 
 	@Test
 	public void testIsNullInvalid() throws Exception {
-		String[] notNullStrings = {
-			"a", "anull", "nulla", " anull", " nulla ", "  null  a"
-		};
+		String[] notNullStrings =
+			{"a", "anull", "nulla", " anull", " nulla ", "  null  a"};
 
 		testIsNull(notNullStrings, false);
 	}
@@ -532,6 +579,16 @@ public class ValidatorTest extends PowerMockito {
 		testValidUrl(validUrls, true);
 	}
 
+	@Test
+	public void testIsVariableName() throws Exception {
+		String[] validVariableNames = {
+			"_hello_world", "_HELLO_WORLD", "helloWorld", "hElLoWoRlD",
+			"helloWorld123"
+		};
+
+		testValidVariableNames(validVariableNames, true);
+	}
+
 	protected void testIsNull(String[] strings, boolean valid) {
 		for (String string : strings) {
 			boolean b = Validator.isNull(string);
@@ -573,11 +630,11 @@ public class ValidatorTest extends PowerMockito {
 	}
 
 	protected void testValidFilePaths(
-		String[] filePaths, boolean isParentDirAllowed, boolean valid) {
+		String[] filePaths, boolean parentDirAllowed, boolean valid) {
 
 		for (String filePath : filePaths) {
 			boolean isFilePath = Validator.isFilePath(
-				filePath, isParentDirAllowed);
+				filePath, parentDirAllowed);
 
 			Assert.assertEquals(valid, isFilePath);
 		}
@@ -605,6 +662,12 @@ public class ValidatorTest extends PowerMockito {
 
 	protected void testValidUrl(String[] urls, boolean valid) {
 		testIsValidByMethodName("isUrl", urls, valid);
+	}
+
+	protected void testValidVariableNames(
+		String[] variableNames, boolean valid) {
+
+		testIsValidByMethodName("isVariableName", variableNames, valid);
 	}
 
 }

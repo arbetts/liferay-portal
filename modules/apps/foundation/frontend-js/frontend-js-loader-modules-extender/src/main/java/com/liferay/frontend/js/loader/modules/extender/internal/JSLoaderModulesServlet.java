@@ -14,9 +14,13 @@
 
 package com.liferay.frontend.js.loader.modules.extender.internal;
 
-import aQute.lib.converter.Converter;
-
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.frontend.js.loader.modules.extender.npm.JSModule;
+import com.liferay.frontend.js.loader.modules.extender.npm.JSPackage;
+import com.liferay.frontend.js.loader.modules.extender.npm.JSPackageDependency;
+import com.liferay.frontend.js.loader.modules.extender.npm.NPMRegistry;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +50,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Raymond Augé
  */
 @Component(
+	configurationPid = "com.liferay.frontend.js.loader.modules.extender.internal.Details",
 	immediate = true,
 	property = {
 		"osgi.http.whiteboard.servlet.name=com.liferay.frontend.js.loader.modules.extender.internal.JSLoaderModulesServlet",
@@ -54,15 +61,26 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class JSLoaderModulesServlet extends HttpServlet {
 
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+
+		_componentContext.enableComponent(
+			JSLoaderModulesPortalWebResources.class.getName());
+	}
+
 	@Activate
 	@Modified
 	protected void activate(
 			ComponentContext componentContext, Map<String, Object> properties)
 		throws Exception {
 
+		_details = ConfigurableUtil.createConfigurable(
+			Details.class, properties);
+
 		_logger = new Logger(componentContext.getBundleContext());
 
-		setDetails(Converter.cnv(Details.class, properties));
+		_componentContext = componentContext;
 	}
 
 	protected JSLoaderModulesTracker getJSLoaderModulesTracker() {
@@ -81,10 +99,10 @@ public class JSLoaderModulesServlet extends HttpServlet {
 		PrintWriter printWriter = new PrintWriter(servletOutputStream, true);
 
 		printWriter.println("(function() {");
-		printWriter.print(_details.globalJSVariable());
-		printWriter.println(".PATHS = {");
+		printWriter.println("Liferay.PATHS = {");
 
 		String delimiter = "";
+		String delimiter2 = "";
 		Set<String> processedNames = new HashSet<>();
 
 		Collection<JSLoaderModule> jsLoaderModules =
@@ -92,33 +110,47 @@ public class JSLoaderModulesServlet extends HttpServlet {
 
 		for (JSLoaderModule jsLoaderModule : jsLoaderModules) {
 			printWriter.write(delimiter);
-			printWriter.write("'");
+			printWriter.write("\"");
 			printWriter.write(jsLoaderModule.getName());
-			printWriter.write('@');
+			printWriter.write("@");
 			printWriter.write(jsLoaderModule.getVersion());
-			printWriter.write("': '");
-			printWriter.write(PortalUtil.getPathProxy());
+			printWriter.write("\": \"");
+			printWriter.write(_portal.getPathProxy());
 			printWriter.write(jsLoaderModule.getContextPath());
-			printWriter.write("'");
+			printWriter.write("\"");
 
 			if (!processedNames.contains(jsLoaderModule.getName())) {
 				processedNames.add(jsLoaderModule.getName());
 
 				printWriter.println(",");
-				printWriter.write("'");
+				printWriter.write("\"");
 				printWriter.write(jsLoaderModule.getName());
-				printWriter.write("': '");
-				printWriter.write(PortalUtil.getPathProxy());
+				printWriter.write("\": \"");
+				printWriter.write(_portal.getPathProxy());
 				printWriter.write(jsLoaderModule.getContextPath());
-				printWriter.write("'");
+				printWriter.write("\"");
 			}
 
 			delimiter = ",\n";
 		}
 
+		Collection<JSModule> resolvedJSModules =
+			_npmRegistry.getResolvedJSModules();
+
+		for (JSModule resolvedJSModule : resolvedJSModules) {
+			printWriter.write(delimiter);
+			printWriter.write("\"");
+			printWriter.write(resolvedJSModule.getResolvedId());
+			printWriter.write("\": \"");
+			printWriter.write(_portal.getPathProxy());
+			printWriter.write(resolvedJSModule.getResolvedURL());
+			printWriter.write("\"");
+
+			delimiter = ",\n";
+		}
+
 		printWriter.println("\n};");
-		printWriter.print(_details.globalJSVariable());
-		printWriter.println(".MODULES = {");
+		printWriter.println("Liferay.MODULES = {");
 
 		delimiter = "";
 		processedNames.clear();
@@ -151,9 +183,76 @@ public class JSLoaderModulesServlet extends HttpServlet {
 			}
 		}
 
+		for (JSModule resolvedJSModule : resolvedJSModules) {
+			printWriter.write(delimiter);
+			printWriter.write("\"");
+			printWriter.write(resolvedJSModule.getResolvedId());
+			printWriter.write("\": {\n");
+
+			delimiter2 = "";
+
+			printWriter.write("  \"dependencies\": [");
+
+			for (String dependency : resolvedJSModule.getDependencies()) {
+				printWriter.write(delimiter2);
+				printWriter.write("\"" + dependency + "\"");
+
+				delimiter2 = ", ";
+			}
+
+			printWriter.write("],\n");
+
+			JSPackage jsPackage = resolvedJSModule.getJSPackage();
+
+			delimiter2 = "";
+
+			printWriter.write("  \"map\": {");
+
+			for (String dependencyPackageName :
+					resolvedJSModule.getDependencyPackageNames()) {
+
+				JSPackageDependency jsPackageDependency =
+					jsPackage.getJSPackageDependency(dependencyPackageName);
+
+				if (jsPackageDependency != null) {
+					JSPackage jsDependencyPackage =
+						_npmRegistry.resolveJSPackageDependency(
+							jsPackageDependency);
+
+					printWriter.write(delimiter2);
+
+					if (jsDependencyPackage == null) {
+						printWriter.write("\"");
+						printWriter.write(dependencyPackageName);
+						printWriter.write("\": \"[NOT-DEPLOYED:");
+						printWriter.write(dependencyPackageName);
+						printWriter.write("]\"");
+					}
+					else {
+						printWriter.write("\"");
+						printWriter.write(jsDependencyPackage.getName());
+						printWriter.write("\": ");
+
+						printWriter.write("\"");
+						printWriter.write(jsDependencyPackage.getName());
+						printWriter.write(StringPool.AT);
+						printWriter.write(jsDependencyPackage.getVersion());
+						printWriter.write("\"");
+					}
+
+					delimiter2 = ", ";
+				}
+			}
+
+			printWriter.write("}\n");
+
+			printWriter.write("}");
+
+			delimiter = ",\n";
+		}
+
 		printWriter.println("\n};");
-		printWriter.print(_details.globalJSVariable());
-		printWriter.println(".MAPS = {");
+		printWriter.println("Liferay.MAPS = {");
 
 		delimiter = "";
 		processedNames.clear();
@@ -166,13 +265,13 @@ public class JSLoaderModulesServlet extends HttpServlet {
 			processedNames.add(jsLoaderModule.getName());
 
 			printWriter.write(delimiter);
-			printWriter.write("'");
+			printWriter.write("\"");
 			printWriter.write(jsLoaderModule.getName());
-			printWriter.write("': '");
+			printWriter.write("\": \"");
 			printWriter.write(jsLoaderModule.getName());
-			printWriter.write('@');
+			printWriter.write("@");
 			printWriter.write(jsLoaderModule.getVersion());
-			printWriter.write("'");
+			printWriter.write("\"");
 
 			delimiter = ",\n";
 
@@ -185,7 +284,28 @@ public class JSLoaderModulesServlet extends HttpServlet {
 			}
 		}
 
+		for (JSPackage jsPackage : _npmRegistry.getJSPackages()) {
+			printWriter.write(delimiter);
+			printWriter.write("\"");
+			printWriter.write(jsPackage.getName());
+			printWriter.write(StringPool.AT);
+			printWriter.write(jsPackage.getVersion());
+			printWriter.write("\": {exactMatch: true, value: \"");
+			printWriter.write(jsPackage.getName());
+			printWriter.write(StringPool.AT);
+			printWriter.write(jsPackage.getVersion());
+			printWriter.write(StringPool.SLASH);
+			printWriter.write(jsPackage.getMainModuleName());
+			printWriter.write("\"}");
+
+			delimiter = ",\n";
+		}
+
 		printWriter.println("\n};");
+
+		printWriter.println(
+			"Liferay.EXPOSE_GLOBAL = " + _details.exposeGlobal() + ";\n");
+
 		printWriter.println("}());");
 
 		printWriter.close();
@@ -202,8 +322,18 @@ public class JSLoaderModulesServlet extends HttpServlet {
 		_jsLoaderModulesTracker = jsLoaderModulesTracker;
 	}
 
+	@Reference(unbind = "-")
+	protected void setNPMRegistry(NPMRegistry npmRegistry) {
+		_npmRegistry = npmRegistry;
+	}
+
+	private ComponentContext _componentContext;
 	private volatile Details _details;
 	private JSLoaderModulesTracker _jsLoaderModulesTracker;
 	private Logger _logger;
+	private NPMRegistry _npmRegistry;
+
+	@Reference
+	private Portal _portal;
 
 }

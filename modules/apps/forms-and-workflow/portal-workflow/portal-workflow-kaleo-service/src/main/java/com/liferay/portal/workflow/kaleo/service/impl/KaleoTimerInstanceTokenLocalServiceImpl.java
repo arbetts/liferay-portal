@@ -91,8 +91,8 @@ public class KaleoTimerInstanceTokenLocalServiceImpl
 		kaleoTimerInstanceToken.setKaleoClassName(
 			kaleoTimer.getKaleoClassName());
 		kaleoTimerInstanceToken.setKaleoClassPK(kaleoTimer.getKaleoClassPK());
-		kaleoTimerInstanceToken.setKaleoDefinitionId(
-			kaleoInstanceToken.getKaleoDefinitionId());
+		kaleoTimerInstanceToken.setKaleoDefinitionVersionId(
+			kaleoInstanceToken.getKaleoDefinitionVersionId());
 		kaleoTimerInstanceToken.setKaleoInstanceId(
 			kaleoInstanceToken.getKaleoInstanceId());
 		kaleoTimerInstanceToken.setKaleoInstanceTokenId(kaleoInstanceTokenId);
@@ -247,20 +247,20 @@ public class KaleoTimerInstanceTokenLocalServiceImpl
 
 	@Override
 	public List<KaleoTimerInstanceToken> getKaleoTimerInstanceTokens(
-		long kaleoInstanceTokenId, boolean completed, boolean blocking,
+		long kaleoInstanceTokenId, boolean blocking, boolean completed,
 		ServiceContext serviceContext) {
 
-		return kaleoTimerInstanceTokenPersistence.findByKITI_C_B(
-			kaleoInstanceTokenId, completed, blocking);
+		return kaleoTimerInstanceTokenPersistence.findByKITI_B_C(
+			kaleoInstanceTokenId, blocking, completed);
 	}
 
 	@Override
 	public int getKaleoTimerInstanceTokensCount(
-		long kaleoInstanceTokenId, boolean completed, boolean blocking,
+		long kaleoInstanceTokenId, boolean blocking, boolean completed,
 		ServiceContext serviceContext) {
 
-		return kaleoTimerInstanceTokenPersistence.countByKITI_C_B(
-			kaleoInstanceTokenId, completed, blocking);
+		return kaleoTimerInstanceTokenPersistence.countByKITI_B_C(
+			kaleoInstanceTokenId, blocking, completed);
 	}
 
 	protected void deleteScheduledTimer(

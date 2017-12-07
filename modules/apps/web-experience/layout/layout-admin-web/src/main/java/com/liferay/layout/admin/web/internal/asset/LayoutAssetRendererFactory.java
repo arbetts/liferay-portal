@@ -26,7 +26,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 
 import javax.servlet.ServletContext;
 
@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	immediate = true,
-	property = {"javax.portlet.name=" + LayoutAdminPortletKeys.LAYOUT_ADMIN},
+	property = {"javax.portlet.name=" + LayoutAdminPortletKeys.GROUP_PAGES},
 	service = AssetRendererFactory.class
 )
 public class LayoutAssetRendererFactory
@@ -49,7 +49,7 @@ public class LayoutAssetRendererFactory
 	public LayoutAssetRendererFactory() {
 		setClassName(Layout.class.getName());
 		setSelectable(false);
-		setPortletId(LayoutAdminPortletKeys.LAYOUT_ADMIN);
+		setPortletId(LayoutAdminPortletKeys.GROUP_PAGES);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class LayoutAssetRendererFactory
 		assetEntry.setUserName(user.getFullName());
 		assetEntry.setCreateDate(layout.getCreateDate());
 		assetEntry.setClassNameId(
-			PortalUtil.getClassNameId(Layout.class.getName()));
+			_portal.getClassNameId(Layout.class.getName()));
 		assetEntry.setClassPK(layout.getLayoutId());
 		assetEntry.setTitle(layout.getHTMLTitle(LocaleUtil.getSiteDefault()));
 
@@ -135,6 +135,10 @@ public class LayoutAssetRendererFactory
 
 	private AssetEntryLocalService _assetEntryLocalService;
 	private LayoutLocalService _layoutLocalService;
+
+	@Reference
+	private Portal _portal;
+
 	private ServletContext _servletContext;
 	private UserLocalService _userLocalService;
 

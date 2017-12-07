@@ -45,6 +45,7 @@ import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalFolderConstants;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.service.JournalFolderLocalService;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -60,8 +61,10 @@ import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.model.LayoutTypePortletConstants;
 import com.liferay.portal.kernel.model.PortletConstants;
+import com.liferay.portal.kernel.model.PortletPreferencesIds;
 import com.liferay.portal.kernel.model.Theme;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactory;
+import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistry;
@@ -71,13 +74,13 @@ import com.liferay.portal.kernel.service.LayoutPrototypeLocalService;
 import com.liferay.portal.kernel.service.LayoutSetLocalService;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalService;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.kernel.service.RepositoryLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.ThemeLocalService;
 import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -204,8 +207,9 @@ public class FileSystemImporter extends BaseImporter {
 			if (!developerModeEnabled) {
 				if (_log.isInfoEnabled()) {
 					_log.info(
-						"DDM template with name " + name + " and version " +
-							version + " already exists");
+						StringBundler.concat(
+							"DDM template with name ", name, " and version ",
+							String.valueOf(version), " already exists"));
 				}
 
 				return;
@@ -379,8 +383,9 @@ public class FileSystemImporter extends BaseImporter {
 			if (!developerModeEnabled) {
 				if (_log.isInfoEnabled()) {
 					_log.info(
-						"DDM structure with name " + name + " and version " +
-							version + " already exists");
+						StringBundler.concat(
+							"DDM structure with name ", name, " and version ",
+							String.valueOf(version), " already exists"));
 				}
 
 				return;
@@ -483,8 +488,9 @@ public class FileSystemImporter extends BaseImporter {
 			if (!developerModeEnabled) {
 				if (_log.isInfoEnabled()) {
 					_log.info(
-						"DDM structure with name " + name + " and version " +
-							version + " already exists");
+						StringBundler.concat(
+							"DDM structure with name ", name, " and version ",
+							String.valueOf(version), " already exists"));
 				}
 
 				return;
@@ -585,8 +591,9 @@ public class FileSystemImporter extends BaseImporter {
 			if (!developerModeEnabled) {
 				if (_log.isInfoEnabled()) {
 					_log.info(
-						"DDM template with name " + name + " and version " +
-							version + " already exists");
+						StringBundler.concat(
+							"DDM template with name ", name, " and version ",
+							String.valueOf(version), " already exists"));
 				}
 
 				return;
@@ -679,8 +686,9 @@ public class FileSystemImporter extends BaseImporter {
 			if (!developerModeEnabled) {
 				if (_log.isInfoEnabled()) {
 					_log.info(
-						"DDM template with name " + name + " and version " +
-							version + " already exists");
+						StringBundler.concat(
+							"DDM template with name ", name, " and version ",
+							String.valueOf(version), " already exists"));
 				}
 
 				return;
@@ -920,6 +928,7 @@ public class FileSystemImporter extends BaseImporter {
 		String content = StringUtil.read(inputStream);
 
 		content = replaceFileEntryURL(content);
+		content = replaceLinksToLayouts(content);
 
 		Locale articleDefaultLocale = LocaleUtil.fromLanguageId(
 			LocalizationUtil.getDefaultLanguageId(content));
@@ -1212,9 +1221,13 @@ public class FileSystemImporter extends BaseImporter {
 		}
 
 		if (portletPreferencesTranslator != null) {
+			PortletPreferencesIds portletPreferencesIds =
+				PortletPreferencesFactoryUtil.getPortletPreferencesIds(
+					layout.getGroupId(), 0, layout, portletId, false);
+
 			PortletPreferences portletSetup =
-				portletPreferencesFactory.getLayoutPortletSetup(
-					layout, portletId);
+				PortletPreferencesLocalServiceUtil.getPreferences(
+					portletPreferencesIds);
 
 			Iterator<String> iterator = portletPreferencesJSONObject.keys();
 
@@ -1288,8 +1301,10 @@ public class FileSystemImporter extends BaseImporter {
 			if (!developerModeEnabled) {
 				if (_log.isInfoEnabled()) {
 					_log.info(
-						"Layout prototype with name " + name +
-							" already exists for company " + companyId);
+						StringBundler.concat(
+							"Layout prototype with name ", name,
+							" already exists for company ",
+							String.valueOf(companyId)));
 				}
 
 				return;
@@ -1402,9 +1417,10 @@ public class FileSystemImporter extends BaseImporter {
 		try {
 			indexStatusManager.setIndexReadOnly(true);
 
+			setUpSitemap("sitemap.json");
+
 			setUpAssets("assets.json");
 			setUpSettings("settings.json");
-			setUpSitemap("sitemap.json");
 
 			indexStatusManager.setIndexReadOnly(false);
 
@@ -1614,8 +1630,10 @@ public class FileSystemImporter extends BaseImporter {
 				catch (SearchException se) {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
-							"Unable to index entry for class name " +
-								className + " and primary key " + primaryKey,
+							StringBundler.concat(
+								"Unable to index entry for class name ",
+								className, " and primary key ",
+								String.valueOf(primaryKey)),
 							se);
 					}
 				}
@@ -1716,6 +1734,18 @@ public class FileSystemImporter extends BaseImporter {
 			}
 
 			content = matcher.replaceFirst(fileEntryURL);
+
+			matcher.reset(content);
+		}
+
+		return content;
+	}
+
+	protected String replaceLinksToLayouts(String content) throws Exception {
+		Matcher matcher = _groupIdPattern.matcher(content);
+
+		while (matcher.find()) {
+			content = matcher.replaceFirst(String.valueOf(groupId));
 
 			matcher.reset(content);
 		}
@@ -1973,29 +2003,28 @@ public class FileSystemImporter extends BaseImporter {
 	private static final String _APPLICATION_DISPLAY_TEMPLATE_DIR_NAME =
 		"/templates/application_display";
 
-	private static final Object[][] _APPLICATION_DISPLAY_TEMPLATE_TYPES =
-		new Object[][] {
-			{"asset_category", "com.liferay.asset.kernel.model.AssetCategory"},
-			{"asset_entry", "com.liferay.asset.kernel.model.AssetEntry"},
-			{"asset_tag", "com.liferay.asset.kernel.model.AssetTag"},
-			{"blogs_entry", "com.liferay.blogs.model.BlogsEntry"},
-			{
-				"bread_crumb",
-				"com.liferay.portal.kernel.servlet.taglib.ui.BreadcrumbEntry"
-			},
-			{
-				"document_library",
-				"com.liferay.portal.kernel.repository.model.FileEntry"
-			},
-			{
-				"language_entry",
-				"com.liferay.portal.kernel.servlet.taglib.ui.LanguageEntry"
-			},
-			{"rss_feed", "com.liferay.rss.web.util.RSSFeed"},
-			{"site_map", "com.liferay.portal.kernel.model.LayoutSet"},
-			{"site_navigation", "com.liferay.portal.kernel.theme.NavItem"},
-			{"wiki_page", "com.liferay.wiki.model.WikiPage"}
-		};
+	private static final Object[][] _APPLICATION_DISPLAY_TEMPLATE_TYPES = {
+		{"asset_category", "com.liferay.asset.kernel.model.AssetCategory"},
+		{"asset_entry", "com.liferay.asset.kernel.model.AssetEntry"},
+		{"asset_tag", "com.liferay.asset.kernel.model.AssetTag"},
+		{"blogs_entry", "com.liferay.blogs.model.BlogsEntry"},
+		{
+			"bread_crumb",
+			"com.liferay.portal.kernel.servlet.taglib.ui.BreadcrumbEntry"
+		},
+		{
+			"document_library",
+			"com.liferay.portal.kernel.repository.model.FileEntry"
+		},
+		{
+			"language_entry",
+			"com.liferay.portal.kernel.servlet.taglib.ui.LanguageEntry"
+		},
+		{"rss_feed", "com.liferay.rss.web.util.RSSFeed"},
+		{"site_map", "com.liferay.portal.kernel.model.LayoutSet"},
+		{"site_navigation", "com.liferay.portal.kernel.theme.NavItem"},
+		{"wiki_page", "com.liferay.wiki.model.WikiPage"}
+	};
 
 	private static final String _DDL_STRUCTURE_DIR_NAME =
 		"/templates/dynamic_data_list/structure";
@@ -2032,6 +2061,8 @@ public class FileSystemImporter extends BaseImporter {
 	private final Map<String, FileEntry> _fileEntries = new HashMap<>();
 	private final Pattern _fileEntryPattern = Pattern.compile(
 		"\\[\\$FILE=([^\\$]+)\\$\\]");
+	private final Pattern _groupIdPattern = Pattern.compile(
+		"\\[\\$GROUP_ID\\$\\]");
 	private final Map<String, Set<Long>> _primaryKeys = new HashMap<>();
 	private File _resourcesDir;
 

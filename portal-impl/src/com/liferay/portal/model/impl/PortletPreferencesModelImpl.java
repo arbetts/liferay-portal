@@ -30,7 +30,6 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Serializable;
 
@@ -103,11 +102,12 @@ public class PortletPreferencesModelImpl extends BaseModelImpl<PortletPreference
 	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.portal.util.PropsUtil.get(
 				"value.object.column.bitmask.enabled.com.liferay.portal.kernel.model.PortletPreferences"),
 			true);
-	public static final long OWNERID_COLUMN_BITMASK = 1L;
-	public static final long OWNERTYPE_COLUMN_BITMASK = 2L;
-	public static final long PLID_COLUMN_BITMASK = 4L;
-	public static final long PORTLETID_COLUMN_BITMASK = 8L;
-	public static final long PORTLETPREFERENCESID_COLUMN_BITMASK = 16L;
+	public static final long COMPANYID_COLUMN_BITMASK = 1L;
+	public static final long OWNERID_COLUMN_BITMASK = 2L;
+	public static final long OWNERTYPE_COLUMN_BITMASK = 4L;
+	public static final long PLID_COLUMN_BITMASK = 8L;
+	public static final long PORTLETID_COLUMN_BITMASK = 16L;
+	public static final long PORTLETPREFERENCESID_COLUMN_BITMASK = 32L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -291,7 +291,19 @@ public class PortletPreferencesModelImpl extends BaseModelImpl<PortletPreference
 
 	@Override
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	@JSON
@@ -367,7 +379,7 @@ public class PortletPreferencesModelImpl extends BaseModelImpl<PortletPreference
 	@Override
 	public String getPortletId() {
 		if (_portletId == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _portletId;
@@ -393,7 +405,7 @@ public class PortletPreferencesModelImpl extends BaseModelImpl<PortletPreference
 	@Override
 	public String getPreferences() {
 		if (_preferences == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _preferences;
@@ -505,6 +517,10 @@ public class PortletPreferencesModelImpl extends BaseModelImpl<PortletPreference
 	@Override
 	public void resetOriginalValues() {
 		PortletPreferencesModelImpl portletPreferencesModelImpl = this;
+
+		portletPreferencesModelImpl._originalCompanyId = portletPreferencesModelImpl._companyId;
+
+		portletPreferencesModelImpl._setOriginalCompanyId = false;
 
 		portletPreferencesModelImpl._originalOwnerId = portletPreferencesModelImpl._ownerId;
 
@@ -636,6 +652,8 @@ public class PortletPreferencesModelImpl extends BaseModelImpl<PortletPreference
 	private long _mvccVersion;
 	private long _portletPreferencesId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _ownerId;
 	private long _originalOwnerId;
 	private boolean _setOriginalOwnerId;

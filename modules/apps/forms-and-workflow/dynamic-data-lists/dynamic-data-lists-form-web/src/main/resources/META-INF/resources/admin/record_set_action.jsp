@@ -23,6 +23,14 @@ DDLRecordSet recordSet = (DDLRecordSet)row.getObject();
 %>
 
 <liferay-ui:icon-menu direction="left-side" icon="<%= StringPool.BLANK %>" markupView="lexicon" message="<%= StringPool.BLANK %>" showWhenSingleIcon="<%= true %>">
+	<c:if test="<%= ddlFormAdminDisplayContext.isShowCopyURLRecordSetIcon(recordSet) && ddlFormAdminDisplayContext.isFormPublished(recordSet) %>">
+		<liferay-ui:icon
+			message="copy-url"
+			onClick='<%= "Liferay.fire('" + renderResponse.getNamespace() + "copyFormURL', { url:'" + ddlFormAdminDisplayContext.getPublishedFormURL(recordSet) + "' , node: this});" %>'
+			url="javascript:;"
+		/>
+	</c:if>
+
 	<c:if test="<%= ddlFormAdminDisplayContext.isShowViewEntriesRecordSetIcon(recordSet) %>">
 		<portlet:renderURL var="viewEntriesURL">
 			<portlet:param name="mvcPath" value="/admin/view_records.jsp" />
@@ -46,6 +54,18 @@ DDLRecordSet recordSet = (DDLRecordSet)row.getObject();
 		<liferay-ui:icon
 			message="edit"
 			url="<%= editURL %>"
+		/>
+	</c:if>
+
+	<c:if test="<%= ddlFormAdminDisplayContext.isShowCopyRecordSetButton() %>">
+		<liferay-portlet:actionURL name="copyRecordSet" var="copyRecordSetURL">
+			<portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" />
+			<portlet:param name="recordSetId" value="<%= String.valueOf(recordSet.getRecordSetId()) %>" />
+		</liferay-portlet:actionURL>
+
+		<liferay-ui:icon
+			message="duplicate"
+			url="<%= copyRecordSetURL %>"
 		/>
 	</c:if>
 

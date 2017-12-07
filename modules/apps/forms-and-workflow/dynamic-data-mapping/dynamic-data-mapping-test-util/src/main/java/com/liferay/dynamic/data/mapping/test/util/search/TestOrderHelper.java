@@ -20,6 +20,8 @@ import com.liferay.asset.kernel.model.AssetRenderer;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.model.DDMFormValuesReader;
 import com.liferay.asset.kernel.service.persistence.AssetEntryQuery;
+import com.liferay.asset.test.util.AssetEntryQueryTestUtil;
+import com.liferay.asset.util.impl.AssetUtil;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMFormFieldOptions;
@@ -35,28 +37,23 @@ import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMTemplateTestUtil;
 import com.liferay.dynamic.data.mapping.util.DDMBeanTranslatorUtil;
 import com.liferay.dynamic.data.mapping.util.DDMIndexer;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.test.IdempotentRetryAssert;
 import com.liferay.portal.kernel.test.util.SearchContextTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portlet.asset.service.persistence.test.AssetEntryQueryTestUtil;
-import com.liferay.portlet.asset.util.AssetUtil;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -346,18 +343,7 @@ public abstract class TestOrderHelper {
 		final AssetEntryQuery assetEntryQuery = createAssetEntryQuery(
 			ddmStructure);
 
-		IdempotentRetryAssert.retryAssert(
-			10, TimeUnit.SECONDS, 1, TimeUnit.SECONDS,
-			new Callable<Void>() {
-
-				@Override
-				public Void call() throws Exception {
-					assertSearch(assetEntryQuery);
-
-					return null;
-				}
-
-			});
+		assertSearch(assetEntryQuery);
 	}
 
 	protected void testOrderByDDMField(
@@ -411,8 +397,8 @@ public abstract class TestOrderHelper {
 			String indexType, String type)
 		throws Exception {
 
-		_unsortedValues = toJsonArrays(unsortedValues);
-		_sortedValues = toJsonArrays(sortedValues);
+		_unsortedValues = unsortedValues;
+		_sortedValues = sortedValues;
 		_dataType = dataType;
 		_indexType = indexType;
 		_type = type;

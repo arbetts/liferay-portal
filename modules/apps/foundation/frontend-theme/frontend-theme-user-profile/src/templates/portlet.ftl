@@ -33,9 +33,7 @@
 
 				<#if portlet_configuration_icons?has_content>
 					<menu class="portlet-topper-toolbar" id="portlet-topper-toolbar_${portlet_id}" type="toolbar">
-						<@liferay_portlet["icon-options"]
-							portletConfigurationIcons=portlet_configuration_icons
-						/>
+						<@liferay_portlet["icon-options"] portletConfigurationIcons=portlet_configuration_icons />
 					</menu>
 				</#if>
 			</header>
@@ -45,7 +43,7 @@
 	</#if>
 
 	<div class="${portlet_content_css_class}">
-		<#if portlet_display.getPortletDecoratorId() != "barebone">
+		<#if !stringUtil.equals(portlet_display.getPortletDecoratorId(), "barebone")>
 			<h2 class="portlet-title-text">${portlet_title}</h2>
 		</#if>
 

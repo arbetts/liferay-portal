@@ -14,7 +14,7 @@
 
 package com.liferay.portal.configuration.cluster.internal;
 
-import com.liferay.portal.configuration.cluster.constants.ConfigurationClusterDestinationNames;
+import com.liferay.portal.configuration.cluster.internal.constants.ConfigurationClusterDestinationNames;
 import com.liferay.portal.kernel.cluster.ClusterLink;
 import com.liferay.portal.kernel.cluster.Priority;
 import com.liferay.portal.kernel.messaging.Destination;
@@ -50,9 +50,8 @@ public class ConfigurationSynchronousConfigurationListener
 		if (factoryPid != null) {
 			message.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
 		}
-		else {
-			message.put(Constants.SERVICE_PID, configurationEvent.getPid());
-		}
+
+		message.put(Constants.SERVICE_PID, configurationEvent.getPid());
 
 		message.put("configuration.event.type", configurationEvent.getType());
 

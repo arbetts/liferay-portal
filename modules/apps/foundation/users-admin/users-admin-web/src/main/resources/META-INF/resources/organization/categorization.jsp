@@ -24,9 +24,11 @@ Organization organization = OrganizationServiceUtil.fetchOrganization(organizati
 
 <aui:model-context bean="<%= organization %>" model="<%= Organization.class %>" />
 
-<liferay-ui:asset-categories-error />
+<liferay-ui:error-marker key="<%= WebKeys.ERROR_SECTION %>" value="categorization" />
 
-<liferay-ui:asset-tags-error />
+<liferay-asset:asset-categories-error />
+
+<liferay-asset:asset-tags-error />
 
 <aui:fieldset>
 	<liferay-asset:asset-categories-selector className="<%= Organization.class.getName() %>" classPK="<%= (organization != null) ? organization.getPrimaryKey() : 0 %>" />

@@ -14,8 +14,8 @@
 
 package com.liferay.portal.kernel.test.rule;
 
-import com.liferay.portal.kernel.concurrent.ConcurrentReferenceKeyHashMap;
-import com.liferay.portal.kernel.memory.FinalizeManager;
+import com.liferay.petra.concurrent.ConcurrentReferenceKeyHashMap;
+import com.liferay.petra.memory.FinalizeManager;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.callback.TestCallback;
 
@@ -157,9 +157,8 @@ public class BaseTestRule<C, M>
 			statement = statementWrapper.getStatement();
 		}
 
-		if ((statement instanceof InvokeMethod) ||
-			(statement instanceof RunAfters) ||
-			(statement instanceof RunBefores)) {
+		if (statement instanceof InvokeMethod ||
+			statement instanceof RunAfters || statement instanceof RunBefores) {
 
 			return ReflectionTestUtil.getFieldValue(statement, "target");
 		}

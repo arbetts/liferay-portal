@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -269,9 +270,9 @@ public abstract class BaseSocialActivityInterpreter
 				return HtmlUtil.escape(groupName);
 			}
 
-			groupName =
-				"<a class=\"group\" href=\"" + groupDisplayURL + "\">" +
-					HtmlUtil.escape(groupName) + "</a>";
+			groupName = StringBundler.concat(
+				"<a class=\"group\" href=\"", groupDisplayURL, "\">",
+				HtmlUtil.escape(groupName), "</a>");
 
 			return groupName;
 		}
@@ -311,9 +312,9 @@ public abstract class BaseSocialActivityInterpreter
 				return HtmlUtil.escape(groupName);
 			}
 
-			groupName =
-				"<a class=\"group\" href=\"" + groupDisplayURL + "\">" +
-					HtmlUtil.escape(groupName) + "</a>";
+			groupName = StringBundler.concat(
+				"<a class=\"group\" href=\"", groupDisplayURL, "\">",
+				HtmlUtil.escape(groupName), "</a>");
 
 			return groupName;
 		}
@@ -376,8 +377,21 @@ public abstract class BaseSocialActivityInterpreter
 			return path;
 		}
 
-		return serviceContext.getPortalURL() + serviceContext.getPathMain() +
-			path;
+		StringBundler sb = new StringBundler(4);
+
+		sb.append(serviceContext.getPortalURL());
+
+		if (!path.startsWith(PortalUtil.getPathContext())) {
+			sb.append(PortalUtil.getPathContext());
+		}
+
+		if (!path.startsWith(serviceContext.getPathMain())) {
+			sb.append(serviceContext.getPathMain());
+		}
+
+		sb.append(path);
+
+		return sb.toString();
 	}
 
 	protected String getPath(
@@ -419,7 +433,7 @@ public abstract class BaseSocialActivityInterpreter
 		}
 
 		ResourceBundle resourceBundle = resourceBundleLoader.loadResourceBundle(
-			LanguageUtil.getLanguageId(serviceContext.getLocale()));
+			serviceContext.getLocale());
 
 		return LanguageUtil.format(
 			resourceBundle, titlePattern, titleArguments);
@@ -464,9 +478,9 @@ public abstract class BaseSocialActivityInterpreter
 			String userDisplayURL = user.getDisplayURL(
 				serviceContext.getThemeDisplay());
 
-			userName =
-				"<a class=\"user\" href=\"" + userDisplayURL + "\">" +
-					HtmlUtil.escape(userName) + "</a>";
+			userName = StringBundler.concat(
+				"<a class=\"user\" href=\"", userDisplayURL, "\">",
+				HtmlUtil.escape(userName), "</a>");
 
 			return userName;
 		}
@@ -502,9 +516,9 @@ public abstract class BaseSocialActivityInterpreter
 
 			String userDisplayURL = user.getDisplayURL(themeDisplay);
 
-			userName =
-				"<a class=\"user\" href=\"" + userDisplayURL + "\">" +
-					HtmlUtil.escape(userName) + "</a>";
+			userName = StringBundler.concat(
+				"<a class=\"user\" href=\"", userDisplayURL, "\">",
+				HtmlUtil.escape(userName), "</a>");
 
 			return userName;
 		}
@@ -604,7 +618,7 @@ public abstract class BaseSocialActivityInterpreter
 		ResourceBundleLoader resourceBundleLoader = getResourceBundleLoader();
 
 		ResourceBundle resourceBundle = resourceBundleLoader.loadResourceBundle(
-			serviceContext.getLanguageId());
+			serviceContext.getLocale());
 
 		String title = LanguageUtil.get(resourceBundle, key);
 

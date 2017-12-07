@@ -15,7 +15,8 @@
 package com.liferay.blogs.internal.upgrade.v1_1_0;
 
 import com.liferay.blogs.model.BlogsEntry;
-import com.liferay.friendly.url.service.FriendlyURLLocalService;
+import com.liferay.friendly.url.service.FriendlyURLEntryLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 
 import java.sql.PreparedStatement;
@@ -26,30 +27,31 @@ import java.sql.ResultSet;
  */
 public class UpgradeFriendlyURL extends UpgradeProcess {
 
-	public UpgradeFriendlyURL(FriendlyURLLocalService friendlyURLLocalService) {
-		_friendlyURLLocalService = friendlyURLLocalService;
+	public UpgradeFriendlyURL(
+		FriendlyURLEntryLocalService friendlyURLEntryLocalService) {
+
+		_friendlyURLEntryLocalService = friendlyURLEntryLocalService;
 	}
 
 	@Override
 	protected void doUpgrade() throws Exception {
 		try (PreparedStatement ps1 = connection.prepareStatement(
-				"select companyId, groupId, entryId, urlTitle from " +
-					"BlogsEntry")) {
+				"select groupId, entryId, urlTitle from BlogsEntry")) {
 
 			ResultSet rs = ps1.executeQuery();
 
 			while (rs.next()) {
-				long companyId = rs.getLong(1);
-				long groupId = rs.getLong(2);
-				long classPK = rs.getLong(3);
-				String urlTitle = rs.getString(4);
+				long groupId = rs.getLong(1);
+				long classPK = rs.getLong(2);
+				String urlTitle = rs.getString(3);
 
-				_friendlyURLLocalService.addFriendlyURL(
-					companyId, groupId, BlogsEntry.class, classPK, urlTitle);
+				_friendlyURLEntryLocalService.addFriendlyURLEntry(
+					groupId, BlogsEntry.class, classPK, urlTitle,
+					new ServiceContext());
 			}
 		}
 	}
 
-	private final FriendlyURLLocalService _friendlyURLLocalService;
+	private final FriendlyURLEntryLocalService _friendlyURLEntryLocalService;
 
 }

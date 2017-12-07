@@ -108,13 +108,13 @@ public int countBy${finder.name}(
 				}
 				else if (${finderCol.names}.length > 1) {
 					${finderCol.names} =
-						<#if finderCol.type == "String">
+						<#if stringUtil.equals(finderCol.type, "String")>
 							ArrayUtil.distinct(${finderCol.names}, NULL_SAFE_STRING_COMPARATOR);
 						<#else>
 							ArrayUtil.unique(${finderCol.names});
 						</#if>
 
-					<#if finderCol.type == "String">
+					<#if stringUtil.equals(finderCol.type, "String")>
 						Arrays.sort(${finderCol.names}, NULL_SAFE_STRING_COMPARATOR);
 					<#else>
 						Arrays.sort(${finderCol.names});
@@ -155,9 +155,7 @@ public int countBy${finder.name}(
 					QueryPos qPos = QueryPos.getInstance(q);
 				</#if>
 
-				<@finderQPos
-					_arrayable=true
-				/>
+				<@finderQPos _arrayable=true />
 
 				count = (Long)q.uniqueResult();
 
@@ -351,13 +349,13 @@ public int countBy${finder.name}(
 					}
 					else if (${finderCol.names}.length > 1) {
 						${finderCol.names} =
-							<#if finderCol.type == "String">
+							<#if stringUtil.equals(finderCol.type, "String")>
 								ArrayUtil.distinct(${finderCol.names}, NULL_SAFE_STRING_COMPARATOR);
 							<#else>
 								ArrayUtil.unique(${finderCol.names});
 							</#if>
 
-						<#if finderCol.type == "String">
+						<#if stringUtil.equals(finderCol.type, "String")>
 							Arrays.sort(${finderCol.names}, NULL_SAFE_STRING_COMPARATOR);
 						<#else>
 							Arrays.sort(${finderCol.names});
@@ -390,9 +388,7 @@ public int countBy${finder.name}(
 						QueryPos qPos = QueryPos.getInstance(q);
 					</#if>
 
-					<@finderQPos
-						_arrayable=true
-					/>
+					<@finderQPos _arrayable=true />
 
 					Long count = (Long)q.uniqueResult();
 
@@ -438,9 +434,7 @@ public int countBy${finder.name}(
 						QueryPos qPos = QueryPos.getInstance(q);
 					</#if>
 
-					<@finderQPos
-						_arrayable=true
-					/>
+					<@finderQPos _arrayable=true />
 
 					Long count = (Long)q.uniqueResult();
 

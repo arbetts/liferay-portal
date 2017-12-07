@@ -17,7 +17,7 @@
 <%@ include file="/com.liferay.portal.settings.web/init.jsp" %>
 
 <%
-OpenIdConfiguration openIdConfiguration = ConfigurationProviderUtil.getConfiguration(OpenIdConfiguration.class, new ParameterMapSettingsLocator(request.getParameterMap(), "openid--", new CompanyServiceSettingsLocator(company.getCompanyId(), OpenIdConstants.SERVICE_NAME)));
+OpenIdConfiguration openIdConfiguration = ConfigurationProviderUtil.getConfiguration(OpenIdConfiguration.class, new ParameterMapSettingsLocator(request.getParameterMap(), PortalSettingsOpenIdConstants.FORM_PARAMETER_NAMESPACE, new CompanyServiceSettingsLocator(company.getCompanyId(), OpenIdConstants.SERVICE_NAME)));
 
 boolean enabled = openIdConfiguration.enabled();
 %>
@@ -25,5 +25,17 @@ boolean enabled = openIdConfiguration.enabled();
 <aui:input name="<%= ActionRequest.ACTION_NAME %>" type="hidden" value="/portal_settings/openid" />
 
 <aui:fieldset>
-	<aui:input label="enabled" name="openid--enabled" type="checkbox" value="<%= enabled %>" />
+	<aui:input label="enabled" name='<%= PortalSettingsOpenIdConstants.FORM_PARAMETER_NAMESPACE + "enabled" %>' type="checkbox" value="<%= enabled %>" />
+
+	<aui:button-row>
+		<portlet:actionURL name="/portal_settings/openid_delete" var="resetValuesURL">
+			<portlet:param name="tabs1" value="openid" />
+		</portlet:actionURL>
+
+		<%
+		String taglibOnClick = "if (confirm('" + UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-reset-the-configured-values") + "')) {submitForm(document.hrefFm, '" + resetValuesURL.toString() + "');}";
+		%>
+
+		<aui:button cssClass="btn-lg" onClick="<%= taglibOnClick %>" value="reset-values" />
+	</aui:button-row>
 </aui:fieldset>

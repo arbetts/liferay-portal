@@ -14,6 +14,7 @@
 
 package com.liferay.portal.test.rule;
 
+import com.liferay.petra.log4j.Log4JUtil;
 import com.liferay.portal.kernel.process.ClassPathUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.BaseTestRule;
@@ -25,19 +26,23 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.SystemProperties;
+import com.liferay.portal.spring.hibernate.DialectDetector;
 import com.liferay.portal.test.rule.callback.ClearThreadLocalTestCallback;
-import com.liferay.portal.test.rule.callback.HotDeployAwaitTestCallback;
+import com.liferay.portal.test.rule.callback.DestinationAwaitTestCallback;
+import com.liferay.portal.test.rule.callback.InjectTestCallback;
 import com.liferay.portal.test.rule.callback.LogAssertionTestCallback;
 import com.liferay.portal.test.rule.callback.MainServletTestCallback;
 import com.liferay.portal.test.rule.callback.SybaseDumpTransactionLogTestCallback;
 import com.liferay.portal.test.rule.callback.UniqueStringRandomizerBumperTestCallback;
 import com.liferay.portal.util.InitUtil;
+import com.liferay.portal.util.PortalClassPathUtil;
 import com.liferay.portal.util.PropsUtil;
-import com.liferay.util.log4j.Log4JUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.log4j.Level;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -67,9 +72,10 @@ public class LiferayIntegrationTestRule extends AggregateTestRule {
 		testRules.add(_clearThreadLocalTestRule);
 		testRules.add(_uniqueStringRandomizerBumperTestRule);
 		testRules.add(_mainServletTestRule);
-		testRules.add(_hotDeployAwaitTestRule);
+		testRules.add(_destinationAwaitTestRule);
 		testRules.add(_companyProviderTestRule);
 		testRules.add(_deleteAfterTestRunTestRule);
+		testRules.add(_injectTestRule);
 
 		return testRules.toArray(new TestRule[testRules.size()]);
 	}
@@ -80,8 +86,10 @@ public class LiferayIntegrationTestRule extends AggregateTestRule {
 		CompanyProviderTestCallback.INSTANCE);
 	private static final TestRule _deleteAfterTestRunTestRule =
 		new BaseTestRule<>(DeleteAfterTestRunTestCallback.INSTANCE);
-	private static final TestRule _hotDeployAwaitTestRule = new BaseTestRule<>(
-		HotDeployAwaitTestCallback.INSTANCE);
+	private static final TestRule _destinationAwaitTestRule =
+		new BaseTestRule<>(DestinationAwaitTestCallback.INSTANCE);
+	private static final TestRule _injectTestRule = new BaseTestRule<>(
+		InjectTestCallback.INSTANCE);
 	private static final TestRule _mainServletTestRule = new BaseTestRule<>(
 		MainServletTestCallback.INSTANCE);
 
@@ -113,7 +121,13 @@ public class LiferayIntegrationTestRule extends AggregateTestRule {
 								configureLog4j = true;
 							}
 
+							Log4JUtil.setLevel(
+								DialectDetector.class.getName(),
+								Level.INFO.toString(), false);
+
 							ClassPathUtil.initializeClassPaths(
+								new MockServletContext());
+							PortalClassPathUtil.initializeClassPaths(
 								new MockServletContext());
 
 							InitUtil.initWithSpring(

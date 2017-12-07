@@ -16,6 +16,7 @@ package com.liferay.portlet.documentlibrary.service.persistence.impl;
 
 import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
 import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.service.persistence.DLFileEntryFinder;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
@@ -23,11 +24,13 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.SQLQuery;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.Type;
+import com.liferay.portal.kernel.dao.orm.WildcardMode;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.DateRange;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -59,6 +62,9 @@ public class DLFileEntryFinderImpl
 	public static final String COUNT_BY_G_U_F =
 		DLFileEntryFinder.class.getName() + ".countByG_U_F";
 
+	public static final String COUNT_BY_G_F_S =
+		DLFileEntryFinder.class.getName() + ".countByG_F_S";
+
 	public static final String FIND_BY_ANY_IMAGE_ID =
 		DLFileEntryFinder.class.getName() + ".findByAnyImageId";
 
@@ -83,9 +89,16 @@ public class DLFileEntryFinderImpl
 	public static final String FIND_BY_G_F =
 		DLFileEntryFinder.class.getName() + ".findByG_F";
 
+	public static final String FIND_BY_C_T =
+		DLFileEntryFinder.class.getName() + ".findByC_T";
+
 	public static final String FIND_BY_G_U_F =
 		DLFileEntryFinder.class.getName() + ".findByG_U_F";
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public static final String JOIN_AE_BY_DL_FILE_ENTRY =
 		DLFileEntryFinder.class.getName() + ".joinAE_ByDLFileEntry";
 
@@ -127,10 +140,7 @@ public class DLFileEntryFinderImpl
 		long groupId, List<Long> folderIds,
 		QueryDefinition<DLFileEntry> queryDefinition) {
 
-		List<Long> repositoryIds = Collections.emptyList();
-
-		return doCountByG_U_R_F_M(
-			groupId, 0, repositoryIds, folderIds, null, queryDefinition, false);
+		return doCountByG_F(groupId, folderIds, queryDefinition, false);
 	}
 
 	/**
@@ -177,6 +187,10 @@ public class DLFileEntryFinderImpl
 			queryDefinition, false);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public DLFileEntry fetchByAnyImageId(long imageId) {
 		Session session = null;
@@ -220,10 +234,7 @@ public class DLFileEntryFinderImpl
 		long groupId, List<Long> folderIds,
 		QueryDefinition<DLFileEntry> queryDefinition) {
 
-		List<Long> repositoryIds = Collections.emptyList();
-
-		return doCountByG_U_R_F_M(
-			groupId, 0, repositoryIds, folderIds, null, queryDefinition, true);
+		return doCountByG_F(groupId, folderIds, queryDefinition, true);
 	}
 
 	@Override
@@ -301,6 +312,10 @@ public class DLFileEntryFinderImpl
 			queryDefinition, true);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public DLFileEntry findByAnyImageId(long imageId)
 		throws NoSuchFileEntryException {
@@ -442,6 +457,11 @@ public class DLFileEntryFinderImpl
 
 			q.addEntity(DLFileEntryImpl.TABLE_NAME, DLFileEntryImpl.class);
 
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			qPos.add(
+				PortalUtil.getClassNameId(DLFileEntryConstants.getClassName()));
+
 			return q.list(true);
 		}
 		catch (Exception e) {
@@ -511,6 +531,35 @@ public class DLFileEntryFinderImpl
 	}
 
 	@Override
+	public List<DLFileEntry> findByC_T(long classNameId, String treePath) {
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			String sql = CustomSQLUtil.get(FIND_BY_C_T);
+
+			SQLQuery q = session.createSynchronizedSQLQuery(sql);
+
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			qPos.add(
+				CustomSQLUtil.keywords(treePath, WildcardMode.TRAILING)[0]);
+			qPos.add(classNameId);
+
+			q.addEntity(DLFileEntryImpl.TABLE_NAME, DLFileEntryImpl.class);
+
+			return q.list(true);
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
+
+	@Override
 	public List<DLFileEntry> findByG_R_F(
 		long groupId, List<Long> repositoryIds, List<Long> folderIds,
 		QueryDefinition<DLFileEntry> queryDefinition) {
@@ -564,6 +613,55 @@ public class DLFileEntryFinderImpl
 			queryDefinition, false);
 	}
 
+	protected int doCountByG_F(
+		long groupId, List<Long> folderIds, QueryDefinition queryDefinition,
+		boolean inlineSQLHelper) {
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			List<Long> repositoryIds = Collections.emptyList();
+
+			String sql = getFileEntriesSQL(
+				COUNT_BY_G_F_S, groupId, repositoryIds, folderIds, null,
+				queryDefinition, inlineSQLHelper);
+
+			SQLQuery q = session.createSynchronizedSQLQuery(sql);
+
+			q.addScalar(COUNT_COLUMN_NAME, Type.LONG);
+
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			qPos.add(groupId);
+
+			qPos.add(queryDefinition.getStatus());
+
+			for (Long folderId : folderIds) {
+				qPos.add(folderId);
+			}
+
+			Iterator<Long> itr = q.iterate();
+
+			if (itr.hasNext()) {
+				Long count = itr.next();
+
+				if (count != null) {
+					return count.intValue();
+				}
+			}
+
+			return 0;
+		}
+		catch (Exception e) {
+			throw new SystemException(e);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
+
 	protected int doCountByG_U_R_F_M(
 		long groupId, long userId, List<Long> repositoryIds,
 		List<Long> folderIds, String[] mimeTypes,
@@ -596,6 +694,7 @@ public class DLFileEntryFinderImpl
 			qPos.add(groupId);
 
 			if (userId > 0) {
+				qPos.add(userId);
 				qPos.add(userId);
 			}
 
@@ -669,6 +768,7 @@ public class DLFileEntryFinderImpl
 
 			if (userId > 0) {
 				qPos.add(userId);
+				qPos.add(userId);
 			}
 
 			qPos.add(queryDefinition.getStatus());
@@ -738,9 +838,16 @@ public class DLFileEntryFinderImpl
 		}
 
 		if (inlineSQLHelper && InlineSQLHelperUtil.isEnabled()) {
-			sql = InlineSQLHelperUtil.replacePermissionCheck(
-				sql, DLFileEntry.class.getName(), "DLFileEntry.fileEntryId",
-				groupId);
+			if (queryDefinition.getStatus() == WorkflowConstants.STATUS_ANY) {
+				sql = InlineSQLHelperUtil.replacePermissionCheck(
+					sql, DLFileEntry.class.getName(), "DLFileEntry.fileEntryId",
+					groupId);
+			}
+			else {
+				sql = InlineSQLHelperUtil.replacePermissionCheck(
+					sql, DLFileEntry.class.getName(),
+					"DLFileVersion.fileEntryId", groupId);
+			}
 		}
 
 		StringBundler sb = new StringBundler(12);

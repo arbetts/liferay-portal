@@ -32,14 +32,14 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @ExtendedObjectClassDefinition(category = "foundation")
 @Meta.OCD(
 	id = "com.liferay.portal.security.sso.openid.configuration.OpenIdConfiguration",
-	localization = "content/Language", name = "open.id.configuration.name"
+	localization = "content/Language", name = "open-id-configuration-name"
 )
 public interface OpenIdConfiguration {
 
 	@Meta.AD(
 		deflt = "false",
 		description = "Set this to true to enable OpenId authentication.",
-		required = false
+		name = "enabled", required = false
 	)
 	public boolean enabled();
 

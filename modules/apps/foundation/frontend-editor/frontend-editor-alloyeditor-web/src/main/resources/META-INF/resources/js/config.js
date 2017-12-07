@@ -11,7 +11,8 @@
 							path: 'alloyeditor.js',
 							requires: [
 								'aui-component',
-								'liferay-portlet-base'
+								'liferay-portlet-base',
+								'timers'
 							]
 						},
 						'liferay-alloy-editor-source': {
@@ -21,6 +22,15 @@
 								'liferay-fullscreen-source-editor',
 								'liferay-source-editor',
 								'plugin'
+							]
+						},
+						'liferay-editor-image-uploader': {
+							path: 'editor_image_uploader.js',
+							requires: [
+								'aui-alert',
+								'aui-base',
+								'aui-progressbar',
+								'uploader'
 							]
 						}
 					},

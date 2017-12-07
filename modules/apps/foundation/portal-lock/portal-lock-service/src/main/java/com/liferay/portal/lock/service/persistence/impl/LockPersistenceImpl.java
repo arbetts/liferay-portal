@@ -31,7 +31,6 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.lock.exception.NoSuchLockException;
@@ -42,6 +41,8 @@ import com.liferay.portal.lock.service.persistence.LockPersistence;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Field;
 
 import java.sql.Timestamp;
 
@@ -222,7 +223,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_UUID_3);
 			}
 			else {
@@ -309,7 +310,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		msg.append("uuid=");
 		msg.append(uuid);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLockException(msg.toString());
 	}
@@ -357,7 +358,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		msg.append("uuid=");
 		msg.append(uuid);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLockException(msg.toString());
 	}
@@ -446,7 +447,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		if (uuid == null) {
 			query.append(_FINDER_COLUMN_UUID_UUID_1);
 		}
-		else if (uuid.equals(StringPool.BLANK)) {
+		else if (uuid.equals("")) {
 			query.append(_FINDER_COLUMN_UUID_UUID_3);
 		}
 		else {
@@ -582,7 +583,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_UUID_3);
 			}
 			else {
@@ -773,7 +774,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 			}
 			else {
@@ -868,7 +869,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		msg.append(", companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLockException(msg.toString());
 	}
@@ -921,7 +922,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		msg.append(", companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLockException(msg.toString());
 	}
@@ -1015,7 +1016,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		if (uuid == null) {
 			query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 		}
-		else if (uuid.equals(StringPool.BLANK)) {
+		else if (uuid.equals("")) {
 			query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 		}
 		else {
@@ -1157,7 +1158,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 			}
 			else {
@@ -1418,7 +1419,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		msg.append("expirationDate=");
 		msg.append(expirationDate);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLockException(msg.toString());
 	}
@@ -1468,7 +1469,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		msg.append("expirationDate=");
 		msg.append(expirationDate);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchLockException(msg.toString());
 	}
@@ -1770,7 +1771,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			msg.append(", key=");
 			msg.append(key);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -1833,7 +1834,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			if (className == null) {
 				query.append(_FINDER_COLUMN_C_K_CLASSNAME_1);
 			}
-			else if (className.equals(StringPool.BLANK)) {
+			else if (className.equals("")) {
 				query.append(_FINDER_COLUMN_C_K_CLASSNAME_3);
 			}
 			else {
@@ -1847,7 +1848,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			if (key == null) {
 				query.append(_FINDER_COLUMN_C_K_KEY_1);
 			}
-			else if (key.equals(StringPool.BLANK)) {
+			else if (key.equals("")) {
 				query.append(_FINDER_COLUMN_C_K_KEY_3);
 			}
 			else {
@@ -1955,7 +1956,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			if (className == null) {
 				query.append(_FINDER_COLUMN_C_K_CLASSNAME_1);
 			}
-			else if (className.equals(StringPool.BLANK)) {
+			else if (className.equals("")) {
 				query.append(_FINDER_COLUMN_C_K_CLASSNAME_3);
 			}
 			else {
@@ -1969,7 +1970,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			if (key == null) {
 				query.append(_FINDER_COLUMN_C_K_KEY_1);
 			}
-			else if (key.equals(StringPool.BLANK)) {
+			else if (key.equals("")) {
 				query.append(_FINDER_COLUMN_C_K_KEY_3);
 			}
 			else {
@@ -2023,6 +2024,25 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 
 	public LockPersistenceImpl() {
 		setModelClass(Lock.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+			dbColumnNames.put("key", "key_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
 	}
 
 	/**
@@ -2090,7 +2110,7 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((LockModelImpl)lock);
+		clearUniqueFindersCache((LockModelImpl)lock, true);
 	}
 
 	@Override
@@ -2102,47 +2122,35 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 			entityCache.removeResult(LockModelImpl.ENTITY_CACHE_ENABLED,
 				LockImpl.class, lock.getPrimaryKey());
 
-			clearUniqueFindersCache((LockModelImpl)lock);
+			clearUniqueFindersCache((LockModelImpl)lock, true);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(LockModelImpl lockModelImpl,
-		boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] {
-					lockModelImpl.getClassName(), lockModelImpl.getKey()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_C_K, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_C_K, args, lockModelImpl);
-		}
-		else {
-			if ((lockModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_C_K.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						lockModelImpl.getClassName(), lockModelImpl.getKey()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_C_K, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_C_K, args,
-					lockModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(LockModelImpl lockModelImpl) {
+	protected void cacheUniqueFindersCache(LockModelImpl lockModelImpl) {
 		Object[] args = new Object[] {
 				lockModelImpl.getClassName(), lockModelImpl.getKey()
 			};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_K, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_K, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_C_K, args, Long.valueOf(1),
+			false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_K, args, lockModelImpl,
+			false);
+	}
+
+	protected void clearUniqueFindersCache(LockModelImpl lockModelImpl,
+		boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					lockModelImpl.getClassName(), lockModelImpl.getKey()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_K, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_K, args);
+		}
 
 		if ((lockModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_K.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					lockModelImpl.getOriginalClassName(),
 					lockModelImpl.getOriginalKey()
 				};
@@ -2292,8 +2300,28 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !LockModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!LockModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { lockModelImpl.getUuid() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				args);
+
+			args = new Object[] {
+					lockModelImpl.getUuid(), lockModelImpl.getCompanyId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -2336,8 +2364,8 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		entityCache.putResult(LockModelImpl.ENTITY_CACHE_ENABLED,
 			LockImpl.class, lock.getPrimaryKey(), lock, false);
 
-		clearUniqueFindersCache(lockModelImpl);
-		cacheUniqueFindersCache(lockModelImpl, isNew);
+		clearUniqueFindersCache(lockModelImpl, false);
+		cacheUniqueFindersCache(lockModelImpl);
 
 		lock.resetOriginalValues();
 
@@ -2517,14 +2545,14 @@ public class LockPersistenceImpl extends BasePersistenceImpl<Lock>
 		query.append(_SQL_SELECT_LOCK_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

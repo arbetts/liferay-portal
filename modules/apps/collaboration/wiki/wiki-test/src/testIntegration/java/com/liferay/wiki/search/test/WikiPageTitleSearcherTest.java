@@ -24,11 +24,7 @@ import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchResult;
 import com.liferay.portal.kernel.search.SearchResultUtil;
-import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
-import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.test.IdempotentRetryAssert;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.rule.Sync;
@@ -37,12 +33,11 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.SearchContextTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
-import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.security.permission.SimplePermissionChecker;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerTestRule;
 import com.liferay.wiki.model.WikiNode;
 import com.liferay.wiki.model.WikiPage;
 import com.liferay.wiki.search.WikiPageTitleSearcher;
@@ -50,10 +45,7 @@ import com.liferay.wiki.service.WikiPageLocalServiceUtil;
 import com.liferay.wiki.util.test.WikiTestUtil;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -73,13 +65,11 @@ public class WikiPageTitleSearcherTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
+			PermissionCheckerTestRule.INSTANCE,
 			SynchronousDestinationTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
-		setUpPermissionThreadLocal();
-		setUpPrincipalThreadLocal();
-
 		_group = GroupTestUtil.addGroup();
 		_user = UserTestUtil.addUser();
 
@@ -88,13 +78,6 @@ public class WikiPageTitleSearcherTest {
 		_searchContext = getSearchContext(_group);
 
 		_searchContext.setNodeIds(new long[] {_node.getNodeId()});
-	}
-
-	@After
-	public void tearDown() {
-		PermissionThreadLocal.setPermissionChecker(_permissionChecker);
-
-		PrincipalThreadLocal.setName(_name);
 	}
 
 	@Test
@@ -164,87 +147,48 @@ public class WikiPageTitleSearcherTest {
 		addPage(_node.getNodeId(), title, content);
 	}
 
-	protected void assertSearch(final String keywords, final int length)
-		throws Exception {
+	protected void assertSearch(String keywords, int length) throws Exception {
+		Indexer<?> indexer = WikiPageTitleSearcher.getInstance();
 
-		IdempotentRetryAssert.retryAssert(
-			3, TimeUnit.SECONDS,
-			new Callable<Void>() {
+		_searchContext.setKeywords(StringUtil.toLowerCase(keywords));
 
-				@Override
-				public Void call() throws Exception {
-					Indexer<?> indexer = WikiPageTitleSearcher.getInstance();
+		Hits hits = indexer.search(_searchContext);
 
-					_searchContext.setKeywords(
-						StringUtil.toLowerCase(keywords));
-
-					Hits hits = indexer.search(_searchContext);
-
-					Assert.assertEquals(length, hits.getLength());
-
-					return null;
-				}
-
-			});
+		Assert.assertEquals(hits.toString(), length, hits.getLength());
 	}
 
-	protected void assertSearchNode(final String keywords, final long nodeId)
+	protected void assertSearchNode(String keywords, long nodeId)
 		throws Exception {
 
-		IdempotentRetryAssert.retryAssert(
-			3, TimeUnit.SECONDS,
-			new Callable<Void>() {
+		Indexer<?> indexer = WikiPageTitleSearcher.getInstance();
 
-				@Override
-				public Void call() throws Exception {
-					Indexer<?> indexer = WikiPageTitleSearcher.getInstance();
+		_searchContext.setKeywords(StringUtil.toLowerCase(keywords));
 
-					_searchContext.setKeywords(
-						StringUtil.toLowerCase(keywords));
+		Hits hits = indexer.search(_searchContext);
 
-					Hits hits = indexer.search(_searchContext);
+		List<SearchResult> searchResults = SearchResultUtil.getSearchResults(
+			hits, LocaleUtil.getDefault());
 
-					List<SearchResult> searchResults =
-						SearchResultUtil.getSearchResults(
-							hits, LocaleUtil.getDefault());
+		for (SearchResult searchResult : searchResults) {
+			WikiPage page = WikiPageLocalServiceUtil.getPage(
+				searchResult.getClassPK());
 
-					for (SearchResult searchResult : searchResults) {
-						WikiPage page = WikiPageLocalServiceUtil.getPage(
-							searchResult.getClassPK());
-
-						Assert.assertEquals(nodeId, page.getNodeId());
-					}
-
-					return null;
-				}
-
-			});
+			Assert.assertEquals(nodeId, page.getNodeId());
+		}
 	}
 
-	protected void assertSearchTitle(final String keywords, final String title)
+	protected void assertSearchTitle(String keywords, String title)
 		throws Exception {
 
-		IdempotentRetryAssert.retryAssert(
-			3, TimeUnit.SECONDS,
-			new Callable<Void>() {
+		Indexer<?> indexer = WikiPageTitleSearcher.getInstance();
 
-				@Override
-				public Void call() throws Exception {
-					Indexer<?> indexer = WikiPageTitleSearcher.getInstance();
+		_searchContext.setKeywords(StringUtil.toLowerCase(keywords));
 
-					_searchContext.setKeywords(
-						StringUtil.toLowerCase(keywords));
+		Hits hits = indexer.search(_searchContext);
 
-					Hits hits = indexer.search(_searchContext);
-
-					for (Document document : hits.getDocs()) {
-						Assert.assertEquals(title, document.get(Field.TITLE));
-					}
-
-					return null;
-				}
-
-			});
+		for (Document document : hits.getDocs()) {
+			Assert.assertEquals(title, document.get(Field.TITLE));
+		}
 	}
 
 	protected SearchContext getSearchContext(Group group) throws Exception {
@@ -254,38 +198,10 @@ public class WikiPageTitleSearcherTest {
 		return searchContext;
 	}
 
-	protected void setUpPermissionThreadLocal() throws Exception {
-		_permissionChecker = PermissionThreadLocal.getPermissionChecker();
-
-		PermissionThreadLocal.setPermissionChecker(
-			new SimplePermissionChecker() {
-				{
-					init(TestPropsValues.getUser());
-				}
-
-				@Override
-				public boolean hasOwnerPermission(
-					long companyId, String name, String primKey, long ownerId,
-					String actionId) {
-
-					return true;
-				}
-
-			});
-	}
-
-	protected void setUpPrincipalThreadLocal() throws Exception {
-		_name = PrincipalThreadLocal.getName();
-
-		PrincipalThreadLocal.setName(TestPropsValues.getUserId());
-	}
-
 	@DeleteAfterTestRun
 	private Group _group;
 
-	private String _name;
 	private WikiNode _node;
-	private PermissionChecker _permissionChecker;
 	private SearchContext _searchContext;
 
 	@DeleteAfterTestRun

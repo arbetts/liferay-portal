@@ -53,7 +53,7 @@ String toolbarSet = (String)request.getAttribute("liferay-ui:input-editor:toolba
 %>
 
 <liferay-util:buffer var="editor">
-	<textarea id="<%= name %>" name="<%= name %>" style="height: 100%; visibility: hidden; width: 100%;"><%= (contents != null) ? contents : StringPool.BLANK %></textarea>
+	<textarea id="<%= HtmlUtil.escapeAttribute(name) %>" name="<%= HtmlUtil.escapeAttribute(name) %>" style="height: 100%; visibility: hidden; width: 100%;"><%= (contents != null) ? HtmlUtil.escape(contents) : StringPool.BLANK %></textarea>
 </liferay-util:buffer>
 
 <c:if test="<%= !skipEditorLoading %>">
@@ -63,28 +63,46 @@ String toolbarSet = (String)request.getAttribute("liferay-ui:input-editor:toolba
 		long javaScriptLastModified = PortalWebResourcesUtil.getLastModified(PortalWebResourceConstants.RESOURCE_TYPE_EDITOR_TINYMCEEDITOR);
 		%>
 
-		<script src="<%= HtmlUtil.escape(PortalUtil.getStaticResourceURL(request, themeDisplay.getCDNHost() + PortalWebResourcesUtil.getContextPath(PortalWebResourceConstants.RESOURCE_TYPE_EDITOR_TINYMCEEDITOR) + "/tiny_mce/tinymce.min.js", javaScriptLastModified)) %>" type="text/javascript"></script>
+		<script data-senna-track="temporary" src="<%= HtmlUtil.escape(PortalUtil.getStaticResourceURL(request, themeDisplay.getCDNHost() + PortalWebResourcesUtil.getContextPath(PortalWebResourceConstants.RESOURCE_TYPE_EDITOR_TINYMCEEDITOR) + "/tiny_mce/tinymce.min.js", javaScriptLastModified)) %>" type="text/javascript"></script>
 
 		<liferay-util:dynamic-include key='<%= "com.liferay.frontend.editor.tinymce.web#" + editorName + "#additionalResources" %>' />
 
-		<script type="text/javascript">
+		<script data-senna-track="temporary" type="text/javascript">
 			Liferay.namespace('EDITORS')['<%= editorName %>'] = true;
+
+			var destroyGlobalEditor = function() {
+				window.tinyMCE = undefined;
+
+				Liferay.detach('beforeScreenFlip', destroyGlobalEditor);
+			};
+
+			Liferay.on('beforeScreenFlip', destroyGlobalEditor);
 		</script>
 	</liferay-util:html-top>
 </c:if>
 
-<div class="<%= cssClass %>" id="<%= name %>Container">
+<div class="<%= HtmlUtil.escapeAttribute(cssClass) %>" id="<%= HtmlUtil.escapeAttribute(name) %>Container">
 	<c:if test="<%= autoCreate %>">
 		<%= editor %>
 	</c:if>
 </div>
 
+<%
+name = HtmlUtil.escapeJS(name);
+%>
+
 <aui:script use="aui-node-base">
+	var browseUrls = {
+		'file': 'filebrowserBrowseUrl',
+		'image': 'filebrowserImageBrowseUrl',
+		'media': 'filebrowserVideoBrowseUrl'
+	};
+
 	var getInitialContent = function() {
 		var data;
 
-		if (window['<%= HtmlUtil.escape(namespace + initMethod) %>']) {
-			data = <%= HtmlUtil.escape(namespace + initMethod) %>();
+		if (window['<%= HtmlUtil.escapeJS(namespace + initMethod) %>']) {
+			data = <%= HtmlUtil.escapeJS(namespace + initMethod) %>();
 		}
 		else {
 			data = '<%= (contents != null) ? HtmlUtil.escapeJS(contents) : StringPool.BLANK %>';
@@ -138,7 +156,43 @@ String toolbarSet = (String)request.getAttribute("liferay-ui:input-editor:toolba
 			}
 		},
 
-		fileBrowserCallback: function(field_name, url, type) {
+		filePickerCallback: function(callback, value, meta) {
+			var url = tinymce.activeEditor.settings[browseUrls[meta.filetype]];
+
+			if (url) {
+				var openItemSelectorDialog = function(itemSelectorDialog) {
+					itemSelectorDialog.set('eventName', '<%= name %>selectItem');
+					itemSelectorDialog.set('url', url);
+					itemSelectorDialog.set('zIndex', tinymce.activeEditor.windowManager.windows[0].zIndex + 10);
+
+					itemSelectorDialog.once(
+						'selectedItemChange',
+						function(event) {
+							callback(event.newVal ? event.newVal.value : value);
+						}
+					);
+
+					itemSelectorDialog.open();
+				};
+
+				var itemSelectorDialog = window['<%= name %>']._itemSelectorDialog;
+
+				if (itemSelectorDialog) {
+					openItemSelectorDialog(itemSelectorDialog);
+				}
+				else {
+					AUI().use(
+						'liferay-item-selector-dialog',
+						function(A) {
+							var itemSelectorDialog = new A.LiferayItemSelectorDialog();
+
+							window['<%= name %>']._itemSelectorDialog = itemSelectorDialog;
+
+							openItemSelectorDialog(itemSelectorDialog);
+						}
+					);
+				}
+			}
 		},
 
 		focus: function() {
@@ -190,7 +244,7 @@ String toolbarSet = (String)request.getAttribute("liferay-ui:input-editor:toolba
 			var editorConfig = <%= (editorConfigJSONObject != null) ? editorConfigJSONObject.toString() : "{}" %>;
 
 			var defaultConfig = {
-				file_browser_callback: window['<%= name %>'].fileBrowserCallback,
+				file_picker_callback: window['<%= name %>'].filePickerCallback,
 				init_instance_callback: window['<%= name %>'].initInstanceCallback
 			};
 
@@ -216,7 +270,7 @@ String toolbarSet = (String)request.getAttribute("liferay-ui:input-editor:toolba
 
 		initInstanceCallback: function() {
 			<c:if test="<%= (contents == null) && Validator.isNotNull(initMethod) %>">
-				window['<%= name %>'].init(<%= HtmlUtil.escape(namespace + initMethod) %>());
+				window['<%= name %>'].init(<%= HtmlUtil.escapeJS(namespace + initMethod) %>());
 			</c:if>
 
 			var iframe = A.one('#<%= name %>_ifr');
@@ -264,7 +318,11 @@ String toolbarSet = (String)request.getAttribute("liferay-ui:input-editor:toolba
 
 	var destroyInstance = function(event) {
 		if (event.portletId === '<%= portletId %>') {
-			window['<%= name %>'].destroy();
+			try {
+				window['<%= name %>'].destroy();
+			}
+			catch (e) {
+			}
 
 			Liferay.detach('destroyPortlet', destroyInstance);
 		}

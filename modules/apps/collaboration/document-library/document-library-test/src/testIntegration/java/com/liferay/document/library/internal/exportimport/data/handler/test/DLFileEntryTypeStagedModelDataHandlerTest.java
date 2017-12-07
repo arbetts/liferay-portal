@@ -22,6 +22,7 @@ import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.dynamic.data.mapping.kernel.DDMStructureManagerUtil;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
+import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -31,7 +32,6 @@ import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
-import com.liferay.portal.lar.test.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.util.HashMap;
@@ -135,7 +135,8 @@ public class DLFileEntryTypeStagedModelDataHandlerTest
 		List<StagedModel> dependentStagedModels = dependentStagedModelsMap.get(
 			ddmStructureClass.getSimpleName());
 
-		Assert.assertEquals(1, dependentStagedModels.size());
+		Assert.assertEquals(
+			dependentStagedModels.toString(), 1, dependentStagedModels.size());
 
 		DDMStructure ddmStructure = (DDMStructure)dependentStagedModels.get(0);
 
@@ -151,14 +152,14 @@ public class DLFileEntryTypeStagedModelDataHandlerTest
 		super.validateImportedStagedModel(stagedModel, importedStagedModel);
 
 		DLFileEntryType dlFileEntryType = (DLFileEntryType)stagedModel;
-		DLFileEntryType importedDlFileEntryType =
+		DLFileEntryType importedDLFileEntryType =
 			(DLFileEntryType)importedStagedModel;
 
 		Assert.assertEquals(
-			dlFileEntryType.getName(), importedDlFileEntryType.getName());
+			dlFileEntryType.getName(), importedDLFileEntryType.getName());
 		Assert.assertEquals(
 			dlFileEntryType.getDescription(),
-			importedDlFileEntryType.getDescription());
+			importedDLFileEntryType.getDescription());
 	}
 
 }

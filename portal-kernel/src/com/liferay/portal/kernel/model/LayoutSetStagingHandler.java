@@ -23,7 +23,6 @@ import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 
 import java.io.Serializable;
 
@@ -92,8 +91,7 @@ public class LayoutSetStagingHandler
 					Class<?> layoutSetBranchClass = _layoutSetBranch.getClass();
 
 					method = layoutSetBranchClass.getMethod(
-						methodName,
-						ReflectionUtil.getParameterTypes(arguments));
+						methodName, method.getParameterTypes());
 
 					bean = _layoutSetBranch;
 				}
@@ -116,7 +114,7 @@ public class LayoutSetStagingHandler
 	private Object _clone() {
 		return ProxyUtil.newProxyInstance(
 			PortalClassLoaderUtil.getClassLoader(),
-			new Class[] {LayoutSet.class},
+			new Class<?>[] {LayoutSet.class},
 			new LayoutSetStagingHandler(_layoutSet));
 	}
 
@@ -151,7 +149,8 @@ public class LayoutSetStagingHandler
 
 	private Object _toEscapedModel() {
 		return ProxyUtil.newProxyInstance(
-			PortalClassLoaderUtil.getClassLoader(), new Class[] {Layout.class},
+			PortalClassLoaderUtil.getClassLoader(),
+			new Class<?>[] {Layout.class},
 			new LayoutSetStagingHandler(_layoutSet.toEscapedModel()));
 	}
 
@@ -170,21 +169,21 @@ public class LayoutSetStagingHandler
 		_layoutSetBranchMethodNames.add("getLogo");
 		_layoutSetBranchMethodNames.add("getLogoId");
 		_layoutSetBranchMethodNames.add("getSettings");
+		_layoutSetBranchMethodNames.add("getSettings");
+		_layoutSetBranchMethodNames.add("getSettingsProperties");
+		_layoutSetBranchMethodNames.add("getSettingsProperty");
+		_layoutSetBranchMethodNames.add("getStagingLogoId");
 		_layoutSetBranchMethodNames.add("getTheme");
 		_layoutSetBranchMethodNames.add("getThemeId");
-		_layoutSetBranchMethodNames.add("getSettingsProperties");
-		_layoutSetBranchMethodNames.add("getSettings");
-		_layoutSetBranchMethodNames.add("getStagingLogoId");
 		_layoutSetBranchMethodNames.add("getThemeSetting");
-		_layoutSetBranchMethodNames.add("getSettingsProperty");
-		_layoutSetBranchMethodNames.add("isLayoutSetPrototypeLinkActive");
 		_layoutSetBranchMethodNames.add("isEscapedModel");
+		_layoutSetBranchMethodNames.add("isLayoutSetPrototypeLinkActive");
 		_layoutSetBranchMethodNames.add("isLogo");
 		_layoutSetBranchMethodNames.add("setColorSchemeId");
 		_layoutSetBranchMethodNames.add("setCss");
+		_layoutSetBranchMethodNames.add("setEscapedModel");
 		_layoutSetBranchMethodNames.add("setLayoutSetPrototypeLinkEnabled");
 		_layoutSetBranchMethodNames.add("setLayoutSetPrototypeUuid");
-		_layoutSetBranchMethodNames.add("setEscapedModel");
 		_layoutSetBranchMethodNames.add("setLogo");
 		_layoutSetBranchMethodNames.add("setLogoId");
 		_layoutSetBranchMethodNames.add("setSettings");

@@ -28,14 +28,20 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.xsl.content.web.configuration.XSLContentPortletInstanceConfiguration",
 	localization = "content/Language",
-	name = "xsl.content.portlet.instance.configuration.name"
+	name = "xsl-content-portlet-instance-configuration-name"
 )
 public interface XSLContentPortletInstanceConfiguration {
 
-	@Meta.AD(deflt = "@portlet_context_url@/example.xml", required = false)
+	@Meta.AD(
+		deflt = "@portlet_context_url@/example.xml", name = "xml-url",
+		required = false
+	)
 	public String xmlUrl();
 
-	@Meta.AD(deflt = "@portlet_context_url@/example.xsl", required = false)
+	@Meta.AD(
+		deflt = "@portlet_context_url@/example.xsl", name = "xsl-url",
+		required = false
+	)
 	public String xslUrl();
 
 }

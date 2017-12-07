@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -34,7 +35,10 @@ import javax.portlet.PortletURL;
  * This class is injected in the context of Asset Publisher display templates.
  *
  * @author Juan Fernández
+ * @deprecated As of 1.2.0, replaced by {@link
+ *             com.liferay.asset.publisher.util.AssetPublisherHelper}
  */
+@Deprecated
 public class AssetPublisherHelper {
 
 	public static String getAssetViewURL(
@@ -50,6 +54,19 @@ public class AssetPublisherHelper {
 		LiferayPortletResponse liferayPortletResponse, AssetEntry assetEntry,
 		boolean viewInContext) {
 
+		AssetRenderer<?> assetRenderer = assetEntry.getAssetRenderer();
+
+		return getAssetViewURL(
+			liferayPortletRequest, liferayPortletResponse, assetRenderer,
+			assetEntry, viewInContext);
+	}
+
+	public static String getAssetViewURL(
+		LiferayPortletRequest liferayPortletRequest,
+		LiferayPortletResponse liferayPortletResponse,
+		AssetRenderer<?> assetRenderer, AssetEntry assetEntry,
+		boolean viewInContext) {
+
 		PortletURL viewFullContentURL =
 			liferayPortletResponse.createRenderURL();
 
@@ -57,10 +74,27 @@ public class AssetPublisherHelper {
 		viewFullContentURL.setParameter(
 			"assetEntryId", String.valueOf(assetEntry.getEntryId()));
 
-		AssetRendererFactory<?> assetRendererFactory =
-			assetEntry.getAssetRendererFactory();
+		PortletURL redirectURL = liferayPortletResponse.createRenderURL();
 
-		AssetRenderer<?> assetRenderer = assetEntry.getAssetRenderer();
+		int cur = ParamUtil.getInteger(liferayPortletRequest, "cur");
+		int delta = ParamUtil.getInteger(liferayPortletRequest, "delta");
+		boolean resetCur = ParamUtil.getBoolean(
+			liferayPortletRequest, "resetCur");
+
+		redirectURL.setParameter("cur", String.valueOf(cur));
+
+		if (delta > 0) {
+			redirectURL.setParameter("delta", String.valueOf(delta));
+		}
+
+		redirectURL.setParameter("resetCur", String.valueOf(resetCur));
+		redirectURL.setParameter(
+			"assetEntryId", String.valueOf(assetEntry.getEntryId()));
+
+		viewFullContentURL.setParameter("redirect", redirectURL.toString());
+
+		AssetRendererFactory<?> assetRendererFactory =
+			assetRenderer.getAssetRendererFactory();
 
 		viewFullContentURL.setParameter("type", assetRendererFactory.getType());
 
@@ -91,8 +125,6 @@ public class AssetPublisherHelper {
 				if (Validator.isNotNull(viewURL) &&
 					!Objects.equals(viewURL, noSuchEntryRedirect)) {
 
-					viewURL = HttpUtil.setParameter(
-						viewURL, "inheritRedirect", Boolean.TRUE);
 					viewURL = HttpUtil.setParameter(
 						viewURL, "redirect",
 						PortalUtil.getCurrentURL(liferayPortletRequest));

@@ -60,12 +60,12 @@
 </tr>
 <tr>
 	<td>ENABLE_SOCIAL_BOOKMARKS</td>
-	<td>//label[contains(.,'Enable Social Bookmarks')]/input[@type='checkbox']/../span[2]/span</td>
+	<td>//label[contains(@for,'enableSocialBookmarks')]/input/../span/span</td>
 	<td></td>
 </tr>
 <tr>
-	<td>REPLICATE_INDIVIDUAL_DELETIONS</td>
-	<td>//label[contains(.,'Replicate Individual Deletions')]//input</td>
+	<td>EXPORT_INDIVIDUAL_DELETIONS</td>
+	<td>//label[contains(.,'Export Individual Deletions')]//input</td>
 	<td></td>
 </tr>
 <tr>
@@ -79,8 +79,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>INHERIT_MOBILE_DEVICE_RULES_FROM_PAGE</td>
+	<td>//label[contains(.,'mobile device rules')]/input[@type='checkbox']/../span[2]/span</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SHOW_SPECIFIC_TOGGLE_SWITCH</td>
 	<td>//label[contains(.,'${key_checkSetupName}')]/input[contains(@class,'field') and contains(@class,'toggle-switch')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>STAGED_CONTENT</td>
+	<td>//li[contains(.,'${key_contentName}')]//input/..//span[contains(@class,'toggle-switch')]</td>
 	<td></td>
 </tr>
 <tr>

@@ -1,22 +1,50 @@
 .has-control-menu {
-	#wrapper {
+	.affix, #wrapper {
 		margin-top: $has-control-menu-margin-top-mobile;
+
+		.portlet-boundary > span:first-child {
+			display: block;
+			position: relative;
+			top: -$has-control-menu-margin-top-mobile;
+			visibility: hidden;
+		}
 
 		@include sm() {
 			margin-top: $has-control-menu-margin-top-desktop;
+
+			.portlet-boundary > span:first-child {
+				display: block;
+				position: relative;
+				top: -$has-control-menu-margin-top-desktop;
+				visibility: hidden;
+			}
 		}
 	}
 
-	&.has-customization-menu #wrapper {
+	&.has-customization-menu .affix, &.has-customization-menu #wrapper {
 		margin-top: ($has-control-menu-margin-top-mobile + $has-customization-menu-margin-top-mobile);
+
+		.portlet-boundary > span:first-child {
+			display: block;
+			position: relative;
+			top: -($has-control-menu-margin-top-mobile + $has-customization-menu-margin-top-mobile);
+			visibility: hidden;
+		}
 
 		@include sm() {
 			margin-top: ($has-control-menu-margin-top-desktop + $has-customization-menu-margin-top-desktop);
+
+			.portlet-boundary > span:first-child {
+				display: block;
+				position: relative;
+				top: -($has-control-menu-margin-top-desktop + $has-customization-menu-margin-top-desktop);
+				visibility: hidden;
+			}
 		}
 	}
 }
 
-.control-menu {
+.affix, .control-menu {
 	left: 0;
 	position: fixed;
 	right: 0;
@@ -26,7 +54,7 @@
 
 .control-menu-icon {
 	display: inline-block;
-	margin: 0 10px;
+	padding: 0 20px;
 }
 
 .control-menu-level-1 {
@@ -229,7 +257,8 @@
 
 .sidenav-transition {
 	.control-menu,
-	.control-menu-level-2 {
+	.control-menu-level-2,
+	.affix {
 		@include transition($control-menu-css-transition);
 	}
 }
@@ -246,6 +275,8 @@
 .tools-control-group {
 	@include flex(1);
 	@include flex-wrap(wrap);
+
+	min-width: 50px;
 
 	> .control-menu-nav {
 		@include flex-wrap(wrap);

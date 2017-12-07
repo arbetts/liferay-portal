@@ -27,11 +27,16 @@ public class Term extends Expression {
 	}
 
 	@Override
-	public <T> T accept(ExpressionVisitor<T> visitor) {
-		return visitor.visit(this);
+	public <T> T accept(ExpressionVisitor<T> expressionVisitor) {
+		return expressionVisitor.visit(this);
 	}
 
 	public String getValue() {
+		return _value;
+	}
+
+	@Override
+	public String toString() {
 		return _value;
 	}
 

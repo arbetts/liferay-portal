@@ -30,6 +30,9 @@ portletURL.setParameter("mvcRenderCommandName", "/polls/view");
 
 <div class="container-fluid-1280 main-content-body">
 	<aui:form method="post" name="fm">
+		<liferay-ui:error exception="<%= DuplicateVoteException.class %>" message="you-may-only-vote-once" />
+		<liferay-ui:error exception="<%= NoSuchChoiceException.class %>" message="please-select-an-option" />
+
 		<liferay-ui:search-container
 			emptyResultsMessage="no-entries-were-found"
 			iteratorURL="<%= portletURL %>"
@@ -85,11 +88,22 @@ portletURL.setParameter("mvcRenderCommandName", "/polls/view");
 
 				<c:choose>
 					<c:when test="<%= question.getExpirationDate() != null %>">
-						<liferay-ui:search-container-column-date
-							href="<%= rowURL %>"
-							name="expiration-date"
-							value="<%= question.getExpirationDate() %>"
-						/>
+						<c:choose>
+							<c:when test="<%= question.getExpirationDate().before(new Date()) %>">
+								<liferay-ui:search-container-column-text
+									href="<%= rowURL %>"
+									name="expiration-date"
+									value='<%= LanguageUtil.get(request, "expired") %>'
+								/>
+							</c:when>
+							<c:otherwise>
+								<liferay-ui:search-container-column-date
+									href="<%= rowURL %>"
+									name="expiration-date"
+									value="<%= question.getExpirationDate() %>"
+								/>
+							</c:otherwise>
+						</c:choose>
 					</c:when>
 					<c:otherwise>
 						<liferay-ui:search-container-column-text

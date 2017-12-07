@@ -18,7 +18,7 @@ import com.liferay.marketplace.model.App;
 import com.liferay.marketplace.service.AppLocalService;
 import com.liferay.marketplace.service.ModuleLocalService;
 import com.liferay.marketplace.util.ContextUtil;
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -93,7 +93,7 @@ public class LPKGDeployerRegistrar {
 					GetterUtil.getString(headers.get("Web-ContextPath")));
 
 				_moduleLocalService.addModule(
-					app.getUserId(), app.getAppId(), bundle.getSymbolicName(),
+					app.getAppId(), bundle.getSymbolicName(),
 					String.valueOf(bundle.getVersion()), contextName);
 			}
 		}
@@ -110,7 +110,7 @@ public class LPKGDeployerRegistrar {
 				String contextName = bundleStringParts[2];
 
 				_moduleLocalService.addModule(
-					0, app.getAppId(), bundleSymbolicName, bundleVersion,
+					app.getAppId(), bundleSymbolicName, bundleVersion,
 					contextName);
 			}
 
@@ -119,8 +119,7 @@ public class LPKGDeployerRegistrar {
 
 			for (String contextName : contextNames) {
 				_moduleLocalService.addModule(
-					0, app.getAppId(), contextName, StringPool.BLANK,
-					contextName);
+					app.getAppId(), contextName, StringPool.BLANK, contextName);
 			}
 		}
 	}

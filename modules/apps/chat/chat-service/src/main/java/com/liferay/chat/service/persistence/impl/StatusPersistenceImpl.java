@@ -35,10 +35,11 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Field;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -111,7 +112,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 			msg.append("userId=");
 			msg.append(userId);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -499,7 +500,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		msg.append("modifiedDate=");
 		msg.append(modifiedDate);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchStatusException(msg.toString());
 	}
@@ -549,7 +550,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		msg.append("modifiedDate=");
 		msg.append(modifiedDate);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchStatusException(msg.toString());
 	}
@@ -999,7 +1000,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		msg.append("online=");
 		msg.append(online);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchStatusException(msg.toString());
 	}
@@ -1048,7 +1049,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		msg.append("online=");
 		msg.append(online);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchStatusException(msg.toString());
 	}
@@ -1519,7 +1520,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		msg.append(", online=");
 		msg.append(online);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchStatusException(msg.toString());
 	}
@@ -1574,7 +1575,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		msg.append(", online=");
 		msg.append(online);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchStatusException(msg.toString());
 	}
@@ -1832,6 +1833,24 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 
 	public StatusPersistenceImpl() {
 		setModelClass(Status.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("online", "online_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
 	}
 
 	/**
@@ -1899,7 +1918,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((StatusModelImpl)status);
+		clearUniqueFindersCache((StatusModelImpl)status, true);
 	}
 
 	@Override
@@ -1911,42 +1930,31 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 			entityCache.removeResult(StatusModelImpl.ENTITY_CACHE_ENABLED,
 				StatusImpl.class, status.getPrimaryKey());
 
-			clearUniqueFindersCache((StatusModelImpl)status);
+			clearUniqueFindersCache((StatusModelImpl)status, true);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(StatusModelImpl statusModelImpl,
-		boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] { statusModelImpl.getUserId() };
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_USERID, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_USERID, args,
-				statusModelImpl);
-		}
-		else {
-			if ((statusModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_USERID.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] { statusModelImpl.getUserId() };
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_USERID, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_USERID, args,
-					statusModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(StatusModelImpl statusModelImpl) {
+	protected void cacheUniqueFindersCache(StatusModelImpl statusModelImpl) {
 		Object[] args = new Object[] { statusModelImpl.getUserId() };
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_USERID, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_USERID, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_USERID, args,
+			statusModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(StatusModelImpl statusModelImpl,
+		boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] { statusModelImpl.getUserId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_USERID, args);
+		}
 
 		if ((statusModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_USERID.getColumnBitmask()) != 0) {
-			args = new Object[] { statusModelImpl.getOriginalUserId() };
+			Object[] args = new Object[] { statusModelImpl.getOriginalUserId() };
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_USERID, args);
@@ -2082,8 +2090,35 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !StatusModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!StatusModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { statusModelImpl.getModifiedDate() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_MODIFIEDDATE, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_MODIFIEDDATE,
+				args);
+
+			args = new Object[] { statusModelImpl.getOnline() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_ONLINE, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_ONLINE,
+				args);
+
+			args = new Object[] {
+					statusModelImpl.getModifiedDate(),
+					statusModelImpl.getOnline()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_M_O, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_M_O,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -2144,8 +2179,8 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		entityCache.putResult(StatusModelImpl.ENTITY_CACHE_ENABLED,
 			StatusImpl.class, status.getPrimaryKey(), status, false);
 
-		clearUniqueFindersCache(statusModelImpl);
-		cacheUniqueFindersCache(statusModelImpl, isNew);
+		clearUniqueFindersCache(statusModelImpl, false);
+		cacheUniqueFindersCache(statusModelImpl);
 
 		status.resetOriginalValues();
 
@@ -2321,14 +2356,14 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		query.append(_SQL_SELECT_STATUS_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

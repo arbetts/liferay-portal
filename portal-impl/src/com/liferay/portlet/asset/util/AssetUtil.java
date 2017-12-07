@@ -23,6 +23,7 @@ import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.model.ClassType;
 import com.liferay.asset.kernel.model.ClassTypeReader;
+import com.liferay.asset.kernel.model.NullClassTypeReader;
 import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetCategoryPropertyLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
@@ -31,6 +32,7 @@ import com.liferay.asset.kernel.service.persistence.AssetEntryQuery;
 import com.liferay.dynamic.data.mapping.kernel.DDMStructure;
 import com.liferay.dynamic.data.mapping.kernel.DDMStructureManager;
 import com.liferay.dynamic.data.mapping.kernel.DDMStructureManagerUtil;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -41,25 +43,25 @@ import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.portlet.PortletBag;
+import com.liferay.portal.kernel.portlet.PortletBagPool;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Document;
-import com.liferay.portal.kernel.search.DocumentImpl;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.QueryConfig;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchContextFactory;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.security.permission.comparator.ModelResourceComparator;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -67,10 +69,12 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PredicateFilter;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portlet.PortletURLImpl;
 import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
 import com.liferay.portlet.asset.service.permission.AssetVocabularyPermission;
 
@@ -80,12 +84,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.TreeMap;
 
 import javax.portlet.PortletMode;
 import javax.portlet.PortletURL;
@@ -93,16 +98,19 @@ import javax.portlet.PortletURL;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author Brian Wing Shun Chan
- * @author Jorge Ferrer
+ * @author     Brian Wing Shun Chan
+ * @author     Jorge Ferrer
+ * @deprecated As of 7.0.0, replaced by {@link
+ *             com.liferay.asset.util.impl.AssetUtil}
  */
+@Deprecated
 public class AssetUtil {
 
 	public static final int ASSET_ENTRY_ABSTRACT_LENGTH = 200;
 
 	public static final String CLASSNAME_SEPARATOR = "_CLASSNAME_";
 
-	public static final char[] INVALID_CHARACTERS = new char[] {
+	public static final char[] INVALID_CHARACTERS = {
 		CharPool.AMPERSAND, CharPool.APOSTROPHE, CharPool.AT,
 		CharPool.BACK_SLASH, CharPool.CLOSE_BRACKET, CharPool.CLOSE_CURLY_BRACE,
 		CharPool.COLON, CharPool.COMMA, CharPool.EQUAL, CharPool.GREATER_THAN,
@@ -215,7 +223,7 @@ public class AssetUtil {
 
 			if ((category != null) &&
 				AssetCategoryPermission.contains(
-					permissionChecker, categoryId, ActionKeys.VIEW)) {
+					permissionChecker, category, ActionKeys.VIEW)) {
 
 				viewableCategoryIds.add(categoryId);
 			}
@@ -399,6 +407,13 @@ public class AssetUtil {
 			allAssetCategoryIds, allAssetTagNames, redirect);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getAssetPublisherAddItemHolders(LiferayPortletRequest,
+	 *             LiferayPortletResponse, long, long[], long[], long[],
+	 *             String[], String)}
+	 */
+	@Deprecated
 	public static Map<String, PortletURL> getAddPortletURLs(
 			LiferayPortletRequest liferayPortletRequest,
 			LiferayPortletResponse liferayPortletResponse, long groupId,
@@ -407,70 +422,20 @@ public class AssetUtil {
 			String redirect)
 		throws Exception {
 
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)liferayPortletRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
+		List<AssetPublisherAddItemHolder> assetPublisherAddItemHolders =
+			getAssetPublisherAddItemHolders(
+				liferayPortletRequest, liferayPortletResponse, groupId,
+				classNameIds, classTypeIds, allAssetCategoryIds,
+				allAssetTagNames, redirect);
 
-		Map<String, PortletURL> addPortletURLs = new TreeMap<>(
-			new ModelResourceComparator(themeDisplay.getLocale()));
+		Map<String, PortletURL> addPortletURLs = new LinkedHashMap<>();
 
-		for (long classNameId : classNameIds) {
-			String className = PortalUtil.getClassName(classNameId);
+		for (AssetPublisherAddItemHolder assetPublisherAddItemHolder :
+				assetPublisherAddItemHolders) {
 
-			AssetRendererFactory<?> assetRendererFactory =
-				AssetRendererFactoryRegistryUtil.
-					getAssetRendererFactoryByClassName(className);
-
-			if (Validator.isNull(assetRendererFactory.getPortletId())) {
-				continue;
-			}
-
-			Portlet portlet = PortletLocalServiceUtil.getPortletById(
-				themeDisplay.getCompanyId(),
-				assetRendererFactory.getPortletId());
-
-			if (!portlet.isActive()) {
-				continue;
-			}
-
-			ClassTypeReader classTypeReader =
-				assetRendererFactory.getClassTypeReader();
-
-			List<ClassType> classTypes = classTypeReader.getAvailableClassTypes(
-				PortalUtil.getCurrentAndAncestorSiteGroupIds(groupId),
-				themeDisplay.getLocale());
-
-			if (classTypes.isEmpty()) {
-				PortletURL addPortletURL = getAddPortletURL(
-					liferayPortletRequest, liferayPortletResponse, groupId,
-					className, 0, allAssetCategoryIds, allAssetTagNames,
-					redirect);
-
-				if (addPortletURL != null) {
-					addPortletURLs.put(className, addPortletURL);
-				}
-			}
-
-			for (ClassType classType : classTypes) {
-				long classTypeId = classType.getClassTypeId();
-
-				if (ArrayUtil.contains(classTypeIds, classTypeId) ||
-					(classTypeIds.length == 0)) {
-
-					PortletURL addPortletURL = getAddPortletURL(
-						liferayPortletRequest, liferayPortletResponse, groupId,
-						className, classTypeId, allAssetCategoryIds,
-						allAssetTagNames, redirect);
-
-					if (addPortletURL != null) {
-						String mesage =
-							className + CLASSNAME_SEPARATOR +
-								classType.getName();
-
-						addPortletURLs.put(mesage, addPortletURL);
-					}
-				}
-			}
+			addPortletURLs.put(
+				assetPublisherAddItemHolder.getName(),
+				assetPublisherAddItemHolder.getPortletURL());
 		}
 
 		return addPortletURLs;
@@ -478,7 +443,7 @@ public class AssetUtil {
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
-	 *             #getAddPortletURLs(LiferayPortletRequest,
+	 *             #getAssetPublisherAddItemHolders(LiferayPortletRequest,
 	 *             LiferayPortletResponse, long, long[], long[], long[],
 	 *             String[], String)}
 	 */
@@ -501,7 +466,7 @@ public class AssetUtil {
 	}
 
 	public static String getAddURLPopUp(
-		long groupId, long plid, PortletURL addPortletURL, String portletId,
+		long groupId, long plid, PortletURL addPortletURL,
 		boolean addDisplayPageParameter, Layout layout) {
 
 		addPortletURL.setParameter(
@@ -509,20 +474,33 @@ public class AssetUtil {
 		addPortletURL.setParameter("groupId", String.valueOf(groupId));
 		addPortletURL.setParameter("showHeader", Boolean.FALSE.toString());
 
-		String addPortletURLString = addPortletURL.toString();
-
-		addPortletURLString = HttpUtil.addParameter(
-			addPortletURLString, "refererPlid", plid);
-
 		if (addDisplayPageParameter && (layout != null)) {
-			String namespace = PortalUtil.getPortletNamespace(portletId);
-
-			addPortletURLString = HttpUtil.addParameter(
-				addPortletURLString, namespace + "layoutUuid",
-				layout.getUuid());
+			addPortletURL.setParameter("layoutUuid", layout.getUuid());
 		}
 
-		return addPortletURLString;
+		if (addPortletURL instanceof PortletURLImpl) {
+			PortletURLImpl portletURLImpl = (PortletURLImpl)addPortletURL;
+
+			portletURLImpl.setRefererPlid(plid);
+
+			return portletURLImpl.toString();
+		}
+
+		return HttpUtil.addParameter(
+			addPortletURL.toString(), "refererPlid", plid);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #getAddURLPopUp(long, long,
+	 *             PortletURL, boolean, Layout)}
+	 */
+	@Deprecated
+	public static String getAddURLPopUp(
+		long groupId, long plid, PortletURL addPortletURL, String portletId,
+		boolean addDisplayPageParameter, Layout layout) {
+
+		return getAddURLPopUp(
+			groupId, plid, addPortletURL, addDisplayPageParameter, layout);
 	}
 
 	public static List<AssetEntry> getAssetEntries(Hits hits) {
@@ -570,6 +548,108 @@ public class AssetUtil {
 		return sb.toString();
 	}
 
+	public static List<AssetPublisherAddItemHolder>
+			getAssetPublisherAddItemHolders(
+				LiferayPortletRequest liferayPortletRequest,
+				LiferayPortletResponse liferayPortletResponse, long groupId,
+				long[] classNameIds, long[] classTypeIds,
+				long[] allAssetCategoryIds, String[] allAssetTagNames,
+				String redirect)
+		throws Exception {
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)liferayPortletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		Locale locale = themeDisplay.getLocale();
+
+		List<AssetPublisherAddItemHolder> assetPublisherAddItemHolders =
+			new ArrayList<>();
+
+		for (long classNameId : classNameIds) {
+			String className = PortalUtil.getClassName(classNameId);
+
+			AssetRendererFactory<?> assetRendererFactory =
+				AssetRendererFactoryRegistryUtil.
+					getAssetRendererFactoryByClassName(className);
+
+			if (Validator.isNull(assetRendererFactory.getPortletId())) {
+				continue;
+			}
+
+			Portlet portlet = PortletLocalServiceUtil.getPortletById(
+				themeDisplay.getCompanyId(),
+				assetRendererFactory.getPortletId());
+
+			if (!portlet.isActive()) {
+				continue;
+			}
+
+			PortletBag portletBag = PortletBagPool.get(
+				portlet.getRootPortletId());
+
+			if (portletBag == null) {
+				continue;
+			}
+
+			ResourceBundle resourceBundle = portletBag.getResourceBundle(
+				locale);
+
+			ClassTypeReader classTypeReader =
+				assetRendererFactory.getClassTypeReader();
+
+			List<ClassType> classTypes = Collections.emptyList();
+
+			if (!(classTypeReader instanceof NullClassTypeReader)) {
+				classTypes = classTypeReader.getAvailableClassTypes(
+					PortalUtil.getCurrentAndAncestorSiteGroupIds(groupId),
+					themeDisplay.getLocale());
+			}
+
+			if (classTypes.isEmpty()) {
+				PortletURL addPortletURL = getAddPortletURL(
+					liferayPortletRequest, liferayPortletResponse, groupId,
+					className, 0, allAssetCategoryIds, allAssetTagNames,
+					redirect);
+
+				if (addPortletURL != null) {
+					assetPublisherAddItemHolders.add(
+						new AssetPublisherAddItemHolder(
+							portlet.getPortletId(), className, resourceBundle,
+							locale, addPortletURL));
+				}
+			}
+
+			for (ClassType classType : classTypes) {
+				long classTypeId = classType.getClassTypeId();
+
+				if (ArrayUtil.contains(classTypeIds, classTypeId) ||
+					(classTypeIds.length == 0)) {
+
+					PortletURL addPortletURL = getAddPortletURL(
+						liferayPortletRequest, liferayPortletResponse, groupId,
+						className, classTypeId, allAssetCategoryIds,
+						allAssetTagNames, redirect);
+
+					if (addPortletURL != null) {
+						assetPublisherAddItemHolders.add(
+							new AssetPublisherAddItemHolder(
+								portlet.getPortletId(), classType.getName(),
+								resourceBundle, locale, addPortletURL));
+					}
+				}
+			}
+		}
+
+		if (assetPublisherAddItemHolders.size() <= 1) {
+			return assetPublisherAddItemHolders;
+		}
+
+		assetPublisherAddItemHolders.sort(null);
+
+		return assetPublisherAddItemHolders;
+	}
+
 	public static String getClassName(String className) {
 		int pos = className.indexOf(AssetUtil.CLASSNAME_SEPARATOR);
 
@@ -580,6 +660,10 @@ public class AssetUtil {
 		return className;
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public static String getClassNameMessage(String className, Locale locale) {
 		String message = null;
 
@@ -669,8 +753,9 @@ public class AssetUtil {
 				if (c == invalidChar) {
 					if (_log.isDebugEnabled()) {
 						_log.debug(
-							"Word " + word + " is not valid because " + c +
-								" is not allowed");
+							StringBundler.concat(
+								"Word ", word, " is not valid because ",
+								String.valueOf(c), " is not allowed"));
 					}
 
 					return false;
@@ -834,7 +919,12 @@ public class AssetUtil {
 		searchContext.setEnd(end);
 		searchContext.setGroupIds(assetEntryQuery.getGroupIds());
 
-		if (Validator.isNotNull(assetEntryQuery.getKeywords())) {
+		if (Validator.isNull(assetEntryQuery.getKeywords())) {
+			QueryConfig queryConfig = searchContext.getQueryConfig();
+
+			queryConfig.setScoreEnabled(false);
+		}
+		else {
 			searchContext.setLike(true);
 		}
 
@@ -866,25 +956,32 @@ public class AssetUtil {
 		if (sortField.startsWith(
 				DDMStructureManager.STRUCTURE_INDEXER_FIELD_PREFIX)) {
 
-			sortField = sortField.concat(StringPool.UNDERLINE).concat(
-				LocaleUtil.toLanguageId(locale));
+			StringBundler sb = new StringBundler(5);
+
+			sb.append(sortField);
+			sb.append(StringPool.UNDERLINE);
+			sb.append(LocaleUtil.toLanguageId(locale));
+			sb.append(StringPool.UNDERLINE);
+
+			String suffix = "String";
 
 			if (!fieldType.equals("ddm-date") &&
 				((sortType == Sort.DOUBLE_TYPE) ||
 				 (sortType == Sort.FLOAT_TYPE) || (sortType == Sort.INT_TYPE) ||
 				 (sortType == Sort.LONG_TYPE))) {
 
-				sortField = sortField.concat(StringPool.UNDERLINE).concat(
-					"Number");
+				suffix = "Number";
 			}
 
-			sortField = DocumentImpl.getSortableFieldName(sortField);
+			sb.append(suffix);
+
+			sortField = Field.getSortableFieldName(sb.toString());
 		}
 		else if (sortField.equals("modifiedDate")) {
 			sortField = Field.MODIFIED_DATE;
 		}
 		else if (sortField.equals("title")) {
-			sortField = DocumentImpl.getSortableFieldName(
+			sortField = Field.getSortableFieldName(
 				"localized_title_".concat(LocaleUtil.toLanguageId(locale)));
 		}
 
@@ -938,15 +1035,12 @@ public class AssetUtil {
 			sortType = Sort.LONG_TYPE;
 		}
 		else if (fieldType.equals(Field.PRIORITY) ||
-				 fieldType.equals(Field.RATINGS) ||
 				 fieldType.equals("ddm-decimal") ||
 				 fieldType.equals("ddm-number")) {
 
 			sortType = Sort.DOUBLE_TYPE;
 		}
-		else if (fieldType.equals(Field.VIEW_COUNT) ||
-				 fieldType.equals("ddm-integer")) {
-
+		else if (fieldType.equals("ddm-integer")) {
 			sortType = Sort.INT_TYPE;
 		}
 

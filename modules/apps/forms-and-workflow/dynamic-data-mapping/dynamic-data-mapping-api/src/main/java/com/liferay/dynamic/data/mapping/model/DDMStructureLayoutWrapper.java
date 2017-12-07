@@ -138,18 +138,153 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	@Override
+	public java.lang.Object clone() {
+		return new DDMStructureLayoutWrapper((DDMStructureLayout)_ddmStructureLayout.clone());
+	}
+
+	@Override
+	public int compareTo(DDMStructureLayout ddmStructureLayout) {
+		return _ddmStructureLayout.compareTo(ddmStructureLayout);
+	}
+
+	/**
+	* Returns the company ID of this ddm structure layout.
+	*
+	* @return the company ID of this ddm structure layout
+	*/
+	@Override
+	public long getCompanyId() {
+		return _ddmStructureLayout.getCompanyId();
+	}
+
+	/**
+	* Returns the create date of this ddm structure layout.
+	*
+	* @return the create date of this ddm structure layout
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _ddmStructureLayout.getCreateDate();
+	}
+
+	@Override
 	public DDMFormLayout getDDMFormLayout() {
 		return _ddmStructureLayout.getDDMFormLayout();
 	}
 
+	/**
+	* Returns the definition of this ddm structure layout.
+	*
+	* @return the definition of this ddm structure layout
+	*/
 	@Override
-	public DDMStructureLayout toEscapedModel() {
-		return new DDMStructureLayoutWrapper(_ddmStructureLayout.toEscapedModel());
+	public java.lang.String getDefinition() {
+		return _ddmStructureLayout.getDefinition();
 	}
 
 	@Override
-	public DDMStructureLayout toUnescapedModel() {
-		return new DDMStructureLayoutWrapper(_ddmStructureLayout.toUnescapedModel());
+	public ExpandoBridge getExpandoBridge() {
+		return _ddmStructureLayout.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this ddm structure layout.
+	*
+	* @return the group ID of this ddm structure layout
+	*/
+	@Override
+	public long getGroupId() {
+		return _ddmStructureLayout.getGroupId();
+	}
+
+	/**
+	* Returns the modified date of this ddm structure layout.
+	*
+	* @return the modified date of this ddm structure layout
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _ddmStructureLayout.getModifiedDate();
+	}
+
+	/**
+	* Returns the primary key of this ddm structure layout.
+	*
+	* @return the primary key of this ddm structure layout
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _ddmStructureLayout.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _ddmStructureLayout.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the structure layout ID of this ddm structure layout.
+	*
+	* @return the structure layout ID of this ddm structure layout
+	*/
+	@Override
+	public long getStructureLayoutId() {
+		return _ddmStructureLayout.getStructureLayoutId();
+	}
+
+	/**
+	* Returns the structure version ID of this ddm structure layout.
+	*
+	* @return the structure version ID of this ddm structure layout
+	*/
+	@Override
+	public long getStructureVersionId() {
+		return _ddmStructureLayout.getStructureVersionId();
+	}
+
+	/**
+	* Returns the user ID of this ddm structure layout.
+	*
+	* @return the user ID of this ddm structure layout
+	*/
+	@Override
+	public long getUserId() {
+		return _ddmStructureLayout.getUserId();
+	}
+
+	/**
+	* Returns the user name of this ddm structure layout.
+	*
+	* @return the user name of this ddm structure layout
+	*/
+	@Override
+	public java.lang.String getUserName() {
+		return _ddmStructureLayout.getUserName();
+	}
+
+	/**
+	* Returns the user uuid of this ddm structure layout.
+	*
+	* @return the user uuid of this ddm structure layout
+	*/
+	@Override
+	public java.lang.String getUserUuid() {
+		return _ddmStructureLayout.getUserUuid();
+	}
+
+	/**
+	* Returns the uuid of this ddm structure layout.
+	*
+	* @return the uuid of this ddm structure layout
+	*/
+	@Override
+	public java.lang.String getUuid() {
+		return _ddmStructureLayout.getUuid();
+	}
+
+	@Override
+	public int hashCode() {
+		return _ddmStructureLayout.hashCode();
 	}
 
 	@Override
@@ -168,166 +303,6 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _ddmStructureLayout.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<DDMStructureLayout> toCacheModel() {
-		return _ddmStructureLayout.toCacheModel();
-	}
-
-	@Override
-	public int compareTo(DDMStructureLayout ddmStructureLayout) {
-		return _ddmStructureLayout.compareTo(ddmStructureLayout);
-	}
-
-	@Override
-	public int hashCode() {
-		return _ddmStructureLayout.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _ddmStructureLayout.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new DDMStructureLayoutWrapper((DDMStructureLayout)_ddmStructureLayout.clone());
-	}
-
-	/**
-	* Returns the definition of this d d m structure layout.
-	*
-	* @return the definition of this d d m structure layout
-	*/
-	@Override
-	public java.lang.String getDefinition() {
-		return _ddmStructureLayout.getDefinition();
-	}
-
-	/**
-	* Returns the user name of this d d m structure layout.
-	*
-	* @return the user name of this d d m structure layout
-	*/
-	@Override
-	public java.lang.String getUserName() {
-		return _ddmStructureLayout.getUserName();
-	}
-
-	/**
-	* Returns the user uuid of this d d m structure layout.
-	*
-	* @return the user uuid of this d d m structure layout
-	*/
-	@Override
-	public java.lang.String getUserUuid() {
-		return _ddmStructureLayout.getUserUuid();
-	}
-
-	/**
-	* Returns the uuid of this d d m structure layout.
-	*
-	* @return the uuid of this d d m structure layout
-	*/
-	@Override
-	public java.lang.String getUuid() {
-		return _ddmStructureLayout.getUuid();
-	}
-
-	@Override
-	public java.lang.String toString() {
-		return _ddmStructureLayout.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _ddmStructureLayout.toXmlString();
-	}
-
-	/**
-	* Returns the create date of this d d m structure layout.
-	*
-	* @return the create date of this d d m structure layout
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _ddmStructureLayout.getCreateDate();
-	}
-
-	/**
-	* Returns the modified date of this d d m structure layout.
-	*
-	* @return the modified date of this d d m structure layout
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _ddmStructureLayout.getModifiedDate();
-	}
-
-	/**
-	* Returns the company ID of this d d m structure layout.
-	*
-	* @return the company ID of this d d m structure layout
-	*/
-	@Override
-	public long getCompanyId() {
-		return _ddmStructureLayout.getCompanyId();
-	}
-
-	/**
-	* Returns the group ID of this d d m structure layout.
-	*
-	* @return the group ID of this d d m structure layout
-	*/
-	@Override
-	public long getGroupId() {
-		return _ddmStructureLayout.getGroupId();
-	}
-
-	/**
-	* Returns the primary key of this d d m structure layout.
-	*
-	* @return the primary key of this d d m structure layout
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _ddmStructureLayout.getPrimaryKey();
-	}
-
-	/**
-	* Returns the structure layout ID of this d d m structure layout.
-	*
-	* @return the structure layout ID of this d d m structure layout
-	*/
-	@Override
-	public long getStructureLayoutId() {
-		return _ddmStructureLayout.getStructureLayoutId();
-	}
-
-	/**
-	* Returns the structure version ID of this d d m structure layout.
-	*
-	* @return the structure version ID of this d d m structure layout
-	*/
-	@Override
-	public long getStructureVersionId() {
-		return _ddmStructureLayout.getStructureVersionId();
-	}
-
-	/**
-	* Returns the user ID of this d d m structure layout.
-	*
-	* @return the user ID of this d d m structure layout
-	*/
-	@Override
-	public long getUserId() {
-		return _ddmStructureLayout.getUserId();
-	}
-
-	@Override
 	public void persist() {
 		_ddmStructureLayout.persist();
 	}
@@ -338,9 +313,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the company ID of this d d m structure layout.
+	* Sets the company ID of this ddm structure layout.
 	*
-	* @param companyId the company ID of this d d m structure layout
+	* @param companyId the company ID of this ddm structure layout
 	*/
 	@Override
 	public void setCompanyId(long companyId) {
@@ -348,9 +323,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the create date of this d d m structure layout.
+	* Sets the create date of this ddm structure layout.
 	*
-	* @param createDate the create date of this d d m structure layout
+	* @param createDate the create date of this ddm structure layout
 	*/
 	@Override
 	public void setCreateDate(Date createDate) {
@@ -358,18 +333,13 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the definition of this d d m structure layout.
+	* Sets the definition of this ddm structure layout.
 	*
-	* @param definition the definition of this d d m structure layout
+	* @param definition the definition of this ddm structure layout
 	*/
 	@Override
 	public void setDefinition(java.lang.String definition) {
 		_ddmStructureLayout.setDefinition(definition);
-	}
-
-	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_ddmStructureLayout.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -379,14 +349,19 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_ddmStructureLayout.setExpandoBridgeAttributes(expandoBridge);
+	}
+
+	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext) {
 		_ddmStructureLayout.setExpandoBridgeAttributes(serviceContext);
 	}
 
 	/**
-	* Sets the group ID of this d d m structure layout.
+	* Sets the group ID of this ddm structure layout.
 	*
-	* @param groupId the group ID of this d d m structure layout
+	* @param groupId the group ID of this ddm structure layout
 	*/
 	@Override
 	public void setGroupId(long groupId) {
@@ -394,9 +369,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the modified date of this d d m structure layout.
+	* Sets the modified date of this ddm structure layout.
 	*
-	* @param modifiedDate the modified date of this d d m structure layout
+	* @param modifiedDate the modified date of this ddm structure layout
 	*/
 	@Override
 	public void setModifiedDate(Date modifiedDate) {
@@ -409,9 +384,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the primary key of this d d m structure layout.
+	* Sets the primary key of this ddm structure layout.
 	*
-	* @param primaryKey the primary key of this d d m structure layout
+	* @param primaryKey the primary key of this ddm structure layout
 	*/
 	@Override
 	public void setPrimaryKey(long primaryKey) {
@@ -424,9 +399,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the structure layout ID of this d d m structure layout.
+	* Sets the structure layout ID of this ddm structure layout.
 	*
-	* @param structureLayoutId the structure layout ID of this d d m structure layout
+	* @param structureLayoutId the structure layout ID of this ddm structure layout
 	*/
 	@Override
 	public void setStructureLayoutId(long structureLayoutId) {
@@ -434,9 +409,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the structure version ID of this d d m structure layout.
+	* Sets the structure version ID of this ddm structure layout.
 	*
-	* @param structureVersionId the structure version ID of this d d m structure layout
+	* @param structureVersionId the structure version ID of this ddm structure layout
 	*/
 	@Override
 	public void setStructureVersionId(long structureVersionId) {
@@ -444,9 +419,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the user ID of this d d m structure layout.
+	* Sets the user ID of this ddm structure layout.
 	*
-	* @param userId the user ID of this d d m structure layout
+	* @param userId the user ID of this ddm structure layout
 	*/
 	@Override
 	public void setUserId(long userId) {
@@ -454,9 +429,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the user name of this d d m structure layout.
+	* Sets the user name of this ddm structure layout.
 	*
-	* @param userName the user name of this d d m structure layout
+	* @param userName the user name of this ddm structure layout
 	*/
 	@Override
 	public void setUserName(java.lang.String userName) {
@@ -464,9 +439,9 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the user uuid of this d d m structure layout.
+	* Sets the user uuid of this ddm structure layout.
 	*
-	* @param userUuid the user uuid of this d d m structure layout
+	* @param userUuid the user uuid of this ddm structure layout
 	*/
 	@Override
 	public void setUserUuid(java.lang.String userUuid) {
@@ -474,13 +449,38 @@ public class DDMStructureLayoutWrapper implements DDMStructureLayout,
 	}
 
 	/**
-	* Sets the uuid of this d d m structure layout.
+	* Sets the uuid of this ddm structure layout.
 	*
-	* @param uuid the uuid of this d d m structure layout
+	* @param uuid the uuid of this ddm structure layout
 	*/
 	@Override
 	public void setUuid(java.lang.String uuid) {
 		_ddmStructureLayout.setUuid(uuid);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<DDMStructureLayout> toCacheModel() {
+		return _ddmStructureLayout.toCacheModel();
+	}
+
+	@Override
+	public DDMStructureLayout toEscapedModel() {
+		return new DDMStructureLayoutWrapper(_ddmStructureLayout.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _ddmStructureLayout.toString();
+	}
+
+	@Override
+	public DDMStructureLayout toUnescapedModel() {
+		return new DDMStructureLayoutWrapper(_ddmStructureLayout.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _ddmStructureLayout.toXmlString();
 	}
 
 	@Override

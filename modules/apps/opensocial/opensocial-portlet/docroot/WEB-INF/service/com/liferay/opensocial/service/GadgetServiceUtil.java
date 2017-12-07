@@ -17,7 +17,6 @@ package com.liferay.opensocial.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortletBeanLocatorUtil;
-import com.liferay.portal.kernel.service.InvokableService;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
@@ -51,10 +50,10 @@ public class GadgetServiceUtil {
 			serviceContext);
 	}
 
-	public static java.lang.Object invokeMethod(java.lang.String name,
-		java.lang.String[] parameterTypes, java.lang.Object[] arguments)
-		throws java.lang.Throwable {
-		return getService().invokeMethod(name, parameterTypes, arguments);
+	public static void deleteGadget(long gadgetId,
+		com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService().deleteGadget(gadgetId, serviceContext);
 	}
 
 	/**
@@ -64,12 +63,6 @@ public class GadgetServiceUtil {
 	*/
 	public static java.lang.String getOSGiServiceIdentifier() {
 		return getService().getOSGiServiceIdentifier();
-	}
-
-	public static void deleteGadget(long gadgetId,
-		com.liferay.portal.kernel.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		getService().deleteGadget(gadgetId, serviceContext);
 	}
 
 	public static void updateGadget(long gadgetId,
@@ -85,15 +78,8 @@ public class GadgetServiceUtil {
 
 	public static GadgetService getService() {
 		if (_service == null) {
-			InvokableService invokableService = (InvokableService)PortletBeanLocatorUtil.locate(ClpSerializer.getServletContextName(),
+			_service = (GadgetService)PortletBeanLocatorUtil.locate(ServletContextUtil.getServletContextName(),
 					GadgetService.class.getName());
-
-			if (invokableService instanceof GadgetService) {
-				_service = (GadgetService)invokableService;
-			}
-			else {
-				_service = new GadgetServiceClp(invokableService);
-			}
 
 			ReferenceRegistry.registerReference(GadgetServiceUtil.class,
 				"_service");

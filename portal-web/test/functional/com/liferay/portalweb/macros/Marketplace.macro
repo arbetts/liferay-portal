@@ -2,7 +2,9 @@
 	<command name="downloadAndInstallApp">
 		<var name="key_appName" value="${appName}" />
 
-		<execute macro="ProductMenu#gotoControlPanelApps">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Apps" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Store" />
 		</execute>
 
@@ -12,7 +14,9 @@
 
 		<execute macro="Portlet#startServer" />
 
-		<execute macro="ProductMenu#gotoControlPanelApps">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Apps" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Store" />
 		</execute>
 
@@ -20,7 +24,9 @@
 			<var name="appName" value="${appName}" />
 		</execute>
 
-		<execute macro="ProductMenu#gotoControlPanelApps">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Apps" />
+			<var name="panel" value="Control Panel" />
 			<var name="portlet" value="Purchased" />
 		</execute>
 
@@ -31,27 +37,40 @@
 
 	<command name="downloadApp">
 		<execute function="SelectFrame" locator1="Store#MARKETPLACE_IFRAME" />
+
 		<execute function="Type" locator1="Store#SEARCH_FIELD" value1="${appName}" />
+
 		<execute function="Click" locator1="Store#SEARCH_BUTTON" />
 
 		<var name="key_appName" value="${appName}" />
 
 		<execute function="Click" locator1="Store#APP_TITLE" />
+
 		<execute function="Click" locator1="Store#DETAILS_PURCHASE_BUTTON" />
+
 		<execute function="Click" locator1="Store#PURCHASE_SELECT_BUTTON" />
+
 		<execute function="Check" locator1="Store#PURCHASE_AGREE_CHECKBOX" />
+
 		<execute function="Click" locator1="Store#PURCHASE_BUTTON" />
+
 		<execute function="AssertTextEquals" locator1="Store#RECEIPT_TITLE" value1="Receipt" />
 		<execute function="AssertTextEquals" locator1="Store#RECEIPT_COMPLETED_THANK_YOU_MESSAGE" value1="Thank You!" />
+
 		<execute function="SelectFrame" value1="relative=top" />
 	</command>
 
 	<command name="installApp">
 		<execute function="SelectFrame" locator1="Store#MARKETPLACE_IFRAME" />
+
 		<execute function="Type" locator1="Store#PURCHASED_SEARCH_TITLE_FIELD" value1="${appName}" />
+
 		<execute function="Click" locator1="Store#PURCHASED_SEARCH_BUTTON" />
+
 		<execute function="Click" locator1="Store#PURCHASED_INSTALL_BUTTON" />
+
 		<execute function="SelectFrame" value1="relative=top" />
+
 		<execute function="Pause" locator1="5000" />
 	</command>
 
@@ -60,6 +79,7 @@
 
 		<execute function="Type" locator1="Store#EMAIL_ADDRESS_FIELD" value1="${userEmailAddress}" />
 		<execute function="Type" locator1="Store#PASSWORD_FIELD" value1="${userEmailPassword}" />
+
 		<execute function="Click" locator1="Store#SIGN_IN_BUTTON" />
 
 		<if>
@@ -71,10 +91,23 @@
 	</command>
 
 	<command name="smoke">
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Blogs Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Blogs Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -207,10 +240,23 @@
 			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Documents and Media Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Documents and Media Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -322,10 +368,23 @@
 			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Wiki Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Wiki Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -387,10 +446,23 @@
 			<var name="wikiPageTitle" value="FrontPage" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Calendar Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Calendar Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -488,10 +560,23 @@
 			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Bookmarks Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Bookmarks Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -591,13 +676,54 @@
 			<var name="siteName" value="${siteName}" />
 			<var name="siteURL" value="${siteURL}" />
 		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Bookmarks Test Page" />
+			<var name="siteName" value="${siteName}" />
+			<var name="siteURL" value="${siteURL}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Sites" />
+			<var name="panel" value="Control Panel" />
+			<var name="portlet" value="Sites" />
+		</execute>
+
+		<execute macro="Site#addCommunityCP">
+			<var name="siteName" value="Site Name" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
+			<var name="pageName" value="Home" />
+			<var name="siteName" value="Site Name" />
+			<var name="siteURL" value="${siteURL}" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
+			<var name="pageName" value="Wiki" />
+			<var name="siteName" value="Site Name" />
+			<var name="siteURL" value="${siteURL}" />
+		</execute>
 	</command>
 
 	<command name="smokeSites">
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Blogs Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Blogs Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -730,10 +856,23 @@
 			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Documents and Media Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Documents and Media Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -845,10 +984,23 @@
 			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Wiki Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Wiki Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -910,10 +1062,23 @@
 			<var name="wikiPageTitle" value="FrontPage" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Calendar Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Calendar Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
@@ -1011,10 +1176,23 @@
 			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
-		<execute macro="Page#add">
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#addPublicPage">
+			<var name="pageName" value="Bookmarks Test Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Bookmarks Test Page" />
 			<var name="siteName" value="${siteName}" />
-			<var name="siteURL" value="${siteURL}" />
 		</execute>
 
 		<execute macro="Portlet#addPG">

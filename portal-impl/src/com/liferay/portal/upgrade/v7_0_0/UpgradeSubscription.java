@@ -14,7 +14,6 @@
 
 package com.liferay.portal.upgrade.v7_0_0;
 
-import com.liferay.blogs.kernel.model.BlogsEntry;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
 import com.liferay.document.library.kernel.model.DLFolder;
@@ -68,9 +67,11 @@ public class UpgradeSubscription extends UpgradeProcess {
 				PortletPreferences.class.getName());
 
 			runSQL(
-				"delete from Subscription where classNameId = " + classNameId +
-					" and classPK not in (select portletPreferencesId from " +
-						"PortletPreferences)");
+				StringBundler.concat(
+					"delete from Subscription where classNameId = ",
+					String.valueOf(classNameId),
+					" and classPK not in (select portletPreferencesId from ",
+					"PortletPreferences)"));
 		}
 	}
 
@@ -117,9 +118,9 @@ public class UpgradeSubscription extends UpgradeProcess {
 			return 0;
 		}
 
-		String sql =
-			"select " + groupIdSQLParts[1] + " from " + groupIdSQLParts[0] +
-				" where " + groupIdSQLParts[2] + " = ?";
+		String sql = StringBundler.concat(
+			"select ", groupIdSQLParts[1], " from ", groupIdSQLParts[0],
+			" where ", groupIdSQLParts[2], " = ?");
 
 		try (PreparedStatement ps = connection.prepareStatement(sql)) {
 			ps.setLong(1, classPK);
@@ -222,8 +223,6 @@ public class UpgradeSubscription extends UpgradeProcess {
 
 	static {
 		_getGroupIdSQLPartsMap.put(
-			BlogsEntry.class.getName(), "BlogsEntry,groupId,entryId");
-		_getGroupIdSQLPartsMap.put(
 			DLFileEntry.class.getName(), "DLFileEntry,groupId,fileEntryId");
 		_getGroupIdSQLPartsMap.put(
 			DLFileEntryType.class.getName(),
@@ -240,21 +239,25 @@ public class UpgradeSubscription extends UpgradeProcess {
 			WorkflowInstanceLink.class.getName(),
 			"WorkflowInstanceLink,groupId,workflowInstanceId");
 		_getGroupIdSQLPartsMap.put(
-			"com.liferay.bookmarks.model.BookmarksEntry",
+			"com.liferay.blogs.kernel.model.BlogsEntry",
+			"BlogsEntry,groupId,entryId");
+		_getGroupIdSQLPartsMap.put(
+			"com.liferay.portlet.bookmarks.model.BookmarksEntry",
 			"BookmarksEntry,groupId,entryId");
 		_getGroupIdSQLPartsMap.put(
-			"com.liferay.bookmarks.model.BookmarksFolder",
+			"com.liferay.portlet.bookmarks.model.BookmarksFolder",
 			"BookmarksFolder,groupId,folderId");
 		_getGroupIdSQLPartsMap.put(
-			"com.liferay.dynamic.data.mapping.kernel.DDMStructure",
+			"com.liferay.portlet.dynamic.data.mapping.kernel.DDMStructure",
 			"DDMStructure,groupId,structureId");
 		_getGroupIdSQLPartsMap.put(
-			"com.liferay.journal.model.JournalFolder",
+			"com.liferay.portlet.journal.model.JournalFolder",
 			"JournalFolder,groupId,folderId");
 		_getGroupIdSQLPartsMap.put(
-			"com.liferay.wiki.model.WikiNode", "WikiNode,groupId,nodeId");
+			"com.liferay.portlet.wiki.model.WikiNode",
+			"WikiNode,groupId,nodeId");
 		_getGroupIdSQLPartsMap.put(
-			"com.liferay.wiki.model.WikiPage",
+			"com.liferay.portlet.wiki.model.WikiPage",
 			"WikiPage,groupId,resourcePrimKey");
 	}
 

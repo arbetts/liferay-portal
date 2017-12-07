@@ -68,7 +68,7 @@ portletDisplay.setURLBack(redirect);
 %>
 
 <liferay-portlet:actionURL name="/polls/edit_question" refererPlid="<%= themeDisplay.getRefererPlid() %>" var="editQuestionURL">
-	<portlet:param name="mvcActionCommand" value="/polls/edit_question" />
+	<portlet:param name="mvcPath" value="/polls/edit_question.jsp" />
 </liferay-portlet:actionURL>
 
 <aui:form action="<%= editQuestionURL %>" cssClass="container-fluid-1280" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveQuestion();" %>'>
@@ -124,7 +124,7 @@ portletDisplay.setURLBack(redirect);
 
 						<aui:input fieldParam="<%= paramName %>" label="<%= c + StringPool.PERIOD %>" name="description" />
 
-						<c:if test="<%= (((question == null) && (choicesCount > 2)) || ((question != null) && (choicesCount > oldChoicesCount))) && (i == choicesCount) %>">
+						<c:if test="<%= (choicesCount > 2) && (i == choicesCount) %>">
 							<div class="input-group-addon">
 								<aui:button cssClass="btn-delete" onClick='<%= renderResponse.getNamespace() + "deletePollChoice(" + i + ");" %>' value="delete" />
 							</div>

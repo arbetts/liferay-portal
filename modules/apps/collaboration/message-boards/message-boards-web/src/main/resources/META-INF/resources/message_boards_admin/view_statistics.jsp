@@ -22,11 +22,9 @@ PortletURL portletURL = renderResponse.createRenderURL();
 portletURL.setParameter("mvcRenderCommandName", "/message_boards/view_banned_users");
 %>
 
-<aui:nav-bar markupView="lexicon">
-	<liferay-util:include page="/message_boards_admin/nav.jsp" servletContext="<%= application %>">
-		<liferay-util:param name="navItemSelected" value="statistics" />
-	</liferay-util:include>
-</aui:nav-bar>
+<liferay-util:include page="/message_boards_admin/nav.jsp" servletContext="<%= application %>">
+	<liferay-util:param name="navItemSelected" value="statistics" />
+</liferay-util:include>
 
 <%
 long categoryId = GetterUtil.getLong(request.getAttribute("view.jsp-categoryId"));
@@ -70,7 +68,7 @@ MBCategoryDisplay categoryDisplay = new MBCategoryDisplayImpl(scopeGroupId, cate
 				/>
 
 				<liferay-ui:search-container-row
-					className="com.liferay.message.boards.kernel.model.MBStatsUser"
+					className="com.liferay.message.boards.model.MBStatsUser"
 					keyProperty="statsUserId"
 					modelVar="statsUser"
 				>

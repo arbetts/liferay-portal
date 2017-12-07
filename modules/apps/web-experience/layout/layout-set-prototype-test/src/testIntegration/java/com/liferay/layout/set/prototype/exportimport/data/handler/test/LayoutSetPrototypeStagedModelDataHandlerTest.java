@@ -16,7 +16,7 @@ package com.liferay.layout.set.prototype.exportimport.data.handler.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
-import com.liferay.layout.set.prototype.exportimport.data.handler.LayoutSetPrototypeStagedModelDataHandler;
+import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
@@ -32,7 +32,6 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.Sync;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Document;
@@ -41,7 +40,6 @@ import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
 import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipReaderFactoryUtil;
-import com.liferay.portal.lar.test.BaseStagedModelDataHandlerTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.test.LayoutTestUtil;
 
@@ -137,7 +135,9 @@ public class LayoutSetPrototypeStagedModelDataHandlerTest
 		List<LayoutFriendlyURL> layoutLayoutFriendlyURLs =
 			LayoutFriendlyURLLocalServiceUtil.getLayoutFriendlyURLs(plid);
 
-		Assert.assertEquals(1, layoutLayoutFriendlyURLs.size());
+		Assert.assertEquals(
+			layoutLayoutFriendlyURLs.toString(), 1,
+			layoutLayoutFriendlyURLs.size());
 
 		layoutFriendlyURLs.add(layoutLayoutFriendlyURLs.get(0));
 	}
@@ -156,7 +156,7 @@ public class LayoutSetPrototypeStagedModelDataHandlerTest
 			_layoutPrototype.getGroupId(), true,
 			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 
-		Assert.assertEquals(1, layouts.size());
+		Assert.assertEquals(layouts.toString(), 1, layouts.size());
 
 		Layout layout = layouts.get(0);
 
@@ -168,7 +168,8 @@ public class LayoutSetPrototypeStagedModelDataHandlerTest
 			LayoutFriendlyURLLocalServiceUtil.getLayoutFriendlyURLs(
 				layout.getPlid());
 
-		Assert.assertEquals(1, layoutFriendlyURLs.size());
+		Assert.assertEquals(
+			layoutFriendlyURLs.toString(), 1, layoutFriendlyURLs.size());
 
 		addDependentStagedModel(
 			dependentStagedModelsMap, LayoutFriendlyURL.class,
@@ -192,7 +193,7 @@ public class LayoutSetPrototypeStagedModelDataHandlerTest
 			_layoutSetPrototype.getGroupId(), true,
 			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 
-		Assert.assertEquals(1, layouts.size());
+		Assert.assertEquals(layouts.toString(), 1, layouts.size());
 
 		Layout layout = layouts.get(0);
 
@@ -231,7 +232,9 @@ public class LayoutSetPrototypeStagedModelDataHandlerTest
 		List<StagedModel> dependentLayoutPrototypeStagedModels =
 			dependentStagedModelsMap.get(LayoutPrototype.class.getSimpleName());
 
-		Assert.assertEquals(1, dependentLayoutPrototypeStagedModels.size());
+		Assert.assertEquals(
+			dependentLayoutPrototypeStagedModels.toString(), 1,
+			dependentLayoutPrototypeStagedModels.size());
 
 		LayoutPrototype layoutPrototype =
 			(LayoutPrototype)dependentLayoutPrototypeStagedModels.get(0);
@@ -274,57 +277,51 @@ public class LayoutSetPrototypeStagedModelDataHandlerTest
 	protected Layout importLayoutFromLAR(StagedModel stagedModel)
 		throws DocumentException, IOException {
 
-		LayoutSetPrototypeStagedModelDataHandler
-			layoutSetPrototypeStagedModelDataHandler =
-				new LayoutSetPrototypeStagedModelDataHandler();
+		LayoutSetPrototype layoutSetPrototype = (LayoutSetPrototype)stagedModel;
 
-		String fileName =
-			layoutSetPrototypeStagedModelDataHandler.
-				getLayoutSetPrototypeLARFileName(
-					(LayoutSetPrototype)stagedModel);
+		String fileName = layoutSetPrototype.getLayoutSetPrototypeId() + ".lar";
 
 		String modelPath = ExportImportPathUtil.getModelPath(
 			stagedModel, fileName);
 
-		InputStream inputStream = portletDataContext.getZipEntryAsInputStream(
-			modelPath);
+		try (InputStream inputStream =
+				portletDataContext.getZipEntryAsInputStream(modelPath)) {
 
-		ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(inputStream);
+			ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(
+				inputStream);
 
-		Document document = UnsecureSAXReaderUtil.read(
-			zipReader.getEntryAsString("manifest.xml"));
+			Document document = UnsecureSAXReaderUtil.read(
+				zipReader.getEntryAsString("manifest.xml"));
 
-		Element rootElement = document.getRootElement();
+			Element rootElement = document.getRootElement();
 
-		Element layoutElement = rootElement.element("Layout");
+			Element layoutElement = rootElement.element("Layout");
 
-		List<Element> elements = layoutElement.elements();
+			List<Element> elements = layoutElement.elements();
 
-		List<Layout> importedLayouts = new ArrayList<>(elements.size());
+			List<Layout> importedLayouts = new ArrayList<>(elements.size());
 
-		for (Element element : elements) {
-			String layoutPrototypeUuid = element.attributeValue(
-				"layout-prototype-uuid");
+			for (Element element : elements) {
+				String layoutPrototypeUuid = element.attributeValue(
+					"layout-prototype-uuid");
 
-			if (Validator.isNotNull(layoutPrototypeUuid)) {
-				String path = element.attributeValue("path");
+				if (Validator.isNotNull(layoutPrototypeUuid)) {
+					String path = element.attributeValue("path");
 
-				Layout layout = (Layout)portletDataContext.fromXML(
-					zipReader.getEntryAsString(path));
+					Layout layout = (Layout)portletDataContext.fromXML(
+						zipReader.getEntryAsString(path));
 
-				importedLayouts.add(layout);
+					importedLayouts.add(layout);
+				}
 			}
-		}
 
-		Assert.assertEquals(1, importedLayouts.size());
+			Assert.assertEquals(
+				importedLayouts.toString(), 1, importedLayouts.size());
 
-		try {
 			return importedLayouts.get(0);
 		}
 		finally {
 			zipReader.close();
-
-			StreamUtil.cleanUp(inputStream);
 		}
 	}
 

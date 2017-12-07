@@ -15,7 +15,7 @@
 </tr>
 <tr>
 	<td>ACTIVE_NAV_ITEM_LINK</td>
-	<td>//div[contains(@class,'navbar-default')]//li[contains(@class,'active')]/a/span[contains(.,'${key_navItem}')]</td>
+	<td>//div[contains(@class,'navbar')]//li[contains(@class,'active')]//a[normalize-space()='${key_navItem}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -74,6 +74,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>CAPTCHA</td>
+	<td>//ul[contains(@class,'navbar-nav')]/li/a[contains(.,'CAPTCHA')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>CONTAINER</td>
 	<td>//div[@class='navbar ' or contains(@class,'navbar-default')]//div[contains(@class,'container')]</td>
 	<td></td>
@@ -95,7 +100,7 @@
 </tr>
 <tr>
 	<td>DOCUMENT_TYPES</td>
-	<td>//*[@data-qa-id='navigation']//a[contains(.,'Document Types')]</td>
+	<td>//ul[contains(@class,'navbar-nav')]/li/a[contains(.,'Document Types')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -145,7 +150,7 @@
 </tr>
 <tr>
 	<td>NAV_ITEM_LINK</td>
-	<td>//div[contains(@class,'navbar-default')]//a/span[contains(.,'${key_navItem}')] | //*[@data-qa-id='navigation']//a[contains(.,'${key_navItem}')]</td>
+	<td>//div[contains(@class,'navbar')]//a[normalize-space()='${key_navItem}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -185,7 +190,7 @@
 </tr>
 <tr>
 	<td>SEARCH_TOGGLE_ADVANCED</td>
-	<td>//a[contains(@id,'searchtoggleAdvanced')]</td>
+	<td>//button[contains(@id,'searchtoggleAdvanced')]/span</td>
 	<td></td>
 </tr>
 <tr>
@@ -211,11 +216,6 @@
 <tr>
 	<td>USERS</td>
 	<td>//ul[contains(@class,'nav') and contains(@class,'navbar-nav')]/li/a[contains(.,'Users')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>USER_GROUPS</td>
-	<td>//ul[contains(@class,'nav') and contains(@class,'navbar-nav')]/li/a[contains(.,'User Groups')]</td>
 	<td></td>
 </tr>
 </tbody>

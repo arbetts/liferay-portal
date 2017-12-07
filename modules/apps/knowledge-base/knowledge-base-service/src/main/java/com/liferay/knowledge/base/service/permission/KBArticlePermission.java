@@ -14,18 +14,29 @@
 
 package com.liferay.knowledge.base.service.permission;
 
+import com.liferay.knowledge.base.constants.KBFolderConstants;
 import com.liferay.knowledge.base.model.KBArticle;
 import com.liferay.knowledge.base.service.KBArticleLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.BaseModelPermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.util.PropsValues;
+
+import org.osgi.service.component.annotations.Component;
 
 /**
  * @author Peter Shin
  * @author Brian Wing Shun Chan
  */
-public class KBArticlePermission {
+@Component(
+	property = {"model.class.name=com.liferay.knowledge.base.model.KBArticle"},
+	service = BaseModelPermissionChecker.class
+)
+public class KBArticlePermission implements BaseModelPermissionChecker {
 
 	public static void check(
 			PermissionChecker permissionChecker, KBArticle kbArticle,
@@ -38,18 +49,50 @@ public class KBArticlePermission {
 	}
 
 	public static void check(
-			PermissionChecker permissionChecker, long resourcePrimKey,
-			String actionId)
+			PermissionChecker permissionChecker, long classPK, String actionId)
 		throws PortalException {
 
-		if (!contains(permissionChecker, resourcePrimKey, actionId)) {
+		if (!contains(permissionChecker, classPK, actionId)) {
 			throw new PrincipalException();
 		}
 	}
 
 	public static boolean contains(
-		PermissionChecker permissionChecker, KBArticle kbArticle,
-		String actionId) {
+			PermissionChecker permissionChecker, KBArticle kbArticle,
+			String actionId)
+		throws PortalException {
+
+		if (actionId.equals(ActionKeys.VIEW) &&
+			PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
+
+			long parentResourceClassNameId =
+				kbArticle.getParentResourceClassNameId();
+			long parentResourcePrimKey = kbArticle.getParentResourcePrimKey();
+
+			long kbFolderClassNameId = PortalUtil.getClassNameId(
+				KBFolderConstants.getClassName());
+
+			if ((parentResourcePrimKey ==
+					KBFolderConstants.DEFAULT_PARENT_FOLDER_ID) ||
+				(parentResourceClassNameId == kbFolderClassNameId)) {
+
+				if (!KBFolderPermission.contains(
+						permissionChecker, kbArticle.getGroupId(),
+						parentResourcePrimKey, actionId)) {
+
+					return false;
+				}
+			}
+			else {
+				KBArticle parentKBArticle =
+					KBArticleLocalServiceUtil.getLatestKBArticle(
+						parentResourcePrimKey, WorkflowConstants.STATUS_ANY);
+
+				if (!contains(permissionChecker, parentKBArticle, actionId)) {
+					return false;
+				}
+			}
+		}
 
 		if (permissionChecker.hasOwnerPermission(
 				kbArticle.getCompanyId(), KBArticle.class.getName(),
@@ -65,14 +108,26 @@ public class KBArticlePermission {
 	}
 
 	public static boolean contains(
-			PermissionChecker permissionChecker, long resourcePrimKey,
+			PermissionChecker permissionChecker, long classPK, String actionId)
+		throws PortalException {
+
+		KBArticle kbArticle = KBArticleLocalServiceUtil.fetchLatestKBArticle(
+			classPK, WorkflowConstants.STATUS_ANY);
+
+		if (kbArticle == null) {
+			kbArticle = KBArticleLocalServiceUtil.getKBArticle(classPK);
+		}
+
+		return contains(permissionChecker, kbArticle, actionId);
+	}
+
+	@Override
+	public void checkBaseModel(
+			PermissionChecker permissionChecker, long groupId, long primaryKey,
 			String actionId)
 		throws PortalException {
 
-		KBArticle kbArticle = KBArticleLocalServiceUtil.getLatestKBArticle(
-			resourcePrimKey, WorkflowConstants.STATUS_ANY);
-
-		return contains(permissionChecker, kbArticle, actionId);
+		check(permissionChecker, primaryKey, actionId);
 	}
 
 }

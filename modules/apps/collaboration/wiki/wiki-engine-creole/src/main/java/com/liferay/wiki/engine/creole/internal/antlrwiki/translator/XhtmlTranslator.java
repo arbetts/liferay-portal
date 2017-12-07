@@ -14,10 +14,10 @@
 
 package com.liferay.wiki.engine.creole.internal.antlrwiki.translator;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -31,7 +31,7 @@ import com.liferay.wiki.engine.creole.internal.parser.ast.ImageNode;
 import com.liferay.wiki.engine.creole.internal.parser.ast.WikiPageNode;
 import com.liferay.wiki.engine.creole.internal.parser.ast.extension.TableOfContentsNode;
 import com.liferay.wiki.engine.creole.internal.parser.ast.link.LinkNode;
-import com.liferay.wiki.engine.creole.internal.parser.visitor.impl.XhtmlTranslationVisitor;
+import com.liferay.wiki.engine.creole.internal.parser.visitor.XhtmlTranslationVisitor;
 import com.liferay.wiki.exception.NoSuchPageException;
 import com.liferay.wiki.model.WikiPage;
 import com.liferay.wiki.service.WikiPageLocalServiceUtil;

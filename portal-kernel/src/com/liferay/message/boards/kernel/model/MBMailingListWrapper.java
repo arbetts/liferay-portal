@@ -37,8 +37,11 @@ import java.util.Objects;
  *
  * @author Brian Wing Shun Chan
  * @see MBMailingList
+ * @deprecated As of 7.0.0, replaced by {@link
+com.liferay.message.boards.service.impl.MBMailingListImpl}
  * @generated
  */
+@Deprecated
 @ProviderType
 public class MBMailingListWrapper implements MBMailingList,
 	ModelWrapper<MBMailingList> {
@@ -250,13 +253,13 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	@Override
-	public MBMailingList toEscapedModel() {
-		return new MBMailingListWrapper(_mbMailingList.toEscapedModel());
+	public java.lang.Object clone() {
+		return new MBMailingListWrapper((MBMailingList)_mbMailingList.clone());
 	}
 
 	@Override
-	public MBMailingList toUnescapedModel() {
-		return new MBMailingListWrapper(_mbMailingList.toUnescapedModel());
+	public int compareTo(MBMailingList mbMailingList) {
+		return _mbMailingList.compareTo(mbMailingList);
 	}
 
 	/**
@@ -280,158 +283,33 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	/**
-	* Returns the in use s s l of this message boards mailing list.
+	* Returns the category ID of this message boards mailing list.
 	*
-	* @return the in use s s l of this message boards mailing list
+	* @return the category ID of this message boards mailing list
 	*/
 	@Override
-	public boolean getInUseSSL() {
-		return _mbMailingList.getInUseSSL();
+	public long getCategoryId() {
+		return _mbMailingList.getCategoryId();
 	}
 
 	/**
-	* Returns the out custom of this message boards mailing list.
+	* Returns the company ID of this message boards mailing list.
 	*
-	* @return the out custom of this message boards mailing list
+	* @return the company ID of this message boards mailing list
 	*/
 	@Override
-	public boolean getOutCustom() {
-		return _mbMailingList.getOutCustom();
+	public long getCompanyId() {
+		return _mbMailingList.getCompanyId();
 	}
 
 	/**
-	* Returns the out use s s l of this message boards mailing list.
+	* Returns the create date of this message boards mailing list.
 	*
-	* @return the out use s s l of this message boards mailing list
+	* @return the create date of this message boards mailing list
 	*/
 	@Override
-	public boolean getOutUseSSL() {
-		return _mbMailingList.getOutUseSSL();
-	}
-
-	/**
-	* Returns <code>true</code> if this message boards mailing list is active.
-	*
-	* @return <code>true</code> if this message boards mailing list is active; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isActive() {
-		return _mbMailingList.isActive();
-	}
-
-	/**
-	* Returns <code>true</code> if this message boards mailing list is allow anonymous.
-	*
-	* @return <code>true</code> if this message boards mailing list is allow anonymous; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isAllowAnonymous() {
-		return _mbMailingList.isAllowAnonymous();
-	}
-
-	@Override
-	public boolean isCachedModel() {
-		return _mbMailingList.isCachedModel();
-	}
-
-	@Override
-	public boolean isEscapedModel() {
-		return _mbMailingList.isEscapedModel();
-	}
-
-	/**
-	* Returns <code>true</code> if this message boards mailing list is in use s s l.
-	*
-	* @return <code>true</code> if this message boards mailing list is in use s s l; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isInUseSSL() {
-		return _mbMailingList.isInUseSSL();
-	}
-
-	@Override
-	public boolean isNew() {
-		return _mbMailingList.isNew();
-	}
-
-	/**
-	* Returns <code>true</code> if this message boards mailing list is out custom.
-	*
-	* @return <code>true</code> if this message boards mailing list is out custom; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isOutCustom() {
-		return _mbMailingList.isOutCustom();
-	}
-
-	/**
-	* Returns <code>true</code> if this message boards mailing list is out use s s l.
-	*
-	* @return <code>true</code> if this message boards mailing list is out use s s l; <code>false</code> otherwise
-	*/
-	@Override
-	public boolean isOutUseSSL() {
-		return _mbMailingList.isOutUseSSL();
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _mbMailingList.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<MBMailingList> toCacheModel() {
-		return _mbMailingList.toCacheModel();
-	}
-
-	@Override
-	public int compareTo(MBMailingList mbMailingList) {
-		return _mbMailingList.compareTo(mbMailingList);
-	}
-
-	/**
-	* Returns the in read interval of this message boards mailing list.
-	*
-	* @return the in read interval of this message boards mailing list
-	*/
-	@Override
-	public int getInReadInterval() {
-		return _mbMailingList.getInReadInterval();
-	}
-
-	/**
-	* Returns the in server port of this message boards mailing list.
-	*
-	* @return the in server port of this message boards mailing list
-	*/
-	@Override
-	public int getInServerPort() {
-		return _mbMailingList.getInServerPort();
-	}
-
-	/**
-	* Returns the out server port of this message boards mailing list.
-	*
-	* @return the out server port of this message boards mailing list
-	*/
-	@Override
-	public int getOutServerPort() {
-		return _mbMailingList.getOutServerPort();
-	}
-
-	@Override
-	public int hashCode() {
-		return _mbMailingList.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _mbMailingList.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new MBMailingListWrapper((MBMailingList)_mbMailingList.clone());
+	public Date getCreateDate() {
+		return _mbMailingList.getCreateDate();
 	}
 
 	/**
@@ -442,6 +320,21 @@ public class MBMailingListWrapper implements MBMailingList,
 	@Override
 	public java.lang.String getEmailAddress() {
 		return _mbMailingList.getEmailAddress();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _mbMailingList.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this message boards mailing list.
+	*
+	* @return the group ID of this message boards mailing list
+	*/
+	@Override
+	public long getGroupId() {
+		return _mbMailingList.getGroupId();
 	}
 
 	/**
@@ -465,6 +358,16 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	/**
+	* Returns the in read interval of this message boards mailing list.
+	*
+	* @return the in read interval of this message boards mailing list
+	*/
+	@Override
+	public int getInReadInterval() {
+		return _mbMailingList.getInReadInterval();
+	}
+
+	/**
 	* Returns the in server name of this message boards mailing list.
 	*
 	* @return the in server name of this message boards mailing list
@@ -475,6 +378,16 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	/**
+	* Returns the in server port of this message boards mailing list.
+	*
+	* @return the in server port of this message boards mailing list
+	*/
+	@Override
+	public int getInServerPort() {
+		return _mbMailingList.getInServerPort();
+	}
+
+	/**
 	* Returns the in user name of this message boards mailing list.
 	*
 	* @return the in user name of this message boards mailing list
@@ -482,6 +395,46 @@ public class MBMailingListWrapper implements MBMailingList,
 	@Override
 	public java.lang.String getInUserName() {
 		return _mbMailingList.getInUserName();
+	}
+
+	/**
+	* Returns the in use ssl of this message boards mailing list.
+	*
+	* @return the in use ssl of this message boards mailing list
+	*/
+	@Override
+	public boolean getInUseSSL() {
+		return _mbMailingList.getInUseSSL();
+	}
+
+	/**
+	* Returns the mailing list ID of this message boards mailing list.
+	*
+	* @return the mailing list ID of this message boards mailing list
+	*/
+	@Override
+	public long getMailingListId() {
+		return _mbMailingList.getMailingListId();
+	}
+
+	/**
+	* Returns the modified date of this message boards mailing list.
+	*
+	* @return the modified date of this message boards mailing list
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _mbMailingList.getModifiedDate();
+	}
+
+	/**
+	* Returns the out custom of this message boards mailing list.
+	*
+	* @return the out custom of this message boards mailing list
+	*/
+	@Override
+	public boolean getOutCustom() {
+		return _mbMailingList.getOutCustom();
 	}
 
 	/**
@@ -515,6 +468,16 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	/**
+	* Returns the out server port of this message boards mailing list.
+	*
+	* @return the out server port of this message boards mailing list
+	*/
+	@Override
+	public int getOutServerPort() {
+		return _mbMailingList.getOutServerPort();
+	}
+
+	/**
 	* Returns the out user name of this message boards mailing list.
 	*
 	* @return the out user name of this message boards mailing list
@@ -522,6 +485,41 @@ public class MBMailingListWrapper implements MBMailingList,
 	@Override
 	public java.lang.String getOutUserName() {
 		return _mbMailingList.getOutUserName();
+	}
+
+	/**
+	* Returns the out use ssl of this message boards mailing list.
+	*
+	* @return the out use ssl of this message boards mailing list
+	*/
+	@Override
+	public boolean getOutUseSSL() {
+		return _mbMailingList.getOutUseSSL();
+	}
+
+	/**
+	* Returns the primary key of this message boards mailing list.
+	*
+	* @return the primary key of this message boards mailing list
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _mbMailingList.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _mbMailingList.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the user ID of this message boards mailing list.
+	*
+	* @return the user ID of this message boards mailing list
+	*/
+	@Override
+	public long getUserId() {
+		return _mbMailingList.getUserId();
 	}
 
 	/**
@@ -555,93 +553,73 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	@Override
-	public java.lang.String toString() {
-		return _mbMailingList.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _mbMailingList.toXmlString();
+	public int hashCode() {
+		return _mbMailingList.hashCode();
 	}
 
 	/**
-	* Returns the create date of this message boards mailing list.
+	* Returns <code>true</code> if this message boards mailing list is active.
 	*
-	* @return the create date of this message boards mailing list
+	* @return <code>true</code> if this message boards mailing list is active; <code>false</code> otherwise
 	*/
 	@Override
-	public Date getCreateDate() {
-		return _mbMailingList.getCreateDate();
+	public boolean isActive() {
+		return _mbMailingList.isActive();
 	}
 
 	/**
-	* Returns the modified date of this message boards mailing list.
+	* Returns <code>true</code> if this message boards mailing list is allow anonymous.
 	*
-	* @return the modified date of this message boards mailing list
+	* @return <code>true</code> if this message boards mailing list is allow anonymous; <code>false</code> otherwise
 	*/
 	@Override
-	public Date getModifiedDate() {
-		return _mbMailingList.getModifiedDate();
+	public boolean isAllowAnonymous() {
+		return _mbMailingList.isAllowAnonymous();
+	}
+
+	@Override
+	public boolean isCachedModel() {
+		return _mbMailingList.isCachedModel();
+	}
+
+	@Override
+	public boolean isEscapedModel() {
+		return _mbMailingList.isEscapedModel();
 	}
 
 	/**
-	* Returns the category ID of this message boards mailing list.
+	* Returns <code>true</code> if this message boards mailing list is in use ssl.
 	*
-	* @return the category ID of this message boards mailing list
+	* @return <code>true</code> if this message boards mailing list is in use ssl; <code>false</code> otherwise
 	*/
 	@Override
-	public long getCategoryId() {
-		return _mbMailingList.getCategoryId();
+	public boolean isInUseSSL() {
+		return _mbMailingList.isInUseSSL();
+	}
+
+	@Override
+	public boolean isNew() {
+		return _mbMailingList.isNew();
 	}
 
 	/**
-	* Returns the company ID of this message boards mailing list.
+	* Returns <code>true</code> if this message boards mailing list is out custom.
 	*
-	* @return the company ID of this message boards mailing list
+	* @return <code>true</code> if this message boards mailing list is out custom; <code>false</code> otherwise
 	*/
 	@Override
-	public long getCompanyId() {
-		return _mbMailingList.getCompanyId();
+	public boolean isOutCustom() {
+		return _mbMailingList.isOutCustom();
 	}
 
 	/**
-	* Returns the group ID of this message boards mailing list.
+	* Returns <code>true</code> if this message boards mailing list is out use ssl.
 	*
-	* @return the group ID of this message boards mailing list
+	* @return <code>true</code> if this message boards mailing list is out use ssl; <code>false</code> otherwise
 	*/
 	@Override
-	public long getGroupId() {
-		return _mbMailingList.getGroupId();
-	}
-
-	/**
-	* Returns the mailing list ID of this message boards mailing list.
-	*
-	* @return the mailing list ID of this message boards mailing list
-	*/
-	@Override
-	public long getMailingListId() {
-		return _mbMailingList.getMailingListId();
-	}
-
-	/**
-	* Returns the primary key of this message boards mailing list.
-	*
-	* @return the primary key of this message boards mailing list
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _mbMailingList.getPrimaryKey();
-	}
-
-	/**
-	* Returns the user ID of this message boards mailing list.
-	*
-	* @return the user ID of this message boards mailing list
-	*/
-	@Override
-	public long getUserId() {
-		return _mbMailingList.getUserId();
+	public boolean isOutUseSSL() {
+		return _mbMailingList.isOutUseSSL();
 	}
 
 	@Override
@@ -715,14 +693,14 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_mbMailingList.setExpandoBridgeAttributes(expandoBridge);
-	}
-
-	@Override
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.kernel.model.BaseModel<?> baseModel) {
 		_mbMailingList.setExpandoBridgeAttributes(baseModel);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_mbMailingList.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -791,16 +769,6 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	/**
-	* Sets whether this message boards mailing list is in use s s l.
-	*
-	* @param inUseSSL the in use s s l of this message boards mailing list
-	*/
-	@Override
-	public void setInUseSSL(boolean inUseSSL) {
-		_mbMailingList.setInUseSSL(inUseSSL);
-	}
-
-	/**
 	* Sets the in user name of this message boards mailing list.
 	*
 	* @param inUserName the in user name of this message boards mailing list
@@ -808,6 +776,16 @@ public class MBMailingListWrapper implements MBMailingList,
 	@Override
 	public void setInUserName(java.lang.String inUserName) {
 		_mbMailingList.setInUserName(inUserName);
+	}
+
+	/**
+	* Sets whether this message boards mailing list is in use ssl.
+	*
+	* @param inUseSSL the in use ssl of this message boards mailing list
+	*/
+	@Override
+	public void setInUseSSL(boolean inUseSSL) {
+		_mbMailingList.setInUseSSL(inUseSSL);
 	}
 
 	/**
@@ -886,16 +864,6 @@ public class MBMailingListWrapper implements MBMailingList,
 	}
 
 	/**
-	* Sets whether this message boards mailing list is out use s s l.
-	*
-	* @param outUseSSL the out use s s l of this message boards mailing list
-	*/
-	@Override
-	public void setOutUseSSL(boolean outUseSSL) {
-		_mbMailingList.setOutUseSSL(outUseSSL);
-	}
-
-	/**
 	* Sets the out user name of this message boards mailing list.
 	*
 	* @param outUserName the out user name of this message boards mailing list
@@ -903,6 +871,16 @@ public class MBMailingListWrapper implements MBMailingList,
 	@Override
 	public void setOutUserName(java.lang.String outUserName) {
 		_mbMailingList.setOutUserName(outUserName);
+	}
+
+	/**
+	* Sets whether this message boards mailing list is out use ssl.
+	*
+	* @param outUseSSL the out use ssl of this message boards mailing list
+	*/
+	@Override
+	public void setOutUseSSL(boolean outUseSSL) {
+		_mbMailingList.setOutUseSSL(outUseSSL);
 	}
 
 	/**
@@ -958,6 +936,31 @@ public class MBMailingListWrapper implements MBMailingList,
 	@Override
 	public void setUuid(java.lang.String uuid) {
 		_mbMailingList.setUuid(uuid);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<MBMailingList> toCacheModel() {
+		return _mbMailingList.toCacheModel();
+	}
+
+	@Override
+	public MBMailingList toEscapedModel() {
+		return new MBMailingListWrapper(_mbMailingList.toEscapedModel());
+	}
+
+	@Override
+	public java.lang.String toString() {
+		return _mbMailingList.toString();
+	}
+
+	@Override
+	public MBMailingList toUnescapedModel() {
+		return new MBMailingListWrapper(_mbMailingList.toUnescapedModel());
+	}
+
+	@Override
+	public java.lang.String toXmlString() {
+		return _mbMailingList.toXmlString();
 	}
 
 	@Override

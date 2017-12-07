@@ -14,15 +14,25 @@
 
 package com.liferay.users.admin.demo.data.creator;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 
 /**
  * @author Sergio González
  */
+@ProviderType
 public interface BasicUserDemoDataCreator extends UserDemoDataCreator {
 
+	public User create(long companyId) throws PortalException;
+
 	public User create(long companyId, String emailAddress)
+		throws PortalException;
+
+	public User create(
+			long companyId, String screenName, String emailAddress,
+			String firstName, String lastName)
 		throws PortalException;
 
 }

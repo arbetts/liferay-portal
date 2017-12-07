@@ -49,7 +49,7 @@ if (Validator.isNull(defaultLanguageId)) {
 	defaultLanguageId = LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault());
 }
 
-Locale[] availableLocales = new Locale[] {LocaleUtil.fromLanguageId(defaultLanguageId)};
+Locale[] availableLocales = {LocaleUtil.fromLanguageId(defaultLanguageId)};
 
 boolean changeableDefaultLanguage = ddlDisplayContext.changeableDefaultLanguage();
 
@@ -119,7 +119,7 @@ else {
 					<aui:icon cssClass="icon-monospaced sidenav-close text-default visible-xs-inline-block" image="times" markupView="lexicon" url="javascript:;" />
 				</div>
 
-				<liferay-ui:tabs names="details,versions" refresh="<%= false %>" type="dropdown">
+				<liferay-ui:tabs cssClass="navbar-no-collapse" names="details,versions" refresh="<%= false %>" type="dropdown">
 					<liferay-ui:section>
 						<div class="sidebar-body">
 							<h3 class="version">
@@ -173,16 +173,7 @@ else {
 			<liferay-ui:error exception="<%= DuplicateFileEntryException.class %>" message="a-file-with-that-name-already-exists" />
 
 			<liferay-ui:error exception="<%= FileSizeException.class %>">
-
-				<%
-				long fileMaxSize = PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE);
-
-				if (fileMaxSize == 0) {
-					fileMaxSize = PrefsPropsUtil.getLong(PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_MAX_SIZE);
-				}
-				%>
-
-				<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(fileMaxSize, locale) %>" key="please-enter-a-file-with-a-valid-file-size-no-larger-than-x" translateArguments="<%= false %>" />
+				<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(DLValidatorUtil.getMaxAllowableSize(), locale) %>" key="please-enter-a-file-with-a-valid-file-size-no-larger-than-x" translateArguments="<%= false %>" />
 			</liferay-ui:error>
 
 			<liferay-ui:error exception="<%= StorageFieldRequiredException.class %>" message="please-fill-out-all-required-fields" />

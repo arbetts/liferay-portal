@@ -20,23 +20,21 @@ import com.liferay.blogs.service.BlogsEntryLocalService;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.verify.VerifyProcess;
 import com.liferay.portal.verify.VerifyResourcePermissions;
 
 import java.util.List;
 
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Raymond Augé
+ * @author     Raymond Augé
+ * @deprecated As of 1.1.0, replaced by {@link
+ *             com.liferay.blogs.internal.verify.BlogsServiceVerifyProcess}
  */
-@Component(
-	immediate = true,
-	property = {"verify.process.name=com.liferay.blogs.service"},
-	service = VerifyProcess.class
-)
+@Deprecated
 public class BlogsServiceVerifyProcess extends VerifyProcess {
 
 	@Override
@@ -71,8 +69,10 @@ public class BlogsServiceVerifyProcess extends VerifyProcess {
 				catch (Exception e) {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
-							"Unable to update asset for entry " +
-								entry.getEntryId() + ": " + e.getMessage());
+							StringBundler.concat(
+								"Unable to update asset for entry ",
+								String.valueOf(entry.getEntryId()), ": ",
+								e.getMessage()));
 					}
 				}
 			}

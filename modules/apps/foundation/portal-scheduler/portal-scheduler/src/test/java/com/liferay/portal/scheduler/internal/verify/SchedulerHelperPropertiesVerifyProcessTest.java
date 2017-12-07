@@ -15,7 +15,8 @@
 package com.liferay.portal.scheduler.internal.verify;
 
 import com.liferay.portal.kernel.util.Props;
-import com.liferay.portal.scheduler.configuration.SchedulerEngineHelperConfiguration;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.scheduler.internal.configuration.SchedulerEngineHelperConfiguration;
 
 import java.util.Dictionary;
 
@@ -60,7 +61,9 @@ public class SchedulerHelperPropertiesVerifyProcessTest {
 			props.get(
 				SchedulerHelperPropertiesVerifyProcess.
 					LEGACY_AUDIT_MESSAGE_SCHEDULER_JOB)
-		).thenReturn(null);
+		).thenReturn(
+			null
+		);
 
 		ConfigurationAdmin configurationAdmin = Mockito.mock(
 			ConfigurationAdmin.class);
@@ -103,7 +106,9 @@ public class SchedulerHelperPropertiesVerifyProcessTest {
 			props.get(
 				SchedulerHelperPropertiesVerifyProcess.
 					LEGACY_AUDIT_MESSAGE_SCHEDULER_JOB)
-		).thenReturn("true");
+		).thenReturn(
+			"true"
+		);
 
 		ConfigurationAdmin configurationAdmin = Mockito.mock(
 			ConfigurationAdmin.class);
@@ -115,14 +120,19 @@ public class SchedulerHelperPropertiesVerifyProcessTest {
 
 		Mockito.when(
 			configurationAdmin.getConfiguration(
-				SchedulerEngineHelperConfiguration.class.getName())
+				SchedulerEngineHelperConfiguration.class.getName(),
+				StringPool.QUESTION)
 		).thenReturn(
 			configuration
 		);
 
 		schedulerHelperPropertiesVerifyProcess.doVerify();
 
-		Mockito.verify(configuration).update(_argumentCaptor.capture());
+		Mockito.verify(
+			configuration
+		).update(
+			_argumentCaptor.capture()
+		);
 
 		Dictionary<String, Object> dictionary = _argumentCaptor.getValue();
 

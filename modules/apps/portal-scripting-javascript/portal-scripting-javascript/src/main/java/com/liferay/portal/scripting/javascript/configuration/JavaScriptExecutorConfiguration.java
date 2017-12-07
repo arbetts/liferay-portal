@@ -25,13 +25,13 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.scripting.javascript.configuration.JavaScriptExecutorConfiguration",
 	localization = "content/Language",
-	name = "javascript.executor.configuration.name"
+	name = "javascript-executor-configuration-name"
 )
 public interface JavaScriptExecutorConfiguration {
 
 	@Meta.AD(
 		deflt = "com.liferay.portal.kernel.scripting.ScriptingUtil|com.liferay.portal.scripting.internal.ScriptingImpl|java.lang.System",
-		required = false
+		name = "forbidden-class-names", required = false
 	)
 	public String[] forbiddenClassNames();
 

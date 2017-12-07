@@ -40,7 +40,6 @@ import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -101,7 +100,7 @@ public class OrganizationImpl extends OrganizationBaseImpl {
 			}
 		}
 		catch (Exception e) {
-			_log.error(e);
+			_log.error("Unable to get address", e);
 		}
 
 		if (address == null) {
@@ -172,14 +171,8 @@ public class OrganizationImpl extends OrganizationBaseImpl {
 
 	@Override
 	public List<Organization> getDescendants() {
-		Set<Organization> descendants = new LinkedHashSet<>();
-
-		for (Organization suborganization : getSuborganizations()) {
-			descendants.add(suborganization);
-			descendants.addAll(suborganization.getDescendants());
-		}
-
-		return new ArrayList<>(descendants);
+		return OrganizationLocalServiceUtil.getOrganizations(
+			getCompanyId(), getTreePath().concat("_%"));
 	}
 
 	@Override
@@ -190,7 +183,7 @@ public class OrganizationImpl extends OrganizationBaseImpl {
 					getCompanyId(), getOrganizationId());
 			}
 			catch (Exception e) {
-				_log.error(e);
+				_log.error("Unable to get organization group", e);
 			}
 		}
 

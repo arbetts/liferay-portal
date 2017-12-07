@@ -107,7 +107,9 @@
 
 	<command name="saveConfiguration">
 		<execute function="AssertClick#assertTextClickAt" locator1="Button#SAVE" value1="Save" />
+
 		<execute macro="Alert#viewSuccessMessage" />
+
 		<execute function="SelectFrameTop" value1="relative=top" />
 	</command>
 
@@ -132,7 +134,7 @@
 	<command name="viewEditableFieldNotVisibleCmd">
 		<var name="key_wfFieldName" value="${wfFieldName}" />
 
-		<execute function="AssertElementNotPresent#assertNotVisible" locator1="WebFormConfiguration#SETUP_FORM_FIELDS_NAME_FIELD" />
+		<execute function="AssertNotVisible" locator1="WebFormConfiguration#SETUP_FORM_FIELDS_NAME_FIELD" />
 	</command>
 
 	<command name="viewSubmittedField">

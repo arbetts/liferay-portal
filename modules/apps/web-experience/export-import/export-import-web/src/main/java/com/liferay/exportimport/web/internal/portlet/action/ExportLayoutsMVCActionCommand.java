@@ -18,7 +18,7 @@ import com.liferay.exportimport.constants.ExportImportPortletKeys;
 import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationConstants;
 import com.liferay.exportimport.kernel.configuration.ExportImportConfigurationSettingsMapFactory;
 import com.liferay.exportimport.kernel.exception.LARFileNameException;
-import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
+import com.liferay.exportimport.kernel.lar.ExportImportHelper;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportConfigurationLocalService;
 import com.liferay.exportimport.kernel.service.ExportImportService;
@@ -35,7 +35,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.taglib.ui.util.SessionTreeJSClicks;
@@ -82,7 +82,7 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 		if (Validator.isNull(cmd)) {
 			SessionMessages.add(
 				actionRequest,
-				PortalUtil.getPortletId(actionRequest) +
+				_portal.getPortletId(actionRequest) +
 					SessionMessages.KEY_SUFFIX_FORCE_SEND_REDIRECT);
 
 			hideDefaultSuccessMessage(actionRequest);
@@ -173,7 +173,7 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 		Set<Layout> layouts = new LinkedHashSet<>();
 
-		Map<Long, Boolean> layoutIdMap = ExportImportHelperUtil.getLayoutIdMap(
+		Map<Long, Boolean> layoutIdMap = _exportImportHelper.getLayoutIdMap(
 			portletRequest);
 
 		for (Map.Entry<Long, Boolean> entry : layoutIdMap.entrySet()) {
@@ -191,8 +191,7 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 			}
 		}
 
-		return ExportImportHelperUtil.getLayoutIds(
-			new ArrayList<Layout>(layouts));
+		return _exportImportHelper.getLayoutIds(new ArrayList<Layout>(layouts));
 	}
 
 	@Reference(unbind = "-")
@@ -212,7 +211,7 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	protected void setLayoutIdMap(ActionRequest actionRequest) {
-		HttpServletRequest portletRequest = PortalUtil.getHttpServletRequest(
+		HttpServletRequest portletRequest = _portal.getHttpServletRequest(
 			actionRequest);
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
@@ -224,9 +223,8 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 		String openNodes = SessionTreeJSClicks.getOpenNodes(
 			portletRequest, treeId + "SelectedNode");
 
-		String selectedLayoutsJSON =
-			ExportImportHelperUtil.getSelectedLayoutsJSON(
-				groupId, privateLayout, openNodes);
+		String selectedLayoutsJSON = _exportImportHelper.getSelectedLayoutsJSON(
+			groupId, privateLayout, openNodes);
 
 		actionRequest.setAttribute("layoutIdMap", selectedLayoutsJSON);
 	}
@@ -243,7 +241,14 @@ public class ExportLayoutsMVCActionCommand extends BaseMVCActionCommand {
 
 	private ExportImportConfigurationLocalService
 		_exportImportConfigurationLocalService;
+
+	@Reference
+	private ExportImportHelper _exportImportHelper;
+
 	private ExportImportService _exportImportService;
 	private LayoutLocalService _layoutLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

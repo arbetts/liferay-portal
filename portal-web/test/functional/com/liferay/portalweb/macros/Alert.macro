@@ -12,12 +12,24 @@
 		</if>
 	</command>
 
+	<command name="closeMessageSpecific">
+		<var name="key_messageSpecific" value="${messageSpecific}" />
+
+		<execute function="Click" locator1="Icon#CLOSE_SPECIFIC" />
+	</command>
+
 	<command name="closePortalLocalizationWarning">
 		<execute macro="Alert#_closeMessage">
 			<var name="messageType" value="PORTAL_LOCALIZATION" />
 		</execute>
 
 		<execute function="Pause" locator1="2000" />
+	</command>
+
+	<command name="viewEmptyFieldMessage">
+		<var name="key_fieldLabel" value="${fieldLabel}" />
+
+		<execute function="AssertTextEquals" locator1="Message#ERROR_EMPTY_FIELD" value1="At least one option should be set for field ${fieldLabel}." />
 	</command>
 
 	<command name="viewErrorMessage">
@@ -28,8 +40,16 @@
 		</execute>
 	</command>
 
+	<command name="viewExpireContentFailedMessage">
+		<execute function="AssertTextEquals#assertPartialText" locator1="Message#ERROR_2" value1="Please enter a valid expiration date." />
+	</command>
+
 	<command name="viewFailedSiteTemplateDeletionMessage">
 		<execute function="AssertTextEquals#assertPartialText" locator1="Message#ERROR_2" value1="You cannot delete site templates that are used by a site." />
+	</command>
+
+	<command name="viewInfoMessage">
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="${infoMessage}" />
 	</command>
 
 	<command name="viewRequestFailedToComplete">
@@ -45,7 +65,7 @@
 
 		<execute function="AssertVisible" locator1="Message#SUCCESS" />
 
-		<execute function="Pause" locator1="10000" />
+		<execute function="Pause" locator1="5000" />
 
 		<execute macro="Alert#_closeMessage">
 			<var name="messageType" value="SUCCESS" />
@@ -60,5 +80,9 @@
 		<execute function="AssertVisible" locator1="Message#SUCCESS" />
 		<execute function="AssertElementPresent" locator1="Message#SUCCESS" />
 		<execute function="AssertTextEquals" locator1="Message#SUCCESS" value1="${sucessMessage}" />
+	</command>
+
+	<command name="waitForSuccessMessageHide">
+		<execute function="AssertNotVisible" locator1="Message#SUCCESS" />
 	</command>
 </definition>

@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 
@@ -46,6 +45,8 @@ import com.liferay.social.kernel.model.SocialRelation;
 import com.liferay.social.kernel.service.persistence.SocialRelationPersistence;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Field;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -228,7 +229,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_UUID_3);
 			}
 			else {
@@ -317,7 +318,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("uuid=");
 		msg.append(uuid);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -366,7 +367,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("uuid=");
 		msg.append(uuid);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -458,7 +459,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		if (uuid == null) {
 			query.append(_FINDER_COLUMN_UUID_UUID_1);
 		}
-		else if (uuid.equals(StringPool.BLANK)) {
+		else if (uuid.equals("")) {
 			query.append(_FINDER_COLUMN_UUID_UUID_3);
 		}
 		else {
@@ -594,7 +595,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_UUID_3);
 			}
 			else {
@@ -788,7 +789,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 			}
 			else {
@@ -885,7 +886,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -941,7 +942,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -1036,7 +1037,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		if (uuid == null) {
 			query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 		}
-		else if (uuid.equals(StringPool.BLANK)) {
+		else if (uuid.equals("")) {
 			query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 		}
 		else {
@@ -1178,7 +1179,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 			if (uuid == null) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_1);
 			}
-			else if (uuid.equals(StringPool.BLANK)) {
+			else if (uuid.equals("")) {
 				query.append(_FINDER_COLUMN_UUID_C_UUID_3);
 			}
 			else {
@@ -1442,7 +1443,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -1493,7 +1494,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -1947,7 +1948,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("userId1=");
 		msg.append(userId1);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -1998,7 +1999,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("userId1=");
 		msg.append(userId1);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -2452,7 +2453,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("userId2=");
 		msg.append(userId2);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -2503,7 +2504,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("userId2=");
 		msg.append(userId2);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -2956,7 +2957,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -3005,7 +3006,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append("type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -3478,7 +3479,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -3534,7 +3535,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -4022,7 +4023,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", userId2=");
 		msg.append(userId2);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -4078,7 +4079,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", userId2=");
 		msg.append(userId2);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -4565,7 +4566,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -4621,7 +4622,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -5108,7 +5109,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -5164,7 +5165,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchRelationException(msg.toString());
 	}
@@ -5467,7 +5468,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 			msg.append(", type=");
 			msg.append(type);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -5674,6 +5675,25 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 
 	public SocialRelationPersistenceImpl() {
 		setModelClass(SocialRelation.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+			dbColumnNames.put("type", "type_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
 	}
 
 	/**
@@ -5746,7 +5766,7 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((SocialRelationModelImpl)socialRelation);
+		clearUniqueFindersCache((SocialRelationModelImpl)socialRelation, true);
 	}
 
 	@Override
@@ -5758,42 +5778,12 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 			entityCache.removeResult(SocialRelationModelImpl.ENTITY_CACHE_ENABLED,
 				SocialRelationImpl.class, socialRelation.getPrimaryKey());
 
-			clearUniqueFindersCache((SocialRelationModelImpl)socialRelation);
+			clearUniqueFindersCache((SocialRelationModelImpl)socialRelation,
+				true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		SocialRelationModelImpl socialRelationModelImpl, boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] {
-					socialRelationModelImpl.getUserId1(),
-					socialRelationModelImpl.getUserId2(),
-					socialRelationModelImpl.getType()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_U1_U2_T, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_U1_U2_T, args,
-				socialRelationModelImpl);
-		}
-		else {
-			if ((socialRelationModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_U1_U2_T.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						socialRelationModelImpl.getUserId1(),
-						socialRelationModelImpl.getUserId2(),
-						socialRelationModelImpl.getType()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_U1_U2_T, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_U1_U2_T, args,
-					socialRelationModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(
 		SocialRelationModelImpl socialRelationModelImpl) {
 		Object[] args = new Object[] {
 				socialRelationModelImpl.getUserId1(),
@@ -5801,12 +5791,28 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 				socialRelationModelImpl.getType()
 			};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_U1_U2_T, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_U1_U2_T, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_U1_U2_T, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_U1_U2_T, args,
+			socialRelationModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		SocialRelationModelImpl socialRelationModelImpl, boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					socialRelationModelImpl.getUserId1(),
+					socialRelationModelImpl.getUserId2(),
+					socialRelationModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U1_U2_T, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_U1_U2_T, args);
+		}
 
 		if ((socialRelationModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_U1_U2_T.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					socialRelationModelImpl.getOriginalUserId1(),
 					socialRelationModelImpl.getOriginalUserId2(),
 					socialRelationModelImpl.getOriginalType()
@@ -5961,8 +5967,89 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !SocialRelationModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!SocialRelationModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { socialRelationModelImpl.getUuid() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID,
+				args);
+
+			args = new Object[] {
+					socialRelationModelImpl.getUuid(),
+					socialRelationModelImpl.getCompanyId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_UUID_C, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_UUID_C,
+				args);
+
+			args = new Object[] { socialRelationModelImpl.getCompanyId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_COMPANYID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID,
+				args);
+
+			args = new Object[] { socialRelationModelImpl.getUserId1() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID1, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID1,
+				args);
+
+			args = new Object[] { socialRelationModelImpl.getUserId2() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID2, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID2,
+				args);
+
+			args = new Object[] { socialRelationModelImpl.getType() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_TYPE, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_TYPE,
+				args);
+
+			args = new Object[] {
+					socialRelationModelImpl.getCompanyId(),
+					socialRelationModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_T,
+				args);
+
+			args = new Object[] {
+					socialRelationModelImpl.getUserId1(),
+					socialRelationModelImpl.getUserId2()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U1_U2, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_U1_U2,
+				args);
+
+			args = new Object[] {
+					socialRelationModelImpl.getUserId1(),
+					socialRelationModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U1_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_U1_T,
+				args);
+
+			args = new Object[] {
+					socialRelationModelImpl.getUserId2(),
+					socialRelationModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U2_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_U2_T,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -6161,8 +6248,8 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 			SocialRelationImpl.class, socialRelation.getPrimaryKey(),
 			socialRelation, false);
 
-		clearUniqueFindersCache(socialRelationModelImpl);
-		cacheUniqueFindersCache(socialRelationModelImpl, isNew);
+		clearUniqueFindersCache(socialRelationModelImpl, false);
+		cacheUniqueFindersCache(socialRelationModelImpl);
 
 		socialRelation.resetOriginalValues();
 
@@ -6339,14 +6426,14 @@ public class SocialRelationPersistenceImpl extends BasePersistenceImpl<SocialRel
 		query.append(_SQL_SELECT_SOCIALRELATION_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

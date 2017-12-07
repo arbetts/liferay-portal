@@ -35,6 +35,8 @@ public class LoadBalancerUtilTest extends BaseJenkinsResultsParserTestCase {
 	public void setUp() throws Exception {
 		downloadSample("test-1", null);
 		downloadSample("test-2", null);
+
+		LoadBalancerUtil.setUpdateInterval(0);
 	}
 
 	@After
@@ -46,7 +48,7 @@ public class LoadBalancerUtilTest extends BaseJenkinsResultsParserTestCase {
 
 	@Test
 	public void testGetMostAvailableMasterURL() throws Exception {
-		LoadBalancerUtil.RECENT_BATCH_AGE = 0;
+		JenkinsMaster.maxRecentBatchAge = 0;
 
 		assertSamples();
 	}
@@ -109,6 +111,17 @@ public class LoadBalancerUtilTest extends BaseJenkinsResultsParserTestCase {
 			"jenkins.local.url[test-3-2]", "http://test-3-2");
 		properties.setProperty(
 			"jenkins.local.url[test-3-3]", "http://test-3-3");
+
+		for (int i = 1; i <= 20; i++) {
+			properties.setProperty("master.slaves(test-1-" + i + ")", "");
+		}
+
+		properties.setProperty("master.slaves(test-2-1)", "");
+
+		for (int i = 1; i <= 3; i++) {
+			properties.setProperty("master.slaves(test-3-" + i + ")", "");
+		}
+
 		properties.setProperty("invoked.batch.size", "2");
 
 		return properties;
@@ -118,33 +131,31 @@ public class LoadBalancerUtilTest extends BaseJenkinsResultsParserTestCase {
 	protected void downloadSample(File sampleDir, URL url) throws Exception {
 		Properties properties = getDownloadProperties(sampleDir.getName());
 
-		List<String> masters = LoadBalancerUtil.getMasters(
-			sampleDir.getName(), properties);
+		JenkinsResultsParserUtil.setBuildProperties(properties);
 
-		for (int i = 1; i <= masters.size(); i++) {
+		List<JenkinsMaster> jenkinsMasters =
+			JenkinsResultsParserUtil.getJenkinsMasters(
+				properties, sampleDir.getName());
+
+		for (JenkinsMaster jenkinsMaster : jenkinsMasters) {
 			downloadSampleURL(
-				new File(sampleDir, sampleDir.getName() + "-" + i),
-				JenkinsResultsParserUtil.createURL(
-					properties.getProperty(
-						"jenkins.local.url[" + sampleDir.getName() + "-" + i +
-							"]")),
+				new File(sampleDir, jenkinsMaster.getName()),
+				JenkinsResultsParserUtil.createURL(jenkinsMaster.getURL()),
 				"/computer/api/json?pretty&tree=computer" +
 					"[displayName,idle,offline]");
+
 			downloadSampleURL(
-				new File(sampleDir, sampleDir.getName() + "-" + i),
-				JenkinsResultsParserUtil.createURL(
-					properties.getProperty(
-						"jenkins.local.url[" + sampleDir.getName() + "-" + i +
-							"]")),
+				new File(sampleDir, jenkinsMaster.getName()),
+				JenkinsResultsParserUtil.createURL(jenkinsMaster.getURL()),
 				"/queue/api/json");
 		}
 	}
 
 	@Override
-	protected String getMessage(String urlString) throws Exception {
-		File sampleDir = new File(urlString.substring("file:".length()));
-
+	protected String getMessage(File sampleDir) throws Exception {
 		Properties properties = getTestProperties(sampleDir.getName());
+
+		JenkinsResultsParserUtil.setBuildProperties(properties);
 
 		return LoadBalancerUtil.getMostAvailableMasterURL(properties);
 	}

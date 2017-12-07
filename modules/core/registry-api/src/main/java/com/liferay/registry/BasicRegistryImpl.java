@@ -42,11 +42,32 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 /**
  * @author Raymond Augé
  */
 public class BasicRegistryImpl implements Registry {
+
+	@Override
+	public <S, R> R callService(
+		Class<S> serviceClass, Function<S, R> function) {
+
+		return callService(serviceClass.getName(), function);
+	}
+
+	@Override
+	public <S, R> R callService(String className, Function<S, R> function) {
+		Filter filter = getFilter("(objectClass=" + className + ")");
+
+		for (Entry<ServiceReference<?>, Object> entry : _services.entrySet()) {
+			if (filter.matches(entry.getKey())) {
+				return function.apply((S)entry.getValue());
+			}
+		}
+
+		return null;
+	}
 
 	@Override
 	public Filter getFilter(String filterString) throws RuntimeException {
@@ -58,6 +79,10 @@ public class BasicRegistryImpl implements Registry {
 		return this;
 	}
 
+	/**
+	 * @deprecated As of 1.2.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public <T> T getService(Class<T> clazz) {
 		return getService(clazz.getName());
@@ -77,6 +102,10 @@ public class BasicRegistryImpl implements Registry {
 		return null;
 	}
 
+	/**
+	 * @deprecated As of 1.2.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public <T> T getService(String className) {
 		Filter filter = getFilter("(objectClass=" + className + ")");
@@ -118,8 +147,14 @@ public class BasicRegistryImpl implements Registry {
 			Class<T> clazz, String filterString)
 		throws Exception {
 
-		return Arrays.asList(
-			this.<T>getServiceReferences(clazz.getName(), filterString));
+		ServiceReference<T>[] serviceReferences = getServiceReferences(
+			clazz.getName(), filterString);
+
+		if (serviceReferences == null) {
+			return Collections.emptyList();
+		}
+
+		return Arrays.asList(serviceReferences);
 	}
 
 	@Override
@@ -198,7 +233,7 @@ public class BasicRegistryImpl implements Registry {
 		Class<T> clazz, T service) {
 
 		BasicServiceReference<T> basicServiceReference =
-			new BasicServiceReference<T>(
+			new BasicServiceReference<>(
 				clazz.getName(), _serviceIdCounter.incrementAndGet(), 0,
 				new HashMap<String, Object>());
 
@@ -218,7 +253,7 @@ public class BasicRegistryImpl implements Registry {
 		}
 
 		BasicServiceReference<T> basicServiceReference =
-			new BasicServiceReference<T>(
+			new BasicServiceReference<>(
 				clazz.getName(), _serviceIdCounter.incrementAndGet(),
 				serviceRanking.intValue(), properties);
 
@@ -232,7 +267,7 @@ public class BasicRegistryImpl implements Registry {
 		String className, T service) {
 
 		BasicServiceReference<T> basicServiceReference =
-			new BasicServiceReference<T>(
+			new BasicServiceReference<>(
 				className, _serviceIdCounter.incrementAndGet(), 0,
 				new HashMap<String, Object>());
 
@@ -252,7 +287,7 @@ public class BasicRegistryImpl implements Registry {
 		}
 
 		BasicServiceReference<T> basicServiceReference =
-			new BasicServiceReference<T>(
+			new BasicServiceReference<>(
 				className, _serviceIdCounter.incrementAndGet(),
 				serviceRanking.intValue(), properties);
 
@@ -274,7 +309,7 @@ public class BasicRegistryImpl implements Registry {
 		properties.put("objectClass", classNames);
 
 		BasicServiceReference<T> basicServiceReference =
-			new BasicServiceReference<T>(
+			new BasicServiceReference<>(
 				classNames[0], _serviceIdCounter.incrementAndGet(), 0,
 				properties);
 
@@ -300,7 +335,7 @@ public class BasicRegistryImpl implements Registry {
 		}
 
 		BasicServiceReference<T> basicServiceReference =
-			new BasicServiceReference<T>(
+			new BasicServiceReference<>(
 				classNames[0], _serviceIdCounter.incrementAndGet(),
 				serviceRanking.intValue(), properties);
 

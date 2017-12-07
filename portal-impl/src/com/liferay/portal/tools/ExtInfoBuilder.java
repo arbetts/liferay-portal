@@ -14,7 +14,8 @@
 
 package com.liferay.portal.tools;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
@@ -53,8 +54,8 @@ public class ExtInfoBuilder {
 		ds.setExcludes(
 			new String[] {
 				".svn/**", "**/.svn/**", "ext-impl/ext-impl.jar",
-				"ext-impl/src/**", "ext-service/ext-service.jar",
-				"ext-service/src/**", "ext-util-bridges/ext-util-bridges.jar",
+				"ext-impl/src/**", "ext-kernel/ext-kernel.jar",
+				"ext-kernel/src/**", "ext-util-bridges/ext-util-bridges.jar",
 				"ext-util-bridges/src/**", "ext-util-java/ext-util-java.jar",
 				"ext-util-java/src/**", "ext-util-taglib/ext-util-taglib.jar",
 				"ext-util-taglib/src/**", "liferay-plugin-package.properties"
@@ -84,7 +85,8 @@ public class ExtInfoBuilder {
 		}
 
 		_fileUtil.write(
-			outputDir + "/ext-" + servletContextName + ".xml",
+			StringBundler.concat(
+				outputDir, "/ext-", servletContextName, ".xml"),
 			document.formattedString());
 	}
 

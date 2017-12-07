@@ -28,17 +28,16 @@ import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.kernel.service.AssetEntryService;
 import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.asset.kernel.service.persistence.AssetEntryQuery;
-import com.liferay.asset.kernel.util.AssetEntryQueryProcessor;
+import com.liferay.asset.publisher.web.configuration.AssetPublisherPortletInstanceConfiguration;
+import com.liferay.asset.publisher.web.configuration.AssetPublisherWebConfiguration;
 import com.liferay.asset.publisher.web.constants.AssetPublisherPortletKeys;
 import com.liferay.asset.publisher.web.display.context.AssetEntryResult;
 import com.liferay.asset.publisher.web.display.context.AssetPublisherDisplayContext;
-import com.liferay.asset.publisher.web.internal.configuration.AssetPublisherWebConfigurationValues;
+import com.liferay.asset.util.AssetEntryQueryProcessor;
+import com.liferay.asset.util.impl.AssetUtil;
 import com.liferay.dynamic.data.mapping.util.DDMIndexer;
 import com.liferay.expando.kernel.model.ExpandoBridge;
-import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
-import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.dao.orm.Property;
-import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -50,29 +49,30 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.PortletConstants;
-import com.liferay.portal.kernel.model.PortletInstance;
-import com.liferay.portal.kernel.model.Subscription;
+import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.PortletPreferencesIds;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.module.configuration.ConfigurationException;
+import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
+import com.liferay.portal.kernel.portlet.PortletIdCodec;
+import com.liferay.portal.kernel.portlet.PortletPreferencesFactory;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
-import com.liferay.portal.kernel.service.SubscriptionLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
 import com.liferay.portal.kernel.servlet.SessionMessages;
+import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.Accessor;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -87,28 +87,23 @@ import com.liferay.portal.kernel.util.PrimitiveLongList;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.SubscriptionSender;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portlet.StrictPortletPreferencesImpl;
-import com.liferay.portlet.asset.service.permission.AssetEntryPermission;
-import com.liferay.portlet.asset.util.AssetUtil;
-import com.liferay.portlet.configuration.kernel.util.PortletConfigurationUtil;
 import com.liferay.sites.kernel.util.SitesUtil;
+import com.liferay.subscription.service.SubscriptionLocalService;
 
 import java.io.IOException;
 import java.io.Serializable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -117,12 +112,12 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.portlet.PortletException;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -134,8 +129,14 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
  *
  * @author Raymond Augé
  * @author Julio Camarero
+ * @deprecated As of 1.2.0, replaced by {@link
+ *             com.liferay.asset.publisher.util.AssetPublisherHelper}
  */
-@Component
+@Component(
+	configurationPid = "com.liferay.asset.publisher.web.configuration.AssetPublisherWebConfiguration",
+	immediate = true, service = AssetPublisherUtil.class
+)
+@Deprecated
 @ProviderType
 public class AssetPublisherUtil {
 
@@ -156,7 +157,7 @@ public class AssetPublisherUtil {
 
 		String portletId = PortalUtil.getPortletId(portletRequest);
 
-		String rootPortletId = PortletConstants.getRootPortletId(portletId);
+		String rootPortletId = PortletIdCodec.decodePortletName(portletId);
 
 		if (!rootPortletId.equals(AssetPublisherPortletKeys.ASSET_PUBLISHER)) {
 			return;
@@ -165,7 +166,7 @@ public class AssetPublisherUtil {
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		Layout layout = _layoutLocalService.getLayout(themeDisplay.getPlid());
+		Layout layout = themeDisplay.getLayout();
 
 		PortletPreferences portletPreferences =
 			PortletPreferencesFactoryUtil.getStrictPortletSetup(
@@ -217,7 +218,8 @@ public class AssetPublisherUtil {
 			String assetEntryType)
 		throws Exception {
 
-		AssetEntry assetEntry = _assetEntryLocalService.getEntry(assetEntryId);
+		AssetEntry assetEntry = _assetEntryLocalService.fetchEntry(
+			assetEntryId);
 
 		String[] assetEntryXmls = portletPreferences.getValues(
 			"assetEntryXml", new String[0]);
@@ -243,21 +245,17 @@ public class AssetPublisherUtil {
 		catch (IOException ioe) {
 			throw new SystemException(ioe);
 		}
-		catch (PortletException pe) {
-			throw new SystemException(pe);
-		}
 	}
 
 	public static void addUserAttributes(
-			User user, String[] customUserAttributeNames,
-			AssetEntryQuery assetEntryQuery)
-		throws Exception {
+		User user, String[] customUserAttributeNames,
+		AssetEntryQuery assetEntryQuery) {
 
 		if ((user == null) || (customUserAttributeNames.length == 0)) {
 			return;
 		}
 
-		Group companyGroup = _groupLocalService.getCompanyGroup(
+		Group companyGroup = _groupLocalService.fetchCompanyGroup(
 			user.getCompanyId());
 
 		long[] allCategoryIds = assetEntryQuery.getAllCategoryIds();
@@ -270,14 +268,8 @@ public class AssetPublisherUtil {
 		for (String customUserAttributeName : customUserAttributeNames) {
 			ExpandoBridge userCustomAttributes = user.getExpandoBridge();
 
-			Serializable userCustomFieldValue = null;
-
-			try {
-				userCustomFieldValue = userCustomAttributes.getAttribute(
-					customUserAttributeName);
-			}
-			catch (Exception e) {
-			}
+			Serializable userCustomFieldValue =
+				userCustomAttributes.getAttribute(customUserAttributeName);
 
 			if (userCustomFieldValue == null) {
 				continue;
@@ -326,8 +318,7 @@ public class AssetPublisherUtil {
 	}
 
 	public static long[] getAssetCategoryIds(
-			PortletPreferences portletPreferences)
-		throws Exception {
+		PortletPreferences portletPreferences) {
 
 		long[] assetCategoryIds = new long[0];
 
@@ -348,10 +339,11 @@ public class AssetPublisherUtil {
 			String queryName = portletPreferences.getValue(
 				"queryName" + i, StringPool.BLANK);
 
-			if (Objects.equals(queryName, "assetCategories") &&
-				queryContains && queryAndOperator) {
+			if (Objects.equals(queryName, "assetCategories") && queryContains &&
+				(queryAndOperator || (queryValues.length == 1))) {
 
-				assetCategoryIds = GetterUtil.getLongValues(queryValues);
+				assetCategoryIds = ArrayUtil.append(
+					assetCategoryIds, GetterUtil.getLongValues(queryValues));
 			}
 		}
 
@@ -385,84 +377,16 @@ public class AssetPublisherUtil {
 		return new BaseModelSearchResult<>(results, total);
 	}
 
+	/**
+	 * @deprecated As of 2.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public static List<AssetEntry> getAssetEntries(
 			PortletPreferences portletPreferences, Layout layout,
 			long scopeGroupId, int max, boolean checkPermission)
 		throws PortalException {
 
-		long[] groupIds = getGroupIds(portletPreferences, scopeGroupId, layout);
-
-		AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
-			portletPreferences, groupIds, null, null);
-
-		assetEntryQuery.setGroupIds(groupIds);
-
-		boolean anyAssetType = GetterUtil.getBoolean(
-			portletPreferences.getValue("anyAssetType", null), true);
-
-		if (!anyAssetType) {
-			long[] availableClassNameIds =
-				AssetRendererFactoryRegistryUtil.getClassNameIds(
-					layout.getCompanyId());
-
-			long[] classNameIds = getClassNameIds(
-				portletPreferences, availableClassNameIds);
-
-			assetEntryQuery.setClassNameIds(classNameIds);
-		}
-
-		long[] classTypeIds = GetterUtil.getLongValues(
-			portletPreferences.getValues("classTypeIds", null));
-
-		assetEntryQuery.setClassTypeIds(classTypeIds);
-
-		boolean enablePermissions = GetterUtil.getBoolean(
-			portletPreferences.getValue("enablePermissions", null));
-
-		assetEntryQuery.setEnablePermissions(enablePermissions);
-
-		assetEntryQuery.setEnd(max);
-
-		boolean excludeZeroViewCount = GetterUtil.getBoolean(
-			portletPreferences.getValue("excludeZeroViewCount", null));
-
-		assetEntryQuery.setExcludeZeroViewCount(excludeZeroViewCount);
-
-		boolean showOnlyLayoutAssets = GetterUtil.getBoolean(
-			portletPreferences.getValue("showOnlyLayoutAssets", null));
-
-		if (showOnlyLayoutAssets) {
-			assetEntryQuery.setLayout(layout);
-		}
-
-		String orderByColumn1 = GetterUtil.getString(
-			portletPreferences.getValue("orderByColumn1", "modifiedDate"));
-
-		assetEntryQuery.setOrderByCol1(orderByColumn1);
-
-		String orderByColumn2 = GetterUtil.getString(
-			portletPreferences.getValue("orderByColumn2", "title"));
-
-		assetEntryQuery.setOrderByCol2(orderByColumn2);
-
-		String orderByType1 = GetterUtil.getString(
-			portletPreferences.getValue("orderByType1", "DESC"));
-
-		assetEntryQuery.setOrderByType1(orderByType1);
-
-		String orderByType2 = GetterUtil.getString(
-			portletPreferences.getValue("orderByType2", "ASC"));
-
-		assetEntryQuery.setOrderByType2(orderByType2);
-
-		assetEntryQuery.setStart(0);
-
-		if (checkPermission) {
-			return _assetEntryService.getEntries(assetEntryQuery);
-		}
-		else {
-			return _assetEntryLocalService.getEntries(assetEntryQuery);
-		}
+		return null;
 	}
 
 	public static List<AssetEntry> getAssetEntries(
@@ -485,6 +409,20 @@ public class AssetPublisherUtil {
 			boolean includeNonVisibleAssets)
 		throws Exception {
 
+		return getAssetEntries(
+			portletRequest, portletPreferences, permissionChecker, groupIds,
+			deleteMissingAssetEntries, checkPermission, includeNonVisibleAssets,
+			AssetRendererFactory.TYPE_LATEST_APPROVED);
+	}
+
+	public static List<AssetEntry> getAssetEntries(
+			PortletRequest portletRequest,
+			PortletPreferences portletPreferences,
+			PermissionChecker permissionChecker, long[] groupIds,
+			boolean deleteMissingAssetEntries, boolean checkPermission,
+			boolean includeNonVisibleAssets, int type)
+		throws Exception {
+
 		String[] assetEntryXmls = portletPreferences.getValues(
 			"assetEntryXml", new String[0]);
 
@@ -499,9 +437,25 @@ public class AssetPublisherUtil {
 
 			String assetEntryUuid = rootElement.elementText("asset-entry-uuid");
 
+			String assetEntryType = rootElement.elementText("asset-entry-type");
+
+			AssetRendererFactory<?> assetRendererFactory =
+				AssetRendererFactoryRegistryUtil.
+					getAssetRendererFactoryByClassName(assetEntryType);
+
+			String portletId = assetRendererFactory.getPortletId();
+
 			AssetEntry assetEntry = null;
 
 			for (long groupId : groupIds) {
+				Group group = _groupLocalService.fetchGroup(groupId);
+
+				if (group.isStagingGroup() &&
+					!group.isStagedPortlet(portletId)) {
+
+					groupId = group.getLiveGroupId();
+				}
+
 				assetEntry = _assetEntryLocalService.fetchEntry(
 					groupId, assetEntryUuid);
 
@@ -522,15 +476,14 @@ public class AssetPublisherUtil {
 				continue;
 			}
 
-			AssetRendererFactory<?> assetRendererFactory =
+			assetRendererFactory =
 				AssetRendererFactoryRegistryUtil.
 					getAssetRendererFactoryByClassName(
 						assetEntry.getClassName());
 
 			AssetRenderer<?> assetRenderer =
 				assetRendererFactory.getAssetRenderer(
-					assetEntry.getClassPK(),
-					AssetRendererFactory.TYPE_LATEST_APPROVED);
+					assetEntry.getClassPK(), type);
 
 			if (!assetRendererFactory.isActive(
 					permissionChecker.getCompanyId())) {
@@ -563,8 +516,7 @@ public class AssetPublisherUtil {
 		}
 
 		if (deleteMissingAssetEntries) {
-			AssetPublisherUtil.removeAndStoreSelection(
-				missingAssetEntryUuids, portletPreferences);
+			removeAndStoreSelection(missingAssetEntryUuids, portletPreferences);
 
 			if (!missingAssetEntryUuids.isEmpty()) {
 				SessionMessages.add(
@@ -609,113 +561,89 @@ public class AssetPublisherUtil {
 	}
 
 	public static AssetEntryQuery getAssetEntryQuery(
+			PortletPreferences portletPreferences, long groupId, Layout layout,
+			long[] overrideAllAssetCategoryIds,
+			String[] overrideAllAssetTagNames)
+		throws PortalException {
+
+		long[] groupIds = getGroupIds(portletPreferences, groupId, layout);
+
+		AssetEntryQuery assetEntryQuery = new AssetEntryQuery();
+
+		_setCategoriesAndTags(
+			assetEntryQuery, portletPreferences, groupIds,
+			overrideAllAssetCategoryIds, overrideAllAssetTagNames);
+
+		assetEntryQuery.setGroupIds(groupIds);
+
+		boolean anyAssetType = GetterUtil.getBoolean(
+			portletPreferences.getValue("anyAssetType", null), true);
+
+		if (!anyAssetType) {
+			long[] availableClassNameIds =
+				AssetRendererFactoryRegistryUtil.getClassNameIds(
+					layout.getCompanyId());
+
+			long[] classNameIds = getClassNameIds(
+				portletPreferences, availableClassNameIds);
+
+			assetEntryQuery.setClassNameIds(classNameIds);
+		}
+
+		long[] classTypeIds = GetterUtil.getLongValues(
+			portletPreferences.getValues("classTypeIds", null));
+
+		assetEntryQuery.setClassTypeIds(classTypeIds);
+
+		boolean enablePermissions = GetterUtil.getBoolean(
+			portletPreferences.getValue("enablePermissions", null));
+
+		assetEntryQuery.setEnablePermissions(enablePermissions);
+
+		boolean excludeZeroViewCount = GetterUtil.getBoolean(
+			portletPreferences.getValue("excludeZeroViewCount", null));
+
+		assetEntryQuery.setExcludeZeroViewCount(excludeZeroViewCount);
+
+		boolean showOnlyLayoutAssets = GetterUtil.getBoolean(
+			portletPreferences.getValue("showOnlyLayoutAssets", null));
+
+		if (showOnlyLayoutAssets) {
+			assetEntryQuery.setLayout(layout);
+		}
+
+		String orderByColumn1 = GetterUtil.getString(
+			portletPreferences.getValue("orderByColumn1", "modifiedDate"));
+
+		assetEntryQuery.setOrderByCol1(orderByColumn1);
+
+		String orderByColumn2 = GetterUtil.getString(
+			portletPreferences.getValue("orderByColumn2", "title"));
+
+		assetEntryQuery.setOrderByCol2(orderByColumn2);
+
+		String orderByType1 = GetterUtil.getString(
+			portletPreferences.getValue("orderByType1", "DESC"));
+
+		assetEntryQuery.setOrderByType1(orderByType1);
+
+		String orderByType2 = GetterUtil.getString(
+			portletPreferences.getValue("orderByType2", "ASC"));
+
+		assetEntryQuery.setOrderByType2(orderByType2);
+
+		return assetEntryQuery;
+	}
+
+	public static AssetEntryQuery getAssetEntryQuery(
 		PortletPreferences portletPreferences, long[] scopeGroupIds,
 		long[] overrideAllAssetCategoryIds, String[] overrideAllAssetTagNames) {
 
 		AssetEntryQuery assetEntryQuery = new AssetEntryQuery();
 
-		long[] allAssetCategoryIds = new long[0];
-		long[] anyAssetCategoryIds = new long[0];
-		long[] notAllAssetCategoryIds = new long[0];
-		long[] notAnyAssetCategoryIds = new long[0];
-
-		String[] allAssetTagNames = new String[0];
-		String[] anyAssetTagNames = new String[0];
-		String[] notAllAssetTagNames = new String[0];
-		String[] notAnyAssetTagNames = new String[0];
-
-		for (int i = 0; true; i++) {
-			String[] queryValues = portletPreferences.getValues(
-				"queryValues" + i, null);
-
-			if (ArrayUtil.isEmpty(queryValues)) {
-				break;
-			}
-
-			boolean queryContains = GetterUtil.getBoolean(
-				portletPreferences.getValue(
-					"queryContains" + i, StringPool.BLANK));
-			boolean queryAndOperator = GetterUtil.getBoolean(
-				portletPreferences.getValue(
-					"queryAndOperator" + i, StringPool.BLANK));
-			String queryName = portletPreferences.getValue(
-				"queryName" + i, StringPool.BLANK);
-
-			if (Objects.equals(queryName, "assetCategories")) {
-				long[] assetCategoryIds = GetterUtil.getLongValues(queryValues);
-
-				if (queryContains && queryAndOperator) {
-					allAssetCategoryIds = assetCategoryIds;
-				}
-				else if (queryContains && !queryAndOperator) {
-					anyAssetCategoryIds = assetCategoryIds;
-				}
-				else if (!queryContains && queryAndOperator) {
-					notAllAssetCategoryIds = assetCategoryIds;
-				}
-				else {
-					notAnyAssetCategoryIds = assetCategoryIds;
-				}
-			}
-			else {
-				if (queryContains && queryAndOperator) {
-					allAssetTagNames = queryValues;
-				}
-				else if (queryContains && !queryAndOperator) {
-					anyAssetTagNames = queryValues;
-				}
-				else if (!queryContains && queryAndOperator) {
-					notAllAssetTagNames = queryValues;
-				}
-				else {
-					notAnyAssetTagNames = queryValues;
-				}
-			}
-		}
-
-		if (overrideAllAssetCategoryIds != null) {
-			allAssetCategoryIds = overrideAllAssetCategoryIds;
-		}
-
-		allAssetCategoryIds = _filterAssetCategoryIds(allAssetCategoryIds);
-
-		assetEntryQuery.setAllCategoryIds(allAssetCategoryIds);
-
-		if (overrideAllAssetTagNames != null) {
-			allAssetTagNames = overrideAllAssetTagNames;
-		}
-
-		long[] siteGroupIds = getSiteGroupIds(scopeGroupIds);
-
-		for (String assetTagName : allAssetTagNames) {
-			long[] allAssetTagIds = _assetTagLocalService.getTagIds(
-				siteGroupIds, assetTagName);
-
-			assetEntryQuery.addAllTagIdsArray(allAssetTagIds);
-		}
-
-		assetEntryQuery.setAnyCategoryIds(anyAssetCategoryIds);
-
-		long[] anyAssetTagIds = _assetTagLocalService.getTagIds(
-			siteGroupIds, anyAssetTagNames);
-
-		assetEntryQuery.setAnyTagIds(anyAssetTagIds);
-
-		assetEntryQuery.setNotAllCategoryIds(notAllAssetCategoryIds);
-
-		for (String assetTagName : notAllAssetTagNames) {
-			long[] notAllAssetTagIds = _assetTagLocalService.getTagIds(
-				siteGroupIds, assetTagName);
-
-			assetEntryQuery.addNotAllTagIdsArray(notAllAssetTagIds);
-		}
-
-		assetEntryQuery.setNotAnyCategoryIds(notAnyAssetCategoryIds);
-
-		long[] notAnyAssetTagIds = _assetTagLocalService.getTagIds(
-			siteGroupIds, notAnyAssetTagNames);
-
-		assetEntryQuery.setNotAnyTagIds(notAnyAssetTagIds);
+		_setCategoriesAndTags(
+			assetEntryQuery, portletPreferences, scopeGroupIds,
+			overrideAllAssetCategoryIds, overrideAllAssetTagNames);
 
 		return assetEntryQuery;
 	}
@@ -793,8 +721,7 @@ public class AssetPublisherUtil {
 	}
 
 	public static String[] getAssetTagNames(
-			PortletPreferences portletPreferences)
-		throws Exception {
+		PortletPreferences portletPreferences) {
 
 		String[] allAssetTagNames = new String[0];
 
@@ -816,7 +743,8 @@ public class AssetPublisherUtil {
 				"queryName" + i, StringPool.BLANK);
 
 			if (!Objects.equals(queryName, "assetCategories") &&
-				queryContains && queryAndOperator) {
+				queryContains &&
+				(queryAndOperator || (queryValues.length == 1))) {
 
 				allAssetTagNames = queryValues;
 			}
@@ -919,11 +847,25 @@ public class AssetPublisherUtil {
 	public static Map<Locale, String> getEmailAssetEntryAddedBodyMap(
 		PortletPreferences portletPreferences) {
 
-		return LocalizationUtil.getLocalizationMap(
-			portletPreferences, "emailAssetEntryAddedBody",
-			AssetPublisherWebConfigurationValues.EMAIL_ASSET_ENTRY_ADDED_BODY,
-			AssetPublisherWebConfigurationValues.EMAIL_ASSET_ENTRY_ADDED_BODY,
-			AssetPublisherUtil.class.getClassLoader());
+		LocalizedValuesMap emailAssetEntryAddedLocalizedBodyMap =
+			_assetPublisherPortletInstanceConfiguration.
+				emailAssetEntryAddedBody();
+
+		Map<Locale, String> emailAssetEntryAddedBodyMap =
+			LocalizationUtil.getLocalizationMap(
+				portletPreferences, "emailAssetEntryAddedBody",
+				StringPool.BLANK, StringPool.BLANK,
+				AssetPublisherUtil.class.getClassLoader());
+
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
+
+		if (Validator.isNull(emailAssetEntryAddedBodyMap.get(defaultLocale))) {
+			emailAssetEntryAddedBodyMap.put(
+				defaultLocale,
+				emailAssetEntryAddedLocalizedBodyMap.getDefaultValue());
+		}
+
+		return emailAssetEntryAddedBodyMap;
 	}
 
 	public static boolean getEmailAssetEntryAddedEnabled(
@@ -936,22 +878,35 @@ public class AssetPublisherUtil {
 			return GetterUtil.getBoolean(emailAssetEntryAddedEnabled);
 		}
 		else {
-			return
-				AssetPublisherWebConfigurationValues.
-					EMAIL_ASSET_ENTRY_ADDED_ENABLED;
+			return _assetPublisherPortletInstanceConfiguration.
+				emailAssetEntryAddedEnabled();
 		}
 	}
 
 	public static Map<Locale, String> getEmailAssetEntryAddedSubjectMap(
 		PortletPreferences portletPreferences) {
 
-		return LocalizationUtil.getLocalizationMap(
-			portletPreferences, "emailAssetEntryAddedSubject",
-			AssetPublisherWebConfigurationValues.
-				EMAIL_ASSET_ENTRY_ADDED_SUBJECT,
-			AssetPublisherWebConfigurationValues.
-				EMAIL_ASSET_ENTRY_ADDED_SUBJECT,
-			AssetPublisherUtil.class.getClassLoader());
+		LocalizedValuesMap emailAssetEntryAddedLocalizedSubjectMap =
+			_assetPublisherPortletInstanceConfiguration.
+				emailAssetEntryAddedSubject();
+
+		Map<Locale, String> emailAssetEntryAddedSubjectMap =
+			LocalizationUtil.getLocalizationMap(
+				portletPreferences, "emailAssetEntryAddedSubject",
+				StringPool.BLANK, StringPool.BLANK,
+				AssetPublisherUtil.class.getClassLoader());
+
+		Locale defaultLocale = LocaleUtil.getSiteDefault();
+
+		if (Validator.isNull(
+				emailAssetEntryAddedSubjectMap.get(defaultLocale))) {
+
+			emailAssetEntryAddedSubjectMap.put(
+				defaultLocale,
+				emailAssetEntryAddedLocalizedSubjectMap.getDefaultValue());
+		}
+
+		return emailAssetEntryAddedSubjectMap;
 	}
 
 	public static Map<String, String> getEmailDefinitionTerms(
@@ -1024,7 +979,7 @@ public class AssetPublisherUtil {
 
 		return PortalUtil.getEmailFromAddress(
 			portletPreferences, companyId,
-			AssetPublisherWebConfigurationValues.EMAIL_FROM_ADDRESS);
+			_assetPublisherPortletInstanceConfiguration.emailFromAddress());
 	}
 
 	public static String getEmailFromName(
@@ -1032,7 +987,7 @@ public class AssetPublisherUtil {
 
 		return PortalUtil.getEmailFromName(
 			portletPreferences, companyId,
-			AssetPublisherWebConfigurationValues.EMAIL_FROM_NAME);
+			_assetPublisherPortletInstanceConfiguration.emailFromName());
 	}
 
 	public static long getGroupIdFromScopeId(
@@ -1145,13 +1100,11 @@ public class AssetPublisherUtil {
 		return ArrayUtil.toLongArray(groupIds);
 	}
 
-	public static String getScopeId(Group group, long scopeGroupId)
-		throws PortalException {
-
+	public static String getScopeId(Group group, long scopeGroupId) {
 		String key = null;
 
 		if (group.isLayout()) {
-			Layout layout = _layoutLocalService.getLayout(group.getClassPK());
+			Layout layout = _layoutLocalService.fetchLayout(group.getClassPK());
 
 			key = SCOPE_ID_LAYOUT_UUID_PREFIX + layout.getUuid();
 		}
@@ -1161,7 +1114,7 @@ public class AssetPublisherUtil {
 			key = SCOPE_ID_GROUP_PREFIX + GroupConstants.DEFAULT;
 		}
 		else {
-			Group scopeGroup = _groupLocalService.getGroup(scopeGroupId);
+			Group scopeGroup = _groupLocalService.fetchGroup(scopeGroupId);
 
 			if (scopeGroup.hasAncestor(group.getGroupId()) &&
 				SitesUtil.isContentSharingWithChildrenEnabled(group)) {
@@ -1182,6 +1135,32 @@ public class AssetPublisherUtil {
 	public static long getSubscriptionClassPK(
 			long ownerId, int ownerType, long plid, String portletId)
 		throws PortalException {
+
+		if (plid != LayoutConstants.DEFAULT_PLID) {
+			Layout layout = _layoutLocalService.fetchLayout(plid);
+
+			if (layout != null) {
+				long userId = 0;
+
+				if (PortletIdCodec.hasUserId(portletId)) {
+					userId = PortletIdCodec.decodeUserId(portletId);
+				}
+
+				PortletPreferencesIds portletPreferencesIds =
+					_portletPreferencesFactory.getPortletPreferencesIds(
+						layout.getGroupId(), userId, layout, portletId, false);
+
+				ownerId = portletPreferencesIds.getOwnerId();
+				ownerType = portletPreferencesIds.getOwnerType();
+				plid = portletPreferencesIds.getPlid();
+				portletId = portletPreferencesIds.getPortletId();
+			}
+		}
+
+		if (PortletIdCodec.hasUserId(portletId)) {
+			ownerId = PortletIdCodec.decodeUserId(portletId);
+			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
+		}
 
 		com.liferay.portal.kernel.model.PortletPreferences
 			portletPreferencesModel =
@@ -1267,36 +1246,13 @@ public class AssetPublisherUtil {
 			getSubscriptionClassPK(plid, portletId));
 	}
 
+	/**
+	 * @deprecated As of 1.2.0, with no direct replacement
+	 */
+	@Deprecated
 	public static void notifySubscriber(
-			long userId, PortletPreferences portletPreferences,
-			List<AssetEntry> assetEntries)
-		throws PortalException {
-
-		assetEntries = _filterAssetEntries(userId, assetEntries);
-
-		if (!getEmailAssetEntryAddedEnabled(portletPreferences) ||
-			assetEntries.isEmpty()) {
-
-			return;
-		}
-
-		User user = _userLocalService.fetchUser(userId);
-
-		if ((user == null) || !user.isActive()) {
-			return;
-		}
-
-		SubscriptionSender subscriptionSender = _getSubscriptionSender(
-			portletPreferences, assetEntries);
-
-		if (subscriptionSender == null) {
-			return;
-		}
-
-		subscriptionSender.addRuntimeSubscribers(
-			user.getEmailAddress(), user.getFullName());
-
-		subscriptionSender.flushNotificationsAsync();
+		long userId, PortletPreferences portletPreferences,
+		List<AssetEntry> assetEntries) {
 	}
 
 	/**
@@ -1307,18 +1263,6 @@ public class AssetPublisherUtil {
 			PortletPreferences portletPreferences, long plid, String portletId,
 			List<AssetEntry> assetEntries)
 		throws PortalException {
-
-		Layout layout = _layoutLocalService.fetchLayout(plid);
-
-		String subscriptionClassName =
-			com.liferay.portal.kernel.model.PortletPreferences.class.getName();
-
-		List<Subscription> subscriptions =
-			_subscriptionLocalService.getSubscriptions(
-				layout.getCompanyId(), subscriptionClassName,
-				getSubscriptionClassPK(plid, portletId));
-
-		_notifySubscribers(subscriptions, portletPreferences, assetEntries);
 	}
 
 	public static void processAssetEntryQuery(
@@ -1420,43 +1364,11 @@ public class AssetPublisherUtil {
 			getSubscriptionClassPK(plid, portletId));
 	}
 
+	/**
+	 * @deprecated As of 2.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public void checkAssetEntries() throws Exception {
-		ActionableDynamicQuery actionableDynamicQuery =
-			_portletPreferencesLocalService.getActionableDynamicQuery();
-
-		actionableDynamicQuery.setAddCriteriaMethod(
-			new ActionableDynamicQuery.AddCriteriaMethod() {
-
-				@Override
-				public void addCriteria(DynamicQuery dynamicQuery) {
-					Property property = PropertyFactoryUtil.forName(
-						"portletId");
-
-					PortletInstance portletInstance = new PortletInstance(
-						AssetPublisherPortletKeys.ASSET_PUBLISHER,
-						StringPool.PERCENT);
-
-					dynamicQuery.add(
-						property.like(portletInstance.getPortletInstanceKey()));
-				}
-
-			});
-		actionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod
-				<com.liferay.portal.kernel.model.PortletPreferences>() {
-
-				@Override
-				public void performAction(
-						com.liferay.portal.kernel.model.PortletPreferences
-							portletPreferences)
-					throws PortalException {
-
-					_checkAssetEntries(portletPreferences);
-				}
-
-			});
-
-		actionableDynamicQuery.performActions();
 	}
 
 	protected static List<AssetEntryResult> getAssetEntryResultsByClassName(
@@ -1649,10 +1561,9 @@ public class AssetPublisherUtil {
 	}
 
 	protected static boolean isSearchWithIndex(
-			String portletName, AssetEntryQuery assetEntryQuery)
-		throws Exception {
+		String portletName, AssetEntryQuery assetEntryQuery) {
 
-		if (AssetPublisherWebConfigurationValues.SEARCH_WITH_INDEX &&
+		if (_assetPublisherWebConfiguration.searchWithIndex() &&
 			(assetEntryQuery.getLinkedAssetEntryId() == 0) &&
 			!portletName.equals(
 				AssetPublisherPortletKeys.HIGHEST_RATED_ASSETS) &&
@@ -1665,8 +1576,7 @@ public class AssetPublisherUtil {
 	}
 
 	protected static boolean isShowAssetEntryResults(
-			String portletName, AssetEntryQuery assetEntryQuery)
-		throws Exception {
+		String portletName, AssetEntryQuery assetEntryQuery) {
 
 		if (!portletName.equals(AssetPublisherPortletKeys.RELATED_ASSETS) ||
 			(assetEntryQuery.getLinkedAssetEntryId() > 0)) {
@@ -1678,8 +1588,18 @@ public class AssetPublisherUtil {
 	}
 
 	@Activate
-	protected void activate() {
+	@Modified
+	protected void activate(Map<String, Object> properties)
+		throws ConfigurationException {
+
 		_instance = this;
+
+		_assetPublisherWebConfiguration = ConfigurableUtil.createConfigurable(
+			AssetPublisherWebConfiguration.class, properties);
+
+		_assetPublisherPortletInstanceConfiguration =
+			ConfigurationProviderUtil.getSystemConfiguration(
+				AssetPublisherPortletInstanceConfiguration.class);
 	}
 
 	@Reference(unbind = "-")
@@ -1737,10 +1657,26 @@ public class AssetPublisherUtil {
 	}
 
 	@Reference(unbind = "-")
+	protected void setPortletPreferencesFactory(
+		PortletPreferencesFactory portletPreferencesFactory) {
+
+		_portletPreferencesFactory = portletPreferencesFactory;
+	}
+
+	@Reference(unbind = "-")
 	protected void setPortletPreferencesLocalService(
 		PortletPreferencesLocalService portletPreferencesLocalService) {
 
 		_portletPreferencesLocalService = portletPreferencesLocalService;
+	}
+
+	/**
+	 * @deprecated As of 2.0.0, with no direct replacement
+	 */
+	@Deprecated
+	protected void setSubscriptionLocalService(
+		com.liferay.portal.kernel.service.SubscriptionLocalService
+			subscriptionLocalService) {
 	}
 
 	@Reference(unbind = "-")
@@ -1750,9 +1686,11 @@ public class AssetPublisherUtil {
 		_subscriptionLocalService = subscriptionLocalService;
 	}
 
-	@Reference(unbind = "-")
+	/**
+	 * @deprecated As of 2.0.0, with no direct replacement
+	 */
+	@Deprecated
 	protected void setUserLocalService(UserLocalService userLocalService) {
-		_userLocalService = userLocalService;
 	}
 
 	protected void unsetAssetEntryQueryProcessor(
@@ -1762,8 +1700,7 @@ public class AssetPublisherUtil {
 	}
 
 	private static List<AssetEntry> _filterAssetCategoriesAssetEntries(
-			List<AssetEntry> assetEntries, long[] assetCategoryIds)
-		throws Exception {
+		List<AssetEntry> assetEntries, long[] assetCategoryIds) {
 
 		List<AssetEntry> filteredAssetEntries = new ArrayList<>();
 
@@ -1797,36 +1734,8 @@ public class AssetPublisherUtil {
 				new Long[assetCategoryIdsList.size()]));
 	}
 
-	private static List<AssetEntry> _filterAssetEntries(
-			long userId, List<AssetEntry> assetEntries)
-		throws PortalException {
-
-		List<AssetEntry> filteredAssetEntries = new ArrayList<>();
-
-		User user = _userLocalService.getUser(userId);
-
-		try {
-			PermissionChecker permissionChecker =
-				PermissionCheckerFactoryUtil.create(user);
-
-			for (AssetEntry assetEntry : assetEntries) {
-				if (AssetEntryPermission.contains(
-						permissionChecker, assetEntry, ActionKeys.VIEW)) {
-
-					filteredAssetEntries.add(assetEntry);
-				}
-			}
-		}
-		catch (Exception e) {
-			throw new PortalException(e);
-		}
-
-		return filteredAssetEntries;
-	}
-
 	private static List<AssetEntry> _filterAssetTagNamesAssetEntries(
-			List<AssetEntry> assetEntries, String[] assetTagNames)
-		throws Exception {
+		List<AssetEntry> assetEntries, String[] assetTagNames) {
 
 		List<AssetEntry> filteredAssetEntries = new ArrayList<>();
 
@@ -1880,179 +1789,113 @@ public class AssetPublisherUtil {
 		return xml;
 	}
 
-	private static SubscriptionSender _getSubscriptionSender(
-		PortletPreferences portletPreferences, List<AssetEntry> assetEntries) {
+	private static void _setCategoriesAndTags(
+		AssetEntryQuery assetEntryQuery, PortletPreferences portletPreferences,
+		long[] scopeGroupIds, long[] overrideAllAssetCategoryIds,
+		String[] overrideAllAssetTagNames) {
 
-		if (assetEntries.isEmpty()) {
-			return null;
-		}
+		long[] allAssetCategoryIds = new long[0];
+		long[] anyAssetCategoryIds = new long[0];
+		long[] notAllAssetCategoryIds = new long[0];
+		long[] notAnyAssetCategoryIds = new long[0];
 
-		AssetEntry assetEntry = assetEntries.get(0);
+		String[] allAssetTagNames = new String[0];
+		String[] anyAssetTagNames = new String[0];
+		String[] notAllAssetTagNames = new String[0];
+		String[] notAnyAssetTagNames = new String[0];
 
-		String fromName = getEmailFromName(
-			portletPreferences, assetEntry.getCompanyId());
-		String fromAddress = getEmailFromAddress(
-			portletPreferences, assetEntry.getCompanyId());
+		for (int i = 0; true; i++) {
+			String[] queryValues = portletPreferences.getValues(
+				"queryValues" + i, null);
 
-		Map<Locale, String> localizedSubjectMap =
-			getEmailAssetEntryAddedSubjectMap(portletPreferences);
-		Map<Locale, String> localizedBodyMap = getEmailAssetEntryAddedBodyMap(
-			portletPreferences);
-
-		SubscriptionSender subscriptionSender = new SubscriptionSender();
-
-		subscriptionSender.setCompanyId(assetEntry.getCompanyId());
-		subscriptionSender.setContextAttributes(
-			"[$ASSET_ENTRIES$]",
-			ListUtil.toString(
-				assetEntries, _titleAccessor, StringPool.COMMA_AND_SPACE));
-		subscriptionSender.setFrom(fromAddress, fromName);
-		subscriptionSender.setHtmlFormat(true);
-		subscriptionSender.setLocalizedBodyMap(localizedBodyMap);
-		subscriptionSender.setLocalizedPortletTitleMap(
-			PortletConfigurationUtil.getPortletTitleMap(portletPreferences));
-		subscriptionSender.setLocalizedSubjectMap(localizedSubjectMap);
-		subscriptionSender.setMailId("asset_entry", assetEntry.getEntryId());
-		subscriptionSender.setPortletId(
-			AssetPublisherPortletKeys.ASSET_PUBLISHER);
-		subscriptionSender.setReplyToAddress(fromAddress);
-
-		return subscriptionSender;
-	}
-
-	private static void _notifySubscribers(
-			List<Subscription> subscriptions,
-			PortletPreferences portletPreferences,
-			List<AssetEntry> assetEntries)
-		throws PortalException {
-
-		if (!getEmailAssetEntryAddedEnabled(portletPreferences)) {
-			return;
-		}
-
-		Map<List<AssetEntry>, List<User>> assetEntriesToUsersMap =
-			new HashMap<>();
-
-		for (Subscription subscription : subscriptions) {
-			long userId = subscription.getUserId();
-
-			User user = _userLocalService.fetchUser(userId);
-
-			if ((user == null) || !user.isActive()) {
-				continue;
+			if (ArrayUtil.isEmpty(queryValues)) {
+				break;
 			}
 
-			List<AssetEntry> filteredAssetEntries = _filterAssetEntries(
-				userId, assetEntries);
+			boolean queryContains = GetterUtil.getBoolean(
+				portletPreferences.getValue(
+					"queryContains" + i, StringPool.BLANK));
+			boolean queryAndOperator = GetterUtil.getBoolean(
+				portletPreferences.getValue(
+					"queryAndOperator" + i, StringPool.BLANK));
+			String queryName = portletPreferences.getValue(
+				"queryName" + i, StringPool.BLANK);
 
-			if (filteredAssetEntries.isEmpty()) {
-				continue;
+			if (Objects.equals(queryName, "assetCategories")) {
+				long[] assetCategoryIds = GetterUtil.getLongValues(queryValues);
+
+				if (queryContains && queryAndOperator) {
+					allAssetCategoryIds = assetCategoryIds;
+				}
+				else if (queryContains && !queryAndOperator) {
+					anyAssetCategoryIds = assetCategoryIds;
+				}
+				else if (!queryContains && queryAndOperator) {
+					notAllAssetCategoryIds = assetCategoryIds;
+				}
+				else {
+					notAnyAssetCategoryIds = assetCategoryIds;
+				}
 			}
-
-			List<User> users = assetEntriesToUsersMap.get(filteredAssetEntries);
-
-			if (users == null) {
-				users = new LinkedList<>();
-
-				assetEntriesToUsersMap.put(filteredAssetEntries, users);
-			}
-
-			users.add(user);
-		}
-
-		for (Map.Entry<List<AssetEntry>, List<User>> entry :
-				assetEntriesToUsersMap.entrySet()) {
-
-			List<AssetEntry> filteredAssetEntries = entry.getKey();
-			List<User> users = entry.getValue();
-
-			SubscriptionSender subscriptionSender = _getSubscriptionSender(
-				portletPreferences, filteredAssetEntries);
-
-			if (subscriptionSender == null) {
-				continue;
-			}
-
-			for (User user : users) {
-				subscriptionSender.addRuntimeSubscribers(
-					user.getEmailAddress(), user.getFullName());
-			}
-
-			subscriptionSender.setBulk(true);
-
-			subscriptionSender.flushNotificationsAsync();
-		}
-	}
-
-	private void _checkAssetEntries(
-			com.liferay.portal.kernel.model.PortletPreferences
-				portletPreferencesModel)
-		throws PortalException {
-
-		Layout layout = _layoutLocalService.fetchLayout(
-			portletPreferencesModel.getPlid());
-
-		if (layout == null) {
-			return;
-		}
-
-		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.fromXML(
-				layout.getCompanyId(), portletPreferencesModel.getOwnerId(),
-				portletPreferencesModel.getOwnerType(),
-				portletPreferencesModel.getPlid(),
-				portletPreferencesModel.getPortletId(),
-				portletPreferencesModel.getPreferences());
-
-		if (!getEmailAssetEntryAddedEnabled(portletPreferences)) {
-			return;
-		}
-
-		List<AssetEntry> assetEntries = getAssetEntries(
-			portletPreferences, layout, layout.getGroupId(),
-			AssetPublisherWebConfigurationValues.DYNAMIC_SUBSCRIPTION_LIMIT,
-			false);
-
-		if (assetEntries.isEmpty()) {
-			return;
-		}
-
-		long[] notifiedAssetEntryIds = GetterUtil.getLongValues(
-			portletPreferences.getValues("notifiedAssetEntryIds", null));
-
-		ArrayList<AssetEntry> newAssetEntries = new ArrayList<>();
-
-		for (AssetEntry assetEntry : assetEntries) {
-			if (!ArrayUtil.contains(
-					notifiedAssetEntryIds, assetEntry.getEntryId())) {
-
-				newAssetEntries.add(assetEntry);
+			else {
+				if (queryContains && queryAndOperator) {
+					allAssetTagNames = queryValues;
+				}
+				else if (queryContains && !queryAndOperator) {
+					anyAssetTagNames = queryValues;
+				}
+				else if (!queryContains && queryAndOperator) {
+					notAllAssetTagNames = queryValues;
+				}
+				else {
+					notAnyAssetTagNames = queryValues;
+				}
 			}
 		}
 
-		List<Subscription> subscriptions =
-			_subscriptionLocalService.getSubscriptions(
-				portletPreferencesModel.getCompanyId(),
-				com.liferay.portal.kernel.model.PortletPreferences.class.
-					getName(),
-				AssetPublisherUtil.getSubscriptionClassPK(
-					portletPreferencesModel.getPlid(),
-					portletPreferencesModel.getPortletId()));
-
-		_notifySubscribers(subscriptions, portletPreferences, assetEntries);
-
-		try {
-			portletPreferences.setValues(
-				"notifiedAssetEntryIds",
-				StringUtil.split(
-					ListUtil.toString(
-						assetEntries, AssetEntry.ENTRY_ID_ACCESSOR)));
-
-			portletPreferences.store();
+		if (overrideAllAssetCategoryIds != null) {
+			allAssetCategoryIds = overrideAllAssetCategoryIds;
 		}
-		catch (IOException | PortletException e) {
-			throw new PortalException(e);
+
+		allAssetCategoryIds = _filterAssetCategoryIds(allAssetCategoryIds);
+
+		assetEntryQuery.setAllCategoryIds(allAssetCategoryIds);
+
+		if (overrideAllAssetTagNames != null) {
+			allAssetTagNames = overrideAllAssetTagNames;
 		}
+
+		long[] siteGroupIds = getSiteGroupIds(scopeGroupIds);
+
+		for (String assetTagName : allAssetTagNames) {
+			long[] allAssetTagIds = _assetTagLocalService.getTagIds(
+				siteGroupIds, assetTagName);
+
+			assetEntryQuery.addAllTagIdsArray(allAssetTagIds);
+		}
+
+		assetEntryQuery.setAnyCategoryIds(anyAssetCategoryIds);
+
+		long[] anyAssetTagIds = _assetTagLocalService.getTagIds(
+			siteGroupIds, anyAssetTagNames);
+
+		assetEntryQuery.setAnyTagIds(anyAssetTagIds);
+
+		assetEntryQuery.setNotAllCategoryIds(notAllAssetCategoryIds);
+
+		for (String assetTagName : notAllAssetTagNames) {
+			long[] notAllAssetTagIds = _assetTagLocalService.getTagIds(
+				siteGroupIds, assetTagName);
+
+			assetEntryQuery.addNotAllTagIdsArray(notAllAssetTagIds);
+		}
+
+		assetEntryQuery.setNotAnyCategoryIds(notAnyAssetCategoryIds);
+
+		long[] notAnyAssetTagIds = _assetTagLocalService.getTagIds(
+			siteGroupIds, notAnyAssetTagNames);
+
+		assetEntryQuery.setNotAnyTagIds(notAnyAssetTagIds);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -2063,35 +1906,18 @@ public class AssetPublisherUtil {
 	private static AssetCategoryLocalService _assetCategoryLocalService;
 	private static AssetEntryLocalService _assetEntryLocalService;
 	private static AssetEntryService _assetEntryService;
+	private static AssetPublisherPortletInstanceConfiguration
+		_assetPublisherPortletInstanceConfiguration;
+	private static AssetPublisherWebConfiguration
+		_assetPublisherWebConfiguration;
 	private static AssetTagLocalService _assetTagLocalService;
 	private static DDMIndexer _ddmIndexer;
 	private static GroupLocalService _groupLocalService;
 	private static LayoutLocalService _layoutLocalService;
+	private static PortletPreferencesFactory _portletPreferencesFactory;
 	private static PortletPreferencesLocalService
 		_portletPreferencesLocalService;
 	private static SubscriptionLocalService _subscriptionLocalService;
-
-	private static final Accessor<AssetEntry, String> _titleAccessor =
-		new Accessor<AssetEntry, String>() {
-
-			@Override
-			public String get(AssetEntry assetEntry) {
-				return assetEntry.getTitle(LocaleUtil.getSiteDefault());
-			}
-
-			@Override
-			public Class<String> getAttributeClass() {
-				return String.class;
-			}
-
-			@Override
-			public Class<AssetEntry> getTypeClass() {
-				return AssetEntry.class;
-			}
-
-		};
-
-	private static UserLocalService _userLocalService;
 
 	private final List<AssetEntryQueryProcessor> _assetEntryQueryProcessors =
 		new CopyOnWriteArrayList<>();

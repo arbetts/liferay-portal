@@ -14,7 +14,17 @@
  */
 --%>
 
-<%@ include file="/html/taglib/init.jsp" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<%@ taglib uri="http://liferay.com/tld/aui" prefix="aui" %>
+
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<%@ page import="com.liferay.portal.kernel.util.GetterUtil" %><%@
+page import="com.liferay.portal.kernel.util.Validator" %><%@
+page import="com.liferay.taglib.aui.AUIUtil" %>
+
+<%@ page import="java.util.Map" %>
 
 <%
 String cssClass = GetterUtil.getString((String)request.getAttribute("liferay-ui:icon-menu:cssClass"));
@@ -31,12 +41,12 @@ if (Validator.isNull(icon)) {
 }
 %>
 
-<div class="dropdown dropdown-menu-no-arrow lfr-icon-menu <%= cssClass %>" <%= AUIUtil.buildData(data) %>>
-	<a aria-expanded="false" class="dropdown-toggle icon-monospaced <%= triggerCssClass %>" data-toggle="dropdown" href="javascript:;" id="<%= id %>" title="<%= message %>">
+<div class="dropdown lfr-icon-menu <%= cssClass %>" <%= AUIUtil.buildData(data) %>>
+	<a class="dropdown-toggle icon-monospaced <%= triggerCssClass %>" href="javascript:;" id="<%= id %>" title="<%= message %>">
 		<aui:icon image="<%= icon %>" markupView="lexicon" />
 	</a>
 
-	<aui:script use="liferay-menu">
+	<aui:script position="inline" use="liferay-menu">
 		Liferay.Menu.register('<%= id %>');
 	</aui:script>
 

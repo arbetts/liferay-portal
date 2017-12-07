@@ -15,33 +15,30 @@
 package com.liferay.bookmarks.internal.exportimport.staged.model.repository;
 
 import com.liferay.bookmarks.model.BookmarksEntry;
-import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.model.BookmarksFolderConstants;
 import com.liferay.bookmarks.service.BookmarksEntryLocalService;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.PortletDataException;
 import com.liferay.exportimport.kernel.lar.StagedModelModifiedDateComparator;
 import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
-import com.liferay.exportimport.staged.model.repository.base.BaseStagedModelRepository;
+import com.liferay.exportimport.staged.model.repository.StagedModelRepositoryHelper;
 import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Daniel Kocsis
+ * @author Mate Thurzo
  */
 @Component(
 	immediate = true,
@@ -49,7 +46,7 @@ import org.osgi.service.component.annotations.Reference;
 	service = StagedModelRepository.class
 )
 public class BookmarksEntryStagedModelRepository
-	extends BaseStagedModelRepository<BookmarksEntry> {
+	implements StagedModelRepository<BookmarksEntry> {
 
 	@Override
 	public BookmarksEntry addStagedModel(
@@ -103,37 +100,10 @@ public class BookmarksEntryStagedModelRepository
 	}
 
 	@Override
-	public List<StagedModel> fetchChildrenStagedModels(
-		PortletDataContext portletDataContext, BookmarksEntry bookmarksEntry) {
-
-		return Collections.emptyList();
-	}
-
-	@Override
-	public List<StagedModel> fetchDependencyStagedModels(
-		PortletDataContext portletDataContext, BookmarksEntry bookmarksEntry) {
-
-		Optional<BookmarksFolder> bookmarksFolderOptional = null;
-
-		try {
-			bookmarksFolderOptional = Optional.ofNullable(
-				bookmarksEntry.getFolder());
-		}
-		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-		}
-
-		List<StagedModel> dependencyStagedModels = new ArrayList<>();
-
-		bookmarksFolderOptional.ifPresent(
-			(bookmarksFolder) -> dependencyStagedModels.add(bookmarksFolder));
-
-		return dependencyStagedModels;
+	public BookmarksEntry fetchMissingReference(String uuid, long groupId) {
+		return
+			(BookmarksEntry)_stagedModelRepositoryHelper.fetchMissingReference(
+				uuid, groupId, this);
 	}
 
 	@Override
@@ -176,12 +146,14 @@ public class BookmarksEntryStagedModelRepository
 				bookmarksEntry.getUuid(), portletDataContext.getScopeGroupId());
 
 		if ((existingBookmarksEntry == null) ||
-			!isStagedModelInTrash(existingBookmarksEntry)) {
+			!_stagedModelRepositoryHelper.isStagedModelInTrash(
+				existingBookmarksEntry)) {
 
 			return;
 		}
 
-		TrashHandler trashHandler = existingBookmarksEntry.getTrashHandler();
+		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
+			BookmarksEntry.class.getName());
 
 		try {
 			if (trashHandler.isRestorable(
@@ -233,5 +205,8 @@ public class BookmarksEntryStagedModelRepository
 		BookmarksEntryStagedModelRepository.class);
 
 	private BookmarksEntryLocalService _bookmarksEntryLocalService;
+
+	@Reference
+	private StagedModelRepositoryHelper _stagedModelRepositoryHelper;
 
 }

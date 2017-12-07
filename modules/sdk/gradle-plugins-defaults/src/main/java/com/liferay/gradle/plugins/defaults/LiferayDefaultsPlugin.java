@@ -15,8 +15,11 @@
 package com.liferay.gradle.plugins.defaults;
 
 import com.liferay.gradle.plugins.LiferayPlugin;
+import com.liferay.gradle.plugins.defaults.internal.LicenseReportDefaultsPlugin;
+import com.liferay.gradle.plugins.defaults.internal.LiferayBaseDefaultsPlugin;
 import com.liferay.gradle.plugins.defaults.internal.LiferayCIPlugin;
 import com.liferay.gradle.plugins.defaults.internal.LiferayRelengPlugin;
+import com.liferay.gradle.plugins.defaults.internal.MavenDefaultsPlugin;
 import com.liferay.gradle.plugins.defaults.internal.NodeDefaultsPlugin;
 import com.liferay.gradle.util.Validator;
 
@@ -32,11 +35,17 @@ public class LiferayDefaultsPlugin extends LiferayPlugin {
 	public void apply(Project project) {
 		super.apply(project);
 
+		if (Boolean.getBoolean("license.report.enabled")) {
+			LicenseReportDefaultsPlugin.INSTANCE.apply(project);
+		}
+
 		if (_isRunningInCIEnvironment()) {
 			LiferayCIPlugin.INSTANCE.apply(project);
 		}
 
+		LiferayBaseDefaultsPlugin.INSTANCE.apply(project);
 		LiferayRelengPlugin.INSTANCE.apply(project);
+		MavenDefaultsPlugin.INSTANCE.apply(project);
 		NodeDefaultsPlugin.INSTANCE.apply(project);
 	}
 

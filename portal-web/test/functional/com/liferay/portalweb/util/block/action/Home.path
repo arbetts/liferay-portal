@@ -89,6 +89,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>LAYOUT_LOGO</td>
+	<td>//img[contains(@class,'layout-logo')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SITE_NAME</td>
 	<td>//div[@id='heading']/span[@class='site-name']</td>
 	<td></td>
@@ -120,17 +125,12 @@
 </tr>
 <tr>
 	<td>STATUS_MESSAGE</td>
-	<td>//tr[1]/td</td>
+	<td>//div[contains(.,'This ${key_resource} is inactive. Please contact the administrator.')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ERROR_MESSAGE_EXPIRED_SESSION</td>
 	<td>//div[contains(@class,'liferayalert')]//div</td>
-	<td></td>
-</tr>
-<tr>
-	<td>ERROR_MESSAGE_ALERT_INFO</td>
-	<td>//tr[contains(.,'This site is inactive. Please contact the administrator.')]/td[@align='center']</td>
 	<td></td>
 </tr>
 <tr>
@@ -213,12 +213,12 @@
 <!--PAGE-->
 <tr>
 	<td>PAGE</td>
-	<td>//div[contains(@class,'navbar')]/ul/li/a[contains(.,'${key_pageName}')]</td>
+	<td>//div[contains(@id,'navbar')]/ul/li/a[contains(.,'${key_pageName}')]</td>
 	<td>Page</td>
 </tr>
 <tr>
 	<td>PAGE_ACTIVE</td>
-	<td>//div[contains(@class,'navbar')]/ul/li[contains(@class,'active')]/a[contains(.,'${key_pageName}')]</td>
+	<td>//div[contains(@id,'navbar')]/ul//*[contains(@class,'active')][contains(.,'${key_pageName}')]</td>
 	<td>Page</td>
 </tr>
 <tr>

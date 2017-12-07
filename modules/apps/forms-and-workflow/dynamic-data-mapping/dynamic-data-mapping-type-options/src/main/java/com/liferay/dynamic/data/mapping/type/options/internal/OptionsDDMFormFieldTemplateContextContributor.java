@@ -15,12 +15,14 @@
 package com.liferay.dynamic.data.mapping.type.options.internal;
 
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTemplateContextContributor;
+import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.render.DDMFormFieldRenderingContext;
 import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.osgi.service.component.annotations.Component;
@@ -32,13 +34,14 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	immediate = true, property = "ddm.form.field.type.name=options",
 	service = {
-		OptionsDDMFormFieldTemplateContextContributor.class,
-		DDMFormFieldTemplateContextContributor.class
+		DDMFormFieldTemplateContextContributor.class,
+		OptionsDDMFormFieldTemplateContextContributor.class
 	}
 )
 public class OptionsDDMFormFieldTemplateContextContributor
 	implements DDMFormFieldTemplateContextContributor {
 
+	@Override
 	public Map<String, Object> getParameters(
 		DDMFormField ddmFormField,
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
@@ -46,18 +49,30 @@ public class OptionsDDMFormFieldTemplateContextContributor
 		Map<String, Object> parameters = new HashMap<>();
 
 		parameters.put(
+			"allowEmptyOptions",
+			GetterUtil.getBoolean(
+				ddmFormField.getProperty("allowEmptyOptions")));
+
+		DDMForm ddmForm = ddmFormField.getDDMForm();
+
+		parameters.put(
+			"defaultLanguageId",
+			LocaleUtil.toLanguageId(ddmForm.getDefaultLocale()));
+
+		parameters.put(
 			"value", getValue(ddmFormField, ddmFormFieldRenderingContext));
 
 		return parameters;
 	}
 
-	protected List<Object> getValue(
+	protected Map<String, Object> getValue(
 		DDMFormField ddmFormField,
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
 
 		OptionsDDMFormFieldContextHelper optionsDDMFormFieldContextHelper =
 			new OptionsDDMFormFieldContextHelper(
-				jsonFactory, ddmFormFieldRenderingContext.getValue());
+				jsonFactory, ddmFormField,
+				ddmFormFieldRenderingContext.getValue());
 
 		return optionsDDMFormFieldContextHelper.getValue();
 	}

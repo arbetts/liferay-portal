@@ -26,7 +26,7 @@ import com.liferay.portal.kernel.process.ProcessChannel;
 import com.liferay.portal.kernel.process.ProcessConfig;
 import com.liferay.portal.kernel.process.ProcessConfig.Builder;
 import com.liferay.portal.kernel.process.ProcessException;
-import com.liferay.portal.kernel.process.ProcessExecutorUtil;
+import com.liferay.portal.kernel.process.ProcessExecutor;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.BaseTestRule;
 import com.liferay.portal.kernel.test.rule.callback.BaseTestCallback;
@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.test.rule.HypersonicServerTestRule;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.InitUtil;
 import com.liferay.portal.util.PropsValues;
@@ -130,6 +131,7 @@ public class CounterLocalServiceTest {
 		List<String> arguments = new ArrayList<>();
 
 		arguments.add("-Dliferay.mode=test");
+		arguments.add("-Dsun.zip.disableMemoryMapping=true");
 
 		for (String property :
 				HypersonicServerTestRule.INSTANCE.getJdbcProperties()) {
@@ -156,7 +158,7 @@ public class CounterLocalServiceTest {
 				new IncrementProcessCallable(
 					"Increment Process-" + i, _COUNTER_NAME, _INCREMENT_COUNT);
 
-			ProcessChannel<Long[]> processChannel = ProcessExecutorUtil.execute(
+			ProcessChannel<Long[]> processChannel = _processExecutor.execute(
 				processConfig, processCallable);
 
 			Future<Long[]> futures =
@@ -170,10 +172,10 @@ public class CounterLocalServiceTest {
 		List<Long> ids = new ArrayList<>(total);
 
 		for (Future<Long[]> futures : futuresList) {
-			ids.addAll(Arrays.asList(futures.get()));
+			Collections.addAll(ids, futures.get());
 		}
 
-		Assert.assertEquals(total, ids.size());
+		Assert.assertEquals(ids.toString(), total, ids.size());
 
 		Collections.sort(ids);
 
@@ -210,6 +212,9 @@ public class CounterLocalServiceTest {
 	private static final int _INCREMENT_COUNT = 10000;
 
 	private static final int _PROCESS_COUNT = 4;
+
+	@Inject
+	private static final ProcessExecutor _processExecutor = null;
 
 	private static class IncrementProcessCallable
 		implements ProcessCallable<Long[]> {

@@ -20,7 +20,7 @@ import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.model.CalendarBookingConstants;
 import com.liferay.calendar.service.CalendarBookingLocalService;
 import com.liferay.calendar.workflow.CalendarBookingWorkflowConstants;
-import com.liferay.exportimport.data.handler.base.BaseStagedModelDataHandler;
+import com.liferay.exportimport.kernel.lar.BaseStagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.ExportImportPathUtil;
 import com.liferay.exportimport.kernel.lar.PortletDataContext;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
@@ -32,6 +32,8 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.trash.TrashHandler;
+import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -125,11 +127,30 @@ public class CalendarBookingStagedModelDataHandler
 			StagedModelDataHandlerUtil.exportReferenceStagedModel(
 				portletDataContext, calendarBooking,
 				calendarBooking.getParentCalendarBooking(),
-				PortletDataContext.REFERENCE_TYPE_STRONG);
+				PortletDataContext.REFERENCE_TYPE_PARENT);
 		}
 
 		Element calendarBookingElement =
 			portletDataContext.getExportDataElement(calendarBooking);
+
+		for (CalendarBooking childCalendarBooking :
+				calendarBooking.getChildCalendarBookings()) {
+
+			if (childCalendarBooking.isMasterBooking()) {
+				continue;
+			}
+
+			StagedModelDataHandlerUtil.exportReferenceStagedModel(
+				portletDataContext, calendarBooking,
+				childCalendarBooking.getCalendar(),
+				PortletDataContext.REFERENCE_TYPE_STRONG);
+
+			Element childElement = calendarBookingElement.addElement("child");
+
+			childElement.addAttribute(
+				"calendarId",
+				String.valueOf(childCalendarBooking.getCalendarId()));
+		}
 
 		portletDataContext.addClassedModel(
 			calendarBookingElement,
@@ -178,6 +199,8 @@ public class CalendarBookingStagedModelDataHandler
 		long parentCalendarBookingId =
 			CalendarBookingConstants.PARENT_CALENDAR_BOOKING_ID_DEFAULT;
 
+		long[] childCalendarIds = new long[0];
+
 		if (!calendarBooking.isMasterBooking()) {
 			Map<Long, Long> calendarBookingIds =
 				(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
@@ -187,6 +210,18 @@ public class CalendarBookingStagedModelDataHandler
 				calendarBookingIds,
 				calendarBooking.getParentCalendarBookingId(),
 				calendarBooking.getParentCalendarBookingId());
+		}
+		else {
+			childCalendarIds = _getChildCalendarIds(
+				portletDataContext, calendarIds, calendarBooking);
+		}
+
+		long recurringCalendarBookingId =
+			CalendarBookingConstants.RECURRING_CALENDAR_BOOKING_ID_DEFAULT;
+
+		if (!calendarBooking.isMasterRecurringBooking()) {
+			recurringCalendarBookingId =
+				calendarBooking.getRecurringCalendarBookingId();
 		}
 
 		ServiceContext serviceContext = portletDataContext.createServiceContext(
@@ -205,9 +240,8 @@ public class CalendarBookingStagedModelDataHandler
 
 				importedCalendarBooking =
 					_calendarBookingLocalService.addCalendarBooking(
-						userId, calendarId, new long[0],
-						parentCalendarBookingId,
-						calendarBooking.getRecurringCalendarBookingId(),
+						userId, calendarId, childCalendarIds,
+						parentCalendarBookingId, recurringCalendarBookingId,
 						calendarBooking.getTitleMap(),
 						calendarBooking.getDescriptionMap(),
 						calendarBooking.getLocation(),
@@ -225,7 +259,8 @@ public class CalendarBookingStagedModelDataHandler
 				importedCalendarBooking =
 					_calendarBookingLocalService.updateCalendarBooking(
 						userId, existingCalendarBooking.getCalendarBookingId(),
-						calendarId, calendarBooking.getTitleMap(),
+						calendarId, childCalendarIds,
+						calendarBooking.getTitleMap(),
 						calendarBooking.getDescriptionMap(),
 						calendarBooking.getLocation(),
 						calendarBooking.getStartTime(),
@@ -242,8 +277,8 @@ public class CalendarBookingStagedModelDataHandler
 		else {
 			importedCalendarBooking =
 				_calendarBookingLocalService.addCalendarBooking(
-					userId, calendarId, new long[0], parentCalendarBookingId,
-					calendarBooking.getRecurringCalendarBookingId(),
+					userId, calendarId, childCalendarIds,
+					parentCalendarBookingId, recurringCalendarBookingId,
 					calendarBooking.getTitleMap(),
 					calendarBooking.getDescriptionMap(),
 					calendarBooking.getLocation(),
@@ -255,6 +290,10 @@ public class CalendarBookingStagedModelDataHandler
 					calendarBooking.getSecondReminder(),
 					calendarBooking.getSecondReminderType(), serviceContext);
 		}
+
+		_calendarBookingLocalService.updateStatus(
+			userId, importedCalendarBooking, calendarBooking.getStatus(),
+			serviceContext);
 
 		// The root discussion message is not automatically imported when
 		// importing a calendar booking
@@ -292,7 +331,8 @@ public class CalendarBookingStagedModelDataHandler
 			return;
 		}
 
-		TrashHandler trashHandler = existingBooking.getTrashHandler();
+		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
+			CalendarBooking.class.getName());
 
 		if (trashHandler.isRestorable(existingBooking.getCalendarBookingId())) {
 			trashHandler.restoreTrashEntry(
@@ -314,11 +354,33 @@ public class CalendarBookingStagedModelDataHandler
 		_mbMessageLocalService = mbMessageLocalService;
 	}
 
+	private long[] _getChildCalendarIds(
+		PortletDataContext portletDataContext, Map<Long, Long> calendarIds,
+		CalendarBooking calendarBooking) {
+
+		long[] childCalendarIds = new long[0];
+
+		Element calendarBookingElement =
+			portletDataContext.getImportDataElement(calendarBooking);
+
+		List<Element> childElements = calendarBookingElement.elements("child");
+
+		for (Element childElement : childElements) {
+			long calendarId = Long.valueOf(
+				childElement.attributeValue("calendarId"));
+
+			calendarId = MapUtil.getLong(calendarIds, calendarId, calendarId);
+
+			childCalendarIds = ArrayUtil.append(childCalendarIds, calendarId);
+		}
+
+		return childCalendarIds;
+	}
+
 	private static final int[] _EXPORTABLE_STATUSES = {
 		CalendarBookingWorkflowConstants.STATUS_APPROVED,
 		CalendarBookingWorkflowConstants.STATUS_DENIED,
-		CalendarBookingWorkflowConstants.STATUS_MAYBE,
-		CalendarBookingWorkflowConstants.STATUS_PENDING
+		CalendarBookingWorkflowConstants.STATUS_MAYBE
 	};
 
 	private CalendarBookingLocalService _calendarBookingLocalService;

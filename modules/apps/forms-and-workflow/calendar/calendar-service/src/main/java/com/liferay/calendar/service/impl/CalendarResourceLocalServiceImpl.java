@@ -23,13 +23,13 @@ import com.liferay.calendar.service.base.CalendarResourceLocalServiceBaseImpl;
 import com.liferay.calendar.service.configuration.CalendarServiceConfigurationValues;
 import com.liferay.calendar.util.comparator.CalendarResourceCodeComparator;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -78,8 +78,7 @@ public class CalendarResourceLocalServiceImpl
 			code = String.valueOf(calendarResourceId);
 		}
 		else {
-			code = code.trim();
-			code = StringUtil.toUpperCase(code);
+			code = StringUtil.toUpperCase(StringUtil.trim(code));
 		}
 
 		Date now = new Date();
@@ -114,14 +113,16 @@ public class CalendarResourceLocalServiceImpl
 		// Calendar
 
 		if (!ExportImportThreadLocal.isImportInProcess()) {
-			serviceContext.setAddGroupPermissions(true);
-			serviceContext.setAddGuestPermissions(true);
+			ServiceContext calendarServiceContext = new ServiceContext();
+
+			calendarServiceContext.setAddGroupPermissions(true);
+			calendarServiceContext.setAddGuestPermissions(true);
 
 			calendarLocalService.addCalendar(
 				userId, calendarResource.getGroupId(), calendarResourceId,
 				nameMap, descriptionMap, calendarResource.getTimeZoneId(),
 				CalendarServiceConfigurationValues.CALENDAR_COLOR_DEFAULT, true,
-				false, false, serviceContext);
+				false, false, calendarServiceContext);
 		}
 
 		// Asset

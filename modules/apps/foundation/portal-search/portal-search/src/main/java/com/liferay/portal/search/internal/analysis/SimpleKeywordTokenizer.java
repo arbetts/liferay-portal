@@ -14,7 +14,7 @@
 
 package com.liferay.portal.search.internal.analysis;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.search.analysis.KeywordTokenizer;
@@ -53,6 +53,8 @@ public class SimpleKeywordTokenizer implements KeywordTokenizer {
 
 	@Override
 	public List<String> tokenize(String keyword) {
+		keyword = _normalizeWhitespace(keyword);
+
 		List<String> tokens = new ArrayList<>();
 
 		int start = keyword.indexOf(CharPool.QUOTE);
@@ -131,5 +133,11 @@ public class SimpleKeywordTokenizer implements KeywordTokenizer {
 			}
 		}
 	}
+
+	private String _normalizeWhitespace(String keyword) {
+		return StringUtil.replace(keyword, _IDEOGRAPHIC_SPACE, CharPool.SPACE);
+	}
+
+	private static final char _IDEOGRAPHIC_SPACE = '\u3000';
 
 }

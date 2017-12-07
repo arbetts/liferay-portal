@@ -45,36 +45,34 @@ import com.liferay.message.boards.kernel.service.MBMessageLocalService;
 import com.liferay.message.boards.kernel.service.MBThreadLocalService;
 import com.liferay.portal.kernel.cal.DayAndPosition;
 import com.liferay.portal.kernel.cal.TZSRecurrence;
+import com.liferay.portal.kernel.dao.db.DBInspector;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.ResourceAction;
-import com.liferay.portal.kernel.model.ResourceBlockConstants;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.ResourcePermission;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
-import com.liferay.portal.kernel.model.Subscription;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
-import com.liferay.portal.kernel.service.ResourceBlockLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.service.SubscriptionLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
@@ -85,9 +83,10 @@ import com.liferay.ratings.kernel.service.RatingsEntryLocalService;
 import com.liferay.ratings.kernel.service.RatingsStatsLocalService;
 import com.liferay.social.kernel.model.SocialActivity;
 import com.liferay.social.kernel.service.SocialActivityLocalService;
+import com.liferay.subscription.model.Subscription;
+import com.liferay.subscription.service.SubscriptionLocalService;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -125,7 +124,9 @@ public class CalEventImporter {
 		try (Connection con = DataAccess.getUpgradeOptimizedConnection()) {
 			connection = con;
 
-			importCalEvents();
+			DBInspector dbInspector = new DBInspector(connection);
+
+			importCalEvents(dbInspector);
 		}
 		finally {
 			connection = null;
@@ -438,8 +439,19 @@ public class CalEventImporter {
 			return null;
 		}
 
-		TZSRecurrence tzsRecurrence = (TZSRecurrence)_jsonSerializer.fromJSON(
-			originalRecurrence);
+		TZSRecurrence tzsRecurrence = null;
+
+		try {
+			tzsRecurrence = (TZSRecurrence)JSONFactoryUtil.deserialize(
+				originalRecurrence);
+		}
+		catch (IllegalStateException ise) {
+
+			// LPS-65972
+
+			tzsRecurrence = (TZSRecurrence)_jsonSerializer.fromJSON(
+				originalRecurrence);
+		}
 
 		if (tzsRecurrence == null) {
 			return null;
@@ -510,26 +522,6 @@ public class CalEventImporter {
 		return RecurrenceSerializer.serialize(recurrence);
 	}
 
-	protected boolean doHasTable(String tableName) throws Exception {
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			DatabaseMetaData metadata = connection.getMetaData();
-
-			rs = metadata.getTables(null, null, tableName, null);
-
-			while (rs.next()) {
-				return true;
-			}
-		}
-		finally {
-			DataAccess.cleanUp(ps, rs);
-		}
-
-		return false;
-	}
-
 	protected long getActionId(
 		ResourceAction oldResourceAction, String newClassName) {
 
@@ -544,28 +536,24 @@ public class CalEventImporter {
 		return newResourceAction.getBitwiseValue();
 	}
 
-	protected long getActionIds(
+	protected String[] getActionIds(
 		ResourcePermission resourcePermission, String oldClassName,
-		String newClassName) {
+		List<String> modelResourceActions) {
 
-		long actionIds = 0;
+		List<String> actionIds = new ArrayList<>();
 
-		List<ResourceAction> oldResourceActions =
+		List<ResourceAction> resourceActions =
 			_resourceActionLocalService.getResourceActions(oldClassName);
 
-		for (ResourceAction oldResourceAction : oldResourceActions) {
-			boolean hasActionId = _resourcePermissionLocalService.hasActionId(
-				resourcePermission, oldResourceAction);
+		for (ResourceAction resourceAction : resourceActions) {
+			if (resourcePermission.hasAction(resourceAction) &&
+				modelResourceActions.contains(resourceAction.getActionId())) {
 
-			if (!hasActionId) {
-				continue;
+				actionIds.add(resourceAction.getActionId());
 			}
-
-			actionIds = actionIds | getActionId(
-				oldResourceAction, newClassName);
 		}
 
-		return actionIds;
+		return actionIds.toArray(new String[actionIds.size()]);
 	}
 
 	protected AssetCategory getAssetCategory(
@@ -719,17 +707,6 @@ public class CalEventImporter {
 		}
 	}
 
-	protected boolean hasTable(String tableName) throws Exception {
-		if (doHasTable(StringUtil.toLowerCase(tableName)) ||
-			doHasTable(StringUtil.toUpperCase(tableName)) ||
-			doHasTable(tableName)) {
-
-			return true;
-		}
-
-		return false;
-	}
-
 	protected void importAssetLink(
 			AssetLink assetLink, long oldEntryId, long newEntryId)
 		throws Exception {
@@ -853,25 +830,29 @@ public class CalEventImporter {
 	}
 
 	protected void importCalendarBookingResourcePermission(
-			ResourcePermission resourcePermission, long calendarBookingId)
+			ResourcePermission resourcePermission, long calendarBookingId,
+			List<String> modelResourceActions)
 		throws PortalException {
 
 		CalendarBooking calendarBooking =
 			_calendarBookingLocalService.getCalendarBooking(calendarBookingId);
 
-		long actionIds = getActionIds(
-			resourcePermission, _CLASS_NAME, CalendarBooking.class.getName());
+		String[] actionIds = getActionIds(
+			resourcePermission, _CLASS_NAME, modelResourceActions);
 
-		_resourceBlockLocalService.updateIndividualScopePermissions(
-			calendarBooking.getCompanyId(), calendarBooking.getGroupId(),
-			CalendarBooking.class.getName(), calendarBooking,
-			resourcePermission.getRoleId(), actionIds,
-			ResourceBlockConstants.OPERATOR_SET);
+		_resourcePermissionLocalService.setResourcePermissions(
+			calendarBooking.getCompanyId(), CalendarBooking.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL, String.valueOf(calendarBooking),
+			resourcePermission.getRoleId(), actionIds);
 	}
 
 	protected void importCalendarBookingResourcePermissions(
 			long companyId, long eventId, long calendarBookingId)
 		throws PortalException {
+
+		List<String> modelResourceActions =
+			ResourceActionsUtil.getModelResourceActions(
+				CalendarBooking.class.getName());
 
 		List<ResourcePermission> resourcePermissions =
 			_resourcePermissionLocalService.getResourcePermissions(
@@ -880,7 +861,7 @@ public class CalEventImporter {
 
 		for (ResourcePermission resourcePermission : resourcePermissions) {
 			importCalendarBookingResourcePermission(
-				resourcePermission, calendarBookingId);
+				resourcePermission, calendarBookingId, modelResourceActions);
 		}
 	}
 
@@ -892,8 +873,8 @@ public class CalEventImporter {
 			sb.append("userName, createDate, modifiedDate, title, ");
 			sb.append("description, location, startDate, endDate, ");
 			sb.append("durationHour, durationMinute, allDay, type_, ");
-			sb.append("repeating, recurrence, firstReminder, secondReminder ");
-			sb.append("from CalEvent where eventId = ?");
+			sb.append("repeating, recurrence, remindBy, firstReminder, ");
+			sb.append("secondReminder from CalEvent where eventId = ?");
 
 			try (PreparedStatement ps =
 					connection.prepareStatement(sb.toString())) {
@@ -919,8 +900,8 @@ public class CalEventImporter {
 					int durationMinute = rs.getInt("durationMinute");
 					boolean allDay = rs.getBoolean("allDay");
 					String type = rs.getString("type_");
-
 					String recurrence = rs.getString("recurrence");
+					int remindBy = rs.getInt("remindBy");
 					int firstReminder = rs.getInt("firstReminder");
 					int secondReminder = rs.getInt("secondReminder");
 
@@ -928,7 +909,7 @@ public class CalEventImporter {
 						uuid, eventId, groupId, companyId, userId, userName,
 						createDate, modifiedDate, title, description, location,
 						startDate, durationHour, durationMinute, allDay, type,
-						recurrence, firstReminder, secondReminder);
+						recurrence, remindBy, firstReminder, secondReminder);
 				}
 				else {
 					throw new NoSuchBookingException();
@@ -943,7 +924,7 @@ public class CalEventImporter {
 			Timestamp modifiedDate, String title, String description,
 			String location, Timestamp startDate, int durationHour,
 			int durationMinute, boolean allDay, String type, String recurrence,
-			int firstReminder, int secondReminder)
+			int remindBy, int firstReminder, int secondReminder)
 		throws Exception {
 
 		// Calendar booking
@@ -968,6 +949,11 @@ public class CalEventImporter {
 
 		if (allDay) {
 			endTime = endTime - 1;
+		}
+
+		if (remindBy == _REMIND_BY_NONE) {
+			firstReminder = 0;
+			secondReminder = 0;
 		}
 
 		calendarBooking = addCalendarBooking(
@@ -1009,8 +995,8 @@ public class CalEventImporter {
 		return calendarBooking;
 	}
 
-	protected void importCalEvents() throws Exception {
-		if (!hasTable("CalEvent")) {
+	protected void importCalEvents(DBInspector dbInspector) throws Exception {
+		if (!dbInspector.hasTable("CalEvent", true)) {
 			return;
 		}
 
@@ -1021,8 +1007,8 @@ public class CalEventImporter {
 			sb.append("userName, createDate, modifiedDate, title, ");
 			sb.append("description, location, startDate, endDate, ");
 			sb.append("durationHour, durationMinute, allDay, type_, ");
-			sb.append("repeating, recurrence, firstReminder, secondReminder ");
-			sb.append("from CalEvent ");
+			sb.append("repeating, recurrence, remindBy, firstReminder, ");
+			sb.append("secondReminder from CalEvent");
 
 			try (PreparedStatement ps =
 					connection.prepareStatement(sb.toString())) {
@@ -1046,8 +1032,8 @@ public class CalEventImporter {
 					int durationMinute = rs.getInt("durationMinute");
 					boolean allDay = rs.getBoolean("allDay");
 					String type = rs.getString("type_");
-
 					String recurrence = rs.getString("recurrence");
+					int remindBy = rs.getInt("remindBy");
 					int firstReminder = rs.getInt("firstReminder");
 					int secondReminder = rs.getInt("secondReminder");
 
@@ -1055,7 +1041,7 @@ public class CalEventImporter {
 						uuid, eventId, groupId, companyId, userId, userName,
 						createDate, modifiedDate, title, description, location,
 						startDate, durationHour, durationMinute, allDay, type,
-						recurrence, firstReminder, secondReminder);
+						recurrence, remindBy, firstReminder, secondReminder);
 				}
 			}
 		}
@@ -1188,18 +1174,12 @@ public class CalEventImporter {
 				className, classPK, ratingsEntry.getScore());
 		}
 
-		List<Long> oldClassPKs = new ArrayList<>();
+		RatingsStats ratingsStats = _ratingsStatsLocalService.fetchStats(
+			oldClassName, oldClassPK);
 
-		oldClassPKs.add(oldClassPK);
-
-		List<RatingsStats> ratingsStatsList =
-			_ratingsStatsLocalService.getStats(oldClassName, oldClassPKs);
-
-		if (ratingsStatsList.isEmpty()) {
+		if (ratingsStats == null) {
 			return;
 		}
-
-		RatingsStats ratingsStats = ratingsStatsList.get(0);
 
 		addRatingsStats(
 			_counterLocalService.increment(), className, classPK,
@@ -1400,13 +1380,6 @@ public class CalEventImporter {
 	}
 
 	@Reference(unbind = "-")
-	protected void setResourceBlockLocalService(
-		ResourceBlockLocalService resourceBlockLocalService) {
-
-		_resourceBlockLocalService = resourceBlockLocalService;
-	}
-
-	@Reference(unbind = "-")
 	protected void setResourcePermissionLocalService(
 		ResourcePermissionLocalService resourcePermissionLocalService) {
 
@@ -1455,6 +1428,8 @@ public class CalEventImporter {
 	private static final String _CLASS_NAME =
 		"com.liferay.portlet.calendar.model.CalEvent";
 
+	private static final int _REMIND_BY_NONE = 0;
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		CalEventImporter.class);
 
@@ -1492,7 +1467,6 @@ public class CalEventImporter {
 	private RatingsEntryLocalService _ratingsEntryLocalService;
 	private RatingsStatsLocalService _ratingsStatsLocalService;
 	private ResourceActionLocalService _resourceActionLocalService;
-	private ResourceBlockLocalService _resourceBlockLocalService;
 	private ResourcePermissionLocalService _resourcePermissionLocalService;
 	private RoleLocalService _roleLocalService;
 	private SocialActivityLocalService _socialActivityLocalService;

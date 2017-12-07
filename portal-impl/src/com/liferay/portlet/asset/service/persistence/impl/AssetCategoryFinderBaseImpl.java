@@ -18,8 +18,14 @@ import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.service.persistence.AssetCategoryPersistence;
 
 import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 
+import java.lang.reflect.Field;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,6 +33,28 @@ import java.util.Set;
  * @generated
  */
 public class AssetCategoryFinderBaseImpl extends BasePersistenceImpl<AssetCategory> {
+	public AssetCategoryFinderBaseImpl() {
+		setModelClass(AssetCategory.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
+	}
+
 	@Override
 	public Set<String> getBadColumnNames() {
 		return getAssetCategoryPersistence().getBadColumnNames();
@@ -53,4 +81,5 @@ public class AssetCategoryFinderBaseImpl extends BasePersistenceImpl<AssetCatego
 
 	@BeanReference(type = AssetCategoryPersistence.class)
 	protected AssetCategoryPersistence assetCategoryPersistence;
+	private static final Log _log = LogFactoryUtil.getLog(AssetCategoryFinderBaseImpl.class);
 }

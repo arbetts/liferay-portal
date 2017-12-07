@@ -1116,7 +1116,7 @@ public class GroupUtil {
 	* Returns the group where companyId = &#63; and friendlyURL = &#63; or throws a {@link NoSuchGroupException} if it could not be found.
 	*
 	* @param companyId the company ID
-	* @param friendlyURL the friendly u r l
+	* @param friendlyURL the friendly url
 	* @return the matching group
 	* @throws NoSuchGroupException if a matching group could not be found
 	*/
@@ -1129,7 +1129,7 @@ public class GroupUtil {
 	* Returns the group where companyId = &#63; and friendlyURL = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	*
 	* @param companyId the company ID
-	* @param friendlyURL the friendly u r l
+	* @param friendlyURL the friendly url
 	* @return the matching group, or <code>null</code> if a matching group could not be found
 	*/
 	public static Group fetchByC_F(long companyId, java.lang.String friendlyURL) {
@@ -1140,7 +1140,7 @@ public class GroupUtil {
 	* Returns the group where companyId = &#63; and friendlyURL = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	*
 	* @param companyId the company ID
-	* @param friendlyURL the friendly u r l
+	* @param friendlyURL the friendly url
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching group, or <code>null</code> if a matching group could not be found
 	*/
@@ -1154,7 +1154,7 @@ public class GroupUtil {
 	* Removes the group where companyId = &#63; and friendlyURL = &#63; from the database.
 	*
 	* @param companyId the company ID
-	* @param friendlyURL the friendly u r l
+	* @param friendlyURL the friendly url
 	* @return the group that was removed
 	*/
 	public static Group removeByC_F(long companyId, java.lang.String friendlyURL)
@@ -1166,7 +1166,7 @@ public class GroupUtil {
 	* Returns the number of groups where companyId = &#63; and friendlyURL = &#63;.
 	*
 	* @param companyId the company ID
-	* @param friendlyURL the friendly u r l
+	* @param friendlyURL the friendly url
 	* @return the number of matching groups
 	*/
 	public static int countByC_F(long companyId, java.lang.String friendlyURL) {
@@ -1519,7 +1519,7 @@ public class GroupUtil {
 	* Returns all the groups where classNameId = &#63; and classPK = &#63;.
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @return the matching groups
 	*/
 	public static List<Group> findByC_CPK(long classNameId, long classPK) {
@@ -1534,7 +1534,7 @@ public class GroupUtil {
 	* </p>
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param start the lower bound of the range of groups
 	* @param end the upper bound of the range of groups (not inclusive)
 	* @return the range of matching groups
@@ -1552,7 +1552,7 @@ public class GroupUtil {
 	* </p>
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param start the lower bound of the range of groups
 	* @param end the upper bound of the range of groups (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -1573,7 +1573,7 @@ public class GroupUtil {
 	* </p>
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param start the lower bound of the range of groups
 	* @param end the upper bound of the range of groups (not inclusive)
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -1592,7 +1592,7 @@ public class GroupUtil {
 	* Returns the first group in the ordered set where classNameId = &#63; and classPK = &#63;.
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching group
 	* @throws NoSuchGroupException if a matching group could not be found
@@ -1608,7 +1608,7 @@ public class GroupUtil {
 	* Returns the first group in the ordered set where classNameId = &#63; and classPK = &#63;.
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the first matching group, or <code>null</code> if a matching group could not be found
 	*/
@@ -1622,7 +1622,7 @@ public class GroupUtil {
 	* Returns the last group in the ordered set where classNameId = &#63; and classPK = &#63;.
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching group
 	* @throws NoSuchGroupException if a matching group could not be found
@@ -1638,7 +1638,7 @@ public class GroupUtil {
 	* Returns the last group in the ordered set where classNameId = &#63; and classPK = &#63;.
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the last matching group, or <code>null</code> if a matching group could not be found
 	*/
@@ -1653,7 +1653,7 @@ public class GroupUtil {
 	*
 	* @param groupId the primary key of the current group
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	* @return the previous, current, and next group
 	* @throws NoSuchGroupException if a group with the primary key could not be found
@@ -1671,7 +1671,7 @@ public class GroupUtil {
 	* Removes all the groups where classNameId = &#63; and classPK = &#63; from the database.
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	*/
 	public static void removeByC_CPK(long classNameId, long classPK) {
 		getPersistence().removeByC_CPK(classNameId, classPK);
@@ -1681,7 +1681,7 @@ public class GroupUtil {
 	* Returns the number of groups where classNameId = &#63; and classPK = &#63;.
 	*
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @return the number of matching groups
 	*/
 	public static int countByC_CPK(long classNameId, long classPK) {
@@ -2033,7 +2033,7 @@ public class GroupUtil {
 	*
 	* @param companyId the company ID
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @return the matching group
 	* @throws NoSuchGroupException if a matching group could not be found
 	*/
@@ -2048,7 +2048,7 @@ public class GroupUtil {
 	*
 	* @param companyId the company ID
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @return the matching group, or <code>null</code> if a matching group could not be found
 	*/
 	public static Group fetchByC_C_C(long companyId, long classNameId,
@@ -2061,7 +2061,7 @@ public class GroupUtil {
 	*
 	* @param companyId the company ID
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching group, or <code>null</code> if a matching group could not be found
 	*/
@@ -2077,7 +2077,7 @@ public class GroupUtil {
 	*
 	* @param companyId the company ID
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @return the group that was removed
 	*/
 	public static Group removeByC_C_C(long companyId, long classNameId,
@@ -2091,7 +2091,7 @@ public class GroupUtil {
 	*
 	* @param companyId the company ID
 	* @param classNameId the class name ID
-	* @param classPK the class p k
+	* @param classPK the class pk
 	* @return the number of matching groups
 	*/
 	public static int countByC_C_C(long companyId, long classNameId,
@@ -2557,6 +2557,203 @@ public class GroupUtil {
 	public static int countByC_L_GK(long companyId, long liveGroupId,
 		java.lang.String groupKey) {
 		return getPersistence().countByC_L_GK(companyId, liveGroupId, groupKey);
+	}
+
+	/**
+	* Returns all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @return the matching groups
+	*/
+	public static List<Group> findByC_T_S(long companyId,
+		java.lang.String treePath, boolean site) {
+		return getPersistence().findByC_T_S(companyId, treePath, site);
+	}
+
+	/**
+	* Returns a range of all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link GroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @param start the lower bound of the range of groups
+	* @param end the upper bound of the range of groups (not inclusive)
+	* @return the range of matching groups
+	*/
+	public static List<Group> findByC_T_S(long companyId,
+		java.lang.String treePath, boolean site, int start, int end) {
+		return getPersistence()
+				   .findByC_T_S(companyId, treePath, site, start, end);
+	}
+
+	/**
+	* Returns an ordered range of all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link GroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @param start the lower bound of the range of groups
+	* @param end the upper bound of the range of groups (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @return the ordered range of matching groups
+	*/
+	public static List<Group> findByC_T_S(long companyId,
+		java.lang.String treePath, boolean site, int start, int end,
+		OrderByComparator<Group> orderByComparator) {
+		return getPersistence()
+				   .findByC_T_S(companyId, treePath, site, start, end,
+			orderByComparator);
+	}
+
+	/**
+	* Returns an ordered range of all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link GroupModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @param start the lower bound of the range of groups
+	* @param end the upper bound of the range of groups (not inclusive)
+	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	* @param retrieveFromCache whether to retrieve from the finder cache
+	* @return the ordered range of matching groups
+	*/
+	public static List<Group> findByC_T_S(long companyId,
+		java.lang.String treePath, boolean site, int start, int end,
+		OrderByComparator<Group> orderByComparator, boolean retrieveFromCache) {
+		return getPersistence()
+				   .findByC_T_S(companyId, treePath, site, start, end,
+			orderByComparator, retrieveFromCache);
+	}
+
+	/**
+	* Returns the first group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching group
+	* @throws NoSuchGroupException if a matching group could not be found
+	*/
+	public static Group findByC_T_S_First(long companyId,
+		java.lang.String treePath, boolean site,
+		OrderByComparator<Group> orderByComparator)
+		throws com.liferay.portal.kernel.exception.NoSuchGroupException {
+		return getPersistence()
+				   .findByC_T_S_First(companyId, treePath, site,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the first group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the first matching group, or <code>null</code> if a matching group could not be found
+	*/
+	public static Group fetchByC_T_S_First(long companyId,
+		java.lang.String treePath, boolean site,
+		OrderByComparator<Group> orderByComparator) {
+		return getPersistence()
+				   .fetchByC_T_S_First(companyId, treePath, site,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the last group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching group
+	* @throws NoSuchGroupException if a matching group could not be found
+	*/
+	public static Group findByC_T_S_Last(long companyId,
+		java.lang.String treePath, boolean site,
+		OrderByComparator<Group> orderByComparator)
+		throws com.liferay.portal.kernel.exception.NoSuchGroupException {
+		return getPersistence()
+				   .findByC_T_S_Last(companyId, treePath, site,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the last group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the last matching group, or <code>null</code> if a matching group could not be found
+	*/
+	public static Group fetchByC_T_S_Last(long companyId,
+		java.lang.String treePath, boolean site,
+		OrderByComparator<Group> orderByComparator) {
+		return getPersistence()
+				   .fetchByC_T_S_Last(companyId, treePath, site,
+			orderByComparator);
+	}
+
+	/**
+	* Returns the groups before and after the current group in the ordered set where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* @param groupId the primary key of the current group
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	* @return the previous, current, and next group
+	* @throws NoSuchGroupException if a group with the primary key could not be found
+	*/
+	public static Group[] findByC_T_S_PrevAndNext(long groupId, long companyId,
+		java.lang.String treePath, boolean site,
+		OrderByComparator<Group> orderByComparator)
+		throws com.liferay.portal.kernel.exception.NoSuchGroupException {
+		return getPersistence()
+				   .findByC_T_S_PrevAndNext(groupId, companyId, treePath, site,
+			orderByComparator);
+	}
+
+	/**
+	* Removes all the groups where companyId = &#63; and treePath LIKE &#63; and site = &#63; from the database.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	*/
+	public static void removeByC_T_S(long companyId, java.lang.String treePath,
+		boolean site) {
+		getPersistence().removeByC_T_S(companyId, treePath, site);
+	}
+
+	/**
+	* Returns the number of groups where companyId = &#63; and treePath LIKE &#63; and site = &#63;.
+	*
+	* @param companyId the company ID
+	* @param treePath the tree path
+	* @param site the site
+	* @return the number of matching groups
+	*/
+	public static int countByC_T_S(long companyId, java.lang.String treePath,
+		boolean site) {
+		return getPersistence().countByC_T_S(companyId, treePath, site);
 	}
 
 	/**

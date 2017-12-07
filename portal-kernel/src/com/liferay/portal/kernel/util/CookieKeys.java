@@ -14,6 +14,7 @@
 
 package com.liferay.portal.kernel.util;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.CookieNotSupportedException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -109,6 +110,34 @@ public class CookieKeys {
 		cookieSupportCookie.setMaxAge(MAX_AGE);
 
 		addCookie(request, response, cookieSupportCookie);
+	}
+
+	public static void deleteCookies(
+		HttpServletRequest request, HttpServletResponse response, String domain,
+		String... cookieNames) {
+
+		if (!_SESSION_ENABLE_PERSISTENT_COOKIES) {
+			return;
+		}
+
+		Map<String, Cookie> cookieMap = _getCookieMap(request);
+
+		for (String cookieName : cookieNames) {
+			Cookie cookie = cookieMap.remove(
+				StringUtil.toUpperCase(cookieName));
+
+			if (cookie != null) {
+				if (domain != null) {
+					cookie.setDomain(domain);
+				}
+
+				cookie.setMaxAge(0);
+				cookie.setPath(StringPool.SLASH);
+				cookie.setValue(StringPool.BLANK);
+
+				response.addCookie(cookie);
+			}
+		}
 	}
 
 	public static String getCookie(HttpServletRequest request, String name) {

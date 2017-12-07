@@ -18,26 +18,24 @@ import com.liferay.bookmarks.model.BookmarksEntry;
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.service.BookmarksEntryLocalService;
 import com.liferay.bookmarks.service.BookmarksFolderLocalService;
+import com.liferay.portal.instances.service.PortalInstancesLocalService;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
-import com.liferay.portal.util.PortalInstances;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.verify.VerifyProcess;
 
 import java.util.List;
 
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Raymond Augé
- * @author Alexander Chow
+ * @author     Raymond Augé
+ * @author     Alexander Chow
+ * @deprecated As of 1.1.0, replaced by {@link
+ *             com.liferay.bookmarks.internal.verify.BookmarksServiceVerifyProcess}
  */
-@Component(
-	immediate = true,
-	property = {"verify.process.name=com.liferay.bookmarks.service"},
-	service = VerifyProcess.class
-)
+@Deprecated
 public class BookmarksServiceVerifyProcess extends VerifyProcess {
 
 	@Override
@@ -79,8 +77,10 @@ public class BookmarksServiceVerifyProcess extends VerifyProcess {
 				catch (Exception e) {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
-							"Unable to update asset for entry " +
-								entry.getEntryId() + ": " + e.getMessage());
+							StringBundler.concat(
+								"Unable to update asset for entry ",
+								String.valueOf(entry.getEntryId()), ": ",
+								e.getMessage()));
 					}
 				}
 			}
@@ -109,8 +109,10 @@ public class BookmarksServiceVerifyProcess extends VerifyProcess {
 				catch (Exception e) {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
-							"Unable to update asset for folder " +
-								folder.getFolderId() + ": " + e.getMessage());
+							StringBundler.concat(
+								"Unable to update asset for folder ",
+								String.valueOf(folder.getFolderId()), ": ",
+								e.getMessage()));
 					}
 				}
 			}
@@ -123,7 +125,8 @@ public class BookmarksServiceVerifyProcess extends VerifyProcess {
 
 	protected void verifyTree() throws Exception {
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
-			long[] companyIds = PortalInstances.getCompanyIdsBySQL();
+			long[] companyIds =
+				_portalInstancesLocalService.getCompanyIdsBySQL();
 
 			for (long companyId : companyIds) {
 				_bookmarksFolderLocalService.rebuildTree(companyId);
@@ -136,5 +139,8 @@ public class BookmarksServiceVerifyProcess extends VerifyProcess {
 
 	private BookmarksEntryLocalService _bookmarksEntryLocalService;
 	private BookmarksFolderLocalService _bookmarksFolderLocalService;
+
+	@Reference
+	private PortalInstancesLocalService _portalInstancesLocalService;
 
 }

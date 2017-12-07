@@ -14,10 +14,10 @@
 
 package com.liferay.portal.kernel.security.auth;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -79,8 +79,14 @@ public abstract class AbstractPortletRequestWhitelist
 	public Set<String> resetPortletInvocationWhitelist() {
 		_portletInvocationWhitelist = SetUtil.fromArray(
 			getWhitelistPropsValues());
-		_portletInvocationWhitelist = Collections.unmodifiableSet(
-			_portletInvocationWhitelist);
+
+		if (_portletInvocationWhitelist.isEmpty()) {
+			_portletInvocationWhitelist = Collections.emptySet();
+		}
+		else {
+			_portletInvocationWhitelist = Collections.unmodifiableSet(
+				_portletInvocationWhitelist);
+		}
 
 		return _portletInvocationWhitelist;
 	}
@@ -89,8 +95,14 @@ public abstract class AbstractPortletRequestWhitelist
 	public Set<String> resetPortletInvocationWhitelistActions() {
 		_portletInvocationWhitelistActions = SetUtil.fromArray(
 			getWhitelistActionsPropsValues());
-		_portletInvocationWhitelistActions = Collections.unmodifiableSet(
-			_portletInvocationWhitelistActions);
+
+		if (_portletInvocationWhitelistActions.isEmpty()) {
+			_portletInvocationWhitelistActions = Collections.emptySet();
+		}
+		else {
+			_portletInvocationWhitelistActions = Collections.unmodifiableSet(
+				_portletInvocationWhitelistActions);
+		}
 
 		return _portletInvocationWhitelistActions;
 	}

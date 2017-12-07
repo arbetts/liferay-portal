@@ -126,7 +126,7 @@ catch (NoSuchFolderException nsfe) {
 						</aui:fieldset>
 
 						<aui:fieldset collapsible="<%= true %>" id="bookmarksListingPanel" label="bookmarks-listing">
-							<aui:input name="preferences--enableRelatedAssets--" type="checkbox" value="<%= bookmarksGroupServiceOverriddenConfiguration.enableRelatedAssets() %>" />
+							<aui:input label="show-related-assets" name="preferences--enableRelatedAssets--" type="checkbox" value="<%= bookmarksGroupServiceOverriddenConfiguration.enableRelatedAssets() %>" />
 
 							<aui:input label="documents-per-page" name="preferences--entriesPerPage--" size="2" type="text" value="<%= bookmarksGroupServiceOverriddenConfiguration.entriesPerPage() %>" />
 
@@ -226,11 +226,11 @@ catch (NoSuchFolderException nsfe) {
 				<div class="container-fluid-1280">
 					<aui:fieldset-group markupView="lexicon">
 						<liferay-frontend:email-notification-settings
-							emailBody="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryAddedBodyXml() %>"
+							emailBodyLocalizedValuesMap="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryAddedBody() %>"
 							emailDefinitionTerms="<%= emailDefinitionTerms %>"
 							emailEnabled="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryAddedEnabled() %>"
 							emailParam="emailEntryAdded"
-							emailSubject="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryAddedSubjectXml() %>"
+							emailSubjectLocalizedValuesMap="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryAddedSubject() %>"
 						/>
 					</aui:fieldset-group>
 				</div>
@@ -240,11 +240,11 @@ catch (NoSuchFolderException nsfe) {
 				<div class="container-fluid-1280">
 					<aui:fieldset-group markupView="lexicon">
 						<liferay-frontend:email-notification-settings
-							emailBody="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryUpdatedBodyXml() %>"
+							emailBodyLocalizedValuesMap="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryUpdatedBody() %>"
 							emailDefinitionTerms="<%= emailDefinitionTerms %>"
 							emailEnabled="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryUpdatedEnabled() %>"
 							emailParam="emailEntryUpdated"
-							emailSubject="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryUpdatedSubjectXml() %>"
+							emailSubjectLocalizedValuesMap="<%= bookmarksGroupServiceOverriddenConfiguration.emailEntryUpdatedSubject() %>"
 						/>
 					</aui:fieldset-group>
 				</div>

@@ -25,11 +25,11 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.portal.security.auto.login.basic.auth.header.module.configuration.BasicAuthHeaderAutoLoginConfiguration",
 	localization = "content/Language",
-	name = "basic.auth.header.auto.login.configuration.name"
+	name = "basic-auth-header-auto-login-configuration-name"
 )
 public interface BasicAuthHeaderAutoLoginConfiguration {
 
-	@Meta.AD(deflt = "false", required = false)
+	@Meta.AD(deflt = "false", name = "enabled", required = false)
 	public boolean enabled();
 
 }

@@ -34,6 +34,12 @@ public class BrowserSnifferUtil {
 		return getBrowserSniffer().getBrowserId(request);
 	}
 
+	public static BrowserMetadata getBrowserMetadata(
+		HttpServletRequest request) {
+
+		return getBrowserSniffer().getBrowserMetadata(request);
+	}
+
 	public static BrowserSniffer getBrowserSniffer() {
 		PortalRuntimePermission.checkGetBeanProperty(BrowserSnifferUtil.class);
 
@@ -62,6 +68,10 @@ public class BrowserSnifferUtil {
 
 	public static boolean isChrome(HttpServletRequest request) {
 		return getBrowserSniffer().isChrome(request);
+	}
+
+	public static boolean isEdge(HttpServletRequest request) {
+		return getBrowserSniffer().isEdge(request);
 	}
 
 	public static boolean isFirefox(HttpServletRequest request) {

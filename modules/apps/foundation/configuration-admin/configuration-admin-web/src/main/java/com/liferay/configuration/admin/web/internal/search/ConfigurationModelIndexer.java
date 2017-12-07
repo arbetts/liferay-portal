@@ -14,7 +14,7 @@
 
 package com.liferay.configuration.admin.web.internal.search;
 
-import com.liferay.configuration.admin.web.internal.constants.ConfigurationAdminPortletKeys;
+import com.liferay.configuration.admin.constants.ConfigurationAdminPortletKeys;
 import com.liferay.configuration.admin.web.internal.model.ConfigurationModel;
 import com.liferay.configuration.admin.web.internal.util.ConfigurationModelRetriever;
 import com.liferay.configuration.admin.web.internal.util.ResourceBundleLoaderProvider;
@@ -286,13 +286,11 @@ public class ConfigurationModelIndexer extends BaseIndexer<ConfigurationModel> {
 		Map<Locale, String> values = new HashMap<>();
 
 		ResourceBundle defaultResourceBundle =
-			resourceBundleLoader.loadResourceBundle(
-				LocaleUtil.toLanguageId(LocaleUtil.getDefault()));
+			resourceBundleLoader.loadResourceBundle(LocaleUtil.getDefault());
 
 		for (Locale locale : LanguageUtil.getAvailableLocales()) {
 			ResourceBundle resourceBundle =
-				resourceBundleLoader.loadResourceBundle(
-					LocaleUtil.toLanguageId(locale));
+				resourceBundleLoader.loadResourceBundle(locale);
 
 			if (resourceBundle != null) {
 				String value = ResourceBundleUtil.getString(

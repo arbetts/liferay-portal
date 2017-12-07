@@ -15,12 +15,12 @@
 package com.liferay.portal.search.internal;
 
 import com.liferay.portal.kernel.search.Field;
-import com.liferay.portal.kernel.search.Indexer;
-import com.liferay.portal.kernel.search.IndexerRegistry;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.SortFactory;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.search.sort.SortFieldBuilder;
 
 import java.util.List;
 
@@ -55,10 +55,15 @@ public class SortFactoryImpl implements SortFactory {
 		Class<?> clazz, int type, String orderByCol, boolean inferSortField,
 		String orderByType) {
 
-		String sortField = orderByCol;
+		String sortFieldName = orderByCol;
+
+		if (orderByCol.equals(Field.PRIORITY)) {
+			inferSortField = false;
+		}
 
 		if (inferSortField) {
-			sortField = getSortField(orderByCol, type, clazz);
+			sortFieldName = sortFieldBuilder.getSortField(
+				clazz.getName(), orderByCol, type);
 		}
 
 		if (Validator.isNull(orderByType)) {
@@ -66,7 +71,8 @@ public class SortFactoryImpl implements SortFactory {
 		}
 
 		return new Sort(
-			sortField, type, !StringUtil.equalsIgnoreCase(orderByType, "asc"));
+			sortFieldName, type,
+			!StringUtil.equalsIgnoreCase(orderByType, "asc"));
 	}
 
 	@Override
@@ -83,7 +89,7 @@ public class SortFactoryImpl implements SortFactory {
 
 	@Override
 	public Sort[] toArray(List<Sort> sorts) {
-		if ((sorts == null) || sorts.isEmpty()) {
+		if (ListUtil.isEmpty(sorts)) {
 			return new Sort[0];
 		}
 
@@ -96,18 +102,12 @@ public class SortFactoryImpl implements SortFactory {
 		return sortsArray;
 	}
 
-	protected String getSortField(String orderByCol, int type, Class<?> clazz) {
-		Indexer<?> indexer = _indexerRegistry.getIndexer(clazz);
+	@Reference
+	protected SortFieldBuilder sortFieldBuilder;
 
-		return indexer.getSortField(orderByCol, type);
-	}
-
-	private static final Sort[] _DEFAULT_SORTS = new Sort[] {
+	private static final Sort[] _DEFAULT_SORTS = {
 		new Sort(null, Sort.SCORE_TYPE, false),
 		new Sort(Field.MODIFIED_DATE, Sort.LONG_TYPE, true)
 	};
-
-	@Reference
-	private IndexerRegistry _indexerRegistry;
 
 }

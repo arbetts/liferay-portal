@@ -20,7 +20,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 /**
  * @author Brian Wing Shun Chan
  * @author Shuyang Zhou
- * @see com.liferay.rss.util.Normalizer
+ * @see    com.liferay.rss.util.Normalizer
  */
 public class Normalizer {
 
@@ -45,10 +45,9 @@ public class Normalizer {
 		return false;
 	}
 
-	private static final char[] _NORMALIZED_TEXT = new char[] {'l', '\'', '\"'};
+	private static final char[] _NORMALIZED_TEXT = {'l', '\'', '\"'};
 
-	private static final char[] _UNICODE_TEXT =
-		new char[] {'\u0142', '\u02B9', '\u02BA'};
+	private static final char[] _UNICODE_TEXT = {'\u0142', '\u02B9', '\u02BA'};
 
 	private static final Transliterator _transliterator =
 		Transliterator.getInstance(

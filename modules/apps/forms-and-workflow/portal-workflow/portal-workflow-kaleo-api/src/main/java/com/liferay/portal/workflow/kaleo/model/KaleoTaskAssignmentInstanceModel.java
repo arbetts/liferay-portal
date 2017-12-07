@@ -194,18 +194,18 @@ public interface KaleoTaskAssignmentInstanceModel extends BaseModel<KaleoTaskAss
 	public void setModifiedDate(Date modifiedDate);
 
 	/**
-	 * Returns the kaleo definition ID of this kaleo task assignment instance.
+	 * Returns the kaleo definition version ID of this kaleo task assignment instance.
 	 *
-	 * @return the kaleo definition ID of this kaleo task assignment instance
+	 * @return the kaleo definition version ID of this kaleo task assignment instance
 	 */
-	public long getKaleoDefinitionId();
+	public long getKaleoDefinitionVersionId();
 
 	/**
-	 * Sets the kaleo definition ID of this kaleo task assignment instance.
+	 * Sets the kaleo definition version ID of this kaleo task assignment instance.
 	 *
-	 * @param kaleoDefinitionId the kaleo definition ID of this kaleo task assignment instance
+	 * @param kaleoDefinitionVersionId the kaleo definition version ID of this kaleo task assignment instance
 	 */
-	public void setKaleoDefinitionId(long kaleoDefinitionId);
+	public void setKaleoDefinitionVersionId(long kaleoDefinitionVersionId);
 
 	/**
 	 * Returns the kaleo instance ID of this kaleo task assignment instance.
@@ -294,16 +294,16 @@ public interface KaleoTaskAssignmentInstanceModel extends BaseModel<KaleoTaskAss
 	public void setAssigneeClassName(String assigneeClassName);
 
 	/**
-	 * Returns the assignee class p k of this kaleo task assignment instance.
+	 * Returns the assignee class pk of this kaleo task assignment instance.
 	 *
-	 * @return the assignee class p k of this kaleo task assignment instance
+	 * @return the assignee class pk of this kaleo task assignment instance
 	 */
 	public long getAssigneeClassPK();
 
 	/**
-	 * Sets the assignee class p k of this kaleo task assignment instance.
+	 * Sets the assignee class pk of this kaleo task assignment instance.
 	 *
-	 * @param assigneeClassPK the assignee class p k of this kaleo task assignment instance
+	 * @param assigneeClassPK the assignee class pk of this kaleo task assignment instance
 	 */
 	public void setAssigneeClassPK(long assigneeClassPK);
 

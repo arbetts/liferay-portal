@@ -14,15 +14,15 @@
 
 package com.liferay.blogs.web.internal.portlet.action;
 
+import com.liferay.blogs.constants.BlogsPortletKeys;
 import com.liferay.blogs.exception.NoSuchEntryException;
 import com.liferay.blogs.model.BlogsEntry;
-import com.liferay.blogs.web.constants.BlogsPortletKeys;
 import com.liferay.blogs.web.constants.BlogsWebKeys;
 import com.liferay.blogs.web.internal.BlogsItemSelectorHelper;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import javax.portlet.PortletException;
@@ -58,7 +58,7 @@ public class EditEntryMVCRenderCommand implements MVCRenderCommand {
 		try {
 			BlogsEntry entry = ActionUtil.getEntry(renderRequest);
 
-			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+			HttpServletRequest request = _portal.getHttpServletRequest(
 				renderRequest);
 
 			request.setAttribute(WebKeys.BLOGS_ENTRY, entry);
@@ -91,5 +91,8 @@ public class EditEntryMVCRenderCommand implements MVCRenderCommand {
 	}
 
 	private BlogsItemSelectorHelper _blogsItemSelectorHelper;
+
+	@Reference
+	private Portal _portal;
 
 }

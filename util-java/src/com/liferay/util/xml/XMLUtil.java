@@ -14,8 +14,8 @@
 
 package com.liferay.util.xml;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -25,7 +25,7 @@ import java.io.IOException;
 
 /**
  * @author Leonardo Barros
- * @see com.liferay.petra.xml.XMLUtil
+ * @see    com.liferay.petra.xml.XMLUtil
  */
 public class XMLUtil {
 
@@ -93,10 +93,21 @@ public class XMLUtil {
 
 			if ((c == 0x9) || (c == 0xA) || (c == 0xD) ||
 				((c >= 0x20) && (c <= 0xD7FF)) ||
-				((c >= 0xE000) && (c <= 0xFFFD)) ||
-				((c >= 0x10000) && (c <= 0x10FFFF))) {
+				((c >= 0xE000) && (c <= 0xFFFD))) {
 
 				sb.append(c);
+			}
+
+			if (Character.isHighSurrogate(c) && (i + 1) < xml.length()) {
+				char c2 = xml.charAt(i + 1);
+
+				if (Character.isLowSurrogate(c2)) {
+					int codePoint = Character.toCodePoint(c, c2);
+
+					if ((codePoint >= 0x10000) && (codePoint <= 0x10FFFF)) {
+						sb.appendCodePoint(codePoint);
+					}
+				}
 			}
 		}
 
@@ -105,13 +116,14 @@ public class XMLUtil {
 
 	public static String toCompactSafe(String xml) {
 		return StringUtil.replace(
-			xml,
-			new String[] {
-				StringPool.RETURN_NEW_LINE, StringPool.NEW_LINE,
-				StringPool.RETURN
-			},
-			new String[] {"[$NEW_LINE$]", "[$NEW_LINE$]", "[$NEW_LINE$]"});
+			xml, _COMPACT_SAFE_OLD_SUBS, _COMPACT_SAFE_NEW_SUBS);
 	}
+
+	private static final String[] _COMPACT_SAFE_NEW_SUBS =
+		{"[$NEW_LINE$]", "[$NEW_LINE$]", "[$NEW_LINE$]"};
+
+	private static final String[] _COMPACT_SAFE_OLD_SUBS =
+		{StringPool.RETURN_NEW_LINE, StringPool.NEW_LINE, StringPool.RETURN};
 
 	private static final String _XML_INDENT = "  ";
 

@@ -1,7 +1,7 @@
 <definition>
 	<command name="_addPageTypeEmbedded">
 		<execute function="Type" locator1="SitePagesEditPage#PAGE_TYPE_EMBEDDED_URL_FIELD" value1="${pageTypeURL}" />
-		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesEditPage#PAGE_TYPE_EMBEDDED_DESCRIPTION_FIELD" value1="Show content from another website." />
+		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesEditPage#PAGE_TYPE_DESCRIPTION" value1="Show content from another website." />
 	</command>
 
 	<command name="_addPageTypeFullPageApplication">
@@ -9,194 +9,38 @@
 	</command>
 
 	<command name="_addPageTypeLinkToURL">
-		<execute function="Type" locator1="SitePagesEditPage#PAGE_TYPE_LINK_TO_URL_URL_FIELD" value1="${pageTypeURL}" />
-		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesEditPage#PAGE_TYPE_LINK_TO_URL_DESCRIPTION_FIELD" value1="Link to another website." />
+		<execute function="Type" locator1="TextInput#URL" value1="${pageTypeURL}" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesEditPage#PAGE_TYPE_DESCRIPTION" value1="Link to another website." />
 	</command>
 
 	<command name="_addPageTypePanel">
 		<var name="key_componentOrPortletName" value="${componentName}" />
 
 		<execute function="Click" locator1="SitePagesEditPage#PAGE_TYPE_PANEL_CHECKBOX" />
-		<execute function="AssertChecked#waitForElementPresentAssertChecked" locator1="SitePagesEditPage#PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
-	</command>
 
-	<command name="_selectPageTypeRadio">
-		<if>
-			<equals arg1="${sitePageType}" arg2="Embedded" />
-			<then>
-				<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_SELECT" value1="Embedded" />
-
-				<execute macro="Page#_addPageTypeEmbedded">
-					<var name="pageTypeDescription" value="${pageTypeDescription}" />
-					<var name="pageTypeURL" value="${pageTypeURL}" />
-				</execute>
-			</then>
-			<elseif>
-				<equals arg1="${sitePageType}" arg2="Link to URL" />
-				<then>
-					<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_SELECT" value1="Link to URL" />
-
-					<execute macro="Page#_addPageTypeLinkToURL">
-						<var name="pageTypeDescription" value="${pageTypeDescription}" />
-						<var name="pageTypeURL" value="${pageTypeURL}" />
-					</execute>
-				</then>
-			</elseif>
-			<elseif>
-				<equals arg1="${sitePageType}" arg2="Panel" />
-				<then>
-					<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_SELECT" value1="Panel" />
-
-					<execute macro="Page#_addPageTypePanel">
-						<var name="componentName" value="${componentName}" />
-					</execute>
-				</then>
-			</elseif>
-			<elseif>
-				<equals arg1="${sitePageType}" arg2="Full Page Application" />
-				<then>
-					<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_SELECT" value1="Full Page Application" />
-
-					<execute macro="Page#_addPageTypeFullPageApplication">
-						<var name="portlet" value="${portlet}" />
-					</execute>
-				</then>
-			</elseif>
-			<elseif>
-				<equals arg1="${sitePageType}" arg2="Empty Page" />
-				<then>
-					<var name="key_columnName" value="${columnName}" />
-
-					<execute function="Click" locator1="SitePagesEditPage#LAYOUT_CARD" />
-				</then>
-			</elseif>
-		</if>
-	</command>
-
-	<command name="add" summary="Add a page named '${pageName}'">
-		<var name="key_siteName" value="${siteName}" />
-
-		<if>
-			<isset var="siteName" />
-			<then>
-				<execute macro="ProductMenu#gotoSite">
-					<var name="site" value="${siteName}" />
-				</execute>
-			</then>
-		</if>
-
-		<if>
-			<isset var="pageStaging" />
-			<then>
-				<execute macro="Navigator#gotoStagedView" />
-			</then>
-		</if>
-
-		<execute macro="SitePageNavigator#gotoAddPage">
-			<var name="sitePagePrivacy" value="${sitePagePrivacy}" />
-		</execute>
-
-		<execute macro-mobile="MobileNavigator#clickRemoveIcon" />
-
-		<execute function="Type#typeClickAt" locator1="TextInput#NAME" value1="${pageName}" />
-
-		<if>
-			<isset var="pageTemplateName" />
-			<then>
-				<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_SELECT" value1="${pageTemplateName}" />
-
-				<execute function="Check#checkToggleSwitch" locator1="SitePagesEditPage#PAGE_TEMPLATE_INHERIT_CHANGES_TOGGLE" />
-			</then>
-		</if>
-
-		<if>
-			<isset var="sitePageType" />
-			<then>
-				<execute macro="Page#_selectPageTypeRadio">
-					<var name="columnName" value="${columnName}" />
-					<var name="componentName" value="${componentName}" />
-					<var name="pageTypeDescription" value="${pageTypeDescription}" />
-					<var name="pageTypeURL" value="${pageTypeURL}" />
-					<var name="portlet" value="${portlet}" />
-					<var name="sitePageType" value="${sitePageType}" />
-				</execute>
-			</then>
-		</if>
-
-		<execute function="AssertClick" locator1="Button#ADD_PAGE_BTN" value1="Add Page" />
-
-		<if>
-			<contains string="${pageName}" substring="&apos;" />
-			<then>
-				<execute function="AssertVisible" locator1="Home#PAGE_WITH_QUOTES">
-					<var name="key_pageName" value="${pageName}" />
-				</execute>
-			</then>
-			<else>
-				<execute function="AssertVisible" locator1="Home#PAGE">
-					<var name="key_pageName" value="${pageName}" />
-				</execute>
-			</else>
-		</if>
-
-		<execute macro="Alert#viewSuccessMessage" />
-	</command>
-
-	<command name="addChild">
-		<execute macro="TestCase#getSiteName">
-			<return from="siteName" name="siteName" />
-			<var name="siteName" value="${siteName}" />
-		</execute>
-
-		<var name="key_siteName" value="${siteName}" />
-
-		<if>
-			<not>
-				<isset var="siteScopeSelected" />
-			</not>
-			<then>
-				<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${siteName}" />
-
-				<execute function="Click" locator1="Icon#BASIC_SEARCH" />
-
-				<execute function="AssertClick" locator1="ContentRow#ENTRY_CONTENT_ENTRY_NAME_LINK" value1="${siteName}">
-					<var name="key_rowEntry" value="${siteName}" />
-				</execute>
-			</then>
-		</if>
-
-		<execute macro="SitePageNavigator#gotoPages">
-			<var name="page" value="${page}" />
-		</execute>
-
-		<var name="key_page" value="${pageName}" />
-
-		<execute function="Click#mouseOverClick" locator1="SitePages#SPECIFIC_PAGE_ELLIPSIS" />
-
-		<execute function="Click" locator1="SitePages#ADD_CHILD_PAGE" />
-
-		<execute function="Type#mouseOverFocusType" locator1="TextInput#NAME" value1="${siteChildPageName}" />
-
-		<execute function="AssertClick" locator1="Button#ADD_PAGE_BTN" value1="Add Page" />
-
-		<execute macro="Alert#viewSuccessMessage" />
+		<execute function="AssertChecked#assertCheckedNotVisible" locator1="SitePagesEditPage#PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
 	</command>
 
 	<command name="addFriendlyURLLocalizedPG">
-		<var name="key_friendlyUrlLocalized" value="${friendlyUrlLocalized}" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="General" />
+		</execute>
 
-		<execute function="Click" locator1="SitePagesEditPage#FRIENDLY_URL_LOCALIZED" />
+		<execute function="Click" locator1="SitePagesEditPage#FRIENDLY_URL_LOCALIZED">
+			<var name="key_friendlyUrlLocalized" value="${friendlyUrlLocalized}" />
+		</execute>
 
 		<execute function="Type" locator1="SitePagesEditPage#FRIENDLY_URL_FIELD" value1="${localizedFriendlyURL}" />
 	</command>
 
 	<command name="addJavaScript">
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${pageName}" />
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Configure" />
+			<var name="rowEntry" value="${pageName}" />
 		</execute>
 
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="Advanced" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="Advanced" />
 		</execute>
 
 		<execute macro="Panel#expandPanel">
@@ -207,12 +51,12 @@
 
 		<execute function="Type" locator1="SitePages#JAVASCRIPT_TEXTAREA" value1="${javaScript}" />
 
-		<execute macro="PortletEntry#save" />
+		<execute function="AssertClickNoError" locator1="Button#SAVE" value1="Save" />
 	</command>
 
 	<command name="addPageCategory">
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="SEO" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="SEO" />
 		</execute>
 
 		<execute macro="Panel#expandPanel">
@@ -235,7 +79,9 @@
 	</command>
 
 	<command name="addPageTitle">
-		<execute function="Type#mouseOverFocusType" locator1="TextInput#NAME" value1="${pageName}" />
+		<execute macro="PortletEntry#inputName">
+			<var name="name" value="${pageName}" />
+		</execute>
 	</command>
 
 	<command name="addPageToSiteTemplates">
@@ -244,7 +90,7 @@
 		</execute>
 
 		<execute macro="SitePageNavigator#gotoAddPage">
-			<var name="sitePagePrivacy" value="Private" />
+			<var name="siteTemplateName" value="${siteTemplateName}" />
 		</execute>
 
 		<execute macro="Page#addPageTitle">
@@ -255,17 +101,26 @@
 	</command>
 
 	<command name="addPageTranslations">
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${page}" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Configure" />
+			<var name="rowEntry" value="${page}" />
 		</execute>
 
 		<var name="key_pageTranslation" value="${pageTranslation}" />
 
 		<execute function="Click" locator1="SitePages#DETAILS_LANGUAGE_TRANSLATIONS" />
 
-		<execute function="Type" locator1="TextInput#NAME" value1="${pageTranslationName}" />
+		<execute macro="PortletEntry#inputName">
+			<var name="name" value="${pageTranslationName}" />
+		</execute>
 
-		<execute macro="PortletEntry#save" />
+		<execute macro="Button#clickSave" />
 	</command>
 
 	<command name="addPageTypePanelPG">
@@ -278,27 +133,15 @@
 
 			<execute function="Click" locator1="SitePagesEditPage#PAGE_TYPE_PANEL_CHECKBOX" value1="${portletName}" />
 
-			<execute function="AssertChecked#waitForElementPresentAssertChecked" locator1="SitePagesEditPage#PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
+			<execute function="AssertChecked#assertCheckedNotVisible" locator1="SitePagesEditPage#PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
 		</for>
 	</command>
 
 	<command name="assertCannotDeleteOnlyPage">
-		<var name="key_page" value="${pageName}" />
-
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${pageName}" />
-			<var name="sitePagePrivacy" value="${sitePagePrivacy}" />
+		<execute macro="LexiconEntry#delete">
+			<var name="failure" value="You must have at least one page." />
+			<var name="rowEntry" value="${pageName}" />
 		</execute>
-
-		<execute function="Click" locator1="Icon#HEADER_VERTICAL_ELLIPSIS" />
-
-		<execute function="ClickNoError" locator1="MenuItem#DELETE" />
-
-		<execute function="Confirm" value1="Are you sure you want to delete the selected page?" />
-
-		<execute macro="Alert#viewRequestFailedToComplete" />
-
-		<execute function="AssertTextPresent" locator1="Message#ERROR_2" value1="You must have at least one page." />
 	</command>
 
 	<command name="assertNodePortPG">
@@ -307,9 +150,35 @@
 		<execute function="AssertTextEquals#assertPartialText" locator1="Home#NODE_NAME" value1="${nodePort}" />
 	</command>
 
+	<command name="changeCurrentTheme">
+		<execute macro="Portlet#gotoPortletOptions">
+			<var name="portletOption" value="Configure" />
+		</execute>
+
+		<execute function="Click" locator1="SitePagesEditPage#CHANGE_CURRENT_THEME_BUTTON" />
+
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
+
+		<var name="key_cardText" value="${themeName}" />
+
+		<execute function="AssertTextPresent" locator1="Card#SPECIFIC_LARGE_TEXT" value1="${key_cardText}" />
+
+		<execute function="Click" locator1="Card#SPECIFIC_LARGE_TEXT" />
+
+		<execute function="SelectFrameTop" value1="relative=top" />
+
+		<execute macro="PortletEntry#save" />
+	</command>
+
 	<command name="changeLogoViaPageCP">
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${page}" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="Portlet#gotoPortletOptions">
+			<var name="portletOption" value="Configure" />
 		</execute>
 
 		<execute macro="Panel#expandPanel">
@@ -326,7 +195,7 @@
 
 		<execute function="Pause" locator1="5000" />
 
-		<execute function="AssertClick" locator1="Button#DONE" value1="Done" />
+		<execute macro="Button#clickDone" />
 
 		<execute function="Pause" locator1="5000" />
 
@@ -336,38 +205,66 @@
 	</command>
 
 	<command name="copyApplicationsFromPageToPage">
-		<execute function="Click" locator1="Icon#HEADER_VERTICAL_ELLIPSIS" />
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Copy Applications" />
+			<var name="rowEntry" value="${pageName}" />
+		</execute>
 
-		<execute function="AssertClick" locator1="MenuItem#COPY_APPLICATIONS" value1="Copy Applications" />
-
-		<execute function="AssertTextEquals" locator1="SitePagesEditPage#COPY_APPLICATIONS_MESSAGE_INFO" value1="The applications in page ${pageName} will be replaced with the ones in the page you select below." />
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="The applications in page ${pageName} will be replaced with the ones in the page you select below." />
 		<execute function="AssertTextEquals" locator1="SitePagesEditPage#COPY_APPLICATIONS_COPY_FROM_PAGE_LABEL" value1="Copy from Page" />
 
-		<execute function="Click" locator1="SitePagesEditPage#COPY_APPLICATIONS_COPY_FROM_PAGE_SELECT" value1="${pageNameCopy}" />
+		<execute function="Select#selectPartialText" locator1="SitePagesEditPage#COPY_APPLICATIONS_COPY_FROM_PAGE_SELECT" value1="${pageNameCopy}" />
 
-		<execute function="AssertClick" locator1="SitePagesEditPage#COPY_APPLICATIONS_COPY_BUTTON" value1="Copy" />
-
-		<var name="key_portletName" value="Blogs" />
-
-		<execute function="AssertTextNotPresent" locator1="Portlet#TITLE" value1="Blogs" />
+		<execute macro="PortletEntry#save" />
 	</command>
 
 	<command name="deleteFriendlyURLPG">
-		<var name="key_friendlyUrlLocalized" value="${friendlyUrlLocalized}" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="General" />
+		</execute>
 
-		<execute function="Click#pauseClickAt" locator1="SitePagesEditPage#FRIENDLY_URL_LOCALIZED" />
+		<execute function="Click#pauseClickAt" locator1="SitePagesEditPage#FRIENDLY_URL_LOCALIZED">
+			<var name="key_friendlyUrlLocalized" value="${friendlyUrlLocalized}" />
+		</execute>
 
 		<execute function="Type" locator1="SitePagesEditPage#FRIENDLY_URL_FIELD" value1=" " />
 
-		<execute function="AssertClick#pauseAssertTextClickAt" locator1="Button#SAVE" value1="Save" />
-
-		<execute macro="Alert#viewSuccessMessage" />
+		<execute macro="Button#clickSave" />
 	</command>
 
 	<command name="deleteLivePG">
 		<execute function="ClickNoError" locator1="ControlMenu#EDIT_LIVE_DELETE" />
 
 		<execute function="Confirm#waitForConfirmation" value1="Are you sure you want to delete the selected page?" />
+	</command>
+
+	<command name="deleteLogoPG">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Configure" />
+			<var name="rowEntry" value="${page}" />
+		</execute>
+
+		<if>
+			<condition function="IsElementPresent" locator1="SitePagesEditPage#PAGE_TYPE_LAYOUT" />
+			<then>
+				<execute function="AssertClick" locator1="SitePages#DETAILS_NAVIGATION_ADVANCED" value1="Advanced" />
+			</then>
+			<else>
+				<execute macro="Panel#expandPanel">
+					<var name="panelHeading" value="Logo" />
+				</execute>
+			</else>
+		</if>
+
+		<execute function="AssertClick" locator1="Button#DELETE" value1="Delete" />
+
+		<execute macro="PortletEntry#save" />
 	</command>
 
 	<command name="deletePG">
@@ -391,9 +288,17 @@
 
 		<execute function="MouseOver" locator1="SitePages#NAVIGATION_SPECIFIC_PAGE" />
 
+		<execute function="MouseOver" locator1="Home#SITE_NAME" />
+
+		<execute function="MouseOver" locator1="SitePages#NAVIGATION_SPECIFIC_PAGE" />
+
 		<execute function="ClickNoError" locator1="SitePages#NAVIGATION_SPECIFIC_PAGE_X_DELETE" />
 
 		<execute function="Confirm#waitForConfirmation" value1="Are you sure you want to delete this page?" />
+	</command>
+
+	<command name="disableMobileDeviceRulesAreInheritedFromPublicPages">
+		<execute function="Uncheck#uncheckHiddenToggleSwitch" locator1="ToggleSwitch#INHERIT_MOBILE_DEVICE_RULES_FROM_PAGE" />
 	</command>
 
 	<command name="disallowEditViaSiteAdminEditCP">
@@ -407,11 +312,11 @@
 	</command>
 
 	<command name="editName">
-		<execute function="Type" locator1="TextInput#NAME" value1="${pageNameEdit}" />
+		<execute macro="PortletEntry#inputName">
+			<var name="name" value="${pageNameEdit}" />
+		</execute>
 
-		<execute function="AssertClick#pauseAssertTextClickAt" locator1="Button#SAVE" value1="Save" />
-
-		<execute macro="Alert#viewSuccessMessage" />
+		<execute macro="Button#clickSave" />
 	</command>
 
 	<command name="editPageLayoutColumn">
@@ -419,9 +324,17 @@
 
 		<execute function="Click" locator1="SitePagesEditPage#LAYOUT_CARD" />
 
-		<execute function="AssertClick#pauseAssertTextClickAt" locator1="Button#SAVE" value1="Save" />
+		<execute macro="Button#clickSave" />
+	</command>
 
-		<execute macro="Alert#viewSuccessMessage" />
+	<command name="editPageMetadata">
+		<execute function="Type#typeClickAt" locator1="TextInput#SEO_HTML_TITLE" value1="${HTMLTitle}" />
+
+		<execute function="Type#typeClickAt" locator1="TextArea#SEO_META_TAGS_DESCRIPTION" value1="${metaTagsDescription}" />
+
+		<execute function="Type#typeClickAt" locator1="TextArea#SEO_META_TAGS_KEYWORDS" value1="${metaTagsKeywords}" />
+
+		<execute macro="Button#clickSave" />
 	</command>
 
 	<command name="editPageTypeLayout">
@@ -429,24 +342,30 @@
 
 		<execute function="Click" locator1="SitePagesEditPage#LAYOUT_CARD" />
 
-		<execute function="Click" locator1="Button#SAVE" value1="Save" />
+		<execute macro="Button#clickSave" />
 	</command>
 
 	<command name="editSelectPageType">
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${page}" />
+		<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_LAYOUT" value1="${pageType}">
+			<var name="key_pageType" value="${pageType}" />
 		</execute>
-
-		<var name="key_pageType" value="${pageType}" />
-
-		<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_LAYOUT" value1="${pageType}" />
 
 		<if>
 			<equals arg1="${pageType}" arg2="Link to a Page of This Site" />
 			<then>
-				<var name="key_indexNumber" value="${indexNumber}" />
+				<execute function="AssertClick" locator1="Button#SELECT" value1="Select" />
 
-				<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_LINK_TO_PAGE_PAGE_SELECT" value1="index=${indexNumber}" />
+				<execute function="SelectFrame" locator1="IFrame#DIALOG" />
+
+				<execute macro="Portlet#expandTree" />
+
+				<execute macro="Portlet#selectTreeNode">
+					<var name="nodeName" value="${pageLinkName}" />
+				</execute>
+
+				<execute function="SelectFrameTop" />
+
+				<execute macro="Button#clickDone" />
 			</then>
 			<elseif>
 				<equals arg1="${pageType}" arg2="Embedded" />
@@ -456,19 +375,30 @@
 			</elseif>
 		</if>
 
-		<execute macro="PortletEntry#save" />
+		<execute function="Pause" locator1="3000" />
+
+		<execute macro="Button#clickSave" />
 	</command>
 
 	<command name="firstPageCanNotBeOfTypeLinkToURL">
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${pageName}" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Configure" />
+			<var name="rowEntry" value="${pageName}" />
 		</execute>
 
 		<execute function="AssertElementPresent" locator1="Icon#HEADER_VERTICAL_ELLIPSIS" />
 
 		<execute function="Click" locator1="Icon#HEADER_VERTICAL_ELLIPSIS" />
 
-		<execute function="AssertClickNoError" locator1="MenuItem#DELETE" value1="Delete" />
+		<execute function="AssertClickNoError" locator1="MenuItem#ANY_MENU_ITEM" value1="Delete">
+			<var name="key_menuItem" value="Delete" />
+		</execute>
 
 		<execute function="Confirm" value1="Are you sure you want to delete the selected page?" />
 
@@ -500,7 +430,9 @@
 
 		<execute function="Click" locator1="SiteTemplates#SITE_TEMPLATE_TABLE_ACTIONS" value1="${siteTemplateName}" />
 
-		<execute function="Click" locator1="MenuItem#MANAGE" />
+		<execute function="Click" locator1="MenuItem#ANY_MENU_ITEM" value1="Manage">
+			<var name="key_menuItem" value="Manage" />
+		</execute>
 	</command>
 
 	<command name="gotoMyAccount">
@@ -508,7 +440,9 @@
 
 		<execute macro="Navigator#openURL" />
 
-		<execute macro="ProductMenu#gotoUserMyAccount">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="My Account" />
+			<var name="panel" value="User" />
 			<var name="portlet" value="${portletName}" />
 		</execute>
 	</command>
@@ -544,9 +478,56 @@
 	</command>
 
 	<command name="localizedPG">
-		<var name="key_pageLocale" value="${pageLocale}" />
+		<execute function="Click" locator1="Link#PAGE_LOCALE">
+			<var name="key_pageLocale" value="${pageLocale}" />
+		</execute>
+	</command>
 
-		<execute function="Click" locator1="Link#PAGE_LOCALE"  value1="${pageLocale}" />
+	<command name="manageDeviceFamilyActions">
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#BODY_VERTICAL_ELLIPSIS" />
+
+		<execute function="Click" locator1="MenuItem#ANY_MENU_ITEM" value1="Manage Actions">
+			<var name="key_menuItem" value="Manage Actions" />
+		</execute>
+
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
+
+		<execute function="Click" locator1="Button#ADD_ACTION" />
+
+		<execute macro="PortletEntry#inputName">
+			<var name="name" value="${actionName}" />
+		</execute>
+
+		<var name="key_actionType" value="${actionType}" />
+
+		<execute function="Click" locator1="MobileDevice#ADD_ACTION_TYPE_OPTION" />
+
+		<if>
+			<equals arg1="${actionType}" arg2="Redirect to URL" />
+			<then>
+				<execute function="Type" locator1="TextInput#URL" value1="${actionURL}" />
+			</then>
+			<elseif>
+				<equals arg1="${actionType}" arg2="Redirect to Site" />
+				<then>
+					<var name="key_siteName" value="${siteName}" />
+
+					<execute function="Click" locator1="MobileDevice#ADD_ACTION_SITE_OPTION" />
+
+					<var name="key_pageName" value="${pageName}" />
+
+					<execute function="Click" locator1="MobileDevice#ADD_ACTION_PAGE_OPTION" />
+				</then>
+			</elseif>
+		</if>
+
+		<execute macro="PortletEntry#save" />
+
+		<execute function="SelectFrame" value1="relative=top" />
+
+		<var name="key_modalTitle" value="Actions" />
+
+		<execute function="Click" locator1="Button#CLOSE_MODAL" />
 	</command>
 
 	<command name="openURLLocale">
@@ -561,61 +542,104 @@
 		<execute macro="Alert#viewSuccessMessage" />
 	</command>
 
+	<command name="selectMobileDeviceFamily">
+		<execute function="AssertClick" locator1="Button#SELECT_MOBILE_DEVICE_RULES" value1="Select" />
+
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
+
+		<var name="key_deviceFamilyName" value="${deviceFamilyName}" />
+
+		<execute function="AssertClick" locator1="MobileDevice#DEVICE_FAMILY_TABLE_NAME_LINK" value1="${deviceFamilyName}" />
+
+		<execute function="SelectFrame" value1="relative=top" />
+	</command>
+
 	<command name="selectSitePagesVariationName">
 		<execute function="Click" locator1="SitePages#STAGING_SITE_PAGES_VARIATION_BUTTON" />
 
 		<var name="key_sitePagesVariationName" value="${sitePagesVariationName}" />
 
-		<execute function="Click" locator1="SitePages#STAGING_SITE_PAGES_VARIATION_MENULIST_VARIATION_NAME" value1="${sitePagesVariationName}" />
+		<execute function="Click" locator1="MenuItem#ANY_MENU_ITEM" value1="${sitePagesVariationName}">
+			<var name="key_menuItem" value="${sitePagesVariationName}" />
+		</execute>
 	</command>
 
-	<command name="tearDownPG" summary="Delete all pages except the Welcome Page">
+	<command name="tearDownCP" summary="Delete all pages except the Welcome Page">
+		<execute macro="TestCase#getSiteName">
+			<return from="siteName" name="siteName" />
+			<var name="siteName" value="${siteName}" />
+		</execute>
+
 		<execute macro="ProductMenu#gotoSite">
-			<var name="site" value="Liferay" />
+			<var name="site" value="${siteName}" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
 		</execute>
 
 		<while>
-			<condition function="IsElementPresent#isElementPresentClickNavigation" locator1="Home#PAGE_2" />
+			<condition function="IsElementPresent" locator1="ContentRow#ENTRY_CONTENT_ROW_NUMBER_ELLIPSIS">
+				<var name="key_rowNumber" value="2" />
+			</condition>
+
 			<then>
-				<execute function="MouseOver#mouseOverClickNavigation" locator1="Home#PAGE_2" />
+				<execute function="Click#waitForMenuToggleJSClick" locator1="ContentRow#ENTRY_CONTENT_ROW_NUMBER_ELLIPSIS">
+					<var name="key_rowNumber" value="2" />
+				</execute>
 
-				<execute function="ClickNoError" locator1="Home#DELETE_PAGE_ICON" />
+				<execute function="AssertClickNoError" locator1="MenuItem#ANY_MENU_ITEM" value1="Delete">
+					<var name="key_menuItem" value="Delete" />
+				</execute>
 
-				<execute function="Confirm" value1="Are you sure you want to delete this page?" />
-
-				<execute function="Refresh" />
+				<execute function="Confirm" value1="Are you sure you want to delete this? It will be deleted immediately." />
 			</then>
 		</while>
 
-		<execute function="AssertElementNotPresent#assertElementNotPresentClickDockbar" locator1="Home#DELETE_PAGE_ICON" />
+		<execute function="AssertElementNotPresent" locator1="ContentRow#ENTRY_CONTENT_ROW_NUMBER_ELLIPSIS">
+			<var name="key_rowNumber" value="2" />
+		</execute>
+	</command>
+
+	<command name="tearDownPG">
+		<execute macro="Page#tearDownCP" />
+	</command>
+
+	<command name="togglePageTemplateInheritChanges">
+		<if>
+			<equals arg1="${toggleValue}" arg2="enable" />
+			<then>
+				<execute function="Check#checkToggleSwitch" locator1="ToggleSwitch#ANY_TOGGLE_SWITCH">
+					<var name="key_toggleSwitchLabel" value="Inherit Changes" />
+				</execute>
+			</then>
+			<elseif>
+				<equals arg1="${toggleValue}" arg2="disable" />
+				<then>
+					<execute function="Uncheck#uncheckToggleSwitch" locator1="ToggleSwitch#ANY_TOGGLE_SWITCH">
+						<var name="key_toggleSwitchLabel" value="Inherit Changes" />
+					</execute>
+				</then>
+			</elseif>
+		</if>
 	</command>
 
 	<command name="view">
-		<execute macro="ProductMenuHelper#expandPanelSites" />
-
-		<execute macro="ProductMenuHelper#expandCategory">
+		<execute macro="ProductMenu#gotoPortlet">
 			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="SitePages#PAGE_TREE_PAGE_LINK" value1="${pageName}">
-			<var name="key_page" value="${pageName}" />
-		</execute>
-	</command>
-
-	<command name="viewChildPage">
-		<execute macro="ProductMenuHelper#openProductMenu" />
-
-		<execute macro="ProductMenuHelper#expandPanelSites" />
-
-		<execute macro="ProductMenuHelper#expandCategory">
-			<var name="category" value="Navigation" />
+		<execute macro="SitePages#togglePrivacy">
+			<var name="privacy" value="${privacy}" />
 		</execute>
 
-		<var name="key_page" value="${pageName}" />
-
-		<execute macro="ProductMenuHelper#expandPageTree" />
-
-		<execute function="AssertTextEquals" locator1="ProductMenu#PAGES" value1="${pageName}" />
+		<execute function="AssertElementPresent" locator1="ContentRow#ENTRY_CONTENT_ENTRY" value1="${pageName}">
+			<var name="key_rowEntry" value="${pageName}" />
+		</execute>
 	</command>
 
 	<command name="viewChildPageDropdown">
@@ -633,6 +657,20 @@
 		<var name="key_childPageName" value="${childPageName}" />
 
 		<execute function="AssertTextEquals" locator1="Home#PAGE_CHILD_PAGE" value1="${childPageName}" />
+	</command>
+
+	<command name="viewCurrentTheme">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="Portlet#gotoPortletOptions">
+			<var name="portletOption" value="Configure" />
+		</execute>
+
+		<execute function="AssertTextPresent" locator1="SitePagesEditPage#VIEW_THEME" value1="${themeName}" />
 	</command>
 
 	<command name="viewCustomLogoPG">
@@ -694,8 +732,15 @@
 	</command>
 
 	<command name="viewFriendlyURL">
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${pageName}" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Configure" />
+			<var name="rowEntry" value="${pageName}" />
 		</execute>
 
 		<execute function="AssertTextEquals" locator1="SitePages#DETAILS_FRIENDLY_BASE_URL" value1="http://localhost:8080/web${siteFriendlyURL}" />
@@ -713,6 +758,24 @@
 					<execute function="AssertElementNotPresent" locator1="SitePagesEditPage#${languageKey}" />
 				</for>
 			</then>
+		</if>
+	</command>
+
+	<command name="viewInactiveRequestMessage">
+		<execute function="AssertTextEquals" locator1="Home#STATUS_MESSAGE" value1="This ${resource} is inactive. Please contact the administrator.">
+			<var name="key_resource" value="${resource}" />
+		</execute>
+	</command>
+
+	<command name="viewLayoutLogoPG">
+		<if>
+			<equals arg1="${assertLayoutLogoPresent}" arg2="true" />
+			<then>
+				<execute function="AssertElementPresent" locator1="Home#LAYOUT_LOGO" />
+			</then>
+			<else>
+				<execute function="AssertElementNotPresent" locator1="Home#LAYOUT_LOGO" />
+			</else>
 		</if>
 	</command>
 
@@ -740,21 +803,47 @@
 	</command>
 
 	<command name="viewNoDeletePagesAssociatedWithSiteTemplate">
-		<execute macro="ProductMenuHelper#expandCategory">
-			<var name="category" value="Navigation" />
+		<execute function="Click#waitForMenuToggleJSClick" locator1="Icon#ROW_VERTICAL_ELLIPSIS">
+			<var name="key_rowEntry" value="${page}" />
 		</execute>
 
-		<execute macro="ProductMenuHelper#expandPageTree" />
+		<execute function="AssertElementNotPresent" locator1="MenuItem#ANY_MENU_ITEM" value1="${menuItem}">
+			<var name="key_menuItem" value="${menuItem}" />
+		</execute>
 
-		<var name="key_page" value="${page}" />
+		<execute function="Check" locator1="ContentRow#ENTRY_CONTENT_ENTRY_CHECKBOX">
+			<var name="key_rowEntry" value="${page}" />
+		</execute>
 
-		<execute function="Click#mouseOverClick" locator1="SitePages#SPECIFIC_PAGE_ELLIPSIS" />
+		<execute function="ClickNoError" locator1="Icon#DELETE" />
 
-		<execute function="AssertNotVisible" locator1="SitePages#DELETE_SPECIFIC_PAGE" value1="Delete" />
+		<execute function="Confirm" value1="Are you sure you want to delete this? It will be deleted immediately." />
 
-		<execute function="Click" locator1="SitePages#EDIT_SPECIFIC_PAGE" />
+		<if>
+			<and>
+				<condition function="IsElementPresent" locator1="Message#ERROR" />
+				<condition function="IsVisible" locator1="Message#ERROR" />
+			</and>
+			<then>
+				<execute function="AssertTextEquals" locator1="Message#ERROR_3" value1="This page cannot be deleted and cannot have child pages because it is associated to a site template." />
+			</then>
+		</if>
+	</command>
 
-		<execute function="AssertTextEquals" locator1="Message#ERROR_3" value1="This page cannot be deleted and cannot have child pages because it is associated to a site template." />
+	<command name="viewNoPage">
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="SitePages#togglePrivacy">
+			<var name="privacy" value="${privacy}" />
+		</execute>
+
+		<execute function="AssertElementNotPresent" locator1="ContentRow#ENTRY_CONTENT_ENTRY" value1="${pageName}">
+			<var name="key_rowEntry" value="${pageName}" />
+		</execute>
 	</command>
 
 	<command name="viewNoPG">
@@ -834,22 +923,22 @@
 			</then>
 		</if>
 
-		<execute macro="ProductMenu#gotoLocalizedEditPage">
+		<execute macro="ProductMenu#gotoPortlet">
 			<var name="category" value="${category}" />
-			<var name="page" value="${page}" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="${portlet}" />
+		</execute>
+
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="${menuItem}" />
+			<var name="rowEntry" value="${page}" />
 		</execute>
 
 		<var name="key_defaultSiteLanguageKey" value="${defaultSiteLanguageKey}" />
 
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="SEO" />
-		</execute>
+		<execute macro="Navigator#gotoSEOPanel" />
 
-		<execute macro="Panel#expandPanel">
-			<var name="panelHeading" value="SEO" />
-		</execute>
-
-		<execute function="AssertElementPresent" locator1="SitePagesEditPage#SEO_HTML_TITLE" />
+		<execute function="AssertElementPresent" locator1="TextInput#SEO_HTML_TITLE" />
 		<execute function="AssertElementPresent" locator1="SitePagesEditPage#SEO_HTML_TITLE_META_TAGS" />
 	</command>
 
@@ -859,25 +948,30 @@
 		<execute function="AssertTextEquals#assertPartialText" locator1="Message#CUSTOMIZED_PAGE_INFO" value1="This page is linked to a site template which does not allow modifications to it." />
 	</command>
 
+	<command name="viewPageMetadata">
+		<execute function="AssertTextEquals" locator1="TextInput#SEO_HTML_TITLE" value1="${HTMLTitle}" />
+
+		<execute function="AssertTextEquals" locator1="TextArea#SEO_META_TAGS_DESCRIPTION" value1="${metaTagsDescription}" />
+
+		<execute function="AssertTextEquals" locator1="TextArea#SEO_META_TAGS_KEYWORDS" value1="${metaTagsKeywords}" />
+	</command>
+
 	<command name="viewPageNoLockCheck">
 		<execute function="AssertElementNotPresent" locator1="Message#CUSTOMIZED_PAGE_INFO" />
 	</command>
 
-	<command name="viewPageOrderStagingLivePG">
-		<execute function="AssertTextEquals" locator1="Home#PAGE_1_STAGING_LIVE" value1="${pageName1}" />
-		<execute function="AssertTextEquals" locator1="Home#PAGE_2_STAGING_LIVE" value1="${pageName2}" />
-		<execute function="AssertTextEquals" locator1="Home#PAGE_3_STAGING_LIVE" value1="${pageName3}" />
-	</command>
-
 	<command name="viewPagesOrder">
-		<execute macro="ProductMenuHelper#expandCategory">
-			<var name="category" value="Navigation" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="ContentRow#ENTRY_CONTENT_ROW_NUMBER" value1="${pageName1}">
+			<var name="key_rowNumber" value="1" />
 		</execute>
 
-		<var name="key_page" value="${pageName1}" />
-		<execute function="AssertTextEquals" locator1="SitePages#PAGE_TREE_PAGE_LINK" value1="${pageName1}" />
-		<execute function="AssertTextEquals" locator1="SitePages#PAGE_TREE_PAGE_LINK_2" value1="${pageName2}" />
-		<execute function="AssertTextEquals" locator1="SitePages#PAGE_TREE_PAGE_LINK_3" value1="${pageName3}" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="ContentRow#ENTRY_CONTENT_ROW_NUMBER" value1="${pageName2}">
+			<var name="key_rowNumber" value="2" />
+		</execute>
+
+		<execute function="AssertTextEquals#assertPartialText" locator1="ContentRow#ENTRY_CONTENT_ROW_NUMBER" value1="${pageName3}">
+			<var name="key_rowNumber" value="3" />
+		</execute>
 	</command>
 
 	<command name="viewPageTemplate">
@@ -889,18 +983,27 @@
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="Message#CUSTOMIZED_PAGE_INFO" value1="This page is linked to a page template. Disable the automatic propagation of changes to this page to be able to make modifications." />
 
-		<execute macro="ProductMenuHelper#expandPanelSites" />
+		<execute macro="ProductMenuHelper#expandPanel">
+			<var name="panel" value="Site Administration" />
+		</execute>
 
 		<execute macro="ProductMenuHelper#expandCategory">
 			<var name="category" value="Navigation" />
 		</execute>
 
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${page}" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
 		</execute>
 
-		<execute function="AssertTextEquals" locator1="SitePagesEditPage#PAGE_TYPE_TEMPLATE_AUTOMATICALLY_APPLY_CHANGES_LABEL_GENERIC" value1="Inherit Changes If enabled, this page will inherit changes made to the ${pageTemplateName} page template." />
-		<execute function="AssertChecked#assertCheckedToggleSwitch" locator1="SitePagesEditPage#PAGE_TYPE_TEMPLATE_AUTOMATICALLY_APPLY_CHANGES_CHECKBOX_GENERIC" />
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Configure" />
+			<var name="rowEntry" value="${page}" />
+		</execute>
+
+		<execute function="AssertTextEquals" locator1="Message#ERROR_3" value1="Some page settings are unavailable because Inherit Changes is enabled. To change these settings, disable Inherit Changes under the General section." />
+		<execute function="AssertChecked#assertCheckedNotVisible" locator1="SitePagesEditPage#PAGE_TYPE_TEMPLATE_AUTOMATICALLY_APPLY_CHANGES_CHECKBOX_GENERIC" />
 	</command>
 
 	<command name="viewPageTemplateLockCheck">
@@ -931,8 +1034,15 @@
 	<command name="viewPanelPortletListCP">
 		<execute macro="ProductMenuHelper#openProductMenu" />
 
-		<execute macro="SitePageNavigator#gotoEditPage">
-			<var name="page" value="${pageName}" />
+		<execute macro="ProductMenu#gotoPortlet">
+			<var name="category" value="Navigation" />
+			<var name="panel" value="Site Administration" />
+			<var name="portlet" value="Site Pages" />
+		</execute>
+
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Configure" />
+			<var name="rowEntry" value="${pageName}" />
 		</execute>
 
 		<var name="key_componentName" value="${componentName}" />
@@ -946,12 +1056,12 @@
 
 		<var name="key_componentOrPortletName" value="${componentName}" />
 
-		<execute function="AssertChecked#waitForElementPresentAssertChecked" locator1="SitePages#DETAILS_PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
+		<execute function="AssertChecked#assertCheckedNotVisible" locator1="SitePages#DETAILS_PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
 
 		<for list="${portletNameList}" param="portletName" >
 			<var name="key_componentOrPortletName" value="${portletName}" />
 
-			<execute function="AssertChecked#waitForElementPresentAssertChecked" locator1="SitePages#DETAILS_PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
+			<execute function="AssertChecked#assertCheckedNotVisible" locator1="SitePages#DETAILS_PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
 		</for>
 	</command>
 
@@ -970,6 +1080,26 @@
 
 			<execute function="AssertTextEquals" locator1="Panel#MENU_ITEM" value1="${portletName}" />
 		</for>
+	</command>
+
+	<command name="viewRTLLayout">
+		<execute function="AssertCssValue" locator1="Home#SITE_NAME" locator2="direction" value1="rtl" />
+		<execute function="AssertCssValue" locator1="ProductMenu#TOGGLE" locator2="text-align" value1="right" />
+		<execute function="AssertCssValue" locator1="ProductMenu#PRODUCT_MENU_OPENED" locator2="right" value1="0px" />
+	</command>
+
+	<command name="viewSelectedLayoutColumn">
+		<execute function="AssertElementPresent" locator1="SitePagesEditPage#LAYOUT_CARD_SELECTED">
+			<var name="key_columnName" value="${columnName}" />
+		</execute>
+	</command>
+
+	<command name="viewSiteNameTranslationsPG">
+		<execute function="Click" locator1="Language#SELECT_LANGUAGE">
+			<var name="key_language" value="${language}" />
+		</execute>
+
+		<execute function="AssertTextEquals" locator1="Home#SITE_NAME" value1="${siteName}" />
 	</command>
 
 	<command name="viewSiteTemplatePages">
@@ -1025,7 +1155,7 @@
 			</else>
 		</if>
 
-		<execute function="AssertClick" locator1="Staging#LIVE_BUTTON" value1="Live" />
+		<execute function="AssertClick#assertPartialTextClickAt" locator1="Staging#LIVE_BUTTON" value1="Live" />
 
 		<var name="key_pageName" value="${pageName}" />
 

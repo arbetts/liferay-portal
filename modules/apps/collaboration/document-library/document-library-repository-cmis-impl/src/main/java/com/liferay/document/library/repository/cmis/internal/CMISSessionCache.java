@@ -14,10 +14,10 @@
 
 package com.liferay.document.library.repository.cmis.internal;
 
-import com.liferay.portal.kernel.concurrent.ConcurrentReferenceValueHashMap;
+import com.liferay.petra.concurrent.ConcurrentReferenceValueHashMap;
+import com.liferay.petra.memory.FinalizeManager;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.memory.FinalizeManager;
 import com.liferay.portal.kernel.servlet.PortalSessionThreadLocal;
 import com.liferay.portal.kernel.util.TransientValue;
 
@@ -55,7 +55,15 @@ public class CMISSessionCache {
 			return null;
 		}
 
-		return transientValue.getValue();
+		Object value = transientValue.getValue();
+
+		if (value instanceof Session) {
+			return (Session)value;
+		}
+
+		httpSession.removeAttribute(key);
+
+		return null;
 	}
 
 	public void put(String key, Session session) {

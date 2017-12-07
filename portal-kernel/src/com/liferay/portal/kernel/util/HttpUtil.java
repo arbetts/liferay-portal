@@ -83,10 +83,19 @@ public class HttpUtil {
 		return getHttp().encodePath(path);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link URLCodec#encodeURL(String)}
+	 */
+	@Deprecated
 	public static String encodeURL(String url) {
 		return getHttp().encodeURL(url);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link URLCodec#encodeURL(String,
+	 *             boolean)}
+	 */
+	@Deprecated
 	public static String encodeURL(String url, boolean escapeSpaces) {
 		return getHttp().encodeURL(url, escapeSpaces);
 	}
@@ -279,6 +288,14 @@ public class HttpUtil {
 		return getHttp().setParameter(url, name, value);
 	}
 
+	public static String shortenURL(String url) {
+		return getHttp().shortenURL(url);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #shortenURL(String)}
+	 */
+	@Deprecated
 	public static String shortenURL(String url, int count) {
 		return getHttp().shortenURL(url, count);
 	}

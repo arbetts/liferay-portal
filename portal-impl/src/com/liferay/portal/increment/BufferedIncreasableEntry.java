@@ -24,8 +24,10 @@ import java.util.Arrays;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * @author Zsolt Berentey
+ * @author     Zsolt Berentey
+ * @deprecated As of 7.0.0, with no direct replacement
  */
+@Deprecated
 public class BufferedIncreasableEntry<K, T>
 	extends IncreasableEntry<K, Increment<T>> {
 
@@ -39,7 +41,7 @@ public class BufferedIncreasableEntry<K, T>
 
 	@Override
 	public BufferedIncreasableEntry<K, T> increase(Increment<T> deltaValue) {
-		return new BufferedIncreasableEntry<K, T>(
+		return new BufferedIncreasableEntry<>(
 			_methodInvocation, key,
 			value.increaseForNew(deltaValue.getValue()));
 	}

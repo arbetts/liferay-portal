@@ -272,7 +272,9 @@ public class StagingImplTest {
 		List<Element> journalStagedModelElements = journalElement.elements(
 			"staged-model");
 
-		Assert.assertEquals(0, journalStagedModelElements.size());
+		Assert.assertEquals(
+			journalStagedModelElements.toString(), 0,
+			journalStagedModelElements.size());
 	}
 
 	protected void enableLocalStaging(boolean branching) throws Exception {
@@ -449,9 +451,8 @@ public class StagingImplTest {
 			ServiceContextTestUtil.getServiceContext());
 	}
 
-	private static final Locale[] _locales = {
-		LocaleUtil.GERMANY, LocaleUtil.SPAIN, LocaleUtil.US
-	};
+	private static final Locale[] _locales =
+		{LocaleUtil.GERMANY, LocaleUtil.SPAIN, LocaleUtil.US};
 
 	@DeleteAfterTestRun
 	private Group _group;

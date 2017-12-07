@@ -40,11 +40,12 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Field;
 
 import java.sql.Timestamp;
 
@@ -311,7 +312,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append("companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -362,7 +363,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append("companyId=");
 		msg.append(companyId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -818,7 +819,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append("userId=");
 		msg.append(userId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -869,7 +870,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append("userId=");
 		msg.append(userId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -1343,7 +1344,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -1399,7 +1400,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -1689,7 +1690,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns all the microblogs entries where creatorClassNameId = &#63; and creatorClassPK = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @return the matching microblogs entries
 	 */
 	@Override
@@ -1707,7 +1708,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @return the range of matching microblogs entries
@@ -1727,7 +1728,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -1749,7 +1750,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -1873,7 +1874,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the first microblogs entry in the ordered set where creatorClassNameId = &#63; and creatorClassPK = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching microblogs entry
 	 * @throws NoSuchEntryException if a matching microblogs entry could not be found
@@ -1900,7 +1901,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", creatorClassPK=");
 		msg.append(creatorClassPK);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -1909,7 +1910,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the first microblogs entry in the ordered set where creatorClassNameId = &#63; and creatorClassPK = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching microblogs entry, or <code>null</code> if a matching microblogs entry could not be found
 	 */
@@ -1931,7 +1932,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the last microblogs entry in the ordered set where creatorClassNameId = &#63; and creatorClassPK = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching microblogs entry
 	 * @throws NoSuchEntryException if a matching microblogs entry could not be found
@@ -1958,7 +1959,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", creatorClassPK=");
 		msg.append(creatorClassPK);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -1967,7 +1968,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the last microblogs entry in the ordered set where creatorClassNameId = &#63; and creatorClassPK = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching microblogs entry, or <code>null</code> if a matching microblogs entry could not be found
 	 */
@@ -1996,7 +1997,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param microblogsEntryId the primary key of the current microblogs entry
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next microblogs entry
 	 * @throws NoSuchEntryException if a microblogs entry with the primary key could not be found
@@ -2152,7 +2153,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @return the matching microblogs entries
 	 */
 	@Override
@@ -2170,7 +2171,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @return the range of matching microblogs entries
@@ -2190,7 +2191,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -2212,7 +2213,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -2283,15 +2284,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query.append(_FINDER_COLUMN_CCNI_CCPK_CREATORCLASSNAMEID_2);
 
 			if (creatorClassPKs.length > 0) {
-				query.append(StringPool.OPEN_PARENTHESIS);
+				query.append("(");
 
 				query.append(_FINDER_COLUMN_CCNI_CCPK_CREATORCLASSPK_7);
 
 				query.append(StringUtil.merge(creatorClassPKs));
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 			}
 
 			query.setStringAt(removeConjunction(query.stringAt(query.index() -
@@ -2355,7 +2356,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Removes all the microblogs entries where creatorClassNameId = &#63; and creatorClassPK = &#63; from the database.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 */
 	@Override
 	public void removeByCCNI_CCPK(long creatorClassNameId, long creatorClassPK) {
@@ -2370,7 +2371,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the number of microblogs entries where creatorClassNameId = &#63; and creatorClassPK = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @return the number of matching microblogs entries
 	 */
 	@Override
@@ -2426,7 +2427,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the number of microblogs entries where creatorClassNameId = &#63; and creatorClassPK = any &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @return the number of matching microblogs entries
 	 */
 	@Override
@@ -2455,15 +2456,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query.append(_FINDER_COLUMN_CCNI_CCPK_CREATORCLASSNAMEID_2);
 
 			if (creatorClassPKs.length > 0) {
-				query.append(StringPool.OPEN_PARENTHESIS);
+				query.append("(");
 
 				query.append(_FINDER_COLUMN_CCNI_CCPK_CREATORCLASSPK_7);
 
 				query.append(StringUtil.merge(creatorClassPKs));
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 			}
 
 			query.setStringAt(removeConjunction(query.stringAt(query.index() -
@@ -2740,7 +2741,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -2796,7 +2797,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -3290,7 +3291,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", parentMicroblogsEntryId=");
 		msg.append(parentMicroblogsEntryId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -3348,7 +3349,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", parentMicroblogsEntryId=");
 		msg.append(parentMicroblogsEntryId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -3649,7 +3650,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @return the matching microblogs entries
 	 */
 	@Override
@@ -3668,7 +3669,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @return the range of matching microblogs entries
@@ -3689,7 +3690,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -3712,7 +3713,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -3844,7 +3845,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching microblogs entry
 	 * @throws NoSuchEntryException if a matching microblogs entry could not be found
@@ -3874,7 +3875,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", creatorClassPK=");
 		msg.append(creatorClassPK);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -3884,7 +3885,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching microblogs entry, or <code>null</code> if a matching microblogs entry could not be found
 	 */
@@ -3907,7 +3908,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching microblogs entry
 	 * @throws NoSuchEntryException if a matching microblogs entry could not be found
@@ -3937,7 +3938,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", creatorClassPK=");
 		msg.append(creatorClassPK);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -3947,7 +3948,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching microblogs entry, or <code>null</code> if a matching microblogs entry could not be found
 	 */
@@ -3979,7 +3980,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * @param microblogsEntryId the primary key of the current microblogs entry
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next microblogs entry
 	 * @throws NoSuchEntryException if a microblogs entry with the primary key could not be found
@@ -4143,7 +4144,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @return the matching microblogs entries
 	 */
 	@Override
@@ -4162,7 +4163,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @return the range of matching microblogs entries
@@ -4183,7 +4184,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -4206,7 +4207,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -4282,15 +4283,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query.append(_FINDER_COLUMN_C_CCNI_CCPK_CREATORCLASSNAMEID_2);
 
 			if (creatorClassPKs.length > 0) {
-				query.append(StringPool.OPEN_PARENTHESIS);
+				query.append("(");
 
 				query.append(_FINDER_COLUMN_C_CCNI_CCPK_CREATORCLASSPK_7);
 
 				query.append(StringUtil.merge(creatorClassPKs));
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 			}
 
 			query.setStringAt(removeConjunction(query.stringAt(query.index() -
@@ -4357,7 +4358,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 */
 	@Override
 	public void removeByC_CCNI_CCPK(long companyId, long creatorClassNameId,
@@ -4374,7 +4375,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @return the number of matching microblogs entries
 	 */
 	@Override
@@ -4438,7 +4439,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @return the number of matching microblogs entries
 	 */
 	@Override
@@ -4470,15 +4471,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query.append(_FINDER_COLUMN_C_CCNI_CCPK_CREATORCLASSNAMEID_2);
 
 			if (creatorClassPKs.length > 0) {
-				query.append(StringPool.OPEN_PARENTHESIS);
+				query.append("(");
 
 				query.append(_FINDER_COLUMN_C_CCNI_CCPK_CREATORCLASSPK_7);
 
 				query.append(StringUtil.merge(creatorClassPKs));
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 			}
 
 			query.setStringAt(removeConjunction(query.stringAt(query.index() -
@@ -4782,7 +4783,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -4845,7 +4846,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -5164,7 +5165,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns all the microblogs entries where creatorClassNameId = &#63; and creatorClassPK = &#63; and type = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @return the matching microblogs entries
 	 */
@@ -5183,7 +5184,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -5204,7 +5205,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -5227,7 +5228,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -5357,7 +5358,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the first microblogs entry in the ordered set where creatorClassNameId = &#63; and creatorClassPK = &#63; and type = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching microblogs entry
@@ -5388,7 +5389,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -5397,7 +5398,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the first microblogs entry in the ordered set where creatorClassNameId = &#63; and creatorClassPK = &#63; and type = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching microblogs entry, or <code>null</code> if a matching microblogs entry could not be found
@@ -5420,7 +5421,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the last microblogs entry in the ordered set where creatorClassNameId = &#63; and creatorClassPK = &#63; and type = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching microblogs entry
@@ -5451,7 +5452,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -5460,7 +5461,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the last microblogs entry in the ordered set where creatorClassNameId = &#63; and creatorClassPK = &#63; and type = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching microblogs entry, or <code>null</code> if a matching microblogs entry could not be found
@@ -5490,7 +5491,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param microblogsEntryId the primary key of the current microblogs entry
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next microblogs entry
@@ -5653,7 +5654,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param type the type
 	 * @return the matching microblogs entries
 	 */
@@ -5672,7 +5673,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -5693,7 +5694,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -5716,7 +5717,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * </p>
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -5789,15 +5790,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query.append(_FINDER_COLUMN_CCNI_CCPK_T_CREATORCLASSNAMEID_2);
 
 			if (creatorClassPKs.length > 0) {
-				query.append(StringPool.OPEN_PARENTHESIS);
+				query.append("(");
 
 				query.append(_FINDER_COLUMN_CCNI_CCPK_T_CREATORCLASSPK_7);
 
 				query.append(StringUtil.merge(creatorClassPKs));
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
 				query.append(WHERE_AND);
 			}
@@ -5867,7 +5868,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Removes all the microblogs entries where creatorClassNameId = &#63; and creatorClassPK = &#63; and type = &#63; from the database.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 */
 	@Override
@@ -5884,7 +5885,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the number of microblogs entries where creatorClassNameId = &#63; and creatorClassPK = &#63; and type = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @return the number of matching microblogs entries
 	 */
@@ -5948,7 +5949,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * Returns the number of microblogs entries where creatorClassNameId = &#63; and creatorClassPK = any &#63; and type = &#63;.
 	 *
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param type the type
 	 * @return the number of matching microblogs entries
 	 */
@@ -5979,15 +5980,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query.append(_FINDER_COLUMN_CCNI_CCPK_T_CREATORCLASSNAMEID_2);
 
 			if (creatorClassPKs.length > 0) {
-				query.append(StringPool.OPEN_PARENTHESIS);
+				query.append("(");
 
 				query.append(_FINDER_COLUMN_CCNI_CCPK_T_CREATORCLASSPK_7);
 
 				query.append(StringUtil.merge(creatorClassPKs));
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
 				query.append(WHERE_AND);
 			}
@@ -6082,7 +6083,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @return the matching microblogs entries
 	 */
@@ -6102,7 +6103,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -6125,7 +6126,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -6149,7 +6150,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -6287,7 +6288,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching microblogs entry
@@ -6321,7 +6322,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -6331,7 +6332,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching microblogs entry, or <code>null</code> if a matching microblogs entry could not be found
@@ -6356,7 +6357,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching microblogs entry
@@ -6390,7 +6391,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", type=");
 		msg.append(type);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -6400,7 +6401,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching microblogs entry, or <code>null</code> if a matching microblogs entry could not be found
@@ -6433,7 +6434,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * @param microblogsEntryId the primary key of the current microblogs entry
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next microblogs entry
@@ -6602,7 +6603,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param type the type
 	 * @return the matching microblogs entries
 	 */
@@ -6622,7 +6623,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -6645,7 +6646,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -6669,7 +6670,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @param start the lower bound of the range of microblogs entries
 	 * @param end the upper bound of the range of microblogs entries (not inclusive)
@@ -6747,15 +6748,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query.append(_FINDER_COLUMN_C_CCNI_CCPK_T_CREATORCLASSNAMEID_2);
 
 			if (creatorClassPKs.length > 0) {
-				query.append(StringPool.OPEN_PARENTHESIS);
+				query.append("(");
 
 				query.append(_FINDER_COLUMN_C_CCNI_CCPK_T_CREATORCLASSPK_7);
 
 				query.append(StringUtil.merge(creatorClassPKs));
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
 				query.append(WHERE_AND);
 			}
@@ -6828,7 +6829,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 */
 	@Override
@@ -6846,7 +6847,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPK the creator class p k
+	 * @param creatorClassPK the creator class pk
 	 * @param type the type
 	 * @return the number of matching microblogs entries
 	 */
@@ -6915,7 +6916,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 *
 	 * @param companyId the company ID
 	 * @param creatorClassNameId the creator class name ID
-	 * @param creatorClassPKs the creator class p ks
+	 * @param creatorClassPKs the creator class pks
 	 * @param type the type
 	 * @return the number of matching microblogs entries
 	 */
@@ -6949,15 +6950,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query.append(_FINDER_COLUMN_C_CCNI_CCPK_T_CREATORCLASSNAMEID_2);
 
 			if (creatorClassPKs.length > 0) {
-				query.append(StringPool.OPEN_PARENTHESIS);
+				query.append("(");
 
 				query.append(_FINDER_COLUMN_C_CCNI_CCPK_T_CREATORCLASSPK_7);
 
 				query.append(StringUtil.merge(creatorClassPKs));
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
-				query.append(StringPool.CLOSE_PARENTHESIS);
+				query.append(")");
 
 				query.append(WHERE_AND);
 			}
@@ -7296,7 +7297,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", socialRelationType=");
 		msg.append(socialRelationType);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -7364,7 +7365,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		msg.append(", socialRelationType=");
 		msg.append(socialRelationType);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchEntryException(msg.toString());
 	}
@@ -7681,6 +7682,24 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 
 	public MicroblogsEntryPersistenceImpl() {
 		setModelClass(MicroblogsEntry.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("type", "type_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
 	}
 
 	/**
@@ -7917,8 +7936,114 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !MicroblogsEntryModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!MicroblogsEntryModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { microblogsEntryModelImpl.getCompanyId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_COMPANYID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID,
+				args);
+
+			args = new Object[] { microblogsEntryModelImpl.getUserId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getUserId(),
+					microblogsEntryModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_U_T,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getCreatorClassNameId(),
+					microblogsEntryModelImpl.getCreatorClassPK()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_CCNI_CCPK, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_CCNI_CCPK,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getCreatorClassNameId(),
+					microblogsEntryModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_CCNI_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_CCNI_T,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getType(),
+					microblogsEntryModelImpl.getParentMicroblogsEntryId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_T_P, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_T_P,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getCompanyId(),
+					microblogsEntryModelImpl.getCreatorClassNameId(),
+					microblogsEntryModelImpl.getCreatorClassPK()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_CCNI_CCPK, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_CCNI_CCPK,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getCompanyId(),
+					microblogsEntryModelImpl.getCreatorClassNameId(),
+					microblogsEntryModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_CCNI_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_CCNI_T,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getCreatorClassNameId(),
+					microblogsEntryModelImpl.getCreatorClassPK(),
+					microblogsEntryModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_CCNI_CCPK_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_CCNI_CCPK_T,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getCompanyId(),
+					microblogsEntryModelImpl.getCreatorClassNameId(),
+					microblogsEntryModelImpl.getCreatorClassPK(),
+					microblogsEntryModelImpl.getType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_CCNI_CCPK_T, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_CCNI_CCPK_T,
+				args);
+
+			args = new Object[] {
+					microblogsEntryModelImpl.getUserId(),
+					microblogsEntryModelImpl.getCreateDate(),
+					microblogsEntryModelImpl.getType(),
+					microblogsEntryModelImpl.getSocialRelationType()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U_C_T_S, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_U_C_T_S,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -8346,14 +8471,14 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		query.append(_SQL_SELECT_MICROBLOGSENTRY_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

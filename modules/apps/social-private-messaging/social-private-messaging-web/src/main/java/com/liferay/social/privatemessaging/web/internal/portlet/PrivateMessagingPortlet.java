@@ -14,16 +14,18 @@
 
 package com.liferay.social.privatemessaging.web.internal.portlet;
 
+import com.liferay.document.library.configuration.DLConfiguration;
 import com.liferay.document.library.kernel.exception.FileExtensionException;
 import com.liferay.document.library.kernel.exception.FileNameException;
 import com.liferay.document.library.kernel.exception.FileSizeException;
+import com.liferay.document.library.kernel.util.DLValidator;
 import com.liferay.message.boards.kernel.model.MBMessage;
 import com.liferay.message.boards.kernel.service.MBMessageLocalService;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.UserScreenNameException;
-import com.liferay.portal.kernel.io.ByteArrayFileInputStream;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
@@ -38,15 +40,11 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.UserNotificationEventLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.PrefsPropsUtil;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -57,7 +55,6 @@ import com.liferay.social.privatemessaging.constants.PrivateMessagingPortletKeys
 import com.liferay.social.privatemessaging.service.UserThreadLocalService;
 import com.liferay.social.privatemessaging.util.PrivateMessagingUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -86,7 +83,10 @@ import org.osgi.service.component.annotations.Reference;
  * @author Peter Fellwock
  */
 @Component(
-	configurationPid = "com.liferay.social.privatemessaging.configuration.PrivateMessagingConfiguration",
+	configurationPid = {
+		"com.liferay.document.library.configuration.DLConfiguration",
+		"com.liferay.social.privatemessaging.configuration.PrivateMessagingConfiguration"
+	},
 	configurationPolicy = ConfigurationPolicy.OPTIONAL, immediate = true,
 	property = {
 		"com.liferay.portlet.add-default-resource=true",
@@ -224,7 +224,7 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 		throws Exception {
 
 		UploadPortletRequest uploadPortletRequest =
-			PortalUtil.getUploadPortletRequest(actionRequest);
+			_portal.getUploadPortletRequest(actionRequest);
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -280,9 +280,13 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 			for (ObjectValuePair<String, InputStream> inputStreamOVP :
 					inputStreamOVPs) {
 
-				InputStream inputStream = inputStreamOVP.getValue();
-
-				StreamUtil.cleanUp(inputStream);
+				try (InputStream inputStream = inputStreamOVP.getValue()) {
+				}
+				catch (IOException ioe) {
+					if (_log.isWarnEnabled()) {
+						_log.warn(ioe, ioe);
+					}
+				}
 			}
 		}
 
@@ -316,6 +320,9 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 	@Activate
 	@Modified
 	protected void activate(Map<String, Object> properties) {
+		_dlConfiguration = ConfigurableUtil.createConfigurable(
+			DLConfiguration.class, properties);
+
 		_privateMessagingConfiguration = ConfigurableUtil.createConfigurable(
 			PrivateMessagingConfiguration.class, properties);
 	}
@@ -330,32 +337,20 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 				portletRequest,
 				"document-names-must-end-with-one-of-the-following-extensions");
 
-			message +=
-				CharPool.SPACE +
-					StringUtil.merge(
-						PrefsPropsUtil.getStringArray(
-							PropsKeys.DL_FILE_EXTENSIONS, StringPool.COMMA),
-						StringPool.COMMA_AND_SPACE);
+			String fileExtensions = StringUtil.merge(
+				_dlConfiguration.fileExtensions(), StringPool.COMMA_AND_SPACE);
+
+			message += CharPool.SPACE + fileExtensions;
 		}
 		else if (key instanceof FileNameException) {
 			message = translate(
 				portletRequest, "please-enter-a-file-with-a-valid-file-name");
 		}
 		else if (key instanceof FileSizeException) {
-			long fileMaxSize = PrefsPropsUtil.getLong(
-				PropsKeys.DL_FILE_MAX_SIZE);
-
-			if (fileMaxSize == 0) {
-				fileMaxSize = PrefsPropsUtil.getLong(
-					PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_MAX_SIZE);
-			}
-
-			fileMaxSize /= 1024;
-
 			message = translate(
 				portletRequest,
 				"please-enter-a-file-with-a-valid-file-size-no-larger-than-x",
-				fileMaxSize);
+				_dlValidator.getMaxAllowableSize() / 1024);
 		}
 		else if (key instanceof UserScreenNameException) {
 			message = translate(
@@ -393,20 +388,6 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 		writeJSON(resourceRequest, resourceResponse, resultsJSONObject);
 	}
 
-	protected boolean isValidName(String name) {
-		if ((name == null) || name.contains("\\") || name.contains("\\\\") ||
-			name.contains("//") || name.contains(":") || name.contains("*") ||
-			name.contains("?") || name.contains("\"") || name.contains("<") ||
-			name.contains(">") || name.contains("|") || name.contains("[") ||
-			name.contains("]") || name.contains("../") ||
-			name.contains("/..")) {
-
-			return false;
-		}
-
-		return true;
-	}
-
 	@Reference(
 		target = "(&(release.bundle.symbolic.name=com.liferay.social.privatemessaging.web)(release.schema.version=1.0.1))",
 		unbind = "-"
@@ -417,43 +398,11 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 	protected void validateAttachment(String fileName, InputStream inputStream)
 		throws Exception {
 
-		if (inputStream instanceof ByteArrayFileInputStream) {
-			ByteArrayFileInputStream byteArrayFileInputStream =
-				(ByteArrayFileInputStream)inputStream;
+		_dlValidator.validateFileSize(fileName, inputStream);
 
-			File file = byteArrayFileInputStream.getFile();
+		_dlValidator.validateFileName(fileName);
 
-			if ((PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE) > 0) &&
-				((file == null) ||
-				 (file.length() >
-					 PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE)))) {
-
-				throw new FileSizeException(fileName);
-			}
-		}
-
-		if (!isValidName(fileName)) {
-			throw new FileNameException(fileName);
-		}
-
-		String[] fileExtensions = PrefsPropsUtil.getStringArray(
-			PropsKeys.DL_FILE_EXTENSIONS, StringPool.COMMA);
-
-		boolean validFileExtension = false;
-
-		for (String fileExtension : fileExtensions) {
-			if (StringPool.STAR.equals(fileExtension) ||
-				StringUtil.endsWith(fileName, fileExtension)) {
-
-				validFileExtension = true;
-
-				break;
-			}
-		}
-
-		if (!validFileExtension) {
-			throw new FileExtensionException(fileName);
-		}
+		_dlValidator.validateFileExtension(fileName);
 	}
 
 	protected void validateTo(String to, ThemeDisplay themeDisplay)
@@ -507,12 +456,12 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 	@Override
 	protected void writeJSON(
 			PortletRequest portletRequest, MimeResponse mimeResponse,
-			Object json)
+			Object jsonObj)
 		throws IOException {
 
 		mimeResponse.setContentType(ContentTypes.TEXT_HTML);
 
-		PortletResponseUtil.write(mimeResponse, json.toString());
+		PortletResponseUtil.write(mimeResponse, jsonObj.toString());
 
 		mimeResponse.flushBuffer();
 	}
@@ -520,8 +469,16 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 	private static final Log _log = LogFactoryUtil.getLog(
 		PrivateMessagingPortlet.class);
 
+	private volatile DLConfiguration _dlConfiguration;
+
+	@Reference
+	private DLValidator _dlValidator;
+
 	@Reference
 	private MBMessageLocalService _mBMessageLocalService;
+
+	@Reference
+	private Portal _portal;
 
 	private PrivateMessagingConfiguration _privateMessagingConfiguration;
 

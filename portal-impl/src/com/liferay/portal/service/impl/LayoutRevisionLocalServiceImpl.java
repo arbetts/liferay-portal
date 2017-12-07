@@ -16,6 +16,8 @@ package com.liferay.portal.service.impl;
 
 import com.liferay.exportimport.kernel.staging.MergeLayoutPrototypesThreadLocal;
 import com.liferay.exportimport.kernel.staging.StagingUtil;
+import com.liferay.petra.lang.CentralizedThreadLocal;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchLayoutRevisionException;
 import com.liferay.portal.kernel.exception.NoSuchPortletPreferencesException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -29,11 +31,11 @@ import com.liferay.portal.kernel.model.LayoutSetBranch;
 import com.liferay.portal.kernel.model.PortletPreferences;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.comparator.LayoutRevisionCreateDateComparator;
+import com.liferay.portal.kernel.util.comparator.LayoutRevisionModifiedDateComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.service.base.LayoutRevisionLocalServiceBaseImpl;
@@ -203,8 +205,8 @@ public class LayoutRevisionLocalServiceImpl
 	public void deleteLayoutRevisions(long layoutSetBranchId, long plid)
 		throws PortalException {
 
-		for (LayoutRevision layoutRevision : getLayoutRevisions(
-				layoutSetBranchId, plid)) {
+		for (LayoutRevision layoutRevision :
+				getLayoutRevisions(layoutSetBranchId, plid)) {
 
 			layoutRevisionLocalService.deleteLayoutRevision(layoutRevision);
 		}
@@ -264,12 +266,24 @@ public class LayoutRevisionLocalServiceImpl
 			new LayoutRevisionCreateDateComparator(false));
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public LayoutRevision fetchLayoutRevision(
 		long layoutSetBranchId, boolean head, long plid) {
 
-		return layoutRevisionPersistence.fetchByL_H_P(
-			layoutSetBranchId, head, plid);
+		return layoutRevisionPersistence.fetchByL_H_P_Collection_First(
+			layoutSetBranchId, head, plid, null);
+	}
+
+	@Override
+	public LayoutRevision fetchLayoutRevision(
+		long layoutSetBranchId, long layoutBranchId, boolean head, long plid) {
+
+		return layoutRevisionPersistence.fetchByL_L_H_P(
+			layoutSetBranchId, layoutBranchId, head, plid);
 	}
 
 	@Override
@@ -298,13 +312,17 @@ public class LayoutRevisionLocalServiceImpl
 			layoutSetBranchId, parentLayoutRevision, plid);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public LayoutRevision getLayoutRevision(
 			long layoutSetBranchId, long plid, boolean head)
 		throws PortalException {
 
-		return layoutRevisionPersistence.findByL_H_P(
-			layoutSetBranchId, head, plid);
+		return layoutRevisionPersistence.findByL_H_P_Collection_First(
+			layoutSetBranchId, head, plid, null);
 	}
 
 	@Override
@@ -362,6 +380,14 @@ public class LayoutRevisionLocalServiceImpl
 
 	@Override
 	public List<LayoutRevision> getLayoutRevisions(
+		long layoutSetBranchId, long plid, boolean head) {
+
+		return layoutRevisionPersistence.findByL_H_P_Collection(
+			layoutSetBranchId, head, plid);
+	}
+
+	@Override
+	public List<LayoutRevision> getLayoutRevisions(
 		long layoutSetBranchId, long plid, int status) {
 
 		return layoutRevisionPersistence.findByL_P_S(
@@ -413,6 +439,18 @@ public class LayoutRevisionLocalServiceImpl
 
 		LayoutRevision layoutRevision = null;
 
+		if (_layoutRevisionId.get() > 0) {
+			LayoutRevision threadLayoutRevision =
+				layoutRevisionPersistence.findByPrimaryKey(
+					_layoutRevisionId.get());
+
+			if (threadLayoutRevision.getParentLayoutRevisionId() ==
+					oldLayoutRevision.getLayoutRevisionId()) {
+
+				layoutRevision = threadLayoutRevision;
+			}
+		}
+
 		int workflowAction = serviceContext.getWorkflowAction();
 
 		boolean revisionInProgress = ParamUtil.getBoolean(
@@ -420,7 +458,7 @@ public class LayoutRevisionLocalServiceImpl
 
 		if (!MergeLayoutPrototypesThreadLocal.isInProgress() &&
 			(workflowAction != WorkflowConstants.ACTION_PUBLISH) &&
-			(_layoutRevisionId.get() <= 0) && !revisionInProgress) {
+			(layoutRevision == null) && !revisionInProgress) {
 
 			long newLayoutRevisionId = counterLocalService.increment();
 
@@ -471,11 +509,7 @@ public class LayoutRevisionLocalServiceImpl
 				layoutRevision.getPlid(), layoutRevision.getLayoutRevisionId());
 		}
 		else {
-			if (_layoutRevisionId.get() > 0) {
-				layoutRevision = layoutRevisionPersistence.findByPrimaryKey(
-					_layoutRevisionId.get());
-			}
-			else {
+			if (layoutRevision == null) {
 				layoutRevision = oldLayoutRevision;
 			}
 
@@ -530,6 +564,8 @@ public class LayoutRevisionLocalServiceImpl
 		LayoutRevision layoutRevision =
 			layoutRevisionPersistence.findByPrimaryKey(layoutRevisionId);
 
+		boolean head = layoutRevision.isHead();
+
 		layoutRevision.setStatus(status);
 		layoutRevision.setStatusByUserId(user.getUserId());
 		layoutRevision.setStatusByUserName(user.getFullName());
@@ -561,12 +597,13 @@ public class LayoutRevisionLocalServiceImpl
 				}
 			}
 		}
-		else {
+		else if (head) {
 			List<LayoutRevision> layoutRevisions =
 				layoutRevisionPersistence.findByL_P_S(
 					layoutRevision.getLayoutSetBranchId(),
-					layoutRevision.getPlid(),
-					WorkflowConstants.STATUS_APPROVED);
+					layoutRevision.getPlid(), WorkflowConstants.STATUS_APPROVED,
+					QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+					new LayoutRevisionModifiedDateComparator(false));
 
 			for (LayoutRevision curLayoutRevision : layoutRevisions) {
 				if (curLayoutRevision.getLayoutRevisionId() !=
@@ -687,7 +724,8 @@ public class LayoutRevisionLocalServiceImpl
 		LayoutRevisionLocalServiceImpl.class);
 
 	private static final ThreadLocal<Long> _layoutRevisionId =
-		new AutoResetThreadLocal<>(
-			LayoutRevisionLocalServiceImpl.class + "._layoutRevisionId", 0L);
+		new CentralizedThreadLocal<>(
+			LayoutRevisionLocalServiceImpl.class + "._layoutRevisionId",
+			() -> 0L);
 
 }

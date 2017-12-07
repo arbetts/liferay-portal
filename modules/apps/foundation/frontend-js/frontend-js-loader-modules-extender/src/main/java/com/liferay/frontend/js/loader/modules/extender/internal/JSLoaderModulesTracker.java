@@ -18,29 +18,37 @@ import aQute.lib.converter.Converter;
 
 import com.liferay.osgi.util.ServiceTrackerFactory;
 
+import java.net.URL;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import javax.servlet.ServletContext;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * @author Carlos Sierra Andrés
  */
-@Component(immediate = true, service = JSLoaderModulesTracker.class)
+@Component(
+	configurationPid = "com.liferay.frontend.js.loader.modules.extender.internal.Details",
+	immediate = true, service = JSLoaderModulesTracker.class
+)
 public class JSLoaderModulesTracker
 	implements ServiceTrackerCustomizer
 		<ServletContext, ServiceReference<ServletContext>> {
 
 	@Activate
+	@Modified
 	public void activate(
 			ComponentContext componentContext, Map<String, Object> properties)
 		throws Exception {
@@ -50,6 +58,8 @@ public class JSLoaderModulesTracker
 		}
 
 		setDetails(Converter.cnv(Details.class, properties));
+
+		_jsLoaderModules.clear();
 
 		_serviceTracker = ServiceTrackerFactory.open(
 			componentContext.getBundleContext(),
@@ -65,17 +75,31 @@ public class JSLoaderModulesTracker
 		String contextPath = (String)serviceReference.getProperty(
 			"osgi.web.contextpath");
 
+		Bundle bundle = serviceReference.getBundle();
+
+		URL url = bundle.getEntry(Details.CONFIG_JSON);
+
+		if (url == null) {
+			return serviceReference;
+		}
+
 		JSLoaderModule jsLoaderModule = new JSLoaderModule(
 			_details.applyVersioning(), serviceReference.getBundle(),
 			contextPath);
 
 		_jsLoaderModules.put(serviceReference, jsLoaderModule);
 
+		_lastModified = System.currentTimeMillis();
+
 		return serviceReference;
 	}
 
 	public Collection<JSLoaderModule> getJSLoaderModules() {
 		return _jsLoaderModules.values();
+	}
+
+	public long getLastModified() {
+		return _lastModified;
 	}
 
 	public long getTrackingCount() {
@@ -98,6 +122,8 @@ public class JSLoaderModulesTracker
 		ServiceReference<ServletContext> trackedServiceReference) {
 
 		_jsLoaderModules.remove(serviceReference);
+
+		_lastModified = System.currentTimeMillis();
 	}
 
 	@Deactivate
@@ -114,6 +140,7 @@ public class JSLoaderModulesTracker
 	private volatile Details _details;
 	private final Map<ServiceReference<ServletContext>, JSLoaderModule>
 		_jsLoaderModules = new ConcurrentSkipListMap<>();
+	private volatile long _lastModified = System.currentTimeMillis();
 	private ServiceTracker<ServletContext, ServiceReference<ServletContext>>
 		_serviceTracker;
 

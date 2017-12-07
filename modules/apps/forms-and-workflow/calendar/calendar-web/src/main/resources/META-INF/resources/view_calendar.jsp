@@ -44,7 +44,7 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 			);
 
 			var destroyInstance = function(event) {
-				if (event.portletId === '<%= portletDisplay.getRootPortletId() %>') {
+				if (event.portletId === '<%= portletDisplay.getId() %>') {
 					calendarContainer.destroy();
 
 					Liferay.component('<portlet:namespace />calendarContainer', null);
@@ -71,7 +71,7 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 			);
 
 			var destroyInstance = function(event) {
-				if (event.portletId === '<%= portletDisplay.getRootPortletId() %>') {
+				if (event.portletId === '<%= portletDisplay.getId() %>') {
 					remoteServices.destroy();
 
 					Liferay.component('<portlet:namespace />remoteServices', null);
@@ -299,7 +299,8 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 
 				calendars: <%= otherCalendarsJSONArray %>,
 				scheduler: <portlet:namespace />scheduler,
-				simpleMenu: window.<portlet:namespace />calendarsMenu
+				simpleMenu: window.<portlet:namespace />calendarsMenu,
+				visible: <%= !displaySchedulerOnly %>
 			}
 		).render();
 	</c:if>

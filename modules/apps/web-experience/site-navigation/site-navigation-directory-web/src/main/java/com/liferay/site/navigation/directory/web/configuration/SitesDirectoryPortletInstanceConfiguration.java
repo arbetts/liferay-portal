@@ -28,14 +28,14 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @Meta.OCD(
 	id = "com.liferay.site.navigation.directory.web.configuration.SitesDirectoryPortletInstanceConfiguration",
 	localization = "content/Language",
-	name = "sites.directory.portlet.instance.configuration.name"
+	name = "sites-directory-portlet-instance-configuration-name"
 )
 public interface SitesDirectoryPortletInstanceConfiguration {
 
-	@Meta.AD(deflt = "descriptive", required = false)
+	@Meta.AD(deflt = "descriptive", name = "display-style", required = false)
 	public String displayStyle();
 
-	@Meta.AD(deflt = "top-level", required = false)
+	@Meta.AD(deflt = "top-level", name = "sites", required = false)
 	public String sites();
 
 }

@@ -7,7 +7,6 @@ import aQute.bnd.annotation.ProviderType;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.util.Date;
 import java.util.List;
@@ -23,10 +22,10 @@ public class ${entity.name}JSONSerializer {
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 		<#list entity.regularColList as column>
-			<#if column.type == "Date">
+			<#if stringUtil.equals(column.type, "Date")>
 				Date ${column.name} = model.get${column.methodName}();
 
-				String ${column.name}JSON = StringPool.BLANK;
+				String ${column.name}JSON = "";
 
 				if (${column.name} != null) {
 					${column.name}JSON = String.valueOf(${column.name}.getTime());

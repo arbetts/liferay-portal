@@ -1,4 +1,10 @@
 <definition>
+	<command name="addTagFacet">
+		<execute function="AssertClick#assertPartialTextClickAt" locator1="SearchResults#USER_FACET_TAGS" value1="${tagName}">
+			<var name="key_tagName" value="${tagName}" />
+		</execute>
+	</command>
+
 	<command name="clearSearchPG">
 		<execute function="AssertClick" locator1="Button#CLEAR" value1="Clear" />
 
@@ -44,7 +50,7 @@
 		<execute function="AssertClick#assertPartialTextClickAt" locator1="SearchResults#MODIFIED_RANGE_FACET_TIME_RANGE" value1="${searchModifiedRange}" />
 	</command>
 
-	<command name="gotoUserSearchResultPG">
+	<command name="gotoSearchResultPG">
 		<var name="key_searchAssetTitle" value="${searchAssetTitle}" />
 
 		<execute function="AssertClick" locator1="SearchResults#ASSET_ENTRY_TABLE_TITLE" value1="${searchAssetTitle}" />
@@ -57,9 +63,13 @@
 	</command>
 
 	<command name="removeUserFacetDisplayPG">
-		<execute function="Click#makeVisibleClickAt" locator1="Search#SEARCH_PORTLET_OPTIONS_WRENCH" />
+		<execute function="MouseOver#mouseOverNotVisible" locator1="Search#SEARCH_PORTLET_OPTIONS_WRENCH" />
 
-		<execute function="AssertClick" locator1="MenuItem#CONFIGURATION" value1="Configuration" />
+		<execute function="Click" locator1="Search#SEARCH_PORTLET_OPTIONS_WRENCH" />
+
+		<execute function="AssertClick" locator1="MenuItem#ANY_MENU_ITEM" value1="Configuration">
+			<var name="key_menuItem" value="Configuration" />
+		</execute>
 
 		<execute function="SelectFrame" locator1="IFrame#CONFIGURATION" />
 
@@ -71,17 +81,16 @@
 	</command>
 
 	<command name="searchCP">
-		<execute function="AssertElementPresent" locator1="NavBar#BASIC_SEARCH_FIELD" />
-		<execute function="AssertElementPresent" locator1="NavBar#SEARCH_BUTTON" />
+		<execute function="AssertElementPresent" locator1="TextInput#SEARCH" />
+		<execute function="AssertElementPresent" locator1="Icon#BASIC_SEARCH" />
 
-		<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${searchTerm}" />
+		<execute function="Type" locator1="TextInput#SEARCH" value1="${searchTerm}" />
 
-		<execute function="KeyPress" locator1="NavBar#BASIC_SEARCH_FIELD" value1="\RETURN" />
+		<execute function="KeyPress" locator1="TextInput#SEARCH" value1="\RETURN" />
 	</command>
 
 	<command name="searchPG">
 		<execute function="AssertElementPresent" locator1="Search#SEARCH_FIELD" />
-		<execute function="AssertElementPresent" locator1="Search#SEARCH_PORTLET_SEARCH_BUTTON" />
 
 		<execute function="Type" locator1="Search#SEARCH_FIELD" value1="${searchTerm}" />
 
@@ -139,6 +148,10 @@
 		<execute function="AssertTextEquals" locator1="Search#INCREMENTAL_SEARCH_SUGGESTION" value1="${kbArticleTitle}" />
 
 		<execute function="AssertClick" locator1="Search#INCREMENTAL_SEARCH_SUGGESTION" value1="${kbArticleTitle}" />
+	</command>
+
+	<command name="viewSearchAssetDetailPage">
+		<execute function="AssertTextEquals" locator1="Portlet#H3_HEADER" value1="${searchAssetTitle}" />
 	</command>
 
 	<command name="viewSearchAssetTitle">
@@ -212,11 +225,13 @@
 
 		<execute function="AssertTextEquals" locator1="SearchResults#USER_FACET_ANY_USER" value1="Any User" />
 
-		<var method="StringUtil#lowerCase('${userLoginFullName}')" name="key_userLoginFullName" />
+		<var method="StringUtil#lowerCase('${userLoginFullName}')" name="userLoginFullName" />
+
+		<var name="key_userLoginFullName" value="${userLoginFullName}" />
 
 		<execute function="AssertTextEquals#assertPartialText" locator1="SearchResults#USER_FACET_FREQUENCY" value1="${facetFrequency}" />
 
-		<execute function="AssertClick#assertPartialTextClickAt" locator1="SearchResults#USER_FACET_USER_NAME" value1="${key_userLoginFullName}" />
+		<execute function="AssertClick#assertPartialTextClickAt" locator1="SearchResults#USER_FACET_USER_NAME" value1="${userLoginFullName}" />
 
 		<execute macro="Search#viewSearchResultPG">
 			<var name="searchAssetSummary" value="${searchAssetSummary}" />

@@ -14,6 +14,8 @@
 
 package com.liferay.source.formatter.dependencies;
 
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.StringUtil;
 
 import java.util.Arrays;
@@ -45,6 +47,12 @@ public class IncorrectLineBreaks1 {
 		boolean b1 = StringUtil.contains(
 			"Hello World Hello World Hello World " +
 				"Hello World Hello World Hello World", "Hello");
+
+		String anotherStringWithAVeryLongName = "Hello World";
+
+		boolean b2 = StringUtil.contains(
+			anotherStringWithAVeryLongName, StringUtil.trim(
+				anotherStringWithAVeryLongName));
 
 		String test2 = thisIsAStringWithAVeryVeryVeryLongName +
 			thisIsAStringWithAVeryVeryVeryLongName2;
@@ -118,6 +126,17 @@ public class IncorrectLineBreaks1 {
 		return;
 	}
 
+	public void method7(ThemeDisplay themeDisplay) {
+		PortletLocalServiceUtil.visitPortlets(
+			themeDisplay.getCompanyId(), portlet -> {
+				if (portlet.isSinglePageApplication() && portlet.isActive() &&
+					portlet.isReady()) {
+
+					return;
+				}
+			});
+	}
+
 	public void methodWithASlightlyLongerName(
 		String test1, String test2, String[] testStringArray) throws Exception {
 
@@ -128,10 +147,21 @@ public class IncorrectLineBreaks1 {
 		}
 	}
 
-	private static final String[] _NUMBERS =
-		new String[] {
-			"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
-			"Nine", "Ten"
-		};
+	protected String[][] getTwoDimensionalArray() {
+		return new String[][] {
+			new String[] {
+				"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
+				"Nine", "Ten"
+			},
+			new String[] {
+				"Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+				"Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty"
+			}};
+	}
+
+	private static final String[] _NUMBERS = {
+		"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+		"Ten"
+	};
 
 }

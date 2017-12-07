@@ -40,11 +40,11 @@ if (threadId > 0) {
 		curParentMessage = MBMessageLocalServiceUtil.getMessage(parentMessageId);
 
 		if (Validator.isNull(subject)) {
-			if (curParentMessage.getSubject().startsWith("RE: ")) {
+			if (curParentMessage.getSubject().startsWith(MBMessageConstants.MESSAGE_SUBJECT_PREFIX_RE)) {
 				subject = curParentMessage.getSubject();
 			}
 			else {
-				subject = "RE: " + curParentMessage.getSubject();
+				subject = MBMessageConstants.MESSAGE_SUBJECT_PREFIX_RE + curParentMessage.getSubject();
 			}
 		}
 	}
@@ -114,7 +114,7 @@ if (portletTitleBasedNavigation) {
 }
 %>
 
-<div <%= portletTitleBasedNavigation ? "class=\"container-fluid-1280\"" : StringPool.BLANK %>>
+<div <%= portletTitleBasedNavigation ? "class=\"container-fluid-1280\"" : StringPool.BLANK %> id='<%= renderResponse.getNamespace() + "mbEditPageContainer" %>'>
 	<c:if test="<%= !portletTitleBasedNavigation %>">
 		<c:if test="<%= Validator.isNull(referringPortletResource) %>">
 			<liferay-util:include page="/message_boards/top_links.jsp" servletContext="<%= application %>" />
@@ -131,7 +131,7 @@ if (portletTitleBasedNavigation) {
 		<portlet:param name="mvcRenderCommandName" value="/message_boards/edit_message" />
 	</portlet:actionURL>
 
-	<aui:form action="<%= editMessageURL %>" enctype="multipart/form-data" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveMessage(false);" %>'>
+	<aui:form action="<%= editMessageURL %>" enctype="multipart/form-data" method="post" name="fm" onSubmit="event.preventDefault();">
 		<aui:input name="<%= Constants.CMD %>" type="hidden" />
 		<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 		<aui:input name="messageId" type="hidden" value="<%= messageId %>" />
@@ -158,26 +158,18 @@ if (portletTitleBasedNavigation) {
 		</liferay-ui:error>
 
 		<liferay-ui:error exception="<%= FileExtensionException.class %>">
-			<liferay-ui:message key="document-names-must-end-with-one-of-the-following-extensions" /><%= StringUtil.merge(PrefsPropsUtil.getStringArray(PropsKeys.DL_FILE_EXTENSIONS, StringPool.COMMA), StringPool.COMMA_AND_SPACE) %>.
+
+			<%
+			DLConfiguration dlConfiguration = ConfigurationProviderUtil.getSystemConfiguration(DLConfiguration.class);
+			%>
+
+			<liferay-ui:message key="document-names-must-end-with-one-of-the-following-extensions" /><%= StringUtil.merge(dlConfiguration.fileExtensions(), StringPool.COMMA_AND_SPACE) %>.
 		</liferay-ui:error>
 
 		<liferay-ui:error exception="<%= FileNameException.class %>" message="please-enter-a-file-with-a-valid-file-name" />
 
-		<%
-		long uploadServletRequestImplMaxSize = PrefsPropsUtil.getLong(PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_MAX_SIZE);
-		%>
-
 		<liferay-ui:error exception="<%= FileSizeException.class %>">
-
-			<%
-			long fileMaxSize = PrefsPropsUtil.getLong(PropsKeys.DL_FILE_MAX_SIZE);
-
-			if (fileMaxSize == 0) {
-				fileMaxSize = uploadServletRequestImplMaxSize;
-			}
-			%>
-
-			<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(fileMaxSize, locale) %>" key="please-enter-a-file-with-a-valid-file-size-no-larger-than-x" translateArguments="<%= false %>" />
+			<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(DLValidatorUtil.getMaxAllowableSize(), locale) %>" key="please-enter-a-file-with-a-valid-file-size-no-larger-than-x" translateArguments="<%= false %>" />
 		</liferay-ui:error>
 
 		<liferay-ui:error exception="<%= LockedThreadException.class %>" message="thread-is-locked" />
@@ -185,12 +177,12 @@ if (portletTitleBasedNavigation) {
 		<liferay-ui:error exception="<%= MessageSubjectException.class %>" message="please-enter-a-valid-subject" />
 
 		<liferay-ui:error exception="<%= UploadRequestSizeException.class %>">
-			<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(uploadServletRequestImplMaxSize, locale) %>" key="request-is-larger-than-x-and-could-not-be-processed" translateArguments="<%= false %>" />
+			<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(UploadServletRequestConfigurationHelperUtil.getMaxSize(), locale) %>" key="request-is-larger-than-x-and-could-not-be-processed" translateArguments="<%= false %>" />
 		</liferay-ui:error>
 
-		<liferay-ui:asset-categories-error />
+		<liferay-asset:asset-categories-error />
 
-		<liferay-ui:asset-tags-error />
+		<liferay-asset:asset-tags-error />
 
 		<aui:fieldset-group markupView="lexicon">
 			<aui:fieldset>
@@ -216,9 +208,9 @@ if (portletTitleBasedNavigation) {
 
 				<aui:model-context bean="<%= message %>" model="<%= MBMessage.class %>" />
 
-				<aui:input autoFocus="<%= (windowState.equals(WindowState.MAXIMIZED) && !themeDisplay.isFacebook()) %>" name="subject" value="<%= subject %>" />
+				<aui:input autoFocus="<%= windowState.equals(WindowState.MAXIMIZED) %>" name="subject" value="<%= subject %>" />
 
-				<aui:field-wrapper label="body">
+				<aui:field-wrapper cssClass="message-content" label="body">
 					<c:choose>
 						<c:when test='<%= ((messageId != 0) && message.isFormatBBCode()) || ((messageId == 0) && messageFormat.equals("bbcode")) %>'>
 							<%@ include file="/message_boards/bbcode_editor.jspf" %>
@@ -232,16 +224,16 @@ if (portletTitleBasedNavigation) {
 				</aui:field-wrapper>
 			</aui:fieldset>
 
-			<liferay-ui:custom-attributes-available className="<%= MBMessage.class.getName() %>">
+			<liferay-expando:custom-attributes-available className="<%= MBMessage.class.getName() %>">
 				<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="custom-fields">
-					<liferay-ui:custom-attribute-list
+					<liferay-expando:custom-attribute-list
 						className="<%= MBMessage.class.getName() %>"
 						classPK="<%= messageId %>"
 						editable="<%= true %>"
 						label="<%= true %>"
 					/>
 				</aui:fieldset>
-			</liferay-ui:custom-attributes-available>
+			</liferay-expando:custom-attributes-available>
 
 			<c:if test="<%= MBCategoryPermission.contains(permissionChecker, scopeGroupId, categoryId, ActionKeys.ADD_FILE) %>">
 				<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="attachments">
@@ -254,7 +246,7 @@ if (portletTitleBasedNavigation) {
 
 								String taglibDeleteAttachment = "javascript:" + renderResponse.getNamespace() + "trashAttachment(" + (i + 1) + ", '" + Constants.MOVE_TO_TRASH + "');";
 
-								if (!TrashUtil.isTrashEnabled(scopeGroupId)) {
+								if (!trashHelper.isTrashEnabled(scopeGroupId)) {
 									taglibDeleteAttachment = "javascript:" + renderResponse.getNamespace() + "deleteAttachment(" + (i + 1) + ");";
 								}
 							%>
@@ -282,13 +274,13 @@ if (portletTitleBasedNavigation) {
 									<liferay-ui:icon-delete
 										id='<%= "removeExisting" + (i + 1) %>'
 										label="<%= true %>"
-										message='<%= TrashUtil.isTrashEnabled(scopeGroupId) ? "remove" : "delete" %>'
+										message='<%= trashHelper.isTrashEnabled(scopeGroupId) ? "remove" : "delete" %>'
 										method="get"
-										trash="<%= TrashUtil.isTrashEnabled(scopeGroupId) %>"
+										trash="<%= trashHelper.isTrashEnabled(scopeGroupId) %>"
 										url="<%= taglibDeleteAttachment %>"
 									/>
 
-									<c:if test="<%= TrashUtil.isTrashEnabled(scopeGroupId) %>">
+									<c:if test="<%= trashHelper.isTrashEnabled(scopeGroupId) %>">
 
 										<%
 										StringBundler sb = new StringBundler(7);
@@ -339,7 +331,7 @@ if (portletTitleBasedNavigation) {
 			</c:if>
 
 			<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="related-assets">
-				<liferay-ui:input-asset-links
+				<liferay-asset:input-asset-links
 					className="<%= MBMessage.class.getName() %>"
 					classPK="<%= (message != null) ? message.getMessageId() : 0 %>"
 				/>
@@ -349,6 +341,8 @@ if (portletTitleBasedNavigation) {
 				<c:if test="<%= curParentMessage == null %>">
 
 					<%
+					MBCategory category = MBCategoryLocalServiceUtil.getCategory(categoryId);
+
 					boolean disabled = false;
 					boolean question = threadAsQuestionByDefault;
 
@@ -357,15 +351,15 @@ if (portletTitleBasedNavigation) {
 
 						if (thread.isQuestion() || message.isAnswer()) {
 							question = true;
+
+							if ((category != null) && category.getDisplayStyle().equals("question")) {
+								disabled = true;
+							}
 						}
 					}
-					else {
-						MBCategory category = MBCategoryLocalServiceUtil.getCategory(categoryId);
-
-						if ((category != null) && category.getDisplayStyle().equals("question")) {
-							disabled = true;
-							question = true;
-						}
+					else if ((category != null) && category.getDisplayStyle().equals("question")) {
+						disabled = true;
+						question = true;
 					}
 					%>
 
@@ -395,7 +389,6 @@ if (portletTitleBasedNavigation) {
 
 							try {
 								String priorityName = priority[0];
-								String priorityImage = priority[1];
 								double priorityValue = GetterUtil.getDouble(priority[2]);
 
 								if (priorityValue > 0) {
@@ -427,10 +420,10 @@ if (portletTitleBasedNavigation) {
 				</aui:fieldset>
 			</c:if>
 
-			<c:if test="<%= (message == null) && PropsValues.CAPTCHA_CHECK_PORTLET_MESSAGE_BOARDS_EDIT_MESSAGE %>">
+			<c:if test="<%= (message == null) && captchaConfiguration.messageBoardsEditMessageCaptchaEnabled() %>">
 				<portlet:resourceURL id="/message_boards/captcha" var="captchaURL" />
 
-				<liferay-ui:captcha url="<%= captchaURL %>" />
+				<liferay-captcha:captcha url="<%= captchaURL %>" />
 			</c:if>
 		</aui:fieldset-group>
 
@@ -473,7 +466,7 @@ if (portletTitleBasedNavigation) {
 			<aui:button cssClass="btn-lg" disabled="<%= pending %>" name="publishButton" type="submit" value="<%= publishButtonLabel %>" />
 
 			<c:if test="<%= themeDisplay.isSignedIn() %>">
-				<aui:button cssClass="btn-lg" name="saveButton" onClick='<%= renderResponse.getNamespace() + "saveMessage(true);" %>' value="<%= saveButtonLabel %>" />
+				<aui:button cssClass="btn-lg" name="saveButton" value="<%= saveButtonLabel %>" />
 			</c:if>
 
 			<aui:button cssClass="btn-lg" href="<%= redirect %>" type="cancel" />
@@ -481,22 +474,24 @@ if (portletTitleBasedNavigation) {
 	</aui:form>
 </div>
 
-<aui:script>
-	function <portlet:namespace />saveMessage(draft) {
-		var form = AUI.$(document.<portlet:namespace />fm);
-
-		form.fm('<%= Constants.CMD %>').val('<%= (message == null) ? Constants.ADD : Constants.UPDATE %>');
-		form.fm('body').val(<portlet:namespace />getHTML());
-
-		if (!draft) {
-			form.fm('workflowAction').val(<%= WorkflowConstants.ACTION_PUBLISH %>);
+<aui:script require="message-boards-web/message_boards/js/MBPortlet.es">
+	new messageBoardsWebMessage_boardsJsMBPortletEs.default(
+		{
+			constants: {
+				'ACTION_PUBLISH': '<%= WorkflowConstants.ACTION_PUBLISH %>',
+				'ACTION_SAVE_DRAFT': '<%= WorkflowConstants.ACTION_SAVE_DRAFT %>',
+				'CMD': '<%= Constants.CMD %>'
+			},
+			currentAction: '<%= (message == null) ? Constants.ADD : Constants.UPDATE %>',
+			namespace: '<portlet:namespace />',
+			rootNode: '#<portlet:namespace />mbEditPageContainer'
 		}
+	);
+</aui:script>
 
-		submitForm(form);
-	}
-
+<aui:script>
 	<c:choose>
-		<c:when test="<%= TrashUtil.isTrashEnabled(scopeGroupId) %>">
+		<c:when test="<%= trashHelper.isTrashEnabled(scopeGroupId) %>">
 			function <portlet:namespace />trashAttachment(index, action) {
 				var $ = AUI.$;
 

@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.model.PortletConstants;
 import com.liferay.portal.kernel.model.PortletPreferencesIds;
 import com.liferay.portal.kernel.portlet.LiferayPortletMode;
 import com.liferay.portal.kernel.portlet.PortalPreferences;
+import com.liferay.portal.kernel.portlet.PortletIdCodec;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactory;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryConstants;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -64,6 +65,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
@@ -257,8 +259,8 @@ public class PortletPreferencesFactoryImpl
 		long ownerId = PortletKeys.PREFS_OWNER_ID_DEFAULT;
 		int ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
 
-		if (PortletConstants.hasUserId(portletId)) {
-			ownerId = PortletConstants.getUserId(portletId);
+		if (PortletIdCodec.hasUserId(portletId)) {
+			ownerId = PortletIdCodec.decodeUserId(portletId);
 			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
 		}
 
@@ -408,8 +410,9 @@ public class PortletPreferencesFactoryImpl
 			modeEditGuest = true;
 		}
 
-		return getPortletPreferencesIds(
-			siteGroupId, userId, layout, portletId, modeEditGuest);
+		return _getPortletPreferencesIds(
+			themeDisplay, siteGroupId, userId, layout, portletId,
+			modeEditGuest);
 	}
 
 	@Override
@@ -428,96 +431,8 @@ public class PortletPreferencesFactoryImpl
 			boolean modeEditGuest)
 		throws PortalException {
 
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
-		String originalPortletId = portletId;
-
-		Portlet portlet = PortletLocalServiceUtil.getPortletById(
-			layout.getCompanyId(), portletId);
-
-		long ownerId = 0;
-		int ownerType = 0;
-		long plid = 0;
-
-		if (modeEditGuest) {
-			boolean hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
-				permissionChecker, layout, ActionKeys.UPDATE);
-
-			if (!layout.isPrivateLayout() && hasUpdateLayoutPermission) {
-			}
-			else {
-
-				// Only users with the correct permissions can update guest
-				// preferences
-
-				throw new PrincipalException.MustHavePermission(
-					permissionChecker, Layout.class.getName(),
-					layout.getLayoutId(), ActionKeys.UPDATE);
-			}
-		}
-
-		if (PortletConstants.hasUserId(originalPortletId) &&
-			(PortletConstants.getUserId(originalPortletId) == userId)) {
-
-			ownerId = userId;
-			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
-			plid = layout.getPlid();
-		}
-		else if (portlet.isPreferencesCompanyWide()) {
-			ownerId = layout.getCompanyId();
-			ownerType = PortletKeys.PREFS_OWNER_TYPE_COMPANY;
-			plid = PortletKeys.PREFS_PLID_SHARED;
-			portletId = PortletConstants.getRootPortletId(portletId);
-		}
-		else {
-			if (portlet.isPreferencesUniquePerLayout()) {
-				ownerId = PortletKeys.PREFS_OWNER_ID_DEFAULT;
-				ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
-				plid = layout.getPlid();
-
-				LayoutTypePortlet layoutTypePortlet =
-					(LayoutTypePortlet)layout.getLayoutType();
-
-				if (layoutTypePortlet.isPortletEmbedded(portletId)) {
-					ownerId = layout.getGroupId();
-					plid = PortletKeys.PREFS_PLID_SHARED;
-				}
-
-				if (portlet.isPreferencesOwnedByGroup()) {
-				}
-				else {
-					if ((userId <= 0) || modeEditGuest) {
-						userId = UserLocalServiceUtil.getDefaultUserId(
-							layout.getCompanyId());
-					}
-
-					ownerId = userId;
-					ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
-				}
-			}
-			else {
-				plid = PortletKeys.PREFS_PLID_SHARED;
-
-				if (portlet.isPreferencesOwnedByGroup()) {
-					ownerId = siteGroupId;
-					ownerType = PortletKeys.PREFS_OWNER_TYPE_GROUP;
-					portletId = PortletConstants.getRootPortletId(portletId);
-				}
-				else {
-					if ((userId <= 0) || modeEditGuest) {
-						userId = UserLocalServiceUtil.getDefaultUserId(
-							layout.getCompanyId());
-					}
-
-					ownerId = userId;
-					ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
-				}
-			}
-		}
-
-		return new PortletPreferencesIds(
-			layout.getCompanyId(), ownerId, ownerType, plid, portletId);
+		return _getPortletPreferencesIds(
+			null, siteGroupId, userId, layout, portletId, modeEditGuest);
 	}
 
 	@Override
@@ -549,8 +464,8 @@ public class PortletPreferencesFactoryImpl
 			ownerId = PortletKeys.PREFS_OWNER_ID_DEFAULT;
 			ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
 
-			if (PortletConstants.hasUserId(portletId)) {
-				ownerId = PortletConstants.getUserId(portletId);
+			if (PortletIdCodec.hasUserId(portletId)) {
+				ownerId = PortletIdCodec.decodeUserId(portletId);
 				ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
 			}
 		}
@@ -689,8 +604,8 @@ public class PortletPreferencesFactoryImpl
 		long ownerId = PortletKeys.PREFS_OWNER_ID_DEFAULT;
 		int ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
 
-		if (PortletConstants.hasUserId(portletId)) {
-			ownerId = PortletConstants.getUserId(portletId);
+		if (PortletIdCodec.hasUserId(portletId)) {
+			ownerId = PortletIdCodec.decodeUserId(portletId);
 			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
 		}
 
@@ -823,7 +738,7 @@ public class PortletPreferencesFactoryImpl
 		boolean uniquePerGroup = false;
 
 		if (portlet.isPreferencesCompanyWide()) {
-			portletId = PortletConstants.getRootPortletId(portletId);
+			portletId = PortletIdCodec.decodePortletName(portletId);
 		}
 		else {
 			if (portlet.isPreferencesUniquePerLayout()) {
@@ -836,7 +751,7 @@ public class PortletPreferencesFactoryImpl
 			else {
 				if (portlet.isPreferencesOwnedByGroup()) {
 					uniquePerGroup = true;
-					portletId = PortletConstants.getRootPortletId(portletId);
+					portletId = PortletIdCodec.decodePortletName(portletId);
 				}
 			}
 		}
@@ -850,8 +765,8 @@ public class PortletPreferencesFactoryImpl
 			plid = group.getClassPK();
 		}
 
-		if (PortletConstants.hasUserId(originalPortletId)) {
-			ownerId = PortletConstants.getUserId(originalPortletId);
+		if (PortletIdCodec.hasUserId(originalPortletId)) {
+			ownerId = PortletIdCodec.decodeUserId(originalPortletId);
 			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
 		}
 		else if (!uniquePerLayout) {
@@ -883,6 +798,15 @@ public class PortletPreferencesFactoryImpl
 	}
 
 	protected Map<String, Preference> toPreferencesMap(String xml) {
+		if (Objects.equals(xml, PortletConstants.DEFAULT_PREFERENCES)) {
+			if (_defaultPreferencesMap == null) {
+				_defaultPreferencesMap = createPreferencesMap(
+					PortletConstants.DEFAULT_PREFERENCES);
+			}
+
+			return _defaultPreferencesMap;
+		}
+
 		if (Validator.isNull(xml)) {
 			return Collections.emptyMap();
 		}
@@ -921,9 +845,114 @@ public class PortletPreferencesFactoryImpl
 		return String.valueOf(cacheKeyGenerator.getCacheKey(xml));
 	}
 
+	private PortletPreferencesIds _getPortletPreferencesIds(
+			ThemeDisplay themeDisplay, long siteGroupId, long userId,
+			Layout layout, String portletId, boolean modeEditGuest)
+		throws PortalException {
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		String originalPortletId = portletId;
+
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(
+			layout.getCompanyId(), portletId);
+
+		long ownerId = 0;
+		int ownerType = 0;
+		long plid = 0;
+
+		if (modeEditGuest) {
+			boolean hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
+				permissionChecker, layout, ActionKeys.UPDATE);
+
+			if (!layout.isPrivateLayout() && hasUpdateLayoutPermission) {
+			}
+			else {
+
+				// Only users with the correct permissions can update guest
+				// preferences
+
+				throw new PrincipalException.MustHavePermission(
+					permissionChecker, Layout.class.getName(),
+					layout.getLayoutId(), ActionKeys.UPDATE);
+			}
+		}
+
+		if (PortletIdCodec.hasUserId(originalPortletId) &&
+			(PortletIdCodec.decodeUserId(originalPortletId) == userId)) {
+
+			ownerId = userId;
+			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
+			plid = layout.getPlid();
+		}
+		else if (portlet.isPreferencesCompanyWide()) {
+			ownerId = layout.getCompanyId();
+			ownerType = PortletKeys.PREFS_OWNER_TYPE_COMPANY;
+			plid = PortletKeys.PREFS_PLID_SHARED;
+			portletId = PortletIdCodec.decodePortletName(portletId);
+		}
+		else {
+			if (portlet.isPreferencesUniquePerLayout()) {
+				ownerId = PortletKeys.PREFS_OWNER_ID_DEFAULT;
+				ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
+				plid = layout.getPlid();
+
+				if (themeDisplay != null) {
+					if (themeDisplay.isPortletEmbedded(
+							layout.getGroupId(), layout, portletId)) {
+
+						ownerId = layout.getGroupId();
+						plid = PortletKeys.PREFS_PLID_SHARED;
+					}
+				}
+				else if (layout.isPortletEmbedded(
+							portletId, layout.getGroupId())) {
+
+					ownerId = layout.getGroupId();
+					plid = PortletKeys.PREFS_PLID_SHARED;
+				}
+
+				if (portlet.isPreferencesOwnedByGroup()) {
+				}
+				else {
+					if ((userId <= 0) || modeEditGuest) {
+						userId = UserLocalServiceUtil.getDefaultUserId(
+							layout.getCompanyId());
+					}
+
+					ownerId = userId;
+					ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
+				}
+			}
+			else {
+				plid = PortletKeys.PREFS_PLID_SHARED;
+
+				if (portlet.isPreferencesOwnedByGroup()) {
+					ownerId = siteGroupId;
+					ownerType = PortletKeys.PREFS_OWNER_TYPE_GROUP;
+					portletId = PortletIdCodec.decodePortletName(portletId);
+				}
+				else {
+					if ((userId <= 0) || modeEditGuest) {
+						userId = UserLocalServiceUtil.getDefaultUserId(
+							layout.getCompanyId());
+					}
+
+					ownerId = userId;
+					ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
+				}
+			}
+		}
+
+		return new PortletPreferencesIds(
+			layout.getCompanyId(), ownerId, ownerType, plid, portletId);
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		PortletPreferencesFactoryImpl.class);
 
+	private Map<String, Preference> _defaultPreferencesMap;
 	private final PortalCache<String, Map<String, Preference>>
 		_preferencesMapPortalCache = SingleVMPoolUtil.getPortalCache(
 			PortletPreferencesFactoryImpl.class.getName());

@@ -14,41 +14,31 @@
 
 package com.liferay.dynamic.data.mapping.type.select.internal;
 
-import com.liferay.dynamic.data.mapping.data.provider.DDMDataProvider;
-import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderContext;
-import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderContextContributor;
-import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderRequest;
-import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderResponse;
-import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderTracker;
+import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldOptionsFactory;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTemplateContextContributor;
-import com.liferay.dynamic.data.mapping.io.DDMFormValuesJSONDeserializer;
-import com.liferay.dynamic.data.mapping.model.DDMDataProviderInstance;
-import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMFormFieldOptions;
+import com.liferay.dynamic.data.mapping.model.LocalizedValue;
 import com.liferay.dynamic.data.mapping.render.DDMFormFieldRenderingContext;
-import com.liferay.dynamic.data.mapping.service.DDMDataProviderInstanceService;
-import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
-import com.liferay.dynamic.data.mapping.util.DDMFormFactory;
-import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.AggregateResourceBundle;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.ResourceBundleLoader;
+import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringPool;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.ResourceBundle;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -59,13 +49,14 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	immediate = true, property = "ddm.form.field.type.name=select",
 	service = {
-		SelectDDMFormFieldTemplateContextContributor.class,
-		DDMFormFieldTemplateContextContributor.class
+		DDMFormFieldTemplateContextContributor.class,
+		SelectDDMFormFieldTemplateContextContributor.class
 	}
 )
 public class SelectDDMFormFieldTemplateContextContributor
 	implements DDMFormFieldTemplateContextContributor {
 
+	@Override
 	public Map<String, Object> getParameters(
 		DDMFormField ddmFormField,
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
@@ -73,10 +64,21 @@ public class SelectDDMFormFieldTemplateContextContributor
 		Map<String, Object> parameters = new HashMap<>();
 
 		parameters.put(
+			"dataSourceType",
+			GetterUtil.getString(
+				ddmFormField.getProperty("dataSourceType"), "manual"));
+		parameters.put(
 			"multiple",
 			ddmFormField.isMultiple() ? "multiple" : StringPool.BLANK);
+
+		DDMFormFieldOptions ddmFormFieldOptions =
+			ddmFormFieldOptionsFactory.create(
+				ddmFormField, ddmFormFieldRenderingContext);
+
 		parameters.put(
-			"options", getOptions(ddmFormField, ddmFormFieldRenderingContext));
+			"options",
+			getOptions(
+				ddmFormFieldOptions, ddmFormFieldRenderingContext.getLocale()));
 
 		Map<String, String> stringsMap = new HashMap<>();
 
@@ -86,193 +88,91 @@ public class SelectDDMFormFieldTemplateContextContributor
 		stringsMap.put(
 			"chooseAnOption",
 			LanguageUtil.get(resourceBundle, "choose-an-option"));
+		stringsMap.put(
+			"dynamicallyLoadedData",
+			LanguageUtil.get(resourceBundle, "dynamically-loaded-data"));
+		stringsMap.put(
+			"emptyList", LanguageUtil.get(resourceBundle, "empty-list"));
+		stringsMap.put("search", LanguageUtil.get(resourceBundle, "search"));
 
 		parameters.put("strings", stringsMap);
+
 		parameters.put(
-			"value", getValue(ddmFormField, ddmFormFieldRenderingContext));
+			"value",
+			getValue(
+				GetterUtil.getString(
+					ddmFormFieldRenderingContext.getValue(), "[]")));
 
 		return parameters;
 	}
 
-	protected void addDDMDataProviderContextParameters(
-		HttpServletRequest request,
-		DDMDataProviderContext ddmDataProviderContext,
-		List<DDMDataProviderContextContributor>
-			ddmDataProviderContextContributors) {
-
-		for (DDMDataProviderContextContributor
-				ddmDataProviderContextContributor :
-					ddmDataProviderContextContributors) {
-
-			Map<String, String> parameters =
-				ddmDataProviderContextContributor.getParameters(request);
-
-			if (parameters == null) {
-				continue;
-			}
-
-			ddmDataProviderContext.addParameters(parameters);
-		}
-	}
-
-	protected DDMFormFieldOptions getDDMFormFieldOptions(
-		DDMFormField ddmFormField,
-		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
-
-		DDMFormFieldOptions ddmFormFieldOptions = new DDMFormFieldOptions();
-
-		String dataSourceType = GetterUtil.getString(
-			ddmFormField.getProperty("dataSourceType"), "manual");
-
-		if (Objects.equals(dataSourceType, "data-provider")) {
-			ddmFormFieldOptions.setDefaultLocale(
-				ddmFormFieldRenderingContext.getLocale());
-
-			try {
-				String ddmDataProviderInstanceId = GetterUtil.getString(
-					ddmFormField.getProperty("ddmDataProviderInstanceId"));
-
-				DDMDataProvider ddmDataProvider =
-					ddmDataProviderTracker.getDDMDataProviderByInstanceId(
-						ddmDataProviderInstanceId);
-
-				DDMDataProviderContext ddmDataProviderContext = null;
-
-				if (ddmDataProvider != null) {
-					ddmDataProviderContext = new DDMDataProviderContext(null);
-				}
-				else {
-					DDMDataProviderInstance ddmDataProviderInstance =
-						ddmDataProviderInstanceService.getDataProviderInstance(
-							Long.valueOf(ddmDataProviderInstanceId));
-
-					ddmDataProvider = ddmDataProviderTracker.getDDMDataProvider(
-						ddmDataProviderInstance.getType());
-
-					DDMForm ddmForm = DDMFormFactory.create(
-						ddmDataProvider.getSettings());
-
-					DDMFormValues ddmFormValues =
-						ddmFormValuesJSONDeserializer.deserialize(
-							ddmForm, ddmDataProviderInstance.getDefinition());
-
-					ddmDataProviderContext = new DDMDataProviderContext(
-						ddmFormValues);
-
-					List<DDMDataProviderContextContributor>
-						ddmDataProviderContextContributors =
-					ddmDataProviderTracker.
-					getDDMDataProviderContextContributors(
-						ddmDataProviderInstance.getType());
-
-					addDDMDataProviderContextParameters(
-						ddmFormFieldRenderingContext.getHttpServletRequest(),
-						ddmDataProviderContext,
-						ddmDataProviderContextContributors);
-				}
-
-				ddmDataProviderContext.setHttpServletRequest(
-					ddmFormFieldRenderingContext.getHttpServletRequest());
-
-				DDMDataProviderRequest ddmDataProviderRequest =
-					new DDMDataProviderRequest(ddmDataProviderContext);
-
-				DDMDataProviderResponse ddmDataProviderResponse =
-					ddmDataProvider.getData(ddmDataProviderRequest);
-
-				for (Map<Object, Object> map :
-						ddmDataProviderResponse.getData()) {
-
-					for (Entry<Object, Object> entry : map.entrySet()) {
-						ddmFormFieldOptions.addOptionLabel(
-							String.valueOf(entry.getValue()),
-							ddmFormFieldRenderingContext.getLocale(),
-							String.valueOf(entry.getKey()));
-					}
-				}
-
-				return ddmFormFieldOptions;
-			}
-			catch (PortalException pe) {
-				_log.error("Unable to fetch data provider data", pe);
-			}
-		}
-		else {
-			List<Map<String, String>> keyValuePairs =
-				(List<Map<String, String>>)
-					ddmFormFieldRenderingContext.getProperty("options");
-
-			if (keyValuePairs.isEmpty()) {
-				return ddmFormField.getDDMFormFieldOptions();
-			}
-
-			for (Map<String, String> keyValuePair : keyValuePairs) {
-				ddmFormFieldOptions.addOptionLabel(
-					keyValuePair.get("value"),
-					ddmFormFieldRenderingContext.getLocale(),
-					keyValuePair.get("label"));
-			}
-		}
-
-		return ddmFormFieldOptions;
-	}
-
 	protected List<Object> getOptions(
-		DDMFormField ddmFormField,
-		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
+		DDMFormFieldOptions ddmFormFieldOptions, Locale locale) {
 
-		SelectDDMFormFieldContextHelper selectDDMFormFieldContextHelper =
-			new SelectDDMFormFieldContextHelper(
-				jsonFactory,
-				getDDMFormFieldOptions(
-					ddmFormField, ddmFormFieldRenderingContext),
-				ddmFormFieldRenderingContext.getValue(),
-				ddmFormField.getPredefinedValue(),
-				ddmFormFieldRenderingContext.getLocale());
+		List<Object> options = new ArrayList<>();
 
-		return selectDDMFormFieldContextHelper.getOptions();
+		for (String optionValue : ddmFormFieldOptions.getOptionsValues()) {
+			Map<String, String> optionMap = new HashMap<>();
+
+			LocalizedValue optionLabel = ddmFormFieldOptions.getOptionLabels(
+				optionValue);
+
+			optionMap.put("label", optionLabel.getString(locale));
+
+			optionMap.put("value", optionValue);
+
+			options.add(optionMap);
+		}
+
+		return options;
 	}
 
 	protected ResourceBundle getResourceBundle(Locale locale) {
 		Class<?> clazz = getClass();
 
-		return ResourceBundleUtil.getBundle(
+		ResourceBundleLoader portalResourceBundleLoader =
+			ResourceBundleLoaderUtil.getPortalResourceBundleLoader();
+
+		ResourceBundle portalResourceBundle =
+			portalResourceBundleLoader.loadResourceBundle(locale);
+
+		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
 			"content.Language", locale, clazz.getClassLoader());
+
+		return new AggregateResourceBundle(
+			resourceBundle, portalResourceBundle);
 	}
 
-	protected List<String> getValue(
-		DDMFormField ddmFormField,
-		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
+	protected List<String> getValue(String valueString) {
+		JSONArray jsonArray = null;
 
-		SelectDDMFormFieldContextHelper selectDDMFormFieldContextHelper =
-			new SelectDDMFormFieldContextHelper(
-				jsonFactory,
-				getDDMFormFieldOptions(
-					ddmFormField, ddmFormFieldRenderingContext),
-				ddmFormFieldRenderingContext.getValue(),
-				ddmFormField.getPredefinedValue(),
-				ddmFormFieldRenderingContext.getLocale());
+		try {
+			jsonArray = jsonFactory.createJSONArray(valueString);
+		}
+		catch (JSONException jsone) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsone, jsone);
+			}
 
-		String[] valuesStringArray =
-			selectDDMFormFieldContextHelper.toStringArray(
-				ddmFormFieldRenderingContext.getValue());
+			jsonArray = jsonFactory.createJSONArray();
+		}
 
-		return ListUtil.toList(valuesStringArray);
+		List<String> values = new ArrayList<>(jsonArray.length());
+
+		for (int i = 0; i < jsonArray.length(); i++) {
+			values.add(String.valueOf(jsonArray.get(i)));
+		}
+
+		return values;
 	}
 
 	@Reference
-	protected DDMDataProviderInstanceService ddmDataProviderInstanceService;
+	protected DDMFormFieldOptionsFactory ddmFormFieldOptionsFactory;
 
 	@Reference
 	protected JSONFactory jsonFactory;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		SelectDDMFormFieldTemplateContextContributor.class);
-
-	@Reference
-	private DDMDataProviderTracker ddmDataProviderTracker;
-
-	@Reference
-	private DDMFormValuesJSONDeserializer ddmFormValuesJSONDeserializer;
 
 }

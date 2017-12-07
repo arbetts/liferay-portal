@@ -14,8 +14,8 @@
 
 package com.liferay.journal.content.web.internal.portlet;
 
+import com.liferay.journal.constants.JournalContentPortletKeys;
 import com.liferay.journal.constants.JournalWebKeys;
-import com.liferay.journal.content.web.constants.JournalContentPortletKeys;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleDisplay;
 import com.liferay.journal.service.JournalArticleLocalService;
@@ -25,15 +25,20 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.PortletRequestModel;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PrefsParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.trash.kernel.service.TrashEntryService;
 
 import java.io.IOException;
 
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
 import javax.portlet.PortletException;
 import javax.portlet.PortletPreferences;
@@ -72,8 +77,8 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.name=" + JournalContentPortletKeys.JOURNAL_CONTENT,
 		"javax.portlet.resource-bundle=content.Language",
 		"javax.portlet.security-role-ref=guest,power-user,user",
-		"javax.portlet.supports.mime-type=text/html",
-		"javax.portlet.supports.mime-type=application/vnd.wap.xhtml+xml"
+		"javax.portlet.supports.mime-type=application/vnd.wap.xhtml+xml",
+		"javax.portlet.supports.mime-type=text/html"
 	},
 	service = Portlet.class
 )
@@ -116,26 +121,17 @@ public class JournalContentPortlet extends MVCPortlet {
 						WorkflowConstants.STATUS_ANY);
 				}
 
-				double version = article.getVersion();
-
 				if (Validator.isNull(ddmTemplateKey)) {
 					ddmTemplateKey = article.getDDMTemplateKey();
 				}
 
 				articleDisplay = _journalContent.getDisplay(
-					articleGroupId, articleId, version, ddmTemplateKey,
-					viewMode, languageId, page,
+					article, ddmTemplateKey, viewMode, languageId, page,
 					new PortletRequestModel(renderRequest, renderResponse),
 					themeDisplay);
 			}
 			catch (Exception e) {
 				renderRequest.removeAttribute(WebKeys.JOURNAL_ARTICLE);
-
-				articleDisplay = _journalContent.getDisplay(
-					articleGroupId, articleId, ddmTemplateKey, viewMode,
-					languageId, page,
-					new PortletRequestModel(renderRequest, renderResponse),
-					themeDisplay);
 			}
 		}
 
@@ -165,6 +161,16 @@ public class JournalContentPortlet extends MVCPortlet {
 		super.render(renderRequest, renderResponse);
 	}
 
+	public void restoreJournalArticle(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		long classPK = ParamUtil.getLong(actionRequest, "classPK");
+
+		_trashEntryService.restoreEntry(
+			JournalArticle.class.getName(), classPK);
+	}
+
 	@Override
 	public void serveResource(
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
@@ -174,7 +180,25 @@ public class JournalContentPortlet extends MVCPortlet {
 			resourceRequest.getResourceID());
 
 		if (resourceID.equals("exportArticle")) {
-			_exportArticleUtil.sendFile(resourceRequest, resourceResponse);
+			String targetExtension = ParamUtil.getString(
+				resourceRequest, "targetExtension");
+
+			targetExtension = StringUtil.toUpperCase(targetExtension);
+
+			PortletPreferences portletPreferences =
+				resourceRequest.getPreferences();
+
+			String[] allowedExtensions = StringUtil.split(
+				portletPreferences.getValue(
+					"userToolAssetAddonEntryKeys", null));
+
+			if (ArrayUtil.contains(
+					allowedExtensions,
+					"enable" + StringUtil.toUpperCase(targetExtension))) {
+
+				_exportArticleUtil.sendFile(
+					targetExtension, resourceRequest, resourceResponse);
+			}
 		}
 		else {
 			resourceRequest.setAttribute(
@@ -184,21 +208,26 @@ public class JournalContentPortlet extends MVCPortlet {
 		}
 	}
 
-	@Reference
+	@Reference(unbind = "-")
 	protected void setExportArticleUtil(ExportArticleUtil exportArticleUtil) {
 		_exportArticleUtil = exportArticleUtil;
 	}
 
-	@Reference
+	@Reference(unbind = "-")
 	protected void setJournalContent(JournalContent journalContent) {
 		_journalContent = journalContent;
 	}
 
-	@Reference
+	@Reference(unbind = "-")
 	protected void setJournalContentSearchLocal(
 		JournalArticleLocalService journalArticleLocalService) {
 
 		_journalArticleLocalService = journalArticleLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setTrashEntryService(TrashEntryService trashEntryService) {
+		_trashEntryService = trashEntryService;
 	}
 
 	protected void unsetExportArticleUtil(ExportArticleUtil exportArticleUtil) {
@@ -218,5 +247,6 @@ public class JournalContentPortlet extends MVCPortlet {
 	private ExportArticleUtil _exportArticleUtil;
 	private JournalArticleLocalService _journalArticleLocalService;
 	private JournalContent _journalContent;
+	private TrashEntryService _trashEntryService;
 
 }

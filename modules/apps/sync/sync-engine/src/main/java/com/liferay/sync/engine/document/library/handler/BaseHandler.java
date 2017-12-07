@@ -14,7 +14,6 @@
 
 package com.liferay.sync.engine.document.library.handler;
 
-import com.liferay.sync.engine.SyncEngine;
 import com.liferay.sync.engine.document.library.event.Event;
 import com.liferay.sync.engine.document.library.event.GetSyncContextEvent;
 import com.liferay.sync.engine.document.library.util.FileEventManager;
@@ -34,7 +33,8 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
@@ -43,6 +43,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.StatusLine;
+import org.apache.http.TruncatedChunkException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -86,47 +87,35 @@ public class BaseHandler implements Handler<Void> {
 			int statusCode = hre.getStatusCode();
 
 			if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-				if (syncAccount.getUiEvent() ==
-						SyncAccount.UI_EVENT_AUTHENTICATION_EXCEPTION) {
-
-					if (_logger.isDebugEnabled()) {
-						_logger.debug(
-							"Authentication failed. Retrying in {} seconds.",
-							syncAccount.getAuthenticationRetryInterval());
-					}
-
-					syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
-
-					SyncAccountService.update(syncAccount);
-
-					ServerEventUtil.retryServerConnection(
-						getSyncAccountId(),
-						syncAccount.getAuthenticationRetryInterval(),
-						TimeUnit.SECONDS);
+				if (_logger.isDebugEnabled()) {
+					_logger.debug(
+						"Authentication failed. Retrying in {} seconds.",
+						syncAccount.getAuthenticationRetryInterval());
 				}
-				else {
-					syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
-					syncAccount.setUiEvent(
-						SyncAccount.UI_EVENT_AUTHENTICATION_EXCEPTION);
 
-					SyncAccountService.update(syncAccount);
+				syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
+				syncAccount.setUiEvent(
+					SyncAccount.UI_EVENT_AUTHENTICATION_EXCEPTION);
 
-					retryServerConnection(
-						SyncAccount.UI_EVENT_AUTHENTICATION_EXCEPTION);
-				}
+				SyncAccountService.update(syncAccount);
+
+				ServerEventUtil.retryServerConnection(
+					getSyncAccountId(),
+					syncAccount.getAuthenticationRetryInterval(),
+					TimeUnit.SECONDS);
 
 				return;
 			}
 		}
 
-		if ((e instanceof ClientProtocolException) ||
-			(e instanceof ConnectTimeoutException) ||
-			(e instanceof HttpHostConnectException) ||
-			(e instanceof NoHttpResponseException) ||
-			(e instanceof SocketException) ||
-			(e instanceof SocketTimeoutException) ||
-			(e instanceof SSLException) ||
-			(e instanceof UnknownHostException)) {
+		if (e instanceof ClientProtocolException ||
+			e instanceof ConnectTimeoutException ||
+			e instanceof HttpHostConnectException ||
+			e instanceof NoHttpResponseException ||
+			e instanceof SocketException ||
+			e instanceof SocketTimeoutException || e instanceof SSLException ||
+			e instanceof TruncatedChunkException ||
+			e instanceof UnknownHostException) {
 
 			retryServerConnection(SyncAccount.UI_EVENT_CONNECTION_EXCEPTION);
 		}
@@ -141,10 +130,7 @@ public class BaseHandler implements Handler<Void> {
 						"Retrying event {} for sync file {}", _event, syncFile);
 				}
 
-				ExecutorService executorService =
-					SyncEngine.getExecutorService();
-
-				executorService.execute(_event);
+				_scheduledExecutorService.schedule(_event, 1, TimeUnit.SECONDS);
 			}
 			else if (syncFile.getVersion() == null) {
 				SyncFileService.deleteSyncFile(syncFile, false);
@@ -319,6 +305,9 @@ public class BaseHandler implements Handler<Void> {
 
 	private static final Logger _logger = LoggerFactory.getLogger(
 		BaseHandler.class);
+
+	private static final ScheduledExecutorService _scheduledExecutorService =
+		Executors.newSingleThreadScheduledExecutor();
 
 	private final Event _event;
 

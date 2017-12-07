@@ -18,8 +18,14 @@ import com.liferay.calendar.model.CalendarResource;
 import com.liferay.calendar.service.persistence.CalendarResourcePersistence;
 
 import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 
+import java.lang.reflect.Field;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,6 +33,30 @@ import java.util.Set;
  * @generated
  */
 public class CalendarResourceFinderBaseImpl extends BasePersistenceImpl<CalendarResource> {
+	public CalendarResourceFinderBaseImpl() {
+		setModelClass(CalendarResource.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("uuid", "uuid_");
+			dbColumnNames.put("code", "code_");
+			dbColumnNames.put("active", "active_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
+	}
+
 	@Override
 	public Set<String> getBadColumnNames() {
 		return getCalendarResourcePersistence().getBadColumnNames();
@@ -53,4 +83,5 @@ public class CalendarResourceFinderBaseImpl extends BasePersistenceImpl<Calendar
 
 	@BeanReference(type = CalendarResourcePersistence.class)
 	protected CalendarResourcePersistence calendarResourcePersistence;
+	private static final Log _log = LogFactoryUtil.getLog(CalendarResourceFinderBaseImpl.class);
 }

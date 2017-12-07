@@ -37,6 +37,15 @@ import java.util.Set;
  */
 public class UpgradePermission extends UpgradeProcess {
 
+	public UpgradePermission() {
+		this(false);
+	}
+
+	public UpgradePermission(boolean ignoreMissingAddEntryResourceAction) {
+		_ignoreMissingAddEntryResourceAction =
+			ignoreMissingAddEntryResourceAction;
+	}
+
 	protected void addAnnouncementsAdminResourceActions() {
 		addResourceAction(
 			ActionKeys.ACCESS_IN_CONTROL_PANEL,
@@ -146,12 +155,13 @@ public class UpgradePermission extends UpgradeProcess {
 	protected void deleteResourceAction(long resourceActionId)
 		throws SQLException {
 
-		PreparedStatement ps = connection.prepareStatement(
-			"delete from ResourceAction where resourceActionId = ?");
+		try (PreparedStatement ps = connection.prepareStatement(
+				"delete from ResourceAction where resourceActionId = ?")) {
 
-		ps.setLong(1, resourceActionId);
+			ps.setLong(1, resourceActionId);
 
-		ps.executeUpdate();
+			ps.executeUpdate();
+		}
 	}
 
 	@Override
@@ -182,14 +192,15 @@ public class UpgradePermission extends UpgradeProcess {
 			long resourcePermissionId, long bitwiseValue)
 		throws Exception {
 
-		PreparedStatement ps = connection.prepareStatement(
-			"update ResourcePermission set actionIds = ? where " +
-				"resourcePermissionId = ?");
+		try (PreparedStatement ps = connection.prepareStatement(
+				"update ResourcePermission set actionIds = ? where " +
+					"resourcePermissionId = ?")) {
 
-		ps.setLong(1, bitwiseValue);
-		ps.setLong(2, resourcePermissionId);
+			ps.setLong(1, bitwiseValue);
+			ps.setLong(2, resourcePermissionId);
 
-		ps.executeUpdate();
+			ps.executeUpdate();
+		}
 	}
 
 	protected void upgradeAlertsResourcePermission() throws Exception {
@@ -220,13 +231,16 @@ public class UpgradePermission extends UpgradeProcess {
 
 		try (PreparedStatement ps1 = connection.prepareStatement(
 				sb1.toString());
-
 			ResultSet rs1 = ps1.executeQuery()) {
 
 			if (!rs1.next()) {
-				_log.error(
-					"Unable to upgrade ADD_ENTRY action, ResourceAction for " +
-						name + " is not initialized");
+				if (!_ignoreMissingAddEntryResourceAction) {
+					_log.error(
+						StringBundler.concat(
+							"Unable to upgrade ADD_ENTRY action, ",
+							"ResourceAction for ", name,
+							" is not initialized"));
+				}
 
 				return;
 			}
@@ -236,7 +250,6 @@ public class UpgradePermission extends UpgradeProcess {
 
 			try (PreparedStatement ps2 = connection.prepareStatement(
 					sb2.toString());
-
 				ResultSet rs = ps2.executeQuery()) {
 
 				while (rs.next()) {
@@ -286,6 +299,7 @@ public class UpgradePermission extends UpgradeProcess {
 	private static final Log _log = LogFactoryUtil.getLog(
 		UpgradePermission.class);
 
+	private final boolean _ignoreMissingAddEntryResourceAction;
 	private final Set<String> _resourcePermissions = new HashSet<>();
 
 }

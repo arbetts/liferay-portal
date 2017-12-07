@@ -48,7 +48,7 @@ String viewMoreURL = (String)request.getAttribute("liferay-frontend:add-menu:vie
 		}
 		%>
 
-		<a <%= AUIUtil.buildData(menuItem.getAnchorData()) %> class="btn btn-action btn-bottom-right btn-primary" data-placement="left" data-qa-id="addButton" data-toggle="tooltip" href="<%= HtmlUtil.escapeAttribute(menuItem.getUrl()) %>" id="<%= namespace + id %>" title="<%= title %>">
+		<a <%= AUIUtil.buildData(menuItem.getAnchorData()) %> class="btn btn-action btn-bottom-right btn-primary" data-placement="left" data-qa-id="addButton" data-toggle="tooltip" href="<%= HtmlUtil.escapeAttribute(menuItem.getUrl()) %>" id="<%= namespace + id %>" title="<%= HtmlUtil.escapeAttribute(title) %>">
 			<aui:icon image="plus" markupView="lexicon" />
 		</a>
 
@@ -56,6 +56,13 @@ String viewMoreURL = (String)request.getAttribute("liferay-frontend:add-menu:vie
 			$(document).ready(
 				function() {
 					$('[data-toggle="tooltip"]').tooltip();
+
+					Liferay.once(
+						'startNavigate',
+						function() {
+							$('[data-toggle="tooltip"]').tooltip('dispose');
+						}
+					);
 				}
 			);
 		</aui:script>
@@ -140,7 +147,7 @@ String viewMoreURL = (String)request.getAttribute("liferay-frontend:add-menu:vie
 							</a>
 						</li>
 
-						<aui:script use="liferay-util-window">
+						<aui:script use="liferay-store,liferay-util-window">
 							var viewMoreAddMenuElements = A.one('#<%= namespace %>viewMoreButton');
 
 							viewMoreAddMenuElements.on(

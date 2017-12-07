@@ -28,7 +28,6 @@ import com.liferay.portal.kernel.model.PersistedModel;
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.service.BaseLocalService;
-import com.liferay.portal.kernel.service.InvokableLocalService;
 import com.liferay.portal.kernel.service.PersistedModelLocalService;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
@@ -55,12 +54,17 @@ import java.util.List;
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface OAuthTokenLocalService extends BaseLocalService,
-	InvokableLocalService, PersistedModelLocalService {
+	PersistedModelLocalService {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
 	 * Never modify or reference this interface directly. Always use {@link OAuthTokenLocalServiceUtil} to access the o auth token local service. Add custom service methods to {@link com.liferay.opensocial.service.impl.OAuthTokenLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	public OAuthToken addOAuthToken(long userId, java.lang.String gadgetKey,
+		java.lang.String serviceName, long moduleId,
+		java.lang.String accessToken, java.lang.String tokenName,
+		java.lang.String tokenSecret, java.lang.String sessionHandle,
+		long expiration) throws PortalException;
 
 	/**
 	* Adds the o auth token to the database. Also notifies the appropriate model listeners.
@@ -71,12 +75,6 @@ public interface OAuthTokenLocalService extends BaseLocalService,
 	@Indexable(type = IndexableType.REINDEX)
 	public OAuthToken addOAuthToken(OAuthToken oAuthToken);
 
-	public OAuthToken addOAuthToken(long userId, java.lang.String gadgetKey,
-		java.lang.String serviceName, long moduleId,
-		java.lang.String accessToken, java.lang.String tokenName,
-		java.lang.String tokenSecret, java.lang.String sessionHandle,
-		long expiration) throws PortalException;
-
 	/**
 	* Creates a new o auth token with the primary key. Does not add the o auth token to the database.
 	*
@@ -84,15 +82,6 @@ public interface OAuthTokenLocalService extends BaseLocalService,
 	* @return the new o auth token
 	*/
 	public OAuthToken createOAuthToken(long oAuthTokenId);
-
-	/**
-	* Deletes the o auth token from the database. Also notifies the appropriate model listeners.
-	*
-	* @param oAuthToken the o auth token
-	* @return the o auth token that was removed
-	*/
-	@Indexable(type = IndexableType.DELETE)
-	public OAuthToken deleteOAuthToken(OAuthToken oAuthToken);
 
 	/**
 	* Deletes the o auth token with the primary key from the database. Also notifies the appropriate model listeners.
@@ -105,45 +94,21 @@ public interface OAuthTokenLocalService extends BaseLocalService,
 	public OAuthToken deleteOAuthToken(long oAuthTokenId)
 		throws PortalException;
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public OAuthToken fetchOAuthToken(long oAuthTokenId);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public OAuthToken fetchOAuthToken(long userId, java.lang.String gadgetKey,
-		java.lang.String serviceName, long moduleId, java.lang.String tokenName);
-
-	/**
-	* Returns the o auth token with the primary key.
-	*
-	* @param oAuthTokenId the primary key of the o auth token
-	* @return the o auth token
-	* @throws PortalException if a o auth token with the primary key could not be found
-	*/
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public OAuthToken getOAuthToken(long oAuthTokenId)
-		throws PortalException;
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public OAuthToken getOAuthToken(long userId, java.lang.String gadgetKey,
+	public void deleteOAuthToken(long userId, java.lang.String gadgetKey,
 		java.lang.String serviceName, long moduleId, java.lang.String tokenName)
 		throws PortalException;
 
 	/**
-	* Updates the o auth token in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	* Deletes the o auth token from the database. Also notifies the appropriate model listeners.
 	*
 	* @param oAuthToken the o auth token
-	* @return the o auth token that was updated
+	* @return the o auth token that was removed
 	*/
-	@Indexable(type = IndexableType.REINDEX)
-	public OAuthToken updateOAuthToken(OAuthToken oAuthToken);
+	@Indexable(type = IndexableType.DELETE)
+	public OAuthToken deleteOAuthToken(OAuthToken oAuthToken);
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public ActionableDynamicQuery getActionableDynamicQuery();
-
-	public DynamicQuery dynamicQuery();
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
+	public void deleteOAuthTokens(java.lang.String gadgetKey,
+		java.lang.String serviceName);
 
 	/**
 	* @throws PortalException
@@ -152,30 +117,7 @@ public interface OAuthTokenLocalService extends BaseLocalService,
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException;
 
-	@Override
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
-		throws PortalException;
-
-	/**
-	* Returns the number of o auth tokens.
-	*
-	* @return the number of o auth tokens
-	*/
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getOAuthTokensCount();
-
-	@Override
-	public java.lang.Object invokeMethod(java.lang.String name,
-		java.lang.String[] parameterTypes, java.lang.Object[] arguments)
-		throws java.lang.Throwable;
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	public java.lang.String getOSGiServiceIdentifier();
+	public DynamicQuery dynamicQuery();
 
 	/**
 	* Performs a dynamic query on the database and returns the matching rows.
@@ -217,6 +159,53 @@ public interface OAuthTokenLocalService extends BaseLocalService,
 		int end, OrderByComparator<T> orderByComparator);
 
 	/**
+	* Returns the number of rows matching the dynamic query.
+	*
+	* @param dynamicQuery the dynamic query
+	* @return the number of rows matching the dynamic query
+	*/
+	public long dynamicQueryCount(DynamicQuery dynamicQuery);
+
+	/**
+	* Returns the number of rows matching the dynamic query.
+	*
+	* @param dynamicQuery the dynamic query
+	* @param projection the projection to apply to the query
+	* @return the number of rows matching the dynamic query
+	*/
+	public long dynamicQueryCount(DynamicQuery dynamicQuery,
+		Projection projection);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public OAuthToken fetchOAuthToken(long oAuthTokenId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public OAuthToken fetchOAuthToken(long userId, java.lang.String gadgetKey,
+		java.lang.String serviceName, long moduleId, java.lang.String tokenName);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public ActionableDynamicQuery getActionableDynamicQuery();
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
+
+	/**
+	* Returns the o auth token with the primary key.
+	*
+	* @param oAuthTokenId the primary key of the o auth token
+	* @return the o auth token
+	* @throws PortalException if a o auth token with the primary key could not be found
+	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public OAuthToken getOAuthToken(long oAuthTokenId)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public OAuthToken getOAuthToken(long userId, java.lang.String gadgetKey,
+		java.lang.String serviceName, long moduleId, java.lang.String tokenName)
+		throws PortalException;
+
+	/**
 	* Returns a range of all the o auth tokens.
 	*
 	* <p>
@@ -235,27 +224,31 @@ public interface OAuthTokenLocalService extends BaseLocalService,
 		java.lang.String serviceName);
 
 	/**
-	* Returns the number of rows matching the dynamic query.
+	* Returns the number of o auth tokens.
 	*
-	* @param dynamicQuery the dynamic query
-	* @return the number of rows matching the dynamic query
+	* @return the number of o auth tokens
 	*/
-	public long dynamicQueryCount(DynamicQuery dynamicQuery);
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getOAuthTokensCount();
 
 	/**
-	* Returns the number of rows matching the dynamic query.
+	* Returns the OSGi service identifier.
 	*
-	* @param dynamicQuery the dynamic query
-	* @param projection the projection to apply to the query
-	* @return the number of rows matching the dynamic query
+	* @return the OSGi service identifier
 	*/
-	public long dynamicQueryCount(DynamicQuery dynamicQuery,
-		Projection projection);
+	public java.lang.String getOSGiServiceIdentifier();
 
-	public void deleteOAuthToken(long userId, java.lang.String gadgetKey,
-		java.lang.String serviceName, long moduleId, java.lang.String tokenName)
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
 		throws PortalException;
 
-	public void deleteOAuthTokens(java.lang.String gadgetKey,
-		java.lang.String serviceName);
+	/**
+	* Updates the o auth token in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param oAuthToken the o auth token
+	* @return the o auth token that was updated
+	*/
+	@Indexable(type = IndexableType.REINDEX)
+	public OAuthToken updateOAuthToken(OAuthToken oAuthToken);
 }

@@ -19,27 +19,35 @@ AUI.add(
 
 					height = 410;
 				}
-				else if (li.hasClass('task-assign-to-me-link')) {
-					content = '#' + randomId + 'updateAsigneeToMe';
-				}
-				else if (li.hasClass('task-assign-link')) {
-					content = '#' + randomId + 'updateAsignee';
-
-					height = 410;
-				}
 
 				var title = icon.text();
 
-				WorkflowTasks.showPopup(icon.attr('href'), A.one(content), title, randomId, height);
+				WorkflowTasks._showPopup(icon.attr('href'), A.one(content), title, randomId, height);
 			},
 
-			showPopup: function(url, content, title, randomId, height) {
+			_showPopup: function(url, content, title, randomId, height) {
+				var instance = this;
+
 				var form = A.Node.create('<form />');
 
 				form.setAttribute('action', url);
 				form.setAttribute('method', 'POST');
 
 				var comments = A.one('#' + randomId + 'updateComments');
+
+				if (comments && !instance._comments[randomId]) {
+					instance._comments[randomId] = comments;
+				}
+				else if (!comments && instance._comments[randomId]) {
+					comments = instance._comments[randomId];
+				}
+
+				if (content && !instance._content[randomId]) {
+					instance._content[randomId] = content;
+				}
+				else if (!content && title && title.trim().indexOf('Update Due Date') !== -1) {
+					content = instance._content[randomId];
+				}
 
 				if (content) {
 					form.append(content);
@@ -55,11 +63,12 @@ AUI.add(
 					{
 						dialog: {
 							bodyContent: form,
+							destroyOnHide: true,
 							height: height,
 							toolbars: {
 								footer: [
 									{
-										cssClass: "btn-lg btn-primary",
+										cssClass: 'btn-lg btn-primary',
 										label: Liferay.Language.get('done'),
 										on: {
 											click: function() {
@@ -68,7 +77,7 @@ AUI.add(
 										}
 									},
 									{
-										cssClass: "btn-lg btn-cancel btn-link",
+										cssClass: 'btn-cancel btn-lg btn-link',
 										label: Liferay.Language.get('cancel'),
 										on: {
 											click: function() {
@@ -95,9 +104,11 @@ AUI.add(
 						title: A.Lang.String.escapeHTML(title)
 					}
 				);
-			}
-		};
+			},
 
+			_comments: {},
+			_content: {}
+		};
 		Liferay.WorkflowTasks = WorkflowTasks;
 	},
 	'',

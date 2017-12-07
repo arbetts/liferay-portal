@@ -49,6 +49,12 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 		<aui:fieldset markupView="lexicon">
 			<dl class="property-list">
 				<dt>
+					<liferay-ui:message key="status" />:
+				</dt>
+				<dd>
+					<aui:workflow-status markupView="lexicon" model="<%= CalendarBooking.class %>" showHelpMessage="<%= false %>" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= calendarBooking.getStatus() %>" />
+				</dd>
+				<dt>
 					<liferay-ui:message key="starts" />:
 				</dt>
 				<dd>
@@ -62,7 +68,7 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 				</dd>
 
 				<%
-				List<CalendarBooking> childCalendarBookings = calendarBooking.getChildCalendarBookings();
+				List<CalendarBooking> childCalendarBookings = calendarDisplayContext.getChildCalendarBookings(calendarBooking);
 				%>
 
 				<c:if test="<%= !childCalendarBookings.isEmpty() %>">
@@ -104,28 +110,28 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 				</c:if>
 			</dl>
 
-			<liferay-ui:custom-attributes-available className="<%= CalendarBooking.class.getName() %>">
-				<liferay-ui:custom-attribute-list
+			<liferay-expando:custom-attributes-available className="<%= CalendarBooking.class.getName() %>">
+				<liferay-expando:custom-attribute-list
 					className="<%= CalendarBooking.class.getName() %>"
 					classPK="<%= calendarBooking.getCalendarBookingId() %>"
 					editable="<%= false %>"
 					label="<%= true %>"
 				/>
-			</liferay-ui:custom-attributes-available>
+			</liferay-expando:custom-attributes-available>
 
 			<p>
 				<%= calendarBooking.getDescription(locale) %>
 			</p>
 
 			<div class="entry-categories">
-				<liferay-ui:asset-categories-summary
+				<liferay-asset:asset-categories-summary
 					className="<%= CalendarBooking.class.getName() %>"
 					classPK="<%= calendarBooking.getCalendarBookingId() %>"
 				/>
 			</div>
 
 			<div class="entry-tags">
-				<liferay-ui:asset-tags-summary
+				<liferay-asset:asset-tags-summary
 					className="<%= CalendarBooking.class.getName() %>"
 					classPK="<%= calendarBooking.getCalendarBookingId() %>"
 					message="tags"
@@ -133,7 +139,7 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 			</div>
 
 			<div class="entry-links">
-				<liferay-ui:asset-links
+				<liferay-asset:asset-links
 					assetEntryId="<%= layoutAssetEntry.getEntryId() %>"
 				/>
 			</div>
@@ -143,6 +149,7 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 					<liferay-ui:ratings
 						className="<%= CalendarBooking.class.getName() %>"
 						classPK="<%= calendarBooking.getCalendarBookingId() %>"
+						inTrash="<%= calendarBooking.isInTrash() %>"
 					/>
 				</div>
 			</c:if>
@@ -151,7 +158,7 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 		<c:if test="<%= calendar.isEnableComments() %>">
 			<liferay-ui:panel-container extended="<%= false %>" id="calendarBookingPanelContainer" persistState="<%= true %>">
 				<liferay-ui:panel collapsible="<%= true %>" extended="<%= false %>" id="calendarBookingCommentsPanel" persistState="<%= true %>" title="comments">
-					<liferay-ui:discussion
+					<liferay-comment:discussion
 						className="<%= CalendarBooking.class.getName() %>"
 						classPK="<%= calendarBooking.getCalendarBookingId() %>"
 						formName="fm2"
@@ -184,7 +191,7 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 					<c:when test="<%= untilJCalendar != null %>">
 						endValue = 'on';
 
-						untilDate = new Date('<%= dateFormatLongDate.format(untilJCalendar.getTimeInMillis()) %>');
+						untilDate = new Date(<%= untilJCalendar.get(java.util.Calendar.YEAR) %>, <%= untilJCalendar.get(java.util.Calendar.MONTH) %>, <%= untilJCalendar.get(java.util.Calendar.DATE) %>);
 					</c:when>
 					<c:when test="<%= recurrence.getCount() > 0 %>">
 						endValue = 'after';

@@ -14,6 +14,7 @@
 
 package com.liferay.portal.servlet.filters.cache;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -29,7 +30,6 @@ import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
 import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.struts.LastPath;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -72,6 +72,10 @@ public class CacheFilter extends BasePortalFilter {
 
 			_log.error("Cache pattern is invalid");
 		}
+
+		_includeUserAgent = GetterUtil.getBoolean(
+			filterConfig.getInitParameter("includeUserAgent"),
+			PropsValues.CACHE_FILTER_INCLUDE_USER_AGENT);
 	}
 
 	@Override
@@ -132,11 +136,13 @@ public class CacheFilter extends BasePortalFilter {
 
 		// User agent
 
-		String userAgent = GetterUtil.getString(
-			request.getHeader(HttpHeaders.USER_AGENT));
+		if (_includeUserAgent) {
+			String userAgent = GetterUtil.getString(
+				request.getHeader(HttpHeaders.USER_AGENT));
 
-		sb.append(StringPool.POUND);
-		sb.append(StringUtil.toLowerCase(userAgent).hashCode());
+			sb.append(StringPool.POUND);
+			sb.append(StringUtil.toLowerCase(userAgent).hashCode());
+		}
 
 		// Gzip compression
 
@@ -203,12 +209,12 @@ public class CacheFilter extends BasePortalFilter {
 		}
 		catch (NoSuchLayoutException nsle) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(nsle);
+				_log.warn(nsle, nsle);
 			}
 		}
 		catch (Exception e) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(e);
+				_log.warn("Unable to get friendly URL group", e);
 			}
 
 			return 0;
@@ -248,12 +254,12 @@ public class CacheFilter extends BasePortalFilter {
 			return layout.getPlid();
 		}
 		catch (NoSuchLayoutException nsle) {
-			_log.warn(nsle);
+			_log.warn("Unable to get friendly URL layout", nsle);
 
 			return 0;
 		}
 		catch (Exception e) {
-			_log.error(e);
+			_log.error("Unable to get friendly URL layout", e);
 
 			return 0;
 		}
@@ -486,6 +492,7 @@ public class CacheFilter extends BasePortalFilter {
 
 	private static final Log _log = LogFactoryUtil.getLog(CacheFilter.class);
 
+	private boolean _includeUserAgent;
 	private int _pattern;
 
 }

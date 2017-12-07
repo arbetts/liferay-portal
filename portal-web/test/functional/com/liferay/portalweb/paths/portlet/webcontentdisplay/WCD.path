@@ -9,6 +9,11 @@
 </thead>
 <tbody>
 <tr>
+	<td>ARTICLE_ELLIPSIS_ICON</td>
+	<td>//div[h2[./text()='${key_webContentTitle}']]//*[name()='svg'][contains(@class,'icon-ellipsis')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SELECT_WEB_CONTENT</td>
 	<td>//span[contains(@class,'lfr-icon-action')]/a[contains(.,'Select Web Content')]</td>
 	<td></td>
@@ -56,8 +61,13 @@
 	<td></td>
 </tr>
 <tr>
-	<td>WEB_CONTENT_CONTENT_IMAGE</td>
-	<td>//div[@class='journal-content-article']/img</td>
+	<td>WEB_CONTENT_CONTENT_2</td>
+	<td>xPath=(//div[@class='journal-content-article'])[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>WEB_CONTENT_CONTENT_3</td>
+	<td>xPath=(//div[@class='journal-content-article'])[3]</td>
 	<td></td>
 </tr>
 <tr>
@@ -88,6 +98,11 @@
 <tr>
 	<td>WEB_CONTENT_INLINE_IMAGE</td>
 	<td>//img[contains(@src,'Document')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>WEB_CONTENT_VIDEO</td>
+	<td>//div[contains(@class,'video-content')]/video[@class='video-node']</td>
 	<td></td>
 </tr>
 <tr>

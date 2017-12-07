@@ -31,7 +31,7 @@ import com.liferay.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.journal.transformer.JournalTransformer;
 import com.liferay.journal.transformer.JournalTransformerListenerRegistryUtil;
 import com.liferay.journal.util.comparator.ArticleVersionComparator;
-import com.liferay.petra.collection.stack.FiniteUniqueStack;
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.xml.XMLUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.diff.CompareVersionsException;
@@ -72,13 +72,13 @@ import com.liferay.portal.kernel.templateparser.TransformerListener;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -836,6 +836,28 @@ public class JournalUtil {
 		return false;
 	}
 
+	public static boolean isLatestArticle(JournalArticle article) {
+		JournalArticle latestArticle =
+			JournalArticleLocalServiceUtil.fetchLatestArticle(
+				article.getResourcePrimKey(), WorkflowConstants.STATUS_ANY,
+				false);
+
+		if ((latestArticle != null) &&
+			(article.getId() == latestArticle.getId())) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public static boolean isSubscribedToArticle(
+		long companyId, long groupId, long userId, long articleId) {
+
+		return SubscriptionLocalServiceUtil.isSubscribed(
+			companyId, userId, JournalArticle.class.getName(), articleId);
+	}
+
 	public static boolean isSubscribedToFolder(
 			long companyId, long groupId, long userId, long folderId)
 		throws PortalException {
@@ -980,7 +1002,7 @@ public class JournalUtil {
 		catch (Exception e) {
 			throw new LocaleException(
 				LocaleException.TYPE_CONTENT,
-				"The locale " + defaultImportLocale + " is not available");
+				"The locale " + defaultImportLocale + " is not available", e);
 		}
 
 		return content;
@@ -1325,6 +1347,10 @@ public class JournalUtil {
 
 		List<Element> elements = newElement.elements("dynamic-content");
 
+		if ((elements == null) || elements.isEmpty()) {
+			return;
+		}
+
 		Element newContentElement = elements.get(0);
 
 		String newLanguageId = newContentElement.attributeValue("language-id");
@@ -1430,7 +1456,7 @@ public class JournalUtil {
 			return;
 		}
 
-		if (_customTokens == null) {
+		if (MapUtil.isEmpty(_customTokens)) {
 			synchronized (JournalUtil.class) {
 				_customTokens = new HashMap<>();
 
@@ -1510,9 +1536,9 @@ public class JournalUtil {
 			"protocol", HttpUtil.getProtocol(themeDisplay.getURLPortal()));
 		tokens.put("root_path", themeDisplay.getPathContext());
 		tokens.put(
-			"site_group_id", String.valueOf(themeDisplay.getSiteGroupId()));
-		tokens.put(
 			"scope_group_id", String.valueOf(themeDisplay.getScopeGroupId()));
+		tokens.put(
+			"site_group_id", String.valueOf(themeDisplay.getSiteGroupId()));
 		tokens.put("theme_image_path", themeDisplay.getPathThemeImages());
 
 		_populateCustomTokens(tokens, themeDisplay.getCompanyId());
@@ -1661,5 +1687,30 @@ public class JournalUtil {
 	private static Map<String, String> _customTokens;
 	private static final JournalTransformer _journalTransformer =
 		new JournalTransformer(true);
+
+	private static class FiniteUniqueStack<E> extends Stack<E> {
+
+		@Override
+		public E push(E item) {
+			if (contains(item)) {
+				if (!item.equals(peek())) {
+					remove(item);
+					super.push(item);
+				}
+			}
+			else if (size() < _maxSize) {
+				super.push(item);
+			}
+
+			return item;
+		}
+
+		private FiniteUniqueStack(int maxSize) {
+			_maxSize = maxSize;
+		}
+
+		private final int _maxSize;
+
+	}
 
 }

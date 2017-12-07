@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutPrototype;
@@ -45,13 +46,13 @@ import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.model.LayoutType;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.model.Organization;
-import com.liferay.portal.kernel.model.PortletConstants;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.model.impl.VirtualLayout;
+import com.liferay.portal.kernel.portlet.PortletIdCodec;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
@@ -61,6 +62,7 @@ import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.GroupServiceUtil;
+import com.liferay.portal.kernel.service.ImageLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutPrototypeLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutServiceUtil;
@@ -251,6 +253,15 @@ public class SitesImpl implements Sites {
 
 		Layout layoutPrototypeLayout = layoutPrototype.getLayout();
 
+		byte[] iconBytes = null;
+
+		if (layoutPrototypeLayout.isIconImage()) {
+			Image image = ImageLocalServiceUtil.getImage(
+				layoutPrototypeLayout.getIconImageId());
+
+			iconBytes = image.getTextObj();
+		}
+
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
@@ -271,7 +282,7 @@ public class SitesImpl implements Sites {
 				targetLayout.getDescriptionMap(), targetLayout.getKeywordsMap(),
 				targetLayout.getRobotsMap(), layoutPrototypeLayout.getType(),
 				targetLayout.getHidden(), targetLayout.getFriendlyURLMap(),
-				targetLayout.getIconImage(), null, serviceContext);
+				layoutPrototypeLayout.isIconImage(), iconBytes, serviceContext);
 		}
 		finally {
 			LocaleThreadLocal.setSiteDefaultLocale(siteDefaultLocale);
@@ -389,7 +400,7 @@ public class SitesImpl implements Sites {
 		List<String> sourcePortletIds = sourceLayoutTypePortlet.getPortletIds();
 
 		for (String sourcePortletId : sourcePortletIds) {
-			String resourceName = PortletConstants.getRootPortletId(
+			String resourceName = PortletIdCodec.decodePortletName(
 				sourcePortletId);
 
 			String sourceResourcePrimKey = PortletPermissionUtil.getPrimaryKey(
@@ -534,7 +545,7 @@ public class SitesImpl implements Sites {
 		}
 
 		Group group = layout.getGroup();
-		String oldFriendlyURL = layout.getFriendlyURL(themeDisplay.getLocale());
+		String oldFriendlyURL = themeDisplay.getLayoutFriendlyURL(layout);
 
 		if (group.isStagingGroup() &&
 			!GroupPermissionUtil.contains(
@@ -634,6 +645,10 @@ public class SitesImpl implements Sites {
 
 		Map<String, String[]> parameterMap = getLayoutSetPrototypeParameters(
 			serviceContext);
+
+		parameterMap.put(
+			PortletDataHandlerKeys.PERFORM_DIRECT_BINARY_IMPORT,
+			new String[] {Boolean.FALSE.toString()});
 
 		Map<String, Serializable> exportLayoutSettingsMap =
 			ExportImportConfigurationSettingsMapFactory.
@@ -877,6 +892,10 @@ public class SitesImpl implements Sites {
 
 		Map<String, String[]> parameterMap = getLayoutSetPrototypeParameters(
 			serviceContext);
+
+		parameterMap.put(
+			PortletDataHandlerKeys.PERFORM_DIRECT_BINARY_IMPORT,
+			new String[] {Boolean.FALSE.toString()});
 
 		setLayoutSetPrototypeLinkEnabledParameter(
 			parameterMap, layoutSet, serviceContext);
@@ -1354,16 +1373,18 @@ public class SitesImpl implements Sites {
 		catch (Exception e) {
 			mergeFailCount++;
 
-			StringBundler sb = new StringBundler(6);
+			if (_log.isWarnEnabled()) {
+				StringBundler sb = new StringBundler(6);
 
-			sb.append("Merge fail count increased to ");
-			sb.append(mergeFailCount);
-			sb.append(" for layout set prototype ");
-			sb.append(layoutSetPrototype.getLayoutSetPrototypeId());
-			sb.append(" and layout set ");
-			sb.append(layoutSet.getLayoutSetId());
+				sb.append("Merge fail count increased to ");
+				sb.append(mergeFailCount);
+				sb.append(" for layout set prototype ");
+				sb.append(layoutSetPrototype.getLayoutSetPrototypeId());
+				sb.append(" and layout set ");
+				sb.append(layoutSet.getLayoutSetId());
 
-			_log.error(sb.toString(), e);
+				_log.warn(sb.toString(), e);
+			}
 
 			layoutSetPrototypeSettingsProperties.setProperty(
 				MERGE_FAIL_COUNT, String.valueOf(mergeFailCount));
@@ -1512,7 +1533,7 @@ public class SitesImpl implements Sites {
 		}
 
 		String portletTitle = PortalUtil.getPortletTitle(
-			PortletConstants.getRootPortletId(sourcePortletId), languageId);
+			PortletIdCodec.decodePortletName(sourcePortletId), languageId);
 
 		String newPortletTitle = PortalUtil.getNewPortletTitle(
 			portletTitle, String.valueOf(sourceLayout.getLayoutId()),
@@ -1570,18 +1591,14 @@ public class SitesImpl implements Sites {
 				permissionChecker, layout.getName(), layout.getLayoutId(),
 				ActionKeys.UPDATE);
 		}
-		else if (!group.isUser() &&
-				 !GroupPermissionUtil.contains(
-					 permissionChecker, group, ActionKeys.UPDATE)) {
+		else if (!GroupPermissionUtil.contains(
+					permissionChecker, group, ActionKeys.UPDATE) &&
+				 (!group.isUser() ||
+				  (permissionChecker.getUserId() != group.getClassPK()))) {
 
 			throw new PrincipalException.MustHavePermission(
 				permissionChecker, group.getName(), group.getGroupId(),
 				ActionKeys.UPDATE);
-		}
-		else if (group.isUser() &&
-				 (permissionChecker.getUserId() != group.getClassPK())) {
-
-			throw new PrincipalException();
 		}
 	}
 
@@ -1938,14 +1955,16 @@ public class SitesImpl implements Sites {
 
 				if (_log.isDebugEnabled()) {
 					_log.debug(
-						"Copied " + file.getAbsolutePath() + " to " +
-							cacheFile.getAbsolutePath());
+						StringBundler.concat(
+							"Copied ", file.getAbsolutePath(), " to ",
+							cacheFile.getAbsolutePath()));
 				}
 			}
 			catch (Exception e) {
 				_log.error(
-					"Unable to copy file " + file.getAbsolutePath() + " to " +
-						cacheFile.getAbsolutePath(),
+					StringBundler.concat(
+						"Unable to copy file ", file.getAbsolutePath(), " to ",
+						cacheFile.getAbsolutePath()),
 					e);
 			}
 		}

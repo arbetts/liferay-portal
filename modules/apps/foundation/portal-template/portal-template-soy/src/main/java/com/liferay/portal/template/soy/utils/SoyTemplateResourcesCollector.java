@@ -14,6 +14,8 @@
 
 package com.liferay.portal.template.soy.utils;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateException;
 import com.liferay.portal.kernel.template.TemplateResource;
@@ -55,15 +57,32 @@ public class SoyTemplateResourcesCollector {
 	}
 
 	protected void collectBundleTemplateResources(
-		List<TemplateResource> templateResources) {
+		Bundle bundle, List<TemplateResource> templateResources) {
 
-		List<URL> urls = getSoyResourceURLs(_bundle, _templatePath);
+		List<URL> urls = getSoyResourceURLs(bundle, _templatePath);
 
 		for (URL url : urls) {
-			String templateId = getTemplateId(_bundle.getBundleId(), url);
+			String templateId = getTemplateId(bundle.getBundleId(), url);
 
-			templateResources.add(new URLTemplateResource(templateId, url));
+			try {
+				TemplateResource templateResource = _getTemplateResource(
+					templateId, url);
+
+				templateResources.add(templateResource);
+			}
+			catch (TemplateException te) {
+				throw new IllegalStateException(
+					"Unable to collect template reosurces for bundle " +
+						bundle.getBundleId(),
+					te);
+			}
 		}
+	}
+
+	protected void collectBundleTemplateResources(
+		List<TemplateResource> templateResources) {
+
+		collectBundleTemplateResources(_bundle, templateResources);
 	}
 
 	protected void collectProviderBundlesTemplateResources(
@@ -82,9 +101,19 @@ public class SoyTemplateResourcesCollector {
 				String templateId = getTemplateId(
 					providerBundle.getBundleId(), url);
 
-				TemplateResource templateResource =
-					TemplateResourceLoaderUtil.getTemplateResource(
-						TemplateConstants.LANG_TYPE_SOY, templateId);
+				TemplateResource templateResource = null;
+
+				try {
+					templateResource = _getTemplateResource(templateId, url);
+				}
+				catch (IllegalStateException ise) {
+					_log.error(
+						String.format(
+							"{providerBundle=%s, templateId=%s}",
+							providerBundle.getSymbolicName(), templateId));
+
+					throw ise;
+				}
 
 				templateResources.add(templateResource);
 			}
@@ -98,6 +127,12 @@ public class SoyTemplateResourcesCollector {
 	}
 
 	protected List<URL> getSoyResourceURLs(Bundle bundle, String templatePath) {
+		int bundleState = bundle.getState();
+
+		if (bundleState == Bundle.UNINSTALLED) {
+			return Collections.emptyList();
+		}
+
 		Enumeration<URL> urls = bundle.findEntries(
 			"META-INF/resources" + templatePath, _SOY_FILE_EXTENSION, true);
 
@@ -113,7 +148,28 @@ public class SoyTemplateResourcesCollector {
 			TemplateConstants.BUNDLE_SEPARATOR).concat(url.getPath());
 	}
 
+	private TemplateResource _getTemplateResource(String templateId, URL url)
+		throws TemplateException {
+
+		TemplateResource templateResource;
+
+		if (TemplateResourceLoaderUtil.hasTemplateResourceLoader(
+				TemplateConstants.LANG_TYPE_SOY)) {
+
+			templateResource = TemplateResourceLoaderUtil.getTemplateResource(
+				TemplateConstants.LANG_TYPE_SOY, templateId);
+		}
+		else {
+			templateResource = new URLTemplateResource(templateId, url);
+		}
+
+		return templateResource;
+	}
+
 	private static final String _SOY_FILE_EXTENSION = "*.soy";
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		SoyTemplateResourcesCollector.class);
 
 	private final Bundle _bundle;
 	private final String _templatePath;

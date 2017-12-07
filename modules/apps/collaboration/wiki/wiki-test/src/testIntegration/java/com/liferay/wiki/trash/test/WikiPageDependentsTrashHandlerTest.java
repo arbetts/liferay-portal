@@ -31,8 +31,8 @@ import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.trash.kernel.service.TrashEntryLocalServiceUtil;
-import com.liferay.trash.kernel.service.TrashVersionLocalServiceUtil;
+import com.liferay.trash.service.TrashEntryLocalServiceUtil;
+import com.liferay.trash.service.TrashVersionLocalServiceUtil;
 import com.liferay.wiki.model.WikiNode;
 import com.liferay.wiki.model.WikiPage;
 import com.liferay.wiki.model.WikiPageResource;
@@ -96,8 +96,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testMoveExplicitlyChildPageAndParentPageWithRedirectorPageToTrash()
+	public void testMoveExplicitlyChildPageAndParentPageWithRedirectorPageToTrash()
 		throws Exception {
 
 		RelatedPages relatedPages = buildRelatedPages();
@@ -446,8 +445,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testRestoreExplicitlyTrashedChildPageAndParentPageWithRedirectorPageFromTrash()
+	public void testRestoreExplicitlyTrashedChildPageAndParentPageWithRedirectorPageFromTrash()
 		throws Exception {
 
 		RelatedPages relatedPages = buildRelatedPages();
@@ -504,8 +502,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testRestoreExplicitlyTrashedChildPageWithTrashedParentFromTrash()
+	public void testRestoreExplicitlyTrashedChildPageWithTrashedParentFromTrash()
 		throws Exception {
 
 		int initialBaseModelsCount =
@@ -563,8 +560,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testRestoreExplicitlyTrashedParentPageAndChildPageAndRedirectorPageFromTrash()
+	public void testRestoreExplicitlyTrashedParentPageAndChildPageAndRedirectorPageFromTrash()
 		throws Exception {
 
 		RelatedPages relatedPages = buildRelatedPages();
@@ -653,8 +649,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testRestoreExplicitlyTrashedParentPageWitExplicitlyTrashedChildPageFromTrash()
+	public void testRestoreExplicitlyTrashedParentPageWitExplicitlyTrashedChildPageFromTrash()
 		throws Exception {
 
 		RelatedPages relatedPages = buildRelatedPages();
@@ -675,8 +670,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testRestoreExplicitlyTrashedParentPageWithChildPageAndgrandchildPageFromTrash()
+	public void testRestoreExplicitlyTrashedParentPageWithChildPageAndgrandchildPageFromTrash()
 		throws Exception {
 
 		int initialBaseModelsCount =
@@ -712,8 +706,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testRestoreExplicitlyTrashedParentPageWithRedirectorPageFromTrash()
+	public void testRestoreExplicitlyTrashedParentPageWithRedirectorPageFromTrash()
 		throws Exception {
 
 		RelatedPages relatedPages = buildRelatedPages();
@@ -772,8 +765,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testRestoreExplicitlyTrashedRedirectorPageWithRestoredPageFromTrash()
+	public void testRestoreExplicitlyTrashedRedirectorPageWithRestoredPageFromTrash()
 		throws Exception {
 
 		RelatedPages relatedPages = buildRelatedPages();
@@ -885,8 +877,7 @@ public class WikiPageDependentsTrashHandlerTest {
 	}
 
 	@Test
-	public void
-			testRestoreParentPageWithExplicitlyTrashedRedirectorPageFromTrash()
+	public void testRestoreParentPageWithExplicitlyTrashedRedirectorPageFromTrash()
 		throws Exception {
 
 		RelatedPages relatedPages = buildRelatedPages();

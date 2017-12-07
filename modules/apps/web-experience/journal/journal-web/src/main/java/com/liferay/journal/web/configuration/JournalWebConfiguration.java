@@ -24,19 +24,16 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 @ExtendedObjectClassDefinition(category = "web-experience")
 @Meta.OCD(
 	id = "com.liferay.journal.web.configuration.JournalWebConfiguration",
-	localization = "content/Language", name = "journal.web.configuration.name"
+	localization = "content/Language", name = "journal-web-configuration-name"
 )
 public interface JournalWebConfiguration {
 
 	@Meta.AD(
 		deflt = "false",
-		description = "changeable.default.language.description",
-		name = "changeable.default.language", required = false
+		description = "changeable-default-language-description",
+		name = "changeable-default-language", required = false
 	)
 	public boolean changeableDefaultLanguage();
-
-	@Meta.AD(deflt = "15", required = false)
-	public int checkInterval();
 
 	@Meta.AD(deflt = "descriptive", required = false)
 	public String defaultDisplayView();
@@ -47,7 +44,15 @@ public interface JournalWebConfiguration {
 	@Meta.AD(deflt = "true", required = false)
 	public boolean journalArticleForceAutogenerateId();
 
-	@Meta.AD(deflt = "true", required = false)
+	/**
+	 * @deprecated As of 2.0.0, with no direct replacement
+	 */
+	@Deprecated
+	@Meta.AD(
+		deflt = "true",
+		description = "journal-article-search-with-index-description",
+		required = false
+	)
 	public boolean journalArticlesSearchWithIndex();
 
 	@Meta.AD(deflt = "true", required = false)

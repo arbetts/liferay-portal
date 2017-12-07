@@ -33,7 +33,6 @@ import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
@@ -44,6 +43,8 @@ import com.liferay.social.privatemessaging.model.impl.UserThreadModelImpl;
 import com.liferay.social.privatemessaging.service.persistence.UserThreadPersistence;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Field;
 
 import java.util.Collections;
 import java.util.Date;
@@ -298,7 +299,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		msg.append("userId=");
 		msg.append(userId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchUserThreadException(msg.toString());
 	}
@@ -347,7 +348,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		msg.append("userId=");
 		msg.append(userId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchUserThreadException(msg.toString());
 	}
@@ -802,7 +803,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		msg.append("mbThreadId=");
 		msg.append(mbThreadId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchUserThreadException(msg.toString());
 	}
@@ -853,7 +854,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		msg.append("mbThreadId=");
 		msg.append(mbThreadId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchUserThreadException(msg.toString());
 	}
@@ -1130,7 +1131,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 			msg.append(", mbThreadId=");
 			msg.append(mbThreadId);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -1559,7 +1560,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		msg.append(", deleted=");
 		msg.append(deleted);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchUserThreadException(msg.toString());
 	}
@@ -1615,7 +1616,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		msg.append(", deleted=");
 		msg.append(deleted);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchUserThreadException(msg.toString());
 	}
@@ -2125,7 +2126,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		msg.append(", deleted=");
 		msg.append(deleted);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchUserThreadException(msg.toString());
 	}
@@ -2186,7 +2187,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		msg.append(", deleted=");
 		msg.append(deleted);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchUserThreadException(msg.toString());
 	}
@@ -2458,6 +2459,24 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 
 	public UserThreadPersistenceImpl() {
 		setModelClass(UserThread.class);
+
+		try {
+			Field field = BasePersistenceImpl.class.getDeclaredField(
+					"_dbColumnNames");
+
+			field.setAccessible(true);
+
+			Map<String, String> dbColumnNames = new HashMap<String, String>();
+
+			dbColumnNames.put("read", "read_");
+
+			field.set(this, dbColumnNames);
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e, e);
+			}
+		}
 	}
 
 	/**
@@ -2527,7 +2546,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((UserThreadModelImpl)userThread);
+		clearUniqueFindersCache((UserThreadModelImpl)userThread, true);
 	}
 
 	@Override
@@ -2539,52 +2558,38 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 			entityCache.removeResult(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
 				UserThreadImpl.class, userThread.getPrimaryKey());
 
-			clearUniqueFindersCache((UserThreadModelImpl)userThread);
+			clearUniqueFindersCache((UserThreadModelImpl)userThread, true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		UserThreadModelImpl userThreadModelImpl, boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] {
-					userThreadModelImpl.getUserId(),
-					userThreadModelImpl.getMbThreadId()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_U_M, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_U_M, args,
-				userThreadModelImpl);
-		}
-		else {
-			if ((userThreadModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_U_M.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						userThreadModelImpl.getUserId(),
-						userThreadModelImpl.getMbThreadId()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_U_M, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_U_M, args,
-					userThreadModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(
 		UserThreadModelImpl userThreadModelImpl) {
 		Object[] args = new Object[] {
 				userThreadModelImpl.getUserId(),
 				userThreadModelImpl.getMbThreadId()
 			};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_U_M, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_U_M, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_U_M, args, Long.valueOf(1),
+			false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_U_M, args,
+			userThreadModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		UserThreadModelImpl userThreadModelImpl, boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					userThreadModelImpl.getUserId(),
+					userThreadModelImpl.getMbThreadId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U_M, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_U_M, args);
+		}
 
 		if ((userThreadModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_U_M.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					userThreadModelImpl.getOriginalUserId(),
 					userThreadModelImpl.getOriginalMbThreadId()
 				};
@@ -2750,8 +2755,45 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !UserThreadModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!UserThreadModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { userThreadModelImpl.getUserId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_USERID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_USERID,
+				args);
+
+			args = new Object[] { userThreadModelImpl.getMbThreadId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_MBTHREADID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_MBTHREADID,
+				args);
+
+			args = new Object[] {
+					userThreadModelImpl.getUserId(),
+					userThreadModelImpl.getDeleted()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U_D, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_U_D,
+				args);
+
+			args = new Object[] {
+					userThreadModelImpl.getUserId(),
+					userThreadModelImpl.getRead(),
+					userThreadModelImpl.getDeleted()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_U_R_D, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_U_R_D,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -2837,8 +2879,8 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		entityCache.putResult(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
 			UserThreadImpl.class, userThread.getPrimaryKey(), userThread, false);
 
-		clearUniqueFindersCache(userThreadModelImpl);
-		cacheUniqueFindersCache(userThreadModelImpl, isNew);
+		clearUniqueFindersCache(userThreadModelImpl, false);
+		cacheUniqueFindersCache(userThreadModelImpl);
 
 		userThread.resetOriginalValues();
 
@@ -3018,14 +3060,14 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		query.append(_SQL_SELECT_USERTHREAD_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

@@ -26,6 +26,7 @@ PortletURL resourceURL = (PortletURL)request.getAttribute("liferay-frontend:diff
 double sourceVersion = (Double)request.getAttribute("liferay-frontend:diff-version-comparator:sourceVersion");
 double targetVersion = (Double)request.getAttribute("liferay-frontend:diff-version-comparator:targetVersion");
 
+List<DiffVersion> diffVersions = diffVersionsInfo.getDiffVersions();
 double nextVersion = diffVersionsInfo.getNextVersion();
 double previousVersion = diffVersionsInfo.getPreviousVersion();
 
@@ -49,30 +50,47 @@ if (Validator.isNotNull(languageId)) {
 			<aui:row>
 				<aui:col width="<%= 30 %>">
 					<div class="pull-right">
-						<liferay-ui:icon-menu direction="down" extended="<%= false %>" message='<%= LanguageUtil.format(request, "version-x", sourceVersion) %>' showArrow="<%= true %>" showWhenSingleIcon="<%= true %>" useIconCaret="<%= true %>">
+						<c:choose>
+							<c:when test="<%= diffVersions.size() <= 2 %>">
+								<liferay-ui:icon label="<%= true %>" message='<%= LanguageUtil.format(request, "version-x", sourceVersion) %>' />
+							</c:when>
+							<c:otherwise>
+								<div class="dropdown">
+									<a aria-expanded="true" class="dropdown-toggle" data-toggle="dropdown" href="javascript:;">
+										<span class="management-bar-item-title">
+											<liferay-ui:message key='<%= LanguageUtil.format(request, "version-x", sourceVersion) %>' />
+										</span>
 
-							<%
-							PortletURL sourceURL = PortletURLUtil.clone(portletURL, renderResponse);
+										<aui:icon image="caret-double-l" markupView="lexicon" />
+									</a>
 
-							sourceURL.setParameter("targetVersion", String.valueOf(targetVersion));
+									<ul class="dropdown-menu">
 
-							for (DiffVersion diffVersion : diffVersionsInfo.getDiffVersions()) {
-								sourceURL.setParameter("sourceVersion", String.valueOf(diffVersion.getVersion()));
-							%>
+										<%
+										PortletURL sourceURL = PortletURLUtil.clone(portletURL, renderResponse);
 
-								<c:if test="<%= sourceVersion != diffVersion.getVersion() %>">
-									<liferay-ui:icon
-										label="<%= true %>"
-										message='<%= LanguageUtil.format(request, "version-x", diffVersion.getVersion()) %>'
-										url="<%= sourceURL.toString() %>"
-									/>
-								</c:if>
+										sourceURL.setParameter("targetVersion", String.valueOf(targetVersion));
 
-							<%
-							}
-							%>
+										for (DiffVersion diffVersion : diffVersions) {
+											sourceURL.setParameter("sourceVersion", String.valueOf(diffVersion.getVersion()));
+										%>
 
-						</liferay-ui:icon-menu>
+											<c:if test="<%= (sourceVersion != diffVersion.getVersion()) && (targetVersion != diffVersion.getVersion()) %>">
+												<li>
+													<a href="<%= sourceURL.toString() %>">
+														<liferay-ui:message key='<%= LanguageUtil.format(request, "version-x", diffVersion.getVersion()) %>' />
+													</a>
+												</li>
+											</c:if>
+
+										<%
+										}
+										%>
+
+									</ul>
+								</div>
+							</c:otherwise>
+						</c:choose>
 
 						<c:if test="<%= previousVersion == 0 %>">
 							<h6 class="text-default">
@@ -83,30 +101,47 @@ if (Validator.isNotNull(languageId)) {
 				</aui:col>
 
 				<aui:col cssClass="diff-target-selector" width="<%= 70 %>">
-					<liferay-ui:icon-menu direction="down" extended="<%= false %>" message='<%= LanguageUtil.format(request, "version-x", targetVersion) %>' showArrow="<%= true %>" showWhenSingleIcon="<%= true %>" useIconCaret="<%= true %>">
+					<c:choose>
+						<c:when test="<%= diffVersions.size() <= 2 %>">
+							<liferay-ui:icon label="<%= true %>" message='<%= LanguageUtil.format(request, "version-x", targetVersion) %>' />
+						</c:when>
+						<c:otherwise>
+							<div class="dropdown">
+								<a aria-expanded="true" class="dropdown-toggle" data-toggle="dropdown" href="javascript:;">
+									<span class="management-bar-item-title">
+										<liferay-ui:message key='<%= LanguageUtil.format(request, "version-x", targetVersion) %>' />
+									</span>
 
-						<%
-						PortletURL targetURL = PortletURLUtil.clone(portletURL, renderResponse);
+									<aui:icon image="caret-double-l" markupView="lexicon" />
+								</a>
 
-						targetURL.setParameter("sourceVersion", String.valueOf(sourceVersion));
+								<ul class="dropdown-menu">
 
-						for (DiffVersion diffVersion : diffVersionsInfo.getDiffVersions()) {
-							targetURL.setParameter("targetVersion", String.valueOf(diffVersion.getVersion()));
-						%>
+									<%
+									PortletURL targetURL = PortletURLUtil.clone(portletURL, renderResponse);
 
-							<c:if test="<%= targetVersion != diffVersion.getVersion() %>">
-								<liferay-ui:icon
-									label="<%= true %>"
-									message='<%= LanguageUtil.format(request, "version-x", diffVersion.getVersion()) %>'
-									url="<%= targetURL.toString() %>"
-								/>
-							</c:if>
+									targetURL.setParameter("sourceVersion", String.valueOf(sourceVersion));
 
-						<%
-						}
-						%>
+									for (DiffVersion diffVersion : diffVersions) {
+										targetURL.setParameter("targetVersion", String.valueOf(diffVersion.getVersion()));
+									%>
 
-					</liferay-ui:icon-menu>
+										<c:if test="<%= (sourceVersion != diffVersion.getVersion()) && (targetVersion != diffVersion.getVersion()) %>">
+											<li>
+												<a href="<%= targetURL.toString() %>">
+													<liferay-ui:message key='<%= LanguageUtil.format(request, "version-x", diffVersion.getVersion()) %>' />
+												</a>
+											</li>
+										</c:if>
+
+									<%
+									}
+									%>
+
+								</ul>
+							</div>
+						</c:otherwise>
+					</c:choose>
 
 					<c:if test="<%= nextVersion == 0 %>">
 						<h6 class="text-default">
@@ -122,8 +157,6 @@ if (Validator.isNotNull(languageId)) {
 				<aui:col width="<%= 30 %>">
 
 					<%
-					List<DiffVersion> diffVersions = diffVersionsInfo.getDiffVersions();
-
 					int diffVersionsCount = 0;
 
 					for (int i = 0; i < diffVersions.size(); i++) {
@@ -185,7 +218,7 @@ if (Validator.isNotNull(languageId)) {
 									<div class="list-group-item-field">
 										<liferay-ui:user-portrait
 											cssClass="user-icon-lg"
-											userId="<%= userDisplay.getUserId() %>"
+											user="<%= userDisplay %>"
 										/>
 									</div>
 

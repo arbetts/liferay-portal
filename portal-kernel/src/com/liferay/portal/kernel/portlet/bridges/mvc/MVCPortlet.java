@@ -17,10 +17,13 @@ package com.liferay.portal.kernel.portlet.bridges.mvc;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortlet;
+import com.liferay.portal.kernel.portlet.LiferayPortletConfig;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -197,18 +200,26 @@ public class MVCPortlet extends LiferayPortlet {
 		copyRequestParameters = GetterUtil.getBoolean(
 			getInitParameter("copy-request-parameters"), true);
 
+		LiferayPortletConfig liferayPortletConfig =
+			(LiferayPortletConfig)getPortletConfig();
+
+		String portletId = liferayPortletConfig.getPortletId();
+
 		_actionMVCCommandCache = new MVCCommandCache(
 			MVCActionCommand.EMPTY,
 			getInitParameter("mvc-action-command-package-prefix"),
-			getPortletName(), MVCActionCommand.class, "ActionCommand");
+			getPortletName(), portletId, MVCActionCommand.class,
+			"ActionCommand");
 		_renderMVCCommandCache = new MVCCommandCache(
 			MVCRenderCommand.EMPTY,
 			getInitParameter("mvc-render-command-package-prefix"),
-			getPortletName(), MVCRenderCommand.class, "RenderCommand");
+			getPortletName(), portletId, MVCRenderCommand.class,
+			"RenderCommand");
 		_resourceMVCCommandCache = new MVCCommandCache(
 			MVCResourceCommand.EMPTY,
 			getInitParameter("mvc-resource-command-package-prefix"),
-			getPortletName(), MVCResourceCommand.class, "ResourceCommand");
+			getPortletName(), portletId, MVCResourceCommand.class,
+			"ResourceCommand");
 
 		initValidPaths(templatePath, ".jsp");
 	}
@@ -283,9 +294,24 @@ public class MVCPortlet extends LiferayPortlet {
 				return;
 			}
 
-			renderRequest.setAttribute(
-				getMVCPathAttributeName(renderResponse.getNamespace()),
-				mvcPath);
+			if (Validator.isNotNull(mvcPath)) {
+				renderRequest.setAttribute(
+					getMVCPathAttributeName(renderResponse.getNamespace()),
+					mvcPath);
+			}
+			else if (!mvcRenderCommandName.equals("/")) {
+				if (_log.isWarnEnabled()) {
+					StringBundler sb = new StringBundler(5);
+
+					sb.append("No render mappings found for MVC render ");
+					sb.append("command name \"");
+					sb.append(HtmlUtil.escape(mvcRenderCommandName));
+					sb.append("\" for portlet ");
+					sb.append(renderRequest.getAttribute(WebKeys.PORTLET_ID));
+
+					_log.warn(sb.toString());
+				}
+			}
 		}
 
 		super.render(renderRequest, renderResponse);

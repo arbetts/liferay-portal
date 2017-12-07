@@ -14,10 +14,8 @@
 
 package com.liferay.portal.configuration.extender.internal;
 
-import com.liferay.portal.configuration.extender.BundleStorage;
-import com.liferay.portal.configuration.extender.ConfigurationDescriptionFactory;
-import com.liferay.portal.configuration.extender.NamedConfigurationContent;
-import com.liferay.portal.configuration.extender.NamedConfigurationContentFactory;
+import com.liferay.osgi.felix.util.AbstractExtender;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.io.IOException;
 
@@ -30,7 +28,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.felix.utils.extender.AbstractExtender;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.felix.utils.log.Logger;
 
@@ -54,15 +51,13 @@ public class ConfiguratorExtender extends AbstractExtender {
 
 	@Activate
 	protected void activate(BundleContext bundleContext) throws Exception {
-		setSynchronous(true);
-
 		_logger = new Logger(bundleContext);
 
 		start(bundleContext);
 	}
 
 	@Reference(
-		cardinality = ReferenceCardinality.MULTIPLE,
+		cardinality = ReferenceCardinality.AT_LEAST_ONE,
 		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY,
 		unbind = "removeConfigurationDescriptionFactory"
@@ -74,7 +69,7 @@ public class ConfiguratorExtender extends AbstractExtender {
 	}
 
 	@Reference(
-		cardinality = ReferenceCardinality.MULTIPLE,
+		cardinality = ReferenceCardinality.AT_LEAST_ONE,
 		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY,
 		unbind = "removeNamedConfigurationContentFactory"
@@ -93,7 +88,9 @@ public class ConfiguratorExtender extends AbstractExtender {
 
 	@Override
 	protected void debug(Bundle bundle, String s) {
-		_logger.log(Logger.LOG_DEBUG, "[" + bundle + "] " + s);
+		_logger.log(
+			Logger.LOG_DEBUG,
+			StringBundler.concat("[", String.valueOf(bundle), "] ", s));
 	}
 
 	@Override
@@ -156,7 +153,9 @@ public class ConfiguratorExtender extends AbstractExtender {
 
 	@Override
 	protected void warn(Bundle bundle, String s, Throwable throwable) {
-		_logger.log(Logger.LOG_WARNING, "[" + bundle + "] " + s);
+		_logger.log(
+			Logger.LOG_WARNING,
+			StringBundler.concat("[", String.valueOf(bundle), "] ", s));
 	}
 
 	private ConfigurationAdmin _configurationAdmin;

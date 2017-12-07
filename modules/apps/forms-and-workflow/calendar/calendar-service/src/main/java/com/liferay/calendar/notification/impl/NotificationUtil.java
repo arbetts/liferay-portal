@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
@@ -128,33 +129,68 @@ public class NotificationUtil {
 
 	public static void notifyCalendarBookingRecipients(
 			CalendarBooking calendarBooking, NotificationType notificationType,
-			NotificationTemplateType notificationTemplateType, User sender)
+			NotificationTemplateType notificationTemplateType, User senderUser)
+		throws Exception {
+
+		notifyCalendarBookingRecipients(
+			calendarBooking, notificationType, notificationTemplateType,
+			senderUser, null);
+	}
+
+	public static void notifyCalendarBookingRecipients(
+			CalendarBooking calendarBooking, NotificationType notificationType,
+			NotificationTemplateType notificationTemplateType, User senderUser,
+			ServiceContext serviceContext)
 		throws Exception {
 
 		NotificationSender notificationSender =
 			NotificationSenderFactory.getNotificationSender(
 				notificationType.toString());
 
-		List<NotificationRecipient> notificationRecipients =
-			_getNotificationRecipients(calendarBooking);
+		if (notificationTemplateType == NotificationTemplateType.DECLINE) {
+			User recipientUser = senderUser;
 
-		for (NotificationRecipient notificationRecipient :
-				notificationRecipients) {
+			Calendar calendar = calendarBooking.getCalendar();
 
-			User user = notificationRecipient.getUser();
+			senderUser = getDefaultSenderUser(calendar);
 
-			if (user.equals(sender)) {
-				continue;
-			}
+			String resourceName = calendar.getName(
+				recipientUser.getLanguageId());
+
+			NotificationRecipient notificationRecipient =
+				new NotificationRecipient(recipientUser);
 
 			NotificationTemplateContext notificationTemplateContext =
 				NotificationTemplateContextFactory.getInstance(
 					notificationType, notificationTemplateType, calendarBooking,
-					user);
+					recipientUser, serviceContext);
 
 			notificationSender.sendNotification(
-				sender.getEmailAddress(), sender.getFullName(),
+				senderUser.getEmailAddress(), resourceName,
 				notificationRecipient, notificationTemplateContext);
+		}
+		else {
+			List<NotificationRecipient> notificationRecipients =
+				_getNotificationRecipients(calendarBooking);
+
+			for (NotificationRecipient notificationRecipient :
+					notificationRecipients) {
+
+				User user = notificationRecipient.getUser();
+
+				if (user.equals(senderUser)) {
+					continue;
+				}
+
+				NotificationTemplateContext notificationTemplateContext =
+					NotificationTemplateContextFactory.getInstance(
+						notificationType, notificationTemplateType,
+						calendarBooking, user, serviceContext);
+
+				notificationSender.sendNotification(
+					senderUser.getEmailAddress(), senderUser.getFullName(),
+					notificationRecipient, notificationTemplateContext);
+			}
 		}
 	}
 
@@ -254,7 +290,9 @@ public class NotificationUtil {
 
 		long intervalEnd = intervalStart + _CHECK_INTERVAL;
 
-		if ((intervalStart <= deltaTime) && (deltaTime < intervalEnd)) {
+		if ((intervalStart > 0) && (intervalStart <= deltaTime) &&
+			(deltaTime < intervalEnd)) {
+
 			return true;
 		}
 

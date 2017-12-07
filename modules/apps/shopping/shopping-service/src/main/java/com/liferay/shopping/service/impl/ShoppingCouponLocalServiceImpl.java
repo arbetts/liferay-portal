@@ -14,10 +14,10 @@
 
 package com.liferay.shopping.service.impl;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -63,7 +63,7 @@ public class ShoppingCouponLocalServiceImpl
 		User user = userLocalService.getUser(userId);
 		long groupId = serviceContext.getScopeGroupId();
 
-		code = StringUtil.toUpperCase(code.trim());
+		code = StringUtil.toUpperCase(StringUtil.trim(code));
 
 		if (autoCode) {
 			code = getCode();
@@ -146,7 +146,7 @@ public class ShoppingCouponLocalServiceImpl
 
 	@Override
 	public ShoppingCoupon getCoupon(String code) throws PortalException {
-		code = StringUtil.toUpperCase(code.trim());
+		code = StringUtil.toUpperCase(StringUtil.trim(code));
 
 		return shoppingCouponPersistence.findByCode(code);
 	}

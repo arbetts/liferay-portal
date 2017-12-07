@@ -14,7 +14,7 @@
 
 package com.liferay.rss.util;
 
-import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 
 import com.sun.syndication.feed.synd.SyndContent;
@@ -30,13 +30,11 @@ import org.jdom.IllegalDataException;
 /**
  * @author Brian Wing Shun Chan
  * @author Eduardo Garcia
- * @see com.liferay.util.RSSUtil
+ * @see    com.liferay.util.RSSUtil
  */
 public class RSSUtil extends com.liferay.portal.kernel.util.RSSUtil {
 
 	public static String export(SyndFeed feed) throws FeedException {
-		RSSThreadLocal.setExportRSS(true);
-
 		feed.setEncoding(StringPool.UTF8);
 
 		SyndFeedOutput output = new SyndFeedOutput();

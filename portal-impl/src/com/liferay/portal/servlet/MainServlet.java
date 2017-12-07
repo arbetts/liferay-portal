@@ -56,7 +56,6 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.servlet.InactiveRequestHandler;
 import com.liferay.portal.kernel.servlet.PortalSessionThreadLocal;
-import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateManager;
 import com.liferay.portal.kernel.util.ClassLoaderUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -66,8 +65,8 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalLifecycleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.ProxyFactory;
 import com.liferay.portal.kernel.util.ReleaseInfo;
+import com.liferay.portal.kernel.util.ServiceProxyFactory;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -78,6 +77,7 @@ import com.liferay.portal.kernel.xml.DocumentException;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
 import com.liferay.portal.plugin.PluginPackageUtil;
+import com.liferay.portal.service.impl.LayoutTemplateLocalServiceImpl;
 import com.liferay.portal.servlet.filters.absoluteredirects.AbsoluteRedirectsResponse;
 import com.liferay.portal.servlet.filters.i18n.I18nFilter;
 import com.liferay.portal.setup.SetupWizardSampleDataUtil;
@@ -104,11 +104,13 @@ import com.liferay.util.servlet.EncryptedServletRequest;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
@@ -241,15 +243,17 @@ public class MainServlet extends ActionServlet {
 				_log.warn(sb.toString());
 			}
 
-			String userTimeZone = System.getProperty("user.timezone");
+			TimeZone timeZone = TimeZone.getDefault();
 
-			if (!Objects.equals("UTC", userTimeZone) &&
-				!Objects.equals("GMT", userTimeZone)) {
+			String timeZoneID = timeZone.getID();
+
+			if (!Objects.equals("UTC", timeZoneID) &&
+				!Objects.equals("GMT", timeZoneID)) {
 
 				StringBundler sb = new StringBundler(4);
 
 				sb.append("The default JVM time zone \"");
-				sb.append(userTimeZone);
+				sb.append(timeZoneID);
 				sb.append("\" is not UTC or GMT. Please review the JVM ");
 				sb.append("property \"user.timezone\".");
 
@@ -413,7 +417,7 @@ public class MainServlet extends ActionServlet {
 			_log.error(e, e);
 		}
 
-		servletContext.setAttribute(WebKeys.STARTUP_FINISHED, true);
+		servletContext.setAttribute(WebKeys.STARTUP_FINISHED, Boolean.TRUE);
 
 		StartupHelperUtil.setStartupFinished(true);
 
@@ -512,8 +516,9 @@ public class MainServlet extends ActionServlet {
 		try {
 			if (_log.isDebugEnabled()) {
 				_log.debug(
-					"Authenticate user id " + userId + " and remote user " +
-						remoteUser);
+					StringBundler.concat(
+						"Authenticate user id ", String.valueOf(userId),
+						" and remote user ", remoteUser));
 			}
 
 			userId = loginUser(
@@ -623,10 +628,6 @@ public class MainServlet extends ActionServlet {
 		ServletContext servletContext = getServletContext();
 
 		request.setAttribute(WebKeys.CTX, servletContext);
-
-		String contextPath = request.getContextPath();
-
-		servletContext.setAttribute(WebKeys.CTX_PATH, contextPath);
 	}
 
 	protected void checkTilesDefinitionsFactory() {
@@ -848,7 +849,7 @@ public class MainServlet extends ActionServlet {
 
 						ServletContext servletContext = getServletContext();
 
-						String[] xmls = new String[] {
+						String[] xmls = {
 							HttpUtil.URLtoString(
 								servletContext.getResource(
 									"/WEB-INF/liferay-layout-templates.xml")),
@@ -878,15 +879,26 @@ public class MainServlet extends ActionServlet {
 
 		Registry registry = RegistryUtil.getRegistry();
 
-		Filter freeMarkerFilter = registry.getFilter(
-			"(&(language.type=" + TemplateConstants.LANG_TYPE_FTL +
-				")(objectClass=" + TemplateManager.class.getName() + "))");
-		Filter velocityFilter = registry.getFilter(
-			"(&(language.type=" + TemplateConstants.LANG_TYPE_VM +
-				")(objectClass=" + TemplateManager.class.getName() + "))");
+		Collection<Filter> filters = new ArrayList<>();
+
+		for (String langType :
+				LayoutTemplateLocalServiceImpl.supportedLangTypes) {
+
+			StringBundler sb = new StringBundler(5);
+
+			sb.append("(&(language.type=");
+			sb.append(langType);
+			sb.append(")(objectClass=");
+			sb.append(TemplateManager.class.getName());
+			sb.append("))");
+
+			Filter filter = registry.getFilter(sb.toString());
+
+			filters.add(filter);
+		}
 
 		serviceDependencyManager.registerDependencies(
-			freeMarkerFilter, velocityFilter);
+			filters.toArray(new Filter[0]));
 	}
 
 	protected PluginPackage initPluginPackage() throws Exception {
@@ -1001,7 +1013,7 @@ public class MainServlet extends ActionServlet {
 
 		ServletContext servletContext = getServletContext();
 
-		String[] xmls = new String[] {
+		String[] xmls = {
 			HttpUtil.URLtoString(
 				servletContext.getResource("/WEB-INF/liferay-social.xml")),
 			HttpUtil.URLtoString(
@@ -1017,7 +1029,7 @@ public class MainServlet extends ActionServlet {
 
 		ServletContext servletContext = getServletContext();
 
-		String[] xmls = new String[] {
+		String[] xmls = {
 			HttpUtil.URLtoString(
 				servletContext.getResource(
 					"/WEB-INF/liferay-look-and-feel.xml")),
@@ -1218,6 +1230,16 @@ public class MainServlet extends ActionServlet {
 				PropsValues.SERVLET_SERVICE_EVENTS_PRE_ERROR_PAGE,
 				servletContext, request, response);
 
+			if (e == request.getAttribute(PageContext.EXCEPTION)) {
+				request.removeAttribute(PageContext.EXCEPTION);
+				request.removeAttribute(RequestDispatcher.ERROR_EXCEPTION);
+				request.removeAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE);
+				request.removeAttribute(RequestDispatcher.ERROR_MESSAGE);
+				request.removeAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+				request.removeAttribute(RequestDispatcher.ERROR_SERVLET_NAME);
+				request.removeAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+			}
+
 			return true;
 		}
 
@@ -1240,7 +1262,9 @@ public class MainServlet extends ActionServlet {
 			HttpServletResponse response)
 		throws IOException, ServletException {
 
-		if (userId > 0) {
+		if ((userId > 0) ||
+			(ParamUtil.getInteger(request, "p_p_lifecycle") == 2)) {
+
 			sendError(
 				HttpServletResponse.SC_UNAUTHORIZED, t, request, response);
 
@@ -1383,9 +1407,9 @@ public class MainServlet extends ActionServlet {
 	private static final Log _log = LogFactoryUtil.getLog(MainServlet.class);
 
 	private static volatile InactiveRequestHandler _inactiveRequesthandler =
-		ProxyFactory.newServiceTrackedInstance(
+		ServiceProxyFactory.newServiceTrackedInstance(
 			InactiveRequestHandler.class, MainServlet.class,
-			"_inactiveRequesthandler");
+			"_inactiveRequesthandler", false);
 
 	private ServiceRegistration<ModuleServiceLifecycle>
 		_moduleServiceLifecycleServiceRegistration;

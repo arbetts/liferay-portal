@@ -16,19 +16,20 @@ package com.liferay.asset.categories.internal.validator;
 
 import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.exception.AssetCategoryException;
+import com.liferay.asset.kernel.model.AssetRenderer;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
 import com.liferay.asset.kernel.validator.AssetEntryValidator;
-import com.liferay.document.library.kernel.model.DLFileEntry;
-import com.liferay.document.library.kernel.model.DLFileEntryConstants;
-import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.util.List;
 
@@ -46,20 +47,9 @@ public class CardinalityAssetEntryValidator implements AssetEntryValidator {
 
 	@Override
 	public void validate(
-			long groupId, String className, long classTypePK,
+			long groupId, String className, long classPK, long classTypePK,
 			long[] categoryIds, String[] entryNames)
 		throws PortalException {
-
-		if (className.equals(DLFileEntryConstants.getClassName())) {
-			DLFileEntry dlFileEntry = _dlFileEntryLocalService.fetchDLFileEntry(
-				classTypePK);
-
-			if ((dlFileEntry == null) ||
-				(dlFileEntry.getRepositoryId() != groupId)) {
-
-				return;
-			}
-		}
 
 		List<AssetVocabulary> assetVocabularies =
 			_assetVocabularyLocalService.getGroupVocabularies(groupId, false);
@@ -81,7 +71,7 @@ public class CardinalityAssetEntryValidator implements AssetEntryValidator {
 
 		long classNameId = _classNameLocalService.getClassNameId(className);
 
-		if (isCategorizable(classNameId)) {
+		if (isCategorizable(groupId, classNameId, classPK)) {
 			for (AssetVocabulary assetVocabulary : assetVocabularies) {
 				validate(
 					classNameId, classTypePK, categoryIds, assetVocabulary);
@@ -89,8 +79,23 @@ public class CardinalityAssetEntryValidator implements AssetEntryValidator {
 		}
 	}
 
-	protected boolean isCategorizable(long classNameId) {
-		String className = PortalUtil.getClassName(classNameId);
+	/**
+	 * @deprecated As of 1.1.0
+	 */
+	@Deprecated
+	@Override
+	public void validate(
+			long groupId, String className, long classTypePK,
+			long[] categoryIds, String[] entryNames)
+		throws PortalException {
+
+		validate(groupId, className, 0L, classTypePK, categoryIds, entryNames);
+	}
+
+	protected boolean isCategorizable(
+		long groupId, long classNameId, long classPK) {
+
+		String className = _portal.getClassName(classNameId);
 
 		AssetRendererFactory<?> assetRendererFactory =
 			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
@@ -100,6 +105,29 @@ public class CardinalityAssetEntryValidator implements AssetEntryValidator {
 			!assetRendererFactory.isCategorizable()) {
 
 			return false;
+		}
+
+		if (classPK != 0L) {
+			try {
+				AssetRenderer<?> assetRenderer =
+					assetRendererFactory.getAssetRenderer(classPK);
+
+				if (!assetRenderer.isCategorizable(groupId)) {
+					return false;
+				}
+			}
+			catch (PortalException pe) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						StringBundler.concat(
+							"Entity with ClassPK: ", String.valueOf(classPK),
+							" and ClassNameId: ", String.valueOf(classNameId),
+							" is not categorizable"),
+						pe);
+				}
+
+				return false;
+			}
 		}
 
 		return true;
@@ -117,13 +145,6 @@ public class CardinalityAssetEntryValidator implements AssetEntryValidator {
 		ClassNameLocalService classNameLocalService) {
 
 		_classNameLocalService = classNameLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setDLFileEntryLocalService(
-		DLFileEntryLocalService dlFileEntryLocalService) {
-
-		_dlFileEntryLocalService = dlFileEntryLocalService;
 	}
 
 	@Reference(unbind = "-")
@@ -157,9 +178,14 @@ public class CardinalityAssetEntryValidator implements AssetEntryValidator {
 		}
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		CardinalityAssetEntryValidator.class.getName());
+
 	private AssetVocabularyLocalService _assetVocabularyLocalService;
 	private ClassNameLocalService _classNameLocalService;
-	private DLFileEntryLocalService _dlFileEntryLocalService;
 	private GroupLocalService _groupLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

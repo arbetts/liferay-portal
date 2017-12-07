@@ -60,9 +60,9 @@ public class RoleSearch extends SearchContainer<Role> {
 
 		headerNames.add("description");
 
+		orderableHeaders.put("description", "description");
 		orderableHeaders.put("title", "title");
 		orderableHeaders.put("type", "type");
-		orderableHeaders.put("description", "description");
 	}
 
 	public RoleSearch(PortletRequest portletRequest, PortletURL iteratorURL) {
@@ -123,7 +123,7 @@ public class RoleSearch extends SearchContainer<Role> {
 			setOrderByComparator(orderByComparator);
 		}
 		catch (Exception e) {
-			_log.error(e);
+			_log.error("Unable to initialize role search", e);
 		}
 	}
 

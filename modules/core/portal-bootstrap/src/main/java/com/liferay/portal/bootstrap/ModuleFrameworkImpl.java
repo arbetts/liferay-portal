@@ -18,6 +18,7 @@ import aQute.bnd.header.OSGiHeader;
 import aQute.bnd.header.Parameters;
 import aQute.bnd.version.Version;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.concurrent.DefaultNoticeableFuture;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.io.unsync.UnsyncBufferedInputStream;
@@ -29,7 +30,6 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
-import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.Props;
@@ -38,7 +38,6 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.ServiceLoader;
-import com.liferay.portal.kernel.util.ServiceLoaderCondition;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -56,8 +55,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,6 +81,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -250,24 +255,16 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 			_log.debug("Initializing the OSGi framework");
 		}
 
+		_validateModuleFrameworkBaseDirForEquinox();
+
 		_initRequiredStartupDirs();
 
-		List<ServiceLoaderCondition> serviceLoaderConditions =
-			ServiceLoader.load(ServiceLoaderCondition.class);
-
-		ServiceLoaderCondition serviceLoaderCondition =
-			serviceLoaderConditions.get(0);
-
-		if (_log.isDebugEnabled()) {
-			Class<?> clazz = serviceLoaderCondition.getClass();
-
-			_log.debug(
-				"Using conditional loading to find the OSGi framework " +
-					"factory " + clazz.getName());
-		}
+		Thread currentThread = Thread.currentThread();
 
 		List<FrameworkFactory> frameworkFactories = ServiceLoader.load(
-			FrameworkFactory.class, serviceLoaderCondition);
+			new URLClassLoader(_getClassPathURLs(), null),
+			currentThread.getContextClassLoader(), FrameworkFactory.class,
+			null);
 
 		FrameworkFactory frameworkFactory = frameworkFactories.get(0);
 
@@ -494,8 +491,10 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 
 		if (frameworkEvent.getType() == FrameworkEvent.WAIT_TIMEDOUT) {
 			_log.error(
-				"OSGi framework event " + frameworkEvent +
-					" triggered after a " + timeout + "ms timeout");
+				StringBundler.concat(
+					"OSGi framework event ", String.valueOf(frameworkEvent),
+					" triggered after a ", String.valueOf(timeout),
+					"ms timeout"));
 		}
 		else if (_log.isInfoEnabled()) {
 			_log.info(frameworkEvent);
@@ -587,6 +586,27 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 	}
 
+	private static URL[] _getClassPathURLs() throws IOException {
+		File coreDir = new File(PropsValues.MODULE_FRAMEWORK_BASE_DIR, "core");
+
+		File[] files = coreDir.listFiles();
+
+		if (files == null) {
+			throw new IllegalStateException(
+				"Missing " + coreDir.getCanonicalPath());
+		}
+
+		URL[] urls = new URL[files.length];
+
+		for (int i = 0; i < urls.length; i++) {
+			URI uri = files[i].toURI();
+
+			urls[i] = uri.toURL();
+		}
+
+		return urls;
+	}
+
 	private Bundle _addBundle(
 			String location, InputStream inputStream, boolean checkPermission)
 		throws PortalException {
@@ -610,9 +630,9 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 
 			Bundle bundle = null;
 
-			if (location.startsWith("reference:")) {
+			if (location.contains("static=true")) {
 				bundle = _getStaticBundle(
-					bundleContext, unsyncBufferedInputStream);
+					bundleContext, unsyncBufferedInputStream, location);
 			}
 			else {
 				bundle = getBundle(bundleContext, unsyncBufferedInputStream);
@@ -642,7 +662,9 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 	}
 
-	private Map<String, String> _buildFrameworkProperties(Class<?> clazz) {
+	private Map<String, String> _buildFrameworkProperties(Class<?> clazz)
+		throws URISyntaxException {
+
 		if (_log.isDebugEnabled()) {
 			_log.debug("Building OSGi framework properties");
 		}
@@ -695,7 +717,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		properties.put(
 			FrameworkPropsKeys.OSGI_FRAMEWORK, codeSourceURL.toExternalForm());
 
-		File frameworkFile = new File(codeSourceURL.getFile());
+		File frameworkFile = new File(codeSourceURL.toURI());
 
 		properties.put(
 			FrameworkPropsKeys.OSGI_INSTALL_AREA, frameworkFile.getParent());
@@ -730,8 +752,9 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		if (_log.isDebugEnabled()) {
 			for (Entry<String, String> entry : properties.entrySet()) {
 				_log.debug(
-					"OSGi framework property key \"" + entry.getKey() +
-						"\" with value \"" + entry.getValue() + "\"");
+					StringBundler.concat(
+						"OSGi framework property key \"", entry.getKey(),
+						"\" with value \"", entry.getValue(), "\""));
 			}
 		}
 
@@ -777,13 +800,19 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 	}
 
 	private Bundle _getStaticBundle(
-			BundleContext bundleContext, InputStream inputStream)
+			BundleContext bundleContext, InputStream inputStream,
+			String location)
 		throws PortalException {
 
 		try {
 			JarInputStream jarInputStream = new JarInputStream(inputStream);
 
 			Manifest manifest = jarInputStream.getManifest();
+
+			if (manifest == null) {
+				throw new IllegalStateException(
+					"No manifest found at location " + location);
+			}
 
 			Attributes attributes = manifest.getMainAttributes();
 
@@ -816,11 +845,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 					else {
 						bundle.uninstall();
 
-						FrameworkWiring frameworkWiring = _framework.adapt(
-							FrameworkWiring.class);
-
-						frameworkWiring.refreshBundles(
-							Collections.singletonList(bundle));
+						_refreshBundles(Collections.singletonList(bundle));
 
 						return null;
 					}
@@ -915,6 +940,8 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 
 		FileUtil.mkdirs(PropsValues.MODULE_FRAMEWORK_BASE_DIR + "/static");
+		FileUtil.mkdirs(
+			PropsValues.MODULE_FRAMEWORK_MARKETPLACE_DIR + "/override");
 	}
 
 	private Bundle _installInitialBundle(
@@ -925,8 +952,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 				_log.debug("Adding initial bundle " + location.toString());
 			}
 
-			Bundle bundle = _addBundle(
-				"reference:" + location, inputStream, false);
+			Bundle bundle = _addBundle(location, inputStream, false);
 
 			if (_log.isDebugEnabled()) {
 				_log.debug("Added initial bundle " + bundle);
@@ -938,8 +964,12 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(
-					"Setting bundle " + bundle + " at start level " +
-						PropsValues.MODULE_FRAMEWORK_BEGINNING_START_LEVEL);
+					StringBundler.concat(
+						"Setting bundle ", String.valueOf(bundle),
+						" at start level ",
+						String.valueOf(
+							PropsValues.
+								MODULE_FRAMEWORK_BEGINNING_START_LEVEL)));
 			}
 
 			BundleStartLevel bundleStartLevel = bundle.adapt(
@@ -992,6 +1022,36 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 
 		return false;
+	}
+
+	private void _refreshBundles(List<Bundle> refreshBundles) {
+		FrameworkWiring frameworkWiring = _framework.adapt(
+			FrameworkWiring.class);
+
+		final DefaultNoticeableFuture<FrameworkEvent> defaultNoticeableFuture =
+			new DefaultNoticeableFuture<>();
+
+		frameworkWiring.refreshBundles(
+			refreshBundles,
+			new FrameworkListener() {
+
+				@Override
+				public void frameworkEvent(FrameworkEvent frameworkEvent) {
+					defaultNoticeableFuture.set(frameworkEvent);
+				}
+
+			});
+
+		try {
+			FrameworkEvent frameworkEvent = defaultNoticeableFuture.get();
+
+			if (frameworkEvent.getType() != FrameworkEvent.PACKAGES_REFRESHED) {
+				throw frameworkEvent.getThrowable();
+			}
+		}
+		catch (Throwable t) {
+			ReflectionUtil.throwException(t);
+		}
 	}
 
 	private void _registerApplicationContext(
@@ -1097,7 +1157,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		bundleContext.registerService(
 			ThrowableCollector.class, throwableCollector, dictionary);
 
-		final List<Bundle> bundles = new ArrayList<>();
+		final Map<String, Bundle> bundles = new LinkedHashMap<>();
 
 		final List<Path> jarPaths = new ArrayList<>();
 
@@ -1115,8 +1175,22 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 					String fileName = StringUtil.toLowerCase(
 						fileNamePath.toString());
 
-					if (fileName.endsWith(".jar")) {
+					if (!fileName.endsWith(".jar")) {
+						return FileVisitResult.CONTINUE;
+					}
+
+					Matcher matcher = _pattern.matcher(fileName);
+
+					if (!matcher.matches()) {
 						jarPaths.add(filePath.toAbsolutePath());
+
+						return FileVisitResult.CONTINUE;
+					}
+
+					if (_log.isWarnEnabled()) {
+						_log.warn(
+							"Override static jar " + fileName +
+								" has an invalid name and will be ignored");
 					}
 
 					return FileVisitResult.CONTINUE;
@@ -1124,33 +1198,37 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 
 			});
 
-		File utilTaglibFile = new File(
-			PropsValues.LIFERAY_LIB_PORTAL_DIR, "util-taglib.jar");
+		for (String staticJarFileName :
+				PropsValues.MODULE_FRAMEWORK_STATIC_JARS) {
 
-		if (utilTaglibFile.exists()) {
-			jarPaths.add(utilTaglibFile.toPath());
-		}
-		else {
-			_log.error("Missing " + utilTaglibFile);
+			File staticJarFile = new File(
+				PropsValues.LIFERAY_LIB_PORTAL_DIR, staticJarFileName);
+
+			if (staticJarFile.exists()) {
+				jarPaths.add(staticJarFile.toPath());
+			}
+			else {
+				_log.error("Missing " + staticJarFile);
+			}
 		}
 
 		Collections.sort(jarPaths);
-
-		String prefix = "reference:".concat(_STATIC_JAR);
 
 		List<Bundle> refreshBundles = new ArrayList<>();
 
 		for (Bundle bundle : bundleContext.getBundles()) {
 			String location = bundle.getLocation();
 
-			if (!location.startsWith(prefix)) {
+			if (!location.contains("static=true")) {
 				continue;
 			}
 
-			Path filePath = Paths.get(location.substring(prefix.length()));
+			URI uri = new URI(location);
 
-			if (jarPaths.contains(filePath)) {
-				bundles.add(bundle);
+			File file = new File(uri.getPath());
+
+			if (jarPaths.contains(file.toPath())) {
+				bundles.put(bundle.getLocation(), bundle);
 
 				continue;
 			}
@@ -1166,33 +1244,36 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 			}
 		}
 
-		FrameworkWiring frameworkWiring = _framework.adapt(
-			FrameworkWiring.class);
-
-		frameworkWiring.refreshBundles(refreshBundles);
+		_refreshBundles(refreshBundles);
 
 		refreshBundles.clear();
 
-		Set<String> overrideFileNames = new HashSet<>();
+		Set<String> overrideStaticFileNames = new HashSet<>();
 
 		for (Path jarPath : jarPaths) {
 			try (InputStream inputStream = Files.newInputStream(jarPath)) {
-				String path = jarPath.toString();
+				URI uri = jarPath.toUri();
 
-				Bundle bundle = _installInitialBundle(
-					_STATIC_JAR.concat(path), inputStream);
+				String uriString = uri.toString();
+
+				String location = uriString.concat("?protocol=jar&static=true");
+
+				Bundle bundle = _installInitialBundle(location, inputStream);
 
 				if (bundle != null) {
-					bundles.add(bundle);
+					bundles.put(location, bundle);
 
-					overrideFileNames.add(
-						path.substring(path.lastIndexOf(StringPool.SLASH) + 1));
+					overrideStaticFileNames.add(
+						uriString.substring(
+							uriString.lastIndexOf(StringPool.SLASH) + 1));
 				}
 			}
 		}
 
+		String deployDir = bundleContext.getProperty("lpkg.deployer.dir");
+
 		File file = new File(
-			bundleContext.getProperty("lpkg.deployer.dir") + StringPool.SLASH +
+			deployDir + StringPool.SLASH +
 				StaticLPKGResolver.getStaticLPKGFileName());
 
 		if (file.exists()) {
@@ -1241,7 +1322,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 							String fileName =
 								matcher.group(1) + matcher.group(4);
 
-							if (overrideFileNames.contains(fileName)) {
+							if (overrideStaticFileNames.contains(fileName)) {
 								if (_log.isInfoEnabled()) {
 									StringBundler sb = new StringBundler(7);
 
@@ -1261,14 +1342,48 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 							}
 						}
 
+						String location =
+							"file:/" + zipEntryName +
+								"?protocol=lpkg&static=true";
+
 						Bundle bundle = _installInitialBundle(
-							StringPool.SLASH.concat(zipEntryName), inputStream);
+							location, inputStream);
 
 						if (bundle != null) {
-							bundles.add(bundle);
+							bundles.put(location, bundle);
 						}
 					}
 				}
+			}
+		}
+
+		Set<String> overrideLPKGFileNames = new HashSet<>();
+
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
+				Paths.get(deployDir, "override"))) {
+
+			for (Path path : directoryStream) {
+				String fileName = String.valueOf(path.getFileName());
+
+				String pathName = StringUtil.toLowerCase(fileName);
+
+				if (pathName.endsWith("jar")) {
+					overrideLPKGFileNames.add(fileName);
+				}
+			}
+		}
+
+		for (Bundle bundle : bundleContext.getBundles()) {
+			String location = bundle.getLocation();
+
+			Matcher matcher = _pattern.matcher(location);
+
+			if (matcher.matches()) {
+				location = matcher.group(1) + matcher.group(4);
+			}
+
+			if (overrideLPKGFileNames.contains(location)) {
+				bundle.uninstall();
 			}
 		}
 
@@ -1280,7 +1395,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		frameworkStartLevel.setStartLevel(
 			PropsValues.MODULE_FRAMEWORK_BEGINNING_START_LEVEL);
 
-		for (final Bundle bundle : bundles) {
+		for (final Bundle bundle : bundles.values()) {
 			if (_isFragmentBundle(bundle)) {
 				continue;
 			}
@@ -1321,15 +1436,6 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		List<String> hostBundleSymbolicNames = new ArrayList<>();
 
 		for (Bundle bundle : installedBundles) {
-			BundleStartLevel bundleStartLevel = bundle.adapt(
-				BundleStartLevel.class);
-
-			if (bundleStartLevel.getStartLevel() !=
-					PropsValues.MODULE_FRAMEWORK_DYNAMIC_INSTALL_START_LEVEL) {
-
-				continue;
-			}
-
 			Dictionary<String, String> headers = bundle.getHeaders();
 
 			String fragmentHost = headers.get(Constants.FRAGMENT_HOST);
@@ -1353,7 +1459,7 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 			}
 		}
 
-		frameworkWiring.refreshBundles(refreshBundles);
+		_refreshBundles(refreshBundles);
 
 		return new HashSet<>(Arrays.asList(initialBundles));
 	}
@@ -1471,13 +1577,42 @@ public class ModuleFrameworkImpl implements ModuleFramework {
 		}
 	}
 
-	private static final String _STATIC_JAR = "Static-Jar::";
+	@SuppressWarnings("deprecation")
+	private void _validateModuleFrameworkBaseDirForEquinox()
+		throws MalformedURLException {
+
+		File baseDir = new File(PropsValues.MODULE_FRAMEWORK_BASE_DIR);
+
+		baseDir = baseDir.getAbsoluteFile();
+
+		// See LPS-71758. Do what Equinox does internally to get a file path and
+		// validate it. Equinox converts a File into a URL using File#toURL(),
+		// and later creates the OSGi persistence directory using the URL, which
+		// does not properly handle special character escaping and decoding.
+
+		URL url = baseDir.toURL();
+
+		File equinoxBaseDir = new File(url.getFile());
+
+		if (!baseDir.equals(equinoxBaseDir) && _log.isWarnEnabled()) {
+			StringBundler sb = new StringBundler(6);
+
+			sb.append("The module.framework.base.dir path \"");
+			sb.append(baseDir);
+			sb.append("\" contains characters that Equinox cannot handle. ");
+			sb.append("The OSGi persistence data will be stored under \"");
+			sb.append(equinoxBaseDir);
+			sb.append("\"");
+
+			_log.warn(sb.toString());
+		}
+	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ModuleFrameworkImpl.class);
 
 	private static final Pattern _pattern = Pattern.compile(
-		"(.*?)(-\\d+\\.\\d+\\.\\d+)(\\..+)?(\\.jar)");
+		"/?(.*?)(-\\d+\\.\\d+\\.\\d+)(\\..+)?(\\.jar)");
 
 	private Framework _framework;
 	private final Map<ApplicationContext, List<ServiceRegistration<?>>>

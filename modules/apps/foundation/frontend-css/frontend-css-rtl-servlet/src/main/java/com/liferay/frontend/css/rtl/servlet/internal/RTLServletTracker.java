@@ -15,6 +15,7 @@
 package com.liferay.frontend.css.rtl.servlet.internal;
 
 import com.liferay.osgi.util.ServiceTrackerFactory;
+import com.liferay.portal.kernel.util.StringBundler;
 
 import java.util.Hashtable;
 
@@ -39,9 +40,9 @@ public class RTLServletTracker {
 
 	@Activate
 	protected void activate(final BundleContext bundleContext) {
-		String filterString =
-			"(&(objectClass=" + ServletContextHelper.class.getName() + ")" +
-				"(rtl.required = true))";
+		String filterString = StringBundler.concat(
+			"(&(objectClass=", ServletContextHelper.class.getName(), ")",
+			"(rtl.required=true))");
 
 		_serviceTracker = ServiceTrackerFactory.open(
 			bundleContext, filterString,
@@ -58,24 +59,9 @@ public class RTLServletTracker {
 					Servlet servlet = new RTLServlet(
 						serviceReference.getBundle(), servletContextHelper);
 
-					Hashtable<String, Object> properties = new Hashtable<>();
-
-					Object contextName = serviceReference.getProperty(
-						HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
-
-					properties.put(
-						HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-						contextName);
-
-					properties.put(
-						HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME,
-						RTLServlet.class.getName());
-					properties.put(
-						HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
-						"*.css");
-
 					return bundleContext.registerService(
-						Servlet.class, servlet, properties);
+						Servlet.class, servlet,
+						_buildProperties(serviceReference));
 				}
 
 				@Override
@@ -83,9 +69,8 @@ public class RTLServletTracker {
 					ServiceReference<ServletContextHelper> serviceReference,
 					ServiceRegistration<Servlet> serviceRegistration) {
 
-					removedService(serviceReference, serviceRegistration);
-
-					addingService(serviceReference);
+					serviceRegistration.setProperties(
+						_buildProperties(serviceReference));
 				}
 
 				@Override
@@ -104,6 +89,27 @@ public class RTLServletTracker {
 	@Deactivate
 	protected void deactivate() {
 		_serviceTracker.close();
+	}
+
+	private Hashtable<String, Object> _buildProperties(
+		ServiceReference<ServletContextHelper> serviceReference) {
+
+		Hashtable<String, Object> properties = new Hashtable<>();
+
+		Object contextName = serviceReference.getProperty(
+			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME);
+
+		properties.put(
+			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+			contextName);
+
+		properties.put(
+			HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME,
+			RTLServlet.class.getName());
+		properties.put(
+			HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, "*.css");
+
+		return properties;
 	}
 
 	private ServiceTracker<ServletContextHelper, ServiceRegistration<Servlet>>

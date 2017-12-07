@@ -36,7 +36,6 @@ import com.liferay.portal.kernel.service.persistence.ResourceBlockPersistence;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.impl.ResourceBlockImpl;
 import com.liferay.portal.model.impl.ResourceBlockModelImpl;
 
@@ -61,8 +60,10 @@ import java.util.Set;
  * @author Brian Wing Shun Chan
  * @see ResourceBlockPersistence
  * @see com.liferay.portal.kernel.service.persistence.ResourceBlockUtil
+ * @deprecated As of 7.0.0, with no direct replacement
  * @generated
  */
+@Deprecated
 @ProviderType
 public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBlock>
 	implements ResourceBlockPersistence {
@@ -237,7 +238,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			if (name == null) {
 				query.append(_FINDER_COLUMN_C_N_NAME_1);
 			}
-			else if (name.equals(StringPool.BLANK)) {
+			else if (name.equals("")) {
 				query.append(_FINDER_COLUMN_C_N_NAME_3);
 			}
 			else {
@@ -332,7 +333,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		msg.append(", name=");
 		msg.append(name);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchResourceBlockException(msg.toString());
 	}
@@ -388,7 +389,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		msg.append(", name=");
 		msg.append(name);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchResourceBlockException(msg.toString());
 	}
@@ -485,7 +486,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		if (name == null) {
 			query.append(_FINDER_COLUMN_C_N_NAME_1);
 		}
-		else if (name.equals(StringPool.BLANK)) {
+		else if (name.equals("")) {
 			query.append(_FINDER_COLUMN_C_N_NAME_3);
 		}
 		else {
@@ -627,7 +628,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			if (name == null) {
 				query.append(_FINDER_COLUMN_C_N_NAME_1);
 			}
-			else if (name.equals(StringPool.BLANK)) {
+			else if (name.equals("")) {
 				query.append(_FINDER_COLUMN_C_N_NAME_3);
 			}
 			else {
@@ -843,7 +844,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			if (name == null) {
 				query.append(_FINDER_COLUMN_C_G_N_NAME_1);
 			}
-			else if (name.equals(StringPool.BLANK)) {
+			else if (name.equals("")) {
 				query.append(_FINDER_COLUMN_C_G_N_NAME_3);
 			}
 			else {
@@ -944,7 +945,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		msg.append(", name=");
 		msg.append(name);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchResourceBlockException(msg.toString());
 	}
@@ -1005,7 +1006,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		msg.append(", name=");
 		msg.append(name);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchResourceBlockException(msg.toString());
 	}
@@ -1106,7 +1107,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		if (name == null) {
 			query.append(_FINDER_COLUMN_C_G_N_NAME_1);
 		}
-		else if (name.equals(StringPool.BLANK)) {
+		else if (name.equals("")) {
 			query.append(_FINDER_COLUMN_C_G_N_NAME_3);
 		}
 		else {
@@ -1254,7 +1255,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			if (name == null) {
 				query.append(_FINDER_COLUMN_C_G_N_NAME_1);
 			}
-			else if (name.equals(StringPool.BLANK)) {
+			else if (name.equals("")) {
 				query.append(_FINDER_COLUMN_C_G_N_NAME_3);
 			}
 			else {
@@ -1358,7 +1359,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			msg.append(", permissionsHash=");
 			msg.append(permissionsHash);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -1435,7 +1436,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			if (name == null) {
 				query.append(_FINDER_COLUMN_C_G_N_P_NAME_1);
 			}
-			else if (name.equals(StringPool.BLANK)) {
+			else if (name.equals("")) {
 				query.append(_FINDER_COLUMN_C_G_N_P_NAME_3);
 			}
 			else {
@@ -1449,7 +1450,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			if (permissionsHash == null) {
 				query.append(_FINDER_COLUMN_C_G_N_P_PERMISSIONSHASH_1);
 			}
-			else if (permissionsHash.equals(StringPool.BLANK)) {
+			else if (permissionsHash.equals("")) {
 				query.append(_FINDER_COLUMN_C_G_N_P_PERMISSIONSHASH_3);
 			}
 			else {
@@ -1578,7 +1579,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			if (name == null) {
 				query.append(_FINDER_COLUMN_C_G_N_P_NAME_1);
 			}
-			else if (name.equals(StringPool.BLANK)) {
+			else if (name.equals("")) {
 				query.append(_FINDER_COLUMN_C_G_N_P_NAME_3);
 			}
 			else {
@@ -1592,7 +1593,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			if (permissionsHash == null) {
 				query.append(_FINDER_COLUMN_C_G_N_P_PERMISSIONSHASH_1);
 			}
-			else if (permissionsHash.equals(StringPool.BLANK)) {
+			else if (permissionsHash.equals("")) {
 				query.append(_FINDER_COLUMN_C_G_N_P_PERMISSIONSHASH_3);
 			}
 			else {
@@ -1724,7 +1725,7 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((ResourceBlockModelImpl)resourceBlock);
+		clearUniqueFindersCache((ResourceBlockModelImpl)resourceBlock, true);
 	}
 
 	@Override
@@ -1736,44 +1737,11 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			entityCache.removeResult(ResourceBlockModelImpl.ENTITY_CACHE_ENABLED,
 				ResourceBlockImpl.class, resourceBlock.getPrimaryKey());
 
-			clearUniqueFindersCache((ResourceBlockModelImpl)resourceBlock);
+			clearUniqueFindersCache((ResourceBlockModelImpl)resourceBlock, true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		ResourceBlockModelImpl resourceBlockModelImpl, boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] {
-					resourceBlockModelImpl.getCompanyId(),
-					resourceBlockModelImpl.getGroupId(),
-					resourceBlockModelImpl.getName(),
-					resourceBlockModelImpl.getPermissionsHash()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_C_G_N_P, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_C_G_N_P, args,
-				resourceBlockModelImpl);
-		}
-		else {
-			if ((resourceBlockModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_C_G_N_P.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						resourceBlockModelImpl.getCompanyId(),
-						resourceBlockModelImpl.getGroupId(),
-						resourceBlockModelImpl.getName(),
-						resourceBlockModelImpl.getPermissionsHash()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_C_G_N_P, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_C_G_N_P, args,
-					resourceBlockModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(
 		ResourceBlockModelImpl resourceBlockModelImpl) {
 		Object[] args = new Object[] {
 				resourceBlockModelImpl.getCompanyId(),
@@ -1782,12 +1750,29 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 				resourceBlockModelImpl.getPermissionsHash()
 			};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_C_G_N_P, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_C_G_N_P, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_C_G_N_P, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_G_N_P, args,
+			resourceBlockModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		ResourceBlockModelImpl resourceBlockModelImpl, boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					resourceBlockModelImpl.getCompanyId(),
+					resourceBlockModelImpl.getGroupId(),
+					resourceBlockModelImpl.getName(),
+					resourceBlockModelImpl.getPermissionsHash()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_G_N_P, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_G_N_P, args);
+		}
 
 		if ((resourceBlockModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_C_G_N_P.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					resourceBlockModelImpl.getOriginalCompanyId(),
 					resourceBlockModelImpl.getOriginalGroupId(),
 					resourceBlockModelImpl.getOriginalName(),
@@ -1933,8 +1918,33 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !ResourceBlockModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!ResourceBlockModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] {
+					resourceBlockModelImpl.getCompanyId(),
+					resourceBlockModelImpl.getName()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_N, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_N,
+				args);
+
+			args = new Object[] {
+					resourceBlockModelImpl.getCompanyId(),
+					resourceBlockModelImpl.getGroupId(),
+					resourceBlockModelImpl.getName()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_G_N, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_C_G_N,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -1987,8 +1997,8 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 			ResourceBlockImpl.class, resourceBlock.getPrimaryKey(),
 			resourceBlock, false);
 
-		clearUniqueFindersCache(resourceBlockModelImpl);
-		cacheUniqueFindersCache(resourceBlockModelImpl, isNew);
+		clearUniqueFindersCache(resourceBlockModelImpl, false);
+		cacheUniqueFindersCache(resourceBlockModelImpl);
 
 		resourceBlock.resetOriginalValues();
 
@@ -2165,14 +2175,14 @@ public class ResourceBlockPersistenceImpl extends BasePersistenceImpl<ResourceBl
 		query.append(_SQL_SELECT_RESOURCEBLOCK_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

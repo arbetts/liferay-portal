@@ -17,8 +17,15 @@ package com.liferay.bookmarks.web.internal.portlet;
 import com.liferay.bookmarks.constants.BookmarksPortletKeys;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
+import com.liferay.trash.TrashHelper;
+import com.liferay.trash.util.TrashWebKeys;
+
+import java.io.IOException;
 
 import javax.portlet.Portlet;
+import javax.portlet.PortletException;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -42,6 +49,7 @@ import org.osgi.service.component.annotations.Reference;
 		"com.liferay.portlet.struts-path=bookmarks",
 		"javax.portlet.display-name=Bookmarks",
 		"javax.portlet.expiration-cache=0",
+		"javax.portlet.init-param.always-display-default-configuration-icons=true",
 		"javax.portlet.init-param.mvc-command-names-default-views=/bookmarks/view",
 		"javax.portlet.init-param.portlet-title-based-navigation=false",
 		"javax.portlet.init-param.template-path=/",
@@ -57,11 +65,24 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class BookmarksPortlet extends MVCPortlet {
 
+	@Override
+	public void render(
+			RenderRequest renderRequest, RenderResponse renderResponse)
+		throws IOException, PortletException {
+
+		renderRequest.setAttribute(TrashWebKeys.TRASH_HELPER, _trashHelper);
+
+		super.render(renderRequest, renderResponse);
+	}
+
 	@Reference(
 		target = "(&(release.bundle.symbolic.name=com.liferay.bookmarks.web)(release.schema.version=1.0.0))",
 		unbind = "-"
 	)
 	protected void setRelease(Release release) {
 	}
+
+	@Reference
+	private TrashHelper _trashHelper;
 
 }

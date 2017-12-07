@@ -180,7 +180,7 @@ if (organization != null) {
 					if (Validator.isNotNull(keywords)) {
 						total = OrganizationLocalServiceUtil.searchOrganizationsAndUsersCount(company.getCompanyId(), organizationId, keywords, status, null);
 
-						Sort[] sorts = new Sort[] {new Sort("name", orderByType.equals("desc")), new Sort("lastName", orderByType.equals("desc"))};
+						Sort[] sorts = {new Sort("name", orderByType.equals("desc")), new Sort("lastName", orderByType.equals("desc"))};
 
 						Hits hits = OrganizationLocalServiceUtil.searchOrganizationsAndUsers(company.getCompanyId(), organizationId, keywords, status, null, searchContainer.getStart(), searchContainer.getEnd(), sorts);
 
@@ -258,6 +258,13 @@ if (organization != null) {
 
 		submitForm(form, '<portlet:actionURL name="/users_admin/delete_organizations_and_users" />');
 	};
+
+	AUI.$('#<portlet:namespace />assignUsers').on(
+		'click',
+		function(event) {
+			<portlet:namespace />openSelectUsersDialog('<%= organizationId %>');
+		}
+	);
 </aui:script>
 
 <%!

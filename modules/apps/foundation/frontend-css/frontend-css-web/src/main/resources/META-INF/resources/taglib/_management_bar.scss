@@ -1,11 +1,7 @@
 .info-panel {
-	.sidebar-header > h4 {
-		line-height: 32px;
-	}
-
 	.sidenav-close {
 		float: right;
-		margin-left: 3px;
+		margin-left: 12px;
 		margin-right: 9px;
 		margin-top: 25px;
 	}
@@ -13,6 +9,10 @@
 
 .management-bar-container {
 	position: relative;
+
+	.dropdown-backdrop {
+		position: relative;
+	}
 
 	.management-bar {
 		padding: 0;
